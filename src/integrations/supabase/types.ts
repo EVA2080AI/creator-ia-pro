@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      canvas_nodes: {
+        Row: {
+          asset_url: string | null
+          created_at: string
+          error_message: string | null
+          height: number
+          id: string
+          pos_x: number
+          pos_y: number
+          prompt: string
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+          width: number
+        }
+        Insert: {
+          asset_url?: string | null
+          created_at?: string
+          error_message?: string | null
+          height?: number
+          id?: string
+          pos_x?: number
+          pos_y?: number
+          prompt: string
+          status?: string
+          type: string
+          updated_at?: string
+          user_id: string
+          width?: number
+        }
+        Update: {
+          asset_url?: string | null
+          created_at?: string
+          error_message?: string | null
+          height?: number
+          id?: string
+          pos_x?: number
+          pos_y?: number
+          prompt?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+          width?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          credits_balance: number
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          credits_balance?: number
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          credits_balance?: number
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          node_id: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          node_id?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          node_id?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "canvas_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
