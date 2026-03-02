@@ -33,7 +33,8 @@ const Canvas = () => {
 
   const nodes = useCanvasStore((s) => s.nodes);
   const edges = useCanvasStore((s) => s.edges);
-  const onNodesChange = useCanvasStore((s) => s.onNodesChange);
+  const setEdges = useCanvasStore((s) => s.setEdges);
+  const onEdgesChange = useCanvasStore((s) => s.onEdgesChange);
   const persistPosition = useCanvasStore((s) => s.persistPosition);
   const setSelectedNode = useCanvasStore((s) => s.setSelectedNode);
   const addNodeToStore = useCanvasStore((s) => s.addNodeToStore);
