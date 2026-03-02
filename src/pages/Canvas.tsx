@@ -35,6 +35,7 @@ const Canvas = () => {
   const edges = useCanvasStore((s) => s.edges);
   const setEdges = useCanvasStore((s) => s.setEdges);
   const onEdgesChange = useCanvasStore((s) => s.onEdgesChange);
+  const onNodesChange = useCanvasStore((s) => s.onNodesChange);
   const persistPosition = useCanvasStore((s) => s.persistPosition);
   const setSelectedNode = useCanvasStore((s) => s.setSelectedNode);
   const addNodeToStore = useCanvasStore((s) => s.addNodeToStore);
@@ -55,6 +56,14 @@ const Canvas = () => {
       });
     },
     [onNodesChange, persistPosition]
+  );
+
+  // Handle edge connections
+  const handleConnect = useCallback(
+    (connection: Connection) => {
+      setEdges(addEdge({ ...connection, animated: true }, useCanvasStore.getState().edges));
+    },
+    [setEdges]
   );
 
   // Handle node selection
