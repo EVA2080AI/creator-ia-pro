@@ -29,6 +29,11 @@ export default {
         "node-glow": "hsl(var(--node-glow))",
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
+        gold: {
+          DEFAULT: "hsl(var(--gold))",
+          foreground: "hsl(var(--gold-foreground))",
+          muted: "hsl(var(--gold-muted))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
