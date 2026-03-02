@@ -6,6 +6,8 @@ import {
   MiniMap,
   type NodeChange,
   type Node,
+  type Connection,
+  addEdge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -31,6 +33,8 @@ const Canvas = () => {
 
   const nodes = useCanvasStore((s) => s.nodes);
   const edges = useCanvasStore((s) => s.edges);
+  const setEdges = useCanvasStore((s) => s.setEdges);
+  const onEdgesChange = useCanvasStore((s) => s.onEdgesChange);
   const onNodesChange = useCanvasStore((s) => s.onNodesChange);
   const persistPosition = useCanvasStore((s) => s.persistPosition);
   const setSelectedNode = useCanvasStore((s) => s.setSelectedNode);
@@ -52,6 +56,14 @@ const Canvas = () => {
       });
     },
     [onNodesChange, persistPosition]
+  );
+
+  // Handle edge connections
+  const handleConnect = useCallback(
+    (connection: Connection) => {
+      setEdges(addEdge({ ...connection, animated: true }, useCanvasStore.getState().edges));
+    },
+    [setEdges]
   );
 
   // Handle node selection
@@ -197,20 +209,22 @@ const Canvas = () => {
         nodes={nodes}
         edges={edges}
         onNodesChange={handleNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={handleConnect}
         onNodeClick={handleNodeClick}
         onPaneClick={handlePaneClick}
         nodeTypes={nodeTypes}
         fitView
         proOptions={{ hideAttribution: true }}
         className="canvas-grid"
-        minZoom={0.1}
+        minZoom={0.05}
         maxZoom={2}
       >
         <Background color="hsl(222 30% 16%)" gap={24} size={1} />
-        <Controls className="!bg-card !border-border !rounded-xl !shadow-lg [&>button]:!bg-card [&>button]:!border-border [&>button]:!text-foreground [&>button:hover]:!bg-muted" />
+        <Controls className="!bg-card !border-border !rounded-xl !shadow-lg [&>button]:!bg-card [&>button]:!border-border [&>button]:!text-foreground [&>button:hover]:!bg-muted !bottom-6 !right-6 !left-auto" />
         <MiniMap
           className="!bg-card !border-border !rounded-xl"
-          nodeColor="hsl(187 80% 48%)"
+          nodeColor="hsl(43 74% 49%)"
           maskColor="hsl(222 47% 4% / 0.8)"
         />
       </ReactFlow>
@@ -227,9 +241,10 @@ const Canvas = () => {
       <PropertiesSidebar onRun={handleRunNode} generating={generating} />
 
       {/* Branding */}
-      <div className="absolute left-6 top-6 z-50 flex items-center gap-2">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card/80 backdrop-blur-sm">
-          <span className="gradient-text text-lg font-bold">C</span>
+      {/* Branding — top left, offset for vertical toolbar */}
+      <div className="absolute left-20 top-5 z-50 flex items-center gap-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card/80 backdrop-blur-sm">
+          <span className="gradient-text text-base font-bold">C</span>
         </div>
         <span className="text-sm font-semibold text-foreground">
           Canvas<span className="text-primary">AI</span>
