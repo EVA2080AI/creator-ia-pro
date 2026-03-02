@@ -1,10 +1,13 @@
 import { memo } from "react";
 import type { NodeProps } from "@xyflow/react";
-import type { CanvasNodeData } from "@/hooks/useCanvasNodes";
+import type { CanvasNodeData } from "@/store/useCanvasStore";
+import { useCanvasStore } from "@/store/useCanvasStore";
 import { Image, Video, Loader2, AlertTriangle, Trash2 } from "lucide-react";
 
-function AINodeComponent({ data, id }: NodeProps) {
+function AINodeComponent({ data, id, selected }: NodeProps) {
   const nodeData = data as unknown as CanvasNodeData;
+  const selectedNodeId = useCanvasStore((s) => s.selectedNodeId);
+  const isSelected = selectedNodeId === id;
   const isLoading = nodeData.status === "loading";
   const isError = nodeData.status === "error";
   const isReady = nodeData.status === "ready";
@@ -15,7 +18,8 @@ function AINodeComponent({ data, id }: NodeProps) {
         group relative w-[280px] rounded-xl border bg-node-bg overflow-hidden node-shadow transition-all duration-200
         ${isLoading ? "border-primary/40 animate-pulse-glow" : ""}
         ${isError ? "border-destructive/50" : ""}
-        ${isReady ? "border-node-border hover:border-primary/30" : ""}
+        ${isReady && !isSelected ? "border-node-border hover:border-primary/30" : ""}
+        ${isSelected ? "border-primary ring-2 ring-primary/30" : ""}
       `}
     >
       {/* Header */}
@@ -33,7 +37,6 @@ function AINodeComponent({ data, id }: NodeProps) {
           className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
           onClick={(e) => {
             e.stopPropagation();
-            // Delete handled by parent through custom event
             window.dispatchEvent(new CustomEvent("delete-node", { detail: id }));
           }}
         >

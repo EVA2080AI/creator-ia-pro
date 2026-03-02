@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           asset_url: string | null
           created_at: string
+          data_payload: Json | null
           error_message: string | null
           height: number
           id: string
@@ -33,6 +34,7 @@ export type Database = {
         Insert: {
           asset_url?: string | null
           created_at?: string
+          data_payload?: Json | null
           error_message?: string | null
           height?: number
           id?: string
@@ -48,6 +50,7 @@ export type Database = {
         Update: {
           asset_url?: string | null
           created_at?: string
+          data_payload?: Json | null
           error_message?: string | null
           height?: number
           id?: string
