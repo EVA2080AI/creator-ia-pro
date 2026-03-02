@@ -6,6 +6,8 @@ import {
   MiniMap,
   type NodeChange,
   type Node,
+  type Connection,
+  addEdge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
