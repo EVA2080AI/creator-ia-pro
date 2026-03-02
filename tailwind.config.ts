@@ -88,8 +88,8 @@ export default {
           to: { height: "0" },
         },
         "pulse-glow": {
-          "0%, 100%": { boxShadow: "0 0 15px -3px hsl(187 80% 48% / 0.3)" },
-          "50%": { boxShadow: "0 0 30px -3px hsl(187 80% 48% / 0.6)" },
+          "0%, 100%": { boxShadow: "0 0 15px -3px hsl(43 74% 49% / 0.3)" },
+          "50%": { boxShadow: "0 0 30px -3px hsl(43 74% 49% / 0.6)" },
         },
         "spin-slow": {
           from: { transform: "rotate(0deg)" },
