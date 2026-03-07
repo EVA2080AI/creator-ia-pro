@@ -66,6 +66,14 @@ const Index = () => {
             Empezar Gratis
             <ArrowRight className="h-4 w-4" />
           </Button>
+          <Button
+            onClick={() => navigate("/pricing")}
+            size="lg"
+            variant="outline"
+            className="border-border text-foreground hover:bg-muted gap-2 text-base px-8"
+          >
+            Ver Planes
+          </Button>
         </div>
 
         {/* Feature cards */}
