@@ -317,13 +317,6 @@ const ToolLanding = () => {
   };
 
   const handleTryDemo = async () => {
-    if (!isLoggedIn && demoUsed) {
-      toast("Regístrate gratis para seguir usando esta herramienta", {
-        action: { label: "Registrarme", onClick: () => navigate("/auth") },
-      });
-      return;
-    }
-
     const realTextTools = ["copywriter", "blog", "ads"];
     const isTextTool = realTextTools.includes(tool.id);
 
@@ -341,63 +334,62 @@ const ToolLanding = () => {
     setDemoResultImage(null);
 
     try {
-      if (isLoggedIn) {
-        if (isTextTool) {
-          const chatType = tool.id === "blog" ? "blog" : "copywriter";
-          const { data, error } = await supabase.functions.invoke("ai-chat", {
-            body: { type: chatType, prompt: tryItInput.trim() },
-          });
-
-          if (error) throw error;
-          if (data?.text) {
-            setDemoResult(data.text);
-            toast.success("¡Resultado real generado con IA!");
-          } else {
-            throw new Error(data?.error || "No se pudo generar el resultado");
-          }
-          return;
-        }
-
-        const supportedImageTools = ["enhance", "upscale", "eraser", "background", "restore", "generate", "logo", "social"];
-        if (!supportedImageTools.includes(tool.id)) {
-          throw new Error("Esta herramienta está disponible en la app completa.");
-        }
-
-        const { data, error } = await supabase.functions.invoke("ai-tool", {
-          body: {
-            tool: tool.id,
-            image: tryItImage || undefined,
-            prompt: tryItInput.trim() || undefined,
-          },
+      if (isTextTool) {
+        const chatType = tool.id === "blog" ? "blog" : "copywriter";
+        const { data, error } = await supabase.functions.invoke("ai-chat", {
+          body: { type: chatType, prompt: tryItInput.trim() },
         });
 
         if (error) throw error;
-        if (data?.result_url) {
-          setDemoResultImage(data.result_url);
-          toast.success("¡Imagen real generada con IA!");
+        if (data?.text) {
+          setDemoResult(data.text);
+          setDemoUsed(Boolean(data?.demo_limit_reached));
+          if (!isLoggedIn && typeof data?.demo_remaining === "number") {
+            toast.success(`¡Resultado real generado! Te quedan ${data.demo_remaining} pruebas gratis.`);
+          } else {
+            toast.success("¡Resultado real generado con IA!");
+          }
         } else {
-          throw new Error(data?.error || "No se pudo generar la imagen");
+          throw new Error(data?.error || "No se pudo generar el resultado");
         }
-
         return;
       }
 
-      // Simulación para usuarios sin cuenta
-      await new Promise((r) => setTimeout(r, 2500));
-
-      if (isTextTool) {
-        setDemoResult(demoTextResults[tool.id] || "✨ Resultado generado exitosamente. Regístrate para ver el resultado completo y descargar.");
-      } else {
-        setDemoResultImage(tool.demoImage);
-        setDemoResult("⚠️ Esta es una vista previa de ejemplo. El resultado real con IA se genera al registrarte y usar tus créditos.");
+      const supportedImageTools = ["enhance", "upscale", "eraser", "background", "restore", "generate", "logo", "social"];
+      if (!supportedImageTools.includes(tool.id)) {
+        throw new Error("Esta herramienta está disponible en la app completa.");
       }
 
-      setDemoUsed(true);
-      toast.success("¡Vista previa lista! Regístrate para resultados reales con IA.", {
-        action: { label: "Registrarme", onClick: () => navigate("/auth") },
+      const { data, error } = await supabase.functions.invoke("ai-tool", {
+        body: {
+          tool: tool.id,
+          image: tryItImage || undefined,
+          prompt: tryItInput.trim() || undefined,
+        },
       });
+
+      if (error) throw error;
+      if (data?.result_url) {
+        setDemoResultImage(data.result_url);
+        setDemoUsed(Boolean(data?.demo_limit_reached));
+        if (!isLoggedIn && typeof data?.demo_remaining === "number") {
+          toast.success(`¡Imagen real generada! Te quedan ${data.demo_remaining} pruebas gratis.`);
+        } else {
+          toast.success("¡Imagen real generada con IA!");
+        }
+      } else {
+        throw new Error(data?.error || "No se pudo generar la imagen");
+      }
     } catch (err: any) {
-      toast.error(err.message || "Error al procesar");
+      const message = err?.message || "Error al procesar";
+      if (message.toLowerCase().includes("límite de pruebas gratuitas")) {
+        setDemoUsed(true);
+        toast("Ya usaste tus pruebas gratis. Regístrate para seguir.", {
+          action: { label: "Registrarme", onClick: () => navigate("/auth") },
+        });
+      } else {
+        toast.error(message);
+      }
     } finally {
       setDemoing(false);
     }
@@ -649,12 +641,12 @@ const ToolLanding = () => {
               >
                 {demoing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
-                ) : demoUsed ? (
+                ) : !isLoggedIn && demoUsed ? (
                   <Lock className="h-4 w-4" />
                 ) : (
                   <Sparkles className="h-4 w-4" />
                 )}
-                {demoing ? "Procesando con IA..." : demoUsed ? "Regístrate para más" : `Probar ${tool.name} Gratis`}
+                {demoing ? "Procesando con IA..." : !isLoggedIn && demoUsed ? "Límite alcanzado" : `Probar ${tool.name}${isLoggedIn ? "" : " Gratis"}`}
               </Button>
             </div>
 

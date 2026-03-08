@@ -5,8 +5,9 @@ const corsHeaders = {
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const IMAGE_MODEL = 'gemini-2.5-flash-preview-image-generation';
+const IMAGE_MODEL = 'gemini-2.0-flash-exp';
 const PROMPT_ONLY_TOOLS = ['logo', 'social', 'generate'];
+const GUEST_TRIAL_LIMIT = 3;
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -14,8 +15,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) throw new Error('No auth header');
+    const authHeader = req.headers.get('Authorization') ?? '';
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -26,42 +26,79 @@ Deno.serve(async (req) => {
     const userClient = createClient(supabaseUrl, supabaseAnon, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user }, error: authError } = await userClient.auth.getUser();
-    if (authError || !user) throw new Error('Unauthorized');
+
+    const {
+      data: { user },
+    } = await userClient.auth.getUser();
+
+    const isGuest = !user;
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
     const { tool, image, prompt } = await req.json();
     if (!tool) throw new Error('Missing tool');
-    
+
     if (!PROMPT_ONLY_TOOLS.includes(tool) && !image) throw new Error('Missing image');
 
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+    let guestFingerprint: string | null = null;
+    let guestTrialsUsed = 0;
 
-    const { data: profile } = await adminClient
-      .from('profiles')
-      .select('credits_balance')
-      .eq('user_id', user.id)
-      .single();
+    if (isGuest) {
+      guestFingerprint = buildGuestFingerprint(req);
+      const { data: usageRow } = await adminClient
+        .from('demo_usage')
+        .select('trials_used')
+        .eq('fingerprint', guestFingerprint)
+        .maybeSingle();
+
+      guestTrialsUsed = usageRow?.trials_used ?? 0;
+      if (guestTrialsUsed >= GUEST_TRIAL_LIMIT) {
+        return new Response(
+          JSON.stringify({
+            error: 'Límite de pruebas gratuitas alcanzado. Regístrate para seguir usando la IA.',
+            demo_limit_reached: true,
+            demo_remaining: 0,
+          }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
 
     const creditCost: Record<string, number> = {
-      enhance: 2, upscale: 3, eraser: 2, background: 1, restore: 3,
-      logo: 2, social: 2, generate: 1,
+      enhance: 2,
+      upscale: 3,
+      eraser: 2,
+      background: 1,
+      restore: 3,
+      logo: 2,
+      social: 2,
+      generate: 1,
     };
     const cost = creditCost[tool] || 2;
 
-    if (!profile || profile.credits_balance < cost) {
-      throw new Error(`Créditos insuficientes. Necesitas ${cost}, tienes ${profile?.credits_balance || 0}`);
-    }
+    let originalCredits: number | null = null;
 
-    // Deduct credits first
-    await adminClient
-      .from('profiles')
-      .update({ credits_balance: profile.credits_balance - cost })
-      .eq('user_id', user.id);
+    if (!isGuest && user) {
+      const { data: profile } = await adminClient
+        .from('profiles')
+        .select('credits_balance')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!profile || profile.credits_balance < cost) {
+        throw new Error(`Créditos insuficientes. Necesitas ${cost}, tienes ${profile?.credits_balance || 0}`);
+      }
+
+      originalCredits = profile.credits_balance;
+
+      await adminClient
+        .from('profiles')
+        .update({ credits_balance: profile.credits_balance - cost })
+        .eq('user_id', user.id);
+    }
 
     const editPrompt = prompt || getDefaultPrompt(tool);
     const isPromptOnly = PROMPT_ONLY_TOOLS.includes(tool);
-    
-    // Build parts for Google Gemini API
+
     const parts: any[] = [{ text: editPrompt }];
     if (!isPromptOnly && image) {
       const base64Match = image.match(/^data:([^;]+);base64,(.+)$/);
@@ -90,26 +127,24 @@ Deno.serve(async (req) => {
     );
 
     if (!aiResponse.ok) {
-      // Rollback credits
-      await adminClient
-        .from('profiles')
-        .update({ credits_balance: profile.credits_balance })
-        .eq('user_id', user.id);
+      if (!isGuest && user && originalCredits !== null) {
+        await adminClient.from('profiles').update({ credits_balance: originalCredits }).eq('user_id', user.id);
+      }
 
       const errText = await aiResponse.text();
       console.error('AI Tool API error:', aiResponse.status, errText);
 
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: 'Límite de solicitudes excedido. Intenta en unos minutos.' }), {
-          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
       throw new Error(`AI processing failed (${aiResponse.status})`);
     }
 
     const aiData = await aiResponse.json();
-    
-    // Extract image from Gemini response
+
     let resultImage: string | null = null;
     const candidates = aiData.candidates;
     if (candidates?.[0]?.content?.parts) {
@@ -122,43 +157,61 @@ Deno.serve(async (req) => {
     }
 
     if (!resultImage) {
-      // Rollback credits
-      await adminClient
-        .from('profiles')
-        .update({ credits_balance: profile.credits_balance })
-        .eq('user_id', user.id);
+      if (!isGuest && user && originalCredits !== null) {
+        await adminClient.from('profiles').update({ credits_balance: originalCredits }).eq('user_id', user.id);
+      }
 
       console.error('No image in response:', JSON.stringify(aiData).slice(0, 500));
       throw new Error('No se pudo generar la imagen. Intenta con otro prompt o imagen.');
     }
 
-    // Record transaction
-    await adminClient.from('transactions').insert({
-      user_id: user.id,
-      amount: -cost,
-      type: 'tool_usage',
-      description: `Tool: ${tool}`,
-    });
+    if (isGuest && guestFingerprint) {
+      const nextTrials = guestTrialsUsed + 1;
+      await adminClient.from('demo_usage').upsert(
+        {
+          fingerprint: guestFingerprint,
+          trials_used: nextTrials,
+          last_trial_at: new Date().toISOString(),
+        },
+        { onConflict: 'fingerprint' }
+      );
 
-    // Save to assets
-    await adminClient.from('saved_assets').insert({
-      user_id: user.id,
-      asset_url: resultImage,
-      prompt: editPrompt,
-      type: 'image',
-    });
+      return new Response(
+        JSON.stringify({
+          success: true,
+          result_url: resultImage,
+          demo_remaining: Math.max(0, GUEST_TRIAL_LIMIT - nextTrials),
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
-    return new Response(
-      JSON.stringify({ success: true, result_url: resultImage }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    if (user) {
+      await adminClient.from('transactions').insert({
+        user_id: user.id,
+        amount: -cost,
+        type: 'tool_usage',
+        description: `Tool: ${tool}`,
+      });
+
+      await adminClient.from('saved_assets').insert({
+        user_id: user.id,
+        asset_url: resultImage,
+        prompt: editPrompt,
+        type: 'image',
+      });
+    }
+
+    return new Response(JSON.stringify({ success: true, result_url: resultImage }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     console.error('AI Tool error:', msg);
-    return new Response(
-      JSON.stringify({ error: msg }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: msg }), {
+      status: 400,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
 
@@ -183,4 +236,10 @@ function getDefaultPrompt(tool: string): string {
     default:
       return 'Enhance this image';
   }
+}
+
+function buildGuestFingerprint(req: Request): string {
+  const forwarded = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'no-ip';
+  const userAgent = req.headers.get('user-agent') || 'no-ua';
+  return `${forwarded}::${userAgent}`;
 }
