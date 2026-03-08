@@ -30,20 +30,19 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    // Auth check
+    // Auth check using getUser
     const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: userData, error: userError } = await supabaseUser.auth.getUser();
+    if (userError || !userData?.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = claimsData.claims.sub;
+    const userId = userData.user.id;
 
     // Parse request
     const { node_id } = await req.json();
@@ -178,7 +177,7 @@ serve(async (req) => {
 
         const result = await aiResponse.json();
 
-        // Extract image from response - Gemini image model returns inline_data
+        // Extract image from response
         let imageUrl: string | null = null;
         const content = result.choices?.[0]?.message?.content;
 
@@ -187,7 +186,6 @@ serve(async (req) => {
         if (parts) {
           for (const part of parts) {
             if (part.inline_data?.mime_type?.startsWith("image/")) {
-              // Upload base64 image to storage or use as data URL
               const base64 = part.inline_data.data;
               const mimeType = part.inline_data.mime_type;
               imageUrl = `data:${mimeType};base64,${base64}`;
@@ -209,10 +207,21 @@ serve(async (req) => {
           imageUrl = `https://picsum.photos/seed/${node_id}/512/512`;
         }
 
+        // Update node as ready
         await supabaseAdmin
           .from("canvas_nodes")
           .update({ status: "ready", asset_url: imageUrl, error_message: null })
           .eq("id", node_id);
+
+        // Auto-save to saved_assets
+        await supabaseAdmin.from("saved_assets").insert({
+          user_id: userId,
+          node_id: node_id,
+          asset_url: imageUrl,
+          prompt: node.prompt,
+          type: "image",
+          tags: [],
+        });
 
         return new Response(
           JSON.stringify({ success: true, asset_url: imageUrl }),

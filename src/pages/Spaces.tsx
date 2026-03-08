@@ -2,24 +2,19 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AppHeader } from "@/components/AppHeader";
 import {
   Plus,
   Search,
   Loader2,
-  Sparkles,
   FolderOpen,
-  Coins,
   MoreVertical,
   Trash2,
   Pencil,
-  Image,
-  LayoutGrid,
   BookOpen,
-  Shield,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -27,7 +22,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useAdmin } from "@/hooks/useAdmin";
 
 interface Space {
   id: string;
@@ -40,8 +34,6 @@ interface Space {
 
 const Spaces = () => {
   const { user, loading: authLoading, signOut } = useAuth("/auth");
-  const { profile } = useProfile(user?.id);
-  const { isAdmin } = useAdmin(user?.id);
   const navigate = useNavigate();
 
   const [spaces, setSpaces] = useState<Space[]>([]);
@@ -120,87 +112,12 @@ const Spaces = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Ambient */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[150px]" />
       </div>
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card glow-primary">
-              <Sparkles className="h-4 w-4 text-primary" />
-            </div>
-            <span className="text-lg font-bold">
-              <span className="gradient-text">Canvas</span>
-              <span className="text-foreground">AI</span>
-            </span>
-          </div>
+      <AppHeader userId={user?.id} onSignOut={signOut} />
 
-          <nav className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/spaces")}
-              className="text-foreground"
-            >
-              <LayoutGrid className="mr-1.5 h-4 w-4" />
-              Spaces
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/canvas")}
-              className="text-muted-foreground"
-            >
-              <Sparkles className="mr-1.5 h-4 w-4" />
-              Canvas
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/assets")}
-              className="text-muted-foreground"
-            >
-              <Image className="mr-1.5 h-4 w-4" />
-              Assets
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/pricing")}
-              className="text-muted-foreground"
-            >
-              <Coins className="mr-1.5 h-4 w-4" />
-              Planes
-            </Button>
-            {isAdmin && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate("/admin")}
-                className="text-muted-foreground"
-              >
-                <Shield className="mr-1.5 h-4 w-4" />
-                Admin
-              </Button>
-            )}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs">
-              <Coins className="h-3.5 w-3.5 text-gold" />
-              <span className="text-gold font-semibold">{profile?.credits_balance ?? 0}</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={signOut} className="text-muted-foreground">
-              Salir
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      {/* Main */}
       <main className="relative z-10 mx-auto max-w-6xl px-6 py-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -217,7 +134,6 @@ const Spaces = () => {
           </Button>
         </div>
 
-        {/* Search */}
         <div className="relative mb-6">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -228,7 +144,6 @@ const Spaces = () => {
           />
         </div>
 
-        {/* Grid */}
         {loading ? (
           <div className="flex h-64 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin-slow text-primary" />
@@ -251,14 +166,9 @@ const Spaces = () => {
                 className="group cursor-pointer rounded-2xl border border-border bg-card p-5 node-shadow hover:border-primary/30 transition-all"
                 onClick={() => navigate("/canvas")}
               >
-                {/* Thumbnail placeholder */}
                 <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-muted/50 border border-border">
                   {space.thumbnail_url ? (
-                    <img
-                      src={space.thumbnail_url}
-                      alt={space.name}
-                      className="h-full w-full rounded-xl object-cover"
-                    />
+                    <img src={space.thumbnail_url} alt={space.name} className="h-full w-full rounded-xl object-cover" />
                   ) : (
                     <BookOpen className="h-8 w-8 text-muted-foreground/40" />
                   )}
