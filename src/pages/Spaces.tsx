@@ -121,7 +121,7 @@ const Spaces = () => {
       <main className="relative z-10 mx-auto max-w-6xl px-6 py-8">
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Mis Spaces</h1>
+            <h1 className="text-3xl font-bold text-foreground">Mis Espacios</h1>
             <p className="mt-1 text-muted-foreground">Organiza tus proyectos generativos</p>
           </div>
           <Button
