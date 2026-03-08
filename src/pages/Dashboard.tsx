@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useSubscription } from "@/hooks/useSubscription";
 import { AppHeader } from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   Sparkles, Wand2, ZoomIn, Eraser, ImagePlus, RotateCcw,
   Palette, Image, Video, LayoutGrid, ArrowRight, Coins,
   TrendingUp, Clock, Star, MessageSquare, FileText,
-  PenTool, Megaphone, Type, Hash,
+  PenTool, Megaphone, Type, Hash, CreditCard, Settings,
 } from "lucide-react";
 
 interface QuickStat {
@@ -21,15 +24,29 @@ interface QuickStat {
 
 const Dashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth("/auth");
-  const { profile } = useProfile(user?.id);
+  const { profile, refreshProfile } = useProfile(user?.id);
+  const { subscription, checkSubscription, openCustomerPortal } = useSubscription(user?.id);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [recentAssets, setRecentAssets] = useState<any[]>([]);
   const [spacesCount, setSpacesCount] = useState(0);
   const [assetsCount, setAssetsCount] = useState(0);
 
+  // Handle checkout success redirect
+  useEffect(() => {
+    if (searchParams.get("checkout") === "success") {
+      toast.success("¡Suscripción activada! Tus créditos se han recargado.");
+      checkSubscription();
+      refreshProfile();
+    }
+    if (searchParams.get("credits") === "success") {
+      toast.success("¡Créditos comprados! Tu balance se ha actualizado.");
+      refreshProfile();
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     if (!user) return;
-    // Fetch counts and recent items
     const load = async () => {
       const [assets, spaces, recent] = await Promise.all([
         supabase.from("saved_assets").select("id", { count: "exact", head: true }).eq("user_id", user.id),
@@ -43,11 +60,20 @@ const Dashboard = () => {
     load();
   }, [user]);
 
+  const tierLabels: Record<string, string> = {
+    free: "Starter",
+    educacion: "Educación",
+    pro: "Pro",
+    business: "Business",
+  };
+
+  const currentTier = profile?.subscription_tier || "free";
+
   const stats: QuickStat[] = [
     { label: "Créditos", value: profile?.credits_balance ?? 0, icon: Coins, accent: "bg-gold/10 text-gold" },
-    { label: "Espacios", value: spacesCount, icon: LayoutGrid, accent: "bg-primary/10 text-primary" },
-    { label: "Assets", value: assetsCount, icon: Image, accent: "bg-accent/10 text-accent" },
-    { label: "Herramientas", value: "12+", icon: Wand2, accent: "bg-warning/10 text-warning" },
+    { label: "Plan", value: tierLabels[currentTier] || "Free", icon: CreditCard, accent: "bg-primary/10 text-primary" },
+    { label: "Espacios", value: spacesCount, icon: LayoutGrid, accent: "bg-accent/10 text-accent" },
+    { label: "Assets", value: assetsCount, icon: Image, accent: "bg-warning/10 text-warning" },
   ];
 
   const quickActions = [
@@ -87,13 +113,32 @@ const Dashboard = () => {
 
       <main className="relative z-10 mx-auto max-w-7xl px-6 py-8">
         {/* Welcome */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
-            ¡Hola, <span className="gradient-text">{profile?.display_name || "Creator"}</span>!
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            Bienvenido a tu estudio de IA generativa. ¿Qué quieres crear hoy?
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              ¡Hola, <span className="gradient-text">{profile?.display_name || "Creator"}</span>!
+            </h1>
+            <p className="mt-1 text-muted-foreground">
+              Bienvenido a tu estudio de IA generativa. ¿Qué quieres crear hoy?
+            </p>
+          </div>
+          {subscription?.subscribed && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                try {
+                  await openCustomerPortal();
+                } catch {
+                  toast.error("Error al abrir el portal de suscripción");
+                }
+              }}
+              className="border-border gap-2 hidden sm:flex"
+            >
+              <Settings className="h-3.5 w-3.5" />
+              Gestionar Plan
+            </Button>
+          )}
         </div>
 
         {/* Stats */}
@@ -112,6 +157,37 @@ const Dashboard = () => {
             </div>
           ))}
         </div>
+
+        {/* Subscription info banner */}
+        {subscription?.subscribed && subscription.subscription_end && (
+          <div className="mb-6 rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <CreditCard className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  Plan {tierLabels[subscription.tier] || subscription.tier} activo
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Próxima renovación: {new Date(subscription.subscription_end).toLocaleDateString("es-ES")}
+                </p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={async () => {
+                try {
+                  await openCustomerPortal();
+                } catch {
+                  toast.error("Error al abrir el portal");
+                }
+              }}
+              className="text-primary"
+            >
+              Gestionar →
+            </Button>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="mb-10">
