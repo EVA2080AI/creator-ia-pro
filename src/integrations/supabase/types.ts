@@ -241,6 +241,7 @@ export type Database = {
           display_name: string
           email: string
           last_sign_in: string
+          subscription_tier: string
           user_id: string
         }[]
       }
