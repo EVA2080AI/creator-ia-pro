@@ -253,6 +253,10 @@ export type Database = {
         Args: { _new_balance: number; _target_user_id: string }
         Returns: undefined
       }
+      admin_update_tier: {
+        Args: { _new_tier: string; _target_user_id: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
