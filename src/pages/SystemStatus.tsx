@@ -405,6 +405,9 @@ const SystemStatus = () => {
     error: features.filter((f) => f.status === "error").length,
     untested: features.filter((f) => f.status === "untested").length,
   };
+  const completionPct = Math.round(
+    ((summary.ok + summary.warning * 0.5) / features.length) * 100
+  );
 
   if (authLoading || adminLoading) {
     return (
