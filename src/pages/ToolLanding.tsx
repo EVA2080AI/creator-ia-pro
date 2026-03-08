@@ -641,12 +641,12 @@ const ToolLanding = () => {
               >
                 {demoing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
-                ) : demoUsed ? (
+                ) : !isLoggedIn && demoUsed ? (
                   <Lock className="h-4 w-4" />
                 ) : (
                   <Sparkles className="h-4 w-4" />
                 )}
-                {demoing ? "Procesando con IA..." : demoUsed ? "Regístrate para más" : `Probar ${tool.name} Gratis`}
+                {demoing ? "Procesando con IA..." : !isLoggedIn && demoUsed ? "Límite alcanzado" : `Probar ${tool.name}${isLoggedIn ? "" : " Gratis"}`}
               </Button>
             </div>
 
