@@ -184,12 +184,14 @@ function buildParts(prompt: string, image?: string) {
 async function callGeminiWithModelFallback(apiKey: string, parts: any[]) {
   const availableModels = await fetchAvailableModels(apiKey);
   const preferred = PREFERRED_MODELS.filter((m) => availableModels.has(m));
-  const modelCandidates = preferred.length > 0 ? preferred : PREFERRED_MODELS;
+  const modelCandidates = [...(preferred.length > 0 ? preferred : PREFERRED_MODELS)];
 
   let lastNon404Status = 0;
   let lastNon404Text = '';
+  let retryAttempt = 0;
 
-  for (const model of modelCandidates) {
+  for (let i = 0; i < modelCandidates.length; i++) {
+    const model = modelCandidates[i];
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
       {
