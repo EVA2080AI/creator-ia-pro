@@ -27,12 +27,7 @@ const aiTools = [
   { icon: Palette, name: "Formaketing Studio", desc: "Flows de marketing visual.", path: "/canvas", cat: "studio" },
 ];
 
-const platforms = [
-  { icon: Monitor, name: "Windows", label: "Windows 10+", available: true },
-  { icon: Apple, name: "macOS", label: "macOS 12+", available: true },
-  { icon: Smartphone, name: "Android", label: "Android 10+", available: true },
-  { icon: Globe, name: "Web App", label: "Cualquier navegador", available: true },
-];
+
 
 const testimonials = [
   { name: "María G.", role: "Community Manager", text: "Creator IA Pro cambió mi flujo de trabajo. Genero contenido para 5 marcas en la mitad del tiempo." },
