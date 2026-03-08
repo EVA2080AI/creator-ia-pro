@@ -242,6 +242,8 @@ const Auth = () => {
                 </div>
               </div>
             )}
+
+            <div className="mt-6 text-center">
               {mode === "forgot" ? (
                 <button onClick={() => setMode("login")} className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   ← Volver al login
