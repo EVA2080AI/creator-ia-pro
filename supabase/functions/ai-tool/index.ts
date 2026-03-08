@@ -188,78 +188,76 @@ async function callGeminiWithModelFallback(apiKey: string, parts: any[]) {
 
   let lastNon404Status = 0;
   let lastNon404Text = '';
-  let retryAttempt = 0;
 
   for (let i = 0; i < modelCandidates.length; i++) {
     const model = modelCandidates[i];
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: {
-            responseModalities: ['TEXT', 'IMAGE'],
-          },
-        }),
+    let retryAttempt = 0;
+    const MAX_RETRIES = 2;
+
+    while (true) {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts }],
+            generationConfig: {
+              responseModalities: ['TEXT', 'IMAGE'],
+            },
+          }),
+        }
+      );
+
+      const text = await response.text();
+
+      if (response.status === 404) {
+        console.warn(`Model not found: ${model}`);
+        break;
       }
-    );
 
-    const text = await response.text();
-
-    if (response.status === 404) {
-      console.warn(`Gemini model not found: ${model}`);
-      continue;
-    }
-
-    if (response.status === 429) {
-      const retryAfter = response.headers.get('Retry-After');
-      let delayMs = 0;
-      if (retryAfter) {
-        const parsed = parseInt(retryAfter, 10);
-        delayMs = !isNaN(parsed) ? parsed * 1000 : 0;
+      if (response.status === 429) {
+        if (retryAttempt < MAX_RETRIES) {
+          const retryAfter = response.headers.get('Retry-After');
+          let delayMs = 0;
+          if (retryAfter) {
+            const parsed = parseInt(retryAfter, 10);
+            delayMs = !isNaN(parsed) ? parsed * 1000 : 0;
+          }
+          if (delayMs <= 0) {
+            delayMs = Math.pow(2, retryAttempt + 1) * 2000 + Math.random() * 2000;
+          }
+          const cappedDelay = Math.min(delayMs, 45000);
+          console.log(`Rate limited on ${model}, waiting ${cappedDelay}ms (retry ${retryAttempt + 1}/${MAX_RETRIES})`);
+          await new Promise((r) => setTimeout(r, cappedDelay));
+          retryAttempt++;
+          continue;
+        }
+        console.warn(`Rate limit exhausted on ${model}, trying next model...`);
+        break;
       }
-      if (delayMs <= 0) {
-        delayMs = Math.pow(2, retryAttempt) * 1000 + Math.random() * 1000;
+
+      if (!response.ok) {
+        lastNon404Status = response.status;
+        lastNon404Text = text;
+        break;
       }
-      const cappedDelay = Math.min(delayMs, 30000);
-      console.log(`Rate limited on ${model}, waiting ${cappedDelay}ms (attempt ${retryAttempt + 1}/3)`);
-      if (retryAttempt < 2) {
-        await new Promise((r) => setTimeout(r, cappedDelay));
-        retryAttempt++;
-        i--; // Retry same model
-        continue;
+
+      const parsed = safeJsonParse(text);
+      const resultUrl = extractGeminiImageData(parsed);
+
+      if (resultUrl) {
+        return { ok: true, resultUrl };
       }
-      // After 3 retries on rate limit, give up
-      return {
-        ok: false,
-        response: new Response(JSON.stringify({ error: 'Límite de solicitudes excedido. Intenta en unos minutos.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        }),
-      };
+
+      lastNon404Status = 422;
+      lastNon404Text = 'Model responded without image output';
+      break;
     }
-
-    if (!response.ok) {
-      lastNon404Status = response.status;
-      lastNon404Text = text;
-      continue;
-    }
-
-    const parsed = safeJsonParse(text);
-    const resultUrl = extractGeminiImageData(parsed);
-
-    if (resultUrl) {
-      return { ok: true, resultUrl };
-    }
-
-    lastNon404Status = 422;
-    lastNon404Text = 'Model responded without image output';
   }
 
   if (lastNon404Status > 0) {
-    console.error('Gemini fallback error:', lastNon404Status, lastNon404Text);
+    console.error('All models failed:', lastNon404Status, lastNon404Text);
     return {
       ok: false,
       response: new Response(JSON.stringify({ error: `AI processing failed (${lastNon404Status})` }), {
