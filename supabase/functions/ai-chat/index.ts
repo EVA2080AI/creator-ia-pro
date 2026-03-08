@@ -5,7 +5,8 @@ const corsHeaders = {
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const CHAT_MODEL = 'gemini-2.0-flash';
+const CHAT_MODEL = 'google/gemini-3-flash-preview';
+const GATEWAY_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions';
 const GUEST_TRIAL_LIMIT = 3;
 
 Deno.serve(async (req) => {
@@ -19,8 +20,8 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnon = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const googleApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
-    if (!googleApiKey) throw new Error('GOOGLE_GEMINI_API_KEY is not configured');
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    if (!lovableApiKey) throw new Error('LOVABLE_API_KEY is not configured');
 
     const userClient = createClient(supabaseUrl, supabaseAnon, {
       global: { headers: { Authorization: authHeader } },
@@ -97,17 +98,20 @@ Responde en español de forma clara y estructurada.`,
 
     const systemPrompt = systemPrompts[type] || systemPrompts.general;
 
-    const aiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${CHAT_MODEL}:generateContent?key=${googleApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ parts: [{ text: prompt }] }],
-        }),
-      }
-    );
+    const aiResponse = await fetch(GATEWAY_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: CHAT_MODEL,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: prompt },
+        ],
+      }),
+    });
 
     if (!aiResponse.ok) {
       if (!isGuest && user && originalCredits !== null) {
@@ -120,11 +124,19 @@ Responde en español de forma clara y estructurada.`,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
+      if (aiResponse.status === 402) {
+        return new Response(JSON.stringify({ error: 'Créditos del servicio agotados. Contacta al administrador.' }), {
+          status: 402,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      const errText = await aiResponse.text();
+      console.error('AI Gateway error:', aiResponse.status, errText);
       throw new Error('AI processing failed');
     }
 
     const aiData = await aiResponse.json();
-    const text = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = aiData.choices?.[0]?.message?.content;
 
     if (!text) {
       if (!isGuest && user && originalCredits !== null) {

@@ -7,7 +7,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const IMAGE_MODEL = "gemini-2.0-flash-exp";
+const IMAGE_MODEL = "google/gemini-2.5-flash-image";
+const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -26,8 +27,8 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const googleApiKey = Deno.env.get("GOOGLE_GEMINI_API_KEY");
-    if (!googleApiKey) throw new Error("GOOGLE_GEMINI_API_KEY is not configured");
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!lovableApiKey) throw new Error("LOVABLE_API_KEY is not configured");
 
     const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
@@ -109,26 +110,22 @@ serve(async (req) => {
 
     if (node.type === "image") {
       try {
-        const aiResponse = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${googleApiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{
-                parts: [{ text: `Generate a high-quality image: ${node.prompt}` }],
-              }],
-              generationConfig: {
-                responseModalities: ["TEXT", "IMAGE"],
-              },
-            }),
-          }
-        );
+        const aiResponse = await fetch(GATEWAY_URL, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${lovableApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: IMAGE_MODEL,
+            messages: [
+              { role: "system", content: "You are an image generation AI. Generate high-quality, professional images based on user descriptions." },
+              { role: "user", content: `Generate a high-quality image: ${node.prompt}` },
+            ],
+          }),
+        });
 
         if (!aiResponse.ok) {
-          const errText = await aiResponse.text();
-          console.error("Google Gemini error:", aiResponse.status, errText);
-
           // Rollback credits
           await supabaseAdmin
             .from("profiles")
@@ -146,6 +143,8 @@ serve(async (req) => {
           const errorMsg =
             aiResponse.status === 429
               ? "Límite de solicitudes excedido. Intenta en un momento."
+              : aiResponse.status === 402
+              ? "Créditos del servicio agotados."
               : `Generación de IA falló (${aiResponse.status})`;
 
           await supabaseAdmin
@@ -160,21 +159,11 @@ serve(async (req) => {
         }
 
         const result = await aiResponse.json();
-        let imageUrl: string | null = null;
-
-        // Extract image from Gemini response
-        const candidates = result.candidates;
-        if (candidates?.[0]?.content?.parts) {
-          for (const part of candidates[0].content.parts) {
-            if (part.inlineData?.mimeType?.startsWith("image/")) {
-              imageUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-              break;
-            }
-          }
-        }
+        const responseContent = result.choices?.[0]?.message?.content;
+        let imageUrl = extractImageFromResponse(responseContent);
 
         if (!imageUrl) {
-          console.error("No image in Gemini response:", JSON.stringify(result).slice(0, 500));
+          console.error("No image in response:", JSON.stringify(result).slice(0, 500));
           
           // Rollback
           await supabaseAdmin
@@ -278,3 +267,34 @@ serve(async (req) => {
     );
   }
 });
+
+function extractImageFromResponse(content: any): string | null {
+  if (typeof content === 'string') {
+    // Check for base64 data URI
+    const base64Match = content.match(/data:image\/[^;]+;base64,[A-Za-z0-9+/=]+/);
+    if (base64Match) return base64Match[0];
+
+    // Check for markdown image with URL
+    const mdMatch = content.match(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/);
+    if (mdMatch) return mdMatch[1];
+
+    return null;
+  }
+
+  if (Array.isArray(content)) {
+    for (const part of content) {
+      if (part.type === 'image_url' && part.image_url?.url) {
+        return part.image_url.url;
+      }
+      if (part.type === 'image' && part.image?.url) {
+        return part.image.url;
+      }
+      if (part.type === 'text') {
+        const extracted = extractImageFromResponse(part.text);
+        if (extracted) return extracted;
+      }
+    }
+  }
+
+  return null;
+}
