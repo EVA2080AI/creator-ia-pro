@@ -6,9 +6,16 @@ import {
   ImagePlus, RotateCcw, Image, MessageSquare, PenTool,
   Hash, FileText, Megaphone, Palette, ArrowLeft, Zap,
   Star, Play, Upload, Loader2, Lock, Copy, Download,
+  Menu, ChevronDown, Home, CreditCard, LayoutGrid,
+  MonitorDown, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { toast } from "sonner";
 
 // Demo images
@@ -368,22 +375,98 @@ const ToolLanding = () => {
       </div>
 
       {/* Nav */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-4 sm:px-8">
-        <button onClick={() => navigate("/")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="h-4 w-4" />
-          <div className="flex items-center gap-2">
+      <header className="relative z-50 flex items-center justify-between px-6 py-4 sm:px-8 border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 border border-primary/20">
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
-            <span className="text-lg font-bold">
+            <span className="text-lg font-bold hidden sm:inline">
               <span className="gradient-text">Creator IA</span>
               <span className="text-foreground"> Pro</span>
             </span>
-          </div>
-        </button>
+          </button>
+
+          {/* Mega Menu */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-card transition-colors">
+                <Menu className="h-4 w-4" />
+                <span className="hidden sm:inline">Herramientas</span>
+                <ChevronDown className="h-3 w-3" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-[560px] p-0 bg-card border-border shadow-2xl rounded-2xl overflow-hidden">
+              <div className="p-4 border-b border-border bg-muted/30">
+                <p className="text-sm font-semibold text-foreground">Todas las herramientas</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Navega entre nuestras soluciones de IA</p>
+              </div>
+              <div className="grid grid-cols-2 gap-0">
+                {/* Image tools */}
+                <div className="p-3 border-r border-border">
+                  <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground px-2 mb-2">Herramientas de Imagen</p>
+                  {Object.entries(toolsData).filter(([, t]) => t.category === "image").map(([slug, t]) => (
+                    <button
+                      key={slug}
+                      onClick={() => navigate(`/herramienta/${slug}`)}
+                      className={`flex items-center gap-2.5 w-full rounded-xl px-2.5 py-2 text-left transition-colors ${
+                        toolSlug === slug ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${toolSlug === slug ? "bg-primary/20" : "bg-muted"}`}>
+                        <t.icon className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium leading-tight">{t.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{t.credits} cr</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                {/* Marketing + Studio tools */}
+                <div className="p-3">
+                  <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground px-2 mb-2">Apps de Marketing</p>
+                  {Object.entries(toolsData).filter(([, t]) => t.category === "marketing" || t.category === "studio").map(([slug, t]) => (
+                    <button
+                      key={slug}
+                      onClick={() => navigate(`/herramienta/${slug}`)}
+                      className={`flex items-center gap-2.5 w-full rounded-xl px-2.5 py-2 text-left transition-colors ${
+                        toolSlug === slug ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${toolSlug === slug ? "bg-primary/20" : "bg-muted"}`}>
+                        <t.icon className="h-3.5 w-3.5" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium leading-tight">{t.name}</p>
+                        <p className="text-[10px] text-muted-foreground">{t.credits} cr</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Quick links footer */}
+              <div className="flex items-center gap-2 p-3 border-t border-border bg-muted/20">
+                <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-xs text-muted-foreground h-7 gap-1.5">
+                  <Home className="h-3 w-3" /> Inicio
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/pricing")} className="text-xs text-muted-foreground h-7 gap-1.5">
+                  <CreditCard className="h-3 w-3" /> Planes
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/descargar")} className="text-xs text-muted-foreground h-7 gap-1.5">
+                  <MonitorDown className="h-3 w-3" /> Descargar
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+
         <div className="flex items-center gap-2">
           <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-muted-foreground hover:text-foreground hidden sm:flex text-sm">
             Precios
+          </Button>
+          <Button onClick={() => navigate("/descargar")} variant="ghost" className="text-muted-foreground hover:text-foreground hidden md:flex text-sm">
+            Descargar
           </Button>
           <Button onClick={handleCTA} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6">
             {isLoggedIn ? "Ir a la App" : "Empezar Gratis"}
