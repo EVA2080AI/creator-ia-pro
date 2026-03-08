@@ -111,9 +111,7 @@ const Index = () => {
             Crear Cuenta Gratis
             <ArrowRight className="h-4 w-4" />
           </Button>
-          <Button onClick={() => {
-            document.getElementById("download-section")?.scrollIntoView({ behavior: "smooth" });
-          }} size="lg" variant="outline" className="border-border text-foreground hover:bg-muted gap-2 text-base px-8 rounded-full h-12">
+          <Button onClick={() => navigate("/descargar")} size="lg" variant="outline" className="border-border text-foreground hover:bg-muted gap-2 text-base px-8 rounded-full h-12">
             <Download className="h-4 w-4" />
             Descargar App
           </Button>
