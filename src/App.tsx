@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -21,31 +22,33 @@ import SystemStatus from "./pages/SystemStatus";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/canvas" element={<Canvas />} />
-          <Route path="/pricing" element={<Pricing />} />
-          <Route path="/spaces" element={<Spaces />} />
-          <Route path="/assets" element={<Assets />} />
-          <Route path="/tools" element={<Tools />} />
-          <Route path="/apps/:appId" element={<Tools />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/descargar" element={<Downloads />} />
-          <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
-          <Route path="/system-status" element={<SystemStatus />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  <ErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/canvas" element={<Canvas />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/spaces" element={<Spaces />} />
+            <Route path="/assets" element={<Assets />} />
+            <Route path="/tools" element={<Tools />} />
+            <Route path="/apps/:appId" element={<Tools />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/descargar" element={<Downloads />} />
+            <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
+            <Route path="/system-status" element={<SystemStatus />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;
