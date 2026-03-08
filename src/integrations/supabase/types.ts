@@ -25,6 +25,7 @@ export type Database = {
           pos_x: number
           pos_y: number
           prompt: string
+          space_id: string | null
           status: string
           type: string
           updated_at: string
@@ -41,6 +42,7 @@ export type Database = {
           pos_x?: number
           pos_y?: number
           prompt: string
+          space_id?: string | null
           status?: string
           type: string
           updated_at?: string
@@ -57,13 +59,22 @@ export type Database = {
           pos_x?: number
           pos_y?: number
           prompt?: string
+          space_id?: string | null
           status?: string
           type?: string
           updated_at?: string
           user_id?: string
           width?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "canvas_nodes_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -251,6 +262,10 @@ export type Database = {
       }
       admin_update_credits: {
         Args: { _new_balance: number; _target_user_id: string }
+        Returns: undefined
+      }
+      admin_update_tier: {
+        Args: { _new_tier: string; _target_user_id: string }
         Returns: undefined
       }
       has_role: {

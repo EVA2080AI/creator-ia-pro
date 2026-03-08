@@ -5,8 +5,9 @@ import type { Node } from "@xyflow/react";
 
 /**
  * Fetches canvas_nodes from DB and hydrates the Zustand store once.
+ * If spaceId is provided, filters by space.
  */
-export function useCanvasLoader(userId: string | undefined) {
+export function useCanvasLoader(userId: string | undefined, spaceId?: string | null) {
   const [loading, setLoading] = useState(true);
   const setNodes = useCanvasStore((s) => s.setNodes);
 
@@ -14,11 +15,19 @@ export function useCanvasLoader(userId: string | undefined) {
     if (!userId) return;
 
     const fetchNodes = async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("canvas_nodes")
         .select("*")
         .eq("user_id", userId)
         .order("created_at", { ascending: true });
+
+      if (spaceId) {
+        query = query.eq("space_id", spaceId);
+      } else {
+        query = query.is("space_id", null);
+      }
+
+      const { data, error } = await query;
 
       if (!error && data) {
         const flowNodes: Node<CanvasNodeData>[] = data.map((n: any) => ({
@@ -41,7 +50,7 @@ export function useCanvasLoader(userId: string | undefined) {
     };
 
     fetchNodes();
-  }, [userId, setNodes]);
+  }, [userId, spaceId, setNodes]);
 
   return { loading };
 }

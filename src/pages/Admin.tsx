@@ -107,10 +107,10 @@ const Admin = () => {
 
   const handleChangeTier = async (targetUserId: string, newTier: string) => {
     setActionLoading(targetUserId + "-tier");
-    const { error } = await supabase
-      .from("profiles")
-      .update({ subscription_tier: newTier } as any)
-      .eq("user_id", targetUserId);
+    const { error } = await supabase.rpc("admin_update_tier", {
+      _target_user_id: targetUserId,
+      _new_tier: newTier,
+    });
     if (error) toast.error(error.message);
     else toast.success(`Plan cambiado a ${tierConfig[newTier]?.label || newTier}`);
     await fetchUsers();
@@ -159,6 +159,7 @@ const Admin = () => {
     { path: "/spaces", label: "Espacios", status: "live" },
     { path: "/assets", label: "Biblioteca Assets", status: "live" },
     { path: "/admin", label: "Admin Dashboard", status: "live" },
+    { path: "/system-status", label: "Estado del Sistema", status: "live" },
     { path: "/reset-password", label: "Reset Password", status: "live" },
     { path: "/descargar", label: "Descargar App", status: "live" },
     { path: "/herramienta/:slug", label: "Landings de Herramientas", status: "live" },

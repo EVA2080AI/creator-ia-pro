@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   ReactFlow, Background, Controls, MiniMap,
   type NodeChange, type Node, type Connection, addEdge,
@@ -23,7 +24,9 @@ const nodeTypes = { aiNode: AINode };
 const Canvas = () => {
   const { user, loading: authLoading, signOut } = useAuth("/auth");
   const { profile, refreshProfile } = useProfile(user?.id);
-  const { loading: nodesLoading } = useCanvasLoader(user?.id);
+  const [searchParams] = useSearchParams();
+  const spaceId = searchParams.get("space");
+  const { loading: nodesLoading } = useCanvasLoader(user?.id, spaceId);
   useNodeSubscription(user?.id);
 
   const nodes = useCanvasStore((s) => s.nodes);
@@ -89,7 +92,7 @@ const Canvas = () => {
       try {
         const { data, error } = await supabase
           .from("canvas_nodes")
-          .insert({ user_id: user.id, type, prompt, pos_x: centerX, pos_y: centerY, status: "loading" })
+          .insert({ user_id: user.id, type, prompt, pos_x: centerX, pos_y: centerY, status: "loading", ...(spaceId ? { space_id: spaceId } : {}) } as any)
           .select()
           .single();
 

@@ -164,7 +164,7 @@ const Spaces = () => {
               <div
                 key={space.id}
                 className="group cursor-pointer rounded-2xl border border-border bg-card p-5 node-shadow hover:border-primary/30 transition-all"
-                onClick={() => navigate("/canvas")}
+                onClick={() => navigate(`/canvas?space=${space.id}`)}
               >
                 <div className="mb-4 flex h-32 items-center justify-center rounded-xl bg-muted/50 border border-border">
                   {space.thumbnail_url ? (
