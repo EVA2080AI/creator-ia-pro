@@ -6,9 +6,16 @@ import {
   ImagePlus, RotateCcw, Image, MessageSquare, PenTool,
   Hash, FileText, Megaphone, Palette, ArrowLeft, Zap,
   Star, Play, Upload, Loader2, Lock, Copy, Download,
+  Menu, ChevronDown, Home, CreditCard, LayoutGrid,
+  MonitorDown, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { toast } from "sonner";
 
 // Demo images
