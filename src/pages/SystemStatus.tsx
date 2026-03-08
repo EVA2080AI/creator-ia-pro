@@ -486,12 +486,12 @@ const SystemStatus = () => {
         <div className="mb-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
           <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
             <Bot className="h-4 w-4 text-primary" />
-            Costos de IA
+            Costos de IA — Google Gemini API Gratuita
           </h3>
           <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-            Las llamadas a IA usan el <strong className="text-foreground">Lovable AI Gateway</strong> (LOVABLE_API_KEY). 
-            El costo está incluido en tu plan Lovable — <strong className="text-foreground">no pagas por llamada</strong>. 
-            Si escalas, podrías necesitar tu propia API key. Errores 429 = rate limit, 402 = créditos agotados.
+            Todas las llamadas a IA usan tu <strong className="text-foreground">API key gratuita de Google Gemini</strong>. 
+            <strong className="text-foreground">No pagas por llamada</strong>. 
+            Límites free: ~60 req/min, ~1500 req/día. Usuarios nuevos reciben <strong className="text-foreground">10 créditos gratis</strong>.
           </p>
         </div>
 
