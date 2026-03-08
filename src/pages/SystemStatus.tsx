@@ -445,6 +445,23 @@ const SystemStatus = () => {
           </Button>
         </div>
 
+        {/* Completion bar */}
+        <div className="mb-6 rounded-xl border border-primary/20 bg-card p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-foreground">Progreso del Proyecto</span>
+            <span className="text-2xl font-bold text-primary font-mono">{completionPct}%</span>
+          </div>
+          <div className="h-3 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-700"
+              style={{ width: `${completionPct}%` }}
+            />
+          </div>
+          <p className="mt-1.5 text-[10px] text-muted-foreground">
+            {summary.ok} OK · {summary.warning} parcial · {summary.error} error · {summary.untested} sin probar — de {features.length} funcionalidades
+          </p>
+        </div>
+
         {/* Summary */}
         <div className="mb-8 grid grid-cols-4 gap-3">
           <div className="rounded-xl border border-accent/20 bg-accent/5 p-3 text-center">
