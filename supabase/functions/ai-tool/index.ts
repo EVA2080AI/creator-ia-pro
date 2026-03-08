@@ -135,9 +135,13 @@ function getDefaultPrompt(tool: string): string {
     case 'eraser':
       return 'Remove unwanted objects and blemishes from this image, fill background naturally';
     case 'background':
-      return 'Remove the background completely, keep only the main subject with clean edges on a white background';
+      return 'Remove the background completely, keep only the main subject with clean edges on a transparent/white background';
     case 'restore':
       return 'Restore this photo: fix damage, scratches, improve colors and make it look new and vibrant';
+    case 'logo':
+      return 'Create a professional, clean, modern logo design based on this reference. The logo should be vector-style, minimal, memorable, and work well at any size. Use clean typography and a cohesive color palette. Output on a clean white background.';
+    case 'social':
+      return 'Create a professional social media post image optimized for engagement. Use bold typography, vibrant colors, and a clear visual hierarchy. The design should be eye-catching and suitable for Instagram, Facebook, or LinkedIn. Include space for text overlay.';
     default:
       return 'Enhance this image';
   }
