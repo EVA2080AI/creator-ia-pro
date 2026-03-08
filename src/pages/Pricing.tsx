@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Check, Zap, Crown, ArrowLeft, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
