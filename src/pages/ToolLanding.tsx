@@ -346,13 +346,14 @@ const ToolLanding = () => {
     if (isTextTool) {
       setDemoResult(demoTextResults[tool.id] || "✨ Resultado generado exitosamente. Regístrate para ver el resultado completo y descargar.");
     } else {
-      // For image tools, show the demo image as "result"
+      // For image tools, show a blurred/watermarked preview with explanation
       setDemoResultImage(tool.demoImage);
+      setDemoResult("⚠️ Esta es una vista previa de ejemplo. El resultado real con IA se genera al registrarte y usar tus créditos.");
     }
 
     setDemoing(false);
     setDemoUsed(true);
-    toast.success("¡Demo completada! Regístrate para acceso completo.", {
+    toast.success("¡Vista previa lista! Regístrate para resultados reales con IA.", {
       action: { label: "Registrarme", onClick: () => navigate("/auth") },
     });
   };
@@ -745,7 +746,7 @@ const ToolLanding = () => {
             Empieza a usar <span className="gradient-text">{tool.name}</span>
           </h2>
           <p className="mt-4 text-muted-foreground max-w-md mx-auto">
-            Regístrate gratis y obtén 100 créditos para probar todas las herramientas. Sin tarjeta de crédito.
+            Regístrate gratis y obtén 10 créditos para probar todas las herramientas. Sin tarjeta de crédito.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Button onClick={handleCTA} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-10 rounded-full h-12">

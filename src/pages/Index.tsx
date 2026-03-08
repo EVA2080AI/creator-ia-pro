@@ -275,7 +275,7 @@ const Index = () => {
             Empieza a crear <span className="gradient-text">hoy</span>
           </h2>
           <p className="mt-4 text-muted-foreground max-w-md mx-auto">
-            Únete a miles de creadores que ya usan Creator IA Pro. 100 créditos gratis, sin tarjeta.
+            Únete a miles de creadores que ya usan Creator IA Pro. 10 créditos gratis, sin tarjeta.
           </p>
           <Button onClick={() => navigate("/auth")} size="lg" className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-10 rounded-full h-12 text-base">
             Empezar Gratis

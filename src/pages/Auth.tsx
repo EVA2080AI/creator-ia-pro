@@ -104,7 +104,7 @@ const Auth = () => {
 
           <div className="mt-8 flex items-center gap-2 text-xs text-muted-foreground">
             <Check className="h-3.5 w-3.5 text-accent" />
-            100 créditos gratis al registrarte
+            10 créditos gratis al registrarte
           </div>
         </div>
       </div>
