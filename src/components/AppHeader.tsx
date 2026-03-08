@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import {
   Sparkles,
   LayoutGrid,
+  Wand2,
   Image,
   Coins,
   Shield,
   CreditCard,
   LogOut,
+  Palette,
 } from "lucide-react";
 
 interface AppHeaderProps {
@@ -24,15 +26,16 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
   const { isAdmin } = useAdmin(userId);
 
   const navItems = [
-    { path: "/spaces", label: "Spaces", icon: LayoutGrid },
-    { path: "/canvas", label: "Canvas", icon: Sparkles },
+    { path: "/spaces", label: "Espacios", icon: LayoutGrid },
+    { path: "/tools", label: "Herramientas IA", icon: Wand2 },
+    { path: "/canvas", label: "Formaketing", icon: Palette },
     { path: "/assets", label: "Assets", icon: Image },
     { path: "/pricing", label: "Planes", icon: CreditCard },
   ];
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-sm">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         {/* Logo */}
         <button
           onClick={() => navigate("/")}
@@ -41,28 +44,28 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card glow-primary">
             <Sparkles className="h-4 w-4 text-primary" />
           </div>
-          <span className="text-lg font-bold">
-            <span className="gradient-text">Canvas</span>
-            <span className="text-foreground">AI</span>
+          <span className="text-base font-bold hidden sm:inline">
+            <span className="gradient-text">Creator IA</span>
+            <span className="text-foreground"> Pro</span>
           </span>
         </button>
 
         {/* Navigation */}
-        <nav className="flex items-center gap-1">
+        <nav className="flex items-center gap-0.5 overflow-x-auto">
           {navItems.map((item) => (
             <Button
               key={item.path}
               variant="ghost"
               size="sm"
               onClick={() => navigate(item.path)}
-              className={
+              className={`shrink-0 ${
                 location.pathname === item.path
-                  ? "text-foreground"
+                  ? "text-foreground bg-muted/50"
                   : "text-muted-foreground"
-              }
+              }`}
             >
-              <item.icon className="mr-1.5 h-4 w-4" />
-              <span className="hidden sm:inline">{item.label}</span>
+              <item.icon className="mr-1 h-4 w-4" />
+              <span className="hidden md:inline text-xs">{item.label}</span>
             </Button>
           ))}
           {isAdmin && (
@@ -70,20 +73,20 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
               variant="ghost"
               size="sm"
               onClick={() => navigate("/admin")}
-              className={
+              className={`shrink-0 ${
                 location.pathname === "/admin"
-                  ? "text-foreground"
+                  ? "text-foreground bg-muted/50"
                   : "text-muted-foreground"
-              }
+              }`}
             >
-              <Shield className="mr-1.5 h-4 w-4" />
-              <span className="hidden sm:inline">Admin</span>
+              <Shield className="mr-1 h-4 w-4" />
+              <span className="hidden md:inline text-xs">Admin</span>
             </Button>
           )}
         </nav>
 
         {/* Credits + Sign out */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs">
             <Coins className="h-3.5 w-3.5 text-gold" />
             <span className="text-gold font-semibold font-mono">
@@ -96,8 +99,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
             onClick={onSignOut}
             className="text-muted-foreground"
           >
-            <LogOut className="h-4 w-4 sm:mr-1.5" />
-            <span className="hidden sm:inline">Salir</span>
+            <LogOut className="h-4 w-4" />
           </Button>
         </div>
       </div>
