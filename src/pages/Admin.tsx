@@ -159,6 +159,7 @@ const Admin = () => {
     { path: "/spaces", label: "Espacios", status: "live" },
     { path: "/assets", label: "Biblioteca Assets", status: "live" },
     { path: "/admin", label: "Admin Dashboard", status: "live" },
+    { path: "/system-status", label: "Estado del Sistema", status: "live" },
     { path: "/reset-password", label: "Reset Password", status: "live" },
     { path: "/descargar", label: "Descargar App", status: "live" },
     { path: "/herramienta/:slug", label: "Landings de Herramientas", status: "live" },
