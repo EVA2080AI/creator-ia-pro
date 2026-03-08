@@ -13,9 +13,13 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import {
   Shield, Users, Search, Loader2, RefreshCw,
   Ban, CheckCircle, KeyRound, Coins, LayoutDashboard,
-  Database, Zap, Settings, Eye, EyeOff, Save,
+  Database, Zap, Settings, Eye, EyeOff, Save, Crown,
+  GraduationCap, Building2,
 } from "lucide-react";
 
 interface AdminUser {
@@ -25,7 +29,15 @@ interface AdminUser {
   credits_balance: number;
   created_at: string;
   last_sign_in: string | null;
+  subscription_tier: string;
 }
+
+const tierConfig: Record<string, { label: string; icon: typeof Zap; className: string }> = {
+  free: { label: "Free", icon: Zap, className: "border-border text-muted-foreground" },
+  pro: { label: "Pro", icon: Crown, className: "border-primary/30 text-primary" },
+  education: { label: "Educación", icon: GraduationCap, className: "border-accent/30 text-accent" },
+  business: { label: "Business", icon: Building2, className: "border-gold/30 text-gold" },
+};
 
 const Admin = () => {
   const { user, loading: authLoading, signOut } = useAuth("/auth");
@@ -93,6 +105,18 @@ const Admin = () => {
     setActionLoading(null);
   };
 
+  const handleChangeTier = async (targetUserId: string, newTier: string) => {
+    setActionLoading(targetUserId + "-tier");
+    const { error } = await supabase
+      .from("profiles")
+      .update({ subscription_tier: newTier } as any)
+      .eq("user_id", targetUserId);
+    if (error) toast.error(error.message);
+    else toast.success(`Plan cambiado a ${tierConfig[newTier]?.label || newTier}`);
+    await fetchUsers();
+    setActionLoading(null);
+  };
+
   const handleSaveStripeKey = async () => {
     if (!stripeKey.trim()) {
       toast.error("Ingresa una clave de Stripe válida");
@@ -119,6 +143,12 @@ const Admin = () => {
       u.display_name?.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Stats
+  const tierCounts = users.reduce((acc, u) => {
+    acc[u.subscription_tier] = (acc[u.subscription_tier] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
   const routes = [
     { path: "/", label: "Landing", status: "live" },
     { path: "/auth", label: "Autenticación", status: "live" },
@@ -130,10 +160,12 @@ const Admin = () => {
     { path: "/assets", label: "Biblioteca Assets", status: "live" },
     { path: "/admin", label: "Admin Dashboard", status: "live" },
     { path: "/reset-password", label: "Reset Password", status: "live" },
+    { path: "/descargar", label: "Descargar App", status: "live" },
+    { path: "/herramienta/:slug", label: "Landings de Herramientas", status: "live" },
   ];
 
   const tables = [
-    { name: "profiles", desc: "Datos de usuario y créditos" },
+    { name: "profiles", desc: "Datos de usuario, créditos y plan de suscripción" },
     { name: "canvas_nodes", desc: "Nodos del lienzo con estado y assets" },
     { name: "transactions", desc: "Registro de débitos y créditos" },
     { name: "user_roles", desc: "Roles de usuario (admin/moderator/user)" },
@@ -160,6 +192,24 @@ const Admin = () => {
             <span className="gradient-text">Creator IA</span> Admin
           </h1>
           <Badge variant="outline" className="border-primary/30 text-primary ml-2">Admin</Badge>
+        </div>
+
+        {/* Plan distribution summary */}
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {Object.entries(tierConfig).map(([key, cfg]) => {
+            const TierIcon = cfg.icon;
+            return (
+              <div key={key} className="flex items-center gap-3 rounded-xl border border-border bg-card p-3 node-shadow">
+                <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${key === 'free' ? 'bg-muted' : key === 'pro' ? 'bg-primary/10' : key === 'education' ? 'bg-accent/10' : 'bg-gold/10'}`}>
+                  <TierIcon className={`h-4 w-4 ${key === 'free' ? 'text-muted-foreground' : key === 'pro' ? 'text-primary' : key === 'education' ? 'text-accent' : 'text-gold'}`} />
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-foreground font-mono">{tierCounts[key] || 0}</p>
+                  <p className="text-[10px] text-muted-foreground">{cfg.label}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className="flex gap-1 rounded-xl border border-border bg-card p-1">
@@ -204,6 +254,7 @@ const Admin = () => {
                   <TableRow className="border-border hover:bg-transparent">
                     <TableHead className="text-muted-foreground">Email</TableHead>
                     <TableHead className="text-muted-foreground">Nombre</TableHead>
+                    <TableHead className="text-muted-foreground">Plan</TableHead>
                     <TableHead className="text-muted-foreground">Créditos</TableHead>
                     <TableHead className="text-muted-foreground">Registro</TableHead>
                     <TableHead className="text-muted-foreground">Último Login</TableHead>
@@ -213,58 +264,87 @@ const Admin = () => {
                 <TableBody>
                   {loadingUsers ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12">
+                      <TableCell colSpan={7} className="text-center py-12">
                         <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
                       </TableCell>
                     </TableRow>
                   ) : filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                         No se encontraron usuarios
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredUsers.map((u) => (
-                      <TableRow key={u.user_id} className="border-border">
-                        <TableCell className="font-mono text-sm text-foreground">{u.email}</TableCell>
-                        <TableCell className="text-foreground">{u.display_name || "—"}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className={u.credits_balance > 0 ? "border-accent/30 text-accent" : "border-destructive/30 text-destructive"}>
-                              {u.credits_balance}
-                            </Badge>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" disabled={actionLoading === u.user_id + "-credits"}
-                              onClick={() => {
-                                const val = prompt("Nuevo balance de créditos:", String(u.credits_balance));
-                                if (val !== null) handleUpdateCredits(u.user_id, parseInt(val) || 0);
-                              }}>
-                              <Coins className="h-3.5 w-3.5 text-gold" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{new Date(u.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{u.last_sign_in ? new Date(u.last_sign_in).toLocaleDateString() : "—"}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button variant="ghost" size="sm" disabled={actionLoading === u.email} onClick={() => handleResetPassword(u.email)} className="text-muted-foreground hover:text-foreground">
-                              {actionLoading === u.email ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5" />}
-                              <span className="ml-1.5 hidden lg:inline">Reset</span>
-                            </Button>
-                            {u.credits_balance > 0 ? (
-                              <Button variant="ghost" size="sm" disabled={actionLoading === u.user_id} onClick={() => handleSuspend(u.user_id, false)} className="text-destructive hover:text-destructive">
-                                {actionLoading === u.user_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Ban className="h-3.5 w-3.5" />}
-                                <span className="ml-1.5 hidden lg:inline">Suspender</span>
+                    filteredUsers.map((u) => {
+                      const tier = tierConfig[u.subscription_tier] || tierConfig.free;
+                      const TierIcon = tier.icon;
+                      return (
+                        <TableRow key={u.user_id} className="border-border">
+                          <TableCell className="font-mono text-sm text-foreground">{u.email}</TableCell>
+                          <TableCell className="text-foreground">{u.display_name || "—"}</TableCell>
+                          <TableCell>
+                            <Select
+                              value={u.subscription_tier || "free"}
+                              onValueChange={(val) => handleChangeTier(u.user_id, val)}
+                              disabled={actionLoading === u.user_id + "-tier"}
+                            >
+                              <SelectTrigger className="h-7 w-[120px] border-border text-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="free">
+                                  <span className="flex items-center gap-1.5"><Zap className="h-3 w-3" /> Free</span>
+                                </SelectItem>
+                                <SelectItem value="pro">
+                                  <span className="flex items-center gap-1.5"><Crown className="h-3 w-3 text-primary" /> Pro</span>
+                                </SelectItem>
+                                <SelectItem value="education">
+                                  <span className="flex items-center gap-1.5"><GraduationCap className="h-3 w-3 text-accent" /> Educación</span>
+                                </SelectItem>
+                                <SelectItem value="business">
+                                  <span className="flex items-center gap-1.5"><Building2 className="h-3 w-3 text-gold" /> Business</span>
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className={u.credits_balance > 0 ? "border-accent/30 text-accent" : "border-destructive/30 text-destructive"}>
+                                {u.credits_balance}
+                              </Badge>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" disabled={actionLoading === u.user_id + "-credits"}
+                                onClick={() => {
+                                  const val = prompt("Nuevo balance de créditos:", String(u.credits_balance));
+                                  if (val !== null) handleUpdateCredits(u.user_id, parseInt(val) || 0);
+                                }}>
+                                <Coins className="h-3.5 w-3.5 text-gold" />
                               </Button>
-                            ) : (
-                              <Button variant="ghost" size="sm" disabled={actionLoading === u.user_id} onClick={() => handleSuspend(u.user_id, true)} className="text-accent hover:text-accent">
-                                {actionLoading === u.user_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
-                                <span className="ml-1.5 hidden lg:inline">Activar</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{new Date(u.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{u.last_sign_in ? new Date(u.last_sign_in).toLocaleDateString() : "—"}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button variant="ghost" size="sm" disabled={actionLoading === u.email} onClick={() => handleResetPassword(u.email)} className="text-muted-foreground hover:text-foreground">
+                                {actionLoading === u.email ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5" />}
+                                <span className="ml-1.5 hidden lg:inline">Reset</span>
                               </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                              {u.credits_balance > 0 ? (
+                                <Button variant="ghost" size="sm" disabled={actionLoading === u.user_id} onClick={() => handleSuspend(u.user_id, false)} className="text-destructive hover:text-destructive">
+                                  {actionLoading === u.user_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Ban className="h-3.5 w-3.5" />}
+                                  <span className="ml-1.5 hidden lg:inline">Suspender</span>
+                                </Button>
+                              ) : (
+                                <Button variant="ghost" size="sm" disabled={actionLoading === u.user_id} onClick={() => handleSuspend(u.user_id, true)} className="text-accent hover:text-accent">
+                                  {actionLoading === u.user_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
+                                  <span className="ml-1.5 hidden lg:inline">Activar</span>
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
