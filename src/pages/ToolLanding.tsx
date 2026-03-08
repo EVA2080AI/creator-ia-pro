@@ -317,15 +317,15 @@ const ToolLanding = () => {
   };
 
   const handleTryDemo = async () => {
-    if (demoUsed) {
+    if (!isLoggedIn && demoUsed) {
       toast("Regístrate gratis para seguir usando esta herramienta", {
         action: { label: "Registrarme", onClick: () => navigate("/auth") },
       });
       return;
     }
 
-    const textTools = ["copywriter", "blog", "ads", "social", "logo"];
-    const isTextTool = textTools.includes(tool.id);
+    const realTextTools = ["copywriter", "blog", "ads"];
+    const isTextTool = realTextTools.includes(tool.id);
 
     if (tool.tryItType === "image-upload" && !tryItImage) {
       toast.error("Sube una imagen primero");
@@ -340,22 +340,67 @@ const ToolLanding = () => {
     setDemoResult(null);
     setDemoResultImage(null);
 
-    // Simulate processing delay
-    await new Promise((r) => setTimeout(r, 2500));
+    try {
+      if (isLoggedIn) {
+        if (isTextTool) {
+          const chatType = tool.id === "blog" ? "blog" : "copywriter";
+          const { data, error } = await supabase.functions.invoke("ai-chat", {
+            body: { type: chatType, prompt: tryItInput.trim() },
+          });
 
-    if (isTextTool) {
-      setDemoResult(demoTextResults[tool.id] || "✨ Resultado generado exitosamente. Regístrate para ver el resultado completo y descargar.");
-    } else {
-      // For image tools, show a blurred/watermarked preview with explanation
-      setDemoResultImage(tool.demoImage);
-      setDemoResult("⚠️ Esta es una vista previa de ejemplo. El resultado real con IA se genera al registrarte y usar tus créditos.");
+          if (error) throw error;
+          if (data?.text) {
+            setDemoResult(data.text);
+            toast.success("¡Resultado real generado con IA!");
+          } else {
+            throw new Error(data?.error || "No se pudo generar el resultado");
+          }
+          return;
+        }
+
+        const supportedImageTools = ["enhance", "upscale", "eraser", "background", "restore", "generate", "logo", "social"];
+        if (!supportedImageTools.includes(tool.id)) {
+          throw new Error("Esta herramienta está disponible en la app completa.");
+        }
+
+        const { data, error } = await supabase.functions.invoke("ai-tool", {
+          body: {
+            tool: tool.id,
+            image: tryItImage || undefined,
+            prompt: tryItInput.trim() || undefined,
+          },
+        });
+
+        if (error) throw error;
+        if (data?.result_url) {
+          setDemoResultImage(data.result_url);
+          toast.success("¡Imagen real generada con IA!");
+        } else {
+          throw new Error(data?.error || "No se pudo generar la imagen");
+        }
+
+        return;
+      }
+
+      // Simulación para usuarios sin cuenta
+      await new Promise((r) => setTimeout(r, 2500));
+
+      if (isTextTool) {
+        setDemoResult(demoTextResults[tool.id] || "✨ Resultado generado exitosamente. Regístrate para ver el resultado completo y descargar.");
+      } else {
+        setDemoResultImage(tool.demoImage);
+        setDemoResult("⚠️ Esta es una vista previa de ejemplo. El resultado real con IA se genera al registrarte y usar tus créditos.");
+      }
+
+      setDemoUsed(true);
+      toast.success("¡Vista previa lista! Regístrate para resultados reales con IA.", {
+        action: { label: "Registrarme", onClick: () => navigate("/auth") },
+      });
+    } catch (err: any) {
+      toast.error(err.message || "Error al procesar");
+    } finally {
+      setDemoing(false);
     }
-
-    setDemoing(false);
-    setDemoUsed(true);
-    toast.success("¡Vista previa lista! Regístrate para resultados reales con IA.", {
-      action: { label: "Registrarme", onClick: () => navigate("/auth") },
-    });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
