@@ -16,6 +16,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import ToolLanding from "./pages/ToolLanding";
 import Downloads from "./pages/Downloads";
+import SystemStatus from "./pages/SystemStatus";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/descargar" element={<Downloads />} />
           <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
+          <Route path="/system-status" element={<SystemStatus />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
