@@ -72,6 +72,7 @@ export type Database = {
           credits_balance: number
           display_name: string | null
           id: string
+          subscription_tier: string
           updated_at: string
           user_id: string
         }
@@ -81,6 +82,7 @@ export type Database = {
           credits_balance?: number
           display_name?: string | null
           id?: string
+          subscription_tier?: string
           updated_at?: string
           user_id: string
         }
@@ -90,6 +92,7 @@ export type Database = {
           credits_balance?: number
           display_name?: string | null
           id?: string
+          subscription_tier?: string
           updated_at?: string
           user_id?: string
         }
@@ -238,6 +241,7 @@ export type Database = {
           display_name: string
           email: string
           last_sign_in: string
+          subscription_tier: string
           user_id: string
         }[]
       }
