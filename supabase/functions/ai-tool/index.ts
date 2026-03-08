@@ -5,6 +5,7 @@ const corsHeaders = {
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+const IMAGE_MODEL = 'gemini-2.5-flash-preview-image-generation';
 const PROMPT_ONLY_TOOLS = ['logo', 'social', 'generate'];
 
 Deno.serve(async (req) => {
@@ -63,7 +64,6 @@ Deno.serve(async (req) => {
     // Build parts for Google Gemini API
     const parts: any[] = [{ text: editPrompt }];
     if (!isPromptOnly && image) {
-      // If image is a base64 data URL, extract the data
       const base64Match = image.match(/^data:([^;]+);base64,(.+)$/);
       if (base64Match) {
         parts.push({
@@ -72,14 +72,11 @@ Deno.serve(async (req) => {
             data: base64Match[2],
           },
         });
-      } else {
-        // It's a URL, include as text reference
-        parts.push({ text: `Image URL: ${image}` });
       }
     }
 
     const aiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${googleApiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${googleApiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -99,12 +96,15 @@ Deno.serve(async (req) => {
         .update({ credits_balance: profile.credits_balance })
         .eq('user_id', user.id);
 
+      const errText = await aiResponse.text();
+      console.error('AI Tool API error:', aiResponse.status, errText);
+
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: 'Límite de solicitudes excedido. Intenta en unos minutos.' }), {
           status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      throw new Error('AI processing failed');
+      throw new Error(`AI processing failed (${aiResponse.status})`);
     }
 
     const aiData = await aiResponse.json();
@@ -122,11 +122,14 @@ Deno.serve(async (req) => {
     }
 
     if (!resultImage) {
+      // Rollback credits
       await adminClient
         .from('profiles')
         .update({ credits_balance: profile.credits_balance })
         .eq('user_id', user.id);
-      throw new Error('No image generated');
+
+      console.error('No image in response:', JSON.stringify(aiData).slice(0, 500));
+      throw new Error('No se pudo generar la imagen. Intenta con otro prompt o imagen.');
     }
 
     // Record transaction
@@ -162,19 +165,21 @@ Deno.serve(async (req) => {
 function getDefaultPrompt(tool: string): string {
   switch (tool) {
     case 'enhance':
-      return 'Enhance this image: improve quality, lighting, sharpness and vibrance while keeping the original composition intact';
+      return 'Enhance this image: improve quality, lighting, sharpness and vibrance while keeping the original composition intact. Return the enhanced version of this exact image.';
     case 'upscale':
-      return 'Upscale this image to higher resolution with enhanced details and sharpness';
+      return 'Upscale this image to higher resolution with enhanced details and sharpness. Keep the exact same content but with more detail and clarity.';
     case 'eraser':
-      return 'Remove unwanted objects and blemishes from this image, fill background naturally';
+      return 'Remove unwanted objects and blemishes from this image, fill background naturally. Return the cleaned image.';
     case 'background':
-      return 'Remove the background completely, keep only the main subject with clean edges on a transparent/white background';
+      return 'Remove the background completely, keep only the main subject with clean edges on a white background.';
     case 'restore':
-      return 'Restore this photo: fix damage, scratches, improve colors and make it look new and vibrant';
+      return 'Restore this photo: fix damage, scratches, improve colors and make it look new and vibrant. Keep the original content.';
     case 'logo':
-      return 'Create a professional, clean, modern logo design. The logo should be vector-style, minimal, memorable, and work well at any size. Use clean typography and a cohesive color palette. Output on a clean white background.';
+      return 'Create a professional, clean, modern logo design. Minimal, memorable, vector-style. Use clean typography and a cohesive color palette. Output on a clean white background.';
     case 'social':
-      return 'Create a professional social media post image optimized for engagement. Use bold typography, vibrant colors, and a clear visual hierarchy. The design should be eye-catching and suitable for Instagram, Facebook, or LinkedIn.';
+      return 'Create a professional social media post image optimized for engagement. Bold typography, vibrant colors, clear visual hierarchy. Eye-catching for Instagram/Facebook/LinkedIn.';
+    case 'generate':
+      return 'Generate a high-quality, professional image based on the description.';
     default:
       return 'Enhance this image';
   }

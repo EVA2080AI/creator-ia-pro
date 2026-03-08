@@ -7,6 +7,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const IMAGE_MODEL = "gemini-2.5-flash-preview-image-generation";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -86,6 +88,7 @@ serve(async (req) => {
       );
     }
 
+    // Deduct credits
     await supabaseAdmin
       .from("profiles")
       .update({ credits_balance: profile.credits_balance - cost })
@@ -107,13 +110,13 @@ serve(async (req) => {
     if (node.type === "image") {
       try {
         const aiResponse = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${googleApiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${googleApiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               contents: [{
-                parts: [{ text: `Generate an image based on this description: ${node.prompt}` }],
+                parts: [{ text: `Generate a high-quality image: ${node.prompt}` }],
               }],
               generationConfig: {
                 responseModalities: ["TEXT", "IMAGE"],
@@ -126,6 +129,7 @@ serve(async (req) => {
           const errText = await aiResponse.text();
           console.error("Google Gemini error:", aiResponse.status, errText);
 
+          // Rollback credits
           await supabaseAdmin
             .from("profiles")
             .update({ credits_balance: profile.credits_balance })
@@ -142,7 +146,7 @@ serve(async (req) => {
           const errorMsg =
             aiResponse.status === 429
               ? "Límite de solicitudes excedido. Intenta en un momento."
-              : "Generación de IA falló";
+              : `Generación de IA falló (${aiResponse.status})`;
 
           await supabaseAdmin
             .from("canvas_nodes")
@@ -156,7 +160,6 @@ serve(async (req) => {
         }
 
         const result = await aiResponse.json();
-
         let imageUrl: string | null = null;
 
         // Extract image from Gemini response
@@ -171,16 +174,31 @@ serve(async (req) => {
         }
 
         if (!imageUrl) {
-          // Fallback: check for text with URL
-          const textPart = candidates?.[0]?.content?.parts?.find((p: any) => p.text);
-          if (textPart?.text) {
-            const urlMatch = textPart.text.match(/https?:\/\/[^\s"'<>]+\.(png|jpg|jpeg|gif|webp)[^\s"'<>]*/i);
-            if (urlMatch) imageUrl = urlMatch[0];
-          }
-        }
+          console.error("No image in Gemini response:", JSON.stringify(result).slice(0, 500));
+          
+          // Rollback
+          await supabaseAdmin
+            .from("profiles")
+            .update({ credits_balance: profile.credits_balance })
+            .eq("user_id", userId);
 
-        if (!imageUrl) {
-          imageUrl = `https://picsum.photos/seed/${node_id}/512/512`;
+          await supabaseAdmin.from("transactions").insert({
+            user_id: userId,
+            node_id: node_id,
+            type: "credit",
+            amount: cost,
+            description: `Rollback: No image generated`,
+          });
+
+          await supabaseAdmin
+            .from("canvas_nodes")
+            .update({ status: "error", error_message: "No se pudo generar la imagen. Intenta con otro prompt." })
+            .eq("id", node_id);
+
+          return new Response(
+            JSON.stringify({ error: "No image generated. Try a different prompt." }),
+            { status: 422, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
         }
 
         await supabaseAdmin
@@ -232,7 +250,7 @@ serve(async (req) => {
     // Video type - not yet supported
     await supabaseAdmin
       .from("canvas_nodes")
-      .update({ status: "error", error_message: "Video generation coming soon" })
+      .update({ status: "error", error_message: "Generación de video próximamente" })
       .eq("id", node_id);
 
     await supabaseAdmin
