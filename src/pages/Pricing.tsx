@@ -104,8 +104,8 @@ const Pricing = () => {
             </span>
           </div>
         </button>
-        <Button onClick={() => navigate("/auth")} variant="outline" className="border-border text-foreground hover:bg-muted">
-          Iniciar Sesión
+        <Button onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")} variant="outline" className="border-border text-foreground hover:bg-muted">
+          {isLoggedIn ? "Ir al Dashboard" : "Iniciar Sesión"}
         </Button>
       </header>
 

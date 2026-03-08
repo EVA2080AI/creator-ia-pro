@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { AppHeader } from "@/components/AppHeader";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +13,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import {
-  Shield, Users, Search, Loader2, ArrowLeft, RefreshCw,
+  Shield, Users, Search, Loader2, RefreshCw,
   Ban, CheckCircle, KeyRound, Coins, LayoutDashboard,
   Database, Zap, Settings, Eye, EyeOff, Save,
 } from "lucide-react";
@@ -27,7 +28,7 @@ interface AdminUser {
 }
 
 const Admin = () => {
-  const { user, loading: authLoading } = useAuth("/auth");
+  const { user, loading: authLoading, signOut } = useAuth("/auth");
   const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
   const navigate = useNavigate();
 
@@ -37,7 +38,6 @@ const Admin = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"users" | "overview" | "db" | "settings">("users");
 
-  // Settings state
   const [stripeKey, setStripeKey] = useState("");
   const [showStripeKey, setShowStripeKey] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -57,7 +57,7 @@ const Admin = () => {
   useEffect(() => {
     if (!authLoading && !adminLoading && !isAdmin) {
       toast.error("Acceso denegado");
-      navigate("/spaces");
+      navigate("/dashboard");
     }
   }, [authLoading, adminLoading, isAdmin, navigate]);
 
@@ -100,7 +100,6 @@ const Admin = () => {
     }
     setSavingSettings(true);
     try {
-      // Store via edge function that saves to secrets
       const { error } = await supabase.functions.invoke("admin-save-settings", {
         body: { key: "STRIPE_SECRET_KEY", value: stripeKey },
       });
@@ -123,6 +122,7 @@ const Admin = () => {
   const routes = [
     { path: "/", label: "Landing", status: "live" },
     { path: "/auth", label: "Autenticación", status: "live" },
+    { path: "/dashboard", label: "Dashboard", status: "live" },
     { path: "/tools", label: "Herramientas IA", status: "live" },
     { path: "/canvas", label: "Formaketing Studio", status: "live" },
     { path: "/pricing", label: "Precios", status: "live" },
@@ -144,29 +144,24 @@ const Admin = () => {
   if (authLoading || adminLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin-slow text-primary" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/spaces")}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <Shield className="h-5 w-5 text-primary" />
-            <h1 className="text-lg font-bold text-foreground">
-              <span className="gradient-text">Creator IA</span> Admin
-            </h1>
-          </div>
-          <Badge variant="outline" className="border-primary/30 text-primary">Admin</Badge>
-        </div>
-      </header>
+      <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <div className="mx-auto max-w-7xl px-6 pt-6">
+        <div className="mb-4 flex items-center gap-2">
+          <Shield className="h-5 w-5 text-primary" />
+          <h1 className="text-xl font-bold text-foreground">
+            <span className="gradient-text">Creator IA</span> Admin
+          </h1>
+          <Badge variant="outline" className="border-primary/30 text-primary ml-2">Admin</Badge>
+        </div>
+
         <div className="flex gap-1 rounded-xl border border-border bg-card p-1">
           {[
             { key: "users" as const, icon: Users, label: "Usuarios" },
@@ -191,7 +186,6 @@ const Admin = () => {
       </div>
 
       <main className="mx-auto max-w-7xl px-6 py-6">
-        {/* Users Tab */}
         {activeTab === "users" && (
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -220,7 +214,7 @@ const Admin = () => {
                   {loadingUsers ? (
                     <TableRow>
                       <TableCell colSpan={6} className="text-center py-12">
-                        <Loader2 className="mx-auto h-6 w-6 animate-spin-slow text-muted-foreground" />
+                        <Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" />
                       </TableCell>
                     </TableRow>
                   ) : filteredUsers.length === 0 ? (
@@ -236,7 +230,7 @@ const Admin = () => {
                         <TableCell className="text-foreground">{u.display_name || "—"}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline" className={u.credits_balance > 0 ? "border-success/30 text-success" : "border-destructive/30 text-destructive"}>
+                            <Badge variant="outline" className={u.credits_balance > 0 ? "border-accent/30 text-accent" : "border-destructive/30 text-destructive"}>
                               {u.credits_balance}
                             </Badge>
                             <Button variant="ghost" size="icon" className="h-7 w-7" disabled={actionLoading === u.user_id + "-credits"}
@@ -262,7 +256,7 @@ const Admin = () => {
                                 <span className="ml-1.5 hidden lg:inline">Suspender</span>
                               </Button>
                             ) : (
-                              <Button variant="ghost" size="sm" disabled={actionLoading === u.user_id} onClick={() => handleSuspend(u.user_id, true)} className="text-success hover:text-success">
+                              <Button variant="ghost" size="sm" disabled={actionLoading === u.user_id} onClick={() => handleSuspend(u.user_id, true)} className="text-accent hover:text-accent">
                                 {actionLoading === u.user_id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle className="h-3.5 w-3.5" />}
                                 <span className="ml-1.5 hidden lg:inline">Activar</span>
                               </Button>
@@ -279,7 +273,6 @@ const Admin = () => {
           </div>
         )}
 
-        {/* Routes Overview Tab */}
         {activeTab === "overview" && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground">Rutas del Frontend</h2>
@@ -290,7 +283,7 @@ const Admin = () => {
                     <p className="font-mono text-sm text-foreground">{r.path}</p>
                     <p className="text-xs text-muted-foreground">{r.label}</p>
                   </div>
-                  <Badge variant="outline" className="border-success/30 text-success">
+                  <Badge variant="outline" className="border-accent/30 text-accent">
                     <Zap className="mr-1 h-3 w-3" />{r.status}
                   </Badge>
                 </div>
@@ -299,7 +292,6 @@ const Admin = () => {
           </div>
         )}
 
-        {/* Database Tab */}
         {activeTab === "db" && (
           <div className="space-y-4">
             <h2 className="text-lg font-semibold text-foreground">Esquema de Base de Datos</h2>
@@ -317,12 +309,10 @@ const Admin = () => {
           </div>
         )}
 
-        {/* Settings Tab */}
         {activeTab === "settings" && (
           <div className="space-y-6 max-w-2xl">
             <h2 className="text-lg font-semibold text-foreground">Configuración de Plataforma</h2>
 
-            {/* Stripe */}
             <div className="rounded-xl border border-border bg-card p-6 node-shadow space-y-4">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
@@ -359,7 +349,6 @@ const Admin = () => {
               </Button>
             </div>
 
-            {/* Platform Info */}
             <div className="rounded-xl border border-border bg-card p-6 node-shadow space-y-3">
               <h3 className="font-semibold text-foreground">Información de Plataforma</h3>
               <div className="grid gap-2 text-sm">
@@ -376,7 +365,7 @@ const Admin = () => {
                   <span className="text-foreground font-medium">{tables.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Usuarios registrados</span>
+                  <span className="text-muted-foreground">Usuarios totales</span>
                   <span className="text-foreground font-medium">{users.length}</span>
                 </div>
               </div>
