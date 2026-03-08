@@ -8,6 +8,7 @@ import {
   Hash, FileText, Type, Megaphone, TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const aiTools = [
   { icon: Wand2, name: "Mejorar Imagen", desc: "Mejora calidad y nitidez al instante." },
