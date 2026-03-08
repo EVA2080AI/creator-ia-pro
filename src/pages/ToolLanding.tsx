@@ -468,6 +468,11 @@ const ToolLanding = () => {
           <Button onClick={() => navigate("/descargar")} variant="ghost" className="text-muted-foreground hover:text-foreground hidden md:flex text-sm">
             Descargar
           </Button>
+          {!isLoggedIn && (
+            <Button onClick={() => navigate("/auth")} variant="outline" className="rounded-full px-5 text-sm border-border">
+              Iniciar Sesión
+            </Button>
+          )}
           <Button onClick={handleCTA} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6">
             {isLoggedIn ? "Ir a la App" : "Empezar Gratis"}
           </Button>
