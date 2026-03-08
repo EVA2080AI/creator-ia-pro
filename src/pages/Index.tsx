@@ -13,17 +13,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 const aiTools = [
-  { icon: Wand2, name: "Mejorar Imagen", desc: "Mejora calidad y nitidez al instante.", path: "/tools", cat: "image" },
-  { icon: ZoomIn, name: "Ampliar 4x", desc: "Escala sin perder detalles.", path: "/tools", cat: "image" },
-  { icon: Eraser, name: "Borrar Objetos", desc: "Elimina lo que sobra con un clic.", path: "/tools", cat: "image" },
-  { icon: ImagePlus, name: "Quitar Fondo", desc: "Fondos eliminados automáticamente.", path: "/tools", cat: "image" },
-  { icon: RotateCcw, name: "Restaurar Foto", desc: "Revive fotos antiguas.", path: "/tools", cat: "image" },
-  { icon: Image, name: "Texto a Imagen", desc: "Crea imágenes desde texto.", path: "/tools", cat: "image" },
-  { icon: MessageSquare, name: "AI Copywriter", desc: "Textos de marketing con IA.", path: "/apps/copywriter", cat: "marketing" },
-  { icon: PenTool, name: "Logo Maker", desc: "Logos profesionales con IA.", path: "/apps/logo", cat: "marketing" },
-  { icon: Hash, name: "Social Media Kit", desc: "Contenido para redes sociales.", path: "/apps/social", cat: "marketing" },
-  { icon: FileText, name: "AI Blog Writer", desc: "Artículos SEO completos.", path: "/apps/blog", cat: "marketing" },
-  { icon: Type, name: "Ad Generator", desc: "Anuncios para Google y Meta.", path: "/apps/ads", cat: "marketing" },
+  { icon: Wand2, name: "Mejorar Imagen", desc: "Mejora calidad y nitidez al instante.", path: "/herramienta/mejorar-imagen", cat: "image" },
+  { icon: ZoomIn, name: "Ampliar 4x", desc: "Escala sin perder detalles.", path: "/herramienta/ampliar-4x", cat: "image" },
+  { icon: Eraser, name: "Borrar Objetos", desc: "Elimina lo que sobra con un clic.", path: "/herramienta/borrar-objetos", cat: "image" },
+  { icon: ImagePlus, name: "Quitar Fondo", desc: "Fondos eliminados automáticamente.", path: "/herramienta/quitar-fondo", cat: "image" },
+  { icon: RotateCcw, name: "Restaurar Foto", desc: "Revive fotos antiguas.", path: "/herramienta/restaurar-foto", cat: "image" },
+  { icon: Image, name: "Texto a Imagen", desc: "Crea imágenes desde texto.", path: "/herramienta/texto-a-imagen", cat: "image" },
+  { icon: MessageSquare, name: "AI Copywriter", desc: "Textos de marketing con IA.", path: "/herramienta/ai-copywriter", cat: "marketing" },
+  { icon: PenTool, name: "Logo Maker", desc: "Logos profesionales con IA.", path: "/herramienta/logo-maker", cat: "marketing" },
+  { icon: Hash, name: "Social Media Kit", desc: "Contenido para redes sociales.", path: "/herramienta/social-media-kit", cat: "marketing" },
+  { icon: FileText, name: "AI Blog Writer", desc: "Artículos SEO completos.", path: "/herramienta/ai-blog-writer", cat: "marketing" },
+  { icon: Type, name: "Ad Generator", desc: "Anuncios para Google y Meta.", path: "/herramienta/ad-generator", cat: "marketing" },
   { icon: Palette, name: "Formaketing Studio", desc: "Flows de marketing visual.", path: "/canvas", cat: "studio" },
 ];
 
