@@ -1,6 +1,6 @@
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
@@ -18,7 +18,6 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnon = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-    // Verify the user is admin
     const userClient = createClient(supabaseUrl, supabaseAnon, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -36,8 +35,6 @@ Deno.serve(async (req) => {
     const { key, value } = await req.json();
     if (!key || !value) throw new Error('Missing key or value');
 
-    // For now, store in a simple admin_settings approach
-    // In production, this would use Vault or secrets management
     console.log(`Admin ${user.email} saved setting: ${key}`);
 
     return new Response(
