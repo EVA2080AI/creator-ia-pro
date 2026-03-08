@@ -1,9 +1,11 @@
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const PROMPT_ONLY_TOOLS = ['logo', 'social', 'generate'];
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -28,8 +30,7 @@ Deno.serve(async (req) => {
     const { tool, image, prompt } = await req.json();
     if (!tool) throw new Error('Missing tool');
     
-    const promptOnlyTools = ['logo', 'social', 'generate'];
-    if (!promptOnlyTools.includes(tool) && !image) throw new Error('Missing image');
+    if (!PROMPT_ONLY_TOOLS.includes(tool) && !image) throw new Error('Missing image');
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -58,9 +59,7 @@ Deno.serve(async (req) => {
 
     // Use Lovable AI to process
     const editPrompt = prompt || getDefaultPrompt(tool);
-    
-    const promptOnlyTools = ['logo', 'social', 'generate'];
-    const isPromptOnly = promptOnlyTools.includes(tool);
+    const isPromptOnly = PROMPT_ONLY_TOOLS.includes(tool);
     
     const messages = isPromptOnly
       ? [{ role: 'user', content: editPrompt }]
@@ -81,7 +80,7 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: isPromptOnly ? 'google/gemini-3-pro-image-preview' : 'google/gemini-2.5-flash-image',
+        model: 'google/gemini-3-pro-image-preview',
         messages,
         modalities: ['image', 'text'],
       }),
@@ -97,7 +96,25 @@ Deno.serve(async (req) => {
     }
 
     const aiData = await aiResponse.json();
-    const resultImage = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    
+    // Extract image from response - check multiple formats
+    let resultImage: string | null = null;
+    
+    // Format 1: images array
+    resultImage = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    
+    // Format 2: inline_data in parts
+    if (!resultImage) {
+      const parts = aiData.choices?.[0]?.message?.parts;
+      if (parts) {
+        for (const part of parts) {
+          if (part.inline_data?.mime_type?.startsWith('image/')) {
+            resultImage = `data:${part.inline_data.mime_type};base64,${part.inline_data.data}`;
+            break;
+          }
+        }
+      }
+    }
 
     if (!resultImage) {
       await adminClient
@@ -150,9 +167,9 @@ function getDefaultPrompt(tool: string): string {
     case 'restore':
       return 'Restore this photo: fix damage, scratches, improve colors and make it look new and vibrant';
     case 'logo':
-      return 'Create a professional, clean, modern logo design based on this reference. The logo should be vector-style, minimal, memorable, and work well at any size. Use clean typography and a cohesive color palette. Output on a clean white background.';
+      return 'Create a professional, clean, modern logo design. The logo should be vector-style, minimal, memorable, and work well at any size. Use clean typography and a cohesive color palette. Output on a clean white background.';
     case 'social':
-      return 'Create a professional social media post image optimized for engagement. Use bold typography, vibrant colors, and a clear visual hierarchy. The design should be eye-catching and suitable for Instagram, Facebook, or LinkedIn. Include space for text overlay.';
+      return 'Create a professional social media post image optimized for engagement. Use bold typography, vibrant colors, and a clear visual hierarchy. The design should be eye-catching and suitable for Instagram, Facebook, or LinkedIn.';
     default:
       return 'Enhance this image';
   }
