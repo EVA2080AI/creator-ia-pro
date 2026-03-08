@@ -14,6 +14,8 @@ import Tools from "./pages/Tools";
 import Admin from "./pages/Admin";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import ToolLanding from "./pages/ToolLanding";
+import Downloads from "./pages/Downloads";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +37,8 @@ const App = () => (
           <Route path="/apps/:appId" element={<Tools />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/descargar" element={<Downloads />} />
+          <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
