@@ -1,19 +1,20 @@
 import { useNavigate } from "react-router-dom";
-import { Sparkles, Check, Zap, Crown, ArrowLeft } from "lucide-react";
+import { Sparkles, Check, Zap, Crown, ArrowLeft, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const plans = [
   {
-    name: "Free",
+    name: "Starter",
     price: "$0",
     period: "para siempre",
     credits: 100,
     creditsLabel: "100 créditos únicos",
-    description: "Perfecto para explorar y experimentar con IA generativa.",
+    description: "Perfecto para explorar todas las herramientas de IA.",
     features: [
       "100 créditos al registrarte",
-      "Lienzo infinito",
+      "Todas las herramientas IA",
       "Generación de imágenes",
+      "Mejorar y restaurar fotos",
       "Resolución estándar",
       "Soporte comunitario",
     ],
@@ -25,42 +26,45 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$10",
+    price: "$9.99",
     period: "/mes",
-    credits: 500,
-    creditsLabel: "500 créditos/mes",
-    description: "Para creadores que necesitan generar contenido regularmente.",
+    credits: 1000,
+    creditsLabel: "1,000 créditos/mes",
+    description: "Para creadores que necesitan producción constante.",
     features: [
-      "500 créditos mensuales",
-      "Lienzo infinito",
+      "1,000 créditos mensuales",
+      "Todas las herramientas IA",
       "Generación de imágenes y video",
-      "Alta resolución",
+      "Formaketing Studio completo",
+      "Alta resolución (4K)",
+      "Ampliación 4x con IA",
       "Modelos premium",
       "Soporte prioritario",
     ],
     cta: "Suscribirme",
     accent: "border-primary/50 ring-1 ring-primary/20",
-    badge: "Popular",
-    icon: Sparkles,
+    badge: "Más Popular",
+    icon: Star,
     iconClass: "text-primary bg-primary/10",
   },
   {
-    name: "Delux",
-    price: "$100",
+    name: "Business",
+    price: "$49.99",
     period: "/mes",
-    credits: 10000,
-    creditsLabel: "10,000 créditos/mes",
-    description: "Para equipos y profesionales con alta demanda de generación.",
+    credits: 5000,
+    creditsLabel: "5,000 créditos/mes",
+    description: "Para equipos y profesionales con alta demanda.",
     features: [
-      "10,000 créditos mensuales",
-      "Lienzo infinito ilimitado",
+      "5,000 créditos mensuales",
+      "Todo lo de Pro",
       "Todos los modelos de IA",
       "Máxima resolución",
-      "Generación prioritaria (cola rápida)",
+      "Cola de generación prioritaria",
+      "Espacios ilimitados",
       "API access",
       "Soporte dedicado 24/7",
     ],
-    cta: "Contactar Ventas",
+    cta: "Elegir Business",
     accent: "border-gold/40 hover:border-gold/60",
     badge: "Enterprise",
     icon: Crown,
@@ -73,49 +77,38 @@ const Pricing = () => {
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
-      {/* Ambient */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[150px]" />
         <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-accent/5 blur-[150px]" />
       </div>
 
-      {/* Nav */}
       <header className="relative z-10 flex items-center justify-between px-8 py-6">
-        <button
-          onClick={() => navigate("/")}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
+        <button onClick={() => navigate("/")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="h-4 w-4" />
           <div className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card">
               <Sparkles className="h-5 w-5 text-primary" />
             </div>
             <span className="text-lg font-bold">
-              <span className="gradient-text">Canvas</span>
-              <span className="text-foreground">AI</span>
+              <span className="gradient-text">Creator IA</span>
+              <span className="text-foreground"> Pro</span>
             </span>
           </div>
         </button>
-        <Button
-          onClick={() => navigate("/auth")}
-          variant="outline"
-          className="border-border text-foreground hover:bg-muted"
-        >
+        <Button onClick={() => navigate("/auth")} variant="outline" className="border-border text-foreground hover:bg-muted">
           Iniciar Sesión
         </Button>
       </header>
 
-      {/* Content */}
       <main className="relative z-10 flex flex-col items-center px-6 pt-12 pb-32">
         <h1 className="text-4xl font-bold text-center md:text-5xl">
           <span className="text-foreground">Planes y </span>
           <span className="gradient-text">Precios</span>
         </h1>
         <p className="mt-4 max-w-lg text-center text-muted-foreground">
-          Elige el plan que mejor se adapte a tu flujo creativo. Escala cuando lo necesites.
+          Precios simples y transparentes. Escala cuando lo necesites.
         </p>
 
-        {/* Cards */}
         <div className="mt-16 grid w-full max-w-5xl gap-6 md:grid-cols-3">
           {plans.map((plan) => (
             <div
@@ -158,7 +151,7 @@ const Pricing = () => {
                 className={`mt-8 w-full ${
                   plan.name === "Pro"
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : plan.name === "Delux"
+                    : plan.name === "Business"
                     ? "bg-gold/90 text-background hover:bg-gold"
                     : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                 }`}
@@ -169,10 +162,9 @@ const Pricing = () => {
           ))}
         </div>
 
-        {/* FAQ teaser */}
         <p className="mt-16 text-sm text-muted-foreground text-center max-w-md">
-          ¿Tienes preguntas? Escríbenos a{" "}
-          <span className="text-primary">soporte@canvasai.com</span> y te ayudamos a elegir el plan ideal.
+          ¿Necesitas un plan personalizado? Escríbenos a{" "}
+          <span className="text-primary">soporte@creatoria.pro</span>
         </p>
       </main>
     </div>
