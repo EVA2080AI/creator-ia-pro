@@ -34,8 +34,8 @@ interface AdminUser {
 
 const tierConfig: Record<string, { label: string; icon: typeof Zap; className: string }> = {
   free: { label: "Free", icon: Zap, className: "border-border text-muted-foreground" },
+  educacion: { label: "Educación", icon: GraduationCap, className: "border-accent/30 text-accent" },
   pro: { label: "Pro", icon: Crown, className: "border-primary/30 text-primary" },
-  education: { label: "Educación", icon: GraduationCap, className: "border-accent/30 text-accent" },
   business: { label: "Business", icon: Building2, className: "border-gold/30 text-gold" },
 };
 
