@@ -745,7 +745,7 @@ const ToolLanding = () => {
             Empieza a usar <span className="gradient-text">{tool.name}</span>
           </h2>
           <p className="mt-4 text-muted-foreground max-w-md mx-auto">
-            Regístrate gratis y obtén 100 créditos para probar todas las herramientas. Sin tarjeta de crédito.
+            Regístrate gratis y obtén 10 créditos para probar todas las herramientas. Sin tarjeta de crédito.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Button onClick={handleCTA} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-10 rounded-full h-12">
