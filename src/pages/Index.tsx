@@ -13,26 +13,21 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 const aiTools = [
-  { icon: Wand2, name: "Mejorar Imagen", desc: "Mejora calidad y nitidez al instante.", path: "/tools", cat: "image" },
-  { icon: ZoomIn, name: "Ampliar 4x", desc: "Escala sin perder detalles.", path: "/tools", cat: "image" },
-  { icon: Eraser, name: "Borrar Objetos", desc: "Elimina lo que sobra con un clic.", path: "/tools", cat: "image" },
-  { icon: ImagePlus, name: "Quitar Fondo", desc: "Fondos eliminados automáticamente.", path: "/tools", cat: "image" },
-  { icon: RotateCcw, name: "Restaurar Foto", desc: "Revive fotos antiguas.", path: "/tools", cat: "image" },
-  { icon: Image, name: "Texto a Imagen", desc: "Crea imágenes desde texto.", path: "/tools", cat: "image" },
-  { icon: MessageSquare, name: "AI Copywriter", desc: "Textos de marketing con IA.", path: "/apps/copywriter", cat: "marketing" },
-  { icon: PenTool, name: "Logo Maker", desc: "Logos profesionales con IA.", path: "/apps/logo", cat: "marketing" },
-  { icon: Hash, name: "Social Media Kit", desc: "Contenido para redes sociales.", path: "/apps/social", cat: "marketing" },
-  { icon: FileText, name: "AI Blog Writer", desc: "Artículos SEO completos.", path: "/apps/blog", cat: "marketing" },
-  { icon: Type, name: "Ad Generator", desc: "Anuncios para Google y Meta.", path: "/apps/ads", cat: "marketing" },
+  { icon: Wand2, name: "Mejorar Imagen", desc: "Mejora calidad y nitidez al instante.", path: "/herramienta/mejorar-imagen", cat: "image" },
+  { icon: ZoomIn, name: "Ampliar 4x", desc: "Escala sin perder detalles.", path: "/herramienta/ampliar-4x", cat: "image" },
+  { icon: Eraser, name: "Borrar Objetos", desc: "Elimina lo que sobra con un clic.", path: "/herramienta/borrar-objetos", cat: "image" },
+  { icon: ImagePlus, name: "Quitar Fondo", desc: "Fondos eliminados automáticamente.", path: "/herramienta/quitar-fondo", cat: "image" },
+  { icon: RotateCcw, name: "Restaurar Foto", desc: "Revive fotos antiguas.", path: "/herramienta/restaurar-foto", cat: "image" },
+  { icon: Image, name: "Texto a Imagen", desc: "Crea imágenes desde texto.", path: "/herramienta/texto-a-imagen", cat: "image" },
+  { icon: MessageSquare, name: "AI Copywriter", desc: "Textos de marketing con IA.", path: "/herramienta/ai-copywriter", cat: "marketing" },
+  { icon: PenTool, name: "Logo Maker", desc: "Logos profesionales con IA.", path: "/herramienta/logo-maker", cat: "marketing" },
+  { icon: Hash, name: "Social Media Kit", desc: "Contenido para redes sociales.", path: "/herramienta/social-media-kit", cat: "marketing" },
+  { icon: FileText, name: "AI Blog Writer", desc: "Artículos SEO completos.", path: "/herramienta/ai-blog-writer", cat: "marketing" },
+  { icon: Type, name: "Ad Generator", desc: "Anuncios para Google y Meta.", path: "/herramienta/ad-generator", cat: "marketing" },
   { icon: Palette, name: "Formaketing Studio", desc: "Flows de marketing visual.", path: "/canvas", cat: "studio" },
 ];
 
-const platforms = [
-  { icon: Monitor, name: "Windows", label: "Windows 10+", available: true },
-  { icon: Apple, name: "macOS", label: "macOS 12+", available: true },
-  { icon: Smartphone, name: "Android", label: "Android 10+", available: true },
-  { icon: Globe, name: "Web App", label: "Cualquier navegador", available: true },
-];
+
 
 const testimonials = [
   { name: "María G.", role: "Community Manager", text: "Creator IA Pro cambió mi flujo de trabajo. Genero contenido para 5 marcas en la mitad del tiempo." },
@@ -111,9 +106,7 @@ const Index = () => {
             Crear Cuenta Gratis
             <ArrowRight className="h-4 w-4" />
           </Button>
-          <Button onClick={() => {
-            document.getElementById("download-section")?.scrollIntoView({ behavior: "smooth" });
-          }} size="lg" variant="outline" className="border-border text-foreground hover:bg-muted gap-2 text-base px-8 rounded-full h-12">
+          <Button onClick={() => navigate("/descargar")} size="lg" variant="outline" className="border-border text-foreground hover:bg-muted gap-2 text-base px-8 rounded-full h-12">
             <Download className="h-4 w-4" />
             Descargar App
           </Button>
@@ -222,35 +215,32 @@ const Index = () => {
         </div>
 
         {/* Download Section */}
-        <div id="download-section" className="mt-28 w-full max-w-5xl scroll-mt-20">
-          <div className="mb-12 text-center">
+        <div className="mt-28 w-full max-w-5xl">
+          <div className="rounded-3xl border border-primary/20 bg-card/60 p-10 text-center backdrop-blur-sm node-shadow">
             <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">Multiplataforma</Badge>
-            <h2 className="text-3xl font-bold text-foreground md:text-5xl">
+            <h2 className="text-3xl font-bold text-foreground md:text-4xl">
               Descarga <span className="gradient-text">Creator IA Pro</span>
             </h2>
-            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              Disponible en todas las plataformas. Trabaja desde donde quieras.
+            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+              Disponible en Windows, macOS y Android. Tu cuenta se sincroniza en todos los dispositivos.
             </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in">
-            {platforms.map((p) => (
-              <div key={p.name} className="group rounded-2xl border border-border bg-card/60 p-6 text-center backdrop-blur-sm hover:border-primary/30 hover:-translate-y-1 transition-all duration-200 cursor-pointer">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <p.icon className="h-7 w-7 text-primary" />
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {[
+                { icon: Monitor, name: "Windows" },
+                { icon: Apple, name: "macOS" },
+                { icon: Smartphone, name: "Android" },
+              ].map((p) => (
+                <div key={p.name} className="flex items-center gap-2 rounded-full border border-border bg-muted/30 px-5 py-2.5">
+                  <p.icon className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">{p.name}</span>
                 </div>
-                <h3 className="text-base font-semibold text-foreground">{p.name}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">{p.label}</p>
-                <Button variant="outline" size="sm" className="mt-4 w-full rounded-full border-primary/20 text-primary hover:bg-primary/10 gap-1.5 text-xs">
-                  <Download className="h-3 w-3" />
-                  {p.name === "Web App" ? "Abrir" : "Descargar"}
-                </Button>
-              </div>
-            ))}
+              ))}
+            </div>
+            <Button onClick={() => navigate("/descargar")} size="lg" className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 rounded-full px-10">
+              <Download className="h-4 w-4" />
+              Ver Descargas
+            </Button>
           </div>
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            Próximamente disponible para iOS. Las apps de escritorio y móvil se sincronizan con tu cuenta en la nube.
-          </p>
         </div>
 
         {/* Testimonials */}
