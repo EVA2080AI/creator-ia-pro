@@ -56,18 +56,15 @@ Deno.serve(async (req) => {
       .update({ credits_balance: profile.credits_balance - cost })
       .eq('user_id', user.id);
 
-    // Use Lovable AI to process image
+    // Use Lovable AI to process
     const editPrompt = prompt || getDefaultPrompt(tool);
     
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image',
-        messages: [
+    const promptOnlyTools = ['logo', 'social', 'generate'];
+    const isPromptOnly = promptOnlyTools.includes(tool);
+    
+    const messages = isPromptOnly
+      ? [{ role: 'user', content: editPrompt }]
+      : [
           {
             role: 'user',
             content: [
@@ -75,7 +72,17 @@ Deno.serve(async (req) => {
               { type: 'image_url', image_url: { url: image } },
             ],
           },
-        ],
+        ];
+
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: isPromptOnly ? 'google/gemini-3-pro-image-preview' : 'google/gemini-2.5-flash-image',
+        messages,
         modalities: ['image', 'text'],
       }),
     });
