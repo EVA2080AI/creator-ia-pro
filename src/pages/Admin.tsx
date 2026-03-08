@@ -296,11 +296,11 @@ const Admin = () => {
                                 <SelectItem value="free">
                                   <span className="flex items-center gap-1.5"><Zap className="h-3 w-3" /> Free</span>
                                 </SelectItem>
+                                <SelectItem value="educacion">
+                                  <span className="flex items-center gap-1.5"><GraduationCap className="h-3 w-3 text-accent" /> Educación</span>
+                                </SelectItem>
                                 <SelectItem value="pro">
                                   <span className="flex items-center gap-1.5"><Crown className="h-3 w-3 text-primary" /> Pro</span>
-                                </SelectItem>
-                                <SelectItem value="education">
-                                  <span className="flex items-center gap-1.5"><GraduationCap className="h-3 w-3 text-accent" /> Educación</span>
                                 </SelectItem>
                                 <SelectItem value="business">
                                   <span className="flex items-center gap-1.5"><Building2 className="h-3 w-3 text-gold" /> Business</span>
