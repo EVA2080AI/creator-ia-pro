@@ -6,6 +6,8 @@ interface Profile {
   user_id: string;
   display_name: string | null;
   credits_balance: number;
+  subscription_tier: string;
+  avatar_url: string | null;
 }
 
 export function useProfile(userId: string | undefined) {
