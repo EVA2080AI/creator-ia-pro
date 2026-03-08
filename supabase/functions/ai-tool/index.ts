@@ -228,8 +228,7 @@ async function callGeminiWithModelFallback(apiKey: string, parts: any[]) {
       if (retryAttempt < 2) {
         await new Promise((r) => setTimeout(r, cappedDelay));
         retryAttempt++;
-        // Retry same model by decrementing index
-        modelCandidates.splice(modelCandidates.indexOf(model) + 1, 0, model);
+        i--; // Retry same model
         continue;
       }
       // After 3 retries on rate limit, give up
