@@ -5,9 +5,15 @@ const corsHeaders = {
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const IMAGE_MODEL = 'gemini-2.0-flash-exp';
 const PROMPT_ONLY_TOOLS = ['logo', 'social', 'generate'];
 const GUEST_TRIAL_LIMIT = 3;
+const PREFERRED_MODELS = [
+  'gemini-2.5-flash-image',
+  'gemini-2.5-flash-image-preview',
+  'gemini-2.0-flash-preview-image-generation',
+  'gemini-2.0-flash-exp-image-generation',
+  'gemini-2.0-flash',
+];
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -36,7 +42,6 @@ Deno.serve(async (req) => {
 
     const { tool, image, prompt } = await req.json();
     if (!tool) throw new Error('Missing tool');
-
     if (!PROMPT_ONLY_TOOLS.includes(tool) && !image) throw new Error('Missing image');
 
     let guestFingerprint: string | null = null;
@@ -97,73 +102,16 @@ Deno.serve(async (req) => {
     }
 
     const editPrompt = prompt || getDefaultPrompt(tool);
-    const isPromptOnly = PROMPT_ONLY_TOOLS.includes(tool);
+    const parts = buildParts(editPrompt, image);
 
-    const parts: any[] = [{ text: editPrompt }];
-    if (!isPromptOnly && image) {
-      const base64Match = image.match(/^data:([^;]+);base64,(.+)$/);
-      if (base64Match) {
-        parts.push({
-          inlineData: {
-            mimeType: base64Match[1],
-            data: base64Match[2],
-          },
-        });
-      }
+    const generationResult = await callGeminiWithModelFallback(googleApiKey, parts);
+
+    if (!generationResult.ok) {
+      await rollbackCredits(adminClient, user?.id, originalCredits);
+      return generationResult.response;
     }
 
-    const aiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${googleApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: {
-            responseModalities: ['TEXT', 'IMAGE'],
-          },
-        }),
-      }
-    );
-
-    if (!aiResponse.ok) {
-      if (!isGuest && user && originalCredits !== null) {
-        await adminClient.from('profiles').update({ credits_balance: originalCredits }).eq('user_id', user.id);
-      }
-
-      const errText = await aiResponse.text();
-      console.error('AI Tool API error:', aiResponse.status, errText);
-
-      if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: 'Límite de solicitudes excedido. Intenta en unos minutos.' }), {
-          status: 429,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      throw new Error(`AI processing failed (${aiResponse.status})`);
-    }
-
-    const aiData = await aiResponse.json();
-
-    let resultImage: string | null = null;
-    const candidates = aiData.candidates;
-    if (candidates?.[0]?.content?.parts) {
-      for (const part of candidates[0].content.parts) {
-        if (part.inlineData?.mimeType?.startsWith('image/')) {
-          resultImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-          break;
-        }
-      }
-    }
-
-    if (!resultImage) {
-      if (!isGuest && user && originalCredits !== null) {
-        await adminClient.from('profiles').update({ credits_balance: originalCredits }).eq('user_id', user.id);
-      }
-
-      console.error('No image in response:', JSON.stringify(aiData).slice(0, 500));
-      throw new Error('No se pudo generar la imagen. Intenta con otro prompt o imagen.');
-    }
+    const resultImage = generationResult.resultUrl;
 
     if (isGuest && guestFingerprint) {
       const nextTrials = guestTrialsUsed + 1;
@@ -214,6 +162,145 @@ Deno.serve(async (req) => {
     });
   }
 });
+
+function buildParts(prompt: string, image?: string) {
+  const parts: any[] = [{ text: prompt }];
+
+  if (image) {
+    const base64Match = image.match(/^data:([^;]+);base64,(.+)$/);
+    if (base64Match) {
+      parts.push({
+        inlineData: {
+          mimeType: base64Match[1],
+          data: base64Match[2],
+        },
+      });
+    }
+  }
+
+  return parts;
+}
+
+async function callGeminiWithModelFallback(apiKey: string, parts: any[]) {
+  const availableModels = await fetchAvailableModels(apiKey);
+  const preferred = PREFERRED_MODELS.filter((m) => availableModels.has(m));
+  const modelCandidates = preferred.length > 0 ? preferred : PREFERRED_MODELS;
+
+  let lastNon404Status = 0;
+  let lastNon404Text = '';
+
+  for (const model of modelCandidates) {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
+        }),
+      }
+    );
+
+    const text = await response.text();
+
+    if (response.status === 404) {
+      console.warn(`Gemini model not found: ${model}`);
+      continue;
+    }
+
+    if (response.status === 429) {
+      return {
+        ok: false,
+        response: new Response(JSON.stringify({ error: 'Límite de solicitudes excedido. Intenta en unos minutos.' }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }),
+      };
+    }
+
+    if (!response.ok) {
+      lastNon404Status = response.status;
+      lastNon404Text = text;
+      continue;
+    }
+
+    const parsed = safeJsonParse(text);
+    const resultUrl = extractGeminiImageData(parsed);
+
+    if (resultUrl) {
+      return { ok: true, resultUrl };
+    }
+
+    lastNon404Status = 422;
+    lastNon404Text = 'Model responded without image output';
+  }
+
+  if (lastNon404Status > 0) {
+    console.error('Gemini fallback error:', lastNon404Status, lastNon404Text);
+    return {
+      ok: false,
+      response: new Response(JSON.stringify({ error: `AI processing failed (${lastNon404Status})` }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }),
+    };
+  }
+
+  return {
+    ok: false,
+    response: new Response(
+      JSON.stringify({ error: 'No hay modelos de imagen disponibles ahora mismo. Intenta más tarde.' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    ),
+  };
+}
+
+async function fetchAvailableModels(apiKey: string): Promise<Set<string>> {
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (!response.ok) return new Set();
+
+    const payload = await response.json();
+    const models = payload?.models || [];
+    const names = models
+      .filter((m: any) => m?.supportedGenerationMethods?.includes('generateContent'))
+      .map((m: any) => String(m?.name || '').replace(/^models\//, ''));
+
+    return new Set(names);
+  } catch {
+    return new Set();
+  }
+}
+
+function extractGeminiImageData(payload: any): string | null {
+  const candidates = payload?.candidates;
+  if (!candidates?.[0]?.content?.parts) return null;
+
+  for (const part of candidates[0].content.parts) {
+    if (part?.inlineData?.mimeType?.startsWith('image/')) {
+      return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+    }
+  }
+
+  return null;
+}
+
+function safeJsonParse(text: string) {
+  try {
+    return text ? JSON.parse(text) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function rollbackCredits(adminClient: ReturnType<typeof createClient>, userId?: string, originalCredits?: number | null) {
+  if (userId && typeof originalCredits === 'number') {
+    await adminClient.from('profiles').update({ credits_balance: originalCredits }).eq('user_id', userId);
+  }
+}
 
 function getDefaultPrompt(tool: string): string {
   switch (tool) {
