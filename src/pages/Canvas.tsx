@@ -92,7 +92,7 @@ const Canvas = () => {
       try {
         const { data, error } = await supabase
           .from("canvas_nodes")
-          .insert({ user_id: user.id, type, prompt, pos_x: centerX, pos_y: centerY, status: "loading" })
+          .insert({ user_id: user.id, type, prompt, pos_x: centerX, pos_y: centerY, status: "loading", ...(spaceId ? { space_id: spaceId } : {}) } as any)
           .select()
           .single();
 
