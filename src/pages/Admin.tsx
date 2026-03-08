@@ -34,8 +34,8 @@ interface AdminUser {
 
 const tierConfig: Record<string, { label: string; icon: typeof Zap; className: string }> = {
   free: { label: "Free", icon: Zap, className: "border-border text-muted-foreground" },
+  educacion: { label: "Educación", icon: GraduationCap, className: "border-accent/30 text-accent" },
   pro: { label: "Pro", icon: Crown, className: "border-primary/30 text-primary" },
-  education: { label: "Educación", icon: GraduationCap, className: "border-accent/30 text-accent" },
   business: { label: "Business", icon: Building2, className: "border-gold/30 text-gold" },
 };
 
@@ -296,11 +296,11 @@ const Admin = () => {
                                 <SelectItem value="free">
                                   <span className="flex items-center gap-1.5"><Zap className="h-3 w-3" /> Free</span>
                                 </SelectItem>
+                                <SelectItem value="educacion">
+                                  <span className="flex items-center gap-1.5"><GraduationCap className="h-3 w-3 text-accent" /> Educación</span>
+                                </SelectItem>
                                 <SelectItem value="pro">
                                   <span className="flex items-center gap-1.5"><Crown className="h-3 w-3 text-primary" /> Pro</span>
-                                </SelectItem>
-                                <SelectItem value="education">
-                                  <span className="flex items-center gap-1.5"><GraduationCap className="h-3 w-3 text-accent" /> Educación</span>
                                 </SelectItem>
                                 <SelectItem value="business">
                                   <span className="flex items-center gap-1.5"><Building2 className="h-3 w-3 text-gold" /> Business</span>
