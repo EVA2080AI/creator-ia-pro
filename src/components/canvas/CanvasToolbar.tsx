@@ -177,7 +177,7 @@ export function CanvasToolbar({
         <ToolbarButton icon={Settings} label="Ajustes" />
       </div>
 
-      {/* Credits + sign out — below toolbar */}
+      {/* Credits — below toolbar */}
       <div className="mt-3 flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-card/95 px-1.5 py-2 backdrop-blur-xl node-shadow">
         <div className="flex items-center gap-1 px-1">
           <Coins className="h-3.5 w-3.5 text-warning" />
@@ -185,7 +185,6 @@ export function CanvasToolbar({
             {creditsBalance}
           </span>
         </div>
-        <ToolbarButton icon={LogOut} label="Cerrar sesión" onClick={onSignOut} />
       </div>
     </div>
   );
