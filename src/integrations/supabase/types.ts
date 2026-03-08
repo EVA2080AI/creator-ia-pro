@@ -76,6 +76,30 @@ export type Database = {
           },
         ]
       }
+      demo_usage: {
+        Row: {
+          created_at: string
+          fingerprint: string
+          id: string
+          last_trial_at: string
+          trials_used: number
+        }
+        Insert: {
+          created_at?: string
+          fingerprint: string
+          id?: string
+          last_trial_at?: string
+          trials_used?: number
+        }
+        Update: {
+          created_at?: string
+          fingerprint?: string
+          id?: string
+          last_trial_at?: string
+          trials_used?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
