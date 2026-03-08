@@ -40,6 +40,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/descargar" element={<Downloads />} />
           <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
+          <Route path="/system-status" element={<SystemStatus />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
