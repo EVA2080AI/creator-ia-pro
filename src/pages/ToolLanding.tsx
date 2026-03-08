@@ -346,13 +346,14 @@ const ToolLanding = () => {
     if (isTextTool) {
       setDemoResult(demoTextResults[tool.id] || "✨ Resultado generado exitosamente. Regístrate para ver el resultado completo y descargar.");
     } else {
-      // For image tools, show the demo image as "result"
+      // For image tools, show a blurred/watermarked preview with explanation
       setDemoResultImage(tool.demoImage);
+      setDemoResult("⚠️ Esta es una vista previa de ejemplo. El resultado real con IA se genera al registrarte y usar tus créditos.");
     }
 
     setDemoing(false);
     setDemoUsed(true);
-    toast.success("¡Demo completada! Regístrate para acceso completo.", {
+    toast.success("¡Vista previa lista! Regístrate para resultados reales con IA.", {
       action: { label: "Registrarme", onClick: () => navigate("/auth") },
     });
   };
