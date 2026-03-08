@@ -226,12 +226,12 @@ const SystemStatus = () => {
       costNote: "URL: https://vmwogpwtpgfcslppvurg.supabase.co/functions/v1/stripe-webhook",
     },
     {
-      id: "int-lovable-ai",
-      name: "Lovable AI Gateway",
+      id: "int-google-gemini",
+      name: "Google Gemini API (Tu key gratuita)",
       category: "Integraciones",
       status: "ok",
-      details: "LOVABLE_API_KEY configurada. Modelos: gemini-3-pro-image-preview, gemini-2.5-flash-image, gemini-3-flash-preview.",
-      costNote: "Costo incluido en tu plan Lovable. Si escalas, podrías necesitar API key propia.",
+      details: "GOOGLE_GEMINI_API_KEY configurada. Modelos: gemini-2.0-flash-exp (imágenes), gemini-2.0-flash (texto). Sin costo para ti.",
+      costNote: "API gratuita de Google. Límite: ~60 req/min, 1500 req/día.",
     },
 
     // FRONTEND FEATURES  
