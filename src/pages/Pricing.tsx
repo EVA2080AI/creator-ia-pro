@@ -1,12 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, Check, Zap, Crown, ArrowLeft, Star, GraduationCap, Building2 } from "lucide-react";
+import { STRIPE_TIERS } from "@/lib/stripe-tiers";
+import { Sparkles, Check, Zap, Crown, ArrowLeft, Star, GraduationCap, Building2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const plans = [
   {
+    key: "starter" as const,
     name: "Starter",
     price: "$0",
     period: "para siempre",
@@ -26,8 +29,10 @@ const plans = [
     badge: null,
     icon: Zap,
     iconClass: "text-primary bg-primary/10",
+    stripeTier: null,
   },
   {
+    key: "educacion" as const,
     name: "Educación",
     price: "$4.99",
     period: "/mes",
@@ -43,13 +48,15 @@ const plans = [
       "Verificación académica",
       "Soporte prioritario",
     ],
-    cta: "Verificar Estudiante",
+    cta: "Suscribirme",
     accent: "border-accent/40 hover:border-accent/60",
     badge: "Educación",
     icon: GraduationCap,
     iconClass: "text-accent bg-accent/10",
+    stripeTier: "educacion" as const,
   },
   {
+    key: "pro" as const,
     name: "Pro",
     price: "$9.99",
     period: "/mes",
@@ -71,8 +78,10 @@ const plans = [
     badge: "Más Popular",
     icon: Star,
     iconClass: "text-primary bg-primary/10",
+    stripeTier: "pro" as const,
   },
   {
+    key: "business" as const,
     name: "Business",
     price: "$49.99",
     period: "/mes",
@@ -94,6 +103,7 @@ const plans = [
     badge: "Enterprise",
     icon: Crown,
     iconClass: "text-gold bg-gold/10",
+    stripeTier: "business" as const,
   },
 ];
 
@@ -107,12 +117,46 @@ const faqs = [
 const Pricing = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsLoggedIn(!!session);
     });
   }, []);
+
+  const handleSubscribe = async (plan: typeof plans[number]) => {
+    if (!plan.stripeTier) {
+      navigate(isLoggedIn ? "/dashboard" : "/auth");
+      return;
+    }
+
+    if (!isLoggedIn) {
+      toast.info("Inicia sesión primero para suscribirte");
+      navigate("/auth");
+      return;
+    }
+
+    setLoadingPlan(plan.key);
+    try {
+      const tier = STRIPE_TIERS[plan.stripeTier];
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId: tier.price_id },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (err: any) {
+      console.error("Checkout error:", err);
+      toast.error(err.message || "Error al iniciar el pago");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -193,7 +237,8 @@ const Pricing = () => {
               </ul>
 
               <Button
-                onClick={() => navigate("/auth")}
+                onClick={() => handleSubscribe(plan)}
+                disabled={loadingPlan === plan.key}
                 className={`mt-7 w-full rounded-full ${
                   plan.name === "Pro"
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -204,7 +249,11 @@ const Pricing = () => {
                     : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                 }`}
               >
-                {plan.cta}
+                {loadingPlan === plan.key ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  plan.cta
+                )}
               </Button>
             </div>
           ))}
