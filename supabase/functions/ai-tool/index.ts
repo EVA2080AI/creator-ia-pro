@@ -5,10 +5,15 @@ const corsHeaders = {
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const IMAGE_MODEL = 'google/gemini-2.5-flash-image';
-const FALLBACK_IMAGE_MODEL = 'google/gemini-3-pro-image-preview';
 const PROMPT_ONLY_TOOLS = ['logo', 'social', 'generate'];
 const GUEST_TRIAL_LIMIT = 3;
+const PREFERRED_MODELS = [
+  'gemini-2.5-flash-image',
+  'gemini-2.5-flash-image-preview',
+  'gemini-2.0-flash-preview-image-generation',
+  'gemini-2.0-flash-exp-image-generation',
+  'gemini-2.0-flash',
+];
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -21,8 +26,8 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnon = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) throw new Error('LOVABLE_API_KEY is not configured');
+    const googleApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
+    if (!googleApiKey) throw new Error('GOOGLE_GEMINI_API_KEY is not configured');
 
     const userClient = createClient(supabaseUrl, supabaseAnon, {
       global: { headers: { Authorization: authHeader } },
@@ -97,30 +102,16 @@ Deno.serve(async (req) => {
     }
 
     const editPrompt = prompt || getDefaultPrompt(tool);
-    const gatewayPayload = buildGatewayPayload(editPrompt, image);
+    const parts = buildParts(editPrompt, image);
 
-    const primaryAttempt = await callGateway(lovableApiKey, IMAGE_MODEL, gatewayPayload);
-    let gatewayJson = primaryAttempt.json;
+    const generationResult = await callGeminiWithModelFallback(googleApiKey, parts);
 
-    if (!primaryAttempt.ok && primaryAttempt.status === 404) {
-      const fallbackAttempt = await callGateway(lovableApiKey, FALLBACK_IMAGE_MODEL, gatewayPayload);
-      gatewayJson = fallbackAttempt.json;
-
-      if (!fallbackAttempt.ok) {
-        await rollbackCredits(adminClient, user?.id, originalCredits);
-        return mapGatewayErrorResponse(fallbackAttempt.status, fallbackAttempt.text);
-      }
-    } else if (!primaryAttempt.ok) {
+    if (!generationResult.ok) {
       await rollbackCredits(adminClient, user?.id, originalCredits);
-      return mapGatewayErrorResponse(primaryAttempt.status, primaryAttempt.text);
+      return generationResult.response;
     }
 
-    const resultImage = extractImageDataUrl(gatewayJson);
-
-    if (!resultImage) {
-      await rollbackCredits(adminClient, user?.id, originalCredits);
-      throw new Error('La IA respondió sin imagen. Intenta con otro prompt o imagen.');
-    }
+    const resultImage = generationResult.resultUrl;
 
     if (isGuest && guestFingerprint) {
       const nextTrials = guestTrialsUsed + 1;
@@ -172,98 +163,137 @@ Deno.serve(async (req) => {
   }
 });
 
-function buildGatewayPayload(prompt: string, image?: string) {
-  const userContent: any[] = [{ type: 'text', text: prompt }];
+function buildParts(prompt: string, image?: string) {
+  const parts: any[] = [{ text: prompt }];
+
   if (image) {
-    userContent.push({ type: 'image_url', image_url: { url: image } });
-  }
-
-  return {
-    messages: [
-      {
-        role: 'system',
-        content:
-          'You are an advanced image generation and editing assistant. Always return an image output matching the user request. No markdown wrappers.',
-      },
-      { role: 'user', content: userContent },
-    ],
-    stream: false,
-  };
-}
-
-async function callGateway(lovableApiKey: string, model: string, payload: Record<string, unknown>) {
-  const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${lovableApiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ model, ...payload }),
-  });
-
-  const text = await response.text();
-  let json: any = null;
-  try {
-    json = text ? JSON.parse(text) : null;
-  } catch {
-    json = null;
-  }
-
-  return { ok: response.ok, status: response.status, text, json };
-}
-
-function extractImageDataUrl(payload: any): string | null {
-  const msg = payload?.choices?.[0]?.message;
-  if (!msg) return null;
-
-  const directB64 = msg?.images?.[0]?.b64_json;
-  if (directB64) return `data:image/png;base64,${directB64}`;
-
-  const content = msg?.content;
-  if (Array.isArray(content)) {
-    for (const part of content) {
-      if (part?.b64_json) return `data:image/png;base64,${part.b64_json}`;
-      if (part?.image_base64) return `data:image/png;base64,${part.image_base64}`;
-      const dataUrl = part?.image_url?.url || part?.url;
-      if (typeof dataUrl === 'string' && dataUrl.startsWith('data:image/')) return dataUrl;
+    const base64Match = image.match(/^data:([^;]+);base64,(.+)$/);
+    if (base64Match) {
+      parts.push({
+        inlineData: {
+          mimeType: base64Match[1],
+          data: base64Match[2],
+        },
+      });
     }
   }
 
-  if (typeof content === 'string') {
-    const match = content.match(/data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\n\r]+/);
-    if (match?.[0]) return match[0].replace(/\s/g, '');
+  return parts;
+}
+
+async function callGeminiWithModelFallback(apiKey: string, parts: any[]) {
+  const availableModels = await fetchAvailableModels(apiKey);
+  const preferred = PREFERRED_MODELS.filter((m) => availableModels.has(m));
+  const modelCandidates = preferred.length > 0 ? preferred : PREFERRED_MODELS;
+
+  let lastNon404Status = 0;
+  let lastNon404Text = '';
+
+  for (const model of modelCandidates) {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
+        }),
+      }
+    );
+
+    const text = await response.text();
+
+    if (response.status === 404) {
+      console.warn(`Gemini model not found: ${model}`);
+      continue;
+    }
+
+    if (response.status === 429) {
+      return {
+        ok: false,
+        response: new Response(JSON.stringify({ error: 'Límite de solicitudes excedido. Intenta en unos minutos.' }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }),
+      };
+    }
+
+    if (!response.ok) {
+      lastNon404Status = response.status;
+      lastNon404Text = text;
+      continue;
+    }
+
+    const parsed = safeJsonParse(text);
+    const resultUrl = extractGeminiImageData(parsed);
+
+    if (resultUrl) {
+      return { ok: true, resultUrl };
+    }
+
+    lastNon404Status = 422;
+    lastNon404Text = 'Model responded without image output';
+  }
+
+  if (lastNon404Status > 0) {
+    console.error('Gemini fallback error:', lastNon404Status, lastNon404Text);
+    return {
+      ok: false,
+      response: new Response(JSON.stringify({ error: `AI processing failed (${lastNon404Status})` }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      }),
+    };
+  }
+
+  return {
+    ok: false,
+    response: new Response(
+      JSON.stringify({ error: 'No hay modelos de imagen disponibles ahora mismo. Intenta más tarde.' }),
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    ),
+  };
+}
+
+async function fetchAvailableModels(apiKey: string): Promise<Set<string>> {
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (!response.ok) return new Set();
+
+    const payload = await response.json();
+    const models = payload?.models || [];
+    const names = models
+      .filter((m: any) => m?.supportedGenerationMethods?.includes('generateContent'))
+      .map((m: any) => String(m?.name || '').replace(/^models\//, ''));
+
+    return new Set(names);
+  } catch {
+    return new Set();
+  }
+}
+
+function extractGeminiImageData(payload: any): string | null {
+  const candidates = payload?.candidates;
+  if (!candidates?.[0]?.content?.parts) return null;
+
+  for (const part of candidates[0].content.parts) {
+    if (part?.inlineData?.mimeType?.startsWith('image/')) {
+      return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+    }
   }
 
   return null;
 }
 
-function mapGatewayErrorResponse(status: number, errText: string) {
-  if (status === 429) {
-    return new Response(JSON.stringify({ error: 'Límite de solicitudes excedido. Intenta en unos minutos.' }), {
-      status: 429,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+function safeJsonParse(text: string) {
+  try {
+    return text ? JSON.parse(text) : null;
+  } catch {
+    return null;
   }
-
-  if (status === 402) {
-    return new Response(JSON.stringify({ error: 'Sin saldo de IA disponible. Añade créditos de uso para continuar.' }), {
-      status: 402,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
-  if (status === 404) {
-    return new Response(JSON.stringify({ error: 'Modelo de IA no disponible temporalmente. Intenta de nuevo en unos minutos.' }), {
-      status: 404,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
-  }
-
-  console.error('AI Tool gateway error:', status, errText);
-  return new Response(JSON.stringify({ error: `AI processing failed (${status})` }), {
-    status: 400,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-  });
 }
 
 async function rollbackCredits(adminClient: ReturnType<typeof createClient>, userId?: string, originalCredits?: number | null) {
@@ -275,23 +305,23 @@ async function rollbackCredits(adminClient: ReturnType<typeof createClient>, use
 function getDefaultPrompt(tool: string): string {
   switch (tool) {
     case 'enhance':
-      return 'Enhance this image: improve quality, lighting, sharpness and vibrance while keeping the original composition intact. Return only the enhanced image.';
+      return 'Enhance this image: improve quality, lighting, sharpness and vibrance while keeping the original composition intact. Return the enhanced version of this exact image.';
     case 'upscale':
-      return 'Upscale this image to higher resolution with enhanced details and sharpness. Keep the exact same composition. Return only the upscaled image.';
+      return 'Upscale this image to higher resolution with enhanced details and sharpness. Keep the exact same content but with more detail and clarity.';
     case 'eraser':
-      return 'Remove unwanted objects and blemishes from this image, then fill the background naturally. Return only the edited image.';
+      return 'Remove unwanted objects and blemishes from this image, fill background naturally. Return the cleaned image.';
     case 'background':
-      return 'Remove the background completely and keep only the main subject with clean edges on a transparent or white background. Return only the image.';
+      return 'Remove the background completely, keep only the main subject with clean edges on a white background.';
     case 'restore':
-      return 'Restore this photo by fixing damage, scratches, and colors while preserving identity. Return only the restored image.';
+      return 'Restore this photo: fix damage, scratches, improve colors and make it look new and vibrant. Keep the original content.';
     case 'logo':
-      return 'Create a professional, clean, modern logo. Minimal, memorable, vector-style feel, with clear typography. Return only the logo image on a clean background.';
+      return 'Create a professional, clean, modern logo design. Minimal, memorable, vector-style. Use clean typography and a cohesive color palette. Output on a clean white background.';
     case 'social':
-      return 'Create a professional social media post image optimized for engagement, with strong hierarchy and readable text. Return only the final image.';
+      return 'Create a professional social media post image optimized for engagement. Bold typography, vibrant colors, clear visual hierarchy. Eye-catching for Instagram/Facebook/LinkedIn.';
     case 'generate':
-      return 'Generate a high-quality, professional image from this description. Return only the image.';
+      return 'Generate a high-quality, professional image based on the description.';
     default:
-      return 'Enhance this image and return only the image.';
+      return 'Enhance this image';
   }
 }
 
