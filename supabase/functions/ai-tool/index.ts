@@ -5,7 +5,7 @@ const corsHeaders = {
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const IMAGE_MODEL = 'gemini-2.0-flash-preview-image-generation';
+const IMAGE_MODEL = 'gemini-2.0-flash-exp';
 const PROMPT_ONLY_TOOLS = ['logo', 'social', 'generate'];
 const GUEST_TRIAL_LIMIT = 3;
 
