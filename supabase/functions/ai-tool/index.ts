@@ -19,7 +19,8 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnon = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
+    const googleApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
+    if (!googleApiKey) throw new Error('GOOGLE_GEMINI_API_KEY is not configured');
 
     const userClient = createClient(supabaseUrl, supabaseAnon, {
       global: { headers: { Authorization: authHeader } },
@@ -34,7 +35,6 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check credits
     const { data: profile } = await adminClient
       .from('profiles')
       .select('credits_balance')
@@ -57,34 +57,40 @@ Deno.serve(async (req) => {
       .update({ credits_balance: profile.credits_balance - cost })
       .eq('user_id', user.id);
 
-    // Use Lovable AI to process
     const editPrompt = prompt || getDefaultPrompt(tool);
     const isPromptOnly = PROMPT_ONLY_TOOLS.includes(tool);
     
-    const messages = isPromptOnly
-      ? [{ role: 'user', content: editPrompt }]
-      : [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: editPrompt },
-              { type: 'image_url', image_url: { url: image } },
-            ],
+    // Build parts for Google Gemini API
+    const parts: any[] = [{ text: editPrompt }];
+    if (!isPromptOnly && image) {
+      // If image is a base64 data URL, extract the data
+      const base64Match = image.match(/^data:([^;]+);base64,(.+)$/);
+      if (base64Match) {
+        parts.push({
+          inlineData: {
+            mimeType: base64Match[1],
+            data: base64Match[2],
           },
-        ];
+        });
+      } else {
+        // It's a URL, include as text reference
+        parts.push({ text: `Image URL: ${image}` });
+      }
+    }
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3-pro-image-preview',
-        messages,
-        modalities: ['image', 'text'],
-      }),
-    });
+    const aiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${googleApiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
+        }),
+      }
+    );
 
     if (!aiResponse.ok) {
       // Rollback credits
@@ -92,26 +98,25 @@ Deno.serve(async (req) => {
         .from('profiles')
         .update({ credits_balance: profile.credits_balance })
         .eq('user_id', user.id);
+
+      if (aiResponse.status === 429) {
+        return new Response(JSON.stringify({ error: 'Límite de solicitudes excedido. Intenta en unos minutos.' }), {
+          status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       throw new Error('AI processing failed');
     }
 
     const aiData = await aiResponse.json();
     
-    // Extract image from response - check multiple formats
+    // Extract image from Gemini response
     let resultImage: string | null = null;
-    
-    // Format 1: images array
-    resultImage = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    
-    // Format 2: inline_data in parts
-    if (!resultImage) {
-      const parts = aiData.choices?.[0]?.message?.parts;
-      if (parts) {
-        for (const part of parts) {
-          if (part.inline_data?.mime_type?.startsWith('image/')) {
-            resultImage = `data:${part.inline_data.mime_type};base64,${part.inline_data.data}`;
-            break;
-          }
+    const candidates = aiData.candidates;
+    if (candidates?.[0]?.content?.parts) {
+      for (const part of candidates[0].content.parts) {
+        if (part.inlineData?.mimeType?.startsWith('image/')) {
+          resultImage = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
+          break;
         }
       }
     }

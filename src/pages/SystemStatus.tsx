@@ -73,9 +73,9 @@ const SystemStatus = () => {
       name: "generate-image (Canvas)",
       category: "Edge Functions",
       status: "untested",
-      details: "Genera imágenes con Gemini 3 Pro. Usa LOVABLE_API_KEY.",
-      apiNeeded: "LOVABLE_API_KEY ✅",
-      costNote: "Incluido en Lovable, sin costo extra por llamada.",
+      details: "Genera imágenes con Google Gemini 2.0 Flash Exp. Usa tu API key gratuita de Google.",
+      apiNeeded: "GOOGLE_GEMINI_API_KEY ✅",
+      costNote: "API gratuita de Google — sin costo por llamada para ti.",
       action: "test-cors",
     },
     {
@@ -83,9 +83,9 @@ const SystemStatus = () => {
       name: "ai-tool (Herramientas imagen)",
       category: "Edge Functions",
       status: "untested",
-      details: "Enhance, upscale, eraser, background, restore, logo, social. Usa Gemini 2.5 Flash.",
-      apiNeeded: "LOVABLE_API_KEY ✅",
-      costNote: "Incluido en Lovable.",
+      details: "Enhance, upscale, eraser, background, restore, logo, social. Usa Google Gemini 2.0 Flash Exp.",
+      apiNeeded: "GOOGLE_GEMINI_API_KEY ✅",
+      costNote: "API gratuita de Google.",
       action: "test-cors",
     },
     {
@@ -93,9 +93,9 @@ const SystemStatus = () => {
       name: "ai-chat (Copywriter/Blog/Ads)",
       category: "Edge Functions",
       status: "untested",
-      details: "Generación de texto con Gemini 3 Flash. Copywriter, blog, social, ads.",
-      apiNeeded: "LOVABLE_API_KEY ✅",
-      costNote: "Incluido en Lovable.",
+      details: "Generación de texto con Google Gemini 2.0 Flash. Copywriter, blog, social, ads.",
+      apiNeeded: "GOOGLE_GEMINI_API_KEY ✅",
+      costNote: "API gratuita de Google.",
       action: "test-cors",
     },
     {
@@ -226,12 +226,12 @@ const SystemStatus = () => {
       costNote: "URL: https://vmwogpwtpgfcslppvurg.supabase.co/functions/v1/stripe-webhook",
     },
     {
-      id: "int-lovable-ai",
-      name: "Lovable AI Gateway",
+      id: "int-google-gemini",
+      name: "Google Gemini API (Tu key gratuita)",
       category: "Integraciones",
       status: "ok",
-      details: "LOVABLE_API_KEY configurada. Modelos: gemini-3-pro-image-preview, gemini-2.5-flash-image, gemini-3-flash-preview.",
-      costNote: "Costo incluido en tu plan Lovable. Si escalas, podrías necesitar API key propia.",
+      details: "GOOGLE_GEMINI_API_KEY configurada. Modelos: gemini-2.0-flash-exp (imágenes), gemini-2.0-flash (texto). Sin costo para ti.",
+      costNote: "API gratuita de Google. Límite: ~60 req/min, 1500 req/día.",
     },
 
     // FRONTEND FEATURES  
@@ -405,6 +405,9 @@ const SystemStatus = () => {
     error: features.filter((f) => f.status === "error").length,
     untested: features.filter((f) => f.status === "untested").length,
   };
+  const completionPct = Math.round(
+    ((summary.ok + summary.warning * 0.5) / features.length) * 100
+  );
 
   if (authLoading || adminLoading) {
     return (
@@ -442,6 +445,23 @@ const SystemStatus = () => {
           </Button>
         </div>
 
+        {/* Completion bar */}
+        <div className="mb-6 rounded-xl border border-primary/20 bg-card p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-foreground">Progreso del Proyecto</span>
+            <span className="text-2xl font-bold text-primary font-mono">{completionPct}%</span>
+          </div>
+          <div className="h-3 rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-accent transition-all duration-700"
+              style={{ width: `${completionPct}%` }}
+            />
+          </div>
+          <p className="mt-1.5 text-[10px] text-muted-foreground">
+            {summary.ok} OK · {summary.warning} parcial · {summary.error} error · {summary.untested} sin probar — de {features.length} funcionalidades
+          </p>
+        </div>
+
         {/* Summary */}
         <div className="mb-8 grid grid-cols-4 gap-3">
           <div className="rounded-xl border border-accent/20 bg-accent/5 p-3 text-center">
@@ -466,12 +486,12 @@ const SystemStatus = () => {
         <div className="mb-6 rounded-xl border border-primary/20 bg-primary/5 p-4">
           <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
             <Bot className="h-4 w-4 text-primary" />
-            Costos de IA
+            Costos de IA — Google Gemini API Gratuita
           </h3>
           <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
-            Las llamadas a IA usan el <strong className="text-foreground">Lovable AI Gateway</strong> (LOVABLE_API_KEY). 
-            El costo está incluido en tu plan Lovable — <strong className="text-foreground">no pagas por llamada</strong>. 
-            Si escalas, podrías necesitar tu propia API key. Errores 429 = rate limit, 402 = créditos agotados.
+            Todas las llamadas a IA usan tu <strong className="text-foreground">API key gratuita de Google Gemini</strong>. 
+            <strong className="text-foreground">No pagas por llamada</strong>. 
+            Límites free: ~60 req/min, ~1500 req/día. Usuarios nuevos reciben <strong className="text-foreground">10 créditos gratis</strong>.
           </p>
         </div>
 

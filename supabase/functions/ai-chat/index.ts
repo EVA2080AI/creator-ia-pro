@@ -17,8 +17,8 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnon = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) throw new Error('LOVABLE_API_KEY is not configured');
+    const googleApiKey = Deno.env.get('GOOGLE_GEMINI_API_KEY');
+    if (!googleApiKey) throw new Error('GOOGLE_GEMINI_API_KEY is not configured');
 
     const userClient = createClient(supabaseUrl, supabaseAnon, {
       global: { headers: { Authorization: authHeader } },
@@ -28,7 +28,6 @@ Deno.serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Check credits
     const { data: profile } = await adminClient
       .from('profiles')
       .select('credits_balance')
@@ -58,20 +57,17 @@ Responde en español de forma clara y estructurada.`,
 
     const systemPrompt = systemPrompts[type] || systemPrompts.general;
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3-flash-preview',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: prompt },
-        ],
-      }),
-    });
+    const aiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${googleApiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ parts: [{ text: prompt }] }],
+        }),
+      }
+    );
 
     if (!aiResponse.ok) {
       if (aiResponse.status === 429) {
@@ -79,16 +75,11 @@ Responde en español de forma clara y estructurada.`,
           status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: 'Sin créditos de IA disponibles.' }), {
-          status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
       throw new Error('AI processing failed');
     }
 
     const aiData = await aiResponse.json();
-    const text = aiData.choices?.[0]?.message?.content;
+    const text = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!text) throw new Error('No text generated');
 
