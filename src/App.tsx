@@ -18,6 +18,7 @@ import NotFound from "./pages/NotFound";
 import ToolLanding from "./pages/ToolLanding";
 import Downloads from "./pages/Downloads";
 import SystemStatus from "./pages/SystemStatus";
+import ProductBacklog from "./pages/ProductBacklog";
 
 const queryClient = new QueryClient();
 
