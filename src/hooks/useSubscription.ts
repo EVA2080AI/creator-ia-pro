@@ -17,8 +17,11 @@ export function useSubscription(userId: string | undefined) {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("check-subscription");
-      if (error) throw error;
-      if (data) {
+      if (error) {
+        // Non-2xx is expected when no Stripe customer exists
+        console.log("check-subscription: no active subscription or error");
+        setSubscription({ subscribed: false, tier: "free", credits: 0, subscription_end: null });
+      } else if (data) {
         setSubscription({
           subscribed: data.subscribed ?? false,
           tier: data.tier ?? "free",
