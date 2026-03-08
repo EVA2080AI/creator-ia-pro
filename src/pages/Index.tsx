@@ -220,35 +220,32 @@ const Index = () => {
         </div>
 
         {/* Download Section */}
-        <div id="download-section" className="mt-28 w-full max-w-5xl scroll-mt-20">
-          <div className="mb-12 text-center">
+        <div className="mt-28 w-full max-w-5xl">
+          <div className="rounded-3xl border border-primary/20 bg-card/60 p-10 text-center backdrop-blur-sm node-shadow">
             <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">Multiplataforma</Badge>
-            <h2 className="text-3xl font-bold text-foreground md:text-5xl">
+            <h2 className="text-3xl font-bold text-foreground md:text-4xl">
               Descarga <span className="gradient-text">Creator IA Pro</span>
             </h2>
-            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              Disponible en todas las plataformas. Trabaja desde donde quieras.
+            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
+              Disponible en Windows, macOS y Android. Tu cuenta se sincroniza en todos los dispositivos.
             </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in">
-            {platforms.map((p) => (
-              <div key={p.name} className="group rounded-2xl border border-border bg-card/60 p-6 text-center backdrop-blur-sm hover:border-primary/30 hover:-translate-y-1 transition-all duration-200 cursor-pointer">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <p.icon className="h-7 w-7 text-primary" />
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {[
+                { icon: Monitor, name: "Windows" },
+                { icon: Apple, name: "macOS" },
+                { icon: Smartphone, name: "Android" },
+              ].map((p) => (
+                <div key={p.name} className="flex items-center gap-2 rounded-full border border-border bg-muted/30 px-5 py-2.5">
+                  <p.icon className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">{p.name}</span>
                 </div>
-                <h3 className="text-base font-semibold text-foreground">{p.name}</h3>
-                <p className="mt-1 text-xs text-muted-foreground">{p.label}</p>
-                <Button variant="outline" size="sm" className="mt-4 w-full rounded-full border-primary/20 text-primary hover:bg-primary/10 gap-1.5 text-xs">
-                  <Download className="h-3 w-3" />
-                  {p.name === "Web App" ? "Abrir" : "Descargar"}
-                </Button>
-              </div>
-            ))}
+              ))}
+            </div>
+            <Button onClick={() => navigate("/descargar")} size="lg" className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 rounded-full px-10">
+              <Download className="h-4 w-4" />
+              Ver Descargas
+            </Button>
           </div>
-          <p className="mt-4 text-center text-xs text-muted-foreground">
-            Próximamente disponible para iOS. Las apps de escritorio y móvil se sincronizan con tu cuenta en la nube.
-          </p>
         </div>
 
         {/* Testimonials */}
