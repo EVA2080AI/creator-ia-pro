@@ -74,6 +74,13 @@ const plans = [
 
 const Pricing = () => {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
