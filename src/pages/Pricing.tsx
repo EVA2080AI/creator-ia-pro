@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, Check, Zap, Crown, ArrowLeft, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -74,6 +76,13 @@ const plans = [
 
 const Pricing = () => {
   const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background overflow-hidden">
@@ -95,8 +104,8 @@ const Pricing = () => {
             </span>
           </div>
         </button>
-        <Button onClick={() => navigate("/auth")} variant="outline" className="border-border text-foreground hover:bg-muted">
-          Iniciar Sesión
+        <Button onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")} variant="outline" className="border-border text-foreground hover:bg-muted">
+          {isLoggedIn ? "Ir al Dashboard" : "Iniciar Sesión"}
         </Button>
       </header>
 

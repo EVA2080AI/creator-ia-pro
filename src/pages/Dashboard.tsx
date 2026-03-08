@@ -186,7 +186,7 @@ const Dashboard = () => {
               {recentAssets.map((asset) => (
                 <div
                   key={asset.id}
-                  className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-card node-shadow hover:border-primary/20 transition-all"
+                  className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card node-shadow hover:border-primary/20 transition-all"
                   onClick={() => navigate("/assets")}
                 >
                   <div className="aspect-square">

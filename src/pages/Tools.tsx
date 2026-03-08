@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { AppHeader } from "@/components/AppHeader";
@@ -12,10 +12,10 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Wand2, ZoomIn, Eraser, ImagePlus, RotateCcw, Sparkles,
   Upload, Loader2, Download, Coins, Type, MessageSquare,
-  PenTool, Hash, Image, Palette, ArrowLeft,
+  PenTool, Hash, Image, ArrowLeft, FileText, Megaphone, Copy,
 } from "lucide-react";
 
-type ToolId = "enhance" | "upscale" | "eraser" | "background" | "restore" | "generate" | "copywriter" | "logo" | "social";
+type ToolId = "enhance" | "upscale" | "eraser" | "background" | "restore" | "generate" | "copywriter" | "logo" | "social" | "blog" | "ads";
 
 interface Tool {
   id: ToolId;
@@ -29,23 +29,32 @@ interface Tool {
 }
 
 const tools: Tool[] = [
-  // Image tools
   { id: "enhance", name: "Mejorar Imagen", desc: "Mejora calidad, iluminación y nitidez con IA.", icon: Wand2, credits: 2, category: "image", needsUpload: true },
   { id: "upscale", name: "Ampliar 4x", desc: "Escala imágenes hasta 4x sin perder detalles.", icon: ZoomIn, credits: 3, category: "image", needsUpload: true },
   { id: "eraser", name: "Borrar Objetos", desc: "Elimina objetos no deseados de cualquier imagen.", icon: Eraser, credits: 2, category: "image", needsUpload: true },
   { id: "background", name: "Quitar Fondo", desc: "Elimina fondos automáticamente con IA.", icon: ImagePlus, credits: 1, category: "image", needsUpload: true },
   { id: "restore", name: "Restaurar Foto", desc: "Restaura fotos antiguas o dañadas.", icon: RotateCcw, credits: 3, category: "image", needsUpload: true },
   { id: "generate", name: "Texto a Imagen", desc: "Genera imágenes profesionales desde una descripción.", icon: Image, credits: 1, category: "image", needsUpload: false, placeholder: "Describe la imagen que quieres crear..." },
-  // AI Apps
   { id: "copywriter", name: "AI Copywriter", desc: "Genera textos de marketing, ads y contenido social.", icon: MessageSquare, credits: 1, category: "ai-app", needsUpload: false, placeholder: "Ej: Escribe un copy para un anuncio de zapatillas deportivas..." },
   { id: "logo", name: "Logo Maker", desc: "Diseña logos profesionales con IA generativa.", icon: PenTool, credits: 2, category: "ai-app", needsUpload: false, placeholder: "Ej: Logo minimalista para una cafetería llamada 'Aroma'..." },
   { id: "social", name: "Social Media Kit", desc: "Genera contenido visual optimizado para redes.", icon: Hash, credits: 2, category: "ai-app", needsUpload: false, placeholder: "Ej: Post de Instagram para lanzamiento de producto de skincare..." },
+  { id: "blog", name: "AI Blog Writer", desc: "Artículos SEO completos generados con IA.", icon: FileText, credits: 1, category: "ai-app", needsUpload: false, placeholder: "Ej: Artículo sobre tendencias de marketing digital 2026..." },
+  { id: "ads", name: "Ad Generator", desc: "Crea textos de anuncios para Google y Meta Ads.", icon: Megaphone, credits: 1, category: "ai-app", needsUpload: false, placeholder: "Ej: Anuncio de Google Ads para una tienda de ropa online..." },
 ];
+
+const appIdToToolId: Record<string, ToolId> = {
+  copywriter: "copywriter",
+  logo: "logo",
+  social: "social",
+  blog: "blog",
+  ads: "ads",
+};
 
 const Tools = () => {
   const { user, signOut } = useAuth("/auth");
   const { profile, refreshProfile } = useProfile(user?.id);
   const navigate = useNavigate();
+  const { appId } = useParams();
   const [activeTool, setActiveTool] = useState<ToolId>("enhance");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
@@ -54,6 +63,15 @@ const Tools = () => {
   const [textPrompt, setTextPrompt] = useState("");
   const [category, setCategory] = useState<"image" | "ai-app">("image");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Handle /apps/:appId route
+  useEffect(() => {
+    if (appId && appIdToToolId[appId]) {
+      const toolId = appIdToToolId[appId];
+      setActiveTool(toolId);
+      setCategory("ai-app");
+    }
+  }, [appId]);
 
   const currentTool = tools.find((t) => t.id === activeTool)!;
   const filteredTools = tools.filter((t) => t.category === category);
@@ -85,10 +103,11 @@ const Tools = () => {
     setResultText(null);
 
     try {
-      if (currentTool.category === "ai-app" && currentTool.id === "copywriter") {
-        // Text generation via AI chat
+      const textTools: ToolId[] = ["copywriter", "blog", "ads"];
+      if (textTools.includes(currentTool.id)) {
+        const chatType = currentTool.id === "blog" ? "blog" : currentTool.id === "ads" ? "copywriter" : "copywriter";
         const { data, error } = await supabase.functions.invoke("ai-chat", {
-          body: { type: "copywriter", prompt: textPrompt },
+          body: { type: chatType, prompt: textPrompt },
         });
         if (error) throw error;
         if (data?.text) {
@@ -97,7 +116,6 @@ const Tools = () => {
           await refreshProfile();
         } else if (data?.error) throw new Error(data.error);
       } else {
-        // Image tools
         const { data, error } = await supabase.functions.invoke("ai-tool", {
           body: {
             tool: activeTool,
@@ -124,7 +142,6 @@ const Tools = () => {
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main className="mx-auto max-w-7xl px-6 py-8">
-        {/* Back + Title */}
         <div className="mb-6 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
             <ArrowLeft className="h-4 w-4" />
@@ -133,11 +150,10 @@ const Tools = () => {
             <h1 className="text-2xl font-bold text-foreground">
               Herramientas <span className="gradient-text">IA</span>
             </h1>
-            <p className="text-sm text-muted-foreground">12+ herramientas profesionales de IA</p>
+            <p className="text-sm text-muted-foreground">{tools.length} herramientas profesionales de IA</p>
           </div>
         </div>
 
-        {/* Category tabs */}
         <div className="mb-6 flex gap-1 rounded-xl border border-border bg-card p-1 w-fit">
           <button
             onClick={() => { setCategory("image"); setActiveTool("enhance"); setResultImage(null); setResultText(null); }}
@@ -159,7 +175,6 @@ const Tools = () => {
           </button>
         </div>
 
-        {/* Tool selector */}
         <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {filteredTools.map((tool) => (
             <button
@@ -182,9 +197,7 @@ const Tools = () => {
           ))}
         </div>
 
-        {/* Workspace */}
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Input area */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-foreground">{currentTool.name}</h2>
@@ -245,7 +258,6 @@ const Tools = () => {
             </Button>
           </div>
 
-          {/* Result area */}
           <div className="space-y-4">
             <h2 className="font-semibold text-foreground">Resultado</h2>
             {resultImage ? (
@@ -269,6 +281,7 @@ const Tools = () => {
                   className="w-full border-border gap-2"
                   onClick={() => { navigator.clipboard.writeText(resultText); toast.success("Copiado al portapapeles"); }}
                 >
+                  <Copy className="h-4 w-4" />
                   Copiar Texto
                 </Button>
               </div>
