@@ -26,7 +26,10 @@ Deno.serve(async (req) => {
     if (authError || !user) throw new Error('Unauthorized');
 
     const { tool, image, prompt } = await req.json();
-    if (!tool || !image) throw new Error('Missing tool or image');
+    if (!tool) throw new Error('Missing tool');
+    
+    const promptOnlyTools = ['logo', 'social', 'generate'];
+    if (!promptOnlyTools.includes(tool) && !image) throw new Error('Missing image');
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
@@ -39,6 +42,7 @@ Deno.serve(async (req) => {
 
     const creditCost: Record<string, number> = {
       enhance: 2, upscale: 3, eraser: 2, background: 1, restore: 3,
+      logo: 2, social: 2, generate: 1,
     };
     const cost = creditCost[tool] || 2;
 
@@ -52,18 +56,15 @@ Deno.serve(async (req) => {
       .update({ credits_balance: profile.credits_balance - cost })
       .eq('user_id', user.id);
 
-    // Use Lovable AI to process image
+    // Use Lovable AI to process
     const editPrompt = prompt || getDefaultPrompt(tool);
     
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image',
-        messages: [
+    const promptOnlyTools = ['logo', 'social', 'generate'];
+    const isPromptOnly = promptOnlyTools.includes(tool);
+    
+    const messages = isPromptOnly
+      ? [{ role: 'user', content: editPrompt }]
+      : [
           {
             role: 'user',
             content: [
@@ -71,7 +72,17 @@ Deno.serve(async (req) => {
               { type: 'image_url', image_url: { url: image } },
             ],
           },
-        ],
+        ];
+
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: isPromptOnly ? 'google/gemini-3-pro-image-preview' : 'google/gemini-2.5-flash-image',
+        messages,
         modalities: ['image', 'text'],
       }),
     });
@@ -135,9 +146,13 @@ function getDefaultPrompt(tool: string): string {
     case 'eraser':
       return 'Remove unwanted objects and blemishes from this image, fill background naturally';
     case 'background':
-      return 'Remove the background completely, keep only the main subject with clean edges on a white background';
+      return 'Remove the background completely, keep only the main subject with clean edges on a transparent/white background';
     case 'restore':
       return 'Restore this photo: fix damage, scratches, improve colors and make it look new and vibrant';
+    case 'logo':
+      return 'Create a professional, clean, modern logo design based on this reference. The logo should be vector-style, minimal, memorable, and work well at any size. Use clean typography and a cohesive color palette. Output on a clean white background.';
+    case 'social':
+      return 'Create a professional social media post image optimized for engagement. Use bold typography, vibrant colors, and a clear visual hierarchy. The design should be eye-catching and suitable for Instagram, Facebook, or LinkedIn. Include space for text overlay.';
     default:
       return 'Enhance this image';
   }

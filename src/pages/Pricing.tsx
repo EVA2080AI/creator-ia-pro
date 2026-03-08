@@ -2,7 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { STRIPE_TIERS } from "@/lib/stripe-tiers";
-import { Sparkles, Check, Zap, Crown, ArrowLeft, Star, GraduationCap, Building2, Loader2 } from "lucide-react";
+import { CREDIT_PACKS } from "@/lib/credit-packs";
+import { Sparkles, Check, Zap, Crown, ArrowLeft, Star, GraduationCap, Building2, Loader2, Coins, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -118,6 +119,7 @@ const Pricing = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [loadingPack, setLoadingPack] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -155,6 +157,33 @@ const Pricing = () => {
       toast.error(err.message || "Error al iniciar el pago");
     } finally {
       setLoadingPlan(null);
+    }
+  };
+
+  const handleBuyCredits = async (pack: typeof CREDIT_PACKS[number]) => {
+    if (!isLoggedIn) {
+      toast.info("Inicia sesión primero para comprar créditos");
+      navigate("/auth");
+      return;
+    }
+
+    setLoadingPack(pack.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("buy-credits", {
+        body: { priceId: pack.price_id },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (err: any) {
+      console.error("Buy credits error:", err);
+      toast.error(err.message || "Error al iniciar la compra");
+    } finally {
+      setLoadingPack(null);
     }
   };
 
@@ -257,6 +286,66 @@ const Pricing = () => {
               </Button>
             </div>
           ))}
+        </div>
+
+        {/* Credit Packs */}
+        <div className="mt-20 w-full max-w-4xl">
+          <div className="text-center mb-10">
+            <Badge className="mb-4 bg-gold/10 text-gold border-gold/20 hover:bg-gold/10">
+              <Package className="mr-1 h-3 w-3" />
+              Pago único
+            </Badge>
+            <h2 className="text-3xl font-bold text-foreground">
+              ¿Necesitas más <span className="gradient-text">créditos</span>?
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              Compra paquetes de créditos adicionales. Sin suscripción, pago único.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-3">
+            {CREDIT_PACKS.map((pack) => (
+              <div
+                key={pack.id}
+                className={`relative rounded-2xl border bg-card/60 p-6 backdrop-blur-sm node-shadow transition-all hover:-translate-y-1 ${
+                  pack.popular
+                    ? "border-gold/50 ring-1 ring-gold/20"
+                    : "border-border hover:border-gold/30"
+                }`}
+              >
+                {pack.popular && (
+                  <span className="absolute -top-3 left-6 rounded-full bg-gold px-3 py-0.5 text-xs font-semibold text-background">
+                    Mejor valor
+                  </span>
+                )}
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10 mb-4">
+                  <Coins className="h-5 w-5 text-gold" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground">{pack.name}</h3>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-3xl font-bold text-foreground">{pack.price}</span>
+                  <span className="text-sm text-muted-foreground">único</span>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  {pack.credits} créditos añadidos a tu balance actual
+                </p>
+                <Button
+                  onClick={() => handleBuyCredits(pack)}
+                  disabled={loadingPack === pack.id}
+                  className="mt-5 w-full rounded-full bg-gold/90 text-background hover:bg-gold gap-2"
+                >
+                  {loadingPack === pack.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Coins className="h-4 w-4" />
+                      Comprar
+                    </>
+                  )}
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* FAQ */}
