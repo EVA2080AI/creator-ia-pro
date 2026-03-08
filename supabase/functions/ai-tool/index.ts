@@ -42,6 +42,7 @@ Deno.serve(async (req) => {
 
     const creditCost: Record<string, number> = {
       enhance: 2, upscale: 3, eraser: 2, background: 1, restore: 3,
+      logo: 2, social: 2, generate: 1,
     };
     const cost = creditCost[tool] || 2;
 
