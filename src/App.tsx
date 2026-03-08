@@ -16,6 +16,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import ToolLanding from "./pages/ToolLanding";
 import Downloads from "./pages/Downloads";
+import SystemStatus from "./pages/SystemStatus";
 
 const queryClient = new QueryClient();
 
