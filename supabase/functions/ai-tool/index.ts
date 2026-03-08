@@ -212,6 +212,25 @@ async function callGeminiWithModelFallback(apiKey: string, parts: any[]) {
     }
 
     if (response.status === 429) {
+      const retryAfter = response.headers.get('Retry-After');
+      let delayMs = 0;
+      if (retryAfter) {
+        const parsed = parseInt(retryAfter, 10);
+        delayMs = !isNaN(parsed) ? parsed * 1000 : 0;
+      }
+      if (delayMs <= 0) {
+        delayMs = Math.pow(2, retryAttempt) * 1000 + Math.random() * 1000;
+      }
+      const cappedDelay = Math.min(delayMs, 30000);
+      console.log(`Rate limited on ${model}, waiting ${cappedDelay}ms (attempt ${retryAttempt + 1}/3)`);
+      if (retryAttempt < 2) {
+        await new Promise((r) => setTimeout(r, cappedDelay));
+        retryAttempt++;
+        // Retry same model by decrementing index
+        modelCandidates.splice(modelCandidates.indexOf(model) + 1, 0, model);
+        continue;
+      }
+      // After 3 retries on rate limit, give up
       return {
         ok: false,
         response: new Response(JSON.stringify({ error: 'Límite de solicitudes excedido. Intenta en unos minutos.' }), {
