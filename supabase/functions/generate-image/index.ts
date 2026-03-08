@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const IMAGE_MODEL = "gemini-2.5-flash-preview-image-generation";
+const IMAGE_MODEL = "gemini-2.0-flash-preview-image-generation";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
