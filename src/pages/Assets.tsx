@@ -2,25 +2,19 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { useProfile } from "@/hooks/useProfile";
-import { useAdmin } from "@/hooks/useAdmin";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { AppHeader } from "@/components/AppHeader";
 import {
   Search,
   Loader2,
-  Sparkles,
   Heart,
   Download,
   Trash2,
-  Image,
   ImageOff,
-  Coins,
   Star,
-  LayoutGrid,
-  Shield,
 } from "lucide-react";
 
 interface SavedAsset {
@@ -35,8 +29,6 @@ interface SavedAsset {
 
 const Assets = () => {
   const { user, loading: authLoading, signOut } = useAuth("/auth");
-  const { profile } = useProfile(user?.id);
-  const { isAdmin } = useAdmin(user?.id);
   const navigate = useNavigate();
 
   const [assets, setAssets] = useState<SavedAsset[]>([]);
@@ -107,55 +99,7 @@ const Assets = () => {
         <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-accent/5 blur-[150px]" />
       </div>
 
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card glow-primary">
-              <Sparkles className="h-4 w-4 text-primary" />
-            </div>
-            <span className="text-lg font-bold">
-              <span className="gradient-text">Canvas</span>
-              <span className="text-foreground">AI</span>
-            </span>
-          </div>
-
-          <nav className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={() => navigate("/spaces")} className="text-muted-foreground">
-              <LayoutGrid className="mr-1.5 h-4 w-4" />
-              Spaces
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/canvas")} className="text-muted-foreground">
-              <Sparkles className="mr-1.5 h-4 w-4" />
-              Canvas
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/assets")} className="text-foreground">
-              <Image className="mr-1.5 h-4 w-4" />
-              Assets
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/pricing")} className="text-muted-foreground">
-              <Coins className="mr-1.5 h-4 w-4" />
-              Planes
-            </Button>
-            {isAdmin && (
-              <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="text-muted-foreground">
-                <Shield className="mr-1.5 h-4 w-4" />
-                Admin
-              </Button>
-            )}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs">
-              <Coins className="h-3.5 w-3.5 text-gold" />
-              <span className="text-gold font-semibold">{profile?.credits_balance ?? 0}</span>
-            </div>
-            <Button variant="ghost" size="sm" onClick={signOut} className="text-muted-foreground">
-              Salir
-            </Button>
-          </div>
-        </div>
-      </header>
+      <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main className="relative z-10 mx-auto max-w-6xl px-6 py-8">
         <div className="mb-8">
@@ -163,7 +107,6 @@ const Assets = () => {
           <p className="mt-1 text-muted-foreground">Tus generaciones guardadas, prompts favoritos y variaciones</p>
         </div>
 
-        {/* Filters */}
         <div className="mb-6 flex items-center gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -185,7 +128,6 @@ const Assets = () => {
           </Button>
         </div>
 
-        {/* Grid */}
         {loading ? (
           <div className="flex h-64 items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin-slow text-primary" />
@@ -199,7 +141,7 @@ const Assets = () => {
             <p className="text-sm">
               {search || filterFav
                 ? "Prueba con otros filtros"
-                : "Las imágenes generadas en el canvas aparecerán aquí"}
+                : "Las imágenes generadas en el canvas se guardan aquí automáticamente"}
             </p>
           </div>
         ) : (
@@ -218,7 +160,6 @@ const Assets = () => {
                   />
                 </div>
 
-                {/* Overlay on hover */}
                 <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3">
                   <div className="flex justify-end gap-1">
                     <Button
@@ -255,7 +196,7 @@ const Assets = () => {
                     {asset.prompt && (
                       <p className="text-xs text-foreground line-clamp-2">{asset.prompt}</p>
                     )}
-                    <div className="mt-1.5 flex items-center gap-1.5">
+                    <div className="mt-1.5 flex items-center gap-1.5 flex-wrap">
                       <Badge variant="outline" className="border-border text-xs">
                         {asset.type}
                       </Badge>
@@ -268,7 +209,6 @@ const Assets = () => {
                   </div>
                 </div>
 
-                {/* Fav indicator */}
                 {asset.is_favorite && (
                   <div className="absolute top-2 left-2">
                     <Star className="h-4 w-4 fill-gold text-gold" />
