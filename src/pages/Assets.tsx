@@ -1,0 +1,286 @@
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
+import { useAdmin } from "@/hooks/useAdmin";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Search,
+  Loader2,
+  Sparkles,
+  Heart,
+  Download,
+  Trash2,
+  Image,
+  ImageOff,
+  Coins,
+  Star,
+  LayoutGrid,
+  Shield,
+} from "lucide-react";
+
+interface SavedAsset {
+  id: string;
+  asset_url: string;
+  prompt: string | null;
+  type: string;
+  is_favorite: boolean;
+  tags: string[];
+  created_at: string;
+}
+
+const Assets = () => {
+  const { user, loading: authLoading, signOut } = useAuth("/auth");
+  const { profile } = useProfile(user?.id);
+  const { isAdmin } = useAdmin(user?.id);
+  const navigate = useNavigate();
+
+  const [assets, setAssets] = useState<SavedAsset[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterFav, setFilterFav] = useState(false);
+
+  const fetchAssets = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("saved_assets")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+    if (error) toast.error("Error cargando assets");
+    else setAssets(data || []);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    if (user) fetchAssets();
+  }, [user, fetchAssets]);
+
+  const toggleFav = async (id: string, current: boolean) => {
+    const { error } = await supabase
+      .from("saved_assets")
+      .update({ is_favorite: !current })
+      .eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      setAssets((prev) =>
+        prev.map((a) => (a.id === id ? { ...a, is_favorite: !current } : a))
+      );
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("¿Eliminar este asset?")) return;
+    const { error } = await supabase.from("saved_assets").delete().eq("id", id);
+    if (error) toast.error(error.message);
+    else {
+      toast.success("Asset eliminado");
+      setAssets((prev) => prev.filter((a) => a.id !== id));
+    }
+  };
+
+  const filtered = assets.filter((a) => {
+    const matchSearch =
+      !search ||
+      a.prompt?.toLowerCase().includes(search.toLowerCase()) ||
+      a.tags?.some((t) => t.toLowerCase().includes(search.toLowerCase()));
+    const matchFav = !filterFav || a.is_favorite;
+    return matchSearch && matchFav;
+  });
+
+  if (authLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin-slow text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-accent/5 blur-[150px]" />
+      </div>
+
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card glow-primary">
+              <Sparkles className="h-4 w-4 text-primary" />
+            </div>
+            <span className="text-lg font-bold">
+              <span className="gradient-text">Canvas</span>
+              <span className="text-foreground">AI</span>
+            </span>
+          </div>
+
+          <nav className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={() => navigate("/spaces")} className="text-muted-foreground">
+              <LayoutGrid className="mr-1.5 h-4 w-4" />
+              Spaces
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/canvas")} className="text-muted-foreground">
+              <Sparkles className="mr-1.5 h-4 w-4" />
+              Canvas
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/assets")} className="text-foreground">
+              <Image className="mr-1.5 h-4 w-4" />
+              Assets
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => navigate("/pricing")} className="text-muted-foreground">
+              <Coins className="mr-1.5 h-4 w-4" />
+              Planes
+            </Button>
+            {isAdmin && (
+              <Button variant="ghost" size="sm" onClick={() => navigate("/admin")} className="text-muted-foreground">
+                <Shield className="mr-1.5 h-4 w-4" />
+                Admin
+              </Button>
+            )}
+          </nav>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs">
+              <Coins className="h-3.5 w-3.5 text-gold" />
+              <span className="text-gold font-semibold">{profile?.credits_balance ?? 0}</span>
+            </div>
+            <Button variant="ghost" size="sm" onClick={signOut} className="text-muted-foreground">
+              Salir
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      <main className="relative z-10 mx-auto max-w-6xl px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground">Mi Biblioteca</h1>
+          <p className="mt-1 text-muted-foreground">Tus generaciones guardadas, prompts favoritos y variaciones</p>
+        </div>
+
+        {/* Filters */}
+        <div className="mb-6 flex items-center gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Buscar por prompt o tags..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="bg-card border-border pl-10"
+            />
+          </div>
+          <Button
+            variant={filterFav ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFilterFav(!filterFav)}
+            className={filterFav ? "bg-gold text-primary-foreground hover:bg-gold/90" : "border-border"}
+          >
+            <Star className={`mr-1.5 h-4 w-4 ${filterFav ? "" : "text-gold"}`} />
+            Favoritos
+          </Button>
+        </div>
+
+        {/* Grid */}
+        {loading ? (
+          <div className="flex h-64 items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin-slow text-primary" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex h-64 flex-col items-center justify-center text-muted-foreground">
+            <ImageOff className="mb-4 h-12 w-12 opacity-40" />
+            <p className="text-lg font-medium">
+              {search || filterFav ? "Sin resultados" : "Tu biblioteca está vacía"}
+            </p>
+            <p className="text-sm">
+              {search || filterFav
+                ? "Prueba con otros filtros"
+                : "Las imágenes generadas en el canvas aparecerán aquí"}
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((asset) => (
+              <div
+                key={asset.id}
+                className="group relative overflow-hidden rounded-2xl border border-border bg-card node-shadow"
+              >
+                <div className="aspect-square">
+                  <img
+                    src={asset.asset_url}
+                    alt={asset.prompt || "Generated asset"}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
+
+                {/* Overlay on hover */}
+                <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3">
+                  <div className="flex justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                      onClick={() => toggleFav(asset.id, asset.is_favorite)}
+                    >
+                      <Heart
+                        className={`h-4 w-4 ${
+                          asset.is_favorite ? "fill-gold text-gold" : "text-foreground"
+                        }`}
+                      />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                      onClick={() => window.open(asset.asset_url, "_blank")}
+                    >
+                      <Download className="h-4 w-4 text-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-card/80 backdrop-blur-sm"
+                      onClick={() => handleDelete(asset.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+
+                  <div>
+                    {asset.prompt && (
+                      <p className="text-xs text-foreground line-clamp-2">{asset.prompt}</p>
+                    )}
+                    <div className="mt-1.5 flex items-center gap-1.5">
+                      <Badge variant="outline" className="border-border text-xs">
+                        {asset.type}
+                      </Badge>
+                      {asset.tags?.map((tag) => (
+                        <Badge key={tag} variant="outline" className="border-primary/30 text-primary text-xs">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fav indicator */}
+                {asset.is_favorite && (
+                  <div className="absolute top-2 left-2">
+                    <Star className="h-4 w-4 fill-gold text-gold" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default Assets;

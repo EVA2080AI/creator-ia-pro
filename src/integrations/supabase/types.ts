@@ -95,6 +95,80 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_assets: {
+        Row: {
+          asset_url: string
+          created_at: string
+          id: string
+          is_favorite: boolean
+          node_id: string | null
+          prompt: string | null
+          tags: string[] | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          asset_url: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          node_id?: string | null
+          prompt?: string | null
+          tags?: string[] | null
+          type?: string
+          user_id: string
+        }
+        Update: {
+          asset_url?: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          node_id?: string | null
+          prompt?: string | null
+          tags?: string[] | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_assets_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "canvas_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spaces: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       transactions: {
         Row: {
           amount: number
@@ -133,15 +207,58 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      admin_list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          credits_balance: number
+          display_name: string
+          email: string
+          last_sign_in: string
+          user_id: string
+        }[]
+      }
+      admin_set_user_status: {
+        Args: { _active: boolean; _target_user_id: string }
+        Returns: undefined
+      }
+      admin_update_credits: {
+        Args: { _new_balance: number; _target_user_id: string }
+        Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -268,6 +385,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const

@@ -7,6 +7,10 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Canvas from "./pages/Canvas";
 import Pricing from "./pages/Pricing";
+import Spaces from "./pages/Spaces";
+import Assets from "./pages/Assets";
+import Admin from "./pages/Admin";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +26,10 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/canvas" element={<Canvas />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/spaces" element={<Spaces />} />
+          <Route path="/assets" element={<Assets />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
