@@ -26,7 +26,10 @@ Deno.serve(async (req) => {
     if (authError || !user) throw new Error('Unauthorized');
 
     const { tool, image, prompt } = await req.json();
-    if (!tool || !image) throw new Error('Missing tool or image');
+    if (!tool) throw new Error('Missing tool');
+    
+    const promptOnlyTools = ['logo', 'social', 'generate'];
+    if (!promptOnlyTools.includes(tool) && !image) throw new Error('Missing image');
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
 
