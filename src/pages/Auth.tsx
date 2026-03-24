@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Sparkles, ArrowRight, Mail, Lock, Eye, EyeOff, User, Wand2, ZoomIn, Eraser, Check } from "lucide-react";
-import { lovable } from "@/integrations/lovable/index";
+import { auth } from "@/integrations/lovable/index";
 
 const features = [
   { icon: Wand2, text: "12+ herramientas IA" },
@@ -204,8 +204,8 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await lovable.auth.signInWithOAuth("google", {
-                        redirect_uri: window.location.origin,
+                      const { error } = await auth.signInWithOAuth("google", {
+                        redirect_uri: `${window.location.origin}/dashboard`,
                       });
                       if (error) toast.error(error.message);
                       setLoading(false);
@@ -227,8 +227,8 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await lovable.auth.signInWithOAuth("apple", {
-                        redirect_uri: window.location.origin,
+                      const { error } = await auth.signInWithOAuth("apple", {
+                        redirect_uri: `${window.location.origin}/dashboard`,
                       });
                       if (error) toast.error(error.message);
                       setLoading(false);

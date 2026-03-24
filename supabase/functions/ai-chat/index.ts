@@ -5,7 +5,9 @@ const corsHeaders = {
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const GATEWAY_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions';
+// OpenRouter — API unificada compatible con OpenAI que soporta DeepSeek, Gemini, Claude, etc.
+// Docs: https://openrouter.ai/docs
+const GATEWAY_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const GUEST_TRIAL_LIMIT = 3;
 
 // Mapeo exhaustivo de modelos que envía el Frontend a los reales del Gateway
@@ -35,8 +37,8 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnon = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!lovableApiKey) throw new Error('LOVABLE_API_KEY is not configured');
+    const openrouterApiKey = Deno.env.get('OPENROUTER_API_KEY');
+    if (!openrouterApiKey) throw new Error('OPENROUTER_API_KEY is not configured');
 
     const userClient = createClient(supabaseUrl, supabaseAnon, {
       global: { headers: { Authorization: authHeader } },
@@ -53,11 +55,11 @@ Deno.serve(async (req) => {
     const bodyArgs = await req.json();
     const type = bodyArgs.type;
     const prompt = bodyArgs.prompt;
-    const requestedModel = bodyArgs.model || "gemini-3-flash";
+    const requestedModel = bodyArgs.model || "deepseek-chat";
     const requiredCredits = typeof bodyArgs.cost === 'number' ? bodyArgs.cost : 1;
 
     // Determinamos qué modelo apuntar
-    const finalModelString = MODEL_MAPPING[requestedModel] || "google/gemini-3-flash-preview";
+    const finalModelString = MODEL_MAPPING[requestedModel] || "deepseek/deepseek-chat";
 
     if (!type || !prompt) throw new Error('Missing type or prompt');
 
@@ -125,8 +127,10 @@ Responde en español de forma clara y estructurada.`,
     const aiResponse = await fetch(GATEWAY_URL, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
+        Authorization: `Bearer ${openrouterApiKey}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://creator-ia-pro.vercel.app',
+        'X-Title': 'Creator IA Pro',
       },
       body: JSON.stringify({
         model: finalModelString,
