@@ -187,6 +187,7 @@ const Auth = () => {
               </Button>
             </form>
 
+            {/* Ocultado temporalmente por el usuario (SSO no configurado)
             {mode !== "forgot" && (
               <div className="mt-4 space-y-3">
                 <div className="relative flex items-center justify-center">
@@ -242,6 +243,7 @@ const Auth = () => {
                 </div>
               </div>
             )}
+            */ }
 
             <div className="mt-6 text-center">
               {mode === "forgot" ? (
