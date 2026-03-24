@@ -19,6 +19,7 @@ import ToolLanding from "./pages/ToolLanding";
 import Downloads from "./pages/Downloads";
 import SystemStatus from "./pages/SystemStatus";
 import ProductBacklog from "./pages/ProductBacklog";
+import ShareScreen from "./pages/ShareScreen";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
             <Route path="/system-status" element={<SystemStatus />} />
             <Route path="/product-backlog" element={<ProductBacklog />} />
+            <Route path="/sharescreen" element={<ShareScreen />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

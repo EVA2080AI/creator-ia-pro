@@ -14,6 +14,7 @@ import {
   Upload, Loader2, Download, Coins, Type, MessageSquare,
   PenTool, Hash, Image, ArrowLeft, FileText, Megaphone, Copy,
 } from "lucide-react";
+import { ModelSelector, AVAILABLE_MODELS } from "@/components/ModelSelector";
 
 type ToolId = "enhance" | "upscale" | "eraser" | "background" | "restore" | "generate" | "copywriter" | "logo" | "social" | "blog" | "ads";
 
@@ -62,6 +63,7 @@ const Tools = () => {
   const [processing, setProcessing] = useState(false);
   const [textPrompt, setTextPrompt] = useState("");
   const [category, setCategory] = useState<"image" | "ai-app">("image");
+  const [selectedModelId, setSelectedModelId] = useState("deepseek-chat");
   const fileRef = useRef<HTMLInputElement>(null);
 
   // Handle /apps/:appId route
@@ -92,9 +94,12 @@ const Tools = () => {
     if (currentTool.needsUpload && !imagePreview) { toast.error("Sube una imagen primero"); return; }
     if (!currentTool.needsUpload && !textPrompt.trim()) { toast.error("Escribe un prompt"); return; }
 
+    const modelObj = AVAILABLE_MODELS.find(m => m.id === selectedModelId) || AVAILABLE_MODELS[0];
+    const requiredCredits = category === "ai-app" ? modelObj.tokenCost : currentTool.credits;
+
     const credits = profile?.credits_balance ?? 0;
-    if (credits < currentTool.credits) {
-      toast.error(`Necesitas ${currentTool.credits} créditos. Tienes ${credits}.`);
+    if (credits < requiredCredits) {
+      toast.error(`Necesitas ${requiredCredits} créditos. Tienes ${credits}.`);
       return;
     }
 
@@ -103,13 +108,19 @@ const Tools = () => {
     setResultText(null);
 
     try {
-      const textTools: ToolId[] = ["copywriter", "blog", "ads"];
-      if (textTools.includes(currentTool.id)) {
+      const textTools: ToolId[] = ["copywriter", "blog", "ads", "logo", "social"];
+      if (textTools.includes(currentTool.id) || category === "ai-app") {
         const chatType = currentTool.id === "blog" ? "blog" : currentTool.id === "ads" ? "copywriter" : "copywriter";
         const { data, error } = await supabase.functions.invoke("ai-chat", {
-          body: { type: chatType, prompt: textPrompt },
+          body: { type: chatType, prompt: textPrompt, model: selectedModelId, cost: requiredCredits },
         });
         if (error) throw error;
+        // Aquí simulamos que se descuentan los créditos si no lo hace la cloud function:
+        await supabase.rpc("admin_update_credits", {
+          _new_balance: credits - requiredCredits,
+          _target_user_id: user.id
+        });
+
         if (data?.text) {
           setResultText(data.text);
           toast.success("¡Texto generado!");
@@ -199,11 +210,22 @@ const Tools = () => {
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-foreground">{currentTool.name}</h2>
-              <Badge variant="outline" className="border-border text-muted-foreground">{currentTool.credits} créditos</Badge>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h2 className="font-semibold text-foreground">{currentTool.name}</h2>
+                <Badge variant="outline" className="border-border text-muted-foreground">{category === "ai-app" ? "Precio Dinámico" : `${currentTool.credits} créditos`}</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground">{currentTool.desc}</p>
+
+              {(category === "ai-app" || activeTool === "generate") && (
+                <div className="space-y-2 mt-4 bg-primary/5 p-4 rounded-xl border border-primary/10">
+                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+                    {activeTool === "generate" ? "🍌 Modelo de Imagen" : "🤖 Cerebro de la IA"}
+                  </span>
+                  <ModelSelector selectedModelId={selectedModelId} onModelChange={setSelectedModelId} />
+                </div>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground">{currentTool.desc}</p>
 
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
 
@@ -251,10 +273,10 @@ const Tools = () => {
             <Button
               onClick={handleProcess}
               disabled={processing || (currentTool.needsUpload ? !imagePreview : !textPrompt.trim())}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-12 rounded-xl text-md"
             >
-              {processing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-              {processing ? "Procesando..." : `Aplicar ${currentTool.name}`}
+              {processing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+              {processing ? "Procesando con IA..." : `Generar (${category === "ai-app" ? (AVAILABLE_MODELS.find(m => m.id === selectedModelId)?.tokenCost || 1) : currentTool.credits} Créditos)`}
             </Button>
           </div>
 

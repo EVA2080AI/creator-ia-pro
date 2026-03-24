@@ -310,14 +310,15 @@ const ToolLanding = () => {
 
   const handleCTA = () => {
     if (isLoggedIn) {
-      navigate(tool.id === "formaketing" ? "/canvas" : "/tools");
+      if (tool.id === "formaketing") navigate("/canvas");
+      else navigate(`/apps/${tool.id}`);
     } else {
       navigate("/auth");
     }
   };
 
   const handleTryDemo = async () => {
-    const realTextTools = ["copywriter", "blog", "ads"];
+    const realTextTools = ["copywriter", "blog", "ads", "logo", "social"];
     const isTextTool = realTextTools.includes(tool.id);
 
     if (tool.tryItType === "image-upload" && !tryItImage) {
@@ -355,7 +356,7 @@ const ToolLanding = () => {
         return;
       }
 
-      const supportedImageTools = ["enhance", "upscale", "eraser", "background", "restore", "generate", "logo", "social"];
+      const supportedImageTools = ["enhance", "upscale", "eraser", "background", "restore", "generate"];
       if (!supportedImageTools.includes(tool.id)) {
         throw new Error("Esta herramienta está disponible en la app completa.");
       }

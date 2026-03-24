@@ -12,7 +12,7 @@ import {
   Sparkles, Wand2, ZoomIn, Eraser, ImagePlus, RotateCcw,
   Palette, Image, Video, LayoutGrid, ArrowRight, Coins,
   TrendingUp, Clock, Star, MessageSquare, FileText,
-  PenTool, Megaphone, Type, Hash, CreditCard, Settings,
+  PenTool, Megaphone, Type, Hash, CreditCard, Settings, Monitor
 } from "lucide-react";
 
 interface QuickStat {
@@ -86,6 +86,7 @@ const Dashboard = () => {
   ];
 
   const aiApps = [
+    { icon: Monitor, label: "ShareScreen Pro", desc: "Extiende tu espacio P2P a dispositivos móviles. [1 Crédito]", path: "/sharescreen", accent: "bg-emerald-500/10 text-emerald-500" },
     { icon: MessageSquare, label: "AI Copywriter", desc: "Genera textos de marketing, ads y redes sociales con IA.", path: "/apps/copywriter", accent: "bg-primary/10 text-primary" },
     { icon: Megaphone, label: "Formaketing Studio", desc: "Crea flows de marketing visual con lienzo infinito.", path: "/canvas", accent: "bg-accent/10 text-accent" },
     { icon: PenTool, label: "Logo Maker", desc: "Diseña logos profesionales con IA generativa.", path: "/apps/logo", accent: "bg-gold/10 text-gold" },

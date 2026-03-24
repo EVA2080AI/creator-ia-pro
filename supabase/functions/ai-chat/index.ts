@@ -5,9 +5,24 @@ const corsHeaders = {
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const CHAT_MODEL = 'google/gemini-3-flash-preview';
 const GATEWAY_URL = 'https://ai.gateway.lovable.dev/v1/chat/completions';
 const GUEST_TRIAL_LIMIT = 3;
+
+// Mapeo exhaustivo de modelos que envía el Frontend a los reales del Gateway
+const MODEL_MAPPING: Record<string, string> = {
+  // ─── TEXT / CHAT ────────────────────────────────────────────────
+  "gemini-3.1-pro-high":  "google/gemini-pro-1.5",
+  "gemini-3.1-pro-low":   "google/gemini-pro-1.5",
+  "gemini-3-flash":       "google/gemini-flash-1.5",
+  "deepseek-chat":        "deepseek/deepseek-chat",
+  "claude-3.5-sonnet":    "anthropic/claude-3-5-sonnet-20241022",
+  "claude-3-opus":        "anthropic/claude-3-opus-20240229",
+  "gpt-oss-120b":         "openai/gpt-4o-mini",
+  // ─── IMAGE / NANO BANANA ────────────────────────────────────────
+  "nano-banana-25":       "google/gemini-2.0-flash-exp",
+  "nano-banana-2":        "google/gemini-flash-1.5",
+  "nano-banana-pro":      "google/gemini-pro-1.5",
+};
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -34,7 +49,16 @@ Deno.serve(async (req) => {
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
     const isGuest = !user;
 
-    const { type, prompt } = await req.json();
+    // Recibimos dynamic model y cost del frontend (Creator IA Pro)
+    const bodyArgs = await req.json();
+    const type = bodyArgs.type;
+    const prompt = bodyArgs.prompt;
+    const requestedModel = bodyArgs.model || "gemini-3-flash";
+    const requiredCredits = typeof bodyArgs.cost === 'number' ? bodyArgs.cost : 1;
+
+    // Determinamos qué modelo apuntar
+    const finalModelString = MODEL_MAPPING[requestedModel] || "google/gemini-3-flash-preview";
+
     if (!type || !prompt) throw new Error('Missing type or prompt');
 
     let guestFingerprint: string | null = null;
@@ -70,15 +94,15 @@ Deno.serve(async (req) => {
         .eq('user_id', user.id)
         .single();
 
-      if (!profile || profile.credits_balance < 1) {
-        throw new Error('Créditos insuficientes');
+      if (!profile || profile.credits_balance < requiredCredits) {
+        throw new Error(`Créditos insuficientes. Necesitas ${requiredCredits}.`);
       }
 
       originalCredits = profile.credits_balance;
 
       await adminClient
         .from('profiles')
-        .update({ credits_balance: profile.credits_balance - 1 })
+        .update({ credits_balance: profile.credits_balance - requiredCredits })
         .eq('user_id', user.id);
     }
 
@@ -105,7 +129,7 @@ Responde en español de forma clara y estructurada.`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: CHAT_MODEL,
+        model: finalModelString,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: prompt },
@@ -164,13 +188,13 @@ Responde en español de forma clara y estructurada.`,
     if (user) {
       await adminClient.from('transactions').insert({
         user_id: user.id,
-        amount: -1,
+        amount: -requiredCredits,
         type: 'ai_chat',
-        description: `AI ${type}: ${prompt.substring(0, 50)}...`,
+        description: `Modelo: ${requestedModel} - ${type}: ${prompt.substring(0, 30)}...`,
       });
     }
 
-    return new Response(JSON.stringify({ success: true, text }), {
+    return new Response(JSON.stringify({ success: true, text, cost: requiredCredits, model_used: finalModelString }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
