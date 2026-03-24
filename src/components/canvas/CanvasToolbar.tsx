@@ -12,6 +12,8 @@ import {
   Video,
   Coins,
   LogOut,
+  Layout,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +26,7 @@ import { toast } from "sonner";
 
 interface CanvasToolbarProps {
   creditsBalance: number;
-  onGenerate: (type: "image" | "video", prompt: string) => void;
+  onGenerate: (type: "image" | "video" | "ui", prompt: string) => void;
   onSignOut: () => void;
   generating: boolean;
 }
@@ -64,14 +66,15 @@ export function CanvasToolbar({
   generating,
 }: CanvasToolbarProps) {
   const [prompt, setPrompt] = useState("");
-  const [genType, setGenType] = useState<"image" | "video">("image");
+  const [genType, setGenType] = useState<"image" | "video" | "ui">("image");
 
   const handleGenerate = () => {
     if (!prompt.trim()) {
       toast.error("Escribe un prompt primero");
       return;
     }
-    const cost = genType === "image" ? 1 : 20;
+    const costs = { image: 1, video: 20, ui: 5 };
+    const cost = costs[genType];
     if (creditsBalance < cost) {
       toast.error(`Necesitas ${cost} créditos. Tienes ${creditsBalance}.`);
       return;
@@ -105,28 +108,39 @@ export function CanvasToolbar({
               </div>
 
               {/* Type toggle */}
-              <div className="flex rounded-lg border border-border overflow-hidden">
+              <div className="flex rounded-xl border border-white/5 bg-background/50 overflow-hidden p-1 gap-1">
                 <button
                   onClick={() => setGenType("image")}
-                  className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors ${
+                  className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
                     genType === "image"
-                      ? "bg-primary/15 text-primary"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                      : "text-muted-foreground hover:bg-white/5"
                   }`}
                 >
-                  <Image className="h-3.5 w-3.5" />
-                  Imagen (1 cr)
+                  <Image className="h-3 w-3" />
+                  Imagen (1)
+                </button>
+                <button
+                  onClick={() => setGenType("ui")}
+                  className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
+                    genType === "ui"
+                      ? "bg-gold text-white shadow-lg shadow-gold/20"
+                      : "text-muted-foreground hover:bg-white/5"
+                  }`}
+                >
+                  <Layout className="h-3 w-3" />
+                  Diseño UI (5)
                 </button>
                 <button
                   onClick={() => setGenType("video")}
-                  className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors border-l border-border ${
+                  className={`flex flex-1 items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${
                     genType === "video"
-                      ? "bg-accent/15 text-accent"
-                      : "text-muted-foreground hover:text-foreground"
+                      ? "bg-accent text-accent-foreground shadow-lg shadow-accent/20"
+                      : "text-muted-foreground hover:bg-white/5"
                   }`}
                 >
-                  <Video className="h-3.5 w-3.5" />
-                  Video (20 cr)
+                  <Video className="h-3 w-3" />
+                  Video (20)
                 </button>
               </div>
 

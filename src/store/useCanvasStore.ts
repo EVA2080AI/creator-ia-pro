@@ -11,8 +11,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 export interface CanvasNodeData {
   dbId: string;
-  type: "image" | "video";
+  type: "image" | "video" | "ui";
   prompt: string;
+  name?: string;
   assetUrl: string | null;
   status: "loading" | "ready" | "error";
   errorMessage: string | null;
@@ -25,6 +26,8 @@ interface CanvasState {
   edges: Edge[];
   selectedNodeId: string | null;
   generating: boolean;
+  currentSpaceId: string | null;
+  currentSpaceName: string | null;
 
   // Actions
   setNodes: (nodes: Node<CanvasNodeData>[]) => void;
@@ -36,6 +39,7 @@ interface CanvasState {
   updateNodeData: (id: string, data: Partial<CanvasNodeData>) => void;
   addNodeToStore: (node: Node<CanvasNodeData>) => void;
   removeNode: (id: string) => void;
+  setSpace: (id: string | null, name?: string | null) => void;
 
   // Debounced position persistence
   _positionTimers: Record<string, ReturnType<typeof setTimeout>>;
@@ -51,6 +55,8 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   edges: [],
   selectedNodeId: null,
   generating: false,
+  currentSpaceId: null,
+  currentSpaceName: null,
   _positionTimers: {},
   _payloadTimers: {},
 
@@ -58,7 +64,15 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
   setEdges: (edges) => set({ edges }),
 
   onNodesChange: (changes) => {
-    set({ nodes: applyNodeChanges(changes, get().nodes) as Node<CanvasNodeData>[] });
+    const nextNodes = applyNodeChanges(changes, get().nodes) as Node<CanvasNodeData>[];
+    set({ nodes: nextNodes });
+
+    // Persistir cambios de posición de forma automática
+    changes.forEach((change) => {
+      if (change.type === "position" && change.position) {
+        get().persistPosition(change.id, change.position.x, change.position.y);
+      }
+    });
   },
 
   onEdgesChange: (changes) => {
@@ -78,10 +92,12 @@ export const useCanvasStore = create<CanvasState>((set, get) => ({
 
   addNodeToStore: (node) => set({ nodes: [...get().nodes, node] }),
 
-  removeNode: (id) => {
+  removeNode: (id: string) => {
     set({ nodes: get().nodes.filter((n) => n.id !== id) });
     if (get().selectedNodeId === id) set({ selectedNodeId: null });
   },
+
+  setSpace: (id, name = null) => set({ currentSpaceId: id, currentSpaceName: name }),
 
   persistPosition: (nodeId, x, y) => {
     const timers = get()._positionTimers;

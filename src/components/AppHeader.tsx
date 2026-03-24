@@ -5,7 +5,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { Button } from "@/components/ui/button";
 import {
   Sparkles, LayoutGrid, Wand2, Image, Coins, Shield,
-  CreditCard, LogOut, Palette, Home, Menu, X, Activity,
+  CreditCard, LogOut, Palette, Home, Menu, X, Activity, MonitorDown
 } from "lucide-react";
 
 interface AppHeaderProps {
@@ -27,6 +27,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
     { path: "/spaces", label: "Espacios", icon: LayoutGrid },
     { path: "/assets", label: "Assets", icon: Image },
     { path: "/pricing", label: "Planes", icon: CreditCard },
+    { path: "/descargar", label: "Descargas", icon: MonitorDown },
   ];
 
   const adminItems = isAdmin
@@ -45,19 +46,19 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-border bg-card/80 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-white/5 glass">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6">
           {/* Logo */}
           <button
             onClick={() => navigate("/dashboard")}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-card glow-primary">
-              <Sparkles className="h-4 w-4 text-primary" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-card/40 glow-primary shadow-lg shadow-primary/20">
+              <Sparkles className="h-4.5 w-4.5 text-primary" />
             </div>
-            <span className="text-sm font-bold hidden sm:inline">
-              <span className="gradient-text">Creator IA</span>
-              <span className="text-foreground"> Pro</span>
+            <span className="text-base font-bold hidden sm:inline font-display">
+              <span className="gradient-text tracking-tight">Creator IA</span>
+              <span className="text-foreground tracking-tight"> Pro</span>
             </span>
           </button>
 

@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { aiService } from "@/services/ai-service";
 import {
   Wand2, ZoomIn, Eraser, ImagePlus, RotateCcw, Sparkles,
   Upload, Loader2, Download, Coins, Type, MessageSquare,
@@ -50,6 +51,11 @@ const appIdToToolId: Record<string, ToolId> = {
   blog: "blog",
   ads: "ads",
 };
+
+const categories = [
+  { id: "image", label: "Herramientas de Imagen", icon: Image },
+  { id: "ai-app", label: "Apps de IA", icon: Sparkles },
+];
 
 const Tools = () => {
   const { user, signOut } = useAuth("/auth");
@@ -108,41 +114,28 @@ const Tools = () => {
     setResultText(null);
 
     try {
-      const textTools: ToolId[] = ["copywriter", "blog", "ads", "logo", "social"];
-      if (textTools.includes(currentTool.id) || category === "ai-app") {
-        const chatType = currentTool.id === "blog" ? "blog" : currentTool.id === "ads" ? "copywriter" : "copywriter";
-        const { data, error } = await supabase.functions.invoke("ai-chat", {
-          body: { type: chatType, prompt: textPrompt, model: selectedModelId, cost: requiredCredits },
-        });
-        if (error) throw error;
-        // Aquí simulamos que se descuentan los créditos si no lo hace la cloud function:
-        await supabase.rpc("admin_update_credits", {
-          _new_balance: credits - requiredCredits,
-          _target_user_id: user.id
-        });
+      const data = await aiService.processAction({ 
+        action: category === "ai-app" ? "chat" : "image",
+        tool: activeTool,
+        prompt: textPrompt,
+        model: selectedModelId,
+        image: imagePreview || undefined,
+      });
 
-        if (data?.text) {
-          setResultText(data.text);
-          toast.success("¡Texto generado!");
-          await refreshProfile();
-        } else if (data?.error) throw new Error(data.error);
+      if (data?.text) {
+        setResultText(data.text);
+        toast.success("¡Texto generado!");
+      } else if (data?.url) {
+        setResultImage(data.url);
+        toast.success("¡Procesado con éxito!");
       } else {
-        const { data, error } = await supabase.functions.invoke("ai-tool", {
-          body: {
-            tool: activeTool,
-            image: imagePreview || undefined,
-            prompt: textPrompt || undefined,
-          },
-        });
-        if (error) throw error;
-        if (data?.result_url) {
-          setResultImage(data.result_url);
-          toast.success("¡Procesado con éxito!");
-          await refreshProfile();
-        } else if (data?.error) throw new Error(data.error);
+        console.error("Payload inesperado:", data);
+        throw new Error("Respuesta inválida del servidor");
       }
+      await refreshProfile();
     } catch (err: any) {
-      toast.error(err.message || "Error al procesar");
+      console.error("Tool Error:", err);
+      toast.error(`${err.message} (Tools V3.4)` || "Error al procesar (V3.4)", { duration: 5000 });
     } finally {
       setProcessing(false);
     }
@@ -165,48 +158,57 @@ const Tools = () => {
           </div>
         </div>
 
-        <div className="mb-6 flex gap-1 rounded-xl border border-border bg-card p-1 w-fit">
-          <button
-            onClick={() => { setCategory("image"); setActiveTool("enhance"); setResultImage(null); setResultText(null); }}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              category === "image" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Image className="h-4 w-4" />
-            Herramientas de Imagen
-          </button>
-          <button
-            onClick={() => { setCategory("ai-app"); setActiveTool("copywriter"); setResultImage(null); setResultText(null); }}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-              category === "ai-app" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Sparkles className="h-4 w-4" />
-            Apps de IA
-          </button>
-        </div>
-
-        <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {filteredTools.map((tool) => (
-            <button
-              key={tool.id}
-              onClick={() => { setActiveTool(tool.id); setResultImage(null); setResultText(null); }}
-              className={`flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all ${
-                activeTool === tool.id
-                  ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20"
-                  : "border-border bg-card hover:border-primary/20"
+        <div className="mb-8 flex gap-2 overflow-x-auto pb-1">
+          {categories.map((cat) => (
+            <Button
+              key={cat.id}
+              variant={category === cat.id ? "default" : "outline"}
+              onClick={() => { setCategory(cat.id as any); setResultImage(null); setResultText(null); }}
+              className={`rounded-2xl px-6 h-11 transition-all duration-300 gap-2 shrink-0 ${
+                category === cat.id 
+                ? "bg-primary shadow-lg shadow-primary/20 glow-primary border-none" 
+                : "border-white/5 glass hover:bg-white/10"
               }`}
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                <tool.icon className="h-5 w-5 text-primary" />
-              </div>
-              <span className="text-xs font-medium text-foreground text-center">{tool.name}</span>
-              <Badge variant="outline" className="text-[10px] border-gold/30 text-gold">
-                <Coins className="mr-1 h-2.5 w-2.5" />{tool.credits}
-              </Badge>
-            </button>
+              <cat.icon className={`h-4 w-4 ${category === cat.id ? "text-primary-foreground" : "text-primary"}`} />
+              <span className="font-medium">{cat.label}</span>
+            </Button>
           ))}
         </div>
+
+        <div className="mb-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredTools.map((tool, idx) => (
+                <button
+                  key={tool.id}
+                  onClick={() => { setActiveTool(tool.id); setResultImage(null); setResultText(null); }}
+                  className={`group relative flex items-start gap-4 rounded-[2rem] border p-5 text-left transition-all duration-300 animate-fade-in ${
+                    activeTool === tool.id
+                      ? "border-primary bg-primary/5 shadow-xl shadow-primary/10 ring-1 ring-primary/20"
+                      : "border-white/5 glass hover:border-white/10 hover:-translate-y-1 hover:shadow-2xl"
+                  }`}
+                  style={{ animationDelay: `${idx * 40}ms` }}
+                >
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
+                    activeTool === tool.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary transition-colors"
+                  }`}>
+                    {<tool.icon className="h-6 w-6" />}
+                  </div>
+                  <div className="pr-4">
+                    <h3 className="font-bold text-foreground font-display tracking-tight">{tool.name}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed opacity-80">{tool.desc}</p>
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="flex items-center gap-1 rounded-full bg-gold/10 px-2 py-0.5 text-[10px] font-bold text-gold uppercase tracking-wider">
+                         <Coins className="h-2.5 w-2.5" />
+                         {tool.credits} Créditos
+                      </span>
+                    </div>
+                  </div>
+                  {activeTool === tool.id && (
+                     <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  )}
+                </button>
+              ))}
+            </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="space-y-4">
@@ -308,12 +310,16 @@ const Tools = () => {
                 </Button>
               </div>
             ) : (
-              <div className="flex h-56 w-full items-center justify-center rounded-2xl border border-dashed border-border bg-card/30">
+              <div className="flex h-64 w-full flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-white/10 bg-white/5 backdrop-blur-sm">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
+                  <Sparkles className="relative h-10 w-10 text-primary/40 animate-pulse" />
+                </div>
                 <div className="text-center">
-                  <Sparkles className="mx-auto mb-2 h-6 w-6 text-muted-foreground/30" />
-                  <p className="text-sm text-muted-foreground">
-                    {processing ? "Procesando con IA..." : "El resultado aparecerá aquí"}
+                  <p className="text-sm font-medium text-foreground opacity-60">
+                    {processing ? "Procesando con IA..." : "Esperando prompt..."}
                   </p>
+                  <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-widest opacity-40">Listo para crear</p>
                 </div>
               </div>
             )}

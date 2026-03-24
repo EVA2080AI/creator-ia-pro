@@ -12,8 +12,14 @@ import {
   Sparkles, Wand2, ZoomIn, Eraser, ImagePlus, RotateCcw,
   Palette, Image, Video, LayoutGrid, ArrowRight, Coins,
   TrendingUp, Clock, Star, MessageSquare, FileText,
-  PenTool, Megaphone, Type, Hash, CreditCard, Settings, Monitor
+  PenTool, Megaphone, Type, Hash, CreditCard, Settings, Monitor, Zap, Plus, FolderPlus,
+  Box, Eye
 } from "lucide-react";
+import { 
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger 
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface QuickStat {
   label: string;
@@ -29,8 +35,13 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [recentAssets, setRecentAssets] = useState<any[]>([]);
-  const [spacesCount, setSpacesCount] = useState(0);
+  const [spaces, setSpaces] = useState<any[]>([]);
+  const [isCreatingSpace, setIsCreatingSpace] = useState(false);
+  const [newSpaceName, setNewSpaceName] = useState("");
+  const [newSpaceDesc, setNewSpaceDesc] = useState("");
+  const [loading, setLoading] = useState(true);
   const [assetsCount, setAssetsCount] = useState(0);
+  const [spacesCount, setSpacesCount] = useState(0);
 
   // Handle checkout success redirect
   useEffect(() => {
@@ -47,17 +58,29 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (!user) return;
-    const load = async () => {
-      const [assets, spaces, recent] = await Promise.all([
-        supabase.from("saved_assets").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("spaces").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("saved_assets").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
-      ]);
-      setAssetsCount(assets.count || 0);
-      setSpacesCount(spaces.count || 0);
-      setRecentAssets(recent.data || []);
+
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [assetsCountData, spacesCountData, recentAssetsData, spacesData] = await Promise.all([
+          supabase.from("saved_assets").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+          supabase.from("spaces").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+          supabase.from("canvas_nodes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+          supabase.from("spaces").select("*").eq("user_id", user.id).order("updated_at", { ascending: false }),
+        ]);
+
+        setAssetsCount(assetsCountData.count || 0);
+        setSpacesCount(spacesCountData.count || 0);
+        setSpaces(spacesData.data || []);
+        setRecentAssets(recentAssetsData.data || []);
+
+      } catch (e) {
+        console.error("Error fetching dashboard data", e);
+      } finally {
+        setLoading(false);
+      }
     };
-    load();
+    fetchData();
   }, [user]);
 
   const tierLabels: Record<string, string> = {
@@ -68,6 +91,31 @@ const Dashboard = () => {
   };
 
   const currentTier = profile?.subscription_tier || "free";
+
+  const handleCreateSpace = async () => {
+    if (!user || !newSpaceName.trim()) return;
+    
+    const { data, error } = await supabase
+      .from("spaces")
+      .insert({
+        user_id: user.id,
+        name: newSpaceName,
+        description: newSpaceDesc
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast.error("Error al crear espacio");
+      return;
+    }
+
+    toast.success("Proyecto creado con éxito");
+    setIsCreatingSpace(false);
+    setNewSpaceName("");
+    setNewSpaceDesc("");
+    navigate(`/canvas?spaceId=${data.id}`);
+  };
 
   const stats: QuickStat[] = [
     { label: "Créditos", value: profile?.credits_balance ?? 0, icon: Coins, accent: "bg-gold/10 text-gold" },
@@ -104,143 +152,235 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[150px]" />
-        <div className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-accent/5 blur-[150px]" />
-      </div>
-
+    <div className="min-h-screen bg-background text-foreground">
       <AppHeader userId={user?.id} onSignOut={signOut} />
-
-      <main className="relative z-10 mx-auto max-w-7xl px-6 py-8">
-        {/* Welcome */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              ¡Hola, <span className="gradient-text">{profile?.display_name || "Creator"}</span>!
+      
+      <main className="container mx-auto px-6 py-10 max-w-7xl animate-fade-in">
+        {/* Welcome Section */}
+        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-primary font-bold tracking-widest text-[10px] uppercase">
+               <Zap className="h-3 w-3" />
+               Industrial System Active
+            </div>
+            <h1 className="text-4xl font-black md:text-5xl lg:text-6xl tracking-tighter">
+              Hola, <span className="gradient-text">{profile?.display_name?.split(' ')[0] || 'Creador'}</span>
             </h1>
-            <p className="mt-1 text-muted-foreground">
-              Bienvenido a tu estudio de IA generativa. ¿Qué quieres crear hoy?
+            <p className="text-muted-foreground text-lg max-w-xl leading-relaxed">
+              Bienvenido a tu suite de diseño industrial. Tienes el control total de <span className="text-foreground font-semibold">{assetsCount} assets</span> y <span className="text-foreground font-semibold">{spacesCount} espacios</span>.
             </p>
           </div>
-          {subscription?.subscribed && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                try {
-                  await openCustomerPortal();
-                } catch {
-                  toast.error("Error al abrir el portal de suscripción");
-                }
-              }}
-              className="border-border gap-2 hidden sm:flex"
-            >
-              <Settings className="h-3.5 w-3.5" />
-              Gestionar Plan
+          
+          <div className="flex gap-3">
+            {subscription?.subscribed && (
+              <Button 
+                onClick={async () => {
+                  try {
+                    await openCustomerPortal();
+                  } catch {
+                    toast.error("Error al abrir el portal de suscripción");
+                  }
+                }}
+                variant="outline"
+                className="border-white/10 bg-white/5 gap-2 px-6 rounded-2xl h-12"
+              >
+                <Settings className="h-4 w-4" />
+                Gestionar Plan
+              </Button>
+            )}
+            <Button onClick={() => navigate("/pricing")} className="group bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-6 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:-translate-y-1">
+              <Zap className="mr-2 h-5 w-5 fill-current group-hover:animate-pulse" />
+              Mejorar Plan
             </Button>
-          )}
+          </div>
         </div>
 
-        {/* Stats */}
-        <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.label} className="rounded-2xl border border-border bg-card p-4 node-shadow">
-              <div className="flex items-center gap-3">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${s.accent}`}>
-                  <s.icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-foreground font-mono">{s.value}</p>
-                  <p className="text-xs text-muted-foreground">{s.label}</p>
-                </div>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+          {stats.map((stat) => (
+            <div key={stat.label} className="group relative rounded-3xl border border-white/5 bg-card/60 p-6 backdrop-blur-xl transition-all hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5">
+              <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ${stat.accent} shadow-inner transition-transform group-hover:scale-110`}>
+                <stat.icon className="h-6 w-6" />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest opacity-60">{stat.label}</p>
+              <h3 className="text-3xl font-black mt-1 tabular-nums">{stat.value}</h3>
+              <div className="absolute top-4 right-6 h-1 w-8 rounded-full bg-white/5 overflow-hidden">
+                 <div className="h-full bg-primary/40 w-1/2 group-hover:w-full transition-all duration-700" />
               </div>
             </div>
           ))}
         </div>
 
-        {/* Subscription info banner */}
-        {subscription?.subscribed && subscription.subscription_end && (
-          <div className="mb-6 rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <CreditCard className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm font-medium text-foreground">
-                  Plan {tierLabels[subscription.tier] || subscription.tier} activo
+        {/* Action Hub */}
+        <div className="grid lg:grid-cols-3 gap-8 mb-16">
+          {/* Main Studio Access */}
+          <div 
+            onClick={() => navigate("/canvas")}
+            className="lg:col-span-2 group relative overflow-hidden rounded-[32px] border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-10 cursor-pointer transition-all hover:border-primary/40 hover:shadow-3xl hover:shadow-primary/10"
+          >
+             <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-[100px] transition-all group-hover:bg-primary/30" />
+             <div className="relative z-10 space-y-4">
+                <Badge className="bg-primary/20 text-primary border-primary/30 py-1 px-4 rounded-full text-[10px] font-bold uppercase tracking-widest">Lienzo Infinito V3.1</Badge>
+                <h2 className="text-4xl font-black tracking-tighter">Formaketing Studio</h2>
+                <p className="text-muted-foreground text-lg max-w-md leading-relaxed">
+                   Diseña flujos de marketing visual, genera interfaces UX/UI y assets generativos en un mismo entorno industrial.
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  Próxima renovación: {new Date(subscription.subscription_end).toLocaleDateString("es-ES")}
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={async () => {
-                try {
-                  await openCustomerPortal();
-                } catch {
-                  toast.error("Error al abrir el portal");
-                }
-              }}
-              className="text-primary"
-            >
-              Gestionar →
-            </Button>
+                <Button className="mt-4 bg-foreground text-background hover:bg-foreground/90 rounded-2xl px-8 h-12 font-bold group">
+                   Entrar al Estudio
+                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                </Button>
+             </div>
+             <div className="absolute bottom-10 right-10 opacity-20 transition-all group-hover:opacity-40 group-hover:scale-110 duration-500">
+                <Palette className="h-40 w-40 text-primary" />
+             </div>
           </div>
-        )}
 
-        {/* Quick Actions */}
-        <div className="mb-10">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-foreground">Acciones Rápidas</h2>
-            <Button variant="ghost" size="sm" onClick={() => navigate("/tools")} className="text-primary gap-1">
-              Ver todas <ArrowRight className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            {quickActions.map((a) => (
-              <button
-                key={a.label}
-                onClick={() => navigate(a.path)}
-                className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-card p-4 node-shadow hover:border-primary/20 hover:-translate-y-0.5 transition-all"
-              >
-                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${a.accent} group-hover:scale-110 transition-transform`}>
-                  <a.icon className="h-6 w-6" />
-                </div>
-                <span className="text-xs font-medium text-foreground">{a.label}</span>
-                <span className="text-[10px] text-muted-foreground">{a.desc}</span>
-              </button>
-            ))}
+          {/* Quick Tools Panel */}
+          <div className="rounded-[32px] border border-white/5 bg-card/60 p-8 flex flex-col backdrop-blur-xl transition-all hover:border-white/10">
+             <div className="flex items-center justify-between mb-8">
+                <h3 className="font-bold text-xl tracking-tight">Acceso Rápido</h3>
+                <Settings className="h-5 w-5 text-muted-foreground opacity-40" />
+             </div>
+             <div className="grid grid-cols-2 gap-4 flex-1">
+                {quickActions.map((action) => (
+                   <button 
+                      key={action.label}
+                      onClick={() => navigate(action.path)}
+                      className="group flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border border-white/5 bg-white/5 transition-all hover:bg-primary/10 hover:border-primary/20"
+                   >
+                      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${action.accent} shadow-sm group-hover:scale-110 transition-transform`}>
+                         <action.icon className="h-5 w-5" />
+                      </div>
+                      <span className="text-[10px] font-bold text-center uppercase tracking-wider opacity-80">{action.label}</span>
+                   </button>
+                ))}
+             </div>
           </div>
         </div>
 
-        {/* AI Applications */}
-        <div className="mb-10">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-foreground">
-              Aplicaciones <span className="gradient-text">IA</span>
-            </h2>
-            <span className="text-xs text-muted-foreground">
-              <TrendingUp className="mr-1 inline h-3 w-3" />
-              Más apps próximamente
-            </span>
+        {/* Workspaces Section (NEW V3.2) */}
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+                <LayoutGrid className="h-4 w-4" />
+              </div>
+              <h2 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                Mis <span className="gradient-text">Proyectos</span>
+                <Badge variant="outline" className="text-[10px] py-0">{spaces.length}</Badge>
+              </h2>
+            </div>
+
+            <Dialog open={isCreatingSpace} onOpenChange={setIsCreatingSpace}>
+              <DialogTrigger asChild>
+                <Button size="sm" className="bg-primary/20 text-primary border-primary/30 hover:bg-primary/30 gap-2 font-bold rounded-xl pr-4">
+                  <FolderPlus className="h-4 w-4" />
+                  Nuevo Proyecto
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="glass border-white/10 shadow-2xl rounded-3xl sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-black tracking-tight">Crear Nuevo Espacio</DialogTitle>
+                  <DialogDescription className="text-muted-foreground">
+                    Organiza tus diseños en un entorno industrial dedicado.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name" className="text-xs font-bold uppercase tracking-wider opacity-60">Nombre del Proyecto</Label>
+                    <Input 
+                      id="name" 
+                      placeholder="Ej: Campaña Verano 2026" 
+                      className="bg-white/5 border-white/10 rounded-xl"
+                      value={newSpaceName}
+                      onChange={(e) => setNewSpaceName(e.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="desc" className="text-xs font-bold uppercase tracking-wider opacity-60">Descripción (Opcional)</Label>
+                    <Input 
+                      id="desc" 
+                      placeholder="Breve descripción técnica..." 
+                      className="bg-white/5 border-white/10 rounded-xl"
+                      value={newSpaceDesc}
+                      onChange={(e) => setNewSpaceDesc(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleCreateSpace} className="w-full bg-primary text-white hover:bg-primary/90 rounded-xl font-bold h-11">
+                    Inicializar Espacio Industrial
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {spaces.length === 0 ? (
+              <div className="col-span-full border-2 border-dashed border-white/5 rounded-[32px] p-12 flex flex-col items-center justify-center text-center bg-white/2 cursor-pointer hover:bg-white/5 transition-all" onClick={() => setIsCreatingSpace(true)}>
+                <div className="h-16 w-16 rounded-3xl bg-white/5 flex items-center justify-center mb-4 text-muted-foreground/40">
+                  <Plus className="h-8 w-8" />
+                </div>
+                <h3 className="font-bold text-muted-foreground">No tienes proyectos activos</h3>
+                <p className="text-xs text-muted-foreground/60 max-w-xs mt-1">Crea tu primer espacio para empezar a diseñar con IA Pro.</p>
+              </div>
+            ) : (
+              spaces.map((space) => (
+                <div 
+                  key={space.id}
+                  onClick={() => navigate(`/canvas?spaceId=${space.id}`)}
+                  className="group relative flex flex-col rounded-[28px] border border-white/5 bg-card/60 p-6 transition-all hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 cursor-pointer backdrop-blur-md"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                      <Box className="h-5 w-5" />
+                    </div>
+                    <div className="flex h-1.5 w-6 rounded-full bg-white/5 overflow-hidden">
+                       <div className="h-full bg-primary/40 w-1/3 group-hover:w-full transition-all duration-1000" />
+                    </div>
+                  </div>
+                  <h3 className="font-black text-lg tracking-tight group-hover:text-primary transition-colors">{space.name}</h3>
+                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2 opacity-60 group-hover:opacity-100 leading-relaxed">
+                    {space.description || "Entorno de diseño activo V3.2"}
+                  </p>
+                  <div className="mt-6 flex items-center justify-between border-t border-white/5 pt-4">
+                    <div className="text-[10px] font-mono text-muted-foreground opacity-40 uppercase tracking-widest">{new Date(space.updated_at).toLocaleDateString()}</div>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-all">
+                       <Eye className="h-4 w-4" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* AI Applications Section */}
+        <div className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <Sparkles className="h-4 w-4" />
+               </div>
+               <h2 className="text-2xl font-black tracking-tight">Aplicaciones <span className="gradient-text">IA</span></h2>
+            </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {aiApps.map((app) => (
               <button
                 key={app.label}
                 onClick={() => navigate(app.path)}
-                className="group flex items-start gap-4 rounded-2xl border border-border bg-card p-5 node-shadow hover:border-primary/20 transition-all text-left"
+                className="group flex items-start gap-4 rounded-[24px] border border-white/5 bg-card/40 p-5 transition-all hover:border-primary/20 hover:bg-card/60 text-left backdrop-blur-sm"
               >
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${app.accent}`}>
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${app.accent} transition-transform group-hover:scale-110 shadow-sm`}>
                   <app.icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                  <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
                     {app.label}
                   </h3>
-                  <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{app.desc}</p>
+                  <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed opacity-70 group-hover:opacity-100">{app.desc}</p>
                 </div>
               </button>
             ))}
@@ -249,29 +389,32 @@ const Dashboard = () => {
 
         {/* Recent Assets */}
         {recentAssets.length > 0 && (
-          <div className="mb-10">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">
-                <Clock className="mr-2 inline h-4 w-4 text-muted-foreground" />
-                Recientes
-              </h2>
-              <Button variant="ghost" size="sm" onClick={() => navigate("/assets")} className="text-primary gap-1">
-                Ver todos <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
+          <div className="mb-16">
+            <div className="flex items-center justify-between mb-8">
+               <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+                     <Clock className="h-4 w-4" />
+                  </div>
+                  <h2 className="text-2xl font-black tracking-tight">Recientes</h2>
+               </div>
+               <Button variant="ghost" size="sm" onClick={() => navigate("/assets")} className="text-primary hover:text-primary/80 gap-2 font-bold text-xs uppercase tracking-widest">
+                 Ver galería <ArrowRight className="h-3.5 w-3.5" />
+               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
               {recentAssets.map((asset) => (
                 <div
                   key={asset.id}
-                  className="group relative cursor-pointer overflow-hidden rounded-xl border border-border bg-card node-shadow hover:border-primary/20 transition-all"
+                  className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl border border-white/5 bg-card/60 transition-all hover:border-primary/30 hover:-translate-y-1 shadow-2xl"
                   onClick={() => navigate("/assets")}
                 >
-                  <div className="aspect-square">
-                    <img src={asset.asset_url} alt={asset.prompt || ""} className="h-full w-full object-cover" loading="lazy" />
+                  <img src={asset.asset_url} alt={asset.prompt || ""} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                     <span className="text-[10px] text-white font-medium truncate">{asset.prompt || 'Sin prompt'}</span>
                   </div>
                   {asset.is_favorite && (
-                    <div className="absolute top-1.5 left-1.5">
-                      <Star className="h-3 w-3 fill-gold text-gold" />
+                    <div className="absolute top-2 left-2 drop-shadow-lg">
+                      <Star className="h-4 w-4 fill-gold text-gold" />
                     </div>
                   )}
                 </div>
@@ -279,28 +422,25 @@ const Dashboard = () => {
             </div>
           </div>
         )}
-
-        {/* CTA */}
-        <div className="rounded-2xl border border-primary/20 bg-card p-8 text-center node-shadow">
-          <Sparkles className="mx-auto mb-3 h-6 w-6 text-primary" />
-          <h3 className="text-xl font-bold text-foreground">
-            ¿Listo para crear algo <span className="gradient-text">increíble</span>?
-          </h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Usa el Formaketing Studio para crear flows de marketing visual o prueba nuestras herramientas de IA.
-          </p>
-          <div className="mt-4 flex justify-center gap-3">
-            <Button onClick={() => navigate("/canvas")} className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2">
-              <Palette className="h-4 w-4" />
-              Formaketing Studio
-            </Button>
-            <Button onClick={() => navigate("/tools")} variant="outline" className="border-border gap-2">
-              <Wand2 className="h-4 w-4" />
-              Herramientas IA
-            </Button>
-          </div>
-        </div>
       </main>
+      
+      {/* Footer */}
+      <footer className="mt-20 border-t border-white/5 bg-card/40 backdrop-blur-xl">
+         <div className="container mx-auto px-6 py-12 flex flex-col items-center gap-6 max-w-7xl">
+            <div className="flex items-center gap-2.5">
+               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 border border-primary/20">
+                  <Sparkles className="h-4 w-4 text-primary" />
+               </div>
+               <span className="text-sm font-bold tracking-tight">
+                  <span className="gradient-text">Creator IA</span>
+                  <span className="text-foreground"> Pro</span>
+               </span>
+            </div>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium opacity-50">
+               © {new Date().getFullYear()} Industrial Generation Suite • V3.1
+            </p>
+         </div>
+      </footer>
     </div>
   );
 };

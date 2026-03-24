@@ -32,7 +32,7 @@ export function useCanvasLoader(userId: string | undefined, spaceId?: string | n
       if (!error && data) {
         const flowNodes: Node<CanvasNodeData>[] = data.map((n: any) => ({
           id: n.id,
-          type: "aiNode",
+          type: n.type === "ui" ? "uiNode" : "aiNode",
           position: { x: n.pos_x, y: n.pos_y },
           data: {
             dbId: n.id,

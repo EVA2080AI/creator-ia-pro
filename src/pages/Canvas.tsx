@@ -12,21 +12,43 @@ import { useCanvasLoader } from "@/hooks/useCanvasLoader";
 import { useNodeSubscription } from "@/hooks/useNodeSubscription";
 import { useCanvasStore, type CanvasNodeData } from "@/store/useCanvasStore";
 import { AINode } from "@/components/canvas/AINode";
+import { UIBuilderNode } from "@/components/canvas/UIBuilderNode";
 import { CanvasToolbar } from "@/components/canvas/CanvasToolbar";
 import { PropertiesSidebar } from "@/components/canvas/PropertiesSidebar";
 import { AppHeader } from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { aiService } from "@/services/ai-service";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Box } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-const nodeTypes = { aiNode: AINode };
+const nodeTypes = { 
+  aiNode: AINode,
+  uiNode: UIBuilderNode
+};
 
 const Canvas = () => {
   const { user, loading: authLoading, signOut } = useAuth("/auth");
   const { profile, refreshProfile } = useProfile(user?.id);
   const [searchParams] = useSearchParams();
-  const spaceId = searchParams.get("space");
+  const spaceId = searchParams.get("space") || searchParams.get("spaceId");
   const { loading: nodesLoading } = useCanvasLoader(user?.id, spaceId);
+  const setSpaceInStore = useCanvasStore((s) => s.setSpace);
+  const currentSpaceName = useCanvasStore((s) => s.currentSpaceName);
+
+  useEffect(() => {
+    if (!spaceId) {
+      setSpaceInStore(null, null);
+      return;
+    }
+    
+    const fetchSpaceInfo = async () => {
+      const { data } = await supabase.from("spaces").select("name").eq("id", spaceId).single();
+      if (data) setSpaceInStore(spaceId, data.name);
+    };
+    fetchSpaceInfo();
+  }, [spaceId, setSpaceInStore]);
+
   useNodeSubscription(user?.id);
 
   const nodes = useCanvasStore((s) => s.nodes);
@@ -84,7 +106,7 @@ const Canvas = () => {
   }, [removeNode]);
 
   const handleGenerate = useCallback(
-    async (type: "image" | "video", prompt: string) => {
+    async (type: "image" | "video" | "ui", prompt: string) => {
       if (!user) return;
       const centerX = Math.random() * 600 - 300;
       const centerY = Math.random() * 400 - 200;
@@ -99,19 +121,29 @@ const Canvas = () => {
         if (error || !data) throw new Error("No se pudo crear el nodo");
 
         addNodeToStore({
-          id: data.id, type: "aiNode",
+          id: data.id, 
+          type: type === "ui" ? "uiNode" : "aiNode",
           position: { x: data.pos_x, y: data.pos_y },
           data: {
-            dbId: data.id, type: data.type as "image" | "video",
+            dbId: data.id, 
+            type: data.type as "image" | "video" | "ui",
             prompt: data.prompt, assetUrl: data.asset_url,
             status: "loading", errorMessage: null, dataPayload: {},
           },
         });
 
         setGenerating(true);
-        const { error: fnError } = await supabase.functions.invoke("generate-image", { body: { node_id: data.id } });
-        if (fnError) toast.error(fnError.message || "Error en generación");
-        else toast.success(type === "image" ? "¡Imagen generada!" : "Video en proceso...");
+        try {
+          const result = await aiService.processAction({ 
+            action: type,
+            prompt: data.prompt,
+            model: type === "ui" ? "gemini-1.5-flash" : "nano-banana-25",
+            node_id: data.id 
+          });
+          toast.success(`¡${type === "ui" ? "Diseño UI" : type === "image" ? "Imagen" : "Video"} generado con éxito! (Industrial V3.4)`);
+        } catch (err: any) {
+          toast.error(`${err.message} (Industrial V3.4)` || "Error en generación (V3.4)");
+        }
         await refreshProfile();
       } catch (error: any) {
         toast.error(error.message || "Error al generar");
@@ -133,12 +165,16 @@ const Canvas = () => {
       await supabase.from("canvas_nodes").update({ status: "loading", error_message: null }).eq("id", nodeId);
 
       try {
-        const { error: fnError } = await supabase.functions.invoke("generate-image", { body: { node_id: nodeId } });
-        if (fnError) toast.error(fnError.message || "Error en generación");
-        else toast.success("¡Regeneración iniciada!");
+        await aiService.processAction({ 
+          action: node.data.type,
+          prompt: node.data.prompt,
+          model: node.data.type === "ui" ? "gemini-1.5-flash" : "nano-banana-25",
+          node_id: node.data.dbId 
+        });
+        toast.success("¡Regeneración finalizada!");
         await refreshProfile();
-      } catch (error: any) {
-        toast.error(error.message || "Error al generar");
+      } catch (err: any) {
+        toast.error(`${err.message} (Regen V3.4)` || "Error al generar (V3.4)");
       } finally {
         setGenerating(false);
       }
@@ -158,6 +194,22 @@ const Canvas = () => {
     <div className="flex h-screen w-screen flex-col bg-background">
       {/* Unified header */}
       <AppHeader userId={user?.id} onSignOut={signOut} />
+
+      {/* Project Status Bar (V3.2) */}
+      {spaceId && (
+        <div className="bg-primary/5 border-b border-white/5 px-6 py-2 flex items-center justify-between backdrop-blur-md">
+          <div className="flex items-center gap-3">
+             <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/20 text-primary">
+                <Box className="h-3.5 w-3.5" />
+             </div>
+             <div className="flex flex-col">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] leading-none opacity-50 font-bold">Proyecto Activo</span>
+                <span className="text-sm font-black tracking-tight text-foreground">{currentSpaceName || "Cargando proyecto..."}</span>
+             </div>
+          </div>
+          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 text-[9px] font-bold py-0.5">Entorno Seguro Industrial</Badge>
+        </div>
+      )}
 
       {/* Canvas area fills remaining space */}
       <div className="relative flex-1">

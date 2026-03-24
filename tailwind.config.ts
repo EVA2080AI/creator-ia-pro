@@ -14,7 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Space Grotesk", "system-ui", "sans-serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Outfit", "sans-serif"],
         mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
@@ -103,9 +104,10 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
-        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
-        "spin-slow": "spin-slow 3s linear infinite",
-        "fade-in": "fade-in 0.4s ease-out",
+        "pulse-glow": "pulse-glow 3s ease-in-out infinite",
+        "spin-slow": "spin-slow 8s linear infinite",
+        "fade-in": "fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1)",
+        "shimmer": "shimmer 2s linear infinite",
       },
     },
   },

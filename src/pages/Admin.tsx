@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { AppHeader } from "@/components/AppHeader";
+import { adminService } from "@/services/billing-service";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,10 +125,7 @@ const Admin = () => {
     }
     setSavingSettings(true);
     try {
-      const { error } = await supabase.functions.invoke("admin-save-settings", {
-        body: { key: "STRIPE_SECRET_KEY", value: stripeKey },
-      });
-      if (error) throw error;
+      await adminService.saveSettings({ STRIPE_SECRET_KEY: stripeKey });
       toast.success("Clave de Stripe guardada correctamente");
       setStripeKey("");
     } catch (err: any) {

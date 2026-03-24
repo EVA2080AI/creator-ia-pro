@@ -28,6 +28,7 @@ export function useNodeSubscription(userId: string | undefined) {
             status: row.status,
             assetUrl: row.asset_url,
             errorMessage: row.error_message,
+            name: row.name,
             dataPayload: row.data_payload ?? {},
           });
         }

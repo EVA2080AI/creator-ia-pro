@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { stripeService } from "@/services/billing-service";
 
 interface SubscriptionInfo {
   subscribed: boolean;
@@ -16,12 +17,8 @@ export function useSubscription(userId: string | undefined) {
     if (!userId) return;
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("check-subscription");
-      if (error) {
-        // Non-2xx is expected when no Stripe customer exists
-        console.log("check-subscription: no active subscription or error");
-        setSubscription({ subscribed: false, tier: "free", credits: 0, subscription_end: null });
-      } else if (data) {
+      const data = await stripeService.checkSubscription();
+      if (data) {
         setSubscription({
           subscribed: data.subscribed ?? false,
           tier: data.tier ?? "free",
@@ -31,6 +28,7 @@ export function useSubscription(userId: string | undefined) {
       }
     } catch (err) {
       console.error("check-subscription error:", err);
+      setSubscription({ subscribed: false, tier: "free", credits: 0, subscription_end: null });
     } finally {
       setLoading(false);
     }
@@ -43,8 +41,7 @@ export function useSubscription(userId: string | undefined) {
 
   const openCustomerPortal = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke("customer-portal");
-      if (error) throw error;
+      const data = await stripeService.openPortal();
       if (data?.url) window.open(data.url, "_blank");
     } catch (err: any) {
       console.error("customer-portal error:", err);

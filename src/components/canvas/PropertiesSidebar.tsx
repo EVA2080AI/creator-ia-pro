@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { X, Play, Image, Video, Sparkles } from "lucide-react";
+import { X, Play, Image, Video, Sparkles, Layout, Smartphone, Tablet, Monitor } from "lucide-react";
 
 interface PropertiesSidebarProps {
   onRun: (nodeId: string) => void;
@@ -30,6 +30,7 @@ export function PropertiesSidebar({ onRun, generating }: PropertiesSidebarProps)
   const { data } = node;
   const payload = data.dataPayload ?? {};
   const isImage = data.type === "image";
+  const isUI = data.type === "ui";
 
   const updatePayload = (key: string, value: unknown) => {
     const newPayload = { ...payload, [key]: value };
@@ -44,13 +45,13 @@ export function PropertiesSidebar({ onRun, generating }: PropertiesSidebarProps)
         <div className="flex items-center gap-2">
           <div
             className={`flex h-7 w-7 items-center justify-center rounded-lg ${
-              isImage ? "bg-primary/15 text-primary" : "bg-accent/15 text-accent"
+              isImage ? "bg-primary/15 text-primary" : isUI ? "bg-gold/15 text-gold" : "bg-accent/15 text-accent"
             }`}
           >
-            {isImage ? <Image className="h-4 w-4" /> : <Video className="h-4 w-4" />}
+            {isImage ? <Image className="h-4 w-4" /> : isUI ? <Layout className="h-4 w-4" /> : <Video className="h-4 w-4" />}
           </div>
           <span className="text-sm font-semibold text-foreground">
-            {isImage ? "Imagen" : "Video"} — Propiedades
+            {isImage ? "Imagen" : isUI ? "Diseño UI" : "Video"} — Propiedades
           </span>
         </div>
         <button
@@ -92,25 +93,54 @@ export function PropertiesSidebar({ onRun, generating }: PropertiesSidebarProps)
         <div className="space-y-1.5">
           <Label className="text-xs text-muted-foreground">Modelo</Label>
           <Select
-            value={(payload.model as string) ?? (isImage ? "gemini-image" : "gemini-video")}
+            value={(payload.model as string) ?? (isUI ? "gemini-3-flash" : isImage ? "gemini-image" : "gemini-video")}
             onValueChange={(v) => updatePayload("model", v)}
           >
             <SelectTrigger className="bg-muted border-none text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {isImage ? (
+              {isUI ? (
                 <>
-                  <SelectItem value="gemini-image">Gemini Image</SelectItem>
+                  <SelectItem value="gemini-3-flash">Gemini 1.5 Flash (Layouts)</SelectItem>
+                  <SelectItem value="gemini-3.1-pro-low">Gemini Pro (Advanced)</SelectItem>
+                </>
+              ) : isImage ? (
+                <>
+                  <SelectItem value="gemini-image">Pollinations (Free)</SelectItem>
                 </>
               ) : (
                 <>
-                  <SelectItem value="gemini-video">Gemini Video (pronto)</SelectItem>
+                  <SelectItem value="gemini-video">Gemini Video (Beta)</SelectItem>
                 </>
               )}
             </SelectContent>
           </Select>
         </div>
+
+        {isUI && (
+           <div className="space-y-1.5">
+             <Label className="text-xs text-muted-foreground">Dispositivo</Label>
+             <div className="flex gap-1">
+               {[
+                 { id: "mobile", icon: Smartphone },
+                 { id: "tablet", icon: Tablet },
+                 { id: "desktop", icon: Monitor }
+               ].map((d) => (
+                 <Button
+                   key={d.id}
+                   variant={(payload.device || "desktop") === d.id ? "default" : "outline"}
+                   size="sm"
+                   onClick={() => updatePayload("device", d.id)}
+                   className="flex-1 h-9 px-0 gap-1"
+                 >
+                   <d.icon className="h-3.5 w-3.5" />
+                   <span className="text-[10px] uppercase font-bold">{d.id.slice(0, 3)}</span>
+                 </Button>
+               ))}
+             </div>
+           </div>
+        )}
 
         {/* Aspect Ratio */}
         <div className="space-y-1.5">

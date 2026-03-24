@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { stripeService } from "@/services/billing-service";
 import { STRIPE_TIERS } from "@/lib/stripe-tiers";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
 import { Sparkles, Check, Zap, Crown, ArrowLeft, Star, GraduationCap, Building2, Loader2, Coins, Package } from "lucide-react";
@@ -142,11 +143,7 @@ const Pricing = () => {
     setLoadingPlan(plan.key);
     try {
       const tier = STRIPE_TIERS[plan.stripeTier];
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { priceId: tier.price_id },
-      });
-
-      if (error) throw error;
+      const data = await stripeService.createCheckout(tier.price_id);
       if (data?.url) {
         window.open(data.url, "_blank");
       } else {
@@ -169,11 +166,7 @@ const Pricing = () => {
 
     setLoadingPack(pack.id);
     try {
-      const { data, error } = await supabase.functions.invoke("buy-credits", {
-        body: { priceId: pack.price_id },
-      });
-
-      if (error) throw error;
+      const data = await stripeService.buyCredits(pack.price_id);
       if (data?.url) {
         window.open(data.url, "_blank");
       } else {
@@ -213,13 +206,13 @@ const Pricing = () => {
       </header>
 
       <main className="relative z-10 flex flex-col items-center px-6 pt-12 pb-32">
-        <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">Precios transparentes</Badge>
-        <h1 className="text-4xl font-bold text-center md:text-5xl">
+        <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 animate-fade-in px-4 py-1">Precios Transparentes V2.0</Badge>
+        <h1 className="text-5xl font-bold text-center md:text-7xl tracking-tight leading-tight">
           <span className="text-foreground">Planes y </span>
-          <span className="gradient-text">Precios</span>
+          <span className="textGradient uppercase font-display italic">Precios</span>
         </h1>
-        <p className="mt-4 max-w-lg text-center text-muted-foreground">
-          Precios simples y transparentes. Incluye plan especial para educación. Escala cuando lo necesites.
+        <p className="mt-6 max-w-2xl text-center text-muted-foreground text-lg font-medium leading-relaxed">
+          Diseñado para creadores, optimizado para equipos. Elige la escala que mejor se adapte a tu visión creativa.
         </p>
 
         <div className="mt-16 grid w-full max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -247,12 +240,13 @@ const Pricing = () => {
               <h2 className="text-xl font-bold text-foreground">{plan.name}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
 
-              <div className="mt-5 flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-foreground">{plan.price}</span>
-                <span className="text-sm text-muted-foreground">{plan.period}</span>
+              <div className="mt-5 flex items-baseline gap-2">
+                <span className="text-5xl font-bold text-foreground tracking-tighter">{plan.price}</span>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{plan.period}</span>
               </div>
-
-              <div className="mt-2 rounded-lg bg-muted/50 px-3 py-1.5 text-sm font-medium text-primary w-fit">
+              
+              <div className="mt-4 flex items-center gap-2 rounded-xl bg-white/5 border border-white/5 px-4 py-2 text-sm font-bold text-gold shadow-inner">
+                <Sparkles className="h-4 w-4" />
                 {plan.creditsLabel}
               </div>
 
@@ -295,11 +289,11 @@ const Pricing = () => {
               <Package className="mr-1 h-3 w-3" />
               Pago único
             </Badge>
-            <h2 className="text-3xl font-bold text-foreground">
-              ¿Necesitas más <span className="gradient-text">créditos</span>?
+            <h2 className="text-4xl font-bold text-foreground md:text-5xl tracking-tight">
+              ¿Necesitas más <span className="textGradient">créditos</span>?
             </h2>
-            <p className="mt-3 text-muted-foreground">
-              Compra paquetes de créditos adicionales. Sin suscripción, pago único.
+            <p className="mt-4 text-muted-foreground text-lg font-medium">
+              Potencia tu cuenta con paquetes adicionales. Sin compromisos, solo creación.
             </p>
           </div>
 

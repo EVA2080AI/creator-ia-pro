@@ -4,12 +4,14 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { AppHeader } from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
+import { aiService } from "@/services/ai-service";
+import { stripeService, adminService } from "@/services/billing-service";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Shield, CheckCircle2, AlertTriangle, XCircle, ArrowLeft,
   Database, Zap, Globe, CreditCard, Bot, Image, MessageSquare,
-  RefreshCw, Loader2, Play, Clock,
+  RefreshCw, Loader2, Play, Clock, Server,
 } from "lucide-react";
 
 type Status = "ok" | "warning" | "error" | "pending" | "untested";
@@ -69,34 +71,22 @@ const SystemStatus = () => {
   const getFeatureList = (): Feature[] => [
     // EDGE FUNCTIONS
     {
-      id: "ef-generate-image",
-      name: "generate-image (Canvas)",
-      category: "Edge Functions",
+      id: "srv-ai-service",
+      name: "aiService (Industrial V3.4 💎)",
+      category: "Servicios Centralizados",
       status: "untested",
-      details: "Genera imágenes con Google Gemini 2.0 Flash Exp. Usa tu API key gratuita de Google.",
-      apiNeeded: "GOOGLE_GEMINI_API_KEY ✅",
-      costNote: "API gratuita de Google — sin costo por llamada para ti.",
-      action: "test-cors",
+      details: "Motor de IA consolidado en el frontend. Controla Imagen, UI y Chat. Usa Gemini 1.5 Flash nativo.",
+      apiNeeded: "VITE_GEMINI_API_KEY ✅",
+      costNote: "Créditos gestionados vía RPC 'spend_credits'.",
+      action: "test-gateway",
     },
     {
-      id: "ef-ai-tool",
-      name: "ai-tool (Herramientas imagen)",
+      id: "ef-legacy",
+      name: "Funciones Legacy (Deprecadas)",
       category: "Edge Functions",
-      status: "untested",
-      details: "Enhance, upscale, eraser, background, restore, logo, social. Usa Google Gemini 2.0 Flash Exp.",
-      apiNeeded: "GOOGLE_GEMINI_API_KEY ✅",
-      costNote: "API gratuita de Google.",
-      action: "test-cors",
-    },
-    {
-      id: "ef-ai-chat",
-      name: "ai-chat (Copywriter/Blog/Ads)",
-      category: "Edge Functions",
-      status: "untested",
-      details: "Generación de texto con Google Gemini 2.0 Flash. Copywriter, blog, social, ads.",
-      apiNeeded: "GOOGLE_GEMINI_API_KEY ✅",
-      costNote: "API gratuita de Google.",
-      action: "test-cors",
+      status: "warning",
+      details: "generate-image, ai-tool, ai-chat. Estas funciones se están migrando al gateway unificado.",
+      costNote: "Uso interno/compatibilidad.",
     },
     {
       id: "ef-create-checkout",
@@ -346,25 +336,22 @@ const SystemStatus = () => {
         );
         updatedFeatures[idx] = {
           ...updatedFeatures[idx],
-          status: res.ok || res.status === 204 ? "ok" : "error",
-          testResult: `CORS: ${res.status} ${res.statusText}`,
+          status: "warning",
+          testResult: `CORS Check: Deprecado (Uso de Servicios Centralizados V3.4)`,
         };
       } else if (feature.action === "test-auth") {
-        // Test with auth
-        const { data, error } = await supabase.functions.invoke(
-          feature.id.replace("ef-", "").replace(/-/g, "-")
-        );
-        if (error) {
-          updatedFeatures[idx] = {
-            ...updatedFeatures[idx],
-            status: "warning",
-            testResult: `Respuesta con error esperado (sin suscripción Stripe): ${JSON.stringify(data || error.message).substring(0, 100)}`,
-          };
-        } else {
+        try {
+          const data = await stripeService.checkSubscription();
           updatedFeatures[idx] = {
             ...updatedFeatures[idx],
             status: "ok",
             testResult: `Respuesta OK: ${JSON.stringify(data).substring(0, 100)}`,
+          };
+        } catch (err: any) {
+          updatedFeatures[idx] = {
+            ...updatedFeatures[idx],
+            status: "warning",
+            testResult: `Error esperado: ${err.message?.substring(0, 100)}`,
           };
         }
       } else if (feature.action === "test-db-read") {
@@ -375,6 +362,25 @@ const SystemStatus = () => {
           status: error ? "error" : "ok",
           testResult: error ? `Error: ${error.message}` : "Lectura OK",
         };
+      } else if (feature.action === "test-gateway") {
+        try {
+          const data = await aiService.processAction({ 
+            action: "chat", 
+            prompt: "Ping diagnostic check", 
+            model: "gemini-3-flash" 
+          });
+          updatedFeatures[idx] = {
+            ...updatedFeatures[idx],
+            status: "ok",
+            testResult: `Respuesta OK: ${data?.text?.substring(0, 50)}...`,
+          };
+        } catch (err: any) {
+          updatedFeatures[idx] = {
+            ...updatedFeatures[idx],
+            status: "error",
+            testResult: `Error: ${err.message}`,
+          };
+        }
       }
     } catch (err: any) {
       updatedFeatures[idx] = {

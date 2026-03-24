@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Map de Proyectos 2026</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --accent: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.15), transparent 25%);
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* TABLE STYLES */
+        .table-wrapper {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 1.25rem 1.5rem;
+            vertical-align: middle;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.03);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 700;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        tr.project-row {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        tr.project-row:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .project-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+        .badge.ready { background: rgba(16, 185, 129, 0.1); color: var(--accent); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge.rebuild { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge.hq { background: rgba(59, 130, 246, 0.1); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.2); }
+
+        .integration-tag {
+            display: inline-block;
+            background: #1e293b;
+            color: #cbd5e1;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            margin-right: 5px;
+            border: 1px solid #334155;
+        }
+        .integration-tag.stripe { color: #6366f1; border-color: rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.1); }
+        .integration-tag.deepseek { color: #ec4899; border-color: rgba(236, 72, 153, 0.3); background: rgba(236, 72, 153, 0.1); }
+        .integration-tag.supabase { color: #10b981; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.1); }
+        .integration-tag.gemini { color: #60a5fa; border-color: rgba(96, 165, 250, 0.3); background: rgba(96, 165, 250, 0.1); }
+
+        /* PROGRESS BAR */
+        .progress-container { width: 100%; background: rgba(255, 255, 255, 0.05); border-radius: 4px; height: 6px; position: relative; }
+        .progress-bar { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 1s ease-in-out; }
+        .progress-label { font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; display: block; font-weight: 700; }
+
+        /* EXPANDABLE DETAILS */
+        tr.details-row {
+            display: none;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        tr.details-row.active {
+            display: table-row;
+        }
+        .details-wrapper {
+            padding: 2rem;
+            display: flex;
+            gap: 3rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .details-section {
+            flex: 1;
+        }
+        .details-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            letter-spacing: 0.05em;
+        }
+        .sub-apps-list {
+            list-style: none;
+        }
+        .sub-apps-list li {
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .sub-apps-list li span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* AGENT DESKS SCENE */
+        .agents-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .agent-desk-setup {
+            position: relative;
+            width: 50px;
+            height: 60px;
+            margin-right: 18px;
+            margin-bottom: 25px;
+            cursor: help;
+        }
+        .agent-desk-setup::after {
+            content: attr(data-role);
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65rem;
+            background: #1e293b;
+            padding: 2px 6px;
+            border-radius: 4px;
+            opacity: 0;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        .agent-desk-setup:hover::after { opacity: 1; }
+
+        .character {
+            position: absolute;
+            bottom: 4px;
+            left: 14px;
+            width: 24px;
+            height: 48px;
+            background-size: 168px 144px;
+            image-rendering: pixelated;
+            z-index: 4;
+        }
+
+        .desk {
+            position: absolute;
+            bottom: 0px;
+            left: -10px;
+            width: 72px;
+            height: 48px;
+            background-image: url('assets/furniture/DESK/DESK_FRONT.png');
+            background-size: 72px 48px;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            z-index: 1;
+         }
+
+        .pc {
+            position: absolute;
+            bottom: 12px;
+            left: 14px;
+            width: 24px;
+            height: 48px;
+            background-image: url('assets/furniture/PC/PC_FRONT_ON_1.png');
+            background-size: 24px 48px;
+            background-repeat: no-repeat;
+            image-rendering: pixelated;
+            z-index: 2;
+            animation: screenBlink 4s infinite;
+        }
+
+        @keyframes typing {
+            0%, 49.9% { background-position: -72px -48px; }
+            50%, 100% { background-position: -96px -48px; }
+        }
+        .type-anim { animation: typing 0.5s infinite steps(1); }
+
+        @keyframes screenBlink {
+            0%, 96% { filter: brightness(1); }
+            98% { filter: brightness(1.2); }
+            100% { filter: brightness(1); }
+        }
+
+        .char-0 { background-image: url('assets/characters/char_0.png'); }
+        .char-1 { background-image: url('assets/characters/char_1.png'); animation-delay: 0.2s; }
+        .char-2 { background-image: url('assets/characters/char_2.png'); animation-delay: 0.1s; }
+        .char-3 { background-image: url('assets/characters/char_3.png'); animation-delay: 0.3s; }
+        .char-4 { background-image: url('assets/characters/char_4.png'); animation-delay: 0.0s; }
+        .char-5 { background-image: url('assets/characters/char_5.png'); animation-delay: 0.4s; }
+
+        .chevron { transition: transform 0.3s; color: var(--text-muted); }
+        .active .chevron { transform: rotate(180deg); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Road Map de Proyectos 2026</h1>
+        <p class="subtitle">Ecosistema Pixel Agent 🤖 | Arquitectura Maestra & Hubs</p>
+    </header>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th width="30%">Proyecto / Hub</th>
+                    <th width="15%">Estado</th>
+                    <th width="35%">Integraciones Clave</th>
+                    <th width="15%">Equipo IA</th>
+                    <th width="5%"></th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <!-- MY TEAM IA (HQ) -->
+                <tr class="project-row" onclick="toggleRow('row-hq')">
+                    <td>
+                        <div class="project-name">🏢 My Team IA</div>
+                    </td>
+                    <td><span class="badge hq">Cuartel General</span></td>
+                    <td>
+                        <span class="integration-tag supabase">Supabase Auth</span>
+                        <span class="integration-tag">Google SSO</span>
+                    </td>
+                    <td>4 Agentes</td>
+                    <td><div class="chevron">▼</div></td>
+                </tr>
+                <tr id="row-hq" class="details-row">
+                    <td colspan="5">
+                        <div class="details-wrapper">
+                            <div class="details-section">
+                                <h4 class="details-title">Descripción Operativa</h4>
+                                <p class="text-muted" style="font-size: 0.9rem; line-height: 1.5; color: #94a3b8;">
+                                    Plataforma base de creación y ejecución. Es el entorno donde viven los agentes (incluyendo Antigravity). Todo el tracking, bases de conocimiento (Notion interno) y despliegues se orquestan desde aquí.
+                                </p>
+                            </div>
+                            <div class="details-section">
+                                <h4 class="details-title">Agentes en Base</h4>
+                                <div class="agents-container">
+                                    <div class="agent-desk-setup" data-role="Master Orchestrator"><div class="character type-anim char-0"></div><div class="desk"></div><div class="pc"></div></div>
+                                    <div class="agent-desk-setup" data-role="System Architect"><div class="character type-anim char-1"></div><div class="desk"></div><div class="pc"></div></div>
+                                    <div class="agent-desk-setup" data-role="Data Analyst"><div class="character type-anim char-2"></div><div class="desk"></div><div class="pc"></div></div>
+                                    <div class="agent-desk-setup" data-role="Documentation QA"><div class="character type-anim char-5"></div><div class="desk"></div><div class="pc"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- CREATOR IA PRO -->
+                <tr class="project-row" onclick="toggleRow('row-creator')">
+                    <td>
+                        <div class="project-name">⚡ Creator IA Pro (Industrial V3.4)</div>
+                    </td>
+                    <td><span class="badge ready">Operativo Industrial (V3.4)</span></td>
+                    <td>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: 100%;"></div>
+                        </div>
+                        <span class="progress-label">100% COMPLETADO (Lanzamiento Final)</span>
+                    </td>
+                    <td>
+                        <span class="integration-tag gemini">Google Gemini</span>
+                        <span class="integration-tag stripe">Stripe (Full)</span>
+                        <span class="integration-tag supabase">Supabase V3</span>
+                    </td>
+                    <td><div class="chevron">▼</div></td>
+                </tr>
+                <tr id="row-creator" class="details-row">
+                    <td colspan="5">
+                    <div class="flex flex-col gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="status-badge status-active">Fase Industrial V3.4</span>
+                        </div>
+                        <div class="text-[11px] opacity-70 leading-relaxed space-y-2">
+                            <p><strong>Core:</strong> Dashboard Industrial con gestión de Espacios (Proyectos). AI Gateway V2.2 (v3) con Fallback & Resiliencia.</p>
+                            
+                            <div class="grid grid-cols-2 gap-2 mt-2">
+                                <div class="bg-white/5 p-2 rounded-lg border border-white/5 text-[10px]">
+                                    <span class="text-primary font-bold">🖼️ Herramientas de Imagen:</span>
+                                    <ul class="mt-1 opacity-80 list-disc list-inside">
+                                        <li>Upscale 4x (IA Precision)</li>
+                                        <li>Eraser (Borrado Inteligente)</li>
+                                        <li>Background Remover</li>
+                                        <li>Restore & Colorize</li>
+                                        <li>Text-to-Image (Nano-Banana)</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-white/5 p-2 rounded-lg border border-white/5 text-[10px]">
+                                    <span class="text-accent font-bold">✍️ Marketing & Copy:</span>
+                                    <ul class="mt-1 opacity-80 list-disc list-inside">
+                                        <li>AI Copywriter (Ads/Web)</li>
+                                        <li>Logo Maker V2</li>
+                                        <li>Social Media Kit</li>
+                                        <li>Blog SEO Writer</li>
+                                        <li>Ad Generator (Google/Meta)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10 text-[10px]">
+                                <span class="text-emerald-400 font-bold">🚀 Extras & Infra:</span>
+                                <ul class="mt-1 opacity-80 list-disc list-inside grid grid-cols-2">
+                                    <li>Lienzo Infinito (Canvas V3)</li>
+                                    <li>Módulo de Descargas (PNG/JPG)</li>
+                                    <li>Apps: Win / Mac / Android</li>
+                                    <li>Stripe Payments (Credits)</li>
+                                </ul>
+                            </div>
+                            <div class="details-section">
+                                <p class="text-muted" style="font-size: 0.85rem; line-height: 1.4;">
+                                    Migración completa de Lovable a **Stack Industrial Autónomo**. 
+                                    Eliminación de **Edge Functions** en favor de un **Ecosistema de IA Centralizado** en el frontend. 
+                                    Gestión de créditos atómica vía **Postgres RPC (spend_credits)** y seguridad reforzada con RLS.
+                                </p>
+                                <div class="agents-container" style="margin-top:20px;">
+                                    <div class="agent-desk-setup" data-role="Frontend Dev"><div class="character type-anim char-0"></div><div class="desk"></div><div class="pc"></div></div>
+                                    <div class="agent-desk-setup" data-role="Backend Architect"><div class="character type-anim char-2"></div><div class="desk"></div><div class="pc"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- DELICIAS 2026 -->
+                <tr class="project-row" onclick="toggleRow('row-delicias')">
+                    <td>
+                        <div class="project-name">🍰 DELICIAS2026</div>
+                    </td>
+                    <td><span class="badge ready">Go-To-Market</span></td>
+                    <td>
+                        <span class="integration-tag stripe">Stripe (Checkout)</span>
+                        <span class="integration-tag supabase">Supabase DB</span>
+                    </td>
+                    <td>Protegido</td>
+                    <td><div class="chevron">▼</div></td>
+                </tr>
+                <tr id="row-delicias" class="details-row">
+                    <td colspan="5">
+                        <div class="details-wrapper">
+                            <div class="details-section">
+                                <h4 class="details-title">Estado</h4>
+                                <p class="text-muted" style="font-size: 0.9rem; color: #94a3b8;">
+                                    Código congelado por seguridad. Plataforma e-commerce completa con CMS propio. Pendiente activación de Stripe en Go-To-Market.
+                                </p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- POS PRO -->
+                <tr class="project-row" onclick="toggleRow('row-pos')">
+                    <td>
+                        <div class="project-name">🏪 POS.pro</div>
+                    </td>
+                    <td><span class="badge ready">Listo</span></td>
+                    <td>
+                        <span class="integration-tag">Node Local</span>
+                        <span class="integration-tag">Google Sheets</span>
+                    </td>
+                    <td>2 Agentes</td>
+                    <td><div class="chevron">▼</div></td>
+                </tr>
+                <tr id="row-pos" class="details-row">
+                    <td colspan="5">
+                        <div class="details-wrapper">
+                            <div class="details-section">
+                                <h4 class="details-title">Descripción</h4>
+                                <p class="text-muted" style="font-size: 0.9rem; color: #94a3b8;">Sistema POS hiper-ligero B2B.</p>
+                            </div>
+                            <div class="details-section">
+                                <h4 class="details-title">Equipo</h4>
+                                <div class="agents-container">
+                                    <div class="agent-desk-setup" data-role="SysAdmin"><div class="character type-anim char-5"></div><div class="desk"></div><div class="pc"></div></div>
+                                    <div class="agent-desk-setup" data-role="Frontend Dev"><div class="character type-anim char-1"></div><div class="desk"></div><div class="pc"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+                 <!-- MUSICANDO -->
+                 <tr class="project-row" onclick="toggleRow('row-musicando')">
+                    <td>
+                        <div class="project-name">🎵 Musicando</div>
+                    </td>
+                    <td><span class="badge ready">Listo</span></td>
+                    <td>
+                        <span class="integration-tag supabase">Supabase</span>
+                    </td>
+                    <td>3 Agentes</td>
+                    <td><div class="chevron">▼</div></td>
+                </tr>
+                <tr id="row-musicando" class="details-row">
+                    <td colspan="5">
+                        <div class="details-wrapper">
+                            <div class="details-section">
+                                <h4 class="details-title">Descripción</h4>
+                                <p class="text-muted" style="font-size: 0.9rem; color: #94a3b8;">Plataforma EdTech B2B para jardines infantiles.</p>
+                            </div>
+                            <div class="details-section">
+                                <h4 class="details-title">Equipo</h4>
+                                <div class="agents-container">
+                                    <div class="agent-desk-setup" data-role="Designer"><div class="character type-anim char-4"></div><div class="desk"></div><div class="pc"></div></div>
+                                    <div class="agent-desk-setup" data-role="Frontend"><div class="character type-anim char-2"></div><div class="desk"></div><div class="pc"></div></div>
+                                    <div class="agent-desk-setup" data-role="Sales"><div class="character type-anim char-1"></div><div class="desk"></div><div class="pc"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function toggleRow(rowId) {
+        const row = document.getElementById(rowId);
+        const trigger = event.currentTarget;
+        
+        if (row.classList.contains('active')) {
+            row.classList.remove('active');
+            trigger.classList.remove('active');
+        } else {
+            // Cierra las demás
+            document.querySelectorAll('.details-row').forEach(r => r.classList.remove('active'));
+            document.querySelectorAll('.project-row').forEach(r => r.classList.remove('active'));
+            
+            row.classList.add('active');
+            trigger.classList.add('active');
+        }
+    }
+</script>
+
+</body>
+</html>
