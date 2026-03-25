@@ -14,6 +14,7 @@ import { useAuth } from "@/hooks/useAuth";
 import CharacterBreakdownNode from '@/components/formarketing/CharacterBreakdownNode';
 import ModelNode from '@/components/formarketing/ModelNode';
 import VideoModelNode from '@/components/formarketing/VideoModelNode';
+import LayoutBuilderNode from '@/components/formarketing/LayoutBuilderNode';
 import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
 import { ArrowLeft, Rocket, Trash2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ const nodeTypes = {
   characterBreakdown: CharacterBreakdownNode,
   modelView: ModelNode,
   videoModel: VideoModelNode,
+  layoutBuilder: LayoutBuilderNode,
 };
 
 const initialNodes: Node[] = [

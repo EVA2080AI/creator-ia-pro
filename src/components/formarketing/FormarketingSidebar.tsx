@@ -7,6 +7,13 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export function FormarketingSidebar() {
   const [search, setSearch] = useState('');
@@ -32,14 +39,39 @@ export function FormarketingSidebar() {
     input.click();
   };
 
+  const handleAddTemplate = (templateType: string) => {
+    const centerX = 400;
+    const centerY = 300;
+    
+    if (templateType === 'metaPack') {
+       toast.info("Inyectando Plantilla: Meta Ads Social Pack...");
+       const charId = crypto.randomUUID();
+       const imgId = crypto.randomUUID();
+       const vidId = crypto.randomUUID();
+       
+       const newNodes = [
+         { id: charId, type: 'characterBreakdown', position: { x: centerX - 350, y: centerY }, data: { title: 'Target Persona', description: 'Describe tu audiencia para Meta Ads...' } },
+         { id: imgId, type: 'modelView', position: { x: centerX, y: centerY }, data: { title: 'Imagen de Campaña', prompt: 'Visual cinemático para redes sociales...' } },
+         { id: vidId, type: 'videoModel', position: { x: centerX + 350, y: centerY }, data: { title: 'Reel de Ventas', status: 'pending' } }
+       ];
+       
+       addNodes(newNodes as any);
+       // Note: Edges are stored as metadata, but we can't easily auto-connect via addNodes here 
+       // unless we also update the metadata node. For now, we spawn them in layout.
+    } else if (templateType === 'landingPack') {
+       toast.info("Inyectando Plantilla: App Landing Structure...");
+       addNodes([
+         { id: crypto.randomUUID(), type: 'characterBreakdown', position: { x: centerX - 350, y: centerY }, data: { title: 'Value Prop', description: 'Define la propuesta de valor...' } },
+         { id: crypto.randomUUID(), type: 'characterBreakdown', position: { x: centerX, y: centerY }, data: { title: 'Wireframe Layout', description: 'Estructura de la landing page...' } }
+       ] as any);
+    }
+  };
+
   const handleAddNode = (type: string, title: string, assetUrl?: string) => {
-    // Generate a slightly random drop position in the center
     const x = Math.random() * 200 + 100;
     const y = Math.random() * 200 + 100;
-    
-    // In xyflow/react v12, project() was replaced by screenToFlowPosition
     const position = screenToFlowPosition({ x, y });
-    const newNodeId = `${type}-${Date.now()}`;
+    const newNodeId = crypto.randomUUID();
 
     let defaultData = {};
     if (type === 'characterBreakdown') {
@@ -48,11 +80,13 @@ export function FormarketingSidebar() {
       defaultData = { title: title || 'Nueva Imagen', prompt: 'Describe la escena...' };
     } else if (type === 'videoModel') {
       defaultData = { title: title || 'Nuevo Video', status: 'pending', duration: '00:00' };
+    } else if (type === 'layoutBuilder') {
+      defaultData = { title: title || 'Nueva Interfaz', platform: 'web', structure: 'Define el layout...' };
     }
 
     addNodes({
       id: newNodeId,
-      type: type, // Pass the type directly (characterBreakdown, modelView, etc)
+      type: type,
       position,
       data: {
         ...defaultData,
@@ -70,16 +104,20 @@ export function FormarketingSidebar() {
   };
 
   const menuItems = [
-    { label: 'Copywriting AI', icon: Type, type: 'characterBreakdown', color: 'text-emerald-500', bg: 'bg-emerald-500/10', description: 'Genera textos persuasivos' },
-    { label: 'Imagen Flux HQ', icon: Image, type: 'modelView', color: 'text-indigo-500', bg: 'bg-indigo-500/10', description: 'Generación industrial' },
-    { label: 'Avatar de Marca', icon: Video, type: 'videoModel', color: 'text-purple-500', bg: 'bg-purple-500/10', description: 'Video con IA' },
-    { label: 'Asistente Estratégico', icon: Sparkles, type: 'characterBreakdown', color: 'text-emerald-500', bg: 'bg-emerald-500/10', description: 'Análisis de mercado' },
-    { label: 'Upscale & Finish', icon: Maximize, type: 'modelView', color: 'text-indigo-500', bg: 'bg-indigo-500/10', description: 'Alta resolución' },
-    { label: 'Guión de Venta', icon: List, type: 'characterBreakdown', color: 'text-muted-foreground', bg: 'bg-muted', description: 'Estructura de video' }
+    { label: 'Copywriting AI', icon: Type, type: 'characterBreakdown', color: 'text-emerald-500', bg: 'bg-emerald-500/10', description: 'Genera textos persuasivos para tus anuncios' },
+    { label: 'Imagen Flux HQ', icon: Image, type: 'modelView', color: 'text-indigo-500', bg: 'bg-indigo-500/10', description: 'Generación industrial de alta calidad' },
+    { label: 'Avatar de Marca', icon: Video, type: 'videoModel', color: 'text-purple-500', bg: 'bg-purple-500/10', description: 'Video con IA para campañas de video' },
+    { label: 'Web/App Builder', icon: LayoutTemplate, type: 'characterBreakdown', color: 'text-blue-500', bg: 'bg-blue-500/10', description: 'Cisueña interfaces y estructuras web' },
+    { label: 'Campaña Social', icon: MessageSquare, type: 'characterBreakdown', color: 'text-orange-500', bg: 'bg-orange-500/10', description: 'Planifica packs de redes sociales' },
   ].filter(item => 
     item.label.toLowerCase().includes(search.toLowerCase()) && 
     (activeCategory === null || (activeCategory === 6 && item.icon === Type) || (activeCategory === 3 && item.icon === Image) || (activeCategory === 4 && item.icon === Video))
   );
+
+  const plantillas = [
+    { label: 'Meta Ads Pack', icon: Sparkles, type: 'metaPack', color: 'text-pink-500', bg: 'bg-pink-500/10' },
+    { label: 'Landing App Structure', icon: LayoutGrid, type: 'landingPack', color: 'text-cyan-500', bg: 'bg-cyan-500/10' }
+  ];
 
   const contentItems = [
     { label: 'Subir', icon: Upload, action: handleFileUpload },
@@ -88,14 +126,14 @@ export function FormarketingSidebar() {
   ].filter(item => item.label.toLowerCase().includes(search.toLowerCase()));
 
   const topIcons = [
-    { icon: Clock, id: 0 }, 
-    { icon: LayoutGrid, id: 1 }, 
-    { icon: LayoutTemplate, id: 2 }, 
-    { icon: Image, id: 3 }, 
-    { icon: Video, id: 4 }, 
-    { icon: Music, id: 5 }, 
-    { icon: Type, id: 6 }, 
-    { icon: PenTool, id: 7 }
+    { icon: Clock, id: 0, title: 'Historial' }, 
+    { icon: LayoutGrid, id: 1, title: 'Lienzo' }, 
+    { icon: LayoutTemplate, id: 2, title: 'Plantillas' }, 
+    { icon: Image, id: 3, title: 'Imágenes' }, 
+    { icon: Video, id: 4, title: 'Videos' }, 
+    { icon: Music, id: 5, title: 'Música' }, 
+    { icon: Type, id: 6, title: 'Texto' }, 
+    { icon: PenTool, id: 7, title: 'Diseño' }
   ];
 
   const toolbarIcons = [
@@ -153,41 +191,74 @@ export function FormarketingSidebar() {
       </div>
 
       {/* Top Icons Row */}
-      <div className="flex items-center justify-between px-1 overflow-x-auto pb-2 scrollbar-none gap-2">
-        {topIcons.map((item, idx) => (
-          <button 
-            key={idx} 
-            onClick={() => setActiveCategory(activeCategory === item.id ? null : item.id)}
-            className={`p-1.5 rounded-lg transition-colors shrink-0 ${activeCategory === item.id ? 'bg-primary text-primary-foreground' : 'hover:bg-white/10 text-muted-foreground hover:text-foreground'}`}
-          >
-            <item.icon className="h-4 w-4" />
-          </button>
-        ))}
+      <TooltipProvider>
+        <div className="flex items-center justify-between px-1 overflow-x-auto pb-2 scrollbar-none gap-2">
+          {topIcons.map((item, idx) => (
+            <Tooltip key={idx}>
+              <TooltipTrigger asChild>
+                <button 
+                  onClick={() => setActiveCategory(activeCategory === item.id ? null : item.id)}
+                  className={`p-1.5 rounded-lg transition-colors shrink-0 ${activeCategory === item.id ? 'bg-primary text-primary-foreground' : 'hover:bg-white/10 text-muted-foreground hover:text-foreground'}`}
+                >
+                  <item.icon className="h-4 w-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="bg-black border-white/10 text-[10px] uppercase font-bold tracking-widest px-2 py-1">
+                {item.title}
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+      </TooltipProvider>
+
+      {/* Plantillas Menu (V5.2) */}
+      <div className="flex flex-col gap-1">
+        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2 mb-1">Plantillas</h3>
+        <div className="grid grid-cols-2 gap-2 px-1">
+          {plantillas.map((item, idx) => (
+            <button 
+              key={idx} 
+              onClick={() => handleAddTemplate(item.type)}
+              className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all group"
+            >
+              <item.icon className={`h-4 w-4 ${item.color}`} />
+              <span className="text-[9px] font-black text-center text-foreground/70 uppercase tracking-tighter leading-none">{item.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Basic Menu */}
-      <div className="flex flex-col gap-1">
-        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2 mb-1">Básicos</h3>
-        {menuItems.map((item, idx) => (
-          <button 
-            key={idx} 
-            draggable
-            onDragStart={(e) => onDragStart(e, item.type, item.label)}
-            onClick={() => handleAddNode(item.type, item.label)}
-            className="flex flex-col gap-1 w-full p-2.5 rounded-xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5 active:scale-95"
-          >
-            <div className="flex items-center gap-3">
-              <div className={`p-2 rounded-lg ${item.bg} group-hover:scale-110 transition-transform`}>
-                <item.icon className={`h-4 w-4 ${item.color}`} />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-bold text-foreground/90 group-hover:text-foreground">{item.label}</span>
-                <span className="text-[10px] text-muted-foreground line-clamp-1 group-hover:text-muted-foreground/80 lowercase">{item.description}</span>
-              </div>
-            </div>
-          </button>
-        ))}
-      </div>
+      <TooltipProvider>
+        <div className="flex flex-col gap-1">
+          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2 mb-1">Básicos</h3>
+          {menuItems.map((item, idx) => (
+            <Tooltip key={idx}>
+              <TooltipTrigger asChild>
+                <button 
+                  draggable
+                  onDragStart={(e) => onDragStart(e, item.type, item.label)}
+                  onClick={() => handleAddNode(item.type, item.label)}
+                  className="flex flex-col gap-1 w-full p-2.5 rounded-xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5 active:scale-95"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${item.bg} group-hover:scale-110 transition-transform`}>
+                      <item.icon className={`h-4 w-4 ${item.color}`} />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-foreground/90 group-hover:text-foreground">{item.label}</span>
+                      <span className="text-[10px] text-muted-foreground line-clamp-1 group-hover:text-muted-foreground/80 lowercase">{item.description}</span>
+                    </div>
+                  </div>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="bg-black border-white/10 text-[10px] font-bold max-w-[200px] p-2">
+                {item.description}
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+      </TooltipProvider>
 
       {/* Content Menu */}
       <div className="flex flex-col gap-1 mt-2">
