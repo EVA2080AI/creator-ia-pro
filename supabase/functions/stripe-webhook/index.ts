@@ -111,12 +111,25 @@ serve(async (req) => {
           return new Response("OK", { status: 200 });
         }
 
-        // Find user
-        const { data: users } = await supabaseAdmin.auth.admin.listUsers();
-        const user = users?.users?.find((u) => u.email === customerEmail);
+        // Use the exact user.id provided during checkout via client_reference_id
+        const supabaseUserId = session.client_reference_id;
         
+        let user: any = null;
+        if (supabaseUserId) {
+          // Verify user exists using admin api
+          const { data: { user: exactUser } } = await supabaseAdmin.auth.admin.getUserById(supabaseUserId);
+          user = exactUser;
+        }
+
         if (!user) {
-          console.log(`[WEBHOOK] No user found for ${customerEmail}`);
+          console.log(`[WEBHOOK] No exact user found for client_reference_id: ${supabaseUserId}. Attempting email fallback...`);
+          // Fallback just in case (e.g. legacy checkout links)
+          const { data: users } = await supabaseAdmin.auth.admin.listUsers();
+          user = users?.users?.find((u) => u.email === customerEmail);
+        }
+
+        if (!user) {
+          console.log(`[WEBHOOK] User completely not found for ${customerEmail} / ${supabaseUserId}`);
           return new Response("OK", { status: 200 });
         }
 

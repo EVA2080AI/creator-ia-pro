@@ -284,10 +284,8 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
       return result;
     } catch (err: any) {
       console.error("Media Proxy Failure:", err.message);
-      // Fallback: If proxy fails or is misconfigured, show the "Coming Soon" message but as a handled error
-      return { 
-        text: `⚙️ El motor de procesamiento industrial para "${tool}" se está configurando. Para activar esta función inmediata, por favor añade el REPLICATE_API_TOKEN en Supabase o contacta a soporte.` 
-      };
+      // Fallback: If proxy fails or is misconfigured, fail hard to trigger credit refund
+      throw new Error(`El motor de procesamiento para "${tool}" requiere REPLICATE_API_TOKEN. Funcionalidad en desarrollo.`);
     }
   },
 };
