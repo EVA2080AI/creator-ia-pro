@@ -22,6 +22,9 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const REDIRECT_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    ? `${window.location.origin}/dashboard`
+    : "https://creator-ia.com/dashboard";
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -35,7 +38,7 @@ const Auth = () => {
     try {
       if (mode === "forgot") {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/reset-password`,
+          redirectTo: REDIRECT_URL.replace("/dashboard", "/reset-password"),
         });
         if (error) throw error;
         toast.success("¡Email enviado! Revisa tu bandeja.");
@@ -50,7 +53,7 @@ const Auth = () => {
           email, password,
           options: { 
             data: { display_name: displayName || email.split("@")[0] },
-            emailRedirectTo: `${window.location.origin}/dashboard`
+            emailRedirectTo: REDIRECT_URL
           },
         });
         if (error) throw error;
@@ -210,7 +213,7 @@ const Auth = () => {
                       const { error } = await supabase.auth.signInWithOAuth({
                         provider: "google",
                         options: {
-                          redirectTo: `${window.location.origin}/dashboard`,
+                          redirectTo: REDIRECT_URL,
                         }
                       });
                       if (error) toast.error(error.message);
@@ -236,7 +239,7 @@ const Auth = () => {
                       const { error } = await supabase.auth.signInWithOAuth({
                         provider: "apple",
                         options: {
-                          redirectTo: `${window.location.origin}/dashboard`,
+                          redirectTo: REDIRECT_URL,
                         }
                       });
                       if (error) toast.error(error.message);
