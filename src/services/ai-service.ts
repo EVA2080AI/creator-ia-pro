@@ -65,8 +65,8 @@ export const aiService = {
       let result: any = { error: "Acción no soportada" };
 
       if (tool && ["upscale", "background", "enhance", "restore", "eraser"].includes(tool)) {
-        // Image edit tools require a secure backend proxy — show meaningful message
-        result = { text: `⚙️ La herramienta "${tool}" requiere un proxy de servidor seguro para procesar imágenes de alta calidad. Esta función estará disponible próximamente en el plan Pro. Por ahora, usa "Texto a Imagen" para generar imágenes desde cero.` };
+        if (!image) throw new Error(`La herramienta "${tool}" requiere una imagen de origen.`);
+        result = await this.handleMediaProxy(tool, image);
       } else if (action === "image" || IMAGE_MODEL_IDS.has(model) || tool === "generate") {
         result = await this.handleImageGen(prompt);
       } else if (action === "video") {
@@ -106,7 +106,7 @@ export const aiService = {
       return result;
 
     } catch (err: any) {
-      console.error("AI Service Error [V3.7]:", err.message);
+      console.error("AI Service Error [V3.9]:", err.message);
 
       // Attempt credit refund on AI failure
       try {
@@ -121,7 +121,7 @@ export const aiService = {
         console.error("Credit refund failed:", refundErr);
       }
 
-      throw new Error(`[IA V3.7] ${err.message}`);
+      throw new Error(`[IA V3.9] ${err.message}`);
     }
   },
 
@@ -259,5 +259,35 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
     // Use Pollinations – free, reliable, no key needed
     const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
     return { url: imageUrl };
+  },
+
+  // ─── MEDIA PROXY (IMAGE EDITING) ──────────────────────────────────────────
+  async handleMediaProxy(tool: string, imageUrl: string) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      const res = await fetch("https://zfzkohjdwggctogehlkw.supabase.co/functions/v1/media-proxy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify({ tool, image_url: imageUrl }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || `Proxy error ${res.status}`);
+      }
+
+      const result = await res.json();
+      return result;
+    } catch (err: any) {
+      console.error("Media Proxy Failure:", err.message);
+      // Fallback: If proxy fails or is misconfigured, show the "Coming Soon" message but as a handled error
+      return { 
+        text: `⚙️ El motor de procesamiento industrial para "${tool}" se está configurando. Para activar esta función inmediata, por favor añade el REPLICATE_API_TOKEN en Supabase o contacta a soporte.` 
+      };
+    }
   },
 };
