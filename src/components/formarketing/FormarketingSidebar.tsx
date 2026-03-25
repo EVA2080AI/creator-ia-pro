@@ -3,7 +3,7 @@ import { useReactFlow } from '@xyflow/react';
 import { 
   Search, Clock, LayoutGrid, LayoutTemplate, Image, Video, 
   Music, Type, PenTool, Sparkles, Maximize, List, Upload, Folder,
-  X, Play, Hand, Scissors, Square, MessageSquare, Undo, Redo, Settings
+  X, Play, Hand, Scissors, Square, MessageSquare, Undo, Redo, Settings, Share2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -48,21 +48,21 @@ export function FormarketingSidebar() {
        const charId = crypto.randomUUID();
        const imgId = crypto.randomUUID();
        const vidId = crypto.randomUUID();
+       const campId = crypto.randomUUID();
        
        const newNodes = [
-         { id: charId, type: 'characterBreakdown', position: { x: centerX - 350, y: centerY }, data: { title: 'Target Persona', description: 'Describe tu audiencia para Meta Ads...' } },
-         { id: imgId, type: 'modelView', position: { x: centerX, y: centerY }, data: { title: 'Imagen de Campaña', prompt: 'Visual cinemático para redes sociales...' } },
-         { id: vidId, type: 'videoModel', position: { x: centerX + 350, y: centerY }, data: { title: 'Reel de Ventas', status: 'pending' } }
+         { id: charId, type: 'characterBreakdown', position: { x: centerX - 450, y: centerY }, data: { title: 'Target Persona', description: 'Describe tu audiencia para Meta Ads...' } },
+         { id: imgId, type: 'modelView', position: { x: centerX - 150, y: centerY }, data: { title: 'Imagen de Campaña', prompt: 'Visual cinemático para redes sociales...' } },
+         { id: vidId, type: 'videoModel', position: { x: centerX + 150, y: centerY }, data: { title: 'Reel de Ventas', status: 'pending' } },
+         { id: campId, type: 'campaignManager', position: { x: centerX + 450, y: centerY }, data: { title: 'Gestor Meta Ads' } }
        ];
        
        addNodes(newNodes as any);
-       // Note: Edges are stored as metadata, but we can't easily auto-connect via addNodes here 
-       // unless we also update the metadata node. For now, we spawn them in layout.
     } else if (templateType === 'landingPack') {
        toast.info("Inyectando Plantilla: App Landing Structure...");
        addNodes([
          { id: crypto.randomUUID(), type: 'characterBreakdown', position: { x: centerX - 350, y: centerY }, data: { title: 'Value Prop', description: 'Define la propuesta de valor...' } },
-         { id: crypto.randomUUID(), type: 'characterBreakdown', position: { x: centerX, y: centerY }, data: { title: 'Wireframe Layout', description: 'Estructura de la landing page...' } }
+         { id: crypto.randomUUID(), type: 'layoutBuilder', position: { x: centerX, y: centerY }, data: { title: 'Wireframe Layout', platform: 'web' } }
        ] as any);
     }
   };
@@ -82,6 +82,8 @@ export function FormarketingSidebar() {
       defaultData = { title: title || 'Nuevo Video', status: 'pending', duration: '00:00' };
     } else if (type === 'layoutBuilder') {
       defaultData = { title: title || 'Nueva Interfaz', platform: 'web', structure: 'Define el layout...' };
+    } else if (type === 'campaignManager') {
+      defaultData = { title: title || 'Nueva Campaña' };
     }
 
     addNodes({
@@ -107,8 +109,8 @@ export function FormarketingSidebar() {
     { label: 'Copywriting AI', icon: Type, type: 'characterBreakdown', color: 'text-emerald-500', bg: 'bg-emerald-500/10', description: 'Genera textos persuasivos para tus anuncios' },
     { label: 'Imagen Flux HQ', icon: Image, type: 'modelView', color: 'text-indigo-500', bg: 'bg-indigo-500/10', description: 'Generación industrial de alta calidad' },
     { label: 'Avatar de Marca', icon: Video, type: 'videoModel', color: 'text-purple-500', bg: 'bg-purple-500/10', description: 'Video con IA para campañas de video' },
-    { label: 'Web/App Builder', icon: LayoutTemplate, type: 'characterBreakdown', color: 'text-blue-500', bg: 'bg-blue-500/10', description: 'Cisueña interfaces y estructuras web' },
-    { label: 'Campaña Social', icon: MessageSquare, type: 'characterBreakdown', color: 'text-orange-500', bg: 'bg-orange-500/10', description: 'Planifica packs de redes sociales' },
+    { label: 'Web/App Builder', icon: LayoutTemplate, type: 'layoutBuilder', color: 'text-blue-500', bg: 'bg-blue-500/10', description: 'Diseña interfaces y estructuras web' },
+    { label: 'Campaña Social', icon: Share2, type: 'campaignManager', color: 'text-orange-500', bg: 'bg-orange-500/10', description: 'Gestiona la distribución en redes sociales' },
   ].filter(item => 
     item.label.toLowerCase().includes(search.toLowerCase()) && 
     (activeCategory === null || (activeCategory === 6 && item.icon === Type) || (activeCategory === 3 && item.icon === Image) || (activeCategory === 4 && item.icon === Video))
