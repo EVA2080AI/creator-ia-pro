@@ -140,9 +140,18 @@ const Canvas = () => {
             model: type === "ui" ? "gemini-1.5-flash" : "nano-banana-25",
             node_id: data.id 
           });
-          toast.success(`¡${type === "ui" ? "Diseño UI" : type === "image" ? "Imagen" : "Video"} generado con éxito! (Industrial V3.4)`);
+
+          // Manual update for immediate UI feedback (redundant to Realtime for robustness)
+          updateNodeData(data.id, {
+            status: "ready",
+            assetUrl: result.url || null,
+            dataPayload: { ...result, _metadata: { last_updated: "V3.8" } }
+          });
+
+          toast.success(`¡${type === "ui" ? "Diseño UI" : type === "image" ? "Imagen" : "Video"} generado con éxito! (Industrial V3.8)`);
         } catch (err: any) {
-          toast.error(`${err.message} (Industrial V3.4)` || "Error en generación (V3.4)");
+          updateNodeData(data.id, { status: "error", errorMessage: err.message });
+          toast.error(`${err.message} (Industrial V3.8)`);
         }
         await refreshProfile();
       } catch (error: any) {
@@ -165,16 +174,25 @@ const Canvas = () => {
       await supabase.from("canvas_nodes").update({ status: "loading", error_message: null }).eq("id", nodeId);
 
       try {
-        await aiService.processAction({ 
+        const result = await aiService.processAction({ 
           action: node.data.type,
           prompt: node.data.prompt,
           model: node.data.type === "ui" ? "gemini-1.5-flash" : "nano-banana-25",
           node_id: node.data.dbId 
         });
-        toast.success("¡Regeneración finalizada!");
+
+        // Manual update for immediate UI feedback
+        updateNodeData(nodeId, {
+          status: "ready",
+          assetUrl: result.url || null,
+          dataPayload: { ...result, _metadata: { last_updated: "V3.8 (Regen)" } }
+        });
+
+        toast.success("¡Regeneración finalizada! (V3.8)");
         await refreshProfile();
       } catch (err: any) {
-        toast.error(`${err.message} (Regen V3.4)` || "Error al generar (V3.4)");
+        updateNodeData(nodeId, { status: "error", errorMessage: err.message });
+        toast.error(`${err.message} (Regen V3.8)`);
       } finally {
         setGenerating(false);
       }
