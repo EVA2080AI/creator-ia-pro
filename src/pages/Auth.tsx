@@ -187,7 +187,6 @@ const Auth = () => {
               </Button>
             </form>
 
-            {/* Ocultado temporalmente por el usuario (SSO no configurado)
             {mode !== "forgot" && (
               <div className="mt-4 space-y-3">
                 <div className="relative flex items-center justify-center">
@@ -205,8 +204,11 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await auth.signInWithOAuth("google", {
-                        redirect_uri: `${window.location.origin}/dashboard`,
+                      const { error } = await supabase.auth.signInWithOAuth({
+                        provider: "google",
+                        options: {
+                          redirectTo: `${window.location.origin}/dashboard`,
+                        }
                       });
                       if (error) toast.error(error.message);
                       setLoading(false);
@@ -228,8 +230,11 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await auth.signInWithOAuth("apple", {
-                        redirect_uri: `${window.location.origin}/dashboard`,
+                      const { error } = await supabase.auth.signInWithOAuth({
+                        provider: "apple",
+                        options: {
+                          redirectTo: `${window.location.origin}/dashboard`,
+                        }
                       });
                       if (error) toast.error(error.message);
                       setLoading(false);
@@ -243,7 +248,6 @@ const Auth = () => {
                 </div>
               </div>
             )}
-            */ }
 
             <div className="mt-6 text-center">
               {mode === "forgot" ? (
