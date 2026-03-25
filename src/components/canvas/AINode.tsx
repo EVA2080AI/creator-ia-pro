@@ -73,7 +73,7 @@ function AINodeComponent({ data, id }: NodeProps) {
               {nodeData.name || (isImage ? "Imagen IA" : "Video IA")}
             </span>
             <span className="text-[8px] text-muted-foreground uppercase tracking-widest opacity-50">
-              V3.92 Engine Output
+              V4.5 Industrial Engine
             </span>
           </div>
           
@@ -118,9 +118,10 @@ function AINodeComponent({ data, id }: NodeProps) {
             <div className="relative h-full w-full">
               <img
                 src={nodeData.assetUrl}
-                alt={nodeData.prompt}
-                onLoad={() => console.log("Image Loaded")}
+                alt={nodeData.prompt || "Generated Content"}
+                onLoad={() => console.log("Canvas: Image Loaded Successfully", nodeData.assetUrl)}
                 onError={(e) => {
+                  console.error("Canvas: Image Load Error", nodeData.assetUrl);
                   (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1544391439-1df6630fbc13?q=80&w=1470&auto=format&fit=crop";
                 }}
                 className="h-full w-full object-cover animate-in fade-in zoom-in duration-500"

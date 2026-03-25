@@ -1,4 +1,4 @@
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -37,39 +37,53 @@ const LoadingScreen = () => (
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <ErrorBoundary>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Suspense fallback={<LoadingScreen />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/canvas" element={<Canvas />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/spaces" element={<Spaces />} />
-              <Route path="/assets" element={<Assets />} />
-              <Route path="/tools" element={<Tools />} />
-              <Route path="/apps/:appId" element={<Tools />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/descargar" element={<Downloads />} />
-              <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
-              <Route path="/system-status" element={<SystemStatus />} />
-              <Route path="/product-backlog" element={<ProductBacklog />} />
-              <Route path="/sharescreen" element={<ShareScreen />} />
-              <Route path="/formarketing" element={<Formarketing />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
-  </ErrorBoundary>
-);
+const App = () => {
+  useEffect(() => {
+    // Domain Guard: Force primary domain in production (V4.5)
+    const hostname = window.location.hostname;
+    const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
+    const isVercelPreview = hostname.includes("vercel.app") && !hostname.includes("creator-ia.com");
+
+    if (!isLocal && isVercelPreview) {
+      console.log("Domain Guard: Redirecting to primary brand domain...");
+      window.location.replace(`https://creator-ia.com${window.location.pathname}${window.location.search}`);
+    }
+  }, []);
+
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Suspense fallback={<LoadingScreen />}>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/canvas" element={<Canvas />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/spaces" element={<Spaces />} />
+                <Route path="/assets" element={<Assets />} />
+                <Route path="/tools" element={<Tools />} />
+                <Route path="/apps/:appId" element={<Tools />} />
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/descargar" element={<Downloads />} />
+                <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
+                <Route path="/system-status" element={<SystemStatus />} />
+                <Route path="/product-backlog" element={<ProductBacklog />} />
+                <Route path="/sharescreen" element={<ShareScreen />} />
+                <Route path="/formarketing" element={<Formarketing />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </BrowserRouter>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
+  );
+};
 
 export default App;
