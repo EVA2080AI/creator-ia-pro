@@ -106,7 +106,7 @@ export const aiService = {
       return result;
 
     } catch (err: any) {
-      console.error("AI Service Error [V3.5]:", err.message);
+      console.error("AI Service Error [V3.7]:", err.message);
 
       // Attempt credit refund on AI failure
       try {
@@ -121,7 +121,7 @@ export const aiService = {
         console.error("Credit refund failed:", refundErr);
       }
 
-      throw new Error(`[IA V3.5] ${err.message}`);
+      throw new Error(`[IA V3.7] ${err.message}`);
     }
   },
 
@@ -202,6 +202,10 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
 
       if (!res.ok) {
         const errBody = await res.text();
+        if (res.status === 402) {
+          console.warn("OpenRouter 402: Falling back to Gemini Flash...");
+          return this.callGeminiDirect(action, prompt, systemPrompt, geminiKey);
+        }
         throw new Error(`OpenRouter error ${res.status}: ${errBody.slice(0, 200)}`);
       }
 
@@ -216,7 +220,11 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
       return { text };
     }
 
-    // Fallback: Gemini Flash direct (for UI gen or when OpenRouter key missing)
+    // Fallback: Gemini Flash direct
+    return this.callGeminiDirect(action, prompt, systemPrompt, geminiKey);
+  },
+
+  async callGeminiDirect(action: string, prompt: string, systemPrompt: string, geminiKey: string | undefined) {
     if (!geminiKey) throw new Error("No se encontró API key de IA. Configura VITE_GEMINI_API_KEY.");
 
     const activeGeminiModel = "gemini-1.5-flash";
