@@ -23,7 +23,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
   const navItems = [
     { path: "/dashboard", label: "Inicio", icon: Home },
     { path: "/tools", label: "Herramientas", icon: Wand2 },
-    { path: "/canvas", label: "Formaketing", icon: Palette },
+    { path: "/formarketing", label: "Formarketing", icon: Palette },
     { path: "/spaces", label: "Espacios", icon: LayoutGrid },
     { path: "/assets", label: "Assets", icon: Image },
     { path: "/pricing", label: "Planes", icon: CreditCard },

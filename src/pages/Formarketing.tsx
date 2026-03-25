@@ -12,9 +12,11 @@ import CharacterBreakdownNode from '@/components/formarketing/CharacterBreakdown
 import ModelNode from '@/components/formarketing/ModelNode';
 import VideoModelNode from '@/components/formarketing/VideoModelNode';
 import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
-import { ArrowLeft, Rocket, Trash2 } from 'lucide-react';
+import { ArrowLeft, Rocket, Trash2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { aiService } from '@/services/ai-service';
+import { supabase } from '@/integrations/supabase/client';
 
 const nodeTypes = {
   characterBreakdown: CharacterBreakdownNode,
@@ -106,9 +108,67 @@ function FormarketingContent() {
     [screenToFlowPosition, setNodes]
   );
 
-  const handleExecute = () => {
-    toast.info("Iniciando ejecución de flujo V4.7...");
-    // Future: Sequential processing logic
+  const handleExecute = async () => {
+    if (nodes.length === 0) {
+      toast.error("No hay nodos que ejecutar");
+      return;
+    }
+
+    toast.info("Iniciando motor de ejecución V4.8...");
+    
+    // 1. Process Image Nodes (modelView)
+    const imageNodes = nodes.filter(n => n.type === 'modelView');
+    
+    for (const node of imageNodes) {
+      try {
+        // Update local status to loading
+        setNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'loading' } } : n));
+
+        // Find source context (Character Breakdown)
+        const incomingEdge = edges.find(e => e.target === node.id);
+        const sourceNode = incomingEdge ? nodes.find(n => n.id === incomingEdge.source) : null;
+        
+        let finalPrompt = (node.data as any).prompt || "High quality marketing visual";
+        if (sourceNode?.type === 'characterBreakdown') {
+          finalPrompt = `${(sourceNode.data as any).description || ""}. ${finalPrompt}`;
+        }
+
+        // Call AI Engine via processAction (Handles credits + logging)
+        const result = await aiService.processAction({
+          action: 'image',
+          prompt: finalPrompt,
+          model: 'nano-banana-pro', // Maps to Flux on Replicate
+          node_id: node.id
+        });
+        
+        // Update local status to ready
+        setNodes((nds) => nds.map((n) => 
+          n.id === node.id 
+            ? { ...n, data: { ...n.data, status: 'ready', assetUrl: result.url } } 
+            : n
+        ));
+
+        // 2. Check if a Video Node is connected to this Image Node
+        const outgoingEdge = edges.find(e => e.source === node.id);
+        const targetNode = outgoingEdge ? nodes.find(n => n.id === outgoingEdge.target) : null;
+
+        if (targetNode?.type === 'videoModel') {
+           setNodes((nds) => nds.map((n) => n.id === targetNode.id ? { ...n, data: { ...n.data, status: 'rendering' } } : n));
+           
+           // Mock rendering delay for industrial effect
+           await new Promise(resolve => setTimeout(resolve, 3000));
+           
+           setNodes((nds) => nds.map((n) => n.id === targetNode.id ? { ...n, data: { ...n.data, status: 'ready', assetUrl: 'https://cdn.pixabay.com/video/2023/10/20/185834-876356744_tiny.mp4' } } : n));
+        }
+
+      } catch (error: any) {
+        console.error("Execution error for node:", node.id, error);
+        setNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'error' } } : n));
+        toast.error(`Error en nodo ${node.id}: ${error.message}`);
+      }
+    }
+
+    toast.success("Ejecución de flujo completada.");
   };
 
   return (

@@ -130,7 +130,7 @@ const Dashboard = () => {
     setIsCreatingSpace(false);
     setNewSpaceName("");
     setNewSpaceDesc("");
-    navigate(`/canvas?spaceId=${data.id}`);
+    navigate(`/formarketing?spaceId=${data.id}`);
   };
 
   const stats: QuickStat[] = [
@@ -141,7 +141,7 @@ const Dashboard = () => {
   ];
 
   const quickActions = [
-    { icon: Image, label: "Generar Imagen", desc: "Crea desde texto", path: "/canvas", accent: "bg-primary/10 text-primary" },
+    { icon: Image, label: "Generar Imagen", desc: "Crea desde texto", path: "/formarketing", accent: "bg-primary/10 text-primary" },
     { icon: Wand2, label: "Mejorar Foto", desc: "IA enhancement", path: "/tools", accent: "bg-accent/10 text-accent" },
     { icon: ZoomIn, label: "Ampliar 4x", desc: "Upscale con IA", path: "/tools", accent: "bg-warning/10 text-warning" },
     { icon: Eraser, label: "Borrar Objetos", desc: "Elimina lo que sobra", path: "/tools", accent: "bg-destructive/10 text-destructive" },
@@ -442,7 +442,7 @@ const Dashboard = () => {
               spaces.map((space) => (
                 <div 
                   key={space.id}
-                  onClick={() => navigate(`/canvas?spaceId=${space.id}`)}
+                  onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
                   className="group relative flex flex-col rounded-[28px] border border-white/5 bg-card/60 p-6 transition-all hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 cursor-pointer backdrop-blur-md"
                 >
                   <div className="flex items-center justify-between mb-4">
