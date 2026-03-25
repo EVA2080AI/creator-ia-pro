@@ -39,14 +39,16 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
-    // Domain Guard: Force primary domain in production (V4.5)
+    // Aggressive Domain Guard: Force primary domain in production (V4.6)
     const hostname = window.location.hostname;
     const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
-    const isVercelPreview = hostname.includes("vercel.app") && !hostname.includes("creator-ia.com");
+    // If it's a Vercel URL and NOT the final domain, redirect
+    const isWrongDomain = hostname.includes("vercel.app") && hostname !== "creator-ia.com";
 
-    if (!isLocal && isVercelPreview) {
-      console.log("Domain Guard: Redirecting to primary brand domain...");
-      window.location.replace(`https://creator-ia.com${window.location.pathname}${window.location.search}`);
+    if (!isLocal && isWrongDomain) {
+      const targetUrl = `https://creator-ia.com${window.location.pathname}${window.location.search}${window.location.hash}`;
+      console.log("Domain Guard: Correcting context to:", targetUrl);
+      window.location.replace(targetUrl);
     }
   }, []);
 
