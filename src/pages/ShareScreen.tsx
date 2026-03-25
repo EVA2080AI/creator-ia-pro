@@ -39,13 +39,15 @@ export default function ShareScreen() {
   // Consumir 1 crédito por conexión Host
   const consumeCredit = async () => {
     if (!profile || profile.credits_balance < 1) {
-      toast.error("No tienes créditos suficientes para ser Host. Recarga en tu perfil.");
+      toast.error("No tienes créditos suficientes para ser Host. Recarga en Planes.");
       return false;
     }
     try {
-      const { error } = await supabase.rpc("admin_update_credits", {
-        _new_balance: profile.credits_balance - 1,
-        _target_user_id: user!.id
+      const { error } = await (supabase.rpc as any)("spend_credits", {
+        _amount: 1,
+        _action: "sharescreen",
+        _model: "p2p",
+        _node_id: null,
       });
       if (error) throw error;
       await refreshProfile();

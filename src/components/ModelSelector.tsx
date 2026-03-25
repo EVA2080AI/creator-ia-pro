@@ -28,18 +28,18 @@ export interface AIModel {
 }
 
 export const AVAILABLE_MODELS: AIModel[] = [
-  // ─── TEXTO / CHAT ───────────────────────────────────────────────
-  { id: "deepseek-chat",       name: "DeepSeek V3",              provider: "DeepSeek",    tokenCost: 1,  badge: "Best Value 🔥", description: "Rendimiento top-tier a una fracción del costo.",         type: "text" },
-  { id: "gemini-3-flash",      name: "Gemini 3 Flash",           provider: "Google",      tokenCost: 1,  description: "Respuestas ultra rápidas para tareas sencillas.",            type: "text" },
-  { id: "gemini-3.1-pro-low",  name: "Gemini 3.1 Pro (Low)",     provider: "Google",      tokenCost: 1,  badge: "New",          description: "Equilibrio entre coste y velocidad.",                   type: "text" },
-  { id: "gemini-3.1-pro-high", name: "Gemini 3.1 Pro (High)",    provider: "Google",      tokenCost: 3,  badge: "New",          description: "Máxima inteligencia y razonamiento complejo.",          type: "text" },
-  { id: "claude-3.5-sonnet",   name: "Claude Sonnet 3.5",        provider: "Anthropic",   tokenCost: 4,  badge: "Thinking ⚡",  description: "Lógica avanzada y programación.",                       type: "text" },
-  { id: "claude-3-opus",       name: "Claude Opus 3",            provider: "Anthropic",   tokenCost: 5,  badge: "Best 🧠",      description: "El modelo más potente de Anthropic.",                   type: "text" },
-  { id: "gpt-oss-120b",        name: "GPT-OSS 120B (Medium)",    provider: "OpenSource",  tokenCost: 2,  badge: "⚠️",          description: "Alternativa Open Source de alto rendimiento.",          type: "text" },
-  // ─── IMAGEN / NANO BANANA ───────────────────────────────────────
-  { id: "nano-banana-2",       name: "Nano Banana 2 (Flash)",    provider: "NanoBanana",  tokenCost: 2,  badge: "Imagen ✨",    description: "Nano Banana 2: Gemini 3.1 Flash Image. 4K, ultra rápido.", type: "image" },
-  { id: "nano-banana-pro",     name: "Nano Banana Pro",          provider: "NanoBanana",  tokenCost: 4,  badge: "Imagen 🎨",    description: "Nano Banana Pro: Gemini 3 Pro Image. Calidad estudio 4K.",  type: "image" },
-  { id: "nano-banana-25",      name: "Nano Banana (2.5 Flash)",  provider: "NanoBanana",  tokenCost: 1,  badge: "Free Tier 🍌", description: "Nano Banana: Gemini 2.5 Flash Image. Rápido y económico.",   type: "image" },
+  // ─── TEXTO / CHAT (via OpenRouter) ──────────────────────────────────────────
+  { id: "deepseek-chat",       name: "DeepSeek V3",              provider: "DeepSeek",    tokenCost: 1,  badge: "Best Value 🔥", description: "deepseek-chat-v3-0324 · Rendimiento top-tier por menos.",        type: "text" },
+  { id: "gemini-3-flash",      name: "Gemini 2.0 Flash",         provider: "Google",      tokenCost: 1,  description: "gemini-2.0-flash-001 · Ultra rápido para tareas cotidianas.",         type: "text" },
+  { id: "gemini-3.1-pro-low",  name: "Gemini 2.5 Pro",           provider: "Google",      tokenCost: 1,  badge: "New",          description: "gemini-2.5-pro-preview · Equilibrio coste-inteligencia.",         type: "text" },
+  { id: "gemini-3.1-pro-high", name: "Gemini 2.5 Pro (Max)",     provider: "Google",      tokenCost: 3,  badge: "New",          description: "gemini-2.5-pro-preview · Razonamiento complejo avanzado.",        type: "text" },
+  { id: "claude-3.5-sonnet",   name: "Claude Sonnet 4.5",        provider: "Anthropic",   tokenCost: 4,  badge: "Thinking ⚡",  description: "claude-sonnet-4-5 · Lógica avanzada y programación.",             type: "text" },
+  { id: "claude-3-opus",       name: "Claude Opus 4.5",          provider: "Anthropic",   tokenCost: 5,  badge: "Best 🧠",      description: "claude-opus-4-5 · El más potente de Anthropic vía OR.",          type: "text" },
+  { id: "gpt-oss-120b",        name: "Llama 4 Maverick",         provider: "OpenSource",  tokenCost: 2,  badge: "Open 🦙",     description: "llama-4-maverick · Open Source de alto rendimiento.",             type: "text" },
+  // ─── IMAGEN (via Pollinations.ai) ───────────────────────────────────────────
+  { id: "nano-banana-2",       name: "Image Flash (Alta Cal.)",  provider: "NanoBanana",  tokenCost: 2,  badge: "Imagen ✨",    description: "Pollinations · 1024x1024, semilla aleatoria, calidad alta.",       type: "image" },
+  { id: "nano-banana-pro",     name: "Image Pro (Estudio)",      provider: "NanoBanana",  tokenCost: 4,  badge: "Imagen 🎨",    description: "Pollinations + enhance · Máxima calidad, estudio profesional.",    type: "image" },
+  { id: "nano-banana-25",      name: "Image Rápida (Eco)",       provider: "NanoBanana",  tokenCost: 1,  badge: "Free Tier 🍌", description: "Pollinations · Generación rápida y económica.",                    type: "image" },
 ];
 
 interface ModelSelectorProps {

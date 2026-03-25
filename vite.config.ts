@@ -24,7 +24,7 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-utils': ['@tanstack/react-query', 'lucide-react', 'clsx', 'tailwind-merge'],
           'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-ui': ['@xyflow/react', 'framer-motion', 'recharts']
+          'vendor-ui': ['@xyflow/react', 'recharts']
         }
       }
     },
