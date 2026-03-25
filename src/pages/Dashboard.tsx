@@ -20,6 +20,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, Cell 
+} from 'recharts';
 
 interface QuickStat {
   label: string;
@@ -155,6 +159,22 @@ const Dashboard = () => {
     { icon: Type, label: "Ad Generator", desc: "Crea anuncios visuales para Google y Meta Ads.", path: "/apps/ads", accent: "bg-primary/10 text-primary" },
   ];
 
+  const usageData = [
+    { name: 'Lun', credits: 12 },
+    { name: 'Mar', credits: 18 },
+    { name: 'Mié', credits: 15 },
+    { name: 'Jue', credits: 25 },
+    { name: 'Vie', credits: 32 },
+    { name: 'Sáb', credits: 28 },
+    { name: 'Dom', credits: 40 },
+  ];
+
+  const toolData = [
+    { name: 'Imagen', value: 45, color: '#3b82f6' },
+    { name: 'Copy', value: 30, color: '#10b981' },
+    { name: 'Studio', value: 25, color: '#f59e0b' },
+  ];
+
   if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
@@ -221,6 +241,87 @@ const Dashboard = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Industrial Analytics Section */}
+        <div className="grid lg:grid-cols-2 gap-8 mb-16">
+          <div className="rounded-[32px] border border-white/5 bg-card/40 p-8 backdrop-blur-xl transition-all hover:border-primary/20">
+             <div className="flex items-center justify-between mb-8">
+                <div>
+                   <h3 className="text-xl font-black tracking-tight">Flujo de Créditos</h3>
+                   <p className="text-xs text-muted-foreground opacity-60">Consumo industrial - Últimos 7 días</p>
+                </div>
+                <TrendingUp className="h-5 w-5 text-accent" />
+             </div>
+             <div className="h-[240px] w-full">
+               <ResponsiveContainer width="100%" height="100%">
+                 <AreaChart data={usageData}>
+                   <defs>
+                     <linearGradient id="colorCredits" x1="0" y1="0" x2="0" y2="1">
+                       <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                     </linearGradient>
+                   </defs>
+                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                   <XAxis 
+                     dataKey="name" 
+                     axisLine={false} 
+                     tickLine={false} 
+                     tick={{ fill: '#94a3b8', fontSize: 10 }}
+                     dy={10}
+                   />
+                   <YAxis hide />
+                   <Tooltip 
+                     contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                     itemStyle={{ color: '#3b82f6' }}
+                   />
+                   <Area 
+                     type="monotone" 
+                     dataKey="credits" 
+                     stroke="#3b82f6" 
+                     strokeWidth={3}
+                     fillOpacity={1} 
+                     fill="url(#colorCredits)" 
+                     animationDuration={2000}
+                   />
+                 </AreaChart>
+               </ResponsiveContainer>
+             </div>
+          </div>
+
+          <div className="rounded-[32px] border border-white/5 bg-card/40 p-8 backdrop-blur-xl transition-all hover:border-accent/20">
+             <div className="flex items-center justify-between mb-8">
+                <div>
+                   <h3 className="text-xl font-black tracking-tight">Actividad por Herramienta</h3>
+                   <p className="text-xs text-muted-foreground opacity-60">Distribución de carga IA</p>
+                </div>
+                <Box className="h-5 w-5 text-primary" />
+             </div>
+             <div className="h-[240px] w-full">
+               <ResponsiveContainer width="100%" height="100%">
+                 <BarChart data={toolData} layout="vertical">
+                   <XAxis type="number" hide />
+                   <YAxis 
+                     dataKey="name" 
+                     type="category" 
+                     axisLine={false} 
+                     tickLine={false} 
+                     tick={{ fill: '#f8fafc', fontSize: 12, fontWeight: 'bold' }}
+                     width={80}
+                   />
+                   <Tooltip 
+                     cursor={{ fill: 'transparent' }}
+                     contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                   />
+                   <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={24} animationDuration={2000}>
+                     {toolData.map((entry, index) => (
+                       <Cell key={`cell-${index}`} fill={entry.color} />
+                     ))}
+                   </Bar>
+                 </BarChart>
+               </ResponsiveContainer>
+             </div>
+          </div>
         </div>
 
         {/* Action Hub */}
