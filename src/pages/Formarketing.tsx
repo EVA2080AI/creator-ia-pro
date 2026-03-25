@@ -1,12 +1,13 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Background, Controls, MiniMap, ReactFlow, addEdge, Connection, Edge, Node } from '@xyflow/react';
+import { Background, Controls, MiniMap, ReactFlow, addEdge, Connection, Edge, Node, ReactFlowProvider } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { AppHeader } from "@/components/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
 import CharacterBreakdownNode from '@/components/formarketing/CharacterBreakdownNode';
 import ModelNode from '@/components/formarketing/ModelNode';
 import VideoModelNode from '@/components/formarketing/VideoModelNode';
+import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
 import { ArrowLeft, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -63,7 +64,8 @@ export default function Formarketing() {
   const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), []);
 
   return (
-    <div className="flex h-screen w-full flex-col bg-background">
+    <ReactFlowProvider>
+      <div className="flex h-screen w-full flex-col bg-background">
       <AppHeader userId={user?.id} onSignOut={signOut} />
       
       <div className="flex h-16 w-full items-center justify-between border-b border-white/5 bg-card/40 px-6 backdrop-blur-md">
@@ -83,6 +85,7 @@ export default function Formarketing() {
       </div>
 
       <div className="relative h-full w-full flex-1">
+        <FormarketingSidebar />
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -107,5 +110,6 @@ export default function Formarketing() {
         </ReactFlow>
       </div>
     </div>
+    </ReactFlowProvider>
   );
 }
