@@ -2,22 +2,24 @@ import { useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { 
   Search, Clock, LayoutGrid, LayoutTemplate, Image, Video, 
-  Music, Type, PenTool, Sparkles, Maximize, List, Upload, Folder
+  Music, Type, PenTool, Sparkles, Maximize, List, Upload, Folder,
+  X, Play, Hand, Scissors, Square, MessageSquare, Undo, Redo, Settings
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 export function FormarketingSidebar() {
   const [search, setSearch] = useState('');
-  const { addNodes, project } = useReactFlow();
+  const [menuOpen, setMenuOpen] = useState(true);
+  const { addNodes, screenToFlowPosition } = useReactFlow();
 
   const handleAddNode = (type: string, title: string) => {
     // Generate a slightly random drop position in the center
     const x = Math.random() * 200 + 100;
     const y = Math.random() * 200 + 100;
     
-    // In xyflow/react v12, project() converts screen to flow coords
-    const position = project({ x, y });
+    // In xyflow/react v12, project() was replaced by screenToFlowPosition
+    const position = screenToFlowPosition({ x, y });
     const newNodeId = `${type}-${Date.now()}`;
 
     let defaultData = {};
@@ -54,10 +56,50 @@ export function FormarketingSidebar() {
 
   const topIcons = [Clock, LayoutGrid, LayoutTemplate, Image, Video, Music, Type, PenTool];
 
+  const toolbarIcons = [
+    { icon: Hand, id: 'hand' },
+    { icon: Scissors, id: 'scissors' },
+    { icon: Square, id: 'square' },
+    { icon: MessageSquare, id: 'message' },
+    { icon: Undo, id: 'undo' },
+    { icon: Redo, id: 'redo' },
+    { icon: Settings, id: 'settings' }
+  ];
+
   return (
-    <div className="absolute left-6 top-24 z-10 w-72 rounded-2xl border border-white/10 bg-[#161616]/95 p-4 shadow-2xl backdrop-blur-xl flex flex-col gap-4 animate-fade-in">
+    <div className="absolute left-6 top-24 z-10 flex gap-4 animate-fade-in items-start h-[calc(100vh-140px)] pointer-events-none">
       
-      {/* Search Bar */}
+      {/* Vertical Pill Toolbar */}
+      <div className="flex flex-col items-center gap-2 rounded-[2rem] border border-white/10 bg-[#161616]/95 w-[56px] py-4 shadow-2xl backdrop-blur-xl shrink-0 h-fit pointer-events-auto">
+        {/* Close/Menu Toggle */}
+        <button 
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-muted-foreground hover:text-foreground transition-all mb-2"
+        >
+          {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
+        </button>
+        
+        {/* Play (Active) */}
+        <button className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)] mb-2 hover:scale-105 transition-transform">
+          <Play className="h-5 w-5 fill-current ml-1" />
+        </button>
+
+        {/* Other Tools */}
+        {toolbarIcons.map((Tool, i) => (
+          <button 
+            key={i} 
+            className={`flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors ${Tool.id === 'settings' ? 'mt-4' : ''}`}
+          >
+            <Tool.icon className="h-[18px] w-[18px]" />
+          </button>
+        ))}
+      </div>
+
+      {/* Expanded Context Menu */}
+      {menuOpen && (
+        <div className="w-76 rounded-2xl border border-white/10 bg-[#161616]/95 p-4 shadow-2xl backdrop-blur-xl flex flex-col gap-4 max-h-full overflow-y-auto scrollbar-none animate-in slide-in-from-left-4 fade-in duration-200 pointer-events-auto">
+          
+          {/* Search Bar */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input 
@@ -118,6 +160,8 @@ export function FormarketingSidebar() {
            <span className="bg-white/5 px-2 py-1 rounded">Insertar</span>
         </div>
       </div>
+        </div>
+      )}
     </div>
   );
 }
