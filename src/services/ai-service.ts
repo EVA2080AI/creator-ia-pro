@@ -106,7 +106,7 @@ export const aiService = {
       return result;
 
     } catch (err: any) {
-      console.error("AI Service Error [V3.9]:", err.message);
+      console.error("AI Service Error [V3.92]:", err.message);
 
       // Attempt credit refund on AI failure
       try {
@@ -121,7 +121,7 @@ export const aiService = {
         console.error("Credit refund failed:", refundErr);
       }
 
-      throw new Error(`[IA V3.9] ${err.message}`);
+      throw new Error(`[IA V3.92] ${err.message}`);
     }
   },
 

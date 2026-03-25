@@ -73,7 +73,7 @@ function AINodeComponent({ data, id }: NodeProps) {
               {nodeData.name || (isImage ? "Imagen IA" : "Video IA")}
             </span>
             <span className="text-[8px] text-muted-foreground uppercase tracking-widest opacity-50">
-              V3.0 Engine Output
+              V3.92 Engine Output
             </span>
           </div>
           
