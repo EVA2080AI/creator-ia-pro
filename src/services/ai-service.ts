@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // ─── MODEL ROUTING TABLE ──────────────────────────────────────────────────────
 // Maps internal model IDs → real API model names
@@ -272,13 +273,17 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
         }),
       });
 
-      if (!res.ok) throw new Error("Proxy error");
+      if (!res.ok) throw new Error("Proxy error: " + res.status);
       const data = await res.json();
+      console.log("Canvas Engine (Industrial): Replicate success", data.url);
+      if (data.url) toast.info("URL Generada: " + data.url.substring(0, 40) + "...");
       return data;
     } catch (err) {
-      console.warn("Replicate failed, falling back to Pollinations...");
+      console.warn("Canvas Engine (Industrial): Replicate failed, falling back to Pollinations...", err);
       const seed = Math.floor(Math.random() * 999999);
       const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
+      console.log("Canvas Engine (Industrial): Fallback URL", imageUrl);
+      toast.warning("Usando motor de respaldo (Industrial Fallback)");
       return { url: imageUrl };
     }
   },
