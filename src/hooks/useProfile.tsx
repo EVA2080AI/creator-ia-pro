@@ -5,6 +5,7 @@ interface Profile {
   id: string;
   user_id: string;
   display_name: string | null;
+  email: string;
   credits_balance: number;
   subscription_tier: string;
   avatar_url: string | null;
@@ -25,7 +26,7 @@ export function useProfile(userId: string | undefined) {
         .single();
 
       if (!error && data) {
-        setProfile(data as Profile);
+        setProfile(data as any as Profile);
       }
       setLoading(false);
     };
@@ -40,7 +41,7 @@ export function useProfile(userId: string | undefined) {
       .select("*")
       .eq("user_id", userId)
       .single();
-    if (data) setProfile(data as Profile);
+    if (data) setProfile(data as any as Profile);
   };
 
   return { profile, loading, refreshProfile };

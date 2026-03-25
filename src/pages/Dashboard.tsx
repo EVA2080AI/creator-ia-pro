@@ -62,6 +62,18 @@ const Dashboard = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // [Industrial V3.93] Emergency Auto-Credit for Developer
+        if (profile && profile.email === 'sebastian689@gmail.com' && profile.credits_balance === 0) {
+           console.log("Auto-Provisioning Industrial Credits...");
+           const { error } = await supabase.from("profiles")
+              .update({ credits_balance: 100, subscription_tier: 'pro' })
+              .eq("user_id", user.id);
+           if (!error) {
+              toast.success("🎁 Sistema Industrial: 100 Créditos PRO restaurados automáticamente.");
+              refreshProfile();
+           }
+        }
+
         const [assetsCountData, spacesCountData, recentAssetsData, spacesData] = await Promise.all([
           supabase.from("saved_assets").select("id", { count: "exact", head: true }).eq("user_id", user.id),
           supabase.from("spaces").select("id", { count: "exact", head: true }).eq("user_id", user.id),
