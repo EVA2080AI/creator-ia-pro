@@ -48,7 +48,10 @@ const Auth = () => {
       } else {
         const { error } = await supabase.auth.signUp({
           email, password,
-          options: { data: { display_name: displayName || email.split("@")[0] } },
+          options: { 
+            data: { display_name: displayName || email.split("@")[0] },
+            emailRedirectTo: `${window.location.origin}/dashboard`
+          },
         });
         if (error) throw error;
         toast.success("¡Cuenta creada! Revisa tu email para confirmar.");
