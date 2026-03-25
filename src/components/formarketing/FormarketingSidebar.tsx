@@ -52,12 +52,12 @@ export function FormarketingSidebar() {
 
     addNodes({
       id: newNodeId,
-      type: type === 'uiNode' ? 'uiNode' : 'aiNode', // Consistency with Canvas.tsx
+      type: type, // Pass the type directly (characterBreakdown, modelView, etc)
       position,
       data: {
         ...defaultData,
         assetUrl: assetUrl || null,
-        status: assetUrl ? 'ready' : 'loading',
+        status: assetUrl ? 'ready' : 'idle',
         prompt: title || 'Elemento'
       },
     });
