@@ -26,7 +26,7 @@ const nodeTypes = {
 
 const initialNodes: Node[] = [
   {
-    id: 'char-1',
+    id: crypto.randomUUID(),
     type: 'characterBreakdown',
     position: { x: 50, y: 100 },
     data: { 
@@ -36,7 +36,7 @@ const initialNodes: Node[] = [
     },
   },
   {
-    id: 'img-1',
+    id: crypto.randomUUID(),
     type: 'modelView',
     position: { x: 450, y: 50 },
     data: { 
@@ -46,7 +46,7 @@ const initialNodes: Node[] = [
     },
   },
   {
-    id: 'vid-1',
+    id: crypto.randomUUID(),
     type: 'videoModel',
     position: { x: 850, y: 100 },
     data: { 
@@ -57,10 +57,7 @@ const initialNodes: Node[] = [
   }
 ];
 
-const initialEdges: Edge[] = [
-   { id: 'e1-2', source: 'char-1', target: 'img-1', animated: true, style: { stroke: '#8b5cf6', strokeWidth: 2 } },
-   { id: 'e2-3', source: 'img-1', target: 'vid-1', animated: true, style: { stroke: '#f59e0b', strokeWidth: 2 } }
-];
+const initialEdges: Edge[] = []; // Clear initial edges to avoid ID mismatches with randomUUID
 
 function FormarketingContent() {
   const { user, signOut } = useAuth("/auth");
@@ -92,7 +89,7 @@ function FormarketingContent() {
       });
 
       const newNode: Node = {
-        id: `${type}-${Date.now()}`,
+        id: crypto.randomUUID(),
         type,
         position,
         data: { 

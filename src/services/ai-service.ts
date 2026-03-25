@@ -50,15 +50,19 @@ export const aiService = {
       const { data: profile } = await supabase
         .from("profiles")
         .select("subscription_tier, credits_balance")
-        .eq("id", user.id)
+        .eq("user_id", user.id)
         .single();
 
-      // 2. Deduct Credits via Atomic RPC
+      // 2. Validate Node ID (must be UUID for DB)
+      const isValidUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+      const safeNodeId = node_id && isValidUUID(node_id) ? node_id : null;
+
+      // 3. Deduct Credits via Atomic RPC
       const { error: rpcError } = await (supabase.rpc as any)("spend_credits", {
         _amount: cost,
         _action: actionName,
         _model: model || tool || "unknown",
-        _node_id: node_id,
+        _node_id: safeNodeId,
       });
       if (rpcError) throw new Error(rpcError.message || "Créditos insuficientes");
 
