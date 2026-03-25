@@ -1,6 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Background, Controls, MiniMap, ReactFlow, addEdge, Connection, Edge, Node, ReactFlowProvider } from '@xyflow/react';
+import { 
+  Background, Controls, MiniMap, ReactFlow, addEdge, 
+  Connection, Edge, Node, ReactFlowProvider,
+  useNodesState, useEdgesState, useReactFlow
+} from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { AppHeader } from "@/components/AppHeader";
 import { useAuth } from "@/hooks/useAuth";
@@ -8,8 +12,9 @@ import CharacterBreakdownNode from '@/components/formarketing/CharacterBreakdown
 import ModelNode from '@/components/formarketing/ModelNode';
 import VideoModelNode from '@/components/formarketing/VideoModelNode';
 import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
-import { ArrowLeft, Rocket } from 'lucide-react';
+import { ArrowLeft, Rocket, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const nodeTypes = {
   characterBreakdown: CharacterBreakdownNode,
@@ -55,17 +60,59 @@ const initialEdges: Edge[] = [
    { id: 'e2-3', source: 'img-1', target: 'vid-1', animated: true, style: { stroke: '#f59e0b', strokeWidth: 2 } }
 ];
 
-export default function Formarketing() {
+function FormarketingContent() {
   const { user, signOut } = useAuth("/auth");
   const navigate = useNavigate();
-  const [nodes, setNodes] = useState<Node[]>(initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges);
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const { screenToFlowPosition } = useReactFlow();
 
-  const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), []);
+  const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
+
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+
+      const type = event.dataTransfer.getData('application/reactflow');
+      const label = event.dataTransfer.getData('application/label');
+
+      if (typeof type === 'undefined' || !type) return;
+
+      const position = screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+
+      const newNode: Node = {
+        id: `${type}-${Date.now()}`,
+        type,
+        position,
+        data: { 
+          title: label || 'Nuevo Elemento',
+          status: 'idle',
+          prompt: ''
+        },
+      };
+
+      setNodes((nds) => nds.concat(newNode));
+      toast.success(`${label} añadido al canvas`);
+    },
+    [screenToFlowPosition, setNodes]
+  );
+
+  const handleExecute = () => {
+    toast.info("Iniciando ejecución de flujo V4.7...");
+    // Future: Sequential processing logic
+  };
 
   return (
-    <ReactFlowProvider>
-      <div className="flex h-screen w-full flex-col bg-background">
+    <div className="flex h-screen w-full flex-col bg-background text-foreground">
       <AppHeader userId={user?.id} onSignOut={signOut} />
       
       <div className="flex h-16 w-full items-center justify-between border-b border-white/5 bg-card/40 px-6 backdrop-blur-md">
@@ -75,21 +122,25 @@ export default function Formarketing() {
             </Button>
             <div className="flex flex-col">
                <h1 className="text-lg font-black tracking-tight">Formarketing Studio</h1>
-               <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Flujos V4.2</span>
+               <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Flujos V4.7 Industrial</span>
             </div>
          </div>
-         <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl gap-2 font-bold px-6 shadow-xl shadow-primary/20">
+         <Button onClick={handleExecute} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl gap-2 font-bold px-6 shadow-xl shadow-primary/20">
             <Rocket className="h-4 w-4" />
             Ejecutar Flujo
          </Button>
       </div>
 
-      <div className="relative h-full w-full flex-1">
+      <div className="relative h-full w-full flex-1" ref={reactFlowWrapper}>
         <FormarketingSidebar />
         <ReactFlow
           nodes={nodes}
           edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
           onConnect={onConnect}
+          onDrop={onDrop}
+          onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           fitView
           className="bg-background/50"
@@ -110,6 +161,13 @@ export default function Formarketing() {
         </ReactFlow>
       </div>
     </div>
+  );
+}
+
+export default function Formarketing() {
+  return (
+    <ReactFlowProvider>
+      <FormarketingContent />
     </ReactFlowProvider>
   );
 }

@@ -63,13 +63,19 @@ export function FormarketingSidebar() {
     });
   };
 
+  const onDragStart = (event: React.DragEvent, nodeType: string, label: string) => {
+    event.dataTransfer.setData('application/reactflow', nodeType);
+    event.dataTransfer.setData('application/label', label);
+    event.dataTransfer.dropEffect = 'move';
+  };
+
   const menuItems = [
-    { label: 'Texto', icon: Type, type: 'characterBreakdown', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { label: 'Generar imagen', icon: Image, type: 'modelView', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-    { label: 'Generar vídeo', icon: Video, type: 'videoModel', color: 'text-purple-500', bg: 'bg-purple-500/10' },
-    { label: 'Asistente', icon: Sparkles, type: 'characterBreakdown', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-    { label: 'Mejorar imagen', icon: Maximize, type: 'modelView', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
-    { label: 'Lista', icon: List, type: 'characterBreakdown', color: 'text-muted-foreground', bg: 'bg-muted' }
+    { label: 'Copywriting AI', icon: Type, type: 'characterBreakdown', color: 'text-emerald-500', bg: 'bg-emerald-500/10', description: 'Genera textos persuasivos' },
+    { label: 'Imagen Flux HQ', icon: Image, type: 'modelView', color: 'text-indigo-500', bg: 'bg-indigo-500/10', description: 'Generación industrial' },
+    { label: 'Avatar de Marca', icon: Video, type: 'videoModel', color: 'text-purple-500', bg: 'bg-purple-500/10', description: 'Video con IA' },
+    { label: 'Asistente Estratégico', icon: Sparkles, type: 'characterBreakdown', color: 'text-emerald-500', bg: 'bg-emerald-500/10', description: 'Análisis de mercado' },
+    { label: 'Upscale & Finish', icon: Maximize, type: 'modelView', color: 'text-indigo-500', bg: 'bg-indigo-500/10', description: 'Alta resolución' },
+    { label: 'Guión de Venta', icon: List, type: 'characterBreakdown', color: 'text-muted-foreground', bg: 'bg-muted', description: 'Estructura de video' }
   ].filter(item => 
     item.label.toLowerCase().includes(search.toLowerCase()) && 
     (activeCategory === null || (activeCategory === 6 && item.icon === Type) || (activeCategory === 3 && item.icon === Image) || (activeCategory === 4 && item.icon === Video))
@@ -165,13 +171,20 @@ export function FormarketingSidebar() {
         {menuItems.map((item, idx) => (
           <button 
             key={idx} 
+            draggable
+            onDragStart={(e) => onDragStart(e, item.type, item.label)}
             onClick={() => handleAddNode(item.type, item.label)}
-            className="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-colors text-left group"
+            className="flex flex-col gap-1 w-full p-2.5 rounded-xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5 active:scale-95"
           >
-            <div className={`p-1.5 rounded-lg ${item.bg}`}>
-              <item.icon className={`h-4 w-4 ${item.color}`} />
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg ${item.bg} group-hover:scale-110 transition-transform`}>
+                <item.icon className={`h-4 w-4 ${item.color}`} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-foreground/90 group-hover:text-foreground">{item.label}</span>
+                <span className="text-[10px] text-muted-foreground line-clamp-1 group-hover:text-muted-foreground/80 lowercase">{item.description}</span>
+              </div>
             </div>
-            <span className="text-sm font-medium text-foreground/90 group-hover:text-foreground">{item.label}</span>
           </button>
         ))}
       </div>
