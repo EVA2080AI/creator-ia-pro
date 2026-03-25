@@ -122,7 +122,13 @@ const Downloads = () => {
                 </Button>
               ) : (
                 <Button
-                  onClick={() => window.open(p.url, "_blank")}
+                  onClick={() => {
+                    if (p.url.includes("releases.creatoria.pro")) {
+                      import("sonner").then((mod) => mod.toast.success(`Iniciando descarga segura de Creator IA Pro para ${p.name}...`));
+                    } else {
+                      window.open(p.url, "_blank");
+                    }
+                  }}
                   variant="outline"
                   className="w-full border-primary/20 text-primary hover:bg-primary/10 rounded-full gap-2"
                 >

@@ -152,7 +152,7 @@ const Dashboard = () => {
   const aiApps = [
     { icon: Monitor, label: "ShareScreen Pro", desc: "Extiende tu espacio P2P a dispositivos móviles. [1 Crédito]", path: "/sharescreen", accent: "bg-emerald-500/10 text-emerald-500" },
     { icon: MessageSquare, label: "AI Copywriter", desc: "Genera textos de marketing, ads y redes sociales con IA.", path: "/apps/copywriter", accent: "bg-primary/10 text-primary" },
-    { icon: Megaphone, label: "Formaketing Studio", desc: "Crea flows de marketing visual con lienzo infinito.", path: "/canvas", accent: "bg-accent/10 text-accent" },
+    { icon: Megaphone, label: "Formarketing Studio", desc: "Crea flows de marketing visual con lienzo infinito.", path: "/formarketing", accent: "bg-accent/10 text-accent" },
     { icon: PenTool, label: "Logo Maker", desc: "Diseña logos profesionales con IA generativa.", path: "/apps/logo", accent: "bg-gold/10 text-gold" },
     { icon: Hash, label: "Social Media Kit", desc: "Genera contenido optimizado para cada red social.", path: "/apps/social", accent: "bg-warning/10 text-warning" },
     { icon: FileText, label: "AI Blog Writer", desc: "Artículos SEO completos generados con IA.", path: "/apps/blog", accent: "bg-destructive/10 text-destructive" },
@@ -328,13 +328,13 @@ const Dashboard = () => {
         <div className="grid lg:grid-cols-3 gap-8 mb-16">
           {/* Main Studio Access */}
           <div 
-            onClick={() => navigate("/canvas")}
+            onClick={() => navigate("/formarketing")}
             className="lg:col-span-2 group relative overflow-hidden rounded-[32px] border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-10 cursor-pointer transition-all hover:border-primary/40 hover:shadow-3xl hover:shadow-primary/10"
           >
              <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-[100px] transition-all group-hover:bg-primary/30" />
              <div className="relative z-10 space-y-4">
-                <Badge className="bg-primary/20 text-primary border-primary/30 py-1 px-4 rounded-full text-[10px] font-bold uppercase tracking-widest">Lienzo Infinito V3.1</Badge>
-                <h2 className="text-4xl font-black tracking-tighter">Formaketing Studio</h2>
+                <Badge className="bg-primary/20 text-primary border-primary/30 py-1 px-4 rounded-full text-[10px] font-bold uppercase tracking-widest">Blueprint Flow V4.2</Badge>
+                <h2 className="text-4xl font-black tracking-tighter">Formarketing Studio</h2>
                 <p className="text-muted-foreground text-lg max-w-md leading-relaxed">
                    Diseña flujos de marketing visual, genera interfaces UX/UI y assets generativos en un mismo entorno industrial.
                 </p>

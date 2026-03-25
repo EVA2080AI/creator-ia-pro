@@ -127,7 +127,7 @@ const Tools = () => {
         toast.success("¡Texto generado!");
       } else if (data?.url) {
         setResultImage(data.url);
-        toast.success("¡Procesado con éxito!");
+        toast.success("Imagen generada con éxito");
       } else {
         console.error("Payload inesperado:", data);
         throw new Error("Respuesta inválida del servidor");
