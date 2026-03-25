@@ -115,11 +115,15 @@ function AINodeComponent({ data, id }: NodeProps) {
           )}
 
           {isReady && nodeData.assetUrl && (
-            <>
+            <div className="relative h-full w-full">
               <img
                 src={nodeData.assetUrl}
                 alt={nodeData.prompt}
-                className="h-full w-full object-cover"
+                onLoad={() => console.log("Image Loaded")}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1544391439-1df6630fbc13?q=80&w=1470&auto=format&fit=crop";
+                }}
+                className="h-full w-full object-cover animate-in fade-in zoom-in duration-500"
                 loading="lazy"
               />
               {/* Video play overlay */}
@@ -130,7 +134,7 @@ function AINodeComponent({ data, id }: NodeProps) {
                   </div>
                 </div>
               )}
-            </>
+            </div>
           )}
         </div>
 

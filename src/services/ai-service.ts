@@ -255,10 +255,32 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
 
   // ─── IMAGE GENERATION ────────────────────────────────────────────────────────
   async handleImageGen(prompt: string) {
-    const seed = Math.floor(Math.random() * 999999);
-    // Use Pollinations – free, reliable, no key needed
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
-    return { url: imageUrl };
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Industrial Route: Use Flux on Replicate via our proxy
+      const res = await fetch("https://zfzkohjdwggctogehlkw.supabase.co/functions/v1/media-proxy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session?.access_token || ""}`,
+        },
+        body: JSON.stringify({ 
+          tool: "generate", 
+          image_url: "none", // indicate new generation
+          prompt 
+        }),
+      });
+
+      if (!res.ok) throw new Error("Proxy error");
+      const data = await res.json();
+      return data;
+    } catch (err) {
+      console.warn("Replicate failed, falling back to Pollinations...");
+      const seed = Math.floor(Math.random() * 999999);
+      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
+      return { url: imageUrl };
+    }
   },
 
   // ─── MEDIA PROXY (IMAGE EDITING) ──────────────────────────────────────────

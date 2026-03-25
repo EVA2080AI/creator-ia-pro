@@ -10,10 +10,29 @@ import { Button } from '@/components/ui/button';
 
 export function FormarketingSidebar() {
   const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(true);
   const { addNodes, screenToFlowPosition } = useReactFlow();
+  const fileInputRef = useState<HTMLInputElement | null>(null)[0]; // Simplified for logic check
+  
+  const handleFileUpload = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e: any) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          handleAddNode('modelView', 'Imagen Subida', reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
 
-  const handleAddNode = (type: string, title: string) => {
+  const handleAddNode = (type: string, title: string, assetUrl?: string) => {
     // Generate a slightly random drop position in the center
     const x = Math.random() * 200 + 100;
     const y = Math.random() * 200 + 100;
@@ -33,9 +52,14 @@ export function FormarketingSidebar() {
 
     addNodes({
       id: newNodeId,
-      type,
+      type: type === 'uiNode' ? 'uiNode' : 'aiNode', // Consistency with Canvas.tsx
       position,
-      data: defaultData,
+      data: {
+        ...defaultData,
+        assetUrl: assetUrl || null,
+        status: assetUrl ? 'ready' : 'loading',
+        prompt: title || 'Elemento'
+      },
     });
   };
 
@@ -46,15 +70,27 @@ export function FormarketingSidebar() {
     { label: 'Asistente', icon: Sparkles, type: 'characterBreakdown', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
     { label: 'Mejorar imagen', icon: Maximize, type: 'modelView', color: 'text-indigo-500', bg: 'bg-indigo-500/10' },
     { label: 'Lista', icon: List, type: 'characterBreakdown', color: 'text-muted-foreground', bg: 'bg-muted' }
-  ];
+  ].filter(item => 
+    item.label.toLowerCase().includes(search.toLowerCase()) && 
+    (activeCategory === null || (activeCategory === 6 && item.icon === Type) || (activeCategory === 3 && item.icon === Image) || (activeCategory === 4 && item.icon === Video))
+  );
 
   const contentItems = [
-    { label: 'Subir', icon: Upload },
+    { label: 'Subir', icon: Upload, action: handleFileUpload },
     { label: 'Recursos', icon: Folder },
     { label: 'Stock', icon: Search }
-  ];
+  ].filter(item => item.label.toLowerCase().includes(search.toLowerCase()));
 
-  const topIcons = [Clock, LayoutGrid, LayoutTemplate, Image, Video, Music, Type, PenTool];
+  const topIcons = [
+    { icon: Clock, id: 0 }, 
+    { icon: LayoutGrid, id: 1 }, 
+    { icon: LayoutTemplate, id: 2 }, 
+    { icon: Image, id: 3 }, 
+    { icon: Video, id: 4 }, 
+    { icon: Music, id: 5 }, 
+    { icon: Type, id: 6 }, 
+    { icon: PenTool, id: 7 }
+  ];
 
   const toolbarIcons = [
     { icon: Hand, id: 'hand' },
@@ -112,9 +148,13 @@ export function FormarketingSidebar() {
 
       {/* Top Icons Row */}
       <div className="flex items-center justify-between px-1 overflow-x-auto pb-2 scrollbar-none gap-2">
-        {topIcons.map((Icon, idx) => (
-          <button key={idx} className="p-1.5 rounded-lg hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors shrink-0">
-            <Icon className="h-4 w-4" />
+        {topIcons.map((item, idx) => (
+          <button 
+            key={idx} 
+            onClick={() => setActiveCategory(activeCategory === item.id ? null : item.id)}
+            className={`p-1.5 rounded-lg transition-colors shrink-0 ${activeCategory === item.id ? 'bg-primary text-primary-foreground' : 'hover:bg-white/10 text-muted-foreground hover:text-foreground'}`}
+          >
+            <item.icon className="h-4 w-4" />
           </button>
         ))}
       </div>
@@ -142,6 +182,7 @@ export function FormarketingSidebar() {
         {contentItems.map((item, idx) => (
           <button 
             key={idx} 
+            onClick={item.action}
             className="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-colors text-left group"
           >
             <div className="p-1.5 rounded-lg border border-white/10 bg-black/20">
