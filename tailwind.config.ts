@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Bebas Neue', 'sans-serif'],
+        display: ['Outfit', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
@@ -31,18 +31,18 @@ export default {
         'node-glow': 'hsl(var(--node-glow))',
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
-        // Creator IA Pro v2.1 Brand Tokens (Industrial Monochrome)
-        creator: {
-          bg: '#050506',
-          canvas: '#020202',
-          card: '#0f0f12',
-          'card-hover': '#141418',
-          pink: '#EC4699',
-          orange: '#FA8214',
-          slate: '#94a3b8',
-          zinc: '#27272a',
-          border: 'rgba(255,255,255,0.06)',
-          'border-hover': 'rgba(255,255,255,0.12)',
+        // Aether Evolution Brand Tokens (Ultra-Premium)
+        aether: {
+          bg: '#020203',
+          canvas: '#010102',
+          card: 'rgba(10, 10, 12, 0.8)',
+          'card-hover': 'rgba(15, 15, 18, 0.9)',
+          purple: '#bd00ff',
+          blue: '#00c2ff',
+          rose: '#ff0071',
+          glass: 'rgba(255, 255, 255, 0.03)',
+          border: 'rgba(255, 255, 255, 0.08)',
+          'border-hover': 'rgba(255,255,255,0.15)',
         },
         gold: {
           DEFAULT: 'hsl(var(--gold))',
@@ -102,19 +102,15 @@ export default {
           from: { height: 'var(--radix-accordion-content-height)' },
           to: { height: '0' },
         },
-        'pulse-brand': {
-          '0%, 100%': { boxShadow: '0 0 15px -5px rgba(255,255,255,0.05)' },
-          '50%': { boxShadow: '0 0 30px -5px rgba(255,255,255,0.1)' },
+        'pulse-prism': {
+          '0%, 100%': { opacity: '0.5', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.02)' },
         },
-        'spin-slow': {
-          from: { transform: 'rotate(0deg)' },
-          to: { transform: 'rotate(360deg)' },
+        'float-slow': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
         },
-        'float-up': {
-          from: { opacity: '0', transform: 'translateY(12px) scale(0.97)' },
-          to: { opacity: '1', transform: 'translateY(0) scale(1)' },
-        },
-        'gradient-shift': {
+        'border-flow': {
           '0%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
           '100%': { backgroundPosition: '0% 50%' },
@@ -127,10 +123,9 @@ export default {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'pulse-brand': 'pulse-brand 3s ease-in-out infinite',
-        'spin-slow': 'spin-slow 8s linear infinite',
-        'float-up': 'float-up 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-        'gradient-shift': 'gradient-shift 4s ease infinite',
+        'pulse-prism': 'pulse-prism 4s ease-in-out infinite',
+        'float-slow': 'float-slow 6s ease-in-out infinite',
+        'border-flow': 'border-flow 6s ease infinite',
         shimmer: 'shimmer 2s linear infinite',
       },
     },

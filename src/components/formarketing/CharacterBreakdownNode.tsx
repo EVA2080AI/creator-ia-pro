@@ -60,37 +60,38 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-white/5 bg-[#0a0a0b] backdrop-blur-xl w-[260px] shadow-2xl transition-all duration-300 hover:border-white/20
-      ${data.status === 'executing' ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.05)] animate-pulse' : ''}
+    <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
+      ${data.status === 'executing' ? 'aether-prism glow-purple' : 'aether-card'}
+      w-[260px] shadow-2xl nodrag
     `}>
-      {/* Nebula V8.0 Minimalist Header */}
-      <div className="flex h-10 items-center justify-between px-3 border-b border-white/5 bg-white/[0.01]">
-        <div className="flex items-center gap-2 overflow-hidden">
-            <UserCircle className="w-3.5 h-3.5 text-white/50 shrink-0" />
+      {/* Aether Character Header */}
+      <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">
+        <div className="flex items-center gap-2.5 overflow-hidden">
+            <UserCircle className="w-4 h-4 text-white/40 group-hover:text-aether-purple transition-colors shrink-0" />
              <input 
               value={localTitle} 
               onChange={(e) => setLocalTitle(e.target.value)}
               onBlur={(e) => persistChange('title', e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
-              className="bg-transparent border-none p-0 m-0 text-[10px] font-black lowercase tracking-wider text-white focus:outline-none w-full truncate transition-all"
-              placeholder="nexus_profile"
+              className="bg-transparent border-none p-0 m-0 text-xs font-bold tracking-tight text-white focus:outline-none w-full truncate transition-all font-display uppercase"
+              placeholder="Unnamed Entity"
             />
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 hover:bg-white/5 text-slate-500 rounded-xl transition-all">
-             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          <button onClick={() => setIsExpanded(!isExpanded)} className="p-2 hover:bg-white/5 text-white/30 hover:text-white rounded-lg transition-all">
+             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
-          <button onClick={deleteNode} className="p-1 hover:bg-destructive/5 text-destructive/30 hover:text-destructive rounded-md transition-all">
-             <Trash2 className="w-3.5 h-3.5" />
+          <button onClick={deleteNode} className="p-2 hover:bg-rose-500/10 text-white/20 hover:text-rose-500 rounded-lg transition-all">
+             <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </div>
       
-      <div className="p-3 space-y-3">
-        <div className="space-y-1">
-            <div className="flex items-center justify-between px-0.5">
-               <span className="text-[9px] font-bold text-slate-400 lowercase tracking-tight flex items-center gap-1.5">
-                  flavor
+      <div className="p-4 space-y-4">
+        <div className="space-y-2">
+            <div className="flex items-center justify-between px-1">
+               <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-display">
+                  Persona flavor
                </span>
             </div>
               <input
@@ -98,45 +99,44 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
                  onChange={(e) => setLocalFlavor(e.target.value)}
                  onBlur={(e) => persistChange('flavor', e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-[11px] text-slate-200 bg-white/5 border border-white/5 p-2 rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 transition-all font-bold placeholder:text-slate-700"
-                 placeholder="ej: cyberpunk..."
+                 className="w-full text-xs text-white/90 bg-white/[0.03] border border-white/[0.08] p-3 rounded-2xl focus:outline-none focus:border-aether-purple/50 transition-all font-bold placeholder:text-white/10"
+                 placeholder="e.g. Cyberpunk Architect..."
               />
         </div>
 
-        {isExpanded && (localDescription || !localDescription) && (
-          <div className="space-y-1 animate-in slide-in-from-top-2 duration-200">
-             <span className="text-[9px] font-bold text-slate-400 lowercase tracking-tight px-0.5">narrative data</span>
+        {isExpanded && (
+          <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
+             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest px-1 font-display">Narrative essence</span>
               <textarea
                  value={localDescription}
                  onChange={(e) => setLocalDescription(e.target.value)}
                  onBlur={(e) => persistChange('description', e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-[10px] leading-relaxed text-slate-400 bg-white/[0.02] p-2.5 rounded-2xl border border-white/5 min-h-[70px] focus:outline-none focus:border-white/20 resize-none transition-all font-medium placeholder:text-slate-800"
-                 placeholder="contexto narrativo..."
+                 className="w-full text-xs leading-relaxed text-white/60 bg-white/[0.02] p-4 rounded-3xl border border-white/[0.05] min-h-[90px] focus:outline-none focus:border-aether-purple/30 resize-none transition-all font-medium placeholder:text-white/5"
+                 placeholder="Describe the core behavior and background..."
               />
           </div>
         )}
 
-        {/* Industrial Fallback Selector */}
-        <div className="pt-2 border-t border-white/5 space-y-1.5">
+        {/* Aether Logic Engine */}
+        <div className="pt-2 border-t border-white/5 space-y-3">
           <div className="flex items-center justify-between px-1">
-             <span className="text-[8px] font-black text-slate-600 uppercase tracking-widest">nexus_engine</span>
-             <span className="text-[8px] font-bold text-white/10 tracking-widest text-[7px]">v3.0</span>
+             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-display">Neural Engine</span>
           </div>
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid grid-cols-2 gap-2">
             {[
-              { id: 'deepseek-chat', name: 'deepseek_v3' },
-              { id: 'gemini-3-flash', name: 'gemini_flash' },
-              { id: 'claude-3.5-sonnet', name: 'claude_sonnet' },
-              { id: 'gpt-oss-120b', name: 'llama_maverick' }
+              { id: 'deepseek-chat', name: 'DeepSeek V3' },
+              { id: 'gemini-3-flash', name: 'Gemini Hyper' },
+              { id: 'claude-3.5-sonnet', name: 'Claude 3.5' },
+              { id: 'gpt-oss-120b', name: 'Llama 405B' }
             ].map((m) => (
               <button
                 key={m.id}
                 onClick={() => persistChange('model', m.id)}
-                className={`px-2 py-1.5 rounded-lg border text-[8px] font-black lowercase tracking-wider transition-all ${
+                className={`px-3 py-2 rounded-xl border text-[10px] font-bold transition-all ${
                   (data.model || 'deepseek-chat') === m.id 
-                  ? 'bg-white/10 border-white/20 text-white' 
-                  : 'bg-white/5 border-white/5 text-slate-600 hover:bg-white/10'
+                  ? 'bg-white/10 border-white/20 text-white shadow-lg shadow-white/5' 
+                  : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'
                 }`}
               >
                 {m.name}

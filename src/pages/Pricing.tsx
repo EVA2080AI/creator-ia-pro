@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { stripeService } from "@/services/billing-service";
 import { STRIPE_TIERS } from "@/lib/stripe-tiers";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
-import { Sparkles, Check, Zap, Crown, ArrowLeft, Star, GraduationCap, Loader2, Coins, Clock, ArrowRight } from "lucide-react";
+import { Sparkles, Check, Zap, Crown, ArrowLeft, Star, GraduationCap, Loader2, Coins, Clock, ArrowRight, ShieldCheck, ZapOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -16,89 +16,89 @@ const plans = [
     key: "starter" as const,
     name: "Starter",
     price: "$0",
-    period: "para siempre",
+    period: "forever",
     credits: 10,
-    creditsLabel: "10 créditos de prueba",
-    description: "Perfecto para explorar las herramientas de IA.",
+    creditsLabel: "10 trial credits",
+    description: "Explore the neural ecosystem with primary access.",
     features: [
-      "10 créditos al registrarte",
-      "Todas las herramientas IA",
-      "Generación de imágenes",
-      "Resolución estándar",
+      "10 init credits",
+      "All neural modules",
+      "Standard resolution",
+      "Community nexus access",
     ],
-    cta: "Empezar Gratis",
+    cta: "Start Free",
     badge: null,
     icon: Zap,
-    color: "#FA8214",
+    color: "text-white",
     stripeTier: null,
   },
   {
     key: "educacion" as const,
-    name: "Educación",
+    name: "Academic",
     price: "$4.99",
-    period: "/mes",
+    period: "/mo",
     credits: 500,
-    creditsLabel: "500 créditos/mes",
-    description: "Descuento especial para estudiantes y profesores.",
+    creditsLabel: "500 credits/mo",
+    description: "Special protocol for students and academic operators.",
     features: [
-      "500 créditos mensuales",
-      "Formarketing Studio",
-      "Alta resolución",
-      "Soporte prioritario",
+      "500 monthly units",
+      "Aether Studio access",
+      "High-fidelity rendering",
+      "Academic verification",
     ],
-    cta: "Plan Estudiante",
-    badge: "50% Off",
+    cta: "Academic Access",
+    badge: "50% Offset",
     icon: GraduationCap,
-    color: "#EC4699",
+    color: "text-rose-400",
     stripeTier: "educacion" as const,
   },
   {
     key: "pro" as const,
-    name: "Pro",
+    name: "Premium",
     price: "$9.99",
-    period: "/mes",
+    period: "/mo",
     credits: 1000,
-    creditsLabel: "1,000 créditos/mes",
-    description: "Para creadores que necesitan producción constante.",
+    creditsLabel: "1,000 credits/mo",
+    description: "For elite creators manifestating high-density assets.",
     features: [
-      "1,000 créditos mensuales",
-      "Formarketing Studio completo",
-      "Generación de Video",
-      "Modelos premium",
+      "1,000 monthly units",
+      "Full Studio orchestration",
+      "Video neural rendering",
+      "Alpha Matte modules",
     ],
-    cta: "Suscribirme - Pro",
-    badge: "Más Popular",
+    cta: "Sync Premium",
+    badge: "Operational Peak",
     icon: Star,
-    color: "#FA8214",
+    color: "text-aether-purple",
     stripeTier: "pro" as const,
   },
   {
     key: "business" as const,
-    name: "Business",
+    name: "Enterprise",
     price: "$49.99",
-    period: "/mes",
+    period: "/mo",
     credits: 5000,
-    creditsLabel: "5,000 créditos/mes",
-    description: "Para agencias y equipos con alta demanda.",
+    creditsLabel: "5,000 credits/mo",
+    description: "Industrial scale for global agencies and clusters.",
     features: [
-      "5,000 créditos mensuales",
-      "Espacios ilimitados",
-      "Assets privados",
-      "Soporte 24/7",
+      "5,000 monthly units",
+      "Infinite cluster spaces",
+      "Private vaulting",
+      "24/7 Neural support",
     ],
-    cta: "Plan Business",
-    badge: "Agencias",
+    cta: "Enterprise Sync",
+    badge: "Global Scale",
     icon: Crown,
-    color: "#EC4699",
+    color: "text-aether-blue",
     stripeTier: "business" as const,
   },
 ];
 
 const faqs = [
-  { q: "¿Cómo funcional el plan de Educación?", a: "Usamos validación automática mediante correo .edu o .ac para aplicar el descuento del 50% de inmediato." },
-  { q: "¿Puedo cambiar de plan en cualquier momento?", a: "Sí, puedes subir o bajar de plan cuando quieras. Los créditos restantes se ajustan proporcionalmente de forma automática." },
-  { q: "¿Qué pasa si se me acaban los créditos?", a: "Puedes comprar Packs de Créditos adicionales al instante o esperar a la recarga de tu siguiente ciclo de facturación mensual." },
-  { q: "¿Las imágenes generadas son mías?", a: "Sí, tú conservas el 100% de los derechos comerciales de todo el contenido generado en los planes de pago." },
+  { q: "How does the Academic Protocol work?", a: "We orchestrate automatic validation via .edu or .ac endpoints to grant the 50% offset immediately." },
+  { q: "Can I modify my protocol anytime?", a: "Yes. You can scale your nexus tier up or down. Remaining credits are automatically recalibrated." },
+  { q: "What happens if I exhaust my charge?", a: "You can manifest instant Credit Packs or wait for the next billing cycle synchronization." },
+  { q: "Who owns the manifested assets?", a: "You maintain 100% industrial ownership of all neural assets manifested under paid protocols." },
 ];
 
 export default function Pricing() {
@@ -115,7 +115,6 @@ export default function Pricing() {
       setUserId(session?.user?.id);
     });
 
-    // Promo Countdown Timer
     const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
@@ -132,22 +131,19 @@ export default function Pricing() {
       navigate(isLoggedIn ? "/dashboard" : "/auth");
       return;
     }
-
     if (!isLoggedIn) {
-      toast.info("Inicia sesión para suscribirte");
+      toast.info("Authentication required for protocol synchronization");
       navigate("/auth");
       return;
     }
-
     setLoadingPlan(plan.key);
     try {
       const tier = STRIPE_TIERS[plan.stripeTier];
       const data = await stripeService.createCheckout(tier.price_id);
       if (data?.url) window.location.href = data.url;
-      else throw new Error("No checkout URL returned");
+      else throw new Error("Nexus link failed");
     } catch (err: any) {
-      console.error("Checkout error:", err);
-      toast.error(err.message || "Error al iniciar el pago");
+      toast.error(err.message || "Protocol link error");
     } finally {
       setLoadingPlan(null);
     }
@@ -155,19 +151,17 @@ export default function Pricing() {
 
   const handleBuyCredits = async (pack: typeof CREDIT_PACKS[number]) => {
     if (!isLoggedIn) {
-      toast.info("Inicia sesión primero para comprar créditos");
+      toast.info("Authentication required for credit manifestation");
       navigate("/auth");
       return;
     }
-
     setLoadingPack(pack.id);
     try {
       const data = await stripeService.buyCredits(pack.price_id);
       if (data?.url) window.location.href = data.url;
-      else throw new Error("No checkout URL returned");
+      else throw new Error("Charge link failed");
     } catch (err: any) {
-      console.error("Buy credits error:", err);
-      toast.error(err.message || "Error al iniciar la compra");
+      toast.error(err.message || "Charge manifestation error");
     } finally {
       setLoadingPack(null);
     }
@@ -176,97 +170,92 @@ export default function Pricing() {
   return (
     <>
       <Helmet>
-        <title>Precios y Planes | Creator IA Pro</title>
-        <meta name="description" content="Descubre nuestros planes diseñados para creadores y agencias. Descuentos para estudiantes disponibles en Creator IA Pro." />
+        <title>Pricing & Protocols | Aether Evolution</title>
+        <meta name="description" content="Choose your neural protocol level. Scalable industrial AI orchestration for elite creators." />
       </Helmet>
-      <div className="min-h-screen bg-[#050506] text-white">
+      
+      <div className="min-h-screen bg-[#050506] text-white selection:bg-aether-purple/30 selection:text-white font-sans overflow-hidden relative">
       <AppHeader userId={userId} onSignOut={() => supabase.auth.signOut()} />
 
-      <main className="pt-14 relative z-10 flex flex-col items-center px-6 pb-40">
+      <main className="pt-24 relative z-10 flex flex-col items-center px-8 pb-48">
         
-        {/* FOMO Promo Banner */}
-        <div className="w-full max-w-[1400px] mt-6 mx-auto">
-          <div className="rounded-2xl bg-gradient-to-r from-[#EC4699]/20 via-[#FA8214]/20 to-[#EC4699]/20 border border-white/10 p-1 flex relative overflow-hidden">
-            <div className="absolute inset-0 bg-white/5 animate-pulse" />
-            <div className="relative z-10 w-full flex flex-col sm:flex-row items-center justify-between px-6 py-3 gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#EC4699] flex items-center justify-center shadow-[0_0_15px_#EC4699]">
-                  <Sparkles className="w-4 h-4 text-white" />
+        {/* Cinematic Promo Banner */}
+        <div className="w-full max-w-[1440px] mb-16 animate-in fade-in slide-in-from-top-4 duration-1000">
+           <div className="aether-card rounded-3xl border border-white/10 p-1 group relative overflow-hidden">
+             <div className="absolute inset-0 bg-gradient-to-r from-aether-purple/10 via-aether-blue/10 to-aether-purple/10 animate-pulse" />
+             <div className="relative z-10 w-full flex flex-col sm:flex-row items-center justify-between px-8 py-4 gap-6 backdrop-blur-3xl">
+                <div className="flex items-center gap-5">
+                   <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-4xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                      <Sparkles className="w-6 h-6 text-black" />
+                   </div>
+                   <div>
+                      <h3 className="text-base font-bold text-white tracking-tight font-display uppercase">Aether Launch Protocol v8.0</h3>
+                      <p className="text-[11px] text-white/30 font-bold uppercase tracking-widest mt-1">Manifest double charge using protocol <strong className="text-white bg-white/5 py-1 px-2 rounded-lg border border-white/10 ml-1">EVOLVE20</strong></p>
+                   </div>
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white tracking-tight">Oferta Especial de Lanzamiento v2.0</h3>
-                  <p className="text-xs text-white/70">Usa el código <strong className="text-white bg-white/10 px-1.5 py-0.5 rounded">NEBULA20</strong> para doble de créditos en tu primer mes.</p>
+                <div className="flex items-center gap-4 bg-[#050506] px-6 py-3 rounded-2xl border border-white/5 shadow-inner">
+                   <Clock className="w-4 h-4 text-aether-purple animate-pulse" />
+                   <div className="flex items-center gap-2 text-sm font-bold tabular-nums font-display tracking-[0.1em]">
+                      <span className="text-white">{String(timeLeft.hours).padStart(2, '0')}</span>
+                      <span className="text-white/20">:</span>
+                      <span className="text-white">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                      <span className="text-white/20">:</span>
+                      <span className="text-aether-purple text-glow-purple">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 bg-[#050506] px-4 py-2 rounded-xl border border-white/10">
-                <Clock className="w-4 h-4 text-[#FA8214] animate-pulse" />
-                <div className="flex items-center gap-1 text-sm font-black tabular-nums">
-                  <span className="text-white">{String(timeLeft.hours).padStart(2, '0')}</span>
-                  <span className="text-white/40">:</span>
-                  <span className="text-white">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                  <span className="text-white/40">:</span>
-                  <span className="text-[#EC4699]">{String(timeLeft.seconds).padStart(2, '0')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+             </div>
+           </div>
         </div>
 
-        <div className="text-center mt-20 mb-16">
-          <Badge className="mb-6 bg-white/5 text-white/70 border-white/10 px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">
-            Planes Transparentes
+        <div className="text-center mb-24 space-y-6">
+          <Badge className="bg-white/5 text-white/30 border-white/10 px-6 py-2 rounded-full text-[10px] font-bold tracking-[0.4em] uppercase font-display">
+            Transparent Protocols
           </Badge>
-          <h1 className="text-6xl md:text-9xl font-display tracking-tight mb-6 uppercase">
-            Poder de IA, <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">escalable.</span>
+          <h1 className="text-6xl md:text-9xl font-bold tracking-tight uppercase font-display">
+            Neural Power, <br /> <span className="bg-gradient-to-r from-white via-white to-white/20 bg-clip-text text-transparent">Scalable.</span>
           </h1>
-          <p className="max-w-xl mx-auto text-sm text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
-            Diseñado para creadores, optimizado para equipos. Elige el plan que mejor se adapte a tu ecosistema.
+          <p className="max-w-xl mx-auto text-sm text-white/20 font-medium uppercase tracking-[0.2em] leading-relaxed font-display italic">
+            Engineered for creators, optimized for agencies. Orchestrate your evolution at the correct level of charge.
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid w-full max-w-[1400px] gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* Protocol Grid */}
+        <div className="grid w-full max-w-[1440px] gap-8 md:grid-cols-2 lg:grid-cols-4 items-stretch">
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative flex flex-col rounded-[2rem] border bg-[#0f0f12] p-8 transition-all duration-300 hover:-translate-y-2
-                ${plan.name === 'Pro' ? 'border-[#FA8214]/30 shadow-2xl shadow-[#FA8214]/10 ring-1 ring-[#FA8214]/20' : 'border-white/8 hover:border-white/20 shadow-xl'}`}
-            >
-              {plan.badge && (
-                <div 
-                  className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg"
-                  style={{ background: plan.color, color: "#050506", boxShadow: `0 4px 14px ${plan.color}50` }}
-                >
-                  {plan.badge}
-                </div>
+              className={cn(
+                "relative flex flex-col rounded-[3rem] p-10 transition-all duration-700 hover:-translate-y-4 group",
+                plan.name === 'Premium' 
+                  ? "aether-card border-aether-purple/30 shadow-5xl shadow-aether-purple/10 aether-border-glow" 
+                  : "aether-card border-white/5"
               )}
-
-              <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl" style={{ background: `${plan.color}15` }}>
-                <plan.icon className="h-6 w-6" style={{ color: plan.color }} />
+            >
+              <div className="mb-10 flex h-16 w-16 items-center justify-center rounded-2.5xl bg-white/5 border border-white/5 group-hover:scale-110 transition-transform duration-500 shadow-inner">
+                <plan.icon className={cn("h-7 w-7", plan.color)} />
               </div>
 
-              <h2 className="text-2xl font-display text-white uppercase">{plan.name}</h2>
-              <p className="mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-wide leading-relaxed h-10">{plan.description}</p>
+              <div className="space-y-2 mb-8">
+                 <h2 className="text-2xl font-bold text-white uppercase font-display tracking-tight">{plan.name}</h2>
+                 <p className="text-[11px] text-white/20 font-bold uppercase tracking-widest leading-relaxed">{plan.description}</p>
+              </div>
 
-              <div className="mt-6 flex items-baseline gap-1.5">
-                <span className="text-6xl font-display tracking-tight" style={{ color: plan.name === 'Pro' ? '#FA8214' : 'white' }}>
+              <div className="mb-10 flex items-baseline gap-2">
+                <span className={cn("text-6xl font-bold tracking-tighter font-display", plan.name === 'Premium' ? "text-white" : "text-white/60")}>
                   {plan.price}
                 </span>
-                <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">{plan.period}</span>
+                <span className="text-[11px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">{plan.period}</span>
               </div>
               
-              <div 
-                className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white/[0.03] border border-white/5 px-4 py-3 text-[10px] font-bold uppercase tracking-widest"
-                style={{ color: plan.color }}
-              >
-                <Sparkles className="h-3.5 w-3.5" />
+              <div className="mb-10 flex items-center justify-center gap-3 rounded-2xl bg-white/[0.03] border border-white/5 px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] font-display text-white/40 group-hover:text-white transition-colors duration-500">
+                <Sparkles className={cn("h-4 w-4", plan.color)} />
                 {plan.creditsLabel}
               </div>
 
-              <ul className="mt-8 flex-1 space-y-4">
+              <ul className="flex-1 space-y-5 px-2">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-wide">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: plan.color }} />
+                  <li key={feature} className="flex items-center gap-4 text-[11px] text-white/20 font-bold uppercase tracking-widest group-hover:text-white/40 transition-colors">
+                    <Check className={cn("h-4 w-4 shrink-0", plan.color)} />
                     {feature}
                   </li>
                 ))}
@@ -275,78 +264,103 @@ export default function Pricing() {
               <Button
                 onClick={() => handleSubscribe(plan)}
                 disabled={loadingPlan === plan.key}
-                className={`mt-10 h-14 w-full rounded-md font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3
-                  ${plan.name === "Pro" || plan.name === "Educación" || plan.name === "Business"
-                    ? "text-white hover:opacity-90"
-                    : "bg-white/5 text-white hover:bg-white/10 shadow-none border border-white/10"
-                }`}
-                style={plan.name !== "Starter" ? { background: `linear-gradient(135deg, ${plan.color} 0%, ${plan.color}CC 100%)`, boxShadow: `0 8px 20px -5px ${plan.color}50` } : undefined}
+                className={cn(
+                  "mt-12 h-18 w-full rounded-2.5xl font-bold text-[11px] uppercase tracking-[0.3em] font-display transition-all active:scale-[0.98] shadow-4xl group-hover:scale-[1.02] duration-500",
+                  plan.name === "Starter" 
+                    ? "bg-white/5 text-white/40 border border-white/5 hover:bg-white/10 hover:text-white" 
+                    : "bg-white text-black hover:bg-white/90"
+                )}
               >
                 {loadingPlan === plan.key ? <Loader2 className="h-5 w-5 animate-spin" /> : plan.cta}
-                {plan.name !== "Starter" && !loadingPlan && <ArrowRight className="w-4 h-4" />}
               </Button>
+              
+              {plan.badge && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest bg-white text-black shadow-5xl animate-bounce">
+                  {plan.badge}
+                </div>
+              )}
             </div>
           ))}
         </div>
         
-        {/* Credit Packs */}
-        <div className="mt-32 w-full max-w-[1400px]">
-            <div className="flex flex-col items-center mb-16">
-              <Badge className="mb-6 bg-[#FA8214]/10 text-[#FA8214] border-[#FA8214]/20 px-6 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase">
-                Recargas Instantáneas
-              </Badge>
-              <h2 className="text-5xl md:text-7xl font-display tracking-tight text-white uppercase">Packs de <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">Créditos</span> Adicionales.</h2>
-              <p className="mt-8 text-slate-500 font-bold uppercase tracking-widest text-xs text-center max-w-xl leading-loose">
-                 Recarga tu balance industrial sin compromisos ni suscripciones mensuales adicionales.
-              </p>
-            </div>
+        {/* Instant Charge Packs */}
+        <div className="mt-56 w-full max-w-[1440px]">
+             <div className="flex flex-col items-center mb-24 text-center space-y-6">
+                 <Badge className="bg-aether-blue/10 text-aether-blue border-aether-blue/20 px-8 py-3 rounded-full text-[10px] font-bold tracking-[0.5em] uppercase font-display">
+                    Instant Manifestation
+                 </Badge>
+                 <h2 className="text-6xl md:text-8xl font-bold tracking-tight text-white uppercase font-display">Nexus <span className="opacity-40">Charges.</span></h2>
+                 <p className="text-white/20 font-bold uppercase tracking-[0.3em] text-xs max-w-xl leading-loose font-display">
+                    Instantly manifests industrial units without protocol modifications.
+                 </p>
+             </div>
            
-           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
               {CREDIT_PACKS.map((pack) => (
-                  <div key={pack.id} className="group relative flex flex-col items-center rounded-[2rem] border border-white/8 bg-[#0f0f12] p-8 transition-all hover:bg-white/[0.04] hover:border-[#FA8214]/30 shadow-xl hover:shadow-[#FA8214]/10">
-                    <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FA8214]/10 text-[#FA8214] group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:from-[#EC4699] group-hover:to-[#FA8214] group-hover:text-white transition-all duration-300">
-                       <Coins className="h-8 w-8" />
+                  <div key={pack.id} className="group aether-card rounded-[3.5rem] border border-white/5 p-12 transition-all duration-700 hover:border-aether-blue/30 hover:scale-[1.05] shadow-5xl text-center relative overflow-hidden">
+                    <div className="mb-10 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-white/5 border border-white/10 mx-auto shadow-inner group-hover:bg-white transition-all duration-700">
+                       <Coins className="h-10 w-10 text-white/20 group-hover:text-black transition-colors" />
                     </div>
-                    <h3 className="text-xl font-display text-white tracking-tight uppercase">{pack.name}</h3>
-                    <p className="mt-2 text-[10px] font-bold text-[#FA8214] uppercase tracking-widest">{pack.credits} créditos</p>
+                    <h3 className="text-2xl font-bold text-white tracking-tight uppercase font-display">{pack.name}</h3>
+                    <p className="mt-2 text-xs font-bold text-aether-blue uppercase tracking-[0.3em] font-display">{pack.credits} units</p>
                     
-                    <div className="mt-6 flex items-baseline gap-1 relative">
-                       <span className="text-4xl font-black text-white tracking-tighter">${pack.price}</span>
-                       <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">USD</span>
+                    <div className="mt-10 flex items-baseline justify-center gap-2">
+                       <span className="text-5xl font-bold text-white tracking-tighter font-display tabular-nums">${pack.price}</span>
+                       <span className="text-[11px] font-bold text-white/20 uppercase tracking-widest font-display">USD</span>
                     </div>
                     
                     <Button 
                        onClick={() => handleBuyCredits(pack)}
                        disabled={loadingPack === pack.id}
-                       className="mt-10 w-full h-12 bg-white/5 border border-white/10 text-white hover:bg-gradient-to-r hover:from-[#EC4699] hover:to-[#FA8214] hover:text-white hover:border-[#EC4699] rounded-md font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm active:scale-95"
+                       className="mt-12 w-full h-16 bg-white/[0.03] border border-white/5 text-white/40 hover:bg-white hover:text-black hover:border-white rounded-2.5xl font-bold text-[10px] uppercase tracking-[0.3em] transition-all shadow-xl active:scale-95 font-display"
                     >
-                       {loadingPack === pack.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Comprar Ahora"}
+                       {loadingPack === pack.id ? <Loader2 className="h-5 w-5 animate-spin" /> : "Manifest Now"}
                     </Button>
+                    
+                    {/* Visual noise background for cards */}
+                    <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
                  </div>
               ))}
            </div>
         </div>
 
-        {/* FAQ */}
-        <div className="mt-40 w-full max-w-4xl">
-          <h2 className="text-center text-4xl md:text-6xl font-display text-white mb-16 tracking-tight uppercase">
-            Preguntas <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">Frecuentes</span>
+        {/* Global FAQs */}
+        <div className="mt-56 w-full max-w-6xl">
+          <h2 className="text-center text-4xl md:text-7xl font-bold text-white mb-28 tracking-tight uppercase font-display">
+            Operational <span className="opacity-40">Intelligence.</span>
           </h2>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 gap-8">
             {faqs.map((faq) => (
-              <div key={faq.q} className="rounded-2xl border border-white/5 bg-[#09090b] p-8 shadow-xl hover:border-[#EC4699]/30 transition-all group">
-                <h3 className="text-xs font-bold text-white leading-snug uppercase tracking-widest group-hover:text-[#EC4699] transition-colors">{faq.q}</h3>
-                <p className="mt-4 text-[11px] text-slate-500 font-bold uppercase tracking-wide leading-loose">{faq.a}</p>
+              <div key={faq.q} className="aether-card rounded-[2.5rem] border border-white/5 p-12 shadow-3xl hover:border-aether-purple/20 transition-all group group duration-700">
+                <h3 className="text-sm font-bold text-white leading-relaxed uppercase tracking-widest font-display group-hover:text-aether-purple transition-colors mb-6">{faq.q}</h3>
+                <p className="text-[13px] text-white/20 font-medium uppercase tracking-widest leading-loose font-display group-hover:text-white/40 transition-colors">{faq.a}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="mt-20 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 text-center bg-white/[0.03] border border-white/5 px-10 py-4 rounded-full">
-          ¿Problemas con el pago? Contáctanos en <span className="text-[#EC4699]">billing@creator-ia.com</span>
-        </p>
+        {/* Support Section */}
+        <div className="mt-32 p-10 rounded-[3rem] aether-card border border-white/5 flex flex-col md:flex-row items-center gap-8 px-16 group hover:border-aether-purple/10 duration-700">
+           <div className="p-5 rounded-2.5xl bg-white/5 border border-white/5 text-aether-purple group-hover:scale-110 transition-transform">
+              <ShieldCheck className="w-8 h-8" />
+           </div>
+           <div className="text-center md:text-left flex-1">
+              <p className="text-xs font-bold uppercase tracking-[0.4em] text-white/20 font-display">Nexus Resolution Center</p>
+              <p className="text-lg font-bold text-white mt-1 font-display">Facing neural deficiency or protocol errors? <span className="text-aether-purple whitespace-nowrap">protocol@aether-evolution.io</span></p>
+           </div>
+           <Button className="bg-white/5 text-white/40 hover:text-white hover:bg-white/10 rounded-2xl px-10 h-14 font-display font-bold uppercase tracking-widest text-[10px]">Contact Liaison</Button>
+        </div>
       </main>
+      
+      {/* Background Evolution Glows */}
+      <div className="pointer-events-none fixed inset-0 z-0">
+          <div className="absolute top-1/2 left-1/4 h-[700px] w-[700px] rounded-full bg-aether-purple/5 blur-[120px] animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 h-[600px] w-[600px] rounded-full bg-aether-blue/5 blur-[100px]" />
+      </div>
+
+      {/* Grain overlay */}
+      <div className="pointer-events-none fixed inset-0 z-10 opacity-[0.02] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
     </div>
     </>
   );
-};
+}

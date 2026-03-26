@@ -668,60 +668,60 @@ function FormarketingContent() {
   return (
     <>
       <Helmet>
-        <title>Nexus Studio V2.0 | Formarketing</title>
-        <meta name="description" content="Lienzo infinito de inteligencia artificial multimodal. Crea, gestiona y escala campañas y flujos de marketing en tiempo real." />
+        <title>Aether Studio | AI Creative Engine</title>
+        <meta name="description" content="Ultimate AI creativity engine. Professional-grade multimodal canvas for industrial creative production." />
       </Helmet>
-      <div className="h-screen w-screen bg-[#050506] font-inter text-slate-100 flex flex-col overflow-hidden relative selection:bg-white/20 selection:text-white">
-      {/* Nexus V8.0 Industrial Studio Header */}
-      <div className="flex h-16 w-full items-center justify-between border-b border-white/5 bg-[#020203]/40 px-10 backdrop-blur-3xl shrink-0 z-[90]">
-         <div className="flex items-center gap-8">
+      <div className="h-screen w-screen bg-[#020203] font-sans text-white/90 flex flex-col overflow-hidden relative selection:bg-aether-purple/20">
+      {/* Aether Evolution Studio Header */}
+      <div className="flex h-20 w-full items-center justify-between border-b border-white/[0.08] bg-black/40 px-8 backdrop-blur-3xl shrink-0 z-[90]">
+         <div className="flex items-center gap-6">
              <button
                 onClick={() => navigate("/dashboard")}
-                className="flex items-center gap-5 hover:opacity-80 transition-all group"
+                className="flex items-center gap-4 hover:opacity-90 transition-all group"
              >
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white border border-white/10 shadow-3xl shadow-white/5 group-hover:rotate-3 transition-transform">
-                   <Rocket className="h-5.5 w-5.5 text-black" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform">
+                   <Rocket className="h-6 w-6" />
                 </div>
                 <div className="flex flex-col text-left">
-                   <h1 className="text-2xl font-black tracking-tighter text-white leading-none lowercase">nexus_studio</h1>
-                   <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mt-2">V7.0 Industrial Engine</span>
+                   <h1 className="text-xl font-bold tracking-tight text-white leading-tight font-display">AETHER EDITION</h1>
+                   <span className="text-[10px] font-medium text-white/40 uppercase tracking-[0.3em]">Creative_Engine_v1.0</span>
                 </div>
              </button>
-            <div className="h-6 w-px bg-white/10 mx-2" />
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-2xl w-11 h-11 text-slate-500 hover:text-white transition-all">
+            <div className="h-8 w-px bg-white/10 mx-2" />
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-xl w-10 h-10 text-white/40 hover:text-white transition-all">
                <ArrowLeft className="h-5 w-5" />
             </Button>
          </div>
 
-         <div className="flex items-center gap-5">
-            <div className="hidden md:flex items-center gap-3 bg-white/[0.02] px-5 py-2.5 rounded-2xl border border-white/5 shadow-2xl">
-               <div className="w-1.5 h-1.5 rounded-full bg-white/40 shadow-[0_0_10px_rgba(255,255,255,0.2)] animate-pulse" />
-               <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">system_online_v7</span>
+         <div className="flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-3 bg-white/[0.03] px-4 py-2 rounded-xl border border-white/5">
+               <div className="w-2 h-2 rounded-full bg-aether-blue shadow-[0_0_12px_rgba(0,194,255,0.4)] animate-pulse" />
+               <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-none">Aether_Link_Active</span>
             </div>
 
             <Button 
                variant="ghost" 
                onClick={handleClear} 
                disabled={nodes.length === 0 && edges.length === 0}
-               className="text-slate-500 hover:text-white hover:bg-white/5 rounded-2xl px-6 h-11 text-[11px] font-black lowercase tracking-widest gap-2 transition-all disabled:opacity-20"
+               className="text-white/40 hover:text-white hover:bg-white/5 rounded-xl px-4 h-11 text-xs font-bold gap-2 transition-all disabled:opacity-20"
             >
                <Trash2 className="w-4 h-4" />
-               clear_canvas
+               Clear
             </Button>
             
             <Button 
                onClick={handleExecute} 
                disabled={nodes.length === 0}
-               className="h-11 bg-white hover:bg-white/90 text-black rounded-xl gap-3 font-black px-10 shadow-3xl shadow-white/5 text-[10px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-20"
+               className="h-11 bg-white hover:bg-white/90 text-black rounded-xl gap-2.5 font-bold px-8 shadow-xl shadow-white/5 text-xs transition-all active:scale-95 disabled:opacity-20 font-display"
             >
-               <Zap className="w-3.5 h-3.5" />
-               sync_flow_engine
+               <Zap className="w-4 h-4 fill-current" />
+               Sync Engine
             </Button>
 
-            <div className="h-6 w-px bg-white/10 mx-2" />
+            <div className="h-8 w-px bg-white/10 mx-2" />
             
-            <button onClick={signOut} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl text-slate-500 hover:text-white transition-all">
-               <LogOut className="h-4 w-4" />
+            <button onClick={signOut} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/40 hover:text-white transition-all">
+               <LogOut className="h-4.5 w-4.5" />
             </button>
       </div>
       </div>
@@ -738,12 +738,12 @@ function FormarketingContent() {
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           fitView
-          className="nebula-canvas bg-[#050506]"
+          className="aether-canvas"
           colorMode="dark"
           defaultEdgeOptions={{ 
             type: 'smoothstep', 
             animated: true,
-            style: { stroke: '#ffffff20', strokeWidth: 1.5 }
+            style: { stroke: 'rgba(255,255,255,0.08)', strokeWidth: 2 }
           }}
         >
           <Background 

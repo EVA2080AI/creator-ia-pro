@@ -8,39 +8,37 @@ import {
   Star, MessageSquare, PenTool,
   Hash, FileText, Type, Megaphone, TrendingUp,
   Monitor, Apple, Smartphone, Download, CheckCircle2,
-  Globe, Users, Layers, Shield, Crown
+  Globe, Users, Layers, Shield, Crown, Rocket
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 const aiTools = [
-  { icon: Wand2, name: "Mejorar Imagen", desc: "Mejora calidad y nitidez al instante.", path: "/herramienta/mejorar-imagen", cat: "image" },
-  { icon: ZoomIn, name: "Ampliar 4x", desc: "Escala sin perder detalles.", path: "/herramienta/ampliar-4x", cat: "image" },
-  { icon: Eraser, name: "Borrar Objetos", desc: "Elimina lo que sobra con un clic.", path: "/herramienta/borrar-objetos", cat: "image" },
-  { icon: ImagePlus, name: "Quitar Fondo", desc: "Fondos eliminados automáticamente.", path: "/herramienta/quitar-fondo", cat: "image" },
-  { icon: RotateCcw, name: "Restaurar Foto", desc: "Revive fotos antiguas.", path: "/herramienta/restaurar-foto", cat: "image" },
-  { icon: Image, name: "Texto a Imagen", desc: "Crea imágenes desde texto.", path: "/herramienta/texto-a-imagen", cat: "image" },
-  { icon: MessageSquare, name: "AI Copywriter", desc: "Textos de marketing con IA.", path: "/herramienta/ai-copywriter", cat: "marketing" },
-  { icon: PenTool, name: "Logo Maker", desc: "Logos profesionales con IA.", path: "/herramienta/logo-maker", cat: "marketing" },
-  { icon: Hash, name: "Social Media Kit", desc: "Contenido para redes sociales.", path: "/herramienta/social-media-kit", cat: "marketing" },
-  { icon: FileText, name: "AI Blog Writer", desc: "Artículos SEO completos.", path: "/herramienta/ai-blog-writer", cat: "marketing" },
-  { icon: Type, name: "Ad Generator", desc: "Anuncios para Google y Meta.", path: "/herramienta/ad-generator", cat: "marketing" },
-  { icon: Palette, name: "Formaketing Studio", desc: "Flows de marketing visual.", path: "/canvas", cat: "studio" },
+  { icon: Wand2, name: "Neural Enhancer", desc: "Optimize lighting and details with AI.", path: "/auth", cat: "image" },
+  { icon: ZoomIn, name: "Quantum Upscale", desc: "Scale assets to 4K without loss.", path: "/auth", cat: "image" },
+  { icon: Eraser, name: "Object Eraser", desc: "Seamlessly remove distractions.", path: "/auth", cat: "image" },
+  { icon: ImagePlus, name: "Alpha Matte", desc: "Perfect background removal.", path: "/auth", cat: "image" },
+  { icon: RotateCcw, name: "Photo Recovery", desc: "Revive damaged visual records.", path: "/auth", cat: "image" },
+  { icon: Image, name: "Vision Morph", desc: "Generate assets from narrative.", path: "/auth", cat: "image" },
+  { icon: MessageSquare, name: "Copy Orchestrator", desc: "High-converting marketing copy.", path: "/auth", cat: "marketing" },
+  { icon: PenTool, name: "Identity Forge", desc: "Neural brand and logo design.", path: "/auth", cat: "marketing" },
+  { icon: Hash, name: "Social Pulse", desc: "Optimized social content kit.", path: "/auth", cat: "marketing" },
+  { icon: FileText, name: "Semantic Writer", desc: "Industrial SEO articles.", path: "/auth", cat: "marketing" },
+  { icon: Type, name: "Ad Synthesizer", desc: "Ads for Google and Meta.", path: "/auth", cat: "marketing" },
+  { icon: Palette, name: "Aether Studio", desc: "Infinite creative canvas.", path: "/auth", cat: "studio" },
 ];
 
-
-
 const testimonials = [
-  { name: "María G.", role: "Community Manager", text: "Creator IA Pro cambió mi flujo de trabajo. Genero contenido para 5 marcas en la mitad del tiempo." },
-  { name: "Carlos R.", role: "Diseñador Freelance", text: "Las herramientas de mejora de imagen y upscale son increíbles. Mis clientes notan la diferencia." },
-  { name: "Ana L.", role: "CEO, Digital Agency", text: "El Formaketing Studio nos permite crear flows de marketing visual que antes tardaban semanas." },
+  { name: "Maria G.", role: "Creative Director", text: "Aether Evolution redefined our workflow. We manifest high-fidelity campaigns in hours, not weeks." },
+  { name: "Carlos R.", role: "Global Operator", text: "The neural upscale and enhancement modules are production-grade. Essential for modern agencies." },
+  { name: "Ana L.", role: "Product Lead", text: "The infinite studio allows for parallel creative orchestration that was simply impossible before." },
 ];
 
 const features = [
-  { icon: Layers, title: "12+ Herramientas IA", desc: "Todo integrado en una sola plataforma." },
-  { icon: Shield, title: "Seguro y Privado", desc: "Tus datos nunca se comparten." },
-  { icon: Users, title: "Para Equipos", desc: "Espacios colaborativos y compartidos." },
-  { icon: Zap, title: "Velocidad Pro", desc: "Procesamiento rápido con GPU cloud." },
+  { icon: Layers, title: "12+ Neural Modules", desc: "Integrated industrial AI arsenal." },
+  { icon: Shield, title: "Quantum Security", desc: "Private, persistent vault architecture." },
+  { icon: Users, title: "Nexus Clusters", desc: "Collaborative production environments." },
+  { icon: Zap, title: "Zero Latency", desc: "Cloud-accelerated neural processing." },
 ];
 
 const Index = () => {
@@ -55,218 +53,227 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Creator IA Pro | Ecosistema Industrial de Creación Multimodal</title>
-        <meta name="description" content="Domina tu contenido con Creator IA Pro. Herramientas avanzadas de edición de imagen, copywriting y flujos de marketing visual impulsados por inteligencia artificial de primer nivel." />
-        <meta property="og:title" content="Creator IA Pro | Ecosistema Industrial" />
-        <meta property="og:description" content="Automatiza y potencia tu agencia con IA multimodal. Flujos de alto rendimiento." />
+        <title>Aether Evolution | Industrial Multimodal Creative Ecosystem</title>
+        <meta name="description" content="Orchestrate high-fidelity visual assets, marketing narratives, and infinite creative flows with the Aether Evolution design system." />
       </Helmet>
       
-      <div className="min-h-screen bg-[#050506] font-sans text-slate-100 overflow-hidden relative selection:bg-white/10 selection:text-white">
-      {/* Ambient blurs - Industrial Monochrome */}
+      <div className="min-h-screen bg-[#050506] font-sans text-slate-100 overflow-hidden relative selection:bg-aether-purple/30 selection:text-white">
+      {/* Ambient Evolution Blurs */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/4 h-[700px] w-[700px] rounded-full bg-white/[0.03] blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-white/[0.02] blur-[100px]" />
+        <div className="absolute -top-40 left-1/4 h-[800px] w-[800px] rounded-full bg-aether-purple/5 blur-[120px] animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-aether-blue/5 blur-[100px]" />
+        <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-rose-500/5 blur-[120px]" />
       </div>
 
-      {/* Nav */}
-      <header className="relative z-50 flex items-center justify-between px-8 py-8 sm:px-14 sticky top-0 bg-[#050506]/60 backdrop-blur-xl border-b border-white/5">
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow-3xl shadow-white/10">
+      {/* Navigation */}
+      <header className="relative z-50 flex items-center justify-between px-10 py-8 sm:px-16 sticky top-0 bg-[#050506]/40 backdrop-blur-2xl border-b border-white/[0.05]">
+        <div className="flex items-center gap-5">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2.5xl bg-white shadow-[0_0_30px_rgba(255,255,255,0.15)]">
             <Sparkles className="h-6 w-6 text-black" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-black text-white tracking-tighter uppercase leading-none lowercase">
-              nexus_ <span className="text-white/40">system</span>
+            <span className="text-2xl font-bold text-white tracking-tighter font-display uppercase leading-none">
+              Aether <span className="opacity-40">Evolution</span>
             </span>
-            <span className="text-[10px] font-black text-white/10 uppercase tracking-[0.4em] mt-2">V2.1 industrial_core</span>
+            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.5em] mt-2">V8.0 Production Core</span>
           </div>
         </div>
-        <div className="flex items-center gap-6">
-          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-white/20 hover:text-white hover:bg-white/5 hidden sm:flex text-[10px] font-black uppercase tracking-widest transition-colors">
-            nexus_tiers
+        <div className="flex items-center gap-8">
+          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-white/30 hover:text-white hover:bg-white/5 hidden sm:flex text-xs font-bold uppercase tracking-widest transition-all font-display">
+            Protocols
           </Button>
-          <Button onClick={() => navigate("/auth")} className="bg-white text-black hover:bg-white/90 rounded-2xl px-10 h-13 shadow-3xl shadow-white/5 font-black uppercase text-[10px] tracking-[0.3em] active:scale-95 transition-all">
-            init_nexus
+          <Button onClick={() => navigate("/auth")} className="bg-white text-black hover:bg-white/90 rounded-2xl px-12 h-13 shadow-2xl shadow-white/10 font-bold uppercase text-xs tracking-[0.2em] active:scale-95 transition-all font-display">
+            Initialize
           </Button>
         </div>
       </header>
 
       <main className="relative z-10 flex flex-col items-center px-8 pt-32 pb-48">
-        {/* Pulse Badge */}
-        <div className="mb-14 flex items-center gap-4 rounded-2xl border border-white/5 bg-white/[0.02] px-8 py-3 text-[10px] text-white/40 font-black uppercase tracking-[0.3em] animate-in fade-in slide-in-from-bottom-2 duration-700">
-          <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-[0_0_12px_rgba(255,255,255,0.4)]" />
-          industrial_multimodal_ecosystem
+        {/* Cinematic Badge */}
+        <div className="mb-14 flex items-center gap-4 rounded-full border border-white/5 bg-white/[0.03] px-8 py-3 text-[10px] text-white/40 font-bold uppercase tracking-[0.4em] animate-in fade-in slide-in-from-bottom-4 duration-1000 font-display">
+          <div className="w-2 h-2 rounded-full bg-aether-purple animate-pulse shadow-[0_0_12px_rgba(168,85,247,0.8)]" />
+          Neural Multimodal Ecosystem
         </div>
 
-        {/* Hero */}
-        <h1 className="max-w-6xl text-center text-8xl font-black leading-[0.85] tracking-tighter animate-in fade-in slide-in-from-bottom-4 duration-1000 md:text-9xl lg:text-[11rem] text-white lowercase">
-          neural_ <span className="text-white/40">studio_</span>
+        {/* Hero Title */}
+        <h1 className="max-w-7xl text-center text-8xl font-bold leading-[0.85] tracking-tight animate-in fade-in slide-in-from-bottom-6 duration-1000 md:text-9xl lg:text-[11rem] text-white font-display">
+          Design <span className="bg-gradient-to-r from-white via-white to-white/20 bg-clip-text text-transparent">the Future</span>
           <br />
-          <span className="text-white/10">without_limits.</span>
+          <span className="opacity-10">without limits.</span>
         </h1>
 
-        <p className="mt-12 max-w-2xl text-center text-lg text-white/20 font-bold animate-in fade-in slide-in-from-bottom-6 duration-1000 leading-relaxed tracking-tight lowercase">
-          orchestrate images, enhance assets, generate marketing copies, and build visual flows.
-          <strong className="text-white font-black"> 12+ professional nexus tools</strong> in a single cluster.
+        <p className="mt-14 max-w-2xl text-center text-lg text-white/30 font-medium animate-in fade-in slide-in-from-bottom-8 duration-1000 leading-relaxed tracking-tight font-display">
+          manifest images, enhance assets, orchestrate narratives, and build infinite visual flows.
+          <strong className="text-white"> 12+ professional neural modules</strong> in a persistent production hub.
         </p>
 
-        <div className="mt-16 flex flex-col sm:flex-row gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <Button onClick={() => navigate("/auth")} size="lg" className="bg-white text-black hover:bg-white/90 gap-4 text-[11px] px-14 rounded-2xl h-18 shadow-3xl shadow-white/10 font-black uppercase tracking-[0.3em] active:scale-95 transition-all">
-            initialize_nexus_node
+        <div className="mt-20 flex flex-col sm:flex-row gap-8 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+          <Button onClick={() => navigate("/auth")} size="lg" className="bg-white text-black hover:bg-white/90 gap-5 text-xs px-16 rounded-[2rem] h-20 shadow-4xl shadow-white/10 font-bold uppercase tracking-[0.2em] active:scale-95 transition-all font-display">
+            Start Evolution
             <ArrowRight className="h-5 w-5" />
           </Button>
-          <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-white/5 bg-white/[0.02] text-white/60 hover:text-white hover:bg-white/5 gap-4 text-[11px] px-12 rounded-2xl h-18 font-black uppercase tracking-[0.3em] shadow-sm transition-all focus:ring-0">
-            <Crown className="h-5 w-5 text-white/40" />
-            review_tiers
+          <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-white/10 bg-white/[0.02] text-white/60 hover:text-white hover:bg-white/5 gap-5 text-xs px-14 rounded-[2rem] h-20 font-bold uppercase tracking-[0.2em] shadow-sm transition-all font-display">
+             View Protocols
           </Button>
         </div>
 
-        {/* Stats */}
-        <div className="mt-32 grid grid-cols-2 gap-20 sm:grid-cols-4 animate-in fade-in duration-1000">
+        {/* Global Metrics */}
+        <div className="mt-40 grid grid-cols-2 gap-24 sm:grid-cols-4 animate-in fade-in duration-1000 text-center">
           {[
-            { value: "12+", label: "nexus_tools" },
-            { value: "100", label: "init_credits" },
-            { value: "4x", label: "upscale_ratio" },
-            { value: "3", label: "clusters" },
+            { value: "12+", label: "Neural Modules" },
+            { value: "100", label: "Init Credits" },
+            { value: "4K+", label: "Upscale Resolution" },
+            { value: "∞", label: "Canvas Depth" },
           ].map((s) => (
-            <div key={s.label} className="text-center group">
-              <p className="text-7xl font-black text-white/10 group-hover:text-white transition-colors duration-500 tracking-tighter">{s.value}</p>
-              <p className="mt-3 text-[9px] text-white/10 font-black uppercase tracking-[0.4em]">{s.label}</p>
+            <div key={s.label} className="group">
+              <p className="text-7xl font-bold text-white/10 group-hover:text-white transition-all duration-700 tracking-tighter font-display tabular-nums">{s.value}</p>
+              <p className="mt-4 text-[10px] text-white/20 font-bold uppercase tracking-[0.4em] font-display">{s.label}</p>
             </div>
           ))}
         </div>
 
-        {/* Features Row - Industrial Numbered Cards */}
-        <div className="mt-32 w-full max-w-6xl grid grid-cols-1 md:grid-cols-4 gap-5 animate-fade-in">
+        {/* Features - Premium Cards */}
+        <div className="mt-48 w-full max-w-7xl grid grid-cols-1 md:grid-cols-4 gap-6">
           {features.map((f, i) => (
-            <div key={f.title} className="relative group rounded-[2rem] border border-white/5 bg-white/[0.01] p-10 backdrop-blur-sm hover:bg-white/[0.03] transition-all overflow-hidden shadow-3xl shadow-white/5">
-              <span className="absolute -right-6 -bottom-10 text-[10rem] font-black text-white/[0.02] pointer-events-none group-hover:text-white/[0.04] transition-colors leading-none">
+            <div key={f.title} className="relative group aether-card rounded-[3rem] border border-white/5 p-12 backdrop-blur-3xl hover:border-white/10 transition-all overflow-hidden shadow-4xl hover:scale-[1.02] duration-500">
+              <span className="absolute -right-6 -bottom-10 text-[12rem] font-bold text-white/[0.02] pointer-events-none group-hover:text-white/[0.04] transition-colors leading-none font-display">
                 0{i + 1}
               </span>
-              <f.icon className="h-7 w-7 text-white/20 mb-8 group-hover:text-white transition-colors" />
-              <h3 className="text-xl font-black text-white mb-3 lowercase tracking-tighter">{f.title}</h3>
-              <p className="text-[10px] text-white/10 leading-relaxed uppercase tracking-[0.2em] font-black">{f.desc}</p>
+              <div className="h-14 w-14 rounded-2xl bg-white/5 flex items-center justify-center mb-10 group-hover:scale-110 transition-transform border border-white/5">
+                <f.icon className="h-6 w-6 text-white/30 group-hover:text-white transition-colors" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-4 tracking-tight font-display">{f.title}</h3>
+              <p className="text-[11px] text-white/20 leading-relaxed font-bold uppercase tracking-[0.1em] font-display">{f.desc}</p>
             </div>
           ))}
         </div>
 
-        {/* Tools Grid — All Accessible */}
-        <div className="mt-40 w-full max-w-7xl">
-          <div className="mb-20 text-center">
-            <Badge className="mb-6 bg-white/5 text-white/20 border-white/10 hover:bg-white/5 uppercase tracking-[0.4em] px-6 py-2 rounded-full font-black text-[9px]">Industrial_Suite</Badge>
-            <h2 className="text-6xl font-black text-white md:text-8xl tracking-tighter leading-none lowercase">
-              orchestrate_ <span className="text-white/40">everything_</span>
+        {/* Module Arsenal Grid */}
+        <div className="mt-56 w-full max-w-7xl">
+          <div className="mb-24 text-center space-y-4">
+            <Badge className="bg-aether-purple/10 text-aether-purple border-aether-purple/20 hover:bg-aether-purple/20 uppercase tracking-[0.5em] px-8 py-3 rounded-full font-bold text-[10px] font-display">Industrial Suite</Badge>
+            <h2 className="text-6xl font-bold text-white md:text-8xl tracking-tight leading-none font-display">
+              Neural <span className="opacity-40">Arsenal.</span>
             </h2>
-            <p className="mt-6 text-white/10 max-w-xl mx-auto uppercase text-[9px] font-black tracking-[0.4em]">
-              Select a visual endpoint to begin neural processing.
+            <p className="text-white/20 max-w-xl mx-auto uppercase text-[10px] font-bold tracking-[0.4em] font-display">
+              Professional modules for multidimensional production.
             </p>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 animate-fade-in">
+          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {aiTools.map((tool) => (
               <button
                 key={tool.name}
                 onClick={() => navigate(tool.path)}
-                className="group rounded-[2rem] border border-white/5 bg-white/[0.01] p-10 text-left backdrop-blur-sm
-                  hover:border-white/20 hover:-translate-y-2 hover:shadow-3xl hover:shadow-white/5
-                  transition-all duration-500 relative overflow-hidden"
+                className="group aether-card rounded-[3rem] border border-white/5 p-10 text-left backdrop-blur-3xl
+                  hover:border-white/20 hover:-translate-y-3 hover:shadow-4xl
+                  transition-all duration-700 relative overflow-hidden"
               >
-                <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 group-hover:bg-white shadow-3xl shadow-white/0 group-hover:shadow-white/10 transition-all">
-                  <tool.icon className="h-6 w-6 text-white/20 group-hover:text-black transition-colors" />
+                <div className="mb-10 flex h-16 w-16 items-center justify-center rounded-2.5xl bg-white/5 group-hover:bg-white shadow-inner transition-all duration-500">
+                  <tool.icon className="h-7 w-7 text-white/30 group-hover:text-black transition-colors" />
                 </div>
-                <h3 className="text-xl font-black text-white mb-3 tracking-tighter lowercase leading-none">{tool.name}</h3>
-                <p className="text-[10px] text-white/10 leading-relaxed font-black uppercase tracking-[0.2em]">{tool.desc}</p>
-                <div className="mt-8 flex items-center gap-3 text-[9px] font-black text-white/40 uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all translate-x-[-15px] group-hover:translate-x-0">
-                  initiate_node <ArrowRight className="h-3 w-3" />
+                <h3 className="text-xl font-bold text-white mb-3 tracking-tight font-display leading-none">{tool.name}</h3>
+                <p className="text-[11px] text-white/20 leading-relaxed font-bold uppercase tracking-[0.1em] font-display">{tool.desc}</p>
+                <div className="mt-10 flex items-center gap-3 text-[10px] font-bold text-white/40 uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all translate-x-[-20px] group-hover:translate-x-0 font-display">
+                  Initiate Module <ArrowRight className="h-4 w-4" />
                 </div>
               </button>
             ))}
           </div>
         </div>
 
-        {/* Formaketing Highlight */}
-        <div className="mt-40 w-full max-w-7xl">
-          <div className="rounded-[4rem] border border-white/5 bg-white/[0.01] overflow-hidden backdrop-blur-3xl shadow-3xl shadow-white/5">
-            <div className="grid md:grid-cols-2">
-              <div className="p-16 md:p-24 flex flex-col justify-center">
-                <Badge className="w-fit mb-8 bg-white/5 text-white/40 border-white/10 hover:bg-white/5 uppercase tracking-[0.4em] px-6 py-2 rounded-full font-black text-[9px]">Nexus_Studio</Badge>
-                <h2 className="text-6xl font-black text-white md:text-8xl leading-[0.85] tracking-tighter lowercase mb-8">
-                  visual_ <span className="text-white/40">marketing_</span> cluster.
+        {/* Aether Studio Cinematic Highlight */}
+        <div className="mt-56 w-full max-w-7xl">
+          <div className="rounded-[4rem] aether-card border border-white/5 overflow-hidden shadow-4xl relative">
+            <div className="grid lg:grid-cols-2 lg:items-center">
+              <div className="p-20 lg:p-28 flex flex-col justify-center space-y-10 relative z-10">
+                <Badge className="w-fit bg-aether-blue/10 text-aether-blue border-aether-blue/20 hover:bg-aether-blue/20 uppercase tracking-[0.5em] px-8 py-3 rounded-full font-bold text-[10px] font-display text-xs">Production Studio</Badge>
+                <h2 className="text-6xl font-bold text-white md:text-8xl leading-[0.85] tracking-tight font-display">
+                  Infinite <span className="opacity-40">Canvas.</span>
                 </h2>
-                <p className="mb-10 text-white/10 leading-relaxed font-black uppercase text-[10px] tracking-[0.3em]">
-                  INFINITE CANVAS FOR NEURAL CREATIVES. ORCHESTRATE CAMPAIGNS, CONNECT NODES, GENERATE ASSETS AND DEPLOY SCALABLE FUNNELS.
+                <p className="text-white/30 leading-relaxed font-medium text-lg font-display max-w-lg">
+                  A high-fidelity node-based environment for elite creators. Orchestrate global campaigns, connect neural clusters, and manifest vision in real-time.
                 </p>
                 <ul className="space-y-6">
-                  {["Infinite node-based canvas", "In-line asset generation", "High-density visual flows", "Prompt-to-UI code export"].map((f) => (
-                    <li key={f} className="flex items-center gap-4 text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">
-                      <CheckCircle2 className="h-5 w-5 text-white/20 shrink-0" />{f}
+                  {["Multimodal infinite canvas", "In-line neural processing", "Parallel campaign orchestration", "Industrial asset persistence"].map((f) => (
+                    <li key={f} className="flex items-center gap-5 text-sm font-bold text-white/40 uppercase tracking-widest font-display">
+                      <div className="p-1 rounded-full bg-white/10"><CheckCircle2 className="h-4 w-4 text-white/40" /></div>{f}
                     </li>
                   ))}
                 </ul>
-                <Button onClick={() => navigate("/auth")} className="mt-16 w-fit bg-white text-black hover:bg-white/90 gap-5 rounded-[1.5rem] px-14 h-16 shadow-3xl shadow-white/10 font-black uppercase text-[11px] tracking-[0.4em] active:scale-95 transition-all">
-                  <Palette className="h-5 w-5" />
-                  initiate_studio
+                <Button onClick={() => navigate("/auth")} className="mt-12 w-fit bg-white text-black hover:bg-white/90 gap-6 rounded-[2rem] px-16 h-20 shadow-4xl font-bold uppercase text-xs tracking-[0.3em] active:scale-95 transition-all font-display">
+                  <Palette className="h-6 w-6" />
+                  Init Aether Studio
                 </Button>
               </div>
-              <div className="flex items-center justify-center bg-white/[0.01] p-16 min-h-[500px] relative border-l border-white/5">
-                <div className="absolute inset-0 bg-white/[0.01] pointer-events-none" />
-                <div className="relative grid grid-cols-2 gap-8">
-                  {[Megaphone, Image, Type, TrendingUp].map((Icon, i) => (
-                    <div key={i} className="flex h-40 w-40 items-center justify-center rounded-[2.5rem] border border-white/5 bg-[#050506] shadow-3xl shadow-white/5 hover:border-white/20 transition-all group hover:-translate-y-2">
-                      <Icon className="h-12 w-12 text-white/5 group-hover:text-white transition-colors" />
+              <div className="hidden lg:flex items-center justify-center p-20 min-h-[600px] relative border-l border-white/[0.05] bg-white/[0.01]">
+                <div className="absolute inset-0 bg-gradient-to-br from-aether-purple/5 to-aether-blue/5 pointer-events-none" />
+                <div className="relative grid grid-cols-2 gap-10">
+                  {[Megaphone, Image, Type, Rocket].map((Icon, i) => (
+                    <div key={i} className="flex h-48 w-48 items-center justify-center rounded-[3rem] aether-card border border-white/5 shadow-inner hover:border-white/20 transition-all group hover:-translate-y-4 hover:shadow-4xl duration-700">
+                      <Icon className="h-16 w-16 text-white/5 group-hover:text-white transition-all duration-700" />
                     </div>
                   ))}
                 </div>
               </div>
             </div>
+            
+            {/* Background Grain */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
           </div>
         </div>
 
-        {/* Testimonials */}
-        <div className="mt-40 w-full max-w-7xl">
-          <h2 className="text-center text-6xl font-black text-white mb-24 md:text-8xl tracking-tighter lowercase">
-            operator_ <span className="text-white/40">feedback_</span>
+        {/* Operator Network */}
+        <div className="mt-56 w-full max-w-7xl">
+          <h2 className="text-center text-6xl font-bold text-white mb-28 md:text-8xl tracking-tight font-display">
+            Global <span className="opacity-40">Network.</span>
           </h2>
-          <div className="grid gap-8 md:grid-cols-3 animate-fade-in">
+          <div className="grid gap-10 md:grid-cols-3">
             {testimonials.map((t) => (
-              <div key={t.name} className="rounded-[2.5rem] border border-white/5 bg-white/[0.01] p-12 backdrop-blur-3xl shadow-3xl shadow-white/5">
-                <div className="flex gap-1.5 mb-8">
+              <div key={t.name} className="aether-card rounded-[3.5rem] border border-white/5 p-16 shadow-4xl hover:border-white/10 transition-all duration-700">
+                <div className="flex gap-2 mb-10">
                   {[1,2,3,4,5].map((s) => (
-                    <Star key={s} className="h-4 w-4 fill-white text-white/10" />
+                    <Star key={s} className="h-4 w-4 fill-aether-purple text-aether-purple/20" />
                   ))}
                 </div>
-                <p className="text-xl text-white/20 leading-relaxed font-bold mb-10 lowercase tracking-tight">"{t.text}"</p>
-                <div className="flex flex-col gap-2 border-t border-white/5 pt-8">
-                  <p className="text-sm font-black text-white uppercase tracking-[0.2em]">{t.name}</p>
-                  <p className="text-[10px] text-white/5 font-black uppercase tracking-[0.4em]">{t.role}</p>
+                <p className="text-2xl text-white/40 leading-relaxed font-bold mb-14 font-display italic">"{t.text}"</p>
+                <div className="flex flex-col gap-3 border-t border-white/5 pt-10">
+                  <p className="text-sm font-bold text-white uppercase tracking-widest font-display">{t.name}</p>
+                  <p className="text-[10px] text-white/20 font-bold uppercase tracking-[0.4em] font-display">{t.role}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Final CTA */}
-        <div className="mt-56 w-full max-w-5xl rounded-[4rem] border border-white/5 bg-[#0a0a0b] p-24 md:p-32 text-center shadow-3xl shadow-white/10 animate-fade-in relative overflow-hidden">
-          <div className="absolute inset-0 bg-white/[0.02] pointer-events-none" />
-          <div className="mx-auto mb-10 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-white shadow-3xl shadow-white/20 relative z-10">
-            <Sparkles className="h-12 w-12 text-black" />
+        {/* Final Evolution CTA */}
+        <div className="mt-64 w-full max-w-5xl rounded-[5rem] aether-card border border-white/10 p-28 md:p-40 text-center shadow-5xl animate-fade-in relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-tr from-aether-purple/5 via-transparent to-aether-blue/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+          <div className="mx-auto mb-14 flex h-28 w-28 items-center justify-center rounded-[2.5rem] bg-white shadow-4xl relative z-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
+            <Sparkles className="h-14 w-14 text-black" />
           </div>
-          <h2 className="text-7xl font-black text-white md:text-9xl relative z-10 leading-[0.85] tracking-tighter lowercase mb-10">
-            initialize_ <br /> <span className="text-white/40">nexus_today.</span>
+          <h2 className="text-7xl font-bold text-white md:text-9xl relative z-10 leading-[0.85] tracking-tight font-display mb-14">
+            Start <br /> <span className="opacity-40">Evolution.</span>
           </h2>
-          <p className="mt-10 text-white/10 max-w-md mx-auto relative z-10 uppercase text-[10px] font-black tracking-[0.4em] leading-loose">
-            JOIN THOUSANDS OF HIGH-LEVEL OPERATORS. 100 INIT CREDITS. NO AUTHENTICATION REQUIRED.
+          <p className="text-white/20 max-w-md mx-auto relative z-10 uppercase text-[11px] font-bold tracking-[0.5em] leading-[2.5] font-display">
+            Join the elite circle of creative operators. Initial protocols active. 
           </p>
-          <Button onClick={() => navigate("/auth")} size="lg" className="mt-16 bg-white text-black hover:bg-white/90 gap-5 px-20 rounded-[1.5rem] h-20 text-[11px] font-black uppercase tracking-[0.5em] shadow-3xl shadow-white/10 relative z-10 transition-all hover:scale-105 active:scale-95">
-            Comenzar_Init
-            <ArrowRight className="h-5 w-5" />
+          <Button onClick={() => navigate("/auth")} size="lg" className="mt-20 bg-white text-black hover:bg-white/90 gap-6 px-24 rounded-[2rem] h-24 text-xs font-bold uppercase tracking-[0.4em] shadow-5xl relative z-10 transition-all hover:scale-105 active:scale-95 font-display">
+            Access Nexus
+            <ArrowRight className="h-6 w-6" />
           </Button>
+          
+          <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-aether-purple to-transparent opacity-20" />
         </div>
 
-        {/* Footer */}
-        <footer className="mt-48 w-full max-w-7xl border-t border-white/5 pt-16 text-center text-[10px] text-white/10 space-y-6 pb-24">
-          <p className="uppercase tracking-[0.5em] font-black">© {new Date().getFullYear()} Nexus System V7. All clusters operational.</p>
-          <p className="text-white/5 uppercase tracking-[0.2em] font-black max-w-sm mx-auto">GLOBAL NEURAL ORCHESTRATION PLATFORM FOR FUTURE OPERATORS 🚀</p>
+        {/* Global Footer */}
+        <footer className="mt-56 w-full max-w-7xl border-t border-white/[0.05] pt-20 text-center text-[10px] text-white/10 space-y-8 pb-32 font-display">
+          <p className="uppercase tracking-[0.6em] font-bold">© {new Date().getFullYear()} Aether Evolution Ecosystem. All nodes operational.</p>
+          <div className="flex items-center justify-center gap-12 opacity-40 uppercase tracking-[0.2em] font-extrabold text-[9px]">
+             <span className="hover:text-white transition-colors cursor-pointer">Security Protocol</span>
+             <span className="hover:text-white transition-colors cursor-pointer">API Manifest</span>
+             <span className="hover:text-white transition-colors cursor-pointer">System Status</span>
+          </div>
         </footer>
       </main>
     </div>

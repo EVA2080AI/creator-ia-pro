@@ -68,73 +68,78 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-white/5 bg-[#080809]/80 backdrop-blur-3xl w-[260px] animate-in zoom-in duration-300 nodrag shadow-3xl transition-all hover:border-white/20 ${data.status === 'loading' || data.status === 'executing' ? 'ring-1 ring-white/30 shadow-[0_0_30px_rgba(255,255,255,0.05)] animate-pulse' : ''}`}>
-      {/* Nexus V3 Industrial Header */}
-      <div className="flex h-10 items-center justify-between px-3 border-b border-white/5 bg-white/[0.01]">
-        <div className="flex items-center gap-2 overflow-hidden">
-            <div className="p-1 rounded-lg bg-white/5 border border-white/10">
-              <ImageIcon className="w-3.5 h-3.5 text-white/50 shrink-0" />
+    <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
+      ${data.status === 'executing' ? 'aether-prism glow-purple' : 'aether-card'}
+      w-[260px] shadow-2xl nodrag
+    `}>
+      {/* Aether Node Header */}
+      <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">
+        <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="p-1.5 rounded-xl bg-white/5 border border-white/10 group-hover:bg-aether-purple/20 group-hover:border-aether-purple/30 transition-colors">
+              <ImageIcon className="w-4 h-4 text-white/70 shrink-0" />
             </div>
-            <h3 className="text-[10px] font-bold text-white/90 tracking-tight truncate uppercase">
-               {data.title || "MODEL_ENGINE_V3"}
+            <h3 className="text-[11px] font-bold text-white/90 tracking-wide truncate font-display uppercase">
+               {data.title || "Visual Engine"}
             </h3>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 hover:bg-white/5 text-slate-500 rounded-xl transition-all">
-             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+        <div className="flex items-center gap-1 shrink-0">
+          <button onClick={() => setIsExpanded(!isExpanded)} className="p-2 hover:bg-white/5 text-white/30 hover:text-white rounded-lg transition-all">
+             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
-          <button onClick={deleteNode} className="p-1.5 hover:bg-destructive/10 text-slate-600 hover:text-destructive rounded-xl transition-all">
-             <Trash2 className="w-3.5 h-3.5" />
+          <button onClick={deleteNode} className="p-2 hover:bg-rose-500/10 text-white/20 hover:text-rose-500 rounded-lg transition-all">
+             <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      <div className="p-0 bg-white/[0.02] aspect-square relative flex items-center justify-center overflow-hidden group/img">
+      <div className="p-0 aspect-[4/5] relative flex items-center justify-center overflow-hidden bg-black/40 group/img border-b border-white/[0.05]">
         {data.assetUrl ? (
           <img 
             src={data.assetUrl} 
             alt="Asset" 
-            className="w-full h-full object-cover grayscale-[0.3] group-hover/img:grayscale-0 transition-all duration-700 group-hover/img:scale-105" 
+            className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-1000 ease-out" 
           />
         ) : (
-          <div className="flex flex-col items-center gap-4 opacity-20">
-             <Wand2 className={`w-12 h-12 text-slate-600 ${data.status === 'loading' ? 'animate-pulse' : ''}`} />
-             <span className="text-[9px] font-black lowercase tracking-widest text-slate-600">
-                {data.status === 'loading' ? 'processing_quantum...' : 'awaiting_nexus...'}
+          <div className="flex flex-col items-center gap-4 group-hover/img:scale-110 transition-transform duration-500">
+             <div className="w-16 h-16 rounded-full bg-white/[0.02] border border-white/[0.05] flex items-center justify-center shadow-inner">
+                <Wand2 className={`w-6 h-6 text-white/20 ${data.status === 'executing' ? 'animate-pulse text-aether-purple' : ''}`} />
+             </div>
+             <span className="text-[10px] font-medium text-white/20 uppercase tracking-[0.2em]">
+                {data.status === 'executing' ? 'Synthesizing...' : 'Awaiting Data'}
              </span>
           </div>
         )}
         
-        {data.status === 'loading' && (
-          <div className="absolute inset-0 bg-[#080809]/90 backdrop-blur-md flex flex-col items-center justify-center gap-4">
-             <div className="w-8 h-8 rounded-full border-2 border-white/30 border-t-white animate-spin shadow-2xl" />
-             <span className="text-[9px] font-bold text-white/40 uppercase tracking-[0.2em] animate-pulse">processing_quantum</span>
+        {data.status === 'executing' && (
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center gap-4">
+             <div className="w-10 h-10 rounded-full border-t-2 border-aether-purple animate-spin" />
+             <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] animate-pulse">Computing_Aether</span>
           </div>
         )}
       </div>
 
       {isExpanded && (
-        <div className="p-3 space-y-3 bg-[#0a0a0b]/60 backdrop-blur-xl animate-in fade-in duration-500">
-           <div className="space-y-2">
+        <div className="p-4 space-y-4 bg-black/20 animate-in fade-in slide-in-from-top-2 duration-300">
+           <div className="space-y-4">
               <div className="flex items-center justify-between">
-                 <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Parameters</span>
-                 <div className="flex gap-1.5">
+                 <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-display">Generation parameters</span>
+                 <div className="flex gap-2">
                     <button 
                       onClick={() => (data as any).onExecute?.()}
-                      disabled={data.status === 'loading'}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-white/90 text-black transition-all shadow-xl disabled:opacity-50 active:scale-95 group/exec"
+                      disabled={data.status === 'executing'}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white hover:bg-white/90 text-black transition-all shadow-lg active:scale-95 disabled:opacity-50 group/exec"
                     >
-                      <Zap className={`w-3 h-3 ${data.status === 'loading' ? 'animate-pulse' : 'group-hover/exec:scale-110 transition-transform font-bold'}`} />
-                      <span className="text-[8px] font-bold lowercase tracking-widest">Run</span>
+                      <Zap className={`w-3.5 h-3.5 fill-current ${data.status === 'executing' ? 'animate-pulse' : 'group-hover/exec:scale-110 transition-transform'}`} />
+                      <span className="text-[10px] font-bold uppercase tracking-tight">Run</span>
                     </button>
                     {data.assetUrl && (
                       <button 
                         onClick={() => data.onVariation?.()}
-                        disabled={data.status === 'loading'}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white border border-white/5 transition-all disabled:opacity-50 active:scale-95 group/var"
+                        disabled={data.status === 'executing'}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 transition-all active:scale-95 disabled:opacity-50 group/var"
                       >
-                        <Sparkles className="w-2.5 h-2.5 text-white/40 group-hover/var:scale-110 transition-transform" />
-                        <span className="text-[8px] font-bold lowercase tracking-widest">Var</span>
+                        <Sparkles className="w-3.5 h-3.5 text-aether-blue group-hover/var:scale-110 transition-transform" />
+                        <span className="text-[10px] font-bold uppercase tracking-tight">Var</span>
                       </button>
                     )}
                  </div>
@@ -144,25 +149,25 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                  onChange={(e) => updatePrompt(e.target.value)}
                  onBlur={(e) => persistChange(e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-[10px] font-medium leading-relaxed text-white/70 bg-white/5 border border-white/5 p-3 rounded-xl focus:outline-none focus:ring-1 focus:ring-white/20 border-white/10 transition-all resize-none min-h-[60px] placeholder:text-white/10"
-                 placeholder="enter_neural_prompt..."
+                 className="w-full text-xs font-medium leading-relaxed text-white/80 bg-white/[0.03] border border-white/[0.08] p-3 rounded-2xl focus:outline-none focus:border-aether-purple/50 transition-all resize-none min-h-[80px] placeholder:text-white/10"
+                 placeholder="Enter creative prompt..."
               />
               
-              <div className="space-y-1.5">
-                  <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest px-1 text-center block">Engine Selector</span>
-                  <div className="grid grid-cols-2 gap-1.5">
+              <div className="space-y-3">
+                  <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-display">Engine Selector</span>
+                  <div className="grid grid-cols-2 gap-2">
                      {[
-                       { id: 'nano-banana-pro', name: 'FLUX_V1' },
-                       { id: 'nano-banana-2', name: 'PRO_V8' },
-                       { id: 'nano-banana-25', name: 'ECON_V2' }
+                       { id: 'nano-banana-pro', name: 'Flux Elite' },
+                       { id: 'nano-banana-2', name: 'Pro Vision' },
+                       { id: 'nano-banana-25', name: 'Economy' }
                      ].map((m) => (
                        <button
                          key={m.id}
                          onClick={() => updateModel(m.id)}
-                         className={`px-2 py-1.5 rounded-lg border text-[8px] font-bold lowercase tracking-wider transition-all ${
+                         className={`px-3 py-2 rounded-xl border text-[10px] font-bold transition-all ${
                            (data.model || 'nano-banana-pro') === m.id 
-                           ? 'bg-white/10 border-white/20 text-white' 
-                           : 'bg-white/5 border-white/5 text-slate-600 hover:bg-white/10'
+                           ? 'bg-white/10 border-white/20 text-white shadow-lg shadow-white/5' 
+                           : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'
                          }`}
                        >
                          {m.name}

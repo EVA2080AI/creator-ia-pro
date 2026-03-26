@@ -14,6 +14,7 @@ import {
   Wand2, ZoomIn, Eraser, ImagePlus, RotateCcw, Sparkles,
   Upload, Loader2, Download, Coins, Type, MessageSquare,
   PenTool, Hash, Image, ArrowLeft, FileText, Megaphone, Copy,
+  Rocket, ChevronRight, Zap
 } from "lucide-react";
 import { ModelSelector, AVAILABLE_MODELS } from "@/components/ModelSelector";
 
@@ -28,20 +29,21 @@ interface Tool {
   category: "image" | "ai-app";
   needsUpload: boolean;
   placeholder?: string;
+  color: string;
 }
 
 const tools: Tool[] = [
-  { id: "enhance", name: "Mejorar Imagen", desc: "Mejora calidad, iluminación y nitidez con IA.", icon: Wand2, credits: 2, category: "image", needsUpload: true },
-  { id: "upscale", name: "Ampliar 4x", desc: "Escala imágenes hasta 4x sin perder detalles.", icon: ZoomIn, credits: 3, category: "image", needsUpload: true },
-  { id: "eraser", name: "Borrar Objetos", desc: "Elimina objetos no deseados de cualquier imagen.", icon: Eraser, credits: 2, category: "image", needsUpload: true },
-  { id: "background", name: "Quitar Fondo", desc: "Elimina fondos automáticamente con IA.", icon: ImagePlus, credits: 1, category: "image", needsUpload: true },
-  { id: "restore", name: "Restaurar Foto", desc: "Restaura fotos antiguas o dañadas.", icon: RotateCcw, credits: 3, category: "image", needsUpload: true },
-  { id: "generate", name: "Texto a Imagen", desc: "Genera imágenes profesionales desde una descripción.", icon: Image, credits: 1, category: "image", needsUpload: false, placeholder: "Describe la imagen que quieres crear..." },
-  { id: "copywriter", name: "AI Copywriter", desc: "Genera textos de marketing, ads y contenido social.", icon: MessageSquare, credits: 1, category: "ai-app", needsUpload: false, placeholder: "Ej: Escribe un copy para un anuncio de zapatillas deportivas..." },
-  { id: "logo", name: "Logo Maker", desc: "Diseña logos profesionales con IA generativa.", icon: PenTool, credits: 2, category: "ai-app", needsUpload: false, placeholder: "Ej: Logo minimalista para una cafetería llamada 'Aroma'..." },
-  { id: "social", name: "Social Media Kit", desc: "Genera contenido visual optimizado para redes.", icon: Hash, credits: 2, category: "ai-app", needsUpload: false, placeholder: "Ej: Post de Instagram para lanzamiento de producto de skincare..." },
-  { id: "blog", name: "AI Blog Writer", desc: "Artículos SEO completos generados con IA.", icon: FileText, credits: 1, category: "ai-app", needsUpload: false, placeholder: "Ej: Artículo sobre tendencias de marketing digital 2026..." },
-  { id: "ads", name: "Ad Generator", desc: "Crea textos de anuncios para Google y Meta Ads.", icon: Megaphone, credits: 1, category: "ai-app", needsUpload: false, placeholder: "Ej: Anuncio de Google Ads para una tienda de ropa online..." },
+  { id: "enhance", name: "Neural Enhancer", desc: "Optimize lighting, clarity and details with high-fidelity AI.", icon: Wand2, credits: 2, category: "image", needsUpload: true, color: "text-aether-purple" },
+  { id: "upscale", name: "Quantum Upscale", desc: "Scale images up to 4K resolution without losing a single pixel.", icon: ZoomIn, credits: 3, category: "image", needsUpload: true, color: "text-aether-blue" },
+  { id: "eraser", name: "Neural Eraser", desc: "Seamlessly remove any object or distraction from your assets.", icon: Eraser, credits: 2, category: "image", needsUpload: true, color: "text-rose-400" },
+  { id: "background", name: "Alpha Matte", desc: "Instant background removal with perfect edges for any object.", icon: ImagePlus, credits: 1, category: "image", needsUpload: true, color: "text-emerald-400" },
+  { id: "restore", name: "Photo Recovery", desc: "Breathe new life into old or damaged photographic records.", icon: RotateCcw, credits: 3, category: "image", needsUpload: true, color: "text-amber-400" },
+  { id: "generate", name: "Vision Morph", desc: "Generate professional-grade visuals from natural language.", icon: Image, credits: 1, category: "image", needsUpload: false, placeholder: "Describe the vision you want to manifest...", color: "text-white" },
+  { id: "copywriter", name: "Copy Orchestrator", desc: "Generate high-converting marketing narratives and social copy.", icon: MessageSquare, credits: 1, category: "ai-app", needsUpload: false, placeholder: "e.g. Write a persuasive ad copy for a luxury watch brand...", color: "text-aether-purple" },
+  { id: "logo", name: "Identity Forge", desc: "Design minimalist, high-impact brand identities from scratch.", icon: PenTool, credits: 2, category: "ai-app", needsUpload: false, placeholder: "e.g. Minimalist logo for a quantum computing startup called 'Nova'...", color: "text-aether-blue" },
+  { id: "social", name: "Social Pulse", desc: "Optimized visual content sequences for global social distribution.", icon: Hash, credits: 2, category: "ai-app", needsUpload: false, placeholder: "e.g. 5-post carousel strategy for a high-end streetwear launch...", color: "text-rose-400" },
+  { id: "blog", name: "Semantic Writer", desc: "Full-length, SEO-optimized articles and industrial whitepapers.", icon: FileText, credits: 1, category: "ai-app", needsUpload: false, placeholder: "e.g. Deep dive into the future of decentralized AI in 2027...", color: "text-emerald-400" },
+  { id: "ads", name: "Ad Synthesizer", desc: "Targeted ad copy generation for Meta, Google, and beyond.", icon: Megaphone, credits: 1, category: "ai-app", needsUpload: false, placeholder: "e.g. High-CTR Google Search ad for a SaaS project management tool...", color: "text-white" },
 ];
 
 const appIdToToolId: Record<string, ToolId> = {
@@ -53,8 +55,8 @@ const appIdToToolId: Record<string, ToolId> = {
 };
 
 const categories = [
-  { id: "image", label: "Herramientas de Imagen", icon: Image },
-  { id: "ai-app", label: "Apps de IA", icon: Sparkles },
+  { id: "image", label: "Visual Processing", icon: Image },
+  { id: "ai-app", label: "Creative Apps", icon: Sparkles },
 ];
 
 const Tools = () => {
@@ -72,7 +74,6 @@ const Tools = () => {
   const [selectedModelId, setSelectedModelId] = useState("deepseek-chat");
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Handle /apps/:appId route
   useEffect(() => {
     if (appId && appIdToToolId[appId]) {
       const toolId = appIdToToolId[appId];
@@ -87,7 +88,7 @@ const Tools = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("Solo se permiten imágenes"); return; }
+    if (!file.type.startsWith("image/")) { toast.error("File type not supported"); return; }
     const reader = new FileReader();
     reader.onload = () => setImagePreview(reader.result as string);
     reader.readAsDataURL(file);
@@ -97,15 +98,15 @@ const Tools = () => {
 
   const handleProcess = async () => {
     if (!user) return;
-    if (currentTool.needsUpload && !imagePreview) { toast.error("Sube una imagen primero"); return; }
-    if (!currentTool.needsUpload && !textPrompt.trim()) { toast.error("Escribe un prompt"); return; }
+    if (currentTool.needsUpload && !imagePreview) { toast.error("Please upload an image first"); return; }
+    if (!currentTool.needsUpload && !textPrompt.trim()) { toast.error("Mission requires a prompt"); return; }
 
     const modelObj = AVAILABLE_MODELS.find(m => m.id === selectedModelId) || AVAILABLE_MODELS[0];
     const requiredCredits = category === "ai-app" ? modelObj.tokenCost : currentTool.credits;
 
     const credits = profile?.credits_balance ?? 0;
     if (credits < requiredCredits) {
-      toast.error(`Necesitas ${requiredCredits} créditos. Tienes ${credits}.`);
+      toast.error(`Neural deficiency: Need ${requiredCredits} credits. Found ${credits}.`);
       return;
     }
 
@@ -124,107 +125,117 @@ const Tools = () => {
 
       if (data?.text) {
         setResultText(data.text);
-        toast.success("¡Texto generado!");
+        toast.success("Content Manifested");
       } else if (data?.url) {
         setResultImage(data.url);
-        toast.success("Imagen generada con éxito");
+        toast.success("Visual Manifested");
       } else {
-        console.error("Payload inesperado:", data);
-        throw new Error("Respuesta inválida del servidor");
+        throw new Error("Invalid nexus response");
       }
       await refreshProfile();
     } catch (err: any) {
       console.error("Tool Error:", err);
-      const msg = err?.message ? `${err.message} (Tools V3.4)` : "Error al procesar (V3.4)";
-      toast.error(msg, { duration: 5000 });
+      toast.error(err?.message || "Quantum error during processing", { duration: 5000 });
     } finally {
       setProcessing(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#050506] text-white selection:bg-aether-purple/30 selection:text-white font-sans">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      <main className="mx-auto max-w-7xl px-6 py-8">
-        <div className="mb-6 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              Herramientas <span className="gradient-text">IA</span>
+      <main className="mx-auto max-w-7xl px-8 py-24">
+        {/* Header Section */}
+        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="space-y-4">
+            <button 
+              onClick={() => navigate("/dashboard")}
+              className="flex items-center gap-2 text-[10px] font-bold text-white/20 hover:text-white transition-all uppercase tracking-[0.2em] font-display"
+            >
+              <ArrowLeft className="w-4 h-4" /> Return to Nexus
+            </button>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display">
+              Neural <span className="bg-gradient-to-r from-aether-purple to-aether-blue bg-clip-text text-transparent">Arsenal</span>
             </h1>
-            <p className="text-sm text-muted-foreground">{tools.length} herramientas profesionales de IA</p>
+            <p className="text-sm text-white/30 font-medium max-w-md">Equipping creators with production-grade AI modules for high-fidelity asset manifestation.</p>
+          </div>
+          
+          <div className="flex bg-white/[0.03] p-1.5 rounded-2.5xl border border-white/5 backdrop-blur-xl">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => { setCategory(cat.id as any); setResultImage(null); setResultText(null); }}
+                className={`flex items-center gap-3 px-8 py-3.5 rounded-2xl transition-all duration-500 font-display text-xs font-bold uppercase tracking-widest ${
+                  category === cat.id 
+                  ? "bg-white text-black shadow-2xl shadow-white/10" 
+                  : "text-white/30 hover:text-white/60"
+                }`}
+              >
+                <cat.icon className={`h-4 w-4 ${category === cat.id ? "text-black" : "text-white/20"}`} />
+                {cat.label}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="mb-8 flex gap-2 overflow-x-auto pb-1">
-          {categories.map((cat) => (
-            <Button
-              key={cat.id}
-              variant={category === cat.id ? "default" : "outline"}
-              onClick={() => { setCategory(cat.id as any); setResultImage(null); setResultText(null); }}
-              className={`rounded-2xl px-6 h-11 transition-all duration-300 gap-2 shrink-0 ${
-                category === cat.id 
-                ? "bg-primary shadow-lg shadow-primary/20 glow-primary border-none" 
-                : "border-white/5 glass hover:bg-white/10"
+        {/* Tools Navigator */}
+        <div className="mb-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredTools.map((tool, idx) => (
+            <button
+              key={tool.id}
+              onClick={() => { setActiveTool(tool.id); setResultImage(null); setResultText(null); }}
+              className={`group relative flex flex-col p-8 aether-card rounded-[2.5rem] border transition-all duration-500 text-left active:scale-95 ${
+                activeTool === tool.id
+                  ? "border-aether-purple/40 bg-aether-purple/5 shadow-3xl shadow-aether-purple/10"
+                  : "border-white/5 hover:border-white/10"
               }`}
+              style={{ animationDelay: `${idx * 40}ms` }}
             >
-              <cat.icon className={`h-4 w-4 ${category === cat.id ? "text-primary-foreground" : "text-primary"}`} />
-              <span className="font-medium">{cat.label}</span>
-            </Button>
+              <div className={`flex h-14 w-14 items-center justify-center rounded-2xl mb-8 bg-white/5 border border-white/5 shadow-inner transition-all group-hover:scale-110 group-hover:rotate-3 ${tool.color}`}>
+                <tool.icon className="h-6 w-6" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-white tracking-tight font-display">{tool.name}</h3>
+                <p className="text-[11px] text-white/20 font-medium line-clamp-2 leading-relaxed">{tool.desc}</p>
+              </div>
+              <div className="mt-6 flex items-center justify-between">
+                <span className="flex items-center gap-2 rounded-xl bg-white/5 px-3 py-1.5 text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                   <Coins className="h-3 w-3" />
+                   {tool.credits} credits
+                </span>
+                {activeTool === tool.id && (
+                   <div className="h-2 w-2 rounded-full bg-aether-purple shadow-[0_0_10px_rgba(168,85,247,0.8)] animate-pulse" />
+                )}
+              </div>
+            </button>
           ))}
         </div>
 
-        <div className="mb-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredTools.map((tool, idx) => (
-                <button
-                  key={tool.id}
-                  onClick={() => { setActiveTool(tool.id); setResultImage(null); setResultText(null); }}
-                  className={`group relative flex items-start gap-4 rounded-[2rem] border p-5 text-left transition-all duration-300 animate-fade-in ${
-                    activeTool === tool.id
-                      ? "border-primary bg-primary/5 shadow-xl shadow-primary/10 ring-1 ring-primary/20"
-                      : "border-white/5 glass hover:border-white/10 hover:-translate-y-1 hover:shadow-2xl"
-                  }`}
-                  style={{ animationDelay: `${idx * 40}ms` }}
-                >
-                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
-                    activeTool === tool.id ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-primary/20 group-hover:text-primary transition-colors"
-                  }`}>
-                    {<tool.icon className="h-6 w-6" />}
-                  </div>
-                  <div className="pr-4">
-                    <h3 className="font-bold text-foreground font-display tracking-tight">{tool.name}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed opacity-80">{tool.desc}</p>
-                    <div className="mt-3 flex items-center gap-2">
-                      <span className="flex items-center gap-1 rounded-full bg-gold/10 px-2 py-0.5 text-[10px] font-bold text-gold uppercase tracking-wider">
-                         <Coins className="h-2.5 w-2.5" />
-                         {tool.credits} Créditos
-                      </span>
-                    </div>
-                  </div>
-                  {activeTool === tool.id && (
-                     <div className="absolute top-4 right-4 h-2 w-2 rounded-full bg-primary animate-pulse" />
-                  )}
-                </button>
-              ))}
-            </div>
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-4">
-            <div className="flex flex-col gap-4">
+        {/* Execution Engine */}
+        <div className="grid gap-10 lg:grid-cols-2 items-start">
+          <div className="space-y-8 aether-card p-10 rounded-[3rem] border border-white/5 relative overflow-hidden">
+            <div className="flex flex-col gap-6 relative z-10">
               <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-foreground">{currentTool.name}</h2>
-                <Badge variant="outline" className="border-border text-muted-foreground">{category === "ai-app" ? "Precio Dinámico" : `${currentTool.credits} créditos`}</Badge>
+                <div className="space-y-1">
+                   <h2 className="text-xl font-bold text-white font-display tracking-tight">{currentTool.name}</h2>
+                   <p className="text-xs text-white/20 font-medium uppercase tracking-[0.1em]">{currentTool.id} protocol</p>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                   <Badge className="bg-white/5 text-white/40 border-none px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest">
+                     {category === "ai-app" ? "Dynamic Sync" : "Static Charge"}
+                   </Badge>
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground">{currentTool.desc}</p>
 
               {(category === "ai-app" || activeTool === "generate") && (
-                <div className="space-y-2 mt-4 bg-primary/5 p-4 rounded-xl border border-primary/10">
-                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">
-                    {activeTool === "generate" ? "🍌 Modelo de Imagen" : "🤖 Cerebro de la IA"}
-                  </span>
+                <div className="space-y-4 p-6 rounded-2.5xl bg-white/[0.02] border border-white/5 shadow-inner">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Zap className="w-3.5 h-3.5 text-aether-purple" />
+                    <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] font-display">
+                      Neural Model Selector
+                    </span>
+                  </div>
                   <ModelSelector selectedModelId={selectedModelId} onModelChange={setSelectedModelId} />
                 </div>
               )}
@@ -232,141 +243,151 @@ const Tools = () => {
 
             <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
 
-            {currentTool.needsUpload ? (
-              !imagePreview ? (
-                <button
-                  onClick={() => fileRef.current?.click()}
-                  className="flex h-56 w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-card/50 hover:border-primary/30 hover:bg-card transition-all"
-                >
-                  <Upload className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Arrastra o haz clic para subir</span>
-                  <span className="text-xs text-muted-foreground/50">JPG, PNG, WEBP hasta 10MB</span>
-                </button>
-              ) : (
-                <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
-                  <img src={imagePreview} alt="Original" className="h-56 w-full object-contain bg-muted/20" />
+            <div className="relative z-10">
+              {currentTool.needsUpload ? (
+                !imagePreview ? (
                   <button
-                    onClick={() => { setImagePreview(null); setResultImage(null); if (fileRef.current) fileRef.current.value = ""; }}
-                    className="absolute right-3 top-3 rounded-lg border border-border bg-card/80 p-1.5 backdrop-blur-sm hover:bg-card"
+                    onClick={() => fileRef.current?.click()}
+                    className="flex h-72 w-full flex-col items-center justify-center gap-4 rounded-[2.5rem] border border-dashed border-white/10 bg-white/[0.01] hover:border-aether-purple/30 hover:bg-aether-purple/5 transition-all group"
                   >
-                    <Eraser className="h-4 w-4 text-muted-foreground" />
-                  </button>
-                </div>
-              )
-            ) : (
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-muted-foreground text-sm">Tu prompt</Label>
-                  <textarea
-                    value={textPrompt}
-                    onChange={(e) => setTextPrompt(e.target.value)}
-                    placeholder={currentTool.placeholder}
-                    rows={5}
-                    className="w-full resize-none rounded-xl border border-border bg-card p-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                  />
-                </div>
-                
-                {activeTool === "generate" && (
-                  <div className="space-y-2">
-                    <Label className="text-muted-foreground text-sm">Estilos Visuales</Label>
-                    <div className="flex flex-wrap gap-2">
-                      {["Fotorealista", "3D Render", "Cyberpunk", "Anime", "Acuarela", "Minimalista"].map(style => (
-                        <Badge 
-                           key={style}
-                           variant="outline" 
-                           className="cursor-pointer hover:bg-primary/20 hover:text-primary transition-colors border-white/5"
-                           onClick={() => setTextPrompt(prev => prev ? `${prev}, estilo ${style}` : `En estilo ${style}: `)}
-                        >
-                          {style}
-                        </Badge>
-                      ))}
+                    <div className="p-5 rounded-3xl bg-white/5 group-hover:scale-110 transition-all border border-white/5">
+                      <Upload className="h-8 w-8 text-white/20 group-hover:text-white transition-colors" />
                     </div>
+                    <div className="text-center">
+                       <span className="text-sm font-bold text-white/40 group-hover:text-white transition-colors block">Manifest Primary Asset</span>
+                       <span className="text-[10px] text-white/10 uppercase font-black tracking-widest mt-2 block">PNG, JPG, WEBP | MAX 10MB</span>
+                    </div>
+                  </button>
+                ) : (
+                  <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#050506]">
+                    <img src={imagePreview} alt="Original" className="h-72 w-full object-contain p-6" />
+                    <button
+                      onClick={() => { setImagePreview(null); setResultImage(null); if (fileRef.current) fileRef.current.value = ""; }}
+                      className="absolute right-6 top-6 rounded-2xl bg-black/60 p-3 backdrop-blur-xl border border-white/10 hover:bg-rose-500/20 hover:text-rose-500 transition-all text-white/40"
+                    >
+                      <Eraser className="h-5 h-5" />
+                    </button>
                   </div>
-                )}
-              </div>
-            )}
-
-            {currentTool.needsUpload && currentTool.id === "eraser" && (
-              <div className="space-y-2">
-                <Label className="text-muted-foreground text-sm">¿Qué quieres borrar? (opcional)</Label>
-                <Input value={textPrompt} onChange={(e) => setTextPrompt(e.target.value)} placeholder="Ej: La persona del fondo" className="bg-card border-border" />
-              </div>
-            )}
+                )
+              ) : (
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <Label className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] ml-2 font-display">Input Narrative</Label>
+                    <textarea
+                      value={textPrompt}
+                      onChange={(e) => setTextPrompt(e.target.value)}
+                      placeholder={currentTool.placeholder}
+                      rows={6}
+                      className="w-full resize-none rounded-[2rem] border border-white/5 bg-white/[0.02] p-8 text-sm text-white placeholder:text-white/10 focus:outline-none focus:border-aether-purple/30 focus:shadow-3xl shadow-inner transition-all font-display leading-relaxed"
+                    />
+                  </div>
+                  
+                  {activeTool === "generate" && (
+                    <div className="space-y-4">
+                      <Label className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] ml-2 font-display">Neural Archetypes</Label>
+                      <div className="flex flex-wrap gap-2 px-2">
+                        {["Photorealistic", "Cinema 4D", "Surrealist", "Anime V3", "Hyper-Minimal", "Cybernetic"].map(style => (
+                          <button 
+                             key={style}
+                             onClick={() => setTextPrompt(prev => prev ? `${prev}, style: ${style}` : `Style: ${style} - `)}
+                             className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/5 text-[10px] font-bold text-white/30 hover:text-white hover:bg-white/10 hover:border-white/10 transition-all uppercase tracking-widest"
+                          >
+                            {style}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             <Button
               onClick={handleProcess}
               disabled={processing || (currentTool.needsUpload ? !imagePreview : !textPrompt.trim())}
-              className="w-full bg-gradient-to-r from-[#bd00ff] to-[#ff0071] hover:opacity-90 text-white gap-2 h-12 rounded-xl text-md shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)]"
+              className="w-full h-16 rounded-[2rem] bg-white text-black text-xs font-bold uppercase tracking-widest shadow-4xl hover:bg-white/90 active:scale-[0.98] transition-all relative z-10"
             >
-              {processing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-              {processing ? "Generando Magia..." : `Generar (${category === "ai-app" ? (AVAILABLE_MODELS.find(m => m.id === selectedModelId)?.tokenCost || 1) : currentTool.credits} Créditos)`}
+              {processing ? (
+                 <div className="flex items-center gap-3">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    Manifesting Neural Sequence...
+                 </div>
+              ) : (
+                 <div className="flex items-center gap-3">
+                    <Sparkles className="h-5 w-5 fill-current" />
+                    Execute Protocol ({category === "ai-app" ? (AVAILABLE_MODELS.find(m => m.id === selectedModelId)?.tokenCost || 1) : currentTool.credits} credits)
+                 </div>
+              )}
             </Button>
+            
+            {/* Visual noise background */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
           </div>
 
-          <div className="space-y-4">
-            <h2 className="font-semibold text-foreground">Resultado</h2>
+          <div className="space-y-8">
+            <h2 className="text-xs font-bold text-white uppercase tracking-[0.5em] font-display ml-4">Manifested Output</h2>
             
-            {processing && currentTool.category === "image" ? (
-              <div className="flex h-64 w-full flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-primary/30 bg-primary/5">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
-                  <Loader2 className="relative h-10 w-10 text-primary animate-spin" />
+            <div className="aether-card rounded-[3rem] border border-white/5 min-h-[460px] flex flex-col relative overflow-hidden group">
+              {processing ? (
+                <div className="flex flex-1 flex-col items-center justify-center p-12 gap-6 text-center">
+                  <div className="relative">
+                    <div className="absolute inset-x-0 top-0 h-20 w-20 bg-aether-purple/20 blur-3xl animate-pulse" />
+                    <Loader2 className="h-12 w-12 text-aether-purple animate-spin relative z-10" />
+                  </div>
+                  <div className="space-y-2 relative z-10">
+                    <p className="text-lg font-bold text-white tracking-tight font-display italic">Synthesizing multidimensional data...</p>
+                    <p className="text-[10px] text-white/20 uppercase tracking-[0.3em] font-bold">Latency compensation active</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-sm font-bold text-primary animate-pulse">Renderizando píxeles...</p>
-                  <p className="text-[10px] text-primary/60 mt-1 uppercase tracking-widest">Esto puede tomar unos segundos</p>
+              ) : resultImage ? (
+                <div className="flex-1 flex flex-col p-8 gap-8 animate-in fade-in zoom-in duration-700">
+                  <div className="flex-1 rounded-2.5xl overflow-hidden border border-white/10 bg-[#050506]">
+                    <img src={resultImage} alt="Manifestation" className="h-full w-full object-contain p-4" />
+                  </div>
+                  <div className="flex gap-4">
+                     <a href={resultImage} download className="flex-1">
+                        <Button className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all font-display font-bold uppercase tracking-widest text-[10px] gap-3">
+                           <Download className="h-4 w-4" /> Export Asset
+                        </Button>
+                     </a>
+                     <Button 
+                       variant="ghost" 
+                       onClick={() => { navigator.clipboard.writeText(resultImage); toast.success("URL copied to clipboard"); }}
+                       className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white"
+                     >
+                        <Copy className="h-4 w-4" />
+                     </Button>
+                  </div>
                 </div>
-              </div>
-            ) : processing && currentTool.category === "ai-app" ? (
-               <div className="flex h-64 w-full flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-primary/30 bg-primary/5">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
-                  <Type className="relative h-10 w-10 text-primary animate-bounce" />
-                </div>
-                <div className="text-center">
-                  <p className="text-sm font-bold text-primary animate-pulse">Escribiendo contenido...</p>
-                  <p className="text-[10px] text-primary/60 mt-1 uppercase tracking-widest">Modelando lingüística</p>
-                </div>
-              </div>
-            ) : resultImage ? (
-              <div className="space-y-4">
-                <div className="overflow-hidden rounded-2xl border border-border bg-card">
-                  <img src={resultImage} alt="Resultado" className="h-56 w-full object-contain bg-muted/20" />
-                </div>
-                <a href={resultImage} download target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="w-full border-border gap-2">
-                    <Download className="h-4 w-4" />Descargar
+              ) : resultText ? (
+                <div className="flex-1 flex flex-col p-8 gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <div className="flex-1 rounded-2.5xl border border-white/10 bg-white/[0.01] p-10 overflow-y-auto custom-scrollbar shadow-inner">
+                    <div className="whitespace-pre-wrap text-[15px] text-white/80 font-sans leading-relaxed tracking-tight">{resultText}</div>
+                  </div>
+                  <Button
+                    onClick={() => { navigator.clipboard.writeText(resultText); toast.success("Copied to clipboard"); }}
+                    className="h-16 rounded-2xl bg-white text-black font-display font-bold uppercase tracking-widest text-[10px] gap-3 shadow-3xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    <Copy className="h-4 w-4" /> Synchronize Context
                   </Button>
-                </a>
-              </div>
-            ) : resultText ? (
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-border bg-card p-5 max-h-80 overflow-y-auto">
-                  <pre className="whitespace-pre-wrap text-sm text-foreground font-sans leading-relaxed">{resultText}</pre>
                 </div>
-                <Button
-                  variant="outline"
-                  className="w-full border-border gap-2"
-                  onClick={() => { navigator.clipboard.writeText(resultText); toast.success("Copiado al portapapeles"); }}
-                >
-                  <Copy className="h-4 w-4" />
-                  Copiar Texto
-                </Button>
-              </div>
-            ) : (
-              <div className="flex h-64 w-full flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-white/10 bg-white/5 backdrop-blur-sm">
-                <div className="relative">
-                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
-                  <Sparkles className="relative h-10 w-10 text-primary/40 animate-pulse" />
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center p-12 gap-8 text-center opacity-40 group-hover:opacity-100 transition-opacity duration-700">
+                  <div className="w-24 h-24 rounded-3xl bg-white/[0.02] border border-white/5 flex items-center justify-center relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-aether-purple/20 to-aether-blue/20 blur-2xl" />
+                    <Rocket className="h-10 w-10 text-white/20 relative z-10" />
+                  </div>
+                  <div className="space-y-3">
+                    <p className="text-xl font-bold text-white tracking-tight font-display">Awaiting Evolution Command</p>
+                    <p className="text-[10px] text-white/20 uppercase tracking-[0.3em] font-bold max-w-[200px] leading-relaxed mx-auto">execute a protocol to manifest industrial assets</p>
+                  </div>
                 </div>
-                <div className="text-center">
-                  <p className="text-sm font-medium text-foreground opacity-60">
-                    {processing ? "Procesando con IA..." : "Esperando prompt..."}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-1 uppercase tracking-widest opacity-40">Listo para crear</p>
-                </div>
-              </div>
-            )}
+              )}
+              
+              {/* Card visual accents */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-aether-purple/5 blur-[100px] pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-32 h-32 bg-aether-blue/5 blur-[100px] pointer-events-none" />
+            </div>
           </div>
         </div>
       </main>
