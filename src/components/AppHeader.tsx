@@ -2,21 +2,11 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { useAdmin } from "@/hooks/useAdmin";
-import { Button } from "@/components/ui/button";
 import {
-  Sparkles, LayoutGrid, Wand2, Image, Coins, Shield,
-  CreditCard, LogOut, Palette, Home, Menu, X, Activity, MonitorDown, Code, User,
-  ChevronDown, Zap, Rocket, BookOpen, Layers, Settings
+  Sparkles, LayoutGrid, Wand2, Image, Shield, CreditCard, LogOut,
+  Palette, Home, Menu, X, Activity, MonitorDown, Code, User,
+  ChevronDown, Zap, BookOpen, Settings, Coins, BrainCircuit, Star
 } from "lucide-react";
-import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 
 interface AppHeaderProps {
@@ -24,189 +14,196 @@ interface AppHeaderProps {
   onSignOut: () => void;
 }
 
+const NAV_ITEMS = [
+  { path: "/dashboard", label: "Inicio", icon: Home },
+  { path: "/tools", label: "Herramientas", icon: Wand2 },
+  { path: "/formarketing", label: "Formarketing", icon: Palette },
+  { path: "/spaces", label: "Espacios", icon: LayoutGrid },
+  { path: "/assets", label: "Assets", icon: Image },
+  { path: "/pricing", label: "Planes", icon: CreditCard },
+  { path: "/descargar", label: "Descargas", icon: MonitorDown },
+];
+
 export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile } = useProfile(userId);
   const { isAdmin } = useAdmin(userId);
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  const menuGroups = [
-    {
-      label: "Nexus Studio",
-      icon: Rocket,
-      items: [
-        { path: "/formarketing", label: "Studio", icon: Palette, description: "Lienzo industrial de creación" },
-        { path: "/spaces", label: "Espacios", icon: LayoutGrid, description: "Organiza proyectos y marcas" },
-        { path: "/tools", label: "Herramientas", icon: Wand2, description: "Utilidades de IA rápida" },
-      ]
-    },
-    {
-      label: "Recursos",
-      icon: BookOpen,
-      items: [
-        { path: "/assets", label: "Biblioteca", icon: Image, description: "Tus generaciones guardadas" },
-        { path: "/descargar", label: "Presets", icon: MonitorDown, description: "Centro de descargas" },
-      ]
-    },
-    {
-      label: "Cuenta",
-      icon: User,
-      items: [
-        { path: "/pricing", label: "Planes", icon: CreditCard, description: "Suscripción y créditos" },
-        { path: "/profile", label: "Perfil", icon: Settings, description: "Ajustes de Nebula V8.0" },
-        { path: "/developer", label: "API", icon: Code, description: "Acceso para desarrolladores" },
-      ]
-    }
-  ];
-
-  const adminItems = isAdmin
-    ? [
-        { path: "/admin", label: "Admin", icon: Shield },
-        { path: "/system-status", label: "Sistema", icon: Activity },
-      ]
-    : [];
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleNav = (path: string) => {
     navigate(path);
     setMobileOpen(false);
+    setUserMenuOpen(false);
   };
 
   return (
-    <header className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] max-w-[1200px] animate-in slide-in-from-top-8 duration-700">
-      <div className="nebula-glass rounded-[2rem] px-8 py-4 flex items-center justify-between shadow-3xl bg-[#080809]/80 backdrop-blur-3xl border border-white/5">
-        
-        {/* Logo Section */}
+    <header className="fixed top-0 left-0 right-0 z-[100] h-14 flex items-center border-b border-[rgba(255,255,255,0.06)] bg-[rgba(5,5,6,0.92)] backdrop-blur-xl">
+      <div className="w-full max-w-[1400px] mx-auto px-4 flex items-center gap-6">
+
+        {/* Logo */}
         <button
           onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-4 hover:opacity-80 transition-all group shrink-0"
+          className="flex items-center gap-2.5 shrink-0 group"
         >
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#d4ff00] shadow-2xl shadow-[#d4ff00]/20 group-hover:rotate-12 transition-transform">
-             <Rocket className="h-5 w-5 text-[#020203]" />
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#bd00ff] to-[#ff0071] flex items-center justify-center shadow-[0_0_12px_rgba(189,0,255,0.5)] group-hover:shadow-[0_0_20px_rgba(189,0,255,0.7)] transition-all">
+            <Sparkles className="w-3.5 h-3.5 text-white" />
           </div>
-          <div className="hidden lg:flex flex-col text-left">
-             <h1 className="text-lg font-black tracking-tighter text-white leading-none">nexo<span className="text-[#d4ff00]">_</span>terminal</h1>
-             <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.4em] mt-1.5">Nebula V8.0</span>
-          </div>
+          <span className="text-sm font-bold text-white tracking-tight hidden sm:block">
+            Creator <span className="brand-gradient-text">IA Pro</span>
+          </span>
         </button>
 
-        {/* Center Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-1">
-          <NavigationMenu>
-            <NavigationMenuList className="gap-2">
-              {menuGroups.map((group) => (
-                <NavigationMenuItem key={group.label}>
-                  <NavigationMenuTrigger className="bg-transparent text-slate-400 hover:text-white font-black lowercase tracking-[0.15em] text-[10px] h-9 px-4 rounded-xl transition-all border-none focus:bg-white/5 data-[state=open]:bg-white/5">
-                    {group.label}
-                  </NavigationMenuTrigger>
-                  <NavigationMenuContent>
-                    <ul className="grid w-[450px] gap-4 p-8 grid-cols-1 bg-[#080809]/95 border border-white/5 backdrop-blur-3xl rounded-[2.5rem] shadow-3xl">
-                      <div className="grid grid-cols-1 gap-2">
-                        {group.items.map((item) => (
-                           <li key={item.path}>
-                              <NavigationMenuLink asChild>
-                                <button
-                                  onClick={() => handleNav(item.path)}
-                                  className={cn(
-                                    "flex w-full items-center gap-5 select-none space-y-1 rounded-2xl p-4 leading-none no-underline outline-none transition-all hover:bg-white/5 group/item",
-                                    location.pathname === item.path && "bg-[#d4ff00]/5 border-[#d4ff00]/10"
-                                  )}
-                                >
-                                  <div className="p-3 rounded-xl bg-white/5 group-hover/item:scale-110 group-hover/item:bg-[#d4ff00]/10 transition-all">
-                                    <item.icon className="h-4.5 w-4.5 text-[#d4ff00]" />
-                                  </div>
-                                  <div className="flex flex-col text-left">
-                                    <span className="text-[11px] font-black leading-none text-white lowercase tracking-widest">{item.label}</span>
-                                    <p className="line-clamp-1 text-[10px] leading-snug text-slate-500 mt-2 lowercase italic font-medium">
-                                      {item.description}
-                                    </p>
-                                  </div>
-                                </button>
-                              </NavigationMenuLink>
-                           </li>
-                        ))}
-                      </div>
-                    </ul>
-                  </NavigationMenuContent>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-0.5 flex-1">
+          {NAV_ITEMS.map((item) => {
+            const isActive = location.pathname === item.path ||
+              (item.path !== "/dashboard" && location.pathname.startsWith(item.path));
+            return (
+              <button
+                key={item.path}
+                onClick={() => handleNav(item.path)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150",
+                  isActive
+                    ? "text-white bg-white/8"
+                    : "text-white/55 hover:text-white hover:bg-white/5"
+                )}
+              >
+                <item.icon className={cn("w-3.5 h-3.5", isActive && "text-[#bd00ff]")} />
+                {item.label}
+              </button>
+            );
+          })}
+          {isAdmin && (
+            <>
+              <button onClick={() => handleNav("/admin")} className="nav-item">
+                <Shield className="w-3.5 h-3.5" /> Admin
+              </button>
+              <button onClick={() => handleNav("/system-status")} className="nav-item">
+                <Activity className="w-3.5 h-3.5" /> Sistema
+              </button>
+            </>
+          )}
         </nav>
 
-        {/* Right Actions */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/5 mr-2">
-             <Coins className="h-3.5 w-3.5 text-[#d4ff00]" />
-             <span className="text-[10px] font-black text-white tracking-widest leading-none">
-               {profile?.credits_balance?.toLocaleString() || "0"}
-             </span>
-          </div>
-
+        {/* Right Zone */}
+        <div className="flex items-center gap-2 ml-auto shrink-0">
+          {/* Credits */}
           <button
-            onClick={() => navigate("/profile")}
-            className="flex items-center gap-3 p-1.5 pr-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group shrink-0"
+            onClick={() => handleNav("/pricing")}
+            className="hidden sm:flex items-center gap-1.5 bg-[rgba(255,184,0,0.1)] border border-[rgba(255,184,0,0.2)] rounded-full px-3 py-1 text-xs font-bold text-[#ffb800] hover:bg-[rgba(255,184,0,0.15)] transition-all"
           >
-            <div className="h-7 w-7 rounded-lg bg-slate-800 flex items-center justify-center overflow-hidden border border-white/10">
-               {profile?.avatar_url ? (
-                 <img src={profile.avatar_url} alt="profile" className="h-full w-full object-cover" />
-               ) : (
-                 <User className="h-4 w-4 text-slate-400 group-hover:text-[#d4ff00] transition-colors" />
-               )}
-            </div>
-            <span className="hidden sm:block text-[10px] font-black text-white lowercase tracking-tighter">
-              {profile?.display_name?.split(" ")[0] || "creador_id"}
-            </span>
+            <Coins className="w-3 h-3" />
+            {profile?.credits_balance?.toLocaleString() ?? "0"}
           </button>
 
+          {/* Upgrade CTA */}
+          <button
+            onClick={() => handleNav("/pricing")}
+            className="hidden lg:flex items-center gap-1.5 btn-brand text-xs py-1.5 px-3"
+          >
+            <Zap className="w-3 h-3" />
+            Mejorar Plan
+          </button>
+
+          {/* User Avatar & Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-2 p-1 pr-2.5 rounded-xl bg-white/5 border border-white/8 hover:bg-white/8 transition-all"
+            >
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#bd00ff]/30 to-[#ff0071]/30 flex items-center justify-center overflow-hidden border border-white/10">
+                {profile?.avatar_url
+                  ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                  : <User className="w-3.5 h-3.5 text-white/70" />
+                }
+              </div>
+              <span className="hidden sm:block text-xs font-medium text-white/70 max-w-[80px] truncate">
+                {profile?.display_name?.split(" ")[0] ?? "Creador"}
+              </span>
+              <ChevronDown className={cn("w-3 h-3 text-white/40 transition-transform", userMenuOpen && "rotate-180")} />
+            </button>
+
+            {/* Dropdown */}
+            {userMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-52 bg-[#0f0f12] border border-[rgba(255,255,255,0.08)] rounded-xl shadow-2xl shadow-black/50 overflow-hidden animate-float-up z-50">
+                <div className="p-3 border-b border-white/5">
+                  <p className="text-xs font-semibold text-white truncate">{profile?.display_name ?? "Creador"}</p>
+                  <p className="text-xs text-white/40 truncate mt-0.5">{profile?.email}</p>
+                </div>
+                <div className="p-1.5 space-y-0.5">
+                  {[
+                    { label: "Perfil", icon: User, path: "/profile" },
+                    { label: "Mis Assets", icon: Image, path: "/assets" },
+                    { label: "API Developer", icon: Code, path: "/developer" },
+                  ].map(item => (
+                    <button
+                      key={item.path}
+                      onClick={() => handleNav(item.path)}
+                      className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                    >
+                      <item.icon className="w-3.5 h-3.5" />
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="p-1.5 border-t border-white/5">
+                  <button
+                    onClick={() => { onSignOut(); setUserMenuOpen(false); }}
+                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs text-[#ff0071]/80 hover:text-[#ff0071] hover:bg-[rgba(255,0,113,0.08)] transition-all"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    Cerrar sesión
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Toggle */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all border border-white/5"
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg bg-white/5 border border-white/8 text-white"
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Terminal Menu */}
+      {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden bg-[#020203]/90 backdrop-blur-xl animate-in fade-in duration-500">
-          <div className="absolute inset-x-4 top-[100px] nebula-glass rounded-[2.5rem] p-8 space-y-8 shadow-3xl animate-in slide-in-from-top-8 duration-700">
-            {menuGroups.map((group) => (
-              <div key={group.label} className="space-y-4">
-                 <div className="px-2 flex items-center gap-3">
-                    <group.icon className="h-4 w-4 text-[#d4ff00]" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{group.label}</span>
-                 </div>
-                 <div className="grid grid-cols-1 gap-2">
-                   {group.items.map((item) => (
-                     <button
-                       key={item.path}
-                       onClick={() => handleNav(item.path)}
-                       className={cn(
-                         "flex w-full items-center gap-5 rounded-2xl px-5 py-4 text-[10px] font-black lowercase tracking-widest transition-all",
-                         location.pathname === item.path
-                           ? "bg-[#d4ff00] text-[#020203] shadow-2xl shadow-[#d4ff00]/20"
-                           : "text-slate-400 hover:text-white hover:bg-white/5"
-                       )}
-                     >
-                       <item.icon className="h-4.5 w-4.5" />
-                       {item.label}
-                     </button>
-                   ))}
-                 </div>
-              </div>
-            ))}
-            <div className="pt-6 border-t border-white/5">
+        <div className="fixed inset-0 top-14 z-40 md:hidden bg-[#050506]/95 backdrop-blur-xl animate-float-up">
+          <nav className="p-4 space-y-1">
+            {NAV_ITEMS.map((item) => {
+              const isActive = location.pathname === item.path;
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => handleNav(item.path)}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
+                    isActive
+                      ? "bg-gradient-to-r from-[#bd00ff]/15 to-[#ff0071]/10 text-white border border-[rgba(189,0,255,0.2)]"
+                      : "text-white/60 hover:text-white hover:bg-white/5"
+                  )}
+                >
+                  <item.icon className={cn("w-4 h-4", isActive && "text-[#bd00ff]")} />
+                  {item.label}
+                </button>
+              );
+            })}
+            <div className="pt-3 border-t border-white/5 mt-3">
               <button
                 onClick={() => { onSignOut(); setMobileOpen(false); }}
-                className="flex w-full items-center gap-5 rounded-2xl px-5 py-4 text-[10px] font-black lowercase tracking-widest text-red-500 hover:bg-red-500/10 transition-all"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-[#ff0071]/80 hover:text-[#ff0071] hover:bg-[rgba(255,0,113,0.08)] transition-all"
               >
-                <LogOut className="h-4.5 w-4.5" />
-                cerrar_sesion_terminal
+                <LogOut className="w-4 h-4" />
+                Cerrar sesión
               </button>
             </div>
-          </div>
+          </nav>
         </div>
       )}
     </header>

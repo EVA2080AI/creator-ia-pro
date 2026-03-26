@@ -27,6 +27,7 @@ const ShareScreen = lazy(() => import("./pages/ShareScreen"));
 const Formarketing = lazy(() => import("./pages/Formarketing"));
 const Developer = lazy(() => import("./pages/Developer"));
 const Profile = lazy(() => import("./pages/Profile"));
+const Hub = lazy(() => import("./pages/Hub"));
 
 const LoadingScreen = () => (
   <div className="flex h-screen w-screen items-center justify-center bg-background">
@@ -82,6 +83,7 @@ const App = () => {
                 <Route path="/formarketing" element={<Formarketing />} />
                 <Route path="/developer" element={<Developer />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/hub" element={<Hub />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

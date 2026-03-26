@@ -3,7 +3,7 @@ import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
 import type { CanvasNodeData } from "@/store/useCanvasStore";
 import { useCanvasStore } from "@/store/useCanvasStore";
-import { Image, Video, Loader2, AlertTriangle, Trash2, Play, Sparkles } from "lucide-react";
+import { Image, Video, Loader2, AlertTriangle, Trash2, Play, Sparkles, Download } from "lucide-react";
 
 function AINodeComponent({ data, id }: NodeProps) {
   const nodeData = data as unknown as CanvasNodeData;
@@ -14,140 +14,173 @@ function AINodeComponent({ data, id }: NodeProps) {
   const isReady = nodeData.status === "ready";
   const isImage = nodeData.type === "image";
 
-  const label =
-    isImage
-      ? nodeData.prompt.length > 20
-        ? nodeData.prompt.slice(0, 20) + "…"
-        : nodeData.prompt
-      : nodeData.type === "video"
-      ? "Video"
-      : "Nodo";
+  // 🔧 BUG FIX: support both `assetUrl` (store) and `asset_url` (DB payload) and `url` (API response)
+  const displayUrl =
+    nodeData.assetUrl ||
+    (nodeData.dataPayload as any)?.url ||
+    (nodeData.dataPayload as any)?.asset_url ||
+    null;
+
+  const label = nodeData.prompt?.length > 20
+    ? nodeData.prompt.slice(0, 20) + "…"
+    : nodeData.prompt || "nuevo nodo";
+
+  const handleDownload = () => {
+    if (!displayUrl) return;
+    const a = document.createElement("a");
+    a.href = displayUrl;
+    a.download = `creator-ia-${Date.now()}.${isImage ? "png" : "mp4"}`;
+    a.target = "_blank";
+    a.click();
+  };
 
   return (
     <div className="relative">
-      {/* Label above node */}
-      {/* Label above node */}
-      <div className="absolute -top-6 left-0 text-[10px] font-black text-slate-500 truncate max-w-[260px] uppercase tracking-widest">
-        {isImage ? "industrial_image" : "industrial_video"} // {label}
+      {/* Label */}
+      <div className="absolute -top-6 left-0 text-[10px] font-semibold text-white/30 truncate max-w-[260px] uppercase tracking-widest">
+        {isImage ? "IMAGE" : "VIDEO"} · {label}
       </div>
 
-      {/* Input handle (left) */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="!-left-[6px]"
-      />
+      {/* Handles */}
+      <Handle type="target" position={Position.Left} className="!-left-[6px]" />
+      <Handle type="source" position={Position.Right} className="!-right-[6px]" />
 
-      {/* Output handle (right) */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="!-right-[6px]"
-      />
-
+      {/* Node Card */}
       <div
         className={`
-          group relative w-[280px] rounded-[1.8rem] border bg-[#080809]/80 backdrop-blur-3xl overflow-hidden shadow-2xl transition-all duration-500
-          ${isLoading ? "border-[#d4ff00]/40 shadow-[#d4ff00]/5" : ""}
-          ${isError ? "border-red-500/50" : ""}
-          ${isReady && !isSelected ? "border-white/5 hover:border-[#d4ff00]/30" : ""}
-          ${isSelected ? "border-[#d4ff00] ring-4 ring-[#d4ff00]/10 shadow-2xl shadow-[#d4ff00]/20 scale-[1.02]" : ""}
+          group relative w-[280px] rounded-[1.5rem] border bg-[#0f0f12] backdrop-blur-xl overflow-hidden shadow-2xl transition-all duration-300
+          ${isLoading ? "border-[#bd00ff]/40 shadow-[#bd00ff]/8" : ""}
+          ${isError ? "border-red-500/40" : ""}
+          ${isReady && !isSelected ? "border-white/8 hover:border-[#bd00ff]/30" : ""}
+          ${isSelected ? "border-[#bd00ff] ring-4 ring-[#bd00ff]/10 shadow-2xl shadow-[#bd00ff]/15 scale-[1.02]" : ""}
         `}
       >
-        {/* Header bar */}
-        <div className="flex items-center gap-3 border-b border-white/5 px-4 py-4 bg-gradient-to-r from-[#d4ff00]/5 to-transparent backdrop-blur-3xl">
+        {/* Header */}
+        <div className={`flex items-center gap-3 border-b border-white/6 px-4 py-3 ${isSelected ? "bg-gradient-to-r from-[#bd00ff]/8 to-transparent" : "bg-white/2"}`}>
           <div
-            className={`flex h-8 w-8 items-center justify-center rounded-xl shadow-inner border border-white/5 transition-all group-hover:bg-[#d4ff00] group-hover:text-[#020203] duration-500 ${
+            className={`flex h-8 w-8 items-center justify-center rounded-xl border transition-all ${
               isImage
-                ? "bg-[#d4ff00]/10 text-[#d4ff00]"
-                : "bg-blue-500/10 text-blue-500"
+                ? "bg-[#bd00ff]/12 border-[#bd00ff]/20 text-[#bd00ff]"
+                : "bg-[#00c2ff]/12 border-[#00c2ff]/20 text-[#00c2ff]"
             }`}
           >
-            {isImage ? (
-              <Image className="h-4 w-4" />
-            ) : (
-              <Video className="h-4 w-4" />
-            )}
+            {isImage ? <Image className="h-4 w-4" /> : <Video className="h-4 w-4" />}
           </div>
           <div className="flex flex-col flex-1 min-w-0">
-            <span className="truncate text-[11px] font-black text-white uppercase tracking-tighter leading-none">
+            <span className="truncate text-[11px] font-bold text-white tracking-tight leading-none">
               {nodeData.name || (isImage ? "Imagen IA" : "Video IA")}
             </span>
-            <span className="text-[7px] text-slate-500 uppercase tracking-widest mt-1.5 font-black">
-              Nebula Engine V8.0
+            <span className="text-[9px] text-white/30 mt-1 font-medium tracking-wide">
+              Creator Engine v2.0
             </span>
           </div>
-          
-          <button
-            className="opacity-0 group-hover:opacity-100 transition-all duration-300 text-muted-foreground hover:text-destructive p-1.5 rounded-lg hover:bg-destructive/10"
-            onClick={(e) => {
-              e.stopPropagation();
-              window.dispatchEvent(
-                new CustomEvent("delete-node", { detail: id })
-              );
-            }}
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+            {displayUrl && (
+              <button
+                onClick={handleDownload}
+                className="p-1.5 rounded-lg text-white/40 hover:text-[#bd00ff] hover:bg-[#bd00ff]/10 transition-all"
+              >
+                <Download className="h-3 w-3" />
+              </button>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent("delete-node", { detail: id }));
+              }}
+              className="p-1.5 rounded-lg text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-all"
+            >
+              <Trash2 className="h-3 w-3" />
+            </button>
+          </div>
         </div>
 
         {/* Content area */}
-        <div className="relative aspect-[4/3] flex items-center justify-center bg-canvas/30">
+        <div className="relative aspect-[4/3] bg-black/30 flex items-center justify-center overflow-hidden">
+          {/* Loading */}
           {isLoading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#020203]/40 backdrop-blur-[4px]">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#050506]/60 backdrop-blur-sm">
               <div className="relative">
-                <div className="absolute inset-0 bg-[#d4ff00]/20 blur-2xl rounded-full animate-pulse" />
-                <Loader2 className="relative h-10 w-10 animate-spin text-[#d4ff00]" />
+                <div className="absolute inset-0 bg-[#bd00ff]/15 blur-2xl rounded-full animate-pulse" />
+                <Loader2 className="relative h-9 w-9 animate-spin text-[#bd00ff]" />
               </div>
               <div className="text-center">
-                <span className="text-[10px] font-black text-white block lowercase tracking-widest">procesando_activos...</span>
-                <span className="text-[8px] text-slate-500 uppercase tracking-[0.3em] mt-2 block font-black">Flux Engine V8</span>
+                <span className="text-[10px] font-semibold text-white block">Generando...</span>
+                <span className="text-[9px] text-white/30 mt-1 block">Flux Engine v2.0</span>
               </div>
             </div>
           )}
 
+          {/* Error */}
           {isError && (
-            <div className="flex flex-col items-center gap-2 text-destructive p-3">
-              <AlertTriangle className="h-6 w-6" />
-              <span className="text-[10px] text-center">
-                {nodeData.errorMessage || "Error"}
+            <div className="flex flex-col items-center gap-2.5 text-red-400 px-5 py-6 text-center">
+              <AlertTriangle className="h-7 w-7 opacity-70" />
+              <span className="text-[11px] leading-relaxed text-white/50">
+                {nodeData.errorMessage || "Error al generar. Intenta de nuevo."}
               </span>
             </div>
           )}
 
-          {isReady && nodeData.assetUrl && (
+          {/* ✅ FIXED: Render image/video when ready with displayUrl */}
+          {isReady && displayUrl && (
             <div className="relative h-full w-full">
-              <img
-                src={nodeData.assetUrl}
-                alt={nodeData.prompt || "Generated Content"}
-                onLoad={() => console.log("Canvas: Image Loaded Successfully", nodeData.assetUrl)}
-                onError={(e) => {
-                  console.error("Canvas: Image Load Error", nodeData.assetUrl);
-                  (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1544391439-1df6630fbc13?q=80&w=1470&auto=format&fit=crop";
-                }}
-                className="h-full w-full object-cover animate-in fade-in zoom-in duration-500"
-                loading="lazy"
-              />
-              {/* Video play overlay */}
-              {!isImage && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/30">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-card/80 backdrop-blur-sm border border-border">
-                    <Play className="h-4 w-4 text-foreground ml-0.5" />
+              {isImage ? (
+                <img
+                  src={displayUrl}
+                  alt={nodeData.prompt || "Generated image"}
+                  onLoad={() => console.log("[AINode] Image loaded:", displayUrl)}
+                  onError={(e) => {
+                    console.error("[AINode] Image failed to load:", displayUrl);
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                  className="h-full w-full object-cover animate-in fade-in zoom-in duration-500"
+                  loading="lazy"
+                  crossOrigin="anonymous"
+                />
+              ) : (
+                <>
+                  <video
+                    src={displayUrl}
+                    className="h-full w-full object-cover"
+                    controls={false}
+                    loop
+                    muted
+                    playsInline
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm border border-white/20">
+                      <Play className="h-4 w-4 text-white ml-0.5" />
+                    </div>
                   </div>
-                </div>
+                </>
               )}
+            </div>
+          )}
+
+          {/* Ready but no image */}
+          {isReady && !displayUrl && (
+            <div className="flex flex-col items-center gap-2.5 text-white/25 px-5 py-8 text-center">
+              <Sparkles className="h-6 w-6" />
+              <span className="text-xs">Listo · Sin preview</span>
             </div>
           )}
         </div>
 
-        {/* Bottom badge bar */}
-        <div className="flex items-center gap-2 border-t border-white/5 px-4 py-2.5 bg-white/[0.02]">
-          <span className="flex h-5 w-5 items-center justify-center rounded-lg border border-white/5 bg-white/5 text-slate-500 group-hover:text-[#d4ff00] transition-colors">
-            <Sparkles className="h-3 w-3" />
+        {/* Footer */}
+        <div className="flex items-center gap-2.5 border-t border-white/5 px-4 py-2.5 bg-white/[0.015]">
+          <div
+            className={`w-1.5 h-1.5 rounded-full ${
+              isLoading ? "bg-[#ffb800] animate-pulse" :
+              isError ? "bg-red-400" :
+              isReady ? "bg-[#00e5a0]" : "bg-white/20"
+            }`}
+          />
+          <span className="text-[9px] text-white/35 font-medium truncate flex-1">
+            {nodeData.prompt?.slice(0, 40)}{(nodeData.prompt?.length || 0) > 40 ? "…" : ""}
           </span>
-          <span className="text-[9px] text-slate-500 font-bold truncate flex-1 lowercase tracking-tight">
-            {nodeData.prompt.slice(0, 35)}{nodeData.prompt.length > 35 ? "…" : ""}
-          </span>
+          {isReady && (
+            <span className="text-[9px] text-[#00e5a0] font-semibold shrink-0">READY</span>
+          )}
         </div>
       </div>
     </div>
