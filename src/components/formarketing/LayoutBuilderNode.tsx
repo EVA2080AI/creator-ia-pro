@@ -1,6 +1,6 @@
 import { memo, useState } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { Layout, Trash2, Globe, Smartphone, Monitor } from 'lucide-react';
+import { Layout, Trash2, Globe, Smartphone, Monitor, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -43,26 +43,34 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
   };
 
   return (
-    <div className="group relative bg-[#121212]/80 border border-white/10 rounded-[2rem] p-0 w-80 shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-500">
-      {/* V5.2 Industrial Header */}
-      <div className="px-6 py-5 border-b border-white/5 bg-gradient-to-r from-blue-500/10 to-transparent flex items-center justify-between">
+    <div className="group relative bg-[#0f0f0f]/90 border border-white/10 rounded-[2.5rem] p-0 w-80 shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in duration-500 isolation-auto">
+      {/* V5.3 Industrial Header */}
+      <div className="px-6 py-5 border-b border-white/5 bg-gradient-to-r from-blue-500/10 to-transparent flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-            <div className="bg-blue-500/20 p-2.5 rounded-2xl shadow-inner group-hover:scale-110 transition-transform">
-               <Layout className="w-4 h-4 text-blue-400" />
+            <div className="bg-blue-500/20 p-2.5 rounded-2xl shadow-inner group-hover:rotate-6 transition-transform">
+               <Layout className="w-5 h-5 text-blue-400" />
             </div>
             <div className="flex flex-col">
               <input 
                 value={data.title || ""} 
                 onChange={(e) => updateField('title', e.target.value)}
-                className="bg-transparent border-none p-0 m-0 text-xs font-black uppercase tracking-widest text-foreground focus:outline-none w-40"
+                className="bg-transparent border-none p-0 m-0 text-xs font-black uppercase tracking-tighter text-foreground focus:outline-none w-40"
                 placeholder="APP/WEB LAYOUT"
               />
-              <span className="text-[9px] font-bold text-blue-500/50 uppercase tracking-[0.2em] mt-0.5">V5.2 Industrial Builder</span>
+              <span className="text-[9px] font-black text-blue-500/50 uppercase tracking-[0.2em] mt-0.5">V5.3 Industrial Builder</span>
             </div>
         </div>
-        <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
-           <Trash2 className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-2">
+            <button 
+              onClick={() => (data as any).onExecute?.()}
+              className="p-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white border border-blue-500/20 transition-all group/exec active:scale-95"
+            >
+               <Zap className="w-4 h-4 group-hover/exec:scale-110 transition-transform" />
+            </button>
+            <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2.5 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
+               <Trash2 className="w-4 h-4" />
+            </button>
+        </div>
       </div>
 
       <div className="p-6 space-y-5">

@@ -3,7 +3,7 @@ import { useReactFlow } from '@xyflow/react';
 import { 
   Search, Clock, LayoutGrid, LayoutTemplate, Image, Video, 
   Music, Type, PenTool, Sparkles, Maximize, List, Upload, Folder,
-  X, Play, Hand, Scissors, Square, MessageSquare, Undo, Redo, Settings, Share2
+  X, Play, Hand, Scissors, Square, MessageSquare, Undo, Redo, Settings, Share2, Zap, Rocket
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { TemplateModal } from './TemplateModal';
 
 export function FormarketingSidebar() {
   const [search, setSearch] = useState('');
@@ -151,28 +152,30 @@ export function FormarketingSidebar() {
   return (
     <div className="absolute left-6 top-24 z-10 flex gap-4 animate-fade-in items-start h-[calc(100vh-140px)] pointer-events-none">
       
-      {/* Vertical Pill Toolbar */}
-      <div className="flex flex-col items-center gap-2 rounded-[2rem] border border-white/10 bg-[#161616]/95 w-[56px] py-4 shadow-2xl backdrop-blur-xl shrink-0 h-fit pointer-events-auto">
+      {/* Vertical Pill Toolbar (High-Performance UI) */}
+      <div className="flex flex-col items-center gap-3 rounded-[2.5rem] border border-white/10 bg-[#0a0a0b]/90 w-[64px] py-6 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-3xl shrink-0 h-fit pointer-events-auto ring-1 ring-white/5">
         {/* Close/Menu Toggle */}
         <button 
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-muted-foreground hover:text-foreground transition-all mb-2"
+          className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-300 ${menuOpen ? 'bg-primary text-primary-foreground rotate-90 shadow-lg shadow-primary/20' : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground'}`}
         >
-          {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
+          {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-5 w-5" />}
         </button>
         
-        {/* Play (Active) */}
-        <button className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.3)] mb-2 hover:scale-105 transition-transform">
-          <Play className="h-5 w-5 fill-current ml-1" />
+        <div className="w-8 h-px bg-white/5 my-1" />
+
+        {/* Play (Active/Industrial Run) */}
+        <button className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-black shadow-2xl hover:scale-105 active:scale-95 transition-all group/play">
+          <Play className="h-5 w-5 fill-current ml-0.5 group-hover:scale-110 transition-transform" />
         </button>
 
         {/* Other Tools */}
         {toolbarIcons.map((Tool, i) => (
           <button 
             key={i} 
-            className={`flex h-10 w-10 items-center justify-center rounded-xl text-muted-foreground hover:bg-white/10 hover:text-foreground transition-colors ${Tool.id === 'settings' ? 'mt-4' : ''}`}
+            className={`flex h-11 w-11 items-center justify-center rounded-2xl text-muted-foreground/60 hover:bg-white/5 hover:text-foreground transition-all group ${Tool.id === 'settings' ? 'mt-6' : ''}`}
           >
-            <Tool.icon className="h-[18px] w-[18px]" />
+            <Tool.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
           </button>
         ))}
       </div>
@@ -213,51 +216,93 @@ export function FormarketingSidebar() {
         </div>
       </TooltipProvider>
 
-      {/* Plantillas Menu (V5.2) */}
+      {/* Plantillas Menu (V5.2 Industrial) */}
       <div className="flex flex-col gap-1">
-        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2 mb-1">Plantillas</h3>
-        <div className="grid grid-cols-2 gap-2 px-1">
-          {plantillas.map((item, idx) => (
+        <div className="flex items-center justify-between px-2 mb-2">
+            <h3 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">Plantillas Pro</h3>
+            <Sparkles className="w-2.5 h-2.5 text-primary/40" />
+        </div>
+        <div className="grid grid-cols-2 gap-3 px-1 text-foreground">
+          <TemplateModal 
+            onSelect={(template) => {
+              toast.success(`Inyectando pack: ${template.title}`);
+              const event = new CustomEvent('add-template', { detail: template });
+              window.dispatchEvent(event);
+            }} 
+            trigger={
+                <button className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-[1.5rem] bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 hover:to-primary/5 border border-white/5 hover:border-primary/30 transition-all duration-300 group/btn shadow-xl backdrop-blur-md">
+                    <div className="p-2 rounded-xl bg-primary/20 group-hover/btn:scale-110 group-hover/btn:rotate-12 transition-all">
+                        <Zap className="h-4 w-4 text-primary" />
+                    </div>
+                    <span className="text-[9px] font-black text-center text-foreground uppercase tracking-widest leading-none">Elite Packs</span>
+                </button>
+            }
+          />
+          {plantillas.filter(p => p.type === 'landingPack').map((item, idx) => (
             <button 
               key={idx} 
               onClick={() => handleAddTemplate(item.type)}
-              className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-transparent hover:border-white/10 transition-all group"
+              className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-[1.5rem] bg-white/5 hover:bg-white/[0.08] border border-white/5 hover:border-white/10 transition-all duration-300 group/btn shadow-lg backdrop-blur-md"
             >
-              <item.icon className={`h-4 w-4 ${item.color}`} />
-              <span className="text-[9px] font-black text-center text-foreground/70 uppercase tracking-tighter leading-none">{item.label}</span>
+              <div className={`p-2 rounded-xl ${item.bg.replace('/10', '/20')} group-hover/btn:scale-110 transition-transform`}>
+                <item.icon className={`h-4 w-4 ${item.color}`} />
+              </div>
+              <span className="text-[9px] font-black text-center text-foreground/80 uppercase tracking-widest leading-none">L-Page Pack</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Basic Menu */}
+      {/* Basics Menu */}
       <TooltipProvider>
         <div className="flex flex-col gap-1">
           <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2 mb-1">Básicos</h3>
           {menuItems.map((item, idx) => (
-            <Tooltip key={idx}>
-              <TooltipTrigger asChild>
-                <button 
-                  draggable
-                  onDragStart={(e) => onDragStart(e, item.type, item.label)}
-                  onClick={() => handleAddNode(item.type, item.label)}
-                  className="flex flex-col gap-1 w-full p-2.5 rounded-xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5 active:scale-95"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${item.bg} group-hover:scale-110 transition-transform`}>
-                      <item.icon className={`h-4 w-4 ${item.color}`} />
+            <div key={idx} className="group/item relative">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button 
+                    draggable
+                    onDragStart={(e) => onDragStart(e, item.type, item.label)}
+                    onClick={() => handleAddNode(item.type, item.label)}
+                    className="flex flex-col gap-1 w-full p-2.5 rounded-xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5 active:scale-95"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${item.bg} group-hover:scale-110 transition-transform`}>
+                        <item.icon className={`h-4 w-4 ${item.color}`} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-foreground/90 group-hover:text-foreground">{item.label}</span>
+                        <span className="text-[10px] text-muted-foreground line-clamp-1 group-hover:text-muted-foreground/80 lowercase">{item.description}</span>
+                      </div>
                     </div>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-foreground/90 group-hover:text-foreground">{item.label}</span>
-                      <span className="text-[10px] text-muted-foreground line-clamp-1 group-hover:text-muted-foreground/80 lowercase">{item.description}</span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-black border-white/10 text-[10px] font-bold max-w-[200px] p-2">
+                  {item.description}
+                </TooltipContent>
+              </Tooltip>
+              
+              {/* Preview on Hover */}
+              <div className="absolute left-[calc(100%+8px)] top-0 w-48 h-32 rounded-2xl border border-white/10 bg-black/95 shadow-2xl opacity-0 translate-x-4 pointer-events-none group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all z-20 overflow-hidden flex flex-col">
+                 <div className="h-full w-full bg-white/5 relative">
+                    {item.type === 'modelView' && <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" className="w-full h-full object-cover opacity-60" />}
+                    {item.type === 'videoModel' && (
+                        <div className="w-full h-full flex items-center justify-center">
+                            <Video className="w-8 h-8 text-amber-500/40 animate-pulse" />
+                        </div>
+                    )}
+                    {item.type === 'characterBreakdown' && (
+                        <div className="w-full h-full flex items-center justify-center p-4">
+                            <Type className="w-8 h-8 text-emerald-500/40" />
+                        </div>
+                    )}
+                    <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black to-transparent">
+                       <p className="text-[9px] font-black uppercase tracking-widest text-white/50">Vista Previa Pro</p>
                     </div>
-                  </div>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="bg-black border-white/10 text-[10px] font-bold max-w-[200px] p-2">
-                {item.description}
-              </TooltipContent>
-            </Tooltip>
+                 </div>
+              </div>
+            </div>
           ))}
         </div>
       </TooltipProvider>

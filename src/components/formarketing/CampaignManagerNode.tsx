@@ -50,21 +50,21 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
   };
 
   return (
-    <div className="group relative bg-[#0f0f0f]/90 border border-white/10 rounded-[2rem] p-0 w-80 shadow-2xl backdrop-blur-2xl overflow-hidden animate-in zoom-in duration-500">
-      {/* V5.2 Industrial Header */}
-      <div className="px-6 py-5 border-b border-white/5 bg-gradient-to-r from-orange-500/10 to-transparent flex items-center justify-between">
+    <div className="group relative bg-[#0f0f0f]/90 border border-white/10 rounded-[2.5rem] p-0 w-80 shadow-2xl backdrop-blur-3xl overflow-hidden animate-in zoom-in duration-500 isolation-auto">
+      {/* V5.3 Industrial Header */}
+      <div className="px-6 py-5 border-b border-white/5 bg-gradient-to-r from-orange-500/10 to-transparent flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-            <div className="bg-orange-500/20 p-2.5 rounded-2xl shadow-inner group-hover:rotate-12 transition-transform">
-               <Share2 className="w-4 h-4 text-orange-400" />
+            <div className="bg-orange-500/20 p-2.5 rounded-2xl shadow-inner group-hover:rotate-6 transition-transform">
+               <Share2 className="w-5 h-5 text-orange-400" />
             </div>
             <div className="flex flex-col">
-              <h3 className="text-xs font-black uppercase tracking-widest text-foreground">
+              <h3 className="text-[11px] font-black uppercase tracking-tighter text-foreground">
                 {data.title || "CAMPAIGN MANAGER"}
               </h3>
-              <span className="text-[9px] font-bold text-orange-500/50 uppercase tracking-[0.2em] mt-0.5">V5.2 Social Maestro</span>
+              <span className="text-[9px] font-black text-orange-500/50 uppercase tracking-[0.2em] mt-0.5">V5.3 Industrial Maestro</span>
             </div>
         </div>
-        <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
+        <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2.5 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
            <Trash2 className="w-4 h-4" />
         </button>
       </div>

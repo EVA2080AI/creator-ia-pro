@@ -53,9 +53,22 @@ export const aiService = {
         .eq("user_id", user.id)
         .single();
 
-      // 2. Validate Node ID (must be UUID for DB)
+      // 2. Validate Node ID (must be UUID for DB and EXIST in canvas_nodes)
       const isValidUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-      const safeNodeId = node_id && isValidUUID(node_id) ? node_id : null;
+      let safeNodeId = node_id && isValidUUID(node_id) ? node_id : null;
+
+      if (safeNodeId) {
+        const { data: nodeExists } = await supabase
+          .from("canvas_nodes")
+          .select("id")
+          .eq("id", safeNodeId)
+          .maybeSingle();
+        
+        if (!nodeExists) {
+          console.warn(`[AI Service] Node ${safeNodeId} does not exist in DB. Proceeding with null node_id.`);
+          safeNodeId = null;
+        }
+      }
 
       // 3. Deduct Credits via Atomic RPC
       const { error: rpcError } = await (supabase.rpc as any)("spend_credits", {
