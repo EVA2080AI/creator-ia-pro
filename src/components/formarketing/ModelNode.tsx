@@ -46,18 +46,18 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
   };
 
   return (
-    <div className="group relative bg-[#0f0f0f]/90 border border-white/10 rounded-[2.5rem] p-0 w-80 shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in duration-500 isolation-auto">
+    <div className="group relative bg-[#0f0f0f]/95 border border-white/5 rounded-[1.5rem] p-0 w-[300px] shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in duration-300 isolation-auto">
       {/* V5.3 Industrial Header */}
-      <div className="px-6 py-5 border-b border-white/5 bg-gradient-to-r from-primary/10 to-transparent flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-            <div className="bg-primary/20 p-2.5 rounded-2xl shadow-inner group-hover:rotate-6 transition-transform">
-               <ImageIcon className="w-5 h-5 text-primary" />
+      <div className="px-5 py-4 border-b border-white/5 bg-gradient-to-r from-primary/10 to-transparent flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+            <div className="bg-primary/20 p-2 rounded-xl shadow-inner group-hover:rotate-6 transition-transform">
+               <ImageIcon className="w-4 h-4 text-primary" />
             </div>
             <div className="flex flex-col">
-              <h3 className="text-[11px] font-black uppercase tracking-tighter text-foreground">
+              <h3 className="text-[10px] font-black uppercase tracking-tighter text-foreground/90 leading-none">
                 {data.title || "IMAGE GENERATOR"}
               </h3>
-              <span className="text-[9px] font-black text-primary/50 uppercase tracking-[0.2em] mt-0.5">V5.3 Industrial Engine</span>
+              <span className="text-[8px] font-black text-primary/40 uppercase tracking-[0.2em] mt-1">V5.4 COMPACT ENGINE</span>
             </div>
         </div>
         <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2.5 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
@@ -89,17 +89,17 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
         )}
       </div>
 
-      <div className="p-5 space-y-4 bg-gradient-to-b from-transparent to-black/20">
-         <div className="space-y-3">
+      <div className="p-4 space-y-3 bg-gradient-to-b from-transparent to-black/20">
+         <div className="space-y-2">
             <div className="flex items-center justify-between px-1">
-               <span className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">Visual Prompt Engine</span>
+               <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] font-mono">Prompt Engine</span>
                <button 
                  onClick={() => (data as any).onExecute?.()}
                  disabled={data.status === 'loading'}
-                 className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground transition-all border border-primary/20 disabled:opacity-50 group/exec shadow-lg active:scale-95"
+                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground transition-all border border-primary/20 disabled:opacity-50 group/exec shadow-lg active:scale-95"
                >
-                 <Zap className={`w-3.5 h-3.5 ${data.status === 'loading' ? 'animate-pulse' : 'group-hover/exec:scale-110 transition-transform'}`} />
-                 <span className="text-[10px] font-black uppercase tracking-widest leading-none">Ejecutar</span>
+                 <Zap className={`w-3 h-3 ${data.status === 'loading' ? 'animate-pulse' : 'group-hover/exec:scale-110 transition-transform'}`} />
+                 <span className="text-[9px] font-black uppercase tracking-widest leading-none text-white lg:inline hidden">Ejecutar</span>
                </button>
             </div>
             <textarea
@@ -107,8 +107,8 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                onChange={(e) => updatePrompt(e.target.value)}
                onBlur={(e) => persistChange(e.target.value)}
                onKeyDown={(e) => e.stopPropagation()}
-               className="w-full text-[11px] leading-relaxed text-foreground/70 bg-black/30 p-4 rounded-[1.5rem] border border-white/5 min-h-[80px] focus:outline-none focus:border-primary/30 rotate-0 hover:rotate-[0.5deg] transition-all resize-none"
-               placeholder="Describe lo que quieres ver..."
+               className="w-full text-[10px] leading-relaxed text-foreground/60 bg-black/30 p-3 rounded-xl border border-white/5 min-h-[60px] focus:outline-none focus:border-primary/30 transition-all resize-none"
+               placeholder="Prompt..."
             />
          </div>
       </div>

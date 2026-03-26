@@ -61,17 +61,17 @@ export const GeniusAssistant = () => {
 
             {/* Chat Panel */}
             {isOpen && (
-                <div className="flex flex-col w-[380px] h-[520px] bg-[#0a0a0b]/95 border border-white/10 rounded-[2.5rem] shadow-2xl backdrop-blur-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-10 duration-500">
+                <div className="flex flex-col w-[320px] h-[460px] bg-[#0a0a0b]/98 border border-white/10 rounded-[2rem] shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
                     {/* Header */}
                     <div className="px-6 py-5 border-b border-white/5 bg-gradient-to-r from-primary/10 to-transparent flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-primary/20 p-2 rounded-xl">
-                                <Bot className="h-5 w-5 text-primary" />
+                        <div className="flex items-center gap-2.5">
+                            <div className="bg-primary/20 p-1.5 rounded-lg">
+                                <Bot className="h-4 w-4 text-primary" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-sm font-black uppercase tracking-widest">Genius AI</span>
-                                <div className="flex items-center gap-1.5">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-[11px] font-black uppercase tracking-widest text-white/90">Genius AI</span>
+                                <div className="flex items-center gap-1">
+                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                                     <span className="text-[9px] font-bold text-emerald-500/80 uppercase tracking-widest">E-Industrial Mode</span>
                                 </div>
                             </div>
@@ -82,61 +82,46 @@ export const GeniusAssistant = () => {
                     </div>
 
                     {/* Chat Messages */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-hide" ref={scrollRef}>
+                    <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide" ref={scrollRef}>
                         {messages.map((msg, i) => (
                             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-[13px] leading-relaxed shadow-sm ${
+                                <div className={`max-w-[90%] px-3.5 py-2.5 rounded-xl text-[11px] leading-relaxed shadow-sm font-medium ${
                                     msg.role === 'user' 
                                     ? 'bg-primary/90 text-primary-foreground' 
-                                    : 'bg-white/5 border border-white/5 text-foreground/90'
+                                    : 'bg-white/5 border border-white/5 text-foreground/80'
                                 }`}>
                                     {msg.content}
                                 </div>
                             </div>
                         ))}
-                        {isLoading && (
-                            <div className="flex justify-start">
-                                <div className="bg-white/5 border border-white/5 px-4 py-3 rounded-2xl flex items-center gap-2">
-                                    <div className="w-1 h-1 bg-white/40 rounded-full animate-bounce" />
-                                    <div className="w-1 h-1 bg-white/40 rounded-full animate-bounce [animation-delay:0.2s]" />
-                                    <div className="w-1 h-1 bg-white/40 rounded-full animate-bounce [animation-delay:0.4s]" />
-                                </div>
-                            </div>
-                        )}
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="px-6 pb-2 flex gap-2 overflow-x-auto scrollbar-hide">
+                    <div className="px-4 pb-2 flex gap-1.5 overflow-x-auto scrollbar-hide">
                         <button 
-                          onClick={() => setInput("Optimiza mi flujo actual")}
-                          className="whitespace-nowrap px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:border-primary/40 hover:text-primary transition-all"
+                          onClick={() => setInput("Optimizar flujo")}
+                          className="whitespace-nowrap px-2.5 py-1 rounded-full border border-white/5 bg-white/5 text-[8px] font-black uppercase tracking-widest text-muted-foreground hover:border-primary/40 hover:text-primary transition-all"
                         >
-                            <Zap className="w-2.5 h-2.5 inline mr-1" /> Optimizar Flujo
-                        </button>
-                        <button 
-                          onClick={() => setInput("Genera un script de Reel")}
-                          className="whitespace-nowrap px-3 py-1.5 rounded-full border border-white/10 bg-white/5 text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:border-primary/40 hover:text-primary transition-all"
-                        >
-                            <Sparkles className="w-2.5 h-2.5 inline mr-1" /> Reel Script
+                            <Zap className="w-2 h-2 inline mr-0.5" /> Optimizar
                         </button>
                     </div>
 
                     {/* Input */}
-                    <div className="p-6 pt-2">
+                    <div className="p-4 pt-1">
                         <div className="relative group">
                             <input 
                               value={input}
                               onChange={(e) => setInput(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                              placeholder="Pregúntale a Genius..."
-                              className="w-full bg-[#161618] border border-white/10 rounded-2xl px-5 py-3.5 pr-14 text-[13px] focus:outline-none focus:border-primary/50 transition-all placeholder:text-muted-foreground/40"
+                              placeholder="Pregunta a Genius..."
+                              className="w-full bg-[#161618] border border-white/5 rounded-xl px-4 py-2.5 pr-12 text-[11px] focus:outline-none focus:border-primary/50 transition-all placeholder:text-muted-foreground/30"
                             />
                             <button 
                               onClick={handleSend}
                               disabled={isLoading || !input.trim()}
-                              className="absolute right-2 top-1.5 p-2 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-0 transition-all"
+                              className="absolute right-1.5 top-1.5 p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-0 transition-all"
                             >
-                                <Send className="h-4 w-4" />
+                                <Send className="h-3.5 w-3.5" />
                             </button>
                         </div>
                     </div>

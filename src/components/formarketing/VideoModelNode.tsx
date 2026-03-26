@@ -23,18 +23,18 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
   };
 
   return (
-    <div className="group relative bg-[#0f0f0f]/90 border border-white/10 rounded-[2.5rem] p-0 w-80 shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in duration-500 isolation-auto">
+    <div className="group relative bg-[#0f0f0f]/95 border border-white/5 rounded-[1.5rem] p-0 w-[300px] shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in duration-300 isolation-auto">
       {/* V5.3 Industrial Header */}
-      <div className="px-6 py-5 border-b border-white/5 bg-gradient-to-r from-amber-500/10 to-transparent flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-            <div className="bg-amber-500/20 p-2.5 rounded-2xl shadow-inner group-hover:rotate-6 transition-transform">
-               <Video className={`w-5 h-5 text-amber-500 ${data.status === 'rendering' ? 'animate-bounce' : ''}`} />
+      <div className="px-5 py-4 border-b border-white/5 bg-gradient-to-r from-amber-500/10 to-transparent flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+            <div className="bg-amber-500/20 p-2 rounded-xl shadow-inner group-hover:rotate-6 transition-transform">
+               <Video className={`w-4 h-4 text-amber-500 ${data.status === 'rendering' ? 'animate-bounce' : ''}`} />
             </div>
             <div className="flex flex-col">
-              <h3 className="text-[11px] font-black uppercase tracking-tighter text-foreground whitespace-nowrap overflow-hidden text-ellipsis">
+              <h3 className="text-[10px] font-black uppercase tracking-tighter text-foreground/90 whitespace-nowrap overflow-hidden text-ellipsis leading-none">
                 {data.title || "VIDEO OUTPUT"}
               </h3>
-              <span className="text-[9px] font-black text-amber-500/50 uppercase tracking-[0.2em] mt-0.5">V5.3 Industrial Engine</span>
+              <span className="text-[8px] font-black text-amber-500/40 uppercase tracking-[0.2em] mt-1">V5.4 COMPACT ENGINE</span>
             </div>
         </div>
         <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2.5 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
@@ -42,16 +42,16 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
         </button>
       </div>
       
-      <div className="p-5 space-y-4">
+      <div className="p-4 space-y-3">
         <div className="flex items-center justify-between px-1">
-           <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest">Estado Sequence</span>
+           <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest font-mono">Sequence Status</span>
            <button 
              onClick={() => (data as any).onExecute?.()}
              disabled={data.status === 'rendering'}
              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 transition-all border border-amber-500/20 disabled:opacity-50 group/exec"
            >
-             <Zap className={`w-3 h-3 ${data.status === 'rendering' ? 'animate-pulse' : 'group-hover/exec:scale-125 transition-transform'}`} />
-             <span className="text-[9px] font-black uppercase tracking-widest">Ejecutar</span>
+             <Zap className={`w-2.5 h-2.5 ${data.status === 'rendering' ? 'animate-pulse' : 'group-hover/exec:scale-125 transition-transform'}`} />
+             <span className="text-[8px] font-black uppercase tracking-widest text-white">Ejecutar</span>
            </button>
         </div>
 

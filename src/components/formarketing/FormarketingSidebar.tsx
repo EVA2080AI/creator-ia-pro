@@ -182,7 +182,7 @@ export function FormarketingSidebar() {
 
       {/* Expanded Context Menu */}
       {menuOpen && (
-        <div className="w-76 rounded-2xl border border-white/10 bg-[#161616]/95 p-4 shadow-2xl backdrop-blur-xl flex flex-col gap-4 max-h-full overflow-y-auto scrollbar-none animate-in slide-in-from-left-4 fade-in duration-200 pointer-events-auto">
+        <div className="w-64 rounded-xl border border-white/10 bg-[#161616]/95 p-3 shadow-2xl backdrop-blur-xl flex flex-col gap-3 max-h-full overflow-y-auto scrollbar-none animate-in slide-in-from-left-4 fade-in duration-200 pointer-events-auto">
           
           {/* Search Bar */}
       <div className="relative">
@@ -230,11 +230,11 @@ export function FormarketingSidebar() {
               window.dispatchEvent(event);
             }} 
             trigger={
-                <button className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-[1.5rem] bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 hover:to-primary/5 border border-white/5 hover:border-primary/30 transition-all duration-300 group/btn shadow-xl backdrop-blur-md">
-                    <div className="p-2 rounded-xl bg-primary/20 group-hover/btn:scale-110 group-hover/btn:rotate-12 transition-all">
-                        <Zap className="h-4 w-4 text-primary" />
+                <button className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 hover:to-primary/5 border border-white/5 hover:border-primary/30 transition-all duration-300 group/btn shadow-xl backdrop-blur-md">
+                    <div className="p-1.5 rounded-lg bg-primary/20 group-hover/btn:scale-110 transition-all">
+                        <Zap className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <span className="text-[9px] font-black text-center text-foreground uppercase tracking-widest leading-none">Elite Packs</span>
+                    <span className="text-[8px] font-black text-center text-foreground uppercase tracking-widest leading-none">Elite Packs</span>
                 </button>
             }
           />
@@ -242,12 +242,12 @@ export function FormarketingSidebar() {
             <button 
               key={idx} 
               onClick={() => handleAddTemplate(item.type)}
-              className="flex flex-col items-center justify-center gap-2.5 p-4 rounded-[1.5rem] bg-white/5 hover:bg-white/[0.08] border border-white/5 hover:border-white/10 transition-all duration-300 group/btn shadow-lg backdrop-blur-md"
+              className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/[0.08] border border-white/5 hover:border-white/10 transition-all duration-300 group/btn shadow-lg backdrop-blur-md"
             >
-              <div className={`p-2 rounded-xl ${item.bg.replace('/10', '/20')} group-hover/btn:scale-110 transition-transform`}>
-                <item.icon className={`h-4 w-4 ${item.color}`} />
+              <div className={`p-1.5 rounded-lg ${item.bg.replace('/10', '/20')} group-hover/btn:scale-110 transition-transform`}>
+                <item.icon className={`h-3.5 w-3.5 ${item.color}`} />
               </div>
-              <span className="text-[9px] font-black text-center text-foreground/80 uppercase tracking-widest leading-none">L-Page Pack</span>
+              <span className="text-[8px] font-black text-center text-foreground/80 uppercase tracking-widest leading-none">L-Page Pack</span>
             </button>
           ))}
         </div>
@@ -265,15 +265,15 @@ export function FormarketingSidebar() {
                     draggable
                     onDragStart={(e) => onDragStart(e, item.type, item.label)}
                     onClick={() => handleAddNode(item.type, item.label)}
-                    className="flex flex-col gap-1 w-full p-2.5 rounded-xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5 active:scale-95"
+                    className="flex flex-col gap-1 w-full p-2 rounded-lg hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5 active:scale-95"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${item.bg} group-hover:scale-110 transition-transform`}>
-                        <item.icon className={`h-4 w-4 ${item.color}`} />
+                    <div className="flex items-center gap-2.5">
+                      <div className={`p-1.5 rounded-lg ${item.bg} group-hover:scale-110 transition-transform`}>
+                        <item.icon className={`h-3.5 w-3.5 ${item.color}`} />
                       </div>
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-foreground/90 group-hover:text-foreground">{item.label}</span>
-                        <span className="text-[10px] text-muted-foreground line-clamp-1 group-hover:text-muted-foreground/80 lowercase">{item.description}</span>
+                        <span className="text-[11px] font-bold text-foreground/90 group-hover:text-foreground">{item.label}</span>
+                        <span className="text-[9px] text-muted-foreground line-clamp-1 group-hover:text-muted-foreground/80 lowercase">{item.description}</span>
                       </div>
                     </div>
                   </button>

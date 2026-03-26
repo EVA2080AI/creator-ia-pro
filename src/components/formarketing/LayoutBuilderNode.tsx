@@ -43,39 +43,39 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
   };
 
   return (
-    <div className="group relative bg-[#0f0f0f]/90 border border-white/10 rounded-[2.5rem] p-0 w-80 shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in duration-500 isolation-auto">
+    <div className="group relative bg-[#0f0f0f]/95 border border-white/5 rounded-[1.5rem] p-0 w-[300px] shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in duration-300 isolation-auto">
       {/* V5.3 Industrial Header */}
-      <div className="px-6 py-5 border-b border-white/5 bg-gradient-to-r from-blue-500/10 to-transparent flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-            <div className="bg-blue-500/20 p-2.5 rounded-2xl shadow-inner group-hover:rotate-6 transition-transform">
-               <Layout className="w-5 h-5 text-blue-400" />
+      <div className="px-5 py-4 border-b border-white/5 bg-gradient-to-r from-blue-500/10 to-transparent flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+            <div className="bg-blue-500/20 p-2 rounded-xl shadow-inner group-hover:rotate-6 transition-transform">
+               <Layout className="w-4 h-4 text-blue-400" />
             </div>
             <div className="flex flex-col">
               <input 
                 value={data.title || ""} 
                 onChange={(e) => updateField('title', e.target.value)}
-                className="bg-transparent border-none p-0 m-0 text-xs font-black uppercase tracking-tighter text-foreground focus:outline-none w-40"
+                className="bg-transparent border-none p-0 m-0 text-[10px] font-black uppercase tracking-tighter text-foreground/90 focus:outline-none w-32"
                 placeholder="APP/WEB LAYOUT"
               />
-              <span className="text-[9px] font-black text-blue-500/50 uppercase tracking-[0.2em] mt-0.5">V5.3 Industrial Builder</span>
+              <span className="text-[8px] font-black text-blue-500/40 uppercase tracking-[0.2em] mt-1">V5.4 COMPACT BUILDER</span>
             </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 font-bold">
             <button 
               onClick={() => (data as any).onExecute?.()}
-              className="p-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white border border-blue-500/20 transition-all group/exec active:scale-95"
+              className="p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white border border-blue-500/20 transition-all group/exec active:scale-95"
             >
-               <Zap className="w-4 h-4 group-hover/exec:scale-110 transition-transform" />
+               <Zap className="w-3.5 h-3.5 group-hover/exec:scale-110 transition-transform" />
             </button>
-            <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2.5 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
-               <Trash2 className="w-4 h-4" />
+            <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 text-destructive rounded-lg transition-all">
+               <Trash2 className="w-3.5 h-3.5" />
             </button>
         </div>
       </div>
 
-      <div className="p-6 space-y-5">
+      <div className="p-4 space-y-4">
         {/* Platform Selector */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
            {[
              { id: 'mobile', icon: Smartphone },
              { id: 'web', icon: Globe },
@@ -84,10 +84,10 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
              <button 
                key={p.id}
                onClick={() => { setPlatform(p.id as any); updateField('platform', p.id); }}
-               className={`flex-1 flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all ${platform === p.id ? 'bg-blue-500/20 border-blue-500/30 text-blue-400 shadow-lg shadow-blue-500/10' : 'bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10'}`}
+               className={`flex-1 flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all ${platform === p.id ? 'bg-blue-500/20 border-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10' : 'bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10'}`}
              >
-               <p.icon className="w-4 h-4" />
-               <span className="text-[8px] font-black uppercase tracking-widest">{p.id}</span>
+               <p.icon className="w-3.5 h-3.5" />
+               <span className="text-[7px] font-black uppercase tracking-widest">{p.id}</span>
              </button>
            ))}
         </div>
@@ -109,13 +109,13 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
         </div>
 
         {/* Structure Input */}
-        <div className="space-y-2">
-           <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest px-1">Estructura del Sitio/App</span>
+        <div className="space-y-1.5">
+           <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest px-1 font-mono">Structure Engine</span>
            <textarea
               value={data.structure || ""}
               onChange={(e) => updateField('structure', e.target.value)}
-              className="w-full text-[11px] leading-relaxed text-foreground/70 bg-black/40 p-4 rounded-[1.5rem] border border-white/5 min-h-[100px] focus:outline-none focus:border-blue-500/30 resize-none transition-all"
-              placeholder="Ej: Landing page de una app de café con sección de menú y reserva..."
+              className="w-full text-[10px] leading-relaxed text-foreground/60 bg-black/40 p-3 rounded-xl border border-white/5 min-h-[80px] focus:outline-none focus:border-blue-500/20 resize-none transition-all"
+              placeholder="Estructura..."
            />
         </div>
       </div>

@@ -50,18 +50,18 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
   };
 
   return (
-    <div className="group relative bg-[#0f0f0f]/90 border border-white/10 rounded-[2.5rem] p-0 w-80 shadow-2xl backdrop-blur-3xl overflow-hidden animate-in zoom-in duration-500 isolation-auto">
+    <div className="group relative bg-[#0f0f0f]/95 border border-white/5 rounded-[1.5rem] p-0 w-[300px] shadow-2xl backdrop-blur-3xl overflow-hidden animate-in zoom-in duration-300 isolation-auto">
       {/* V5.3 Industrial Header */}
-      <div className="px-6 py-5 border-b border-white/5 bg-gradient-to-r from-orange-500/10 to-transparent flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-            <div className="bg-orange-500/20 p-2.5 rounded-2xl shadow-inner group-hover:rotate-6 transition-transform">
-               <Share2 className="w-5 h-5 text-orange-400" />
+      <div className="px-5 py-4 border-b border-white/5 bg-gradient-to-r from-orange-500/10 to-transparent flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+            <div className="bg-orange-500/20 p-2 rounded-xl shadow-inner group-hover:rotate-6 transition-transform">
+               <Share2 className="w-4 h-4 text-orange-400" />
             </div>
             <div className="flex flex-col">
-              <h3 className="text-[11px] font-black uppercase tracking-tighter text-foreground">
+              <h3 className="text-[10px] font-black uppercase tracking-tighter text-foreground/90 leading-none">
                 {data.title || "CAMPAIGN MANAGER"}
               </h3>
-              <span className="text-[9px] font-black text-orange-500/50 uppercase tracking-[0.2em] mt-0.5">V5.3 Industrial Maestro</span>
+              <span className="text-[8px] font-black text-orange-500/40 uppercase tracking-[0.2em] mt-1">V5.4 COMPACT ENGINE</span>
             </div>
         </div>
         <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2.5 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
@@ -69,35 +69,35 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
         </button>
       </div>
 
-      <div className="p-6 space-y-5">
-        <span className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-widest px-1">Distribución Multi-Plataforma</span>
+      <div className="p-4 space-y-4">
+        <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest px-1 font-mono">Multi-Platform Sync</span>
         
-        <div className="space-y-3">
+        <div className="space-y-2">
            {[
-             { id: 'instagram', icon: Instagram, label: 'Instagram Ads/Post' },
-             { id: 'facebook', icon: Facebook, label: 'Facebook Campaign' },
-             { id: 'twitter', icon: Twitter, label: 'X (Twitter) Feed' }
+             { id: 'instagram', icon: Instagram, label: 'Instagram Ads' },
+             { id: 'facebook', icon: Facebook, label: 'Meta Campaign' },
+             { id: 'twitter', icon: Twitter, label: 'X (Twitter)' }
            ].map((plt) => (
              <button 
                key={plt.id}
                onClick={() => togglePlatform(plt.id)}
-               className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all ${platforms[plt.id] === 'ready' ? 'bg-orange-500/10 border-orange-500/20 text-foreground' : 'bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10'}`}
+               className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${platforms[plt.id] === 'ready' ? 'bg-orange-500/10 border-orange-500/10 text-foreground' : 'bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10'}`}
              >
-               <div className="flex items-center gap-3">
-                  <plt.icon className={`w-4 h-4 ${platforms[plt.id] === 'ready' ? 'text-orange-400' : ''}`} />
-                  <span className="text-[11px] font-bold tracking-tight">{plt.label}</span>
+               <div className="flex items-center gap-2.5">
+                  <plt.icon className={`w-3.5 h-3.5 ${platforms[plt.id] === 'ready' ? 'text-orange-400' : ''}`} />
+                  <span className="text-[10px] font-bold tracking-tight">{plt.label}</span>
                </div>
                {platforms[plt.id] === 'ready' ? (
-                 <CheckCircle2 className="w-4 h-4 text-emerald-500 shadow-xl" />
+                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shadow-xl" />
                ) : (
-                 <Clock className="w-4 h-4 opacity-30" />
+                 <Clock className="w-3.5 h-3.5 opacity-20" />
                )}
              </button>
            ))}
         </div>
 
-        <div className="flex items-center justify-center pt-2">
-            <button className="text-[9px] font-black uppercase tracking-[0.2em] text-orange-500/60 bg-orange-500/5 px-6 py-2.5 rounded-full border border-orange-500/10 hover:bg-orange-500/10 transition-colors">
+        <div className="flex items-center justify-center pt-1">
+            <button className="text-[8px] font-black uppercase tracking-[0.2em] text-orange-500/70 bg-orange-500/5 px-5 py-2 rounded-full border border-orange-500/10 hover:bg-orange-500/10 transition-colors">
                Programar Publicación AI
             </button>
         </div>
