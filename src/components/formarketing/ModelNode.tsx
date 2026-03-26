@@ -48,15 +48,15 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
   };
 
   return (
-    <div className={`group relative rounded-[2.5rem] border border-white/5 bg-[#0a0a0b]/80 backdrop-blur-3xl w-[300px] animate-in zoom-in duration-300 nodrag shadow-3xl transition-all hover:border-[#ff0071]/30 ${data.status === 'loading' || data.status === 'executing' ? 'ring-2 ring-[#ff0071] shadow-[0_0_30px_rgba(255,0,113,0.2)] animate-pulse' : ''}`}>
-      {/* V7.0 Industrial Header */}
+    <div className={`group relative rounded-[2.5rem] border border-white/5 bg-[#080809]/80 backdrop-blur-3xl w-[300px] animate-in zoom-in duration-300 nodrag shadow-3xl transition-all hover:border-[#d4ff00]/30 ${data.status === 'loading' || data.status === 'executing' ? 'ring-2 ring-[#d4ff00] shadow-[0_0_30px_rgba(212,255,0,0.2)] animate-pulse' : ''}`}>
+      {/* Nebula V8.0 Minimalist Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/5">
         <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="p-1.5 rounded-lg bg-[#ff0071]/10">
-              <ImageIcon className="w-3.5 h-3.5 text-[#ff0071] shrink-0" />
+            <div className="p-1.5 rounded-lg bg-[#d4ff00]/10">
+              <ImageIcon className="w-3.5 h-3.5 text-[#d4ff00] shrink-0" />
             </div>
             <h3 className="text-[10px] font-black lowercase tracking-widest text-white truncate">
-               {data.title || "nexus_visual_v7"}
+               {data.title || "nexus_visual_v8"}
             </h3>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -80,15 +80,15 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
           <div className="flex flex-col items-center gap-4 opacity-20">
              <Wand2 className={`w-12 h-12 text-slate-600 ${data.status === 'loading' ? 'animate-pulse' : ''}`} />
              <span className="text-[9px] font-black lowercase tracking-widest text-slate-600">
-                {data.status === 'loading' ? 'deep_generating_v7...' : 'waiting_for_nexus...'}
+                {data.status === 'loading' ? 'deep_generating_v8...' : 'waiting_for_nexus...'}
              </span>
           </div>
         )}
         
         {data.status === 'loading' && (
-          <div className="absolute inset-0 bg-[#0a0a0b]/80 backdrop-blur-md flex flex-col items-center justify-center gap-6">
-             <div className="w-10 h-10 rounded-full border-4 border-[#ff0071] border-t-transparent animate-spin shadow-2xl shadow-[#ff0071]/30" />
-             <span className="text-[10px] font-black text-[#ff0071] lowercase tracking-[0.2em] animate-pulse">industrial_processing</span>
+          <div className="absolute inset-0 bg-[#080809]/80 backdrop-blur-md flex flex-col items-center justify-center gap-6">
+             <div className="w-10 h-10 rounded-full border-4 border-[#d4ff00] border-t-transparent animate-spin shadow-2xl shadow-[#d4ff00]/30" />
+             <span className="text-[10px] font-black text-[#d4ff00] lowercase tracking-[0.2em] animate-pulse">nebula_processing</span>
           </div>
         )}
       </div>
@@ -102,7 +102,7 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                     <button 
                       onClick={() => (data as any).onExecute?.()}
                       disabled={data.status === 'loading'}
-                      className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#ff0071] hover:bg-[#e60066] text-white transition-all shadow-xl shadow-[#ff0071]/20 disabled:opacity-50 active:scale-95 group/exec"
+                      className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#d4ff00] hover:bg-[#c4eb00] text-[#020203] transition-all shadow-xl shadow-[#d4ff00]/20 disabled:opacity-50 active:scale-95 group/exec"
                     >
                       <Zap className={`w-3.5 h-3.5 ${data.status === 'loading' ? 'animate-pulse' : 'group-hover/exec:scale-110 transition-transform font-black'}`} />
                       <span className="text-[9px] font-black lowercase tracking-widest">run</span>
@@ -113,7 +113,7 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                         disabled={data.status === 'loading'}
                         className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/10 hover:bg-white/15 text-white transition-all disabled:opacity-50 active:scale-95 group/var"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-[#ff0071] group-hover/var:scale-110 transition-transform" />
+                        <Sparkles className="w-3.5 h-3.5 text-[#d4ff00] group-hover/var:scale-110 transition-transform" />
                         <span className="text-[9px] font-black lowercase tracking-widest">variar</span>
                       </button>
                     )}
@@ -124,15 +124,15 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                  onChange={(e) => updatePrompt(e.target.value)}
                  onBlur={(e) => persistChange(e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-xs leading-relaxed text-slate-300 bg-white/5 border border-white/5 p-4 rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#ff0071]/20 border-white/10 transition-all resize-none min-h-[80px] font-bold placeholder:text-slate-800"
-                 placeholder="industrial prompt engine..."
+                 className="w-full text-xs leading-relaxed text-slate-300 bg-white/5 border border-white/5 p-4 rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#00ff41]/20 border-white/10 transition-all resize-none min-h-[80px] font-bold placeholder:text-slate-800"
+                 placeholder="nebula prompt engine..."
               />
            </div>
         </div>
       )}
 
-      <Handle type="target" position={Position.Left} className="!w-4 !h-4 !-left-2 !bg-slate-800 !border-4 !border-[#0a0a0b] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
-      <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-[#ff0071] !border-4 !border-[#0a0a0b] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
+      <Handle type="target" position={Position.Left} className="!w-4 !h-4 !-left-2 !bg-[#020203] !border-4 !border-[#00ff41] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
+      <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-[#00ff41] !border-4 !border-[#020203] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
     </div>
   );
 };

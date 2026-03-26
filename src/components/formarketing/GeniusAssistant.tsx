@@ -14,7 +14,7 @@ export const GeniusAssistant = ({ onAction }: { onAction: (action: string, data:
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        console.log("GeniusAssistant V6.2 Pulse [Autonomous]");
+        console.log("GeniusAssistant V8.0 Nebula [Autonomous]");
     }, []);
 
     useEffect(() => {
@@ -41,13 +41,14 @@ Puedes ejecutar comandos en el canvas devolviendo un bloque JSON al final de tu 
 Formatos de comando soportados:
 1. Añadir nodo: {"action": "add_node", "data": {"type": "characterBreakdown|modelView|videoModel|layoutBuilder|campaignManager", "data": {"title": "...", "prompt": "..."}}}
 2. Conectar nodos: {"action": "connect_nodes", "data": {"source": "node_id_1", "target": "node_id_2"}}
-3. Aplicar template: {"action": "apply_template", "data": {"template": "meta_ads|landing_page|social_media"}}
+4. Aplicar template: {"action": "apply_template", "data": {"template": "meta_ads|landing_page|social_media|antigravity_ecosystem"}}
 
 REGLAS:
 - Si el usuario pide crear algo, SIEMPRE propón añadir nodos.
-- Mantén tus respuestas en minúsculas (estética Pulse).
+- Mantén tus respuestas en minúsculas (estética Nebula).
 - Sé breve y profesional.
 - Si vas a añadir un nodo, explica brevemente por qué.
+- Si el usuario desea clonar algo, sugiere el nodo antigravityBridge.
 `;
 
             const response = await aiService.processAction({
@@ -83,27 +84,27 @@ REGLAS:
             {!isOpen && (
                 <button 
                   onClick={() => setIsOpen(true)}
-                  className="group relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ff0071] shadow-2xl shadow-[#ff0071]/30 hover:scale-110 active:scale-95 transition-all duration-300 ring-4 ring-white"
+                  className="group relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[#020203] shadow-2xl shadow-[#020203]/30 hover:scale-110 active:scale-95 transition-all duration-300 border-4 border-[#d4ff00]"
                 >
-                    <div className="absolute inset-0 rounded-2xl bg-[#ff0071] animate-ping opacity-20" />
-                    <Sparkles className="h-6 w-6 text-white group-hover:rotate-12 transition-transform" />
+                    <div className="absolute inset-0 rounded-2xl bg-[#020203] animate-ping opacity-20" />
+                    <Sparkles className="h-6 w-6 text-[#d4ff00] group-hover:rotate-12 transition-transform" />
                 </button>
             )}
 
             {/* Pulse Chat Panel */}
             {isOpen && (
                 <div className="flex flex-col w-[360px] h-[520px] bg-[#0a0a0b]/90 backdrop-blur-3xl border border-white/5 rounded-[2.5rem] shadow-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-500">
-                    {/* V7.0 Pulse Header */}
+                    {/* Nebula V8.0 Minimalist Header */}
                     <div className="flex items-center justify-between py-5 px-6 border-b border-white/5 bg-white/[0.02]">
                         <div className="flex items-center gap-3.5">
-                            <div className="p-2.5 rounded-xl bg-[#ff0071]/10 shadow-lg shadow-[#ff0071]/10">
-                               <Bot className="h-4.5 w-4.5 text-[#ff0071]" />
+                            <div className="p-2.5 rounded-xl bg-[#d4ff00]/10 shadow-lg shadow-[#d4ff00]/10">
+                               <Bot className="h-4.5 w-4.5 text-[#d4ff00]" />
                             </div>
                             <div className="flex flex-col text-left">
-                                <span className="text-[12px] font-black lowercase tracking-tighter text-white">genius_nexus_v7</span>
+                                <span className="text-[12px] font-black lowercase tracking-tighter text-white">genius_nexus_v9</span>
                                 <div className="flex items-center gap-1.5 mt-1">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse" />
-                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">autonomous</span>
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[#d4ff00] animate-pulse" />
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest leading-none">midnight</span>
                                 </div>
                             </div>
                         </div>
@@ -118,7 +119,7 @@ REGLAS:
                             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                 <div className={`max-w-[88%] px-5 py-3.5 rounded-2xl text-[11px] leading-relaxed shadow-2xl font-bold tracking-tight ${
                                     msg.role === 'user' 
-                                    ? 'bg-[#ff0071] text-white rounded-tr-none shadow-[#ff0071]/20' 
+                                    ? 'bg-[#020203] text-[#d4ff00] rounded-tr-none shadow-[#020203]/20' 
                                     : 'bg-white/5 border border-white/5 text-slate-200 rounded-tl-none'
                                 }`}>
                                     {msg.content}
@@ -131,7 +132,7 @@ REGLAS:
                     <div className="px-5 pb-3 flex gap-2 overflow-x-auto scrollbar-hide">
                         <button 
                           onClick={() => setInput("optimizar flujo")}
-                          className="whitespace-nowrap px-3.5 py-1.5 rounded-full bg-[#ff0071]/[0.05] border border-[#ff0071]/10 text-[10px] font-bold lowercase tracking-tight text-[#ff0071] hover:bg-[#ff0071] hover:text-white transition-all shadow-sm shadow-[#ff0071]/10"
+                          className="whitespace-nowrap px-3.5 py-1.5 rounded-full bg-[#d4ff00]/[0.1] border border-[#d4ff00]/20 text-[10px] font-bold lowercase tracking-tight text-[#d4ff00] hover:bg-[#d4ff00] hover:text-[#020203] transition-all shadow-sm shadow-[#d4ff00]/10"
                         >
                             <Zap className="w-2.5 h-2.5 inline mr-1" /> optimizar flujo
                         </button>
@@ -145,12 +146,12 @@ REGLAS:
                               onChange={(e) => setInput(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                               placeholder="mensaje industrial..."
-                              className="w-full bg-white/5 border border-white/5 rounded-2xl px-6 py-4 pr-16 text-[11px] font-black text-white focus:outline-none focus:bg-white/10 focus:border-[#ff0071]/40 transition-all placeholder:text-slate-700"
+                              className="w-full bg-white/5 border border-white/5 rounded-2xl px-6 py-4 pr-16 text-[11px] font-black text-white focus:outline-none focus:bg-white/10 focus:border-[#d4ff00]/40 transition-all placeholder:text-slate-700"
                             />
                             <button 
                               onClick={handleSend}
                               disabled={isLoading || !input.trim()}
-                              className="absolute right-2.5 top-2.5 p-3 rounded-xl bg-[#ff0071] text-white hover:bg-[#e60066] disabled:opacity-0 shadow-2xl shadow-[#ff0071]/20 transition-all active:scale-95"
+                              className="absolute right-2.5 top-2.5 p-3 rounded-xl bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] disabled:opacity-0 shadow-2xl shadow-[#d4ff00]/20 transition-all active:scale-95"
                             >
                                 <Send className="h-4.5 w-4.5" />
                             </button>

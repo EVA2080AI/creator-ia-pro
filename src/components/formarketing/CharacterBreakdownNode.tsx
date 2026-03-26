@@ -59,17 +59,17 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
   };
 
   return (
-    <div className={`group relative rounded-[2rem] border border-white/10 bg-black/50 backdrop-blur-3xl w-[300px] animate-in zoom-in duration-300 nodrag shadow-2xl transition-all hover:border-[#ff0071]/50 ${data.status === 'executing' ? 'ring-2 ring-[#ff0071] shadow-[0_0_30px_rgba(255,0,113,0.2)] animate-pulse' : ''}`}>
-      {/* V6.2 Pulse Header */}
-      <div className="pulse-node-header justify-between gap-2">
+    <div className={`group relative rounded-[2.5rem] border border-white/10 bg-[#080809]/80 backdrop-blur-3xl w-[300px] animate-in zoom-in duration-300 nodrag shadow-3xl transition-all hover:border-[#d4ff00]/50 ${data.status === 'executing' ? 'ring-2 ring-[#d4ff00] shadow-[0_0_30px_rgba(212,255,0,0.2)] animate-pulse' : ''}`}>
+      {/* Nebula V8.0 Minimalist Header */}
+      <div className="flex h-12 items-center justify-between px-4 border-b border-white/5 bg-white/[0.01]">
         <div className="flex items-center gap-2 overflow-hidden">
-            <UserCircle className="w-4 h-4 text-[#ff0071] shrink-0" />
+            <UserCircle className="w-4 h-4 text-[#d4ff00] shrink-0" />
              <input 
               value={localTitle} 
               onChange={(e) => setLocalTitle(e.target.value)}
               onBlur={(e) => persistChange('title', e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
-              className="bg-transparent border-none p-0 m-0 text-[11px] font-black lowercase tracking-widest text-white focus:outline-none focus:ring-2 focus:ring-[#ff0071]/20 rounded-lg px-2 -ml-2 w-full truncate transition-all"
+              className="bg-transparent border-none p-0 m-0 text-[11px] font-black lowercase tracking-widest text-white focus:outline-none w-full truncate transition-all"
               placeholder="nexus_profile"
             />
         </div>
@@ -95,7 +95,7 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
                  onChange={(e) => setLocalFlavor(e.target.value)}
                  onBlur={(e) => persistChange('flavor', e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-xs text-slate-200 bg-white/5 border border-white/5 p-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ff0071]/10 focus:border-[#ff0071]/30 transition-all font-bold placeholder:text-slate-700"
+                 className="w-full text-xs text-slate-200 bg-white/5 border border-white/5 p-3 rounded-[1.2rem] focus:outline-none focus:ring-2 focus:ring-[#d4ff00]/10 focus:border-[#d4ff00]/30 transition-all font-bold placeholder:text-slate-700"
                  placeholder="ej: cyberpunk..."
               />
         </div>
@@ -108,24 +108,24 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
                  onChange={(e) => setLocalDescription(e.target.value)}
                  onBlur={(e) => persistChange('description', e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-xs leading-relaxed text-slate-400 bg-white/[0.02] p-4 rounded-3xl border border-white/5 min-h-[90px] focus:outline-none focus:border-[#ff0071]/30 resize-none transition-all font-medium placeholder:text-slate-800"
+                 className="w-full text-xs leading-relaxed text-slate-400 bg-white/[0.02] p-4 rounded-[1.5rem] border border-white/5 min-h-[90px] focus:outline-none focus:border-[#d4ff00]/30 resize-none transition-all font-medium placeholder:text-slate-800"
                  placeholder="contexto narrativo..."
               />
           </div>
         )}
 
-        <div className="bg-[#ff0071]/[0.02] p-3 rounded-2xl border border-[#ff0071]/5 transition-all">
+        <div className="bg-[#d4ff00]/[0.05] p-3 rounded-[1.5rem] border border-[#d4ff00]/10 transition-all">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] font-black text-[#ff0071] lowercase tracking-widest flex items-center gap-2.5">
-               <span className="w-2 h-2 rounded-full bg-[#ff0071] shadow-[0_0_8px_#ff0071]" />
-               nexus_engine_ready
+            <p className="text-[10px] font-black text-[#d4ff00] lowercase tracking-widest flex items-center gap-2.5">
+               <span className="w-2 h-2 rounded-full bg-[#d4ff00] shadow-[0_0_8px_#d4ff00]" />
+               nexus_engine_stable
             </p>
-            <span className="text-[9px] font-black tracking-widest uppercase text-slate-600">V7.0</span>
+            <span className="text-[9px] font-black tracking-widest uppercase text-slate-600">V8.0</span>
           </div>
         </div>
       </div>
 
-      <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-[#ff0071] !border-4 !border-[#0a0a0b] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
+      <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-[#d4ff00] !border-4 !border-[#020203] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
     </div>
   );
 };

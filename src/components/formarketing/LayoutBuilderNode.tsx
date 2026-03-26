@@ -44,25 +44,24 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
   };
 
   return (
-    <div className="group relative rounded-[2rem] border border-white/10 bg-black/50 backdrop-blur-3xl w-[300px] animate-in zoom-in duration-300 nodrag shadow-2xl transition-all hover:border-[#ff0071]/50">
-      {/* V6.2 Pulse Header */}
-      {/* V7.0 Industrial Header */}
+    <div className="group relative rounded-[2.5rem] border border-white/10 bg-[#080809]/80 backdrop-blur-3xl w-[300px] animate-in zoom-in duration-300 nodrag shadow-3xl transition-all hover:border-[#d4ff00]/50">
+      {/* Nebula V8.0 Minimalist Header */}
       <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/[0.01]">
         <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="p-1.5 rounded-lg bg-[#ff0071]/10">
-              <Layout className="w-3.5 h-3.5 text-[#ff0071] shrink-0" />
+            <div className="p-1.5 rounded-lg bg-[#d4ff00]/10">
+              <Layout className="w-3.5 h-3.5 text-[#d4ff00] shrink-0" />
             </div>
             <input 
               value={data.title || ""} 
               onChange={(e) => updateField('title', e.target.value)}
               className="bg-transparent border-none p-0 m-0 text-[10px] font-black lowercase tracking-widest text-white focus:outline-none w-full truncate transition-all"
-              placeholder="nexus_layout_v7"
+              placeholder="nexus_layout_v8"
             />
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <button 
             onClick={() => (data as any).onExecute?.()}
-            className="p-1.5 hover:bg-[#ff0071]/20 text-[#ff0071] rounded-xl transition-all active:scale-95 shadow-lg shadow-[#ff0071]/10"
+            className="p-1.5 hover:bg-[#d4ff00]/20 text-[#d4ff00] rounded-xl transition-all active:scale-95 shadow-lg shadow-[#d4ff00]/10"
           >
              <Zap className="w-3.5 h-3.5 font-black" />
           </button>
@@ -86,7 +85,7 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
                <button 
                  key={p.id}
                  onClick={() => { setPlatform(p.id as any); updateField('platform', p.id); }}
-                 className={`flex-1 flex flex-col items-center gap-2.5 p-4 rounded-3xl border transition-all ${platform === p.id ? 'bg-[#ff0071]/10 border-[#ff0071]/30 text-[#ff0071] shadow-[0_0_20px_rgba(255,0,113,0.1)]' : 'bg-white/[0.02] border-white/5 text-slate-600 hover:bg-white/5'}`}
+                 className={`flex-1 flex flex-col items-center gap-2.5 p-4 rounded-[1.5rem] border transition-all ${platform === p.id ? 'bg-[#d4ff00]/10 border-[#d4ff00]/30 text-[#d4ff00] shadow-[0_0_20px_rgba(212,255,0,0.1)]' : 'bg-white/[0.02] border-white/5 text-slate-600 hover:bg-white/5'}`}
                >
                  <p.icon className="w-4 h-4" />
                  <span className="text-[10px] font-black lowercase tracking-[0.2em]">{p.id}</span>
@@ -96,27 +95,27 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
 
           <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-5 aspect-[16/10] relative group/preview overflow-hidden shadow-inner">
              <div className="absolute inset-x-5 top-4 h-2 bg-white/5 rounded-full" />
-             <div className="grid grid-cols-2 gap-4 mt-10">
-                <div className="h-12 bg-white/5 shadow-2xl rounded-2xl border border-white/5 animate-pulse" />
-                <div className="h-12 bg-white/5 shadow-2xl rounded-2xl border border-white/5 animate-pulse" />
-                <div className="h-16 col-span-2 bg-[#ff0071]/5 shadow-2xl rounded-2xl border border-[#ff0071]/10 animate-pulse" />
-             </div>
+              <div className="grid grid-cols-2 gap-4 mt-10">
+                 <div className="h-12 bg-white/5 shadow-2xl rounded-2xl border border-white/5 animate-pulse" />
+                 <div className="h-12 bg-white/5 shadow-2xl rounded-2xl border border-white/5 animate-pulse" />
+                 <div className="h-16 col-span-2 bg-[#d4ff00]/5 shadow-2xl rounded-2xl border border-[#d4ff00]/10 animate-pulse" />
+              </div>
           </div>
 
           <div className="space-y-3">
              <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block text-center">nexus_logic_structure</span>
-             <textarea
-                value={data.structure || ""}
-                onChange={(e) => updateField('structure', e.target.value)}
-                className="w-full text-xs leading-relaxed text-slate-300 bg-white/5 p-4 rounded-3xl border border-white/5 min-h-[80px] focus:outline-none focus:border-[#ff0071]/30 resize-none transition-all font-bold placeholder:text-slate-800"
-                placeholder="metadata sequence..."
-             />
+              <textarea
+                 value={data.structure || ""}
+                 onChange={(e) => updateField('structure', e.target.value)}
+                 className="w-full text-xs leading-relaxed text-slate-300 bg-white/5 p-4 rounded-[1.5rem] border border-white/5 min-h-[80px] focus:outline-none focus:border-[#d4ff00]/30 resize-none transition-all font-bold placeholder:text-slate-800"
+                 placeholder="metadata sequence..."
+              />
           </div>
         </div>
       )}
 
-      <Handle type="target" position={Position.Left} className="!w-4 !h-4 !-left-2 !bg-slate-800 !border-4 !border-[#0a0a0b] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
-      <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-[#ff0071] !border-4 !border-[#0a0a0b] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
+      <Handle type="target" position={Position.Left} className="!w-4 !h-4 !-left-2 !bg-[#020203] !border-4 !border-[#d4ff00] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
+      <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-[#d4ff00] !border-4 !border-[#020203] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
     </div>
   );
 };
