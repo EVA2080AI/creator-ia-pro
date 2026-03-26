@@ -488,7 +488,7 @@ function FormarketingContent() {
       return;
     }
 
-    toast.info("Iniciando motor de ejecución Nexus V7.0 Industrial...");
+    toast.info("Synchronizing Aether V8.0 Neural Engine...");
     
     const imageNodes = nodes.filter(n => n.type === 'modelView');
     for (const node of imageNodes) {

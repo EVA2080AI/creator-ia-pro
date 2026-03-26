@@ -1,148 +1,109 @@
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
-  DialogTrigger
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Sparkles, LayoutGrid, Zap, Video, Image as ImageIcon, Rocket, ChevronRight } from "lucide-react";
+import {
+  Layout,
+  Megaphone,
+  Share2,
+  Sparkles,
+  Zap,
+  CheckCircle2,
+  ArrowRight
+} from "lucide-react";
+import { toast } from "sonner";
 
-interface Template {
-  id: string;
-  title: string;
-  description: string;
-  icon: any;
-  color: string;
-  bg: string;
-  previewUrl: string;
-  nodes: any[];
+interface TemplateModalProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onApplyTemplate: (templateId: string) => void;
 }
 
-const templates: Template[] = [
+const TEMPLATES = [
   {
-    id: 'antigravityPack',
-    title: 'Nexus_Ecosystem_V3',
-    description: 'Interface cloning engine. Connect reference URL and generate full branch brand context.',
-    icon: Rocket,
-    color: 'text-white/40',
-    bg: 'bg-white/5',
-    previewUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop',
-    nodes: [
-        { type: 'antigravityBridge', data: { title: 'Reference_Hub', status: 'idle' } },
-        { type: 'characterBreakdown', data: { title: 'Brand_Identity', flavor: 'derived_from_url', description: 'Visual context extracted...' } },
-        { type: 'modelView', data: { title: 'Site_Visuals', prompt: 'Hero vision based on brand context' } },
-        { type: 'layoutBuilder', data: { title: 'UI_Skeleton', platform: 'web' } }
-    ]
+    id: "meta_ads",
+    title: "Meta Ads Mastery",
+    description: "Orchestrate high-conversion visuals for Facebook & Instagram.",
+    icon: Megaphone,
+    color: "text-aether-purple",
+    nodes: ["campaignManager", "modelView", "characterBreakdown"]
   },
   {
-    id: 'metaPack',
-    title: 'Social_Ads_Pack',
-    description: 'Full campaign pack for social distribution. Includes Persona, HQ Image, and Reel Engine.',
-    icon: Sparkles,
-    color: 'text-white/30',
-    bg: 'bg-white/5',
-    previewUrl: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1000&auto=format&fit=crop',
-    nodes: [
-        { type: 'characterBreakdown', data: { title: 'Target_Persona', description: 'Describe target audience...' } },
-        { type: 'modelView', data: { title: 'Campaign_Visual', prompt: 'Cinematic visual for social...' } },
-        { type: 'videoModel', data: { title: 'Sales_Reel', status: 'pending' } },
-        { type: 'campaignManager', data: { title: 'Meta_Distributor' } }
-    ]
+    id: "landing_page",
+    title: "Quantum Landing",
+    description: "Manifest a full web structure with semantic copy and hero assets.",
+    icon: Layout,
+    color: "text-aether-blue",
+    nodes: ["layoutBuilder", "modelView", "characterBreakdown"]
   },
   {
-    id: 'landingPack',
-    title: 'Structure_Web_V1',
-    description: 'Optimized landing page structures for mobile applications. Conversion and neural focus.',
-    icon: LayoutGrid,
-    color: 'text-white/20',
-    bg: 'bg-white/5',
-    previewUrl: 'https://images.unsplash.com/photo-1517292987719-0369a794ec0f?q=80&w=1000&auto=format&fit=crop',
-    nodes: [
-        { type: 'characterBreakdown', data: { title: 'Value_Prop', description: 'Define value core...' } },
-        { type: 'layoutBuilder', data: { title: 'Neural_Wireframe', platform: 'web' } }
-    ]
+    id: "social_media",
+    title: "Viral Orchestration",
+    description: "Multichannel distribution fleet with neural visual hooks.",
+    icon: Share2,
+    color: "text-rose-400",
+    nodes: ["characterBreakdown", "videoModel", "campaignManager"]
   }
 ];
 
-interface TemplateModalProps {
-  onSelect: (template: Template) => void;
-  trigger?: React.ReactNode;
-}
-
-export function TemplateModal({ onSelect, trigger }: TemplateModalProps) {
+export function TemplateModal({ isOpen, onOpenChange, onApplyTemplate }: TemplateModalProps) {
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        {trigger || (
-            <button className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 transition-all group">
-                <Sparkles className="h-4 w-4 text-white/40" />
-                <span className="text-[9px] font-black text-center text-white/20 uppercase tracking-tighter leading-none">open_library</span>
-            </button>
-        )}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[950px] bg-[#050506] border border-white/10 backdrop-blur-3xl text-white rounded-[2.5rem] p-0 overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)]">
-        <DialogHeader className="p-10 border-b border-white/5 bg-white/[0.01]">
-          <div className="flex items-center gap-6 mb-0">
-             <div className="p-4 bg-white/5 rounded-2xl border border-white/5 shadow-2xl">
-                <Rocket className="w-8 h-8 text-white/50" />
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-[#0a0a0b]/95 border border-white/10 rounded-[3rem] text-white max-w-2xl p-12 backdrop-blur-3xl shadow-5xl overflow-hidden">
+        <DialogHeader className="mb-12">
+          <div className="flex items-center gap-4 mb-6">
+             <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center shadow-inner">
+                <Sparkles className="w-6 h-6 text-white/40" />
              </div>
-             <div className="flex flex-col">
-                <DialogTitle className="text-3xl font-black lowercase tracking-tighter text-white">nexus_orchestrator</DialogTitle>
-                <DialogDescription className="text-[12px] font-black text-white/10 lowercase tracking-[0.3em] mt-1">ENGINE_V7_INDUSTRIAL_TEMPLATES</DialogDescription>
+             <div>
+                <DialogTitle className="text-3xl font-bold tracking-tight font-display">Neural Templates</DialogTitle>
+                <DialogDescription className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mt-1 font-display">Aether V8.0 Industrial Orchestration</DialogDescription>
              </div>
           </div>
         </DialogHeader>
-        
-        <div className="p-10 max-h-[60vh] overflow-y-auto no-scrollbar bg-[#050506]">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {templates.map((template) => (
-              <div 
-                key={template.id}
-                className="group relative flex flex-col gap-6 p-6 rounded-3xl bg-white/[0.01] border border-white/5 hover:border-white/20 transition-all hover:bg-white/[0.02] overflow-hidden duration-500"
-              >
-                <div className="relative aspect-video rounded-2xl overflow-hidden mb-0">
-                   <img src={template.previewUrl} alt={template.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 grayscale group-hover:grayscale-0 opacity-50 group-hover:opacity-100" />
-                   <div className="absolute inset-0 bg-gradient-to-t from-[#050506] to-transparent" />
-                   <div className={`absolute top-4 left-4 p-2.5 rounded-xl bg-[#050506]/90 backdrop-blur-md border border-white/5 shadow-2xl`}>
-                      <template.icon className={`w-4 h-4 text-white/40`} />
-                   </div>
-                </div>
 
-                <div className="flex flex-col gap-2 px-1">
-                  <h3 className="text-xl font-black lowercase tracking-tighter text-white/90 group-hover:text-white transition-colors">
-                    {template.title}
-                  </h3>
-                  <p className="text-[10px] leading-relaxed text-white/20 font-bold lowercase tracking-tight">
-                    {template.description}
-                  </p>
+        <div className="grid gap-6">
+          {TEMPLATES.map((template) => (
+            <button
+              key={template.id}
+              onClick={() => {
+                onApplyTemplate(template.id);
+                onOpenChange(false);
+                toast.success(`Manifesting ${template.title}...`);
+              }}
+              className="group flex items-start gap-8 p-8 aether-card rounded-[2.5rem] border border-white/5 hover:border-white/10 transition-all duration-500 text-left active:scale-[0.98]"
+            >
+              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center bg-white/5 border border-white/5 shadow-2xl transition-all group-hover:scale-110 group-hover:rotate-3 ${template.color}`}>
+                <template.icon className="w-7 h-7" />
+              </div>
+              <div className="flex-1 mt-1">
+                <div className="flex items-center justify-between mb-2">
+                   <h3 className="text-xl font-bold text-white tracking-tight font-display">{template.title}</h3>
+                   <ArrowRight className="w-4 h-4 text-white/10 group-hover:text-white transition-all transform translate-x-0 group-hover:translate-x-2" />
                 </div>
-
-                <div className="mt-auto flex items-center justify-between px-1">
-                   <div className="flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-full border border-white/5">
-                      <Zap className="w-3.5 h-3.5 text-white/20" />
-                      <span className="text-[9px] font-black lowercase tracking-widest text-white/10">{template.nodes.length} nodes_ready</span>
-                   </div>
-                   <Button 
-                     onClick={() => onSelect(template)}
-                     className="bg-white text-black hover:bg-white/90 rounded-2xl text-[10px] font-black lowercase tracking-widest h-11 px-6 gap-2 transition-all transition-all"
-                   >
-                     inject_pack
-                     <ChevronRight className="w-3.5 h-3.5" />
-                   </Button>
+                <p className="text-[13px] text-white/30 font-medium leading-relaxed mb-6">{template.description}</p>
+                <div className="flex flex-wrap gap-2">
+                  {template.nodes.map(node => (
+                    <span key={node} className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[9px] font-bold text-white/20 uppercase tracking-widest font-display">
+                      {node}
+                    </span>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-12 pt-8 border-t border-white/5 text-center">
+            <p className="text-[10px] font-bold text-white/5 uppercase tracking-[0.4em] font-display">system_v8.0_industrial_audit_ready</p>
         </div>
         
-        <div className="p-8 border-t border-white/5 bg-white/[0.01] flex items-center justify-between">
-            <p className="text-[9px] font-black text-white/5 lowercase tracking-[0.4em]">system_v7.0_industrial_audit_ready</p>
-            <div className="flex gap-4 opacity-10 grayscale hover:opacity-100 transition-all">
-               {/* Neural logos/icons if any */}
-            </div>
-        </div>
+        {/* Decorative noise */}
+        <div className="absolute inset-0 opacity-[0.02] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
       </DialogContent>
     </Dialog>
   );

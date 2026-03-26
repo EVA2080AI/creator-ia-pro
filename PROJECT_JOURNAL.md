@@ -1,30 +1,30 @@
-# PROJECT_JOURNAL.md — Creator IA Pro (Nexus V7.0 Industrial 💎)
+# PROJECT_JOURNAL.md — Aether Evolution (V8.0 High-Fidelity 🌌)
 
 ## Visión
-SaaS de IA generativa industrial multimodal con lienzo infinito. Arquitectura resiliente, multi-modelo y diseño minimalista de alto rendimiento.
+SaaS de IA generativa ultra-premium con orquestación neural multimodal. Arquitectura de alta densidad, diseño cinematográfico y orquestación de activos de nivel industrial.
 
-## Stack (Nexus V7.0 - Industrial Edition)
+## Stack (Aether Evolution V8.0)
 - **Frontend:** React + Vite + TypeScript + Tailwind CSS + React Flow + Zustand
-- **Service Layer:** `aiService` (Nexus Industrial Engine)
-- **Design System:** Nexus V7.0 Monochrome / Stealth (High Density)
-- **AI Gateway:** OpenRouter (DeepSeek/Claude/Gemini/Llama) with Universal Fallback
+- **Service Layer:** `aiService` (Neural Orchestration Engine)
+- **Design System:** Aether Evolution V8.0 (Glassmorphism / Iridescent / Premium)
+- **AI Gateway:** OpenRouter (Universal Fallback Infrastructure)
 - **Database:** Supabase (PostgreSQL, Realtime V3.8+, Auth)
 
-## Arquitectura de BD (V4.5)
+## Arquitectura de BD (V4.6)
 | Tabla | Propósito |
 |-------|-----------|
-| `canvas_nodes` | Persistencia de nodos con `data_payload` para modelos y prompts. |
-| `profiles` | Gestión de créditos y tiers de usuario. |
-| `transactions` | Registro inmutable de operaciones de IA. |
+| `canvas_nodes` | Persistencia de nodos con orquestación modal y prompts. |
+| `profiles` | Gestión de créditos (Charge) y tiers de nexus. |
+| `transactions` | Registro inmutable de manifestaciones de IA. |
 
-## Decisiones Arquitectónicas (V4.5)
-1. **Universal Fallback Selector:** Integración de selectores de modelo por nodo para Imagen, Video, Texto y Layout.
-2. **Nexus Industrial UI:** Rediseño total a estética monocromática/stealth, reduciendo el tamaño de nodos para mayor densidad operativa.
-3. **Real AI Sync:** Eliminación de mocks en nodos de Layout y Personaje, conectándolos al motor de IA real.
+## Decisiones Arquitectónicas (V8.0)
+1. **Aether UI Architecture:** Transición total a `Outfit` typography y `aether-card` system (40px blur glassmorphism).
+2. **Industrial Nomenclature:** Refactorización de toda la interfaz a términos como "Nexus", "Orchestration" y "Manifestation".
+3. **Cinematic Dashboards:** Implementación de gradientes iridiscentes y banners cinematográficos para mejorar la percepción de valor.
 
-## Estado Final (V4.5 - Live 🚀)
-- [x] Nexus V7.0 Industrial Engine (Operational)
-- [x] Universal Model Selection (Image/Video/Text/UI)
-- [x] Real-time Supabase Persistence (100% Sync)
-- [x] Production Deployment (Live at creator-ia.com)
-- [x] E2E Aesthetic Harmonization (Monochrome Stealth)
+## Estado Final (V8.0 - Live 🚀)
+- [x] Aether Evolution V8.0 Design System (Complete)
+- [x] High-Fidelity Cinematic Dashboards (Operational)
+- [x] Neural Orchestration Core (100% Unified)
+- [x] Industrial Nomenclature Sync (Global)
+- [x] Performance & Aesthetic Audit (Pixel-Perfect)
