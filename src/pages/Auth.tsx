@@ -67,52 +67,52 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#050506] font-sans selection:bg-[#EC4699]/30 selection:text-white">
+    <div className="flex min-h-screen bg-[#050506] font-sans selection:bg-white/10 selection:text-white">
       {/* Left — Features (hidden mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-24 relative overflow-hidden bg-[#121215]">
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-24 relative overflow-hidden bg-[#0a0a0b]">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 -left-40 h-[700px] w-[700px] rounded-full bg-[#EC4699]/10 blur-[150px]" />
-          <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-[#FA8214]/10 blur-[120px]" />
+          <div className="absolute -top-40 -left-40 h-[700px] w-[700px] rounded-full bg-white/[0.03] blur-[150px]" />
+          <div className="absolute bottom-10 right-10 h-[500px] w-[500px] rounded-full bg-white/[0.02] blur-[120px]" />
         </div>
-        <div className="relative z-10 space-y-10">
-          <button onClick={() => navigate("/")} className="flex items-center gap-5 mb-14 group transition-all">
-            <div className="flex h-13 w-13 items-center justify-center rounded-[1.2rem] bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] group-hover:rotate-6 transition-transform">
-              <Sparkles className="h-6 w-6 text-white" />
+        <div className="relative z-10 space-y-12">
+          <button onClick={() => navigate("/")} className="flex items-center gap-6 mb-16 group transition-all">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white shadow-3xl shadow-white/10 group-hover:rotate-6 transition-transform">
+              <Sparkles className="h-7 w-7 text-black" />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-2xl font-display text-white tracking-tight leading-none uppercase">
-                creator <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">ia pro</span>
+              <span className="text-2xl font-black text-white tracking-tighter leading-none lowercase">
+                nexus_ <span className="text-white/40">system_v7</span>
               </span>
-              <span className="text-[10px] font-bold text-[#FA8214] uppercase tracking-[0.4em] mt-2">V2.1 Industrial</span>
+              <span className="text-[10px] font-black text-white/10 uppercase tracking-[0.5em] mt-2">Industrial_grade_core</span>
             </div>
           </button>
 
-          <h2 className="text-7xl md:text-8xl font-display text-white leading-[0.9] tracking-tight uppercase">
-            tu estudio de
+          <h2 className="text-7xl md:text-9xl font-black text-white leading-[0.85] tracking-tighter lowercase">
+            neural_
             <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">marketing ia</span>
+            <span className="text-white/40">studio_</span>
             <br />
-            autónomo.
+            cluster.
           </h2>
 
-          <p className="mt-8 text-slate-500 text-lg max-w-md leading-relaxed font-bold tracking-tight uppercase">
-            clona, genera y despliega interfaces de alto impacto con el puente antigravity.
+          <p className="mt-10 text-white/20 text-sm max-w-sm leading-relaxed font-bold lowercase tracking-wide">
+            orchestrate, generate, and deploy high-density interfaces with the antigravity bridge engine.
           </p>
 
-          <div className="mt-12 space-y-6">
+          <div className="mt-14 space-y-7">
             {features.map((f) => (
-              <div key={f.text} className="flex items-center gap-5 group">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 border border-white/5 text-[#EC4699] transition-all group-hover:bg-[#EC4699]/10 group-hover:scale-110">
+              <div key={f.text} className="flex items-center gap-6 group">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/5 text-white/40 transition-all group-hover:bg-white/10 group-hover:scale-105">
                   <f.icon className="h-5 w-5" />
                 </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">{f.text}</span>
+                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">{f.text}</span>
               </div>
             ))}
           </div>
 
-          <div className="mt-16 flex items-center gap-4 text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em]">
-            <div className="w-2 h-2 rounded-full bg-[#EC4699] shadow-[0_0_12px_#EC4699]" />
-            acceso_total_industrial
+          <div className="mt-20 flex items-center gap-4 text-[9px] font-black text-white/10 uppercase tracking-[0.4em]">
+            <div className="w-2 h-2 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.3)] animate-pulse" />
+            industrial_access_granted
           </div>
         </div>
       </div>
@@ -122,48 +122,48 @@ const Auth = () => {
         <div className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-right-4 duration-700">
           {/* Mobile logo */}
           <div className="mb-14 text-center lg:hidden">
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] cursor-pointer" onClick={() => navigate("/")}>
-              <Sparkles className="h-7 w-7 text-white" />
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-3xl shadow-white/10 cursor-pointer" onClick={() => navigate("/")}>
+              <Sparkles className="h-8 w-8 text-black" />
             </div>
-            <h1 className="text-3xl font-display text-white tracking-tight uppercase">
-              creator <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">ia pro</span>
+            <h1 className="text-3xl font-black text-white tracking-tighter lowercase">
+              nexus_ <span className="text-white/40">system</span>
             </h1>
           </div>
 
-          <div className="rounded-[3rem] border border-white/5 bg-[#121215]/80 backdrop-blur-3xl p-12 shadow-[0_0_50px_-12px_rgba(236,70,153,0.15)]">
-            <h2 className="mb-3 text-3xl font-display text-white tracking-tight uppercase">
-              {mode === "login" ? "acceso_nexus" : mode === "signup" ? "inicializar_cuenta" : "recuperar_acceso"}
+          <div className="rounded-[3.5rem] border border-white/5 bg-white/[0.01] backdrop-blur-3xl p-14 shadow-3xl shadow-white/5">
+            <h2 className="mb-4 text-3xl font-black text-white tracking-tighter lowercase">
+              {mode === "login" ? "init_nexus" : mode === "signup" ? "register_account" : "recovery_node"}
             </h2>
-            <p className="mb-12 text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em]">
-              {mode === "login" ? "bienvenido al ecosistema industrial" : mode === "signup" ? "crea tu perfil de ingeniería creativa" : "recuperación de enlace estable"}
+            <p className="mb-14 text-[9px] text-white/10 font-black uppercase tracking-[0.3em] leading-none">
+              {mode === "login" ? "access granted to industrial active clusters" : mode === "signup" ? "create neural engineering profile" : "establish stable recovery link"}
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-7">
               {mode === "signup" && (
                 <div className="space-y-3">
-                  <Label htmlFor="displayName" className="text-slate-600 text-[9px] font-bold uppercase tracking-[0.3em] ml-2">nombre</Label>
+                  <Label htmlFor="displayName" className="text-white/10 text-[9px] font-black uppercase tracking-[0.3em] ml-2">identifier</Label>
                   <div className="relative">
-                    <User className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-700" />
-                    <Input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="TU NOMBRE" className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#EC4699]/30 rounded-2xl pl-12 h-13 text-[10px] font-bold text-white transition-all ring-0 uppercase" />
+                    <User className="absolute left-6 top-1/2 h-4 w-4 -translate-y-1/2 text-white/10" />
+                    <Input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="OPERATOR_NAME" className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-white/20 rounded-2xl pl-14 h-14 text-[10px] font-black text-white transition-all ring-0 uppercase" />
                   </div>
                 </div>
               )}
 
               <div className="space-y-3">
-                <Label htmlFor="email" className="text-slate-600 text-[9px] font-bold uppercase tracking-[0.3em] ml-2">email</Label>
+                <Label htmlFor="email" className="text-white/10 text-[9px] font-black uppercase tracking-[0.3em] ml-2">neural_endpoint</Label>
                 <div className="relative">
-                  <Mail className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-700" />
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="TU@EMAIL.COM" required className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#EC4699]/30 rounded-2xl pl-12 h-13 text-[10px] font-bold text-white transition-all ring-0 uppercase" />
+                  <Mail className="absolute left-6 top-1/2 h-4 w-4 -translate-y-1/2 text-white/10" />
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ENDPOINT@NEXUS.COM" required className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-white/20 rounded-2xl pl-14 h-14 text-[10px] font-black text-white transition-all ring-0 uppercase" />
                 </div>
               </div>
 
               {mode !== "forgot" && (
                 <div className="space-y-3">
-                  <Label htmlFor="password" className="text-slate-600 text-[9px] font-bold uppercase tracking-[0.3em] ml-2">clave_personal</Label>
+                  <Label htmlFor="password" className="text-white/10 text-[9px] font-black uppercase tracking-[0.3em] ml-2">access_key</Label>
                   <div className="relative">
-                    <Lock className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-700" />
-                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#EC4699]/30 rounded-2xl pl-12 pr-12 h-13 text-xs font-bold text-white transition-all ring-0" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-700 hover:text-[#EC4699] transition-colors">
+                    <Lock className="absolute left-6 top-1/2 h-4 w-4 -translate-y-1/2 text-white/10" />
+                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-white/20 rounded-2xl pl-14 pr-14 h-14 text-xs font-black text-white transition-all ring-0" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-white/10 hover:text-white transition-colors">
                       {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                     </button>
                   </div>
@@ -172,18 +172,18 @@ const Auth = () => {
 
               {mode === "login" && (
                 <div className="text-right">
-                  <button type="button" onClick={() => setMode("forgot")} className="text-[9px] font-bold text-slate-600 hover:text-[#EC4699] transition-colors uppercase tracking-widest">
-                    ¿_olvidaste_clave?
+                  <button type="button" onClick={() => setMode("forgot")} className="text-[9px] font-black text-white/10 hover:text-white transition-colors lowercase tracking-widest">
+                    recover_access_node_?
                   </button>
                 </div>
               )}
 
-              <Button type="submit" disabled={loading} className="w-full h-15 bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 rounded-2xl gap-4 font-bold uppercase text-[10px] tracking-[0.3em] shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] transition-all active:scale-95 disabled:opacity-50 mt-4">
+              <Button type="submit" disabled={loading} className="w-full h-16 bg-white text-black hover:bg-white/90 rounded-[1.5rem] gap-4 font-black uppercase text-[10px] tracking-[0.4em] shadow-3xl shadow-white/5 transition-all active:scale-95 disabled:opacity-50 mt-6">
                 {loading ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-black border-t-transparent" />
                 ) : (
                   <>
-                    {mode === "login" ? "conectar_estudio" : mode === "signup" ? "solicitar_acceso" : "enviar_enlace"}
+                    {mode === "login" ? "initialize_nexus" : mode === "signup" ? "request_cluster_access" : "send_recovery_node"}
                     <ArrowRight className="h-5 w-5" />
                   </>
                 )}
@@ -191,19 +191,19 @@ const Auth = () => {
             </form>
 
             {mode !== "forgot" && (
-              <div className="mt-10 space-y-6">
+              <div className="mt-12 space-y-8">
                 <div className="relative flex items-center justify-center">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-white/5" />
                   </div>
-                  <span className="relative bg-[#121215] px-4 text-[9px] font-bold text-slate-700 uppercase tracking-[0.2em]">o_continuar_con</span>
+                  <span className="relative bg-[#050506] px-5 text-[9px] font-black text-white/10 uppercase tracking-[0.3em]">alternative_orchestration</span>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-5">
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-13 gap-3 border-white/5 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black text-white lowercase transition-all active:scale-95"
+                    className="h-14 gap-4 border-white/5 bg-white/[0.02] hover:bg-white/5 rounded-2xl text-[10px] font-black text-white/40 hover:text-white lowercase tracking-widest transition-all active:scale-95 shadow-2xl"
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
@@ -218,10 +218,10 @@ const Auth = () => {
                     }}
                   >
                     <svg className="h-5 w-5" viewBox="0 0 24 24">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="currentColor" fillOpacity="0.4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="currentColor" fillOpacity="0.3"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.96 10.96 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="currentColor" fillOpacity="0.2"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="currentColor" fillOpacity="0.3"/>
                     </svg>
                     Google
                   </Button>
@@ -229,7 +229,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-13 gap-3 border-white/5 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black text-white lowercase transition-all active:scale-95"
+                    className="h-14 gap-4 border-white/5 bg-white/[0.02] hover:bg-white/5 rounded-2xl text-[10px] font-black text-white/40 hover:text-white lowercase tracking-widest transition-all active:scale-95 shadow-2xl"
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
@@ -243,7 +243,7 @@ const Auth = () => {
                       setLoading(false);
                     }}
                   >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" fillOpacity="0.4">
                       <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                     </svg>
                     Apple
@@ -252,24 +252,26 @@ const Auth = () => {
               </div>
             )}
 
-            <div className="mt-10 text-center">
+            <div className="mt-12 text-center">
               {mode === "forgot" ? (
-                <button onClick={() => setMode("login")} className="text-[10px] font-bold text-slate-600 hover:text-white transition-colors uppercase tracking-widest">
-                  ← volver_al_login
+                <button onClick={() => setMode("login")} className="text-[10px] font-black text-white/20 hover:text-white transition-colors lowercase tracking-[0.2em]">
+                  ← return_to_init
                 </button>
               ) : (
-                <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-[10px] font-bold text-slate-600 hover:text-white transition-colors uppercase tracking-widest">
-                  {mode === "login" ? "¿no_tienes_cuenta?_regístrate" : "¿ya_tienes_cuenta?_inicia_sesión"}
+                <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-[10px] font-black text-white/20 hover:text-white transition-colors lowercase tracking-[0.2em]">
+                  {mode === "login" ? "initialize_new_nexus_identity" : "authenticate_existing_nexus"}
                 </button>
               )}
             </div>
           </div>
 
-          <div className="mt-8 text-center">
-            <button onClick={() => navigate("/pricing")} className="text-[9px] font-bold text-white hover:text-white transition-colors uppercase tracking-[0.3em] bg-gradient-to-r from-[#EC4699]/10 to-[#FA8214]/10 px-8 py-3.5 rounded-2xl border border-[#EC4699]/30 shadow-2xl shadow-[#EC4699]/5 transition-all active:scale-95">
-              ver_planes_precios →
+          <div className="mt-10 text-center">
+            <button onClick={() => navigate("/pricing")} className="text-[9px] font-black text-white/10 hover:text-white transition-colors uppercase tracking-[0.5em] bg-white/[0.01] px-10 py-4.5 rounded-[1.5rem] border border-white/5 shadow-3xl shadow-white/5 transition-all active:scale-95 hover:bg-white/[0.03]">
+              review_nexus_tiers →
             </button>
           </div>
+        </div>
+      </div>
         </div>
       </div>
     </div>

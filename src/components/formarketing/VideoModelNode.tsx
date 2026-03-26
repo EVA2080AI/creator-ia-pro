@@ -67,20 +67,20 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
   };
 
   return (
-    <div className={`group relative rounded-[1.5rem] border bg-[#0f0f12] backdrop-blur-xl w-[300px] shadow-2xl transition-all duration-300 hover:border-[#00c2ff]/30
-      ${isRendering ? 'border-[#00c2ff]/40 shadow-[0_0_20px_rgba(0,194,255,0.1)]' : ''}
+    <div className={`group relative rounded-2xl border border-white/5 bg-[#0f0f12] backdrop-blur-xl w-[260px] shadow-2xl transition-all duration-300 hover:border-white/20
+      ${isRendering ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.05)]' : ''}
       ${isReady ? 'border-white/10' : ''}
       ${isError ? 'border-red-500/30' : ''}
       ${!isRendering && !isReady && !isError ? 'border-white/8' : ''}
     `}>
 
       {/* Header */}
-      <div className="flex items-center justify-between p-3.5 border-b border-white/6 bg-white/[0.015]">
-        <div className="flex items-center gap-2.5 overflow-hidden">
-          <div className="p-1.5 rounded-lg bg-[#00c2ff]/10 border border-[#00c2ff]/15">
-            <Video className={`w-3.5 h-3.5 text-[#00c2ff] shrink-0 ${isRendering ? 'animate-pulse' : ''}`} />
+      <div className="flex items-center justify-between p-2.5 border-b border-white/5 bg-white/[0.01]">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <div className="p-1 rounded-lg bg-white/5 border border-white/10">
+            <Video className={`w-3.5 h-3.5 text-white/70 shrink-0 ${isRendering ? 'animate-pulse' : ''}`} />
           </div>
-          <h3 className="text-[11px] font-semibold text-white truncate">{data.title || "Video IA"}</h3>
+          <h3 className="text-[10px] font-bold text-white/90 tracking-tight truncate uppercase">{data.title || "NEXUS_VIDEO_V2"}</h3>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 hover:bg-white/5 text-white/30 rounded-lg transition-all">
@@ -93,30 +93,29 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
       </div>
 
       {isExpanded && (
-        <div className="p-4 space-y-4">
+        <div className="p-3 space-y-3">
           {/* Action bar */}
           <div className="flex items-center justify-between">
-            <span className="text-[10px] font-medium text-white/25 uppercase tracking-widest">Motor de Video</span>
+            <span className="text-[9px] font-medium text-white/20 uppercase tracking-widest">Processing Core</span>
             <button
               onClick={() => (data as any).onExecute?.()}
               disabled={isRendering}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white text-[10px] font-semibold transition-all shadow-lg disabled:opacity-50 active:scale-95 hover:shadow-[0_0_15px_rgba(189,0,255,0.4)]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white text-black text-[9px] font-bold transition-all shadow-lg disabled:opacity-50 active:scale-95 hover:bg-white/90"
             >
               {isRendering
-                ? <><Loader2 className="w-3 h-3 animate-spin" /> Renderizando...</>
-                : <><Zap className="w-3 h-3" /> Render</>
+                ? <><Loader2 className="w-2.5 h-2.5 animate-spin" /> ...</>
+                : <><Zap className="w-2.5 h-2.5" /> Execute</>
               }
             </button>
           </div>
 
           {/* Rendering progress */}
           {isRendering && (
-            <div className="h-28 w-full bg-black/30 rounded-xl border border-[#00c2ff]/15 flex flex-col items-center justify-center gap-3">
-              <Video className="w-8 h-8 text-[#00c2ff]/30 animate-pulse" />
+            <div className="h-16 w-full bg-black/30 rounded-lg border border-white/5 flex flex-col items-center justify-center gap-2">
               <div className="w-2/3 h-1 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#bd00ff] to-[#00c2ff] animate-shimmer w-full" />
+                <div className="h-full bg-white animate-shimmer w-full opacity-50" />
               </div>
-              <span className="text-[9px] text-white/30 font-medium">Procesando fotogramas...</span>
+              <span className="text-[8px] text-white/20 font-medium uppercase tracking-[0.2em]">calculating_layers...</span>
             </div>
           )}
 
@@ -138,9 +137,9 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
                 )}
                 <button
                   onClick={handleDownload}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/8 text-[10px] text-white/50 hover:text-white hover:bg-white/8 transition-all ml-auto"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/8 text-[9px] text-white/50 hover:text-white hover:bg-white/8 transition-all ml-auto"
                 >
-                  <Download className="w-3 h-3" />
+                  <Download className="w-2.5 h-2.5" />
                   Descargar
                 </button>
               </div>
@@ -181,9 +180,9 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
                 <button
                   key={m.id}
                   onClick={() => updateModel(m.id)}
-                  className={`px-3 py-2 rounded-xl border text-[9px] font-bold lowercase tracking-wider transition-all ${
+                  className={`px-2 py-1 rounded-lg border text-[8px] font-bold lowercase tracking-wider transition-all ${
                     (data.model || 'nano-banana-video') === m.id 
-                    ? 'bg-[#00c2ff]/10 border-[#00c2ff]/30 text-[#00c2ff]' 
+                    ? 'bg-white/10 border-white/20 text-white' 
                     : 'bg-white/5 border-white/5 text-white/20 hover:bg-white/10'
                   }`}
                 >
@@ -197,21 +196,21 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
           <div className="flex items-center justify-between px-0.5">
             <div className="flex items-center gap-1.5">
               <div className={`w-1.5 h-1.5 rounded-full ${
-                isRendering ? 'bg-[#00c2ff] animate-pulse' :
-                isReady ? 'bg-[#00e5a0]' :
+                isRendering ? 'bg-[#FA8214] animate-pulse' :
+                isReady ? 'bg-green-500' :
                 isError ? 'bg-red-400' : 'bg-white/20'
               }`} />
-              <span className="text-[9px] text-white/25 font-medium uppercase tracking-widest">
-                {isRendering ? 'renderizando' : isReady ? 'listo' : isError ? 'error' : 'en espera'}
+              <span className="text-[8px] text-white/25 font-medium uppercase tracking-widest">
+                {isRendering ? 'render' : isReady ? 'listo' : isError ? 'error' : 'wait'}
               </span>
             </div>
-            <span className="text-[9px] text-white/20 font-medium">Creator v2.0</span>
+            <span className="text-[8px] text-white/20 font-medium tracking-tighter">Nexus v2.1</span>
           </div>
         </div>
       )}
 
-      <Handle type="target" position={Position.Left} className="!w-3 !h-3 !-left-1.5 !bg-[#bd00ff] !border-2 !border-[#050506]" />
-      <Handle type="source" position={Position.Right} className="!w-3 !h-3 !-right-1.5 !bg-[#00c2ff] !border-2 !border-[#050506]" />
+      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !-left-1 !bg-white/40 !border-2 !border-[#050506]" />
+      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#050506]" />
     </div>
   );
 };

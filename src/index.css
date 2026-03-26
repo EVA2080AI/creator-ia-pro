@@ -11,58 +11,55 @@
 
 @layer base {
   :root {
-    /* Core surfaces */
-    --background: 240 10% 4%;         /* #09090B */
+    /* Core surfaces - Industrial Deep Black */
+    --background: 240 10% 2%;         /* #050506 */
     --foreground: 0 0% 98%;
 
-    --card: 240 6% 8%;               /* #121215 */
+    --card: 240 6% 6%;               /* #0f0f12 */
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 6% 7%;
+    --popover: 240 6% 5%;
     --popover-foreground: 0 0% 98%;
 
-    /* Brand — Pink → Orange gradient (PicLink) */
-    --primary: 330 81% 60%;         /* #EC4699 Pink */
-    --primary-foreground: 0 0% 100%;
+    /* Neutral Accents — Industrial Slate */
+    --primary: 215 20% 65%;         /* Professional Slate/Silver */
+    --primary-foreground: 240 10% 4%;
 
-    --secondary: 240 4% 12%;
+    --secondary: 240 4% 10%;
     --secondary-foreground: 0 0% 90%;
 
-    --muted: 240 4% 14%;
-    --muted-foreground: 240 5% 50%;
+    --muted: 240 4% 12%;
+    --muted-foreground: 240 5% 40%;
 
-    --accent: 25 95% 53%;           /* #FA8214 Orange */
+    --accent: 215 25% 27%;           /* Deep Indigo/Slate Accent */
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 50%;
+    --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 4% 10%;
-    --input: 240 4% 10%;
-    --ring: 330 81% 60%;
-    --radius: 0.75rem;
+    --border: 240 4% 8%;
+    --input: 240 4% 8%;
+    --ring: 215 20% 65%;
+    --radius: 0.5rem;
 
-    /* Creator IA Pro Design Tokens (PicLink Aesthetic) */
-    --creator-bg: #09090b;
-    --creator-canvas: #050506;
-    --creator-card: #121215;
-    --creator-card-hover: #18181b;
-    --creator-border: rgba(255, 255, 255, 0.08);
-    --creator-border-hover: rgba(236, 70, 153, 0.3);
-    --creator-pink: #EC4699;
-    --creator-orange: #FA8214;
-    --creator-purple: #bd00ff;
-    --creator-magenta: #ff0071;
-    --creator-gold: #ffb800;
-    --creator-blue: #0ea5e9;
-    --creator-glow-pink: rgba(236, 70, 153, 0.35);
-    --creator-glow-orange: rgba(250, 130, 20, 0.3);
+    /* Creator IA Pro Design Tokens (Industrial Monochrome) */
+    --creator-bg: #050506;
+    --creator-canvas: #020203;
+    --creator-card: #0f0f12;
+    --creator-card-hover: #121215;
+    --creator-border: rgba(255, 255, 255, 0.06);
+    --creator-border-hover: rgba(255, 255, 255, 0.12);
+    --creator-pink: #EC4699; /* Kept as indicator ONLY */
+    --creator-orange: #FA8214; /* Kept as indicator ONLY */
+    --creator-slate: #94a3b8;
+    --creator-zinc: #27272a;
+    --creator-glow: rgba(255, 255, 255, 0.05);
 
     /* Canvas specific */
-    --canvas: 240 10% 4%;
-    --node-bg: 240 6% 7%;
-    --node-border: 240 4% 12%;
-    --node-glow: 330 81% 60%;
+    --canvas: 240 10% 2%;
+    --node-bg: 240 6% 6%;
+    --node-border: 240 4% 8%;
+    --node-glow: 215 20% 65%;
 
     /* Feedback */
     --success: 142 72% 45%;
@@ -93,21 +90,20 @@
 
   body {
     background-color: var(--creator-bg);
-    color: #f5f5f7;
+    color: #e4e4e7;
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    selection-background-color: rgba(236, 70, 153, 0.3);
   }
 
   *::selection {
-    background: rgba(236, 70, 153, 0.25);
+    background: rgba(255, 255, 255, 0.1);
     color: white;
   }
 
   *:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--creator-pink), 0 0 0 4px rgba(236, 70, 153, 0.15);
+    box-shadow: 0 0 0 1px var(--foreground), 0 0 0 3px rgba(255, 255, 255, 0.1);
   }
 
   h1, h2, h3, h4, h5 {
@@ -132,27 +128,27 @@
   .creator-bg    { background-color: var(--creator-bg); }
   .creator-card  { background-color: var(--creator-card); }
   .creator-glass {
-    background: rgba(18, 18, 21, 0.7);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background: rgba(10, 10, 12, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--creator-border);
   }
 
-  /* --- Brand Gradient (PicLink) --- */
+  /* --- Brand Accents (Subtle Monochrome) --- */
   .brand-gradient {
-    background: linear-gradient(135deg, var(--creator-pink) 0%, var(--creator-orange) 100%);
+    background: linear-gradient(135deg, #27272a 0%, #09090b 100%);
   }
   .brand-gradient-text {
-    background: linear-gradient(135deg, var(--creator-pink) 0%, var(--creator-orange) 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .brand-glow {
-    box-shadow: 0 0 25px -5px var(--creator-glow-pink), 0 0 50px -20px var(--creator-glow-orange);
+    box-shadow: 0 0 30px -10px rgba(255, 255, 255, 0.05);
   }
   .brand-glow-sm {
-    box-shadow: 0 0 15px -5px var(--creator-glow-pink);
+    box-shadow: 0 0 15px -5px rgba(255, 255, 255, 0.03);
   }
 
   /* --- Stat Cards --- */
@@ -171,20 +167,20 @@
 
   /* --- Buttons --- */
   .btn-brand {
-    background: linear-gradient(135deg, var(--creator-pink) 0%, var(--creator-orange) 100%);
-    color: white;
-    font-weight: 700;
-    font-size: 0.8125rem;
-    padding: 0.625rem 1.25rem;
-    border-radius: 0.5rem;
+    background: #ffffff;
+    color: #000000;
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 15px -5px var(--creator-glow-pink);
   }
   .btn-brand:hover {
-    box-shadow: 0 6px 25px -5px var(--creator-glow-pink), 0 0 0 1px rgba(236, 70, 153, 0.4);
+    background: #f4f4f5;
     transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
   }
   .btn-brand:active { transform: scale(0.98); }
 
@@ -337,27 +333,27 @@
 }
 
 .react-flow__handle {
-  width: 12px !important;
-  height: 12px !important;
-  background: linear-gradient(135deg, #bd00ff, #ff0071) !important;
-  border: 3px solid var(--creator-canvas) !important;
-  box-shadow: 0 0 10px rgba(189, 0, 255, 0.6) !important;
+  width: 10px !important;
+  height: 10px !important;
+  background: #ffffff !important;
+  border: 2px solid var(--creator-canvas) !important;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2) !important;
   transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 .react-flow__handle:hover {
-  transform: scale(1.35) !important;
-  box-shadow: 0 0 20px rgba(189, 0, 255, 0.9) !important;
+  transform: scale(1.3) !important;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.4) !important;
 }
 
 .react-flow__edge-path {
   stroke-width: 1.5 !important;
-  stroke: rgba(189, 0, 255, 0.35) !important;
+  stroke: rgba(255, 255, 255, 0.15) !important;
 }
 
 .react-flow__edge.selected .react-flow__edge-path,
 .react-flow__edge:hover .react-flow__edge-path {
-  stroke: rgba(189, 0, 255, 0.7) !important;
+  stroke: rgba(255, 255, 255, 0.4) !important;
   stroke-width: 2 !important;
 }
 

@@ -31,20 +31,18 @@ export default {
         'node-glow': 'hsl(var(--node-glow))',
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
-        // Creator IA Pro v2.0 Brand Tokens (PicLink Aesthetic)
+        // Creator IA Pro v2.1 Brand Tokens (Industrial Monochrome)
         creator: {
           bg: '#050506',
-          canvas: '#030304',
+          canvas: '#020202',
           card: '#0f0f12',
           'card-hover': '#141418',
           pink: '#EC4699',
           orange: '#FA8214',
-          purple: '#bd00ff',
-          magenta: '#ff0071',
-          gold: '#ffb800',
-          blue: '#00c2ff',
-          green: '#00e5a0',
+          slate: '#94a3b8',
+          zinc: '#27272a',
           border: 'rgba(255,255,255,0.06)',
+          'border-hover': 'rgba(255,255,255,0.12)',
         },
         gold: {
           DEFAULT: 'hsl(var(--gold))',
@@ -105,8 +103,8 @@ export default {
           to: { height: '0' },
         },
         'pulse-brand': {
-          '0%, 100%': { boxShadow: '0 0 15px -5px rgba(189,0,255,0.35)' },
-          '50%': { boxShadow: '0 0 35px -5px rgba(189,0,255,0.7), 0 0 60px -15px rgba(255,0,113,0.3)' },
+          '0%, 100%': { boxShadow: '0 0 15px -5px rgba(255,255,255,0.05)' },
+          '50%': { boxShadow: '0 0 30px -5px rgba(255,255,255,0.1)' },
         },
         'spin-slow': {
           from: { transform: 'rotate(0deg)' },

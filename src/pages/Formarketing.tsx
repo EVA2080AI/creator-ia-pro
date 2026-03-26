@@ -671,20 +671,20 @@ function FormarketingContent() {
         <title>Nexus Studio V2.0 | Formarketing</title>
         <meta name="description" content="Lienzo infinito de inteligencia artificial multimodal. Crea, gestiona y escala campañas y flujos de marketing en tiempo real." />
       </Helmet>
-      <div className="h-screen w-screen bg-[#050506] font-inter text-slate-100 flex flex-col overflow-hidden relative selection:bg-[#EC4699]/30 selection:text-[#020203]">
-      {/* Nebula V8.0 Minimalist Studio Header */}
-      <div className="flex h-20 w-full items-center justify-between border-b border-white/5 bg-[#020203]/40 px-10 backdrop-blur-3xl shrink-0 z-[90]">
+      <div className="h-screen w-screen bg-[#050506] font-inter text-slate-100 flex flex-col overflow-hidden relative selection:bg-white/20 selection:text-white">
+      {/* Nexus V8.0 Industrial Studio Header */}
+      <div className="flex h-16 w-full items-center justify-between border-b border-white/5 bg-[#020203]/40 px-10 backdrop-blur-3xl shrink-0 z-[90]">
          <div className="flex items-center gap-8">
              <button
                 onClick={() => navigate("/dashboard")}
                 className="flex items-center gap-5 hover:opacity-80 transition-all group"
              >
-                <div className="flex h-11 w-11 items-center justify-center rounded-[1.2rem] bg-gradient-to-r from-[#EC4699] to-[#FA8214] shadow-2xl shadow-[#EC4699]/20 group-hover:rotate-6 transition-transform">
-                   <Rocket className="h-5.5 w-5.5 text-white" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white border border-white/10 shadow-3xl shadow-white/5 group-hover:rotate-3 transition-transform">
+                   <Rocket className="h-5.5 w-5.5 text-black" />
                 </div>
                 <div className="flex flex-col text-left">
-                   <h1 className="text-2xl font-display tracking-tight text-white leading-none uppercase">creator <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">ia studio</span></h1>
-                   <span className="text-[9px] font-bold text-[#FA8214] uppercase tracking-[0.5em] mt-2">V2.1 Industrial</span>
+                   <h1 className="text-2xl font-black tracking-tighter text-white leading-none lowercase">nexus_studio</h1>
+                   <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] mt-2">V7.0 Industrial Engine</span>
                 </div>
              </button>
             <div className="h-6 w-px bg-white/10 mx-2" />
@@ -694,33 +694,33 @@ function FormarketingContent() {
          </div>
 
          <div className="flex items-center gap-5">
-            <div className="hidden md:flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 shadow-2xl">
-               <div className="w-2 h-2 rounded-full bg-[#ffb800] shadow-[0_0_15px_#ffb800] animate-pulse" />
-               <span className="text-[10px] font-black text-[#ffb800] lowercase tracking-[0.2em]">en línea</span>
+            <div className="hidden md:flex items-center gap-3 bg-white/[0.02] px-5 py-2.5 rounded-2xl border border-white/5 shadow-2xl">
+               <div className="w-1.5 h-1.5 rounded-full bg-white/40 shadow-[0_0_10px_rgba(255,255,255,0.2)] animate-pulse" />
+               <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">system_online_v7</span>
             </div>
 
             <Button 
                variant="ghost" 
                onClick={handleClear} 
                disabled={nodes.length === 0 && edges.length === 0}
-               className="text-slate-500 hover:text-white hover:bg-white/5 rounded-2xl px-6 h-11 text-[11px] font-black lowercase tracking-widest gap-3 transition-all disabled:opacity-20"
+               className="text-slate-500 hover:text-white hover:bg-white/5 rounded-2xl px-6 h-11 text-[11px] font-black lowercase tracking-widest gap-2 transition-all disabled:opacity-20"
             >
                <Trash2 className="w-4 h-4" />
-               limpiar_lienzo
+               clear_canvas
             </Button>
             
             <Button 
                onClick={handleExecute} 
                disabled={nodes.length === 0}
-               className="h-12 bg-gradient-to-r from-[#EC4699] to-[#FA8214] hover:opacity-90 text-white rounded-2xl gap-3 font-bold px-10 shadow-2xl shadow-[#EC4699]/20 text-[10px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
+               className="h-11 bg-white hover:bg-white/90 text-black rounded-xl gap-3 font-black px-10 shadow-3xl shadow-white/5 text-[10px] uppercase tracking-widest transition-all active:scale-95 disabled:opacity-20"
             >
-               <Zap className="w-4 h-4" />
-               Sincronizar Flujo
+               <Zap className="w-3.5 h-3.5" />
+               sync_flow_engine
             </Button>
 
             <div className="h-6 w-px bg-white/10 mx-2" />
             
-            <button onClick={signOut} className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all">
+            <button onClick={signOut} className="p-3 bg-white/5 hover:bg-white/10 rounded-xl text-slate-500 hover:text-white transition-all">
                <LogOut className="h-4 w-4" />
             </button>
       </div>
@@ -743,25 +743,25 @@ function FormarketingContent() {
           defaultEdgeOptions={{ 
             type: 'smoothstep', 
             animated: true,
-            style: { stroke: '#EC469980', strokeWidth: 2 }
+            style: { stroke: '#ffffff20', strokeWidth: 1.5 }
           }}
         >
           <Background 
-            color="#ffffff05" 
+            color="#ffffff03" 
             variant={BackgroundVariant.Dots} 
             gap={40} 
-            size={1.5} 
+            size={1} 
           />
-          <Controls className="!bg-[#0f0f12]/90 !border-white/5 !fill-slate-500 !bottom-12 !left-10 rounded-2xl overflow-hidden scale-110 shadow-3xl backdrop-blur-xl" />
+          <Controls className="!bg-[#0a0a0b]/90 !border-white/5 !fill-white/20 !bottom-12 !left-10 rounded-2xl overflow-hidden scale-110 shadow-3xl backdrop-blur-xl transition-all hover:bg-[#0a0a0b]" />
           <MiniMap 
-            className="!bg-[#0f0f12]/90 border !border-white/5 !rounded-2xl overflow-hidden backdrop-blur-xl !bottom-12 !right-10 shadow-3xl opacity-50 hover:opacity-100 transition-opacity" 
-            maskColor="rgba(5,5,6,0.8)" 
+            className="!bg-[#0a0a0b]/90 border !border-white/5 !rounded-2xl overflow-hidden backdrop-blur-xl !bottom-12 !right-10 shadow-3xl opacity-30 hover:opacity-100 transition-opacity" 
+            maskColor="rgba(0,0,0,0.8)" 
             nodeColor={(n) => {
-               if (n.type === 'characterBreakdown') return '#FA821480';
+               if (n.type === 'characterBreakdown') return '#ffffff10';
                if (n.type === 'modelView') return '#ffffff20';
-               if (n.type === 'videoModel') return '#EC469980';
-               if (n.type === 'antigravityBridge') return '#EC469980';
-               return '#222';
+               if (n.type === 'videoModel') return '#ffffff15';
+               if (n.type === 'antigravityBridge') return '#ffffff30';
+               return '#111';
             }}
           />
         </ReactFlow>

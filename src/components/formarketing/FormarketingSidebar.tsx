@@ -60,37 +60,37 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
   };
 
   const menuItems = [
-    { label: 'copywriting ai', icon: Type, type: 'characterBreakdown', color: 'text-[#00c2ff]', bg: 'bg-[#00c2ff]/10', description: 'genera textos persuasivos' },
-    { label: 'imagen flux hq', icon: Image, type: 'modelView', color: 'text-white', bg: 'bg-white/10', description: 'generación industrial hq' },
-    { label: 'avatar de marca', icon: Video, type: 'videoModel', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'video con ia para campañas' },
-    { label: 'web/app builder', icon: LayoutTemplate, type: 'layoutBuilder', color: 'text-[#ffb800]', bg: 'bg-[#ffb800]/10', description: 'diseña estructuras web' },
-    { label: 'campaña social', icon: Share2, type: 'campaignManager', color: 'text-[#00e5a0]', bg: 'bg-[#00e5a0]/10', description: 'gestiona distribución' },
-    { label: 'antigravity bridge', icon: Rocket, type: 'antigravityBridge', color: 'text-white', bg: 'bg-[#bd00ff]', description: 'clonación de ecosistemas' },
+    { label: 'copywriting_ai', icon: Type, type: 'characterBreakdown', color: 'text-white/50', bg: 'bg-white/5', description: 'persuasive neural copy' },
+    { label: 'imagen_flux_hq', icon: Image, type: 'modelView', color: 'text-white', bg: 'bg-white/10', description: 'industrial hq generation' },
+    { label: 'avatar_engine', icon: Video, type: 'videoModel', color: 'text-white/70', bg: 'bg-white/5', description: 'neural video campaign' },
+    { label: 'web_structure', icon: LayoutTemplate, type: 'layoutBuilder', color: 'text-white/40', bg: 'bg-white/5', description: 'design web structures' },
+    { label: 'social_distrib', icon: Share2, type: 'campaignManager', color: 'text-slate-500', bg: 'bg-white/[0.02]', description: 'distribution engine' },
+    { label: 'nexus_bridge', icon: Rocket, type: 'antigravityBridge', color: 'text-white', bg: 'bg-white/20', description: 'ecosystem cloning' },
   ].filter(item => 
     item.label.toLowerCase().includes(search.toLowerCase()) && 
     (activeCategory === null || (activeCategory === 6 && item.icon === Type) || (activeCategory === 3 && item.icon === Image) || (activeCategory === 4 && item.icon === Video))
   );
 
   const plantillas = [
-    { label: 'Meta Ads Pack', icon: Sparkles, type: 'metaPack', color: 'text-pink-500', bg: 'bg-pink-500/10' },
-    { label: 'Landing App Structure', icon: LayoutGrid, type: 'landingPack', color: 'text-cyan-500', bg: 'bg-cyan-500/10' }
+    { label: 'Meta Ads Pack', icon: Sparkles, type: 'metaPack', color: 'text-white/50', bg: 'bg-white/5' },
+    { label: 'Landing App Structure', icon: LayoutGrid, type: 'landingPack', color: 'text-white/50', bg: 'bg-white/5' }
   ];
 
   const contentItems = [
-    { label: 'Subir', icon: Upload, action: handleFileUpload },
-    { label: 'Recursos', icon: Folder },
-    { label: 'Stock', icon: Search }
+    { label: 'Upload', icon: Upload, action: handleFileUpload },
+    { label: 'Assets', icon: Folder },
+    { label: 'Search', icon: Search }
   ].filter(item => item.label.toLowerCase().includes(search.toLowerCase()));
 
   const topIcons = [
-    { icon: Clock, id: 0, title: 'Historial' }, 
-    { icon: LayoutGrid, id: 1, title: 'Lienzo' }, 
-    { icon: LayoutTemplate, id: 2, title: 'Plantillas' }, 
-    { icon: Image, id: 3, title: 'Imágenes' }, 
+    { icon: Clock, id: 0, title: 'History' }, 
+    { icon: LayoutGrid, id: 1, title: 'Canvas' }, 
+    { icon: LayoutTemplate, id: 2, title: 'Templates' }, 
+    { icon: Image, id: 3, title: 'Images' }, 
     { icon: Video, id: 4, title: 'Videos' }, 
-    { icon: Music, id: 5, title: 'Música' }, 
-    { icon: Type, id: 6, title: 'Texto' }, 
-    { icon: PenTool, id: 7, title: 'Diseño' }
+    { icon: Music, id: 5, title: 'Audio' }, 
+    { icon: Type, id: 6, title: 'Text' }, 
+    { icon: PenTool, id: 7, title: 'Design' }
   ];
 
   const toolbarIcons = [
@@ -104,145 +104,143 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
   ];
 
   return (
-    <div className="absolute left-4 top-20 z-10 flex gap-3 animate-fade-in items-start h-[calc(100vh-120px)] pointer-events-none">
+    <div className="absolute left-6 top-24 z-10 flex gap-4 animate-fade-in items-start h-[calc(100vh-140px)] pointer-events-none">
       
-      {/* Vertical Pulse Toolbar */}
-      <div className="flex flex-col items-center gap-3 rounded-[2rem] border border-white/8 bg-[#0f0f12]/90 w-[56px] py-6 shadow-2xl backdrop-blur-xl shrink-0 h-fit pointer-events-auto">
+      {/* Industrial Monochrome Toolbar */}
+      <div className="flex flex-col items-center gap-2 rounded-2xl border border-white/5 bg-[#0a0a0b]/95 w-[48px] py-4 shadow-3xl backdrop-blur-xl shrink-0 h-fit pointer-events-auto">
         {/* Menu Toggle */}
         <button 
            onClick={() => setMenuOpen(!menuOpen)}
-           className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-all duration-500 ${menuOpen ? 'bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white rotate-90 shadow-xl shadow-[#bd00ff]/30' : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'}`}
+           className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-500 ${menuOpen ? 'bg-white text-black shadow-xl shadow-white/5' : 'bg-white/5 text-white/30 hover:bg-white/10 hover:text-white'}`}
         >
           {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-5 w-5" />}
         </button>
         
         <div className="w-8 h-px bg-white/5 my-2" />
 
-        {/* Play Button */}
-        <button className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-white shadow-xl hover:scale-105 active:scale-95 transition-all group/play border border-white/10">
-          <Play className="h-5 w-5 fill-[#bd00ff] text-[#bd00ff] ml-0.5 group-hover:scale-110 transition-transform" />
+        {/* Action Button */}
+        <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-white/50 shadow-xl hover:bg-white/10 hover:text-white transition-all group/play border border-white/5">
+          <Play className="h-4 w-4 fill-white/20 text-white/40 ml-0.5 group-hover:scale-110 transition-transform" />
         </button>
 
-        {/* Other Tools */}
+        {/* Toolset */}
         {toolbarIcons.map((Tool, i) => (
           <button 
             key={i} 
-            className={`flex h-11 w-11 items-center justify-center rounded-xl text-white/40 hover:bg-white/5 hover:text-[#00c2ff] transition-all group ${Tool.id === 'settings' ? 'mt-8' : ''}`}
+            className={`flex h-9 w-9 items-center justify-center rounded-xl text-white/20 hover:bg-white/5 hover:text-white transition-all group ${Tool.id === 'settings' ? 'mt-4 border-t border-white/5 pt-4' : ''}`}
           >
-            <Tool.icon className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
+            <Tool.icon className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </button>
         ))}
       </div>
 
-      {/* Expanded Pulse Menu */}
+      {/* Industrial Navigation Menu */}
       {menuOpen && (
-        <div className="w-64 rounded-[2.5rem] border border-white/8 bg-[#0f0f12]/95 p-5 shadow-3xl backdrop-blur-xl flex flex-col gap-6 max-h-full overflow-y-auto no-scrollbar animate-in slide-in-from-left-4 duration-500 pointer-events-auto">
+        <div className="w-72 rounded-[2rem] border border-white/5 bg-[#0a0a0b]/95 p-6 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl flex flex-col gap-6 max-h-[85vh] overflow-y-auto no-scrollbar animate-in slide-in-from-left-4 duration-500 pointer-events-auto border-t border-white/10">
           
-          {/* Search Bar */}
-          <div className="relative mb-2">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+          {/* Neural Search */}
+          <div className="relative mb-0 border-b border-white/5 pb-4">
+            <Search className="absolute left-4 top-4 h-4 w-4 text-white/10" />
             <Input 
                value={search}
                onChange={(e) => setSearch(e.target.value)}
-               placeholder="buscar herramientas..." 
-               className="pl-11 bg-white/5 border-transparent focus:border-[#bd00ff]/50 rounded-xl h-12 text-xs font-bold text-white placeholder:text-white/30"
+               placeholder="search_neural_tools..." 
+               className="pl-12 bg-white/[0.02] border-white/5 focus:border-white/20 rounded-xl h-11 text-[11px] font-bold text-white placeholder:text-white/10 transition-all uppercase tracking-tighter"
             />
           </div>
 
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between px-2">
-                <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Nodos de Flujo</h3>
-                <span className="text-[10px] text-white/20 font-medium">({menuItems.length})</span>
+                <h3 className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">Flow_Nodes</h3>
+                <span className="text-[10px] text-white/10 font-medium">[{menuItems.length}]</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
                <TemplateModal 
                  onSelect={(template) => {
-                   toast.success(`Inyectando pack: ${template.title}`);
+                   toast.success(`Injected_Pack: ${template.title}`);
                    const event = new CustomEvent('add-template', { detail: template });
                    window.dispatchEvent(event);
                  }} 
                  trigger={
-                     <button className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-gradient-to-br from-[#bd00ff]/10 to-[#ff0071]/10 border border-[#bd00ff]/20 hover:border-[#ff0071]/20 transition-all group/btn shadow-sm">
-                        <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#bd00ff]/20 to-[#ff0071]/20 group-hover/btn:scale-110 transition-all">
-                           <Zap className="h-3.5 w-3.5 text-white" />
+                     <button className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 transition-all group/btn shadow-sm">
+                        <div className="p-2 rounded-xl bg-white/10 group-hover/btn:scale-110 transition-all">
+                           <Zap className="h-4 w-4 text-white/70" />
                         </div>
-                        <span className="text-[8px] font-bold text-center text-white/80 uppercase tracking-tighter leading-none">ads packs</span>
+                        <span className="text-[9px] font-black text-center text-white/40 uppercase tracking-widest leading-none">ads_packs</span>
                      </button>
                  }
                />
                <button 
                   onClick={() => handleAddTemplate('landingPack')}
-                  className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white/[0.02] hover:bg-white/5 border border-white/10 hover:border-white/20 transition-all group/btn shadow-sm"
+                  className="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/20 transition-all group/btn shadow-sm"
                >
-                  <div className="p-1.5 rounded-lg bg-white/10 group-hover/btn:scale-110 transition-all">
-                    <Rocket className="h-3.5 w-3.5 text-white/60 group-hover:text-white" />
+                  <div className="p-2 rounded-xl bg-white/10 group-hover/btn:scale-110 transition-all">
+                    <Rocket className="h-4 w-4 text-white/70" />
                   </div>
-                  <span className="text-[8px] font-bold text-center text-white/60 uppercase tracking-tighter leading-none group-hover:text-white">landing base</span>
+                  <span className="text-[9px] font-black text-center text-white/40 uppercase tracking-widest leading-none">landing_v1</span>
                </button>
             </div>
           </div>
 
-        {/* Basics Menu */}
-        <TooltipProvider>
-          <div className="flex flex-col gap-2">
-            <p className="text-center text-[9px] font-bold text-white/30 tracking-widest uppercase mt-4">
-              Creator IA Pro v2.0
-            </p>
-           {menuItems.map((item, idx) => (
-             <div key={idx} className="group/item relative">
-               <Tooltip>
-                 <TooltipTrigger asChild>
-                    <button 
-                      draggable
-                      onDragStart={(e) => onDragStart(e, item.type, item.label)}
-                      onClick={() => onAddNode(item.type, item.label)}
-                      className="flex flex-col gap-1.5 p-3 rounded-xl border border-dashed border-white/10 bg-white/[0.02] items-center justify-center cursor-pointer hover:bg-white/5 hover:border-[#bd00ff]/30 transition-all text-white/40 hover:text-white"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-xl flex items-center justify-center shrink-0 ${item.bg}`}>
-                        <item.icon className={`h-4 w-4 ${item.color}`} />
-                      </div>
-                      <div className="flex flex-col text-left">
-                        <span className="text-xs font-bold text-white group-hover:text-white transition-colors">{item.label}</span>
-                        <span className="text-[10px] font-medium text-white/40 leading-tight">{item.description}</span>
-                      </div>
-                      </div>
-                    </button>
-                 </TooltipTrigger>
-                 <TooltipContent side="right" className="bg-slate-900 border-none text-[10px] font-bold max-w-[200px] p-2 text-white rounded-xl">
-                   {item.description}
-                 </TooltipContent>
-               </Tooltip>
-             </div>
-           ))}
-         </div>
-       </TooltipProvider>
+          {/* Core Logic Selector */}
+          <TooltipProvider>
+            <div className="flex flex-col gap-2">
+              <p className="text-center text-[8px] font-black text-white/5 tracking-[0.4em] uppercase mt-2 mb-4">
+                Nexus_System_V3.1
+              </p>
+             {menuItems.map((item, idx) => (
+               <div key={idx} className="group/item relative">
+                 <Tooltip>
+                   <TooltipTrigger asChild>
+                       <button 
+                        draggable
+                        onDragStart={(e) => onDragStart(e, item.type, item.label)}
+                        onClick={() => onAddNode(item.type, item.label)}
+                        className="flex w-full gap-4 rounded-2xl border border-white/5 bg-white/[0.01] items-center p-3 cursor-pointer hover:bg-white/10 hover:border-white/20 transition-all text-white/40 hover:text-white"
+                      >
+                          <div className={`p-2 rounded-xl flex items-center justify-center shrink-0 bg-white/5 border border-white/5 group-hover/item:border-white/20 transition-colors`}>
+                          <item.icon className={`h-4 w-4 text-white/50 group-hover/item:text-white transition-colors`} />
+                        </div>
+                        <div className="flex flex-col text-left">
+                          <span className="text-[11px] font-bold text-white/80 group-hover:text-white transition-colors uppercase tracking-tight">{item.label}</span>
+                          <span className="text-[9px] font-medium text-white/10 leading-tight group-hover:text-white/30 transition-colors">{item.description}</span>
+                        </div>
+                      </button>
+                   </TooltipTrigger>
+                   <TooltipContent side="right" className="bg-black border border-white/10 text-[10px] font-bold max-w-[200px] p-3 text-white rounded-xl shadow-3xl">
+                     {item.description.toUpperCase()}
+                   </TooltipContent>
+                 </Tooltip>
+               </div>
+             ))}
+           </div>
+         </TooltipProvider>
 
-       {/* Content Menu */}
-          <div className="flex flex-col gap-2">
-            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-2 mb-2">contenido</h3>
+         {/* Industrial Content */}
+          <div className="flex flex-col gap-2 pt-4 border-t border-white/5">
+            <h3 className="text-[10px] font-black text-white/10 uppercase tracking-[0.2em] px-2 mb-2">neural_assets</h3>
             {contentItems.map((item, idx) => (
               <button 
                 key={idx} 
                 onClick={item.action}
-                className="flex items-center gap-4 w-full p-3 rounded-2xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5"
+                className="flex items-center gap-4 w-full p-2.5 rounded-xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5"
               >
-                <div className="p-2 rounded-xl border border-white/5 bg-white/5 group-hover:bg-[#ff0071]/10 transition-colors">
-                  <item.icon className="h-4 w-4 text-slate-500 group-hover:text-[#ff0071] transition-colors" />
+                <div className="p-2 rounded-lg border border-white/5 bg-white/[0.02] group-hover:bg-white/5 transition-colors">
+                  <item.icon className="h-4 w-4 text-white/20 group-hover:text-white/60 transition-colors" />
                 </div>
-                <span className="text-[11px] font-black text-slate-300 group-hover:text-white lowercase">{item.label}</span>
+                <span className="text-[10px] font-bold text-white/30 group-hover:text-white/80 lowercase uppercase tracking-tighter">{item.label}</span>
               </button>
             ))}
           </div>
 
-      {/* Bottom Footer Actions */}
-      <div className="mt-2 flex items-center justify-between pt-3 border-t border-white/5 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
-        <span className="px-2 font-mono opacity-50">Imagen</span>
-        <div className="flex gap-2">
-           <span className="bg-white/5 px-2 py-1 rounded">Navegar</span>
-           <span className="bg-white/5 px-2 py-1 rounded">Insertar</span>
-        </div>
-      </div>
+          {/* Industrial Metric Footer */}
+          <div className="mt-4 flex items-center justify-between pt-4 border-t border-white/5 text-[9px] uppercase font-black text-white/5 tracking-[0.3em] px-2">
+            <span className="">ENGINE_V3</span>
+            <div className="flex gap-4">
+               <span className="hover:text-white transition-colors cursor-pointer">INFO</span>
+               <span className="hover:text-white transition-colors cursor-pointer">AUDIT</span>
+            </div>
+          </div>
         </div>
       )}
     </div>
