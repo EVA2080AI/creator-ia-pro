@@ -46,24 +46,27 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-white/5 glass">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2.5 sm:px-6">
+      <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
           {/* Logo */}
           <button
             onClick={() => navigate("/dashboard")}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            aria-label="ir al inicio"
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-card/40 glow-primary shadow-lg shadow-primary/20">
-              <Sparkles className="h-4.5 w-4.5 text-primary" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff0071] shadow-lg shadow-[#ff0071]/20 group-hover:scale-105 transition-transform">
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <span className="text-base font-bold hidden sm:inline font-display">
-              <span className="gradient-text tracking-tight">Creator IA</span>
-              <span className="text-foreground tracking-tight"> Pro</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold hidden sm:inline text-slate-900 leading-none lowercase tracking-tight">
+                creator_ia <span className="text-[#ff0071]">pro</span>
+              </span>
+              <span className="text-[8px] font-bold text-slate-300 uppercase tracking-widest mt-1 hidden sm:inline">Pulse V6.2</span>
+            </div>
           </button>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-0.5">
+          <nav className="hidden md:flex items-center gap-1">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path ||
                 (item.path === "/tools" && location.pathname.startsWith("/apps"));
@@ -73,54 +76,48 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate(item.path)}
-                  className={`shrink-0 h-8 px-2.5 ${
-                    isActive ? "text-foreground bg-muted/50" : "text-muted-foreground"
+                  className={`shrink-0 h-9 px-4 rounded-full text-[11px] font-bold lowercase tracking-normal transition-all ${
+                    isActive ? "text-white bg-[#ff0071] shadow-md shadow-[#ff0071]/20 hover:bg-[#e60066] hover:text-white" : "text-slate-400 hover:text-slate-900 hover:bg-slate-50"
                   }`}
                 >
-                  <item.icon className="h-3.5 w-3.5 mr-1" />
-                  <span className="text-xs">{item.label}</span>
-                </Button>
-              );
-            })}
-            {adminItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <Button
-                  key={item.path}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate(item.path)}
-                  className={`shrink-0 h-8 px-2.5 ${
-                    isActive ? "text-foreground bg-muted/50" : "text-muted-foreground"
-                  }`}
-                >
-                  <item.icon className="h-3.5 w-3.5 mr-1" />
-                  <span className="text-xs">{item.label}</span>
+                  <item.icon className="h-4 w-4 mr-2" />
+                  {item.label}
                 </Button>
               );
             })}
           </nav>
 
-          {/* Credits + Mobile menu + Sign out */}
-          <div className="flex items-center gap-2">
+          {/* Credits + Profile */}
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/pricing")}
-              className="flex items-center gap-1.5 rounded-full border border-border bg-muted/50 px-3 py-1 text-xs hover:bg-muted transition-colors"
+              className="flex items-center gap-2 rounded-full border border-slate-100 bg-slate-50 px-4 py-1.5 text-[11px] font-bold text-slate-600 hover:bg-white hover:border-[#ff0071]/20 hover:text-[#ff0071] transition-all shadow-sm"
             >
-              <Coins className="h-3 w-3 text-gold" />
-              <span className="text-gold font-semibold font-mono">
+              <Coins className="h-3.5 w-3.5 text-[#ff0071]" />
+              <span className="font-mono">
                 {profile?.credits_balance ?? 0}
               </span>
             </button>
-            <Button variant="ghost" size="sm" onClick={onSignOut} className="text-muted-foreground h-8 w-8 p-0 hidden md:flex">
-              <LogOut className="h-3.5 w-3.5" />
+            
+            <div className="h-4 w-px bg-slate-100 mx-1" />
+
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={onSignOut} 
+              aria-label="cerrar sesión"
+              className="text-slate-300 hover:text-[#ff0071] hover:bg-[#ff0071]/5 h-9 w-9 p-0 rounded-full hidden md:flex transition-all"
+            >
+              <LogOut className="h-4 w-4" />
             </Button>
+            
             {/* Mobile hamburger */}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden text-muted-foreground h-8 w-8 p-0"
+              aria-label={mobileOpen ? "cerrar menú" : "abrir menú"}
+              className="md:hidden text-slate-400 hover:text-slate-900 h-9 w-9 p-0 rounded-xl bg-slate-50"
             >
               {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
             </Button>
@@ -130,33 +127,33 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
       {/* Mobile Nav Overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <nav className="absolute top-[57px] left-0 right-0 border-b border-border bg-card p-4 space-y-1 animate-fade-in z-50">
+        <div className="fixed inset-0 z-40 md:hidden bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="absolute inset-0" onClick={() => setMobileOpen(false)} />
+          <nav className="absolute top-[68px] left-4 right-4 border border-slate-100 bg-white/95 backdrop-blur-3xl p-4 rounded-3xl space-y-1.5 shadow-[0_20px_60px_rgba(0,0,0,0.15)] animate-in slide-in-from-top-4 duration-500 z-50">
             {allItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <button
                   key={item.path}
                   onClick={() => handleNav(item.path)}
-                  className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
+                  className={`flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-xs font-bold lowercase transition-all ${
                     isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      ? "bg-[#ff0071] text-white shadow-lg shadow-[#ff0071]/20"
+                      : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
                   }`}
                 >
-                  <item.icon className="h-4 w-4" />
+                  <item.icon className="h-4.5 w-4.5" />
                   {item.label}
                 </button>
               );
             })}
-            <div className="border-t border-border pt-2 mt-2">
+            <div className="border-t border-slate-50 pt-2 mt-2">
               <button
                 onClick={() => { onSignOut(); setMobileOpen(false); }}
-                className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors"
+                className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-xs font-bold lowercase text-destructive hover:bg-destructive/5 transition-all"
               >
-                <LogOut className="h-4 w-4" />
-                Cerrar sesión
+                <LogOut className="h-4.5 w-4.5" />
+                cerrar sesión
               </button>
             </div>
           </nav>

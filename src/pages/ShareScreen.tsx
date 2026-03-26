@@ -169,39 +169,39 @@ export default function ShareScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-white text-slate-900 lowercase font-sans">
       <AppHeader userId={user?.id} onSignOut={signOut} />
       
       <main className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-6 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
+          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} aria-label="volver al dashboard" className="hover:bg-slate-50 rounded-xl">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold">Share<span className="gradient-text">Screen</span> Pro</h1>
-            <p className="text-sm text-muted-foreground">Extiende tu espacio de trabajo a cualquier dispositivo P2P</p>
+            <h1 className="text-4xl font-bold tracking-tight text-slate-900">sharescreen <span className="text-[#ff0071]">pro</span></h1>
+            <p className="text-sm font-medium text-slate-400">extiende tu espacio de trabajo a cualquier dispositivo p2p</p>
           </div>
         </div>
 
         {/* MODO SELECTOR */}
         {!mode ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-            <button onClick={initHost} className="flex flex-col items-center gap-4 p-8 rounded-2xl border border-border bg-card node-shadow hover:border-primary/50 transition-all cursor-pointer group text-left">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Monitor className="h-8 w-8 text-primary" />
+            <button onClick={initHost} className="flex flex-col items-center gap-6 p-10 rounded-[2.5rem] border border-slate-100 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.02)] hover:border-[#ff0071]/20 hover:shadow-2xl hover:shadow-[#ff0071]/5 transition-all cursor-pointer group">
+              <div className="w-16 h-16 rounded-2xl bg-[#ff0071]/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-[#ff0071]/5">
+                <Monitor className="h-8 w-8 text-[#ff0071]" />
               </div>
               <div className="text-center">
-                <h3 className="text-xl font-bold">Modo HOST <span className="text-xs bg-gold/20 text-gold px-2 py-1 rounded ml-2">1 Crédito</span></h3>
-                <p className="text-sm text-muted-foreground mt-2">Compartir pantalla desde este dispositivo. Genera un código para el espectador.</p>
+                <h3 className="text-2xl font-bold text-slate-800">modo host <span className="text-[10px] bg-[#ff0071]/10 text-[#ff0071] px-3 py-1 rounded-full ml-2 lowercase font-bold tracking-tight">1 crédito</span></h3>
+                <p className="text-sm text-slate-400 font-medium mt-3 leading-relaxed">compartir pantalla desde este dispositivo. genera un código para el espectador.</p>
               </div>
             </button>
-            <button onClick={initViewer} className="flex flex-col items-center gap-4 p-8 rounded-2xl border border-border bg-card node-shadow hover:border-accent/50 transition-all cursor-pointer group text-left">
-               <div className="w-16 h-16 rounded-full bg-accent/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Smartphone className="h-8 w-8 text-accent" />
+            <button onClick={initViewer} className="flex flex-col items-center gap-6 p-10 rounded-[2.5rem] border border-slate-100 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.02)] hover:border-[#ff0071]/20 hover:shadow-2xl hover:shadow-[#ff0071]/5 transition-all cursor-pointer group">
+               <div className="w-16 h-16 rounded-2xl bg-slate-900/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                <Smartphone className="h-8 w-8 text-slate-900" />
               </div>
               <div className="text-center">
-                <h3 className="text-xl font-bold">Modo VIEWER <span className="text-xs bg-emerald-500/20 text-emerald-500 px-2 py-1 rounded ml-2">Gratis</span></h3>
-                <p className="text-sm text-muted-foreground mt-2">Ver la pantalla de otro dispositivo. Requiere ingresar el código del Host.</p>
+                <h3 className="text-2xl font-bold text-slate-800">modo viewer <span className="text-[10px] bg-slate-100 text-slate-400 px-3 py-1 rounded-full ml-2 lowercase font-bold tracking-tight">gratis</span></h3>
+                <p className="text-sm text-slate-400 font-medium mt-3 leading-relaxed">ver la pantalla de otro dispositivo. requiere ingresar el código del host.</p>
               </div>
             </button>
           </div>

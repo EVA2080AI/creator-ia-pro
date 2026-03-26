@@ -145,7 +145,7 @@ const Pricing = () => {
       const tier = STRIPE_TIERS[plan.stripeTier];
       const data = await stripeService.createCheckout(tier.price_id);
       if (data?.url) {
-        window.open(data.url, "_blank");
+        window.location.href = data.url;
       } else {
         throw new Error("No checkout URL returned");
       }
@@ -168,7 +168,7 @@ const Pricing = () => {
     try {
       const data = await stripeService.buyCredits(pack.price_id);
       if (data?.url) {
-        window.open(data.url, "_blank");
+        window.location.href = data.url;
       } else {
         throw new Error("No checkout URL returned");
       }
@@ -181,80 +181,87 @@ const Pricing = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-white overflow-hidden text-slate-900 font-sans lowercase">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full bg-primary/8 blur-[180px]" />
-        <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-accent/6 blur-[150px]" />
+        <div className="absolute -top-40 left-1/4 h-[700px] w-[700px] rounded-full bg-[#ff0071]/3 blur-[120px]" />
+        <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-slate-50 blur-[150px]" />
       </div>
 
-      <header className="relative z-10 flex items-center justify-between px-6 py-4 sm:px-8">
-        <button onClick={() => navigate("/")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="h-4 w-4" />
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 border border-primary/20">
-              <Sparkles className="h-5 w-5 text-primary" />
+      <header className="relative z-10 flex items-center justify-between px-8 py-6 sm:px-12 bg-white/50 backdrop-blur-md border-b border-slate-50">
+        <button onClick={() => navigate("/")} className="flex items-center gap-4 text-slate-400 hover:text-slate-900 transition-all group">
+          <div className="h-10 w-10 flex items-center justify-center rounded-2xl bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:border-[#ff0071]/20 transition-all">
+            <ArrowLeft className="h-5 w-5" />
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff0071] shadow-xl shadow-[#ff0071]/20">
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-bold">
-              <span className="gradient-text">Creator IA</span>
-              <span className="text-foreground"> Pro</span>
-            </span>
+            <div className="flex flex-col text-left">
+              <span className="text-base font-bold text-slate-900 tracking-tight lowercase">
+                creator_ia <span className="text-[#ff0071]">pro</span>
+              </span>
+              <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">V6.2 Pulse</span>
+            </div>
           </div>
         </button>
-        <Button onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")} variant="outline" className="border-border text-foreground hover:bg-muted rounded-full">
-          {isLoggedIn ? "Ir al Dashboard" : "Iniciar Sesión"}
+        <Button onClick={() => navigate(isLoggedIn ? "/dashboard" : "/auth")} variant="outline" className="border-slate-100 text-slate-600 hover:bg-slate-50 rounded-2xl font-bold lowercase h-11 px-6 shadow-sm active:scale-95 transition-all">
+          {isLoggedIn ? "ir al dashboard" : "iniciar sesión"}
         </Button>
       </header>
 
-      <main className="relative z-10 flex flex-col items-center px-6 pt-12 pb-32">
-        <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 animate-fade-in px-4 py-1">Precios Transparentes V2.0</Badge>
-        <h1 className="text-5xl font-bold text-center md:text-7xl tracking-tight leading-tight">
-          <span className="text-foreground">Planes y </span>
-          <span className="textGradient uppercase font-display italic">Precios</span>
+      <main className="relative z-10 flex flex-col items-center px-8 pt-20 pb-40">
+        <Badge className="mb-6 bg-[#ff0071]/10 text-[#ff0071] border-transparent animate-fade-in px-5 py-1.5 rounded-full text-[10px] lowercase font-bold tracking-tight">precios_transparentes_v6.2</Badge>
+        <h1 className="text-6xl font-bold text-center md:text-8xl tracking-tight leading-none text-slate-900 lowercase">
+          planes y <span className="text-[#ff0071]">precios.</span>
         </h1>
-        <p className="mt-6 max-w-2xl text-center text-muted-foreground text-lg font-medium leading-relaxed">
-          Diseñado para creadores, optimizado para equipos. Elige la escala que mejor se adapte a tu visión creativa.
+        <p className="mt-8 max-w-2xl text-center text-slate-400 text-xl font-medium leading-relaxed lowercase">
+          diseñado para creadores, optimizado para equipos. elige la escala que mejor se adapte a tu visión creativa.
         </p>
 
-        <div className="mt-16 grid w-full max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-20 grid w-full max-w-7xl gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => (
             <div
               key={plan.name}
-              className={`relative flex flex-col rounded-2xl border bg-card/60 p-7 transition-all backdrop-blur-sm node-shadow hover:-translate-y-1 ${plan.accent}`}
+              className={`relative flex flex-col rounded-[3rem] border bg-white p-10 transition-all shadow-[0_10px_40px_rgba(0,0,0,0.02)] hover:shadow-2xl hover:shadow-[#ff0071]/5 hover:-translate-y-2 ${
+                plan.name === 'Pro' ? 'border-[#ff0071]/20 ring-1 ring-[#ff0071]/5' : 'border-slate-50'
+              }`}
             >
               {plan.badge && (
-                <span className={`absolute -top-3 left-6 rounded-full px-3 py-0.5 text-xs font-semibold ${
+                <span className={`absolute -top-4 left-10 rounded-full px-5 py-1.5 text-[10px] font-bold lowercase tracking-tight shadow-lg ${
                   plan.name === "Educación"
-                    ? "bg-accent text-accent-foreground"
+                    ? "bg-[#ff0071] text-white"
                     : plan.name === "Business"
-                    ? "bg-gold text-background"
-                    : "bg-primary text-primary-foreground"
+                    ? "bg-slate-900 text-white"
+                    : "bg-[#ff0071] text-white"
                 }`}>
-                  {plan.badge}
+                  {plan.badge === "Más Popular" ? "recomendado" : plan.badge.toLowerCase()}
                 </span>
               )}
 
-              <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-xl ${plan.iconClass}`}>
-                <plan.icon className="h-5 w-5" />
+              <div className={`mb-6 flex h-14 w-14 items-center justify-center rounded-[1.5rem] shadow-sm ${
+                plan.name === 'Pro' ? 'bg-[#ff0071] text-white' : 'bg-slate-50 text-slate-400'
+              }`}>
+                <plan.icon className="h-7 w-7" />
               </div>
 
-              <h2 className="text-xl font-bold text-foreground">{plan.name}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
+              <h2 className="text-2xl font-bold text-slate-900 lowercase">{plan.name}</h2>
+              <p className="mt-2 text-sm text-slate-400 font-medium lowercase leading-relaxed line-clamp-2">{plan.description}</p>
 
-              <div className="mt-5 flex items-baseline gap-2">
-                <span className="text-5xl font-bold text-foreground tracking-tighter">{plan.price}</span>
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{plan.period}</span>
+              <div className="mt-8 flex items-baseline gap-2">
+                <span className="text-6xl font-bold text-slate-900 tracking-tighter">{plan.price}</span>
+                <span className="text-xs font-bold text-slate-300 uppercase tracking-widest">{plan.period}</span>
               </div>
               
-              <div className="mt-4 flex items-center gap-2 rounded-xl bg-white/5 border border-white/5 px-4 py-2 text-sm font-bold text-gold shadow-inner">
-                <Sparkles className="h-4 w-4" />
+              <div className="mt-6 flex items-center gap-3 rounded-2xl bg-slate-50 border border-slate-50 px-5 py-3 text-xs font-bold text-[#ff0071] lowercase tracking-tight">
+                <Sparkles className="h-4.5 w-4.5" />
                 {plan.creditsLabel}
               </div>
 
-              <ul className="mt-5 flex-1 space-y-2.5">
+              <ul className="mt-8 flex-1 space-y-3.5">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                    {feature}
+                  <li key={feature} className="flex items-start gap-3 text-[13px] text-slate-500 font-medium lowercase">
+                    <Check className="mt-1 h-4 w-4 shrink-0 text-[#ff0071] opacity-40" />
+                    {feature.toLowerCase()}
                   </li>
                 ))}
               </ul>
@@ -262,104 +269,77 @@ const Pricing = () => {
               <Button
                 onClick={() => handleSubscribe(plan)}
                 disabled={loadingPlan === plan.key}
-                className={`mt-7 w-full rounded-full ${
+                className={`mt-10 h-14 w-full rounded-2xl font-bold lowercase text-sm shadow-xl transition-all active:scale-95 ${
                   plan.name === "Pro"
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                    ? "bg-[#ff0071] text-white hover:bg-[#e60066] shadow-[#ff0071]/20"
                     : plan.name === "Business"
-                    ? "bg-gold/90 text-background hover:bg-gold"
-                    : plan.name === "Educación"
-                    ? "bg-accent text-accent-foreground hover:bg-accent/90"
-                    : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                    ? "bg-slate-900 text-white hover:bg-black shadow-slate-900/10"
+                    : "bg-slate-50 text-slate-600 hover:bg-slate-100 shadow-none border border-slate-100"
                 }`}
               >
                 {loadingPlan === plan.key ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
-                  plan.cta
+                  plan.cta.toLowerCase()
                 )}
               </Button>
             </div>
           ))}
         </div>
-
-        {/* Credit Packs */}
-        <div className="mt-20 w-full max-w-4xl">
-          <div className="text-center mb-10">
-            <Badge className="mb-4 bg-gold/10 text-gold border-gold/20 hover:bg-gold/10">
-              <Package className="mr-1 h-3 w-3" />
-              Pago único
-            </Badge>
-            <h2 className="text-4xl font-bold text-foreground md:text-5xl tracking-tight">
-              ¿Necesitas más <span className="textGradient">créditos</span>?
-            </h2>
-            <p className="mt-4 text-muted-foreground text-lg font-medium">
-              Potencia tu cuenta con paquetes adicionales. Sin compromisos, solo creación.
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-3">
-            {CREDIT_PACKS.map((pack) => (
-              <div
-                key={pack.id}
-                className={`relative rounded-2xl border bg-card/60 p-6 backdrop-blur-sm node-shadow transition-all hover:-translate-y-1 ${
-                  pack.popular
-                    ? "border-gold/50 ring-1 ring-gold/20"
-                    : "border-border hover:border-gold/30"
-                }`}
-              >
-                {pack.popular && (
-                  <span className="absolute -top-3 left-6 rounded-full bg-gold px-3 py-0.5 text-xs font-semibold text-background">
-                    Mejor valor
-                  </span>
-                )}
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gold/10 mb-4">
-                  <Coins className="h-5 w-5 text-gold" />
-                </div>
-                <h3 className="text-lg font-bold text-foreground">{pack.name}</h3>
-                <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-3xl font-bold text-foreground">{pack.price}</span>
-                  <span className="text-sm text-muted-foreground">único</span>
-                </div>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {pack.credits} créditos añadidos a tu balance actual
-                </p>
-                <Button
-                  onClick={() => handleBuyCredits(pack)}
-                  disabled={loadingPack === pack.id}
-                  className="mt-5 w-full rounded-full bg-gold/90 text-background hover:bg-gold gap-2"
-                >
-                  {loadingPack === pack.id ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Coins className="h-4 w-4" />
-                      Comprar
-                    </>
-                  )}
-                </Button>
-              </div>
-            ))}
-          </div>
+        
+        {/* Credit Packs Section */}
+        <div className="mt-40 w-full max-w-7xl">
+           <div className="flex flex-col items-center mb-16">
+              <Badge className="mb-4 bg-amber-500/10 text-amber-500 border-transparent px-5 py-1.5 rounded-full text-[10px] lowercase font-bold tracking-tight">recargas_instantáneas</Badge>
+              <h2 className="text-4xl font-bold tracking-tight text-slate-900 lowercase">packs de créditos.</h2>
+              <p className="mt-4 text-slate-400 font-medium text-lg lowercase">recarga tu balance sin compromisos ni suscripciones.</p>
+           </div>
+           
+           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {CREDIT_PACKS.map((pack) => (
+                 <div key={pack.id} className="group relative flex flex-col items-center rounded-[2.5rem] border border-slate-50 bg-white p-8 transition-all hover:bg-slate-50 hover:border-[#ff0071]/10 shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+                    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500 group-hover:scale-110 transition-transform">
+                       <Coins className="h-7 w-7" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-900 lowercase">{pack.name}</h3>
+                    <p className="mt-1 text-xs font-bold text-slate-400 uppercase tracking-widest">{pack.credits} créditos</p>
+                    
+                    <div className="mt-6 flex items-baseline gap-1">
+                       <span className="text-4xl font-bold text-slate-900 tracking-tighter">${pack.price}</span>
+                       <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">USD</span>
+                    </div>
+                    
+                    <Button 
+                       onClick={() => handleBuyCredits(pack)}
+                       disabled={loadingPack === pack.id}
+                       className="mt-8 w-full h-12 bg-white border border-slate-100 text-slate-600 hover:bg-[#ff0071] hover:text-white hover:border-[#ff0071] rounded-2xl font-bold lowercase text-xs transition-all shadow-sm active:scale-95"
+                       aria-label={`comprar ${pack.name}`}
+                    >
+                       {loadingPack === pack.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "comprar ahora"}
+                    </Button>
+                 </div>
+              ))}
+           </div>
         </div>
 
         {/* FAQ */}
-        <div className="mt-24 w-full max-w-3xl">
-          <h2 className="text-center text-2xl font-bold text-foreground mb-8">
-            Preguntas <span className="gradient-text">frecuentes</span>
+        <div className="mt-32 w-full max-w-4xl">
+          <h2 className="text-center text-3xl font-bold text-slate-900 mb-12 lowercase tracking-tight">
+            preguntas <span className="text-[#ff0071]">frecuentes.</span>
           </h2>
-          <div className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-6">
             {faqs.map((faq) => (
-              <div key={faq.q} className="rounded-2xl border border-border bg-card/60 p-5 backdrop-blur-sm">
-                <h3 className="text-sm font-semibold text-foreground">{faq.q}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{faq.a}</p>
+              <div key={faq.q} className="rounded-[2.5rem] border border-slate-50 bg-white p-8 shadow-sm hover:border-[#ff0071]/10 transition-all">
+                <h3 className="text-[15px] font-bold text-slate-800 lowercase">{faq.q.toLowerCase()}</h3>
+                <p className="mt-3 text-sm text-slate-400 font-medium lowercase leading-relaxed">{faq.a.toLowerCase()}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="mt-16 text-sm text-muted-foreground text-center max-w-md">
-          ¿Necesitas un plan personalizado? Escríbenos a{" "}
-          <span className="text-primary">soporte@creatoria.pro</span>
+        <p className="mt-20 text-[11px] font-bold text-slate-300 text-center max-w-md lowercase bg-slate-50 px-6 py-3 rounded-full">
+          ¿necesitas un plan personalizado? escríbenos a{" "}
+          <span className="text-[#ff0071]">soporte@creatoria.pro</span>
         </p>
       </main>
     </div>

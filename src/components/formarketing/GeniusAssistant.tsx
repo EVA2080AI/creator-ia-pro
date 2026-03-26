@@ -4,17 +4,17 @@ import { Button } from '@/components/ui/button';
 import { aiService } from '@/services/ai-service';
 import { toast } from 'sonner';
 
-export const GeniusAssistant = () => {
+export const GeniusAssistant = ({ onAction }: { onAction: (action: string, data: any) => void }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<{ role: 'user' | 'assistant', content: string }[]>([
-        { role: 'assistant', content: 'Hola, soy Genius. ¿Cómo puedo ayudarte a optimizar tu flujo de marketing hoy?' }
+        { role: 'assistant', content: 'hola, soy genius. ¿cómo puedo ayudarte a crear nuevos flujos de marketing hoy?' }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        console.log("GeniusAssistant V5.3 Rendered [Industrial]");
+        console.log("GeniusAssistant V6.2 Pulse [Autonomous]");
     }, []);
 
     useEffect(() => {
@@ -32,15 +32,46 @@ export const GeniusAssistant = () => {
         setIsLoading(true);
 
         try {
+            const systemPrompt = `
+Eres Genius AI, el copiloto experto en Formarketing Studio. 
+Tu objetivo es ayudar al usuario a crear flujos de marketing visuales en un canvas de React Flow.
+
+HABILIDADES ESPECIALES:
+Puedes ejecutar comandos en el canvas devolviendo un bloque JSON al final de tu respuesta.
+Formatos de comando soportados:
+1. Añadir nodo: {"action": "add_node", "data": {"type": "characterBreakdown|modelView|videoModel|layoutBuilder|campaignManager", "data": {"title": "...", "prompt": "..."}}}
+2. Conectar nodos: {"action": "connect_nodes", "data": {"source": "node_id_1", "target": "node_id_2"}}
+3. Aplicar template: {"action": "apply_template", "data": {"template": "meta_ads|landing_page|social_media"}}
+
+REGLAS:
+- Si el usuario pide crear algo, SIEMPRE propón añadir nodos.
+- Mantén tus respuestas en minúsculas (estética Pulse).
+- Sé breve y profesional.
+- Si vas a añadir un nodo, explica brevemente por qué.
+`;
+
             const response = await aiService.processAction({
                 action: 'chat',
-                prompt: `Actúa como un experto en marketing digital y automatización. Ayuda al usuario con su flujo de trabajo en Formarketing Studio. Pregunta: ${userMsg}`,
+                prompt: `${systemPrompt}\n\nUsuario: ${userMsg}`,
                 model: 'gemini-3-flash'
             });
 
-            setMessages(prev => [...prev, { role: 'assistant', content: response.text || 'No pude procesar eso en este momento lo siento.' }]);
+            const content = response.text || 'no pude procesar eso.';
+            
+            // Parse for commands
+            const jsonMatch = content.match(/\{.*"action".*\}/s);
+            if (jsonMatch && onAction) {
+                try {
+                    const commandData = JSON.parse(jsonMatch[0]);
+                    onAction(commandData.action, commandData.data);
+                } catch (e) {
+                    console.error("Error parsing assistant command:", e);
+                }
+            }
+
+            setMessages(prev => [...prev, { role: 'assistant', content: content.replace(/\{.*"action".*\}/s, '').trim() || 'comando ejecutado.' }]);
         } catch (error: any) {
-            toast.error("Error en el asistente: " + error.message);
+            toast.error("error en el asistente: " + error.message);
         } finally {
             setIsLoading(false);
         }
@@ -48,47 +79,44 @@ export const GeniusAssistant = () => {
 
     return (
         <div className="fixed bottom-32 right-8 z-[99999] isolation-auto">
-            {/* Bubble Trigger */}
+            {/* Pulse Trigger */}
             {!isOpen && (
                 <button 
                   onClick={() => setIsOpen(true)}
-                  className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-primary shadow-2xl shadow-primary/40 hover:scale-110 transition-all duration-300"
+                  className="group relative flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ff0071] shadow-2xl shadow-[#ff0071]/30 hover:scale-110 active:scale-95 transition-all duration-300 ring-4 ring-white"
                 >
-                    <div className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
-                    <Sparkles className="h-6 w-6 text-primary-foreground group-hover:rotate-12 transition-transform" />
+                    <div className="absolute inset-0 rounded-2xl bg-[#ff0071] animate-ping opacity-20" />
+                    <Sparkles className="h-6 w-6 text-white group-hover:rotate-12 transition-transform" />
                 </button>
             )}
 
-            {/* Chat Panel */}
+            {/* Pulse Chat Panel */}
             {isOpen && (
-                <div className="flex flex-col w-[320px] h-[460px] bg-[#0a0a0b]/98 border border-white/10 rounded-[2rem] shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-                    {/* Header */}
-                    <div className="px-6 py-5 border-b border-white/5 bg-gradient-to-r from-primary/10 to-transparent flex items-center justify-between">
-                        <div className="flex items-center gap-2.5">
-                            <div className="bg-primary/20 p-1.5 rounded-lg">
-                                <Bot className="h-4 w-4 text-primary" />
+                <div className="flex flex-col w-[320px] h-[480px] bg-white/95 backdrop-blur-2xl border border-slate-100 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.12)] overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+                    {/* V6.2 Pulse Header */}
+                    <div className="pulse-node-header justify-between py-4 px-5">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-xl bg-[#ff0071]/10">
+                               <Bot className="h-4 w-4 text-[#ff0071]" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-[11px] font-black uppercase tracking-widest text-white/90">Genius AI</span>
-                                <div className="flex items-center gap-1">
-                                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[9px] font-bold text-emerald-500/80 uppercase tracking-widest">E-Industrial Mode</span>
-                                </div>
+                                <span className="text-[11px] font-bold lowercase tracking-tight text-slate-800">genius_ai</span>
+                                <span className="text-[9px] font-medium text-slate-400 lowercase">active_now</span>
                             </div>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                            <X className="h-4 w-4 text-muted-foreground" />
+                        <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-slate-50 rounded-xl transition-colors">
+                            <X className="h-4 w-4 text-slate-300 hover:text-slate-800" />
                         </button>
                     </div>
 
                     {/* Chat Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide" ref={scrollRef}>
+                    <div className="flex-1 overflow-y-auto p-5 space-y-4 scrollbar-hide" ref={scrollRef}>
                         {messages.map((msg, i) => (
                             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[90%] px-3.5 py-2.5 rounded-xl text-[11px] leading-relaxed shadow-sm font-medium ${
+                                <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-xs leading-relaxed shadow-sm font-medium ${
                                     msg.role === 'user' 
-                                    ? 'bg-primary/90 text-primary-foreground' 
-                                    : 'bg-white/5 border border-white/5 text-foreground/80'
+                                    ? 'bg-slate-900 text-white rounded-tr-none' 
+                                    : 'bg-[#ff0071]/[0.03] border border-[#ff0071]/5 text-slate-700 rounded-tl-none'
                                 }`}>
                                     {msg.content}
                                 </div>
@@ -97,31 +125,31 @@ export const GeniusAssistant = () => {
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="px-4 pb-2 flex gap-1.5 overflow-x-auto scrollbar-hide">
+                    <div className="px-5 pb-3 flex gap-2 overflow-x-auto scrollbar-hide">
                         <button 
-                          onClick={() => setInput("Optimizar flujo")}
-                          className="whitespace-nowrap px-2.5 py-1 rounded-full border border-white/5 bg-white/5 text-[8px] font-black uppercase tracking-widest text-muted-foreground hover:border-primary/40 hover:text-primary transition-all"
+                          onClick={() => setInput("optimizar flujo")}
+                          className="whitespace-nowrap px-3.5 py-1.5 rounded-full bg-[#ff0071]/[0.05] border border-[#ff0071]/10 text-[10px] font-bold lowercase tracking-tight text-[#ff0071] hover:bg-[#ff0071] hover:text-white transition-all shadow-sm shadow-[#ff0071]/10"
                         >
-                            <Zap className="w-2 h-2 inline mr-0.5" /> Optimizar
+                            <Zap className="w-2.5 h-2.5 inline mr-1" /> optimizar flujo
                         </button>
                     </div>
 
                     {/* Input */}
-                    <div className="p-4 pt-1">
+                    <div className="p-5 pt-2 border-t border-slate-50 bg-white">
                         <div className="relative group">
                             <input 
                               value={input}
                               onChange={(e) => setInput(e.target.value)}
                               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                              placeholder="Pregunta a Genius..."
-                              className="w-full bg-[#161618] border border-white/5 rounded-xl px-4 py-2.5 pr-12 text-[11px] focus:outline-none focus:border-primary/50 transition-all placeholder:text-muted-foreground/30"
+                              placeholder="mensaje..."
+                              className="w-full bg-slate-50 border border-transparent rounded-2xl px-5 py-3.5 pr-14 text-xs font-medium focus:outline-none focus:bg-white focus:border-[#ff0071]/20 transition-all placeholder:text-slate-300"
                             />
                             <button 
                               onClick={handleSend}
                               disabled={isLoading || !input.trim()}
-                              className="absolute right-1.5 top-1.5 p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-0 transition-all"
+                              className="absolute right-2 top-2 p-2.5 rounded-xl bg-[#ff0071] text-white hover:bg-[#e60066] disabled:opacity-0 shadow-lg shadow-[#ff0071]/20 transition-all active:scale-95"
                             >
-                                <Send className="h-3.5 w-3.5" />
+                                <Send className="h-4 w-4" />
                             </button>
                         </div>
                     </div>

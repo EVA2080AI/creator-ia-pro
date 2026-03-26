@@ -52,82 +52,87 @@ const Index = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
-      {/* Ambient blurs */}
+    <div className="min-h-screen bg-white overflow-hidden text-slate-900 font-sans">
+      {/* Ambient blurs - Pulse Magenta */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full bg-primary/8 blur-[180px]" />
-        <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-accent/6 blur-[150px]" />
-        <div className="absolute top-1/3 right-1/3 h-[300px] w-[300px] rounded-full bg-primary/5 blur-[120px]" />
+        <div className="absolute -top-40 left-1/4 h-[700px] w-[700px] rounded-full bg-[#ff0071]/3 blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-slate-50 blur-[100px]" />
       </div>
 
       {/* Nav */}
-      <header className="relative z-10 flex items-center justify-between px-6 py-4 sm:px-8">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 border border-primary/20 glow-primary">
-            <Sparkles className="h-5 w-5 text-primary" />
+      <header className="relative z-10 flex items-center justify-between px-8 py-6 sm:px-12">
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff0071] shadow-xl shadow-[#ff0071]/20">
+            <Sparkles className="h-5 w-5 text-white" />
           </div>
-          <span className="text-lg font-bold tracking-tight">
-            <span className="gradient-text">Creator IA</span>
-            <span className="text-foreground"> Pro</span>
-          </span>
+          <div className="flex flex-col">
+            <span className="text-base font-bold text-slate-900 tracking-tight lowercase">
+              creator_ia <span className="text-[#ff0071]">pro</span>
+            </span>
+            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">V6.2 Pulse</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-muted-foreground hover:text-foreground hidden sm:flex text-sm">
-            Precios
+        <div className="flex items-center gap-4">
+          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-slate-400 hover:text-[#ff0071] hover:bg-[#ff0071]/5 hidden sm:flex text-sm font-bold lowercase">
+            precios
           </Button>
-          <Button onClick={() => navigate("/auth")} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6">
-            Empezar Gratis
+          <Button onClick={() => navigate("/auth")} className="bg-[#ff0071] text-white hover:bg-[#e60066] rounded-full px-8 h-12 shadow-xl shadow-[#ff0071]/20 font-bold lowercase tracking-normal active:scale-95 transition-all">
+            empezar gratis
           </Button>
         </div>
       </header>
 
-      <main className="relative z-10 flex flex-col items-center px-6 pt-20 pb-32">
-        {/* Badge */}
-        <div className="mb-8 flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-5 py-2 text-xs text-primary font-medium animate-fade-in">
-          <Zap className="h-3.5 w-3.5" />
-          Disponible en Windows, macOS y Android
+      <main className="relative z-10 flex flex-col items-center px-8 pt-24 pb-40">
+        {/* Pulse Badge */}
+        <div className="mb-10 flex items-center gap-3 rounded-full border border-slate-100 bg-slate-50/50 px-6 py-2.5 text-[11px] text-slate-500 font-bold lowercase animate-in fade-in slide-in-from-bottom-2 duration-700">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse" />
+          disponible en windows, macos y android
         </div>
 
         {/* Hero */}
-        <h1 className="max-w-4xl text-center text-5xl font-bold leading-[1.08] tracking-tight animate-fade-in md:text-7xl lg:text-8xl">
-          <span className="text-foreground">Crea con </span>
-          <span className="gradient-text">IA</span>
+        <h1 className="max-w-5xl text-center text-6xl font-bold leading-[1.05] tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-1000 md:text-8xl lg:text-9xl text-slate-900 lowercase">
+          crea con <span className="text-[#ff0071]">ia</span>
           <br />
-          <span className="text-foreground">sin límites</span>
+          <span className="text-slate-200">sin límites.</span>
         </h1>
 
-        <p className="mt-8 max-w-2xl text-center text-lg text-muted-foreground animate-fade-in leading-relaxed">
-          Genera imágenes, mejora fotos, crea textos de marketing, logos y flows visuales.
-          <strong className="text-foreground"> 12+ herramientas profesionales</strong> en una sola plataforma.
+        <p className="mt-10 max-w-2xl text-center text-xl text-slate-400 lowercase font-medium animate-in fade-in slide-in-from-bottom-6 duration-1000 leading-relaxed">
+          genera imágenes, mejora fotos, crea textos de marketing, logos y flows visuales.
+          <strong className="text-slate-900 font-bold"> 12+ herramientas profesionales</strong> en una sola plataforma.
         </p>
 
-        <div className="mt-10 flex flex-col sm:flex-row gap-3 animate-fade-in">
-          <Button onClick={() => navigate("/auth")} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 text-base px-10 rounded-full h-12">
-            Crear Cuenta Gratis
-            <ArrowRight className="h-4 w-4" />
+        <div className="mt-12 flex flex-col sm:flex-row gap-5 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <Button onClick={() => navigate("/auth")} size="lg" className="bg-[#ff0071] text-white hover:bg-[#e60066] gap-3 text-lg px-12 rounded-[2rem] h-16 shadow-2xl shadow-[#ff0071]/20 font-bold lowercase active:scale-95 transition-all">
+            crear cuenta gratis
+            <ArrowRight className="h-5 w-5" />
           </Button>
-          <Button onClick={() => navigate("/descargar")} size="lg" variant="outline" className="border-border text-foreground hover:bg-muted gap-2 text-base px-8 rounded-full h-12">
-            <Download className="h-4 w-4" />
-            Descargar App
+          <Button onClick={() => navigate("/descargar")} size="lg" variant="outline" className="border-slate-100 text-slate-600 hover:bg-slate-50 gap-3 text-lg px-10 rounded-[2rem] h-16 font-bold lowercase shadow-sm transition-all">
+            <Download className="h-5 w-5" />
+            descargar app
           </Button>
         </div>
 
         {/* Stats */}
-        <div className="mt-20 grid grid-cols-2 gap-10 sm:grid-cols-4 animate-fade-in">
+        <div className="mt-28 grid grid-cols-2 gap-16 sm:grid-cols-4 animate-in fade-in duration-1000">
           {[
-            { value: "12+", label: "Herramientas IA" },
-            { value: "100", label: "Créditos Gratis" },
-            { value: "4x", label: "Upscale Máximo" },
-            { value: "3", label: "Plataformas" },
+            { value: "12+", label: "herramientas ia" },
+            { value: "100", label: "créditos gratis" },
+            { value: "4x", label: "upscale máximo" },
+            { value: "3", label: "plataformas" },
           ].map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-5xl font-bold gradient-text">{s.value}</p>
-              <p className="mt-2 text-xs text-muted-foreground uppercase tracking-wider">{s.label}</p>
+            <div key={s.label} className="text-center group">
+              <p className="text-6xl font-bold text-slate-900 group-hover:text-[#ff0071] transition-colors duration-500">{s.value}</p>
+              <p className="mt-3 text-[10px] text-slate-300 font-bold uppercase tracking-[0.2em]">{s.label}</p>
             </div>
           ))}
         </div>
 
-        {/* Features Row */}
+        {/* Footer */}
+        <footer className="mt-40 w-full max-w-6xl border-t border-slate-50 pt-10 text-center text-[10px] text-slate-300 font-bold uppercase tracking-[0.2em] space-y-3">
+          <p>© {new Date().getFullYear()} creator ia pro • pulse engine v6.2</p>
+          <p className="opacity-40">plataforma de ia generativa para creadores del futuro 🚀</p>
+        </footer>
+       {/* Features Row */}
         <div className="mt-24 w-full max-w-5xl grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in">
           {features.map((f) => (
             <div key={f.title} className="rounded-2xl border border-border bg-card/50 p-5 text-center backdrop-blur-sm">

@@ -1,6 +1,6 @@
 import { memo, useState } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { Layout, Trash2, Globe, Smartphone, Monitor, Zap } from 'lucide-react';
+import { Layout, Trash2, Globe, Smartphone, Monitor, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -13,6 +13,7 @@ interface LayoutNodeData {
 const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) => {
   const { setNodes } = useReactFlow();
   const [platform, setPlatform] = useState(data.platform || 'web');
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const updateField = async (field: string, value: any) => {
     setNodes((nds) => 
@@ -43,85 +44,76 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
   };
 
   return (
-    <div className="group relative bg-[#0f0f0f]/95 border border-white/5 rounded-[1.5rem] p-0 w-[300px] shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in duration-300 isolation-auto">
-      {/* V5.3 Industrial Header */}
-      <div className="px-5 py-4 border-b border-white/5 bg-gradient-to-r from-blue-500/10 to-transparent flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-            <div className="bg-blue-500/20 p-2 rounded-xl shadow-inner group-hover:rotate-6 transition-transform">
-               <Layout className="w-4 h-4 text-blue-400" />
-            </div>
-            <div className="flex flex-col">
-              <input 
-                value={data.title || ""} 
-                onChange={(e) => updateField('title', e.target.value)}
-                className="bg-transparent border-none p-0 m-0 text-[10px] font-black uppercase tracking-tighter text-foreground/90 focus:outline-none w-32"
-                placeholder="APP/WEB LAYOUT"
-              />
-              <span className="text-[8px] font-black text-blue-500/40 uppercase tracking-[0.2em] mt-1">V5.4 COMPACT BUILDER</span>
-            </div>
+    <div className="group relative pulse-node w-[280px] animate-in zoom-in duration-200 nodrag shadow-xl">
+      {/* V6.2 Pulse Header */}
+      <div className="pulse-node-header justify-between gap-2">
+        <div className="flex items-center gap-2 overflow-hidden">
+            <Layout className="w-4 h-4 text-[#ff0071] shrink-0" />
+            <input 
+              value={data.title || ""} 
+              onChange={(e) => updateField('title', e.target.value)}
+              className="bg-transparent border-none p-0 m-0 text-[11px] font-bold lowercase tracking-tight text-slate-800 focus:outline-none w-full truncate"
+              placeholder="structure hub"
+            />
         </div>
-        <div className="flex items-center gap-1.5 font-bold">
-            <button 
-              onClick={() => (data as any).onExecute?.()}
-              className="p-2 rounded-lg bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white border border-blue-500/20 transition-all group/exec active:scale-95"
-            >
-               <Zap className="w-3.5 h-3.5 group-hover/exec:scale-110 transition-transform" />
-            </button>
-            <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 text-destructive rounded-lg transition-all">
-               <Trash2 className="w-3.5 h-3.5" />
-            </button>
+        <div className="flex items-center gap-1 shrink-0">
+          <button 
+            onClick={() => (data as any).onExecute?.()}
+            className="p-1 hover:bg-[#ff0071]/10 text-[#ff0071] rounded-md transition-all active:scale-95"
+          >
+             <Zap className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-slate-100 text-slate-400 rounded-md transition-all">
+             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+          <button onClick={deleteNode} className="p-1 hover:bg-destructive/5 text-destructive/30 hover:text-destructive rounded-md transition-all">
+             <Trash2 className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
-        {/* Platform Selector */}
-        <div className="flex gap-1.5">
-           {[
-             { id: 'mobile', icon: Smartphone },
-             { id: 'web', icon: Globe },
-             { id: 'desktop', icon: Monitor }
-           ].map((p) => (
-             <button 
-               key={p.id}
-               onClick={() => { setPlatform(p.id as any); updateField('platform', p.id); }}
-               className={`flex-1 flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all ${platform === p.id ? 'bg-blue-500/20 border-blue-500/20 text-blue-400 shadow-lg shadow-blue-500/10' : 'bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10'}`}
-             >
-               <p.icon className="w-3.5 h-3.5" />
-               <span className="text-[7px] font-black uppercase tracking-widest">{p.id}</span>
-             </button>
-           ))}
-        </div>
+      {isExpanded && (
+        <div className="p-4 space-y-4 animate-in slide-in-from-top-2 duration-200 bg-white">
+          <div className="flex gap-2">
+             {[
+               { id: 'mobile', icon: Smartphone },
+               { id: 'web', icon: Globe },
+               { id: 'desktop', icon: Monitor }
+             ].map((p) => (
+               <button 
+                 key={p.id}
+                 onClick={() => { setPlatform(p.id as any); updateField('platform', p.id); }}
+                 className={`flex-1 flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all ${platform === p.id ? 'bg-[#ff0071]/[0.03] border-[#ff0071]/30 text-[#ff0071] shadow-sm' : 'bg-slate-50/50 border-slate-100 text-slate-400 hover:bg-slate-50'}`}
+               >
+                 <p.icon className="w-3.5 h-3.5" />
+                 <span className="text-[9px] font-bold lowercase tracking-tight">{p.id}</span>
+               </button>
+             ))}
+          </div>
 
-        {/* Wireframe Preview Area */}
-        <div className="bg-black/40 rounded-3xl border border-white/5 p-4 aspect-[4/3] relative group/preview overflow-hidden">
-           <div className="absolute inset-x-4 top-4 h-2 bg-white/10 rounded-full" />
-           <div className="grid grid-cols-2 gap-3 mt-8">
-              <div className="h-12 bg-white/5 rounded-xl animate-pulse" />
-              <div className="h-12 bg-white/5 rounded-xl animate-pulse" />
-              <div className="h-24 col-span-2 bg-white/5 rounded-2xl animate-pulse" />
-           </div>
-           
-           <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
-              <span className="text-[10px] font-black text-blue-400 bg-black/80 px-4 py-2 rounded-full border border-blue-500/30 backdrop-blur-md uppercase tracking-[0.2em]">
-                 Diseño Generativo AI
-              </span>
-           </div>
-        </div>
+          <div className="bg-slate-50/50 rounded-2xl border border-slate-100 p-4 aspect-[16/10] relative group/preview overflow-hidden">
+             <div className="absolute inset-x-4 top-3 h-1.5 bg-slate-200/50 rounded-full" />
+             <div className="grid grid-cols-2 gap-3 mt-8">
+                <div className="h-10 bg-white shadow-sm rounded-xl border border-slate-100 animate-pulse" />
+                <div className="h-10 bg-white shadow-sm rounded-xl border border-slate-100 animate-pulse" />
+                <div className="h-14 col-span-2 bg-white shadow-sm rounded-xl border border-slate-100 animate-pulse" />
+             </div>
+          </div>
 
-        {/* Structure Input */}
-        <div className="space-y-1.5">
-           <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest px-1 font-mono">Structure Engine</span>
-           <textarea
-              value={data.structure || ""}
-              onChange={(e) => updateField('structure', e.target.value)}
-              className="w-full text-[10px] leading-relaxed text-foreground/60 bg-black/40 p-3 rounded-xl border border-white/5 min-h-[80px] focus:outline-none focus:border-blue-500/20 resize-none transition-all"
-              placeholder="Estructura..."
-           />
+          <div className="space-y-1.5">
+             <span className="text-[10px] font-bold text-slate-400 lowercase tracking-tight px-1 text-center block">structure engine</span>
+             <textarea
+                value={data.structure || ""}
+                onChange={(e) => updateField('structure', e.target.value)}
+                className="w-full text-xs leading-relaxed text-slate-600 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 min-h-[60px] focus:outline-none focus:border-[#ff0071]/20 resize-none transition-all"
+                placeholder="metadata..."
+             />
+          </div>
         </div>
-      </div>
+      )}
 
-      <Handle type="target" position={Position.Left} className="w-5 h-5 -left-2.5 bg-blue-500 border-[6px] border-[#0a0a0a] shadow-xl !z-20" />
-      <Handle type="source" position={Position.Right} className="w-5 h-5 -right-2.5 bg-blue-500 border-[6px] border-[#0a0a0a] shadow-xl !z-20" />
+      <Handle type="target" position={Position.Left} className="!w-3 !h-3 !-left-1.5 !bg-slate-300 !border-2 !border-white !shadow-sm !z-20" />
+      <Handle type="source" position={Position.Right} className="!w-3 !h-3 !-left-1.5 !bg-slate-300 !border-2 !border-white !shadow-sm !z-20" />
     </div>
   );
 };

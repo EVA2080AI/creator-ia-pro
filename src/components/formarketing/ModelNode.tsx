@@ -1,6 +1,6 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { Image as ImageIcon, Trash2, Wand2, Zap } from 'lucide-react';
+import { Image as ImageIcon, Trash2, Wand2, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -8,11 +8,12 @@ interface ModelNodeData {
   title?: string;
   prompt?: string;
   assetUrl?: string;
-  status?: 'idle' | 'loading' | 'ready' | 'error';
+  status?: 'idle' | 'loading' | 'executing' | 'ready' | 'error';
 }
 
 const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
   const { setNodes } = useReactFlow();
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const updatePrompt = useCallback((val: string) => {
     setNodes((nds) => 
@@ -46,75 +47,77 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
   };
 
   return (
-    <div className="group relative bg-[#0f0f0f]/95 border border-white/5 rounded-[1.5rem] p-0 w-[300px] shadow-2xl backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in duration-300 isolation-auto">
-      {/* V5.3 Industrial Header */}
-      <div className="px-5 py-4 border-b border-white/5 bg-gradient-to-r from-primary/10 to-transparent flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-            <div className="bg-primary/20 p-2 rounded-xl shadow-inner group-hover:rotate-6 transition-transform">
-               <ImageIcon className="w-4 h-4 text-primary" />
-            </div>
-            <div className="flex flex-col">
-              <h3 className="text-[10px] font-black uppercase tracking-tighter text-foreground/90 leading-none">
-                {data.title || "IMAGE GENERATOR"}
-              </h3>
-              <span className="text-[8px] font-black text-primary/40 uppercase tracking-[0.2em] mt-1">V5.4 COMPACT ENGINE</span>
-            </div>
+    <div className={`group relative pulse-node w-[280px] animate-in zoom-in duration-200 nodrag shadow-xl transition-all ${data.status === 'loading' || data.status === 'executing' ? 'ring-2 ring-[#ff0071] shadow-[0_0_20px_rgba(255,0,113,0.15)] animate-pulse' : ''}`}>
+      {/* V6.2 Pulse Header */}
+      <div className="pulse-node-header justify-between gap-2">
+        <div className="flex items-center gap-2 overflow-hidden">
+            <ImageIcon className="w-4 h-4 text-[#ff0071] shrink-0" />
+            <h3 className="text-[11px] font-bold lowercase tracking-tight text-slate-800 truncate">
+               {data.title || "image gen"}
+            </h3>
         </div>
-        <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2.5 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
-           <Trash2 className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-slate-100 text-slate-400 rounded-md transition-all">
+             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+          <button onClick={deleteNode} className="p-1 hover:bg-destructive/5 text-destructive/30 hover:text-destructive rounded-md transition-all">
+             <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
-      <div className="p-0 border-b border-white/5 bg-black/40 aspect-square relative flex items-center justify-center overflow-hidden group/img">
+      <div className="p-0 bg-slate-50/50 aspect-square relative flex items-center justify-center overflow-hidden group/img">
         {data.assetUrl ? (
           <img 
             src={data.assetUrl} 
             alt="Asset" 
-            className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-110" 
+            className="w-full h-full object-cover transition-transform duration-700 group-hover/img:scale-105" 
           />
         ) : (
-          <div className="flex flex-col items-center gap-2 opacity-20">
-             <Wand2 className={`w-8 h-8 ${data.status === 'loading' ? 'animate-pulse' : ''}`} />
-             <span className="text-[10px] font-bold uppercase tracking-[0.2em]">
-                {data.status === 'loading' ? 'Generando...' : 'Esperando ejecución...'}
+          <div className="flex flex-col items-center gap-3 opacity-20">
+             <Wand2 className={`w-10 h-10 text-slate-400 ${data.status === 'loading' ? 'animate-pulse' : ''}`} />
+             <span className="text-[10px] font-bold lowercase tracking-tight text-slate-400">
+                {data.status === 'loading' ? 'generando...' : 'esperando ejecución...'}
              </span>
           </div>
         )}
         
         {data.status === 'loading' && (
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
-             <div className="w-12 h-12 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-             <span className="text-[10px] font-black text-primary uppercase tracking-widest animate-pulse">Deep Processing</span>
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+             <div className="w-8 h-8 rounded-full border-2 border-[#ff0071] border-t-transparent animate-spin" />
+             <span className="text-[10px] font-bold text-[#ff0071] lowercase tracking-tight animate-pulse">deep processing</span>
           </div>
         )}
       </div>
 
-      <div className="p-4 space-y-3 bg-gradient-to-b from-transparent to-black/20">
-         <div className="space-y-2">
-            <div className="flex items-center justify-between px-1">
-               <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-[0.2em] font-mono">Prompt Engine</span>
-               <button 
-                 onClick={() => (data as any).onExecute?.()}
-                 disabled={data.status === 'loading'}
-                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 hover:bg-primary text-primary hover:text-primary-foreground transition-all border border-primary/20 disabled:opacity-50 group/exec shadow-lg active:scale-95"
-               >
-                 <Zap className={`w-3 h-3 ${data.status === 'loading' ? 'animate-pulse' : 'group-hover/exec:scale-110 transition-transform'}`} />
-                 <span className="text-[9px] font-black uppercase tracking-widest leading-none text-white lg:inline hidden">Ejecutar</span>
-               </button>
-            </div>
-            <textarea
-               value={data.prompt || ""}
-               onChange={(e) => updatePrompt(e.target.value)}
-               onBlur={(e) => persistChange(e.target.value)}
-               onKeyDown={(e) => e.stopPropagation()}
-               className="w-full text-[10px] leading-relaxed text-foreground/60 bg-black/30 p-3 rounded-xl border border-white/5 min-h-[60px] focus:outline-none focus:border-primary/30 transition-all resize-none"
-               placeholder="Prompt..."
-            />
-         </div>
-      </div>
+      {isExpanded && (
+        <div className="p-4 space-y-4 bg-white animate-in slide-in-from-top-2 duration-200">
+           <div className="space-y-2">
+              <div className="flex items-center justify-between px-0.5">
+                 <span className="text-[10px] font-bold text-slate-400 lowercase tracking-tight">prompt engine</span>
+                 <button 
+                   onClick={() => (data as any).onExecute?.()}
+                   disabled={data.status === 'loading'}
+                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ff0071] hover:bg-[#e60066] text-white transition-all shadow-md shadow-[#ff0071]/10 disabled:opacity-50 active:scale-95 group/exec"
+                 >
+                   <Zap className={`w-3 h-3 ${data.status === 'loading' ? 'animate-pulse' : 'group-hover/exec:scale-110 transition-transform'}`} />
+                   <span className="text-[10px] font-bold lowercase tracking-tight leading-none">execute</span>
+                 </button>
+              </div>
+              <textarea
+                 value={data.prompt || ""}
+                 onChange={(e) => updatePrompt(e.target.value)}
+                 onBlur={(e) => persistChange(e.target.value)}
+                 onKeyDown={(e) => e.stopPropagation()}
+                 className="w-full text-xs leading-relaxed text-slate-600 bg-slate-50 border border-slate-100 p-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ff0071]/10 focus:border-[#ff0071]/30 transition-all resize-none min-h-[60px]"
+                 placeholder="prompt..."
+              />
+           </div>
+        </div>
+      )}
 
-      <Handle type="target" position={Position.Left} className="w-5 h-5 -left-2.5 bg-primary border-[6px] border-[#0a0a0a] shadow-xl !z-20" />
-      <Handle type="source" position={Position.Right} className="w-5 h-5 -right-2.5 bg-primary border-[6px] border-[#0a0a0a] shadow-xl !z-20" />
+      <Handle type="target" position={Position.Left} className="!w-3 !h-3 !-left-1.5 !bg-slate-300 !border-2 !border-white !shadow-sm !z-20" />
+      <Handle type="source" position={Position.Right} className="!w-3 !h-3 !-right-1.5 !bg-slate-300 !border-2 !border-white !shadow-sm !z-20" />
     </div>
   );
 };

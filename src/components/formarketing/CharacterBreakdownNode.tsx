@@ -1,6 +1,6 @@
 import { memo, useCallback, useState, useEffect } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { UserCircle, Trash2, ShieldCheck } from 'lucide-react';
+import { UserCircle, Trash2, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -8,6 +8,7 @@ interface CharacterNodeData {
   title?: string;
   flavor?: string;
   description?: string;
+  status?: 'idle' | 'executing' | 'ready' | 'error';
 }
 
 const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeData }) => {
@@ -17,8 +18,9 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
   const [localTitle, setLocalTitle] = useState(data.title || "");
   const [localFlavor, setLocalFlavor] = useState(data.flavor || "");
   const [localDescription, setLocalDescription] = useState(data.description || "");
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  // Sync local state if external data changes (e.g. from DB load)
+  // Sync local state if external data changes
   useEffect(() => {
     setLocalTitle(data.title || "");
     setLocalFlavor(data.flavor || "");
@@ -57,75 +59,73 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
   };
 
   return (
-    <div className="group relative bg-[#0f0f0f]/95 border border-white/5 rounded-[1.8rem] p-0 w-72 shadow-2xl backdrop-blur-3xl overflow-hidden animate-in zoom-in duration-300 nodrag">
-      {/* V5.3 Premium Header */}
-      <div className="px-5 py-4 border-b border-white/5 bg-gradient-to-r from-emerald-500/10 to-transparent flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-            <div className="bg-emerald-500/20 p-2 rounded-xl shadow-inner group-hover:rotate-6 transition-transform">
-               <UserCircle className="w-4 h-4 text-emerald-500" />
-            </div>
-            <div className="flex flex-col">
-              <input 
-                value={localTitle} 
-                onChange={(e) => setLocalTitle(e.target.value)}
-                onBlur={(e) => persistChange('title', e.target.value)}
-                onKeyDown={(e) => e.stopPropagation()}
-                className="bg-transparent border-none p-0 m-0 text-[10px] font-black uppercase tracking-tighter text-foreground/90 focus:outline-none w-32"
-                placeholder="CHARACTER PROFILE"
-              />
-              <span className="text-[8px] font-bold text-emerald-500/40 uppercase tracking-[0.2em] mt-0.5">V5.4 SPACES COMPACT</span>
-            </div>
-        </div>
-        <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
-           <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
-      
-      <div className="p-5 space-y-4">
-        <div className="space-y-1.5">
-            <div className="flex items-center justify-between px-1">
-               <span className="text-[9px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-1.5 font-mono">
-                 <ShieldCheck className="w-2.5 h-2.5" />
-                 Flavor
-               </span>
-               <span className="text-[8px] opacity-20 font-bold uppercase tracking-widest">PRO</span>
-            </div>
-            <input
-               value={localFlavor}
-               onChange={(e) => setLocalFlavor(e.target.value)}
-               onBlur={(e) => persistChange('flavor', e.target.value)}
-               onKeyDown={(e) => e.stopPropagation()}
-               className="w-full text-[10px] text-foreground/70 bg-white/5 p-2.5 rounded-xl border border-white/5 italic focus:outline-none focus:border-emerald-500/20 transition-all font-medium"
-               placeholder="Ej: Dark & Mysterious Cyberpunk"
+    <div className={`group relative pulse-node w-[280px] animate-in zoom-in duration-200 nodrag shadow-xl transition-all ${data.status === 'executing' ? 'ring-2 ring-[#ff0071] shadow-[0_0_20px_rgba(255,0,113,0.15)] animate-pulse' : ''}`}>
+      {/* V6.2 Pulse Header */}
+      <div className="pulse-node-header justify-between gap-2">
+        <div className="flex items-center gap-2 overflow-hidden">
+            <UserCircle className="w-4 h-4 text-[#ff0071] shrink-0" />
+            <input 
+              value={localTitle} 
+              onChange={(e) => setLocalTitle(e.target.value)}
+              onBlur={(e) => persistChange('title', e.target.value)}
+              onKeyDown={(e) => e.stopPropagation()}
+              className="bg-transparent border-none p-0 m-0 text-[11px] font-bold lowercase tracking-tight text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#ff0071]/20 rounded px-1 -ml-1 w-full truncate"
+              placeholder="nexus profile"
             />
         </div>
-
+        <div className="flex items-center gap-1 shrink-0">
+          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-slate-100 text-slate-400 rounded-md transition-all">
+             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+          <button onClick={deleteNode} className="p-1 hover:bg-destructive/5 text-destructive/30 hover:text-destructive rounded-md transition-all">
+             <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+      
+      <div className="p-4 space-y-4">
         <div className="space-y-1.5">
-           <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest px-1 font-mono">Narrative Engine</span>
-           <textarea
-              value={localDescription}
-              onChange={(e) => setLocalDescription(e.target.value)}
-              onBlur={(e) => persistChange('description', e.target.value)}
-              onKeyDown={(e) => e.stopPropagation()}
-              className="w-full text-[10px] leading-relaxed text-foreground/60 bg-black/20 p-3 rounded-2xl border border-white/5 min-h-[80px] focus:outline-none focus:border-emerald-500/20 resize-none transition-all"
-              placeholder="Contexto IA..."
-           />
+            <div className="flex items-center justify-between px-0.5">
+               <span className="text-[10px] font-bold text-slate-400 lowercase tracking-tight flex items-center gap-1.5">
+                  flavor
+               </span>
+            </div>
+             <input
+                value={localFlavor}
+                onChange={(e) => setLocalFlavor(e.target.value)}
+                onBlur={(e) => persistChange('flavor', e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
+                className="w-full text-xs text-slate-600 bg-slate-50 border border-slate-100 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff0071]/10 focus:border-[#ff0071]/30 transition-all font-medium"
+                placeholder="ej: cyberpunk..."
+             />
         </div>
 
-        <div className="bg-emerald-500/5 p-3 rounded-2xl border border-emerald-500/5 transition-all group-hover:bg-emerald-500/8">
-          <p className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-             Autonomy Logic Status
-          </p>
-          <div className="flex items-center gap-2 opacity-50">
-             <div className="h-0.5 flex-1 bg-emerald-500/20" />
-             <span className="text-[8px] font-mono tracking-tighter uppercase font-bold">READY FOR EXECUTION</span>
-             <div className="h-0.5 flex-1 bg-emerald-500/20" />
+        {isExpanded && (localDescription || !localDescription) && (
+          <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-200">
+             <span className="text-[10px] font-bold text-slate-400 lowercase tracking-tight px-0.5">narrative data</span>
+             <textarea
+                value={localDescription}
+                onChange={(e) => setLocalDescription(e.target.value)}
+                onBlur={(e) => persistChange('description', e.target.value)}
+                onKeyDown={(e) => e.stopPropagation()}
+                className="w-full text-xs leading-relaxed text-slate-500 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 min-h-[70px] focus:outline-none focus:border-[#ff0071]/30 resize-none transition-all"
+                placeholder="contexto..."
+             />
+          </div>
+        )}
+
+        <div className="bg-[#ff0071]/[0.02] p-3 rounded-2xl border border-[#ff0071]/5 transition-all">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-bold text-[#ff0071]/60 lowercase tracking-tight flex items-center gap-2">
+               <span className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse" />
+               nexus status
+            </p>
+            <span className="text-[9px] font-bold tracking-tight uppercase text-[#ff0071]/40">READY</span>
           </div>
         </div>
       </div>
 
-      <Handle type="source" position={Position.Right} className="w-5 h-5 -right-2.5 bg-emerald-500 border-[6px] border-[#0a0a0a] shadow-xl !z-20" />
+      <Handle type="source" position={Position.Right} className="!w-3 !h-3 !-right-1.5 !bg-slate-300 !border-2 !border-white !shadow-sm !z-20" />
     </div>
   );
 };

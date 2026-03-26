@@ -16,12 +16,11 @@ import {
 } from "@/components/ui/tooltip";
 import { TemplateModal } from './TemplateModal';
 
-export function FormarketingSidebar() {
+export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, label: string, assetUrl?: string) => void }) {
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
   const [menuOpen, setMenuOpen] = useState(true);
-  const { addNodes, screenToFlowPosition } = useReactFlow();
-  const fileInputRef = useState<HTMLInputElement | null>(null)[0]; // Simplified for logic check
+  const { screenToFlowPosition } = useReactFlow();
   
   const handleFileUpload = () => {
     const input = document.createElement('input');
@@ -32,7 +31,7 @@ export function FormarketingSidebar() {
       if (file) {
         const reader = new FileReader();
         reader.onload = () => {
-          handleAddNode('modelView', 'Imagen Subida', reader.result as string);
+          onAddNode('modelView', 'imagen_subida', reader.result as string);
         };
         reader.readAsDataURL(file);
       }
@@ -41,63 +40,17 @@ export function FormarketingSidebar() {
   };
 
   const handleAddTemplate = (templateType: string) => {
-    const centerX = 400;
-    const centerY = 300;
-    
-    if (templateType === 'metaPack') {
-       toast.info("Inyectando Plantilla: Meta Ads Social Pack...");
-       const charId = crypto.randomUUID();
-       const imgId = crypto.randomUUID();
-       const vidId = crypto.randomUUID();
-       const campId = crypto.randomUUID();
-       
-       const newNodes = [
-         { id: charId, type: 'characterBreakdown', position: { x: centerX - 450, y: centerY }, data: { title: 'Target Persona', description: 'Describe tu audiencia para Meta Ads...' } },
-         { id: imgId, type: 'modelView', position: { x: centerX - 150, y: centerY }, data: { title: 'Imagen de Campaña', prompt: 'Visual cinemático para redes sociales...' } },
-         { id: vidId, type: 'videoModel', position: { x: centerX + 150, y: centerY }, data: { title: 'Reel de Ventas', status: 'pending' } },
-         { id: campId, type: 'campaignManager', position: { x: centerX + 450, y: centerY }, data: { title: 'Gestor Meta Ads' } }
-       ];
-       
-       addNodes(newNodes as any);
-    } else if (templateType === 'landingPack') {
-       toast.info("Inyectando Plantilla: App Landing Structure...");
-       addNodes([
-         { id: crypto.randomUUID(), type: 'characterBreakdown', position: { x: centerX - 350, y: centerY }, data: { title: 'Value Prop', description: 'Define la propuesta de valor...' } },
-         { id: crypto.randomUUID(), type: 'layoutBuilder', position: { x: centerX, y: centerY }, data: { title: 'Wireframe Layout', platform: 'web' } }
-       ] as any);
+    if (templateType === 'landingPack') {
+       toast.info("inyectando estructura: landing app...");
+       const template = {
+         title: 'Landing App',
+         nodes: [
+           { type: 'characterBreakdown', data: { title: 'Propuesta de Valor', description: 'Define el núcleo de tu producto...' } },
+           { type: 'layoutBuilder', data: { title: 'Wireframe Web', platform: 'web' } }
+         ]
+       };
+       window.dispatchEvent(new CustomEvent('add-template', { detail: template }));
     }
-  };
-
-  const handleAddNode = (type: string, title: string, assetUrl?: string) => {
-    const x = Math.random() * 200 + 100;
-    const y = Math.random() * 200 + 100;
-    const position = screenToFlowPosition({ x, y });
-    const newNodeId = crypto.randomUUID();
-
-    let defaultData = {};
-    if (type === 'characterBreakdown') {
-      defaultData = { title: title || 'Nuevo Personaje', description: 'Describe tu personaje aquí...' };
-    } else if (type === 'modelView') {
-      defaultData = { title: title || 'Nueva Imagen', prompt: 'Describe la escena...' };
-    } else if (type === 'videoModel') {
-      defaultData = { title: title || 'Nuevo Video', status: 'pending', duration: '00:00' };
-    } else if (type === 'layoutBuilder') {
-      defaultData = { title: title || 'Nueva Interfaz', platform: 'web', structure: 'Define el layout...' };
-    } else if (type === 'campaignManager') {
-      defaultData = { title: title || 'Nueva Campaña' };
-    }
-
-    addNodes({
-      id: newNodeId,
-      type: type,
-      position,
-      data: {
-        ...defaultData,
-        assetUrl: assetUrl || null,
-        status: assetUrl ? 'ready' : 'idle',
-        prompt: title || 'Elemento'
-      },
-    });
   };
 
   const onDragStart = (event: React.DragEvent, nodeType: string, label: string) => {
@@ -107,11 +60,11 @@ export function FormarketingSidebar() {
   };
 
   const menuItems = [
-    { label: 'Copywriting AI', icon: Type, type: 'characterBreakdown', color: 'text-emerald-500', bg: 'bg-emerald-500/10', description: 'Genera textos persuasivos para tus anuncios' },
-    { label: 'Imagen Flux HQ', icon: Image, type: 'modelView', color: 'text-indigo-500', bg: 'bg-indigo-500/10', description: 'Generación industrial de alta calidad' },
-    { label: 'Avatar de Marca', icon: Video, type: 'videoModel', color: 'text-purple-500', bg: 'bg-purple-500/10', description: 'Video con IA para campañas de video' },
-    { label: 'Web/App Builder', icon: LayoutTemplate, type: 'layoutBuilder', color: 'text-blue-500', bg: 'bg-blue-500/10', description: 'Diseña interfaces y estructuras web' },
-    { label: 'Campaña Social', icon: Share2, type: 'campaignManager', color: 'text-orange-500', bg: 'bg-orange-500/10', description: 'Gestiona la distribución en redes sociales' },
+    { label: 'copywriting ai', icon: Type, type: 'characterBreakdown', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'genera textos persuasivos' },
+    { label: 'imagen flux hq', icon: Image, type: 'modelView', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'generación industrial hq' },
+    { label: 'avatar de marca', icon: Video, type: 'videoModel', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'video con ia para campañas' },
+    { label: 'web/app builder', icon: LayoutTemplate, type: 'layoutBuilder', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'diseña estructuras web' },
+    { label: 'campaña social', icon: Share2, type: 'campaignManager', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'gestiona distribución' },
   ].filter(item => 
     item.label.toLowerCase().includes(search.toLowerCase()) && 
     (activeCategory === null || (activeCategory === 6 && item.icon === Type) || (activeCategory === 3 && item.icon === Image) || (activeCategory === 4 && item.icon === Video))
@@ -150,179 +103,134 @@ export function FormarketingSidebar() {
   ];
 
   return (
-    <div className="absolute left-6 top-24 z-10 flex gap-4 animate-fade-in items-start h-[calc(100vh-140px)] pointer-events-none">
+    <div className="absolute left-4 top-20 z-10 flex gap-3 animate-fade-in items-start h-[calc(100vh-120px)] pointer-events-none">
       
-      {/* Vertical Pill Toolbar (High-Performance UI) */}
-      <div className="flex flex-col items-center gap-3 rounded-[2.5rem] border border-white/10 bg-[#0a0a0b]/90 w-[64px] py-6 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-3xl shrink-0 h-fit pointer-events-auto ring-1 ring-white/5">
-        {/* Close/Menu Toggle */}
+      {/* Vertical Pulse Toolbar */}
+      <div className="flex flex-col items-center gap-2.5 rounded-2xl border border-slate-100 bg-white/95 w-[48px] py-4 shadow-[0_10px_40px_rgba(0,0,0,0.06)] backdrop-blur-3xl shrink-0 h-fit pointer-events-auto">
+        {/* Menu Toggle */}
         <button 
-          onClick={() => setMenuOpen(!menuOpen)}
-          className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-300 ${menuOpen ? 'bg-primary text-primary-foreground rotate-90 shadow-lg shadow-primary/20' : 'bg-white/5 text-muted-foreground hover:bg-white/10 hover:text-foreground'}`}
+           onClick={() => setMenuOpen(!menuOpen)}
+           className={`flex h-9 w-9 items-center justify-center rounded-2xl transition-all duration-300 ${menuOpen ? 'bg-[#ff0071] text-white rotate-90 shadow-lg shadow-[#ff0071]/20' : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:text-slate-800'}`}
         >
-          {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-5 w-5" />}
+          {menuOpen ? <X className="h-3.5 w-3.5" /> : <LayoutGrid className="h-4 w-4" />}
         </button>
         
-        <div className="w-8 h-px bg-white/5 my-1" />
+        <div className="w-8 h-px bg-slate-100 my-1" />
 
-        {/* Play (Active/Industrial Run) */}
-        <button className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-black shadow-2xl hover:scale-105 active:scale-95 transition-all group/play">
-          <Play className="h-5 w-5 fill-current ml-0.5 group-hover:scale-110 transition-transform" />
+        {/* Play Button */}
+        <button className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-xl hover:scale-105 active:scale-95 transition-all group/play">
+          <Play className="h-5 w-5 fill-[#ff0071] text-[#ff0071] ml-0.5 group-hover:scale-110 transition-transform" />
         </button>
 
         {/* Other Tools */}
         {toolbarIcons.map((Tool, i) => (
           <button 
             key={i} 
-            className={`flex h-11 w-11 items-center justify-center rounded-2xl text-muted-foreground/60 hover:bg-white/5 hover:text-foreground transition-all group ${Tool.id === 'settings' ? 'mt-6' : ''}`}
+            className={`flex h-11 w-11 items-center justify-center rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-slate-800 transition-all group ${Tool.id === 'settings' ? 'mt-6' : ''}`}
           >
-            <Tool.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
+            <Tool.icon className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
           </button>
         ))}
       </div>
 
-      {/* Expanded Context Menu */}
+      {/* Expanded Pulse Menu */}
       {menuOpen && (
-        <div className="w-64 rounded-xl border border-white/10 bg-[#161616]/95 p-3 shadow-2xl backdrop-blur-xl flex flex-col gap-3 max-h-full overflow-y-auto scrollbar-hide animate-in slide-in-from-left-4 fade-in duration-200 pointer-events-auto">
+        <div className="w-56 rounded-2xl border border-slate-100 bg-white/98 p-3 shadow-[0_20px_50px_rgba(0,0,0,0.08)] backdrop-blur-3xl flex flex-col gap-4 max-h-full overflow-y-auto scrollbar-hide animate-in slide-in-from-left-2 duration-300 pointer-events-auto">
           
           {/* Search Bar */}
-      <div className="relative mb-1">
-        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground/50" />
-        <Input 
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar" 
-          className="pl-8 bg-white/5 border-transparent focus:border-white/10 rounded-lg h-8 text-[11px]"
-        />
-      </div>
+          <div className="relative mb-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+            <Input 
+               value={search}
+               onChange={(e) => setSearch(e.target.value)}
+               placeholder="buscar herramientas..." 
+               className="pl-9 bg-slate-50 border-transparent focus:border-slate-100 rounded-xl h-10 text-xs lowercase font-medium"
+            />
+          </div>
 
-      {/* Top Icons Row */}
-      <TooltipProvider>
-        <div className="flex flex-wrap items-center justify-start px-1 gap-1.5 py-1">
-          {topIcons.map((item, idx) => (
-            <Tooltip key={idx}>
-              <TooltipTrigger asChild>
-                <button 
-                  onClick={() => setActiveCategory(activeCategory === item.id ? null : item.id)}
-                  className={`p-1.5 rounded-lg transition-colors shrink-0 ${activeCategory === item.id ? 'bg-primary text-primary-foreground' : 'hover:bg-white/10 text-muted-foreground hover:text-foreground'}`}
-                >
-                  <item.icon className="h-4 w-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-black border-white/10 text-[10px] uppercase font-bold tracking-widest px-2 py-1">
-                {item.title}
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </div>
-      </TooltipProvider>
-
-      {/* Plantillas Menu (V5.2 Industrial) */}
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between px-2 mb-2">
-            <h3 className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">Plantillas Pro</h3>
-            <Sparkles className="w-2.5 h-2.5 text-primary/40" />
-        </div>
-        <div className="grid grid-cols-2 gap-3 px-1 text-foreground">
-          <TemplateModal 
-            onSelect={(template) => {
-              toast.success(`Inyectando pack: ${template.title}`);
-              const event = new CustomEvent('add-template', { detail: template });
-              window.dispatchEvent(event);
-            }} 
-            trigger={
-                <button className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-gradient-to-br from-white/10 to-transparent hover:from-primary/20 hover:to-primary/5 border border-white/5 hover:border-primary/30 transition-all duration-300 group/btn shadow-xl backdrop-blur-md">
-                    <div className="p-1.5 rounded-lg bg-primary/20 group-hover/btn:scale-110 transition-all">
-                        <Zap className="h-3.5 w-3.5 text-primary" />
-                    </div>
-                    <span className="text-[8px] font-black text-center text-foreground uppercase tracking-widest leading-none">Elite Packs</span>
-                </button>
-            }
-          />
-          {plantillas.filter(p => p.type === 'landingPack').map((item, idx) => (
-            <button 
-              key={idx} 
-              onClick={() => handleAddTemplate(item.type)}
-              className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white/5 hover:bg-white/[0.08] border border-white/5 hover:border-white/10 transition-all duration-300 group/btn shadow-lg backdrop-blur-md"
-            >
-              <div className={`p-1.5 rounded-lg ${item.bg.replace('/10', '/20')} group-hover/btn:scale-110 transition-transform`}>
-                <item.icon className={`h-3.5 w-3.5 ${item.color}`} />
-              </div>
-              <span className="text-[8px] font-black text-center text-foreground/80 uppercase tracking-widest leading-none">L-Page Pack</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Basics Menu */}
-      <TooltipProvider>
-        <div className="flex flex-col gap-1">
-          <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2 mb-1">Básicos</h3>
-          {menuItems.map((item, idx) => (
-            <div key={idx} className="group/item relative">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button 
-                    draggable
-                    onDragStart={(e) => onDragStart(e, item.type, item.label)}
-                    onClick={() => handleAddNode(item.type, item.label)}
-                    className="flex flex-col gap-1 w-full p-2 rounded-lg hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5 active:scale-95"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <div className={`p-1.5 rounded-lg ${item.bg} group-hover:scale-110 transition-transform`}>
-                        <item.icon className={`h-3.5 w-3.5 ${item.color}`} />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[11px] font-bold text-foreground/90 group-hover:text-foreground">{item.label}</span>
-                        <span className="text-[9px] text-muted-foreground line-clamp-1 group-hover:text-muted-foreground/80 lowercase">{item.description}</span>
-                      </div>
-                    </div>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="bg-black border-white/10 text-[10px] font-bold max-w-[200px] p-2">
-                  {item.description}
-                </TooltipContent>
-              </Tooltip>
-              
-              {/* Preview on Hover */}
-              <div className="absolute left-[calc(100%+8px)] top-0 w-48 h-32 rounded-2xl border border-white/10 bg-black/95 shadow-2xl opacity-0 translate-x-4 pointer-events-none group-hover/item:opacity-100 group-hover/item:translate-x-0 transition-all z-20 overflow-hidden flex flex-col">
-                 <div className="h-full w-full bg-white/5 relative">
-                    {item.type === 'modelView' && <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop" className="w-full h-full object-cover opacity-60" />}
-                    {item.type === 'videoModel' && (
-                        <div className="w-full h-full flex items-center justify-center">
-                            <Video className="w-8 h-8 text-amber-500/40 animate-pulse" />
-                        </div>
-                    )}
-                    {item.type === 'characterBreakdown' && (
-                        <div className="w-full h-full flex items-center justify-center p-4">
-                            <Type className="w-8 h-8 text-emerald-500/40" />
-                        </div>
-                    )}
-                    <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black to-transparent">
-                       <p className="text-[9px] font-black uppercase tracking-widest text-white/50">Vista Previa Pro</p>
-                    </div>
-                 </div>
-              </div>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between px-1">
+                <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">plantillas elite</h3>
+                <Sparkles className="w-3 h-3 text-[#ff0071]" />
             </div>
-          ))}
-        </div>
-      </TooltipProvider>
-
-      {/* Content Menu */}
-      <div className="flex flex-col gap-1 mt-2">
-        <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-2 mb-1">Contenido</h3>
-        {contentItems.map((item, idx) => (
-          <button 
-            key={idx} 
-            onClick={item.action}
-            className="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-colors text-left group"
-          >
-            <div className="p-1.5 rounded-lg border border-white/10 bg-black/20">
-              <item.icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground/80 transition-colors" />
+            <div className="grid grid-cols-2 gap-3">
+               <TemplateModal 
+                 onSelect={(template) => {
+                   toast.success(`Inyectando pack: ${template.title}`);
+                   const event = new CustomEvent('add-template', { detail: template });
+                   window.dispatchEvent(event);
+                 }} 
+                 trigger={
+                     <button className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-[#ff0071]/[0.02] border border-[#ff0071]/10 hover:bg-[#ff0071]/[0.05] transition-all group/btn shadow-sm">
+                        <div className="p-1.5 rounded-lg bg-[#ff0071]/10 group-hover/btn:scale-110 transition-all">
+                           <Zap className="h-3.5 w-3.5 text-[#ff0071]" />
+                        </div>
+                        <span className="text-[8px] font-bold text-center text-slate-800 uppercase tracking-tighter leading-none">ads packs</span>
+                     </button>
+                 }
+               />
+               <button 
+                  onClick={() => handleAddTemplate('landingPack')}
+                  className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 transition-all group/btn shadow-sm"
+               >
+                  <div className="p-1.5 rounded-lg bg-slate-100 group-hover/btn:scale-110 transition-all">
+                    <Rocket className="h-3.5 w-3.5 text-slate-400 group-hover:text-[#ff0071]" />
+                  </div>
+                  <span className="text-[8px] font-bold text-center text-slate-400 uppercase tracking-tighter leading-none group-hover:text-slate-800">landing base</span>
+               </button>
             </div>
-            <span className="text-sm font-medium text-foreground/90 group-hover:text-foreground">{item.label}</span>
-          </button>
-        ))}
-      </div>
+          </div>
+
+       {/* Basics Menu */}
+       <TooltipProvider>
+         <div className="flex flex-col gap-1.5">
+           <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-1">herramientas nexus</h3>
+           {menuItems.map((item, idx) => (
+             <div key={idx} className="group/item relative">
+               <Tooltip>
+                 <TooltipTrigger asChild>
+                   <button 
+                     draggable
+                     onDragStart={(e) => onDragStart(e, item.type, item.label)}
+                     onClick={() => onAddNode(item.type, item.label)}
+                     className="flex flex-col gap-1 w-full p-2.5 rounded-2xl hover:bg-slate-50 transition-all text-left group border border-transparent hover:border-slate-100 active:scale-[0.98]"
+                   >
+                     <div className="flex items-center gap-3">
+                       <div className={`p-2 rounded-xl ${item.bg} group-hover:scale-110 transition-transform`}>
+                         <item.icon className={`h-4 w-4 ${item.color}`} />
+                       </div>
+                       <div className="flex flex-col">
+                         <span className="text-[11px] font-bold text-slate-800 group-hover:text-[#ff0071] transition-colors">{item.label}</span>
+                         <span className="text-[9px] text-slate-400 line-clamp-1 lowercase">{item.description}</span>
+                       </div>
+                     </div>
+                   </button>
+                 </TooltipTrigger>
+                 <TooltipContent side="right" className="bg-slate-900 border-none text-[10px] font-bold max-w-[200px] p-2 text-white rounded-xl">
+                   {item.description}
+                 </TooltipContent>
+               </Tooltip>
+             </div>
+           ))}
+         </div>
+       </TooltipProvider>
+
+       {/* Content Menu */}
+       <div className="flex flex-col gap-1.5">
+         <h3 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-1">contenido</h3>
+         {contentItems.map((item, idx) => (
+           <button 
+             key={idx} 
+             onClick={item.action}
+             className="flex items-center gap-3 w-full p-2.5 rounded-2xl hover:bg-slate-50 transition-all text-left group"
+           >
+             <div className="p-1.5 rounded-xl border border-slate-100 bg-slate-50">
+               <item.icon className="h-4 w-4 text-slate-400 group-hover:text-[#ff0071] transition-colors" />
+             </div>
+             <span className="text-[11px] font-bold text-slate-700 lowercase">{item.label}</span>
+           </button>
+         ))}
+       </div>
 
       {/* Bottom Footer Actions */}
       <div className="mt-2 flex items-center justify-between pt-3 border-t border-white/5 text-[10px] uppercase font-bold text-muted-foreground tracking-widest">

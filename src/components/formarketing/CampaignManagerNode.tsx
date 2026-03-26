@@ -1,16 +1,18 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { Share2, Trash2, Instagram, Facebook, Twitter, CheckCircle2, Clock } from 'lucide-react';
+import { Share2, Trash2, Instagram, Facebook, Twitter, CheckCircle2, Clock, ChevronDown, ChevronUp, Users, MousePointer2, Zap, Megaphone } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface CampaignNodeData {
   title?: string;
+  status?: 'pending' | 'processing' | 'ready' | 'error';
   platforms?: Record<string, 'pending' | 'ready' | 'error'>;
 }
 
 const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData }) => {
   const { setNodes } = useReactFlow();
+  const [isExpanded, setIsExpanded] = useState(true);
   const platforms = data.platforms || {
     instagram: 'pending',
     facebook: 'pending',
@@ -50,61 +52,81 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
   };
 
   return (
-    <div className="group relative bg-[#0f0f0f]/95 border border-white/5 rounded-[1.5rem] p-0 w-[300px] shadow-2xl backdrop-blur-3xl overflow-hidden animate-in zoom-in duration-300 isolation-auto">
-      {/* V5.3 Industrial Header */}
-      <div className="px-5 py-4 border-b border-white/5 bg-gradient-to-r from-orange-500/10 to-transparent flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-            <div className="bg-orange-500/20 p-2 rounded-xl shadow-inner group-hover:rotate-6 transition-transform">
-               <Share2 className="w-4 h-4 text-orange-400" />
-            </div>
-            <div className="flex flex-col">
-              <h3 className="text-[10px] font-black uppercase tracking-tighter text-foreground/90 leading-none">
-                {data.title || "CAMPAIGN MANAGER"}
-              </h3>
-              <span className="text-[8px] font-black text-orange-500/40 uppercase tracking-[0.2em] mt-1">V5.4 COMPACT ENGINE</span>
-            </div>
+    <div className="group relative pulse-node w-[280px] animate-in zoom-in duration-200 nodrag shadow-xl">
+      {/* V6.2 Pulse Header */}
+      <div className="pulse-node-header justify-between gap-2">
+        <div className="flex items-center gap-2 overflow-hidden">
+            <Megaphone className="w-4 h-4 text-[#ff0071] shrink-0" />
+            <h3 className="text-[11px] font-bold lowercase tracking-tight text-slate-800 truncate">
+               {data.title || "campaign manager"}
+            </h3>
         </div>
-        <button onClick={deleteNode} className="opacity-0 group-hover:opacity-100 p-2.5 hover:bg-destructive/10 text-destructive rounded-xl transition-all">
-           <Trash2 className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1 shrink-0">
+          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-slate-100 text-slate-400 rounded-md transition-all">
+             {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+          <button onClick={deleteNode} className="p-1 hover:bg-destructive/5 text-destructive/30 hover:text-destructive rounded-md transition-all">
+             <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
-      <div className="p-4 space-y-4">
-        <span className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest px-1 font-mono">Multi-Platform Sync</span>
-        
-        <div className="space-y-2">
-           {[
-             { id: 'instagram', icon: Instagram, label: 'Instagram Ads' },
-             { id: 'facebook', icon: Facebook, label: 'Meta Campaign' },
-             { id: 'twitter', icon: Twitter, label: 'X (Twitter)' }
-           ].map((plt) => (
+      {isExpanded && (
+        <div className="p-4 space-y-4 animate-in slide-in-from-top-2 duration-200 bg-white">
+          <div className="flex items-center justify-between px-0.5">
+             <span className="text-[10px] font-bold text-slate-400 lowercase tracking-tight">campaign engine</span>
              <button 
-               key={plt.id}
-               onClick={() => togglePlatform(plt.id)}
-               className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all ${platforms[plt.id] === 'ready' ? 'bg-orange-500/10 border-orange-500/10 text-foreground' : 'bg-white/5 border-white/5 text-muted-foreground hover:bg-white/10'}`}
+               onClick={() => (data as any).onExecute?.()}
+               disabled={data.status === 'processing'}
+               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ff0071] hover:bg-[#e60066] text-white transition-all shadow-md shadow-[#ff0071]/10 disabled:opacity-50 active:scale-95 group/exec"
              >
-               <div className="flex items-center gap-2.5">
-                  <plt.icon className={`w-3.5 h-3.5 ${platforms[plt.id] === 'ready' ? 'text-orange-400' : ''}`} />
-                  <span className="text-[10px] font-bold tracking-tight">{plt.label}</span>
-               </div>
-               {platforms[plt.id] === 'ready' ? (
-                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shadow-xl" />
-               ) : (
-                 <Clock className="w-3.5 h-3.5 opacity-20" />
-               )}
+               <Zap className={`w-3 h-3 ${data.status === 'processing' ? 'animate-pulse' : 'group-hover/exec:scale-110 transition-transform'}`} />
+               <span className="text-[10px] font-bold lowercase tracking-tight leading-none">deploy</span>
              </button>
-           ))}
-        </div>
+          </div>
 
-        <div className="flex items-center justify-center pt-1">
-            <button className="text-[8px] font-black uppercase tracking-[0.2em] text-orange-500/70 bg-orange-500/5 px-5 py-2 rounded-full border border-orange-500/10 hover:bg-orange-500/10 transition-colors">
-               Programar Publicación AI
-            </button>
-        </div>
-      </div>
+          <div className="space-y-4">
+             <div className="space-y-2">
+                <div className="flex justify-between px-1">
+                   <span className="text-[9px] font-bold text-slate-400 lowercase tracking-tight">delivery performance</span>
+                   <span className="text-[9px] font-bold text-[#ff0071]">84%</span>
+                </div>
+                <div className="h-1.5 w-full bg-slate-50 rounded-full overflow-hidden border border-slate-100 shadow-inner">
+                   <div 
+                      className={`h-full bg-[#ff0071] transition-all duration-1000 ${data.status === 'processing' ? 'animate-[shimmer_2s_infinite] w-full' : 'w-[84%]'}`}
+                   />
+                </div>
+             </div>
 
-      <Handle type="target" position={Position.Left} className="w-5 h-5 -left-2.5 bg-orange-500 border-[6px] border-[#0a0a0a] shadow-xl !z-20" />
-      <Handle type="source" position={Position.Right} className="w-5 h-5 -right-2.5 bg-orange-500 border-[6px] border-[#0a0a0a] shadow-xl !z-20" />
+             <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'reach', val: '12.4k', icon: Users },
+                  { label: 'clicks', val: '842', icon: MousePointer2 }
+                ].map((stat) => (
+                   <div key={stat.label} className="p-3 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col gap-1 hover:border-[#ff0071]/10 transition-all">
+                      <div className="flex items-center gap-2">
+                         <stat.icon className="w-3 h-3 text-slate-300" />
+                         <span className="text-[9px] font-bold text-slate-400 lowercase tracking-tight">{stat.label}</span>
+                      </div>
+                      <span className="text-xs font-bold text-slate-700">{stat.val}</span>
+                   </div>
+                ))}
+             </div>
+          </div>
+
+          <div className="bg-[#ff0071]/[0.02] p-3 rounded-2xl border border-[#ff0071]/5 transition-all">
+             <div className="flex items-center justify-between">
+                <p className="text-[10px] font-bold text-[#ff0071]/60 lowercase tracking-tight flex items-center gap-2">
+                   <span className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse" />
+                   nexus distribution
+                </p>
+                <span className="text-[8px] font-mono tracking-tighter uppercase font-bold text-[#ff0071]/40">active</span>
+             </div>
+          </div>
+        </div>
+      )}
+
+      <Handle type="target" position={Position.Left} className="!w-3 !h-3 !-left-1.5 !bg-slate-300 !border-2 !border-white !shadow-sm !z-20" />
     </div>
   );
 };

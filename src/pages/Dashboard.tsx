@@ -184,26 +184,25 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-white text-slate-900 overflow-hidden">
       <AppHeader userId={user?.id} onSignOut={signOut} />
       
       <main className="container mx-auto px-6 py-10 max-w-7xl animate-fade-in">
-        {/* Welcome Section */}
-        <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-primary font-bold tracking-widest text-[10px] uppercase">
-               <Zap className="h-3 w-3" />
-               Industrial System Active
+        <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5 text-[#ff0071] font-bold tracking-tight text-[11px] lowercase">
+               <div className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse" />
+               industrial_system_active
             </div>
-            <h1 className="text-4xl font-black md:text-5xl lg:text-6xl tracking-tighter">
-              Hola, <span className="gradient-text">{profile?.display_name?.split(' ')[0] || 'Creador'}</span>
+            <h1 className="text-5xl font-bold md:text-6xl lg:text-7xl tracking-tight text-slate-900 lowercase">
+              hola, <span className="text-[#ff0071]">{profile?.display_name?.split(' ')[0] || 'creador'}</span>
             </h1>
-            <p className="text-muted-foreground text-lg max-w-xl leading-relaxed">
-              Bienvenido a tu suite de diseño industrial. Tienes el control total de <span className="text-foreground font-semibold">{assetsCount} assets</span> y <span className="text-foreground font-semibold">{spacesCount} espacios</span>.
+            <p className="text-slate-400 text-lg max-w-xl leading-relaxed lowercase font-medium">
+              bienvenido a tu suite de diseño industrial. tienes el control total de <span className="text-slate-900 font-bold">{assetsCount} assets</span> y <span className="text-slate-900 font-bold">{spacesCount} espacios</span>.
             </p>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             {subscription?.subscribed && (
               <Button 
                 onClick={async () => {
@@ -214,55 +213,60 @@ const Dashboard = () => {
                   }
                 }}
                 variant="outline"
-                className="border-white/10 bg-white/5 gap-2 px-6 rounded-2xl h-12"
+                className="border-slate-100 bg-white gap-2 px-6 rounded-2xl h-12 text-xs font-bold lowercase tracking-tight shadow-sm hover:bg-slate-50 transition-all"
               >
                 <Settings className="h-4 w-4" />
-                Gestionar Plan
+                gestionar plan
               </Button>
             )}
-            <Button onClick={() => navigate("/pricing")} className="group bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-6 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:-translate-y-1">
+            <Button onClick={() => navigate("/pricing")} className="group bg-[#ff0071] text-white hover:bg-[#e60066] px-8 py-6 rounded-2xl shadow-xl shadow-[#ff0071]/20 transition-all hover:-translate-y-1 text-xs font-bold lowercase tracking-tight active:scale-95">
               <Zap className="mr-2 h-5 w-5 fill-current group-hover:animate-pulse" />
-              Mejorar Plan
+              mejorar plan
             </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
           {stats.map((stat) => (
-            <div key={stat.label} className="group relative rounded-3xl border border-white/5 bg-card/60 p-6 backdrop-blur-xl transition-all hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5">
-              <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl ${stat.accent} shadow-inner transition-transform group-hover:scale-110`}>
-                <stat.icon className="h-6 w-6" />
+            <div 
+              key={stat.label} 
+              role="status"
+              aria-label={`${stat.label}: ${stat.value}`}
+              className="group relative rounded-[2.5rem] border border-slate-100 bg-white p-7 shadow-[0_10px_40px_rgba(0,0,0,0.04)] transition-all hover:border-[#ff0071]/20 hover:shadow-2xl hover:shadow-[#ff0071]/5 overflow-hidden"
+            >
+              <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-3xl ${stat.accent.replace('primary', '[#ff0071]')} shadow-sm transition-transform group-hover:scale-110`}>
+                <stat.icon className="h-7 w-7" />
               </div>
-              <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest opacity-60">{stat.label}</p>
-              <h3 className="text-3xl font-black mt-1 tabular-nums">{stat.value}</h3>
-              <div className="absolute top-4 right-6 h-1 w-8 rounded-full bg-white/5 overflow-hidden">
-                 <div className="h-full bg-primary/40 w-1/2 group-hover:w-full transition-all duration-700" />
+              <p className="text-[11px] font-bold text-slate-400 lowercase tracking-tight opacity-80">{stat.label}</p>
+              <h3 className="text-4xl font-bold mt-1 tabular-nums text-slate-800">{stat.value}</h3>
+              <div className="absolute top-6 right-8 h-1.5 w-10 rounded-full bg-slate-50 overflow-hidden">
+                 <div className="h-full bg-[#ff0071]/20 w-1/2 group-hover:w-full transition-all duration-1000" />
               </div>
             </div>
           ))}
         </div>
 
         {/* Industrial Analytics Section */}
-        <div className="grid lg:grid-cols-2 gap-8 mb-16">
-          <div className="rounded-[32px] border border-white/5 bg-card/40 p-8 backdrop-blur-xl transition-all hover:border-primary/20">
-             <div className="flex items-center justify-between mb-8">
+        <div className="grid lg:grid-cols-2 gap-10 mb-20">
+          <div className="rounded-[3rem] border border-slate-100 bg-white p-10 shadow-[0_10px_40px_rgba(0,0,0,0.03)] transition-all hover:border-[#ff0071]/10">
+             <div className="flex items-center justify-between mb-10">
                 <div>
-                   <h3 className="text-xl font-black tracking-tight">Flujo de Créditos</h3>
-                   <p className="text-xs text-muted-foreground opacity-60">Consumo industrial - Últimos 7 días</p>
+                   <h3 className="text-2xl font-bold tracking-tight text-slate-800 lowercase">flujo de créditos</h3>
+                   <p className="text-[11px] font-medium text-slate-400 lowercase italic">consumo industrial - últimos 7 días</p>
                 </div>
-                <TrendingUp className="h-5 w-5 text-accent" />
+                <TrendingUp className="h-6 w-6 text-[#ff0071] opacity-20" />
              </div>
              <div className="h-[240px] w-full">
                <ResponsiveContainer width="100%" height="100%">
                  <AreaChart data={usageData}>
-                   <defs>
-                     <linearGradient id="colorCredits" x1="0" y1="0" x2="0" y2="1">
-                       <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                       <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                     </linearGradient>
-                   </defs>
-                   <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" vertical={false} />
+                    <defs>
+                      <linearGradient id="colorCredits" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ff0071" stopOpacity={0.1}/>
+                        <stop offset="95%" stopColor="#ff0071" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                    <XAxis 
                      dataKey="name" 
                      axisLine={false} 
@@ -275,27 +279,27 @@ const Dashboard = () => {
                      contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
                      itemStyle={{ color: '#3b82f6' }}
                    />
-                   <Area 
-                     type="monotone" 
-                     dataKey="credits" 
-                     stroke="#3b82f6" 
-                     strokeWidth={3}
-                     fillOpacity={1} 
-                     fill="url(#colorCredits)" 
-                     animationDuration={2000}
-                   />
+                    <Area 
+                      type="monotone" 
+                      dataKey="credits" 
+                      stroke="#ff0071" 
+                      strokeWidth={4}
+                      fillOpacity={1} 
+                      fill="url(#colorCredits)" 
+                      animationDuration={2000}
+                    />
                  </AreaChart>
                </ResponsiveContainer>
              </div>
           </div>
 
-          <div className="rounded-[32px] border border-white/5 bg-card/40 p-8 backdrop-blur-xl transition-all hover:border-accent/20">
-             <div className="flex items-center justify-between mb-8">
+          <div className="rounded-[3rem] border border-slate-100 bg-white p-10 shadow-[0_10px_40px_rgba(0,0,0,0.03)] transition-all hover:border-[#ff0071]/10">
+             <div className="flex items-center justify-between mb-10">
                 <div>
-                   <h3 className="text-xl font-black tracking-tight">Actividad por Herramienta</h3>
-                   <p className="text-xs text-muted-foreground opacity-60">Distribución de carga IA</p>
+                   <h3 className="text-2xl font-bold tracking-tight text-slate-800 lowercase">actividad por herramienta</h3>
+                   <p className="text-[11px] font-medium text-slate-400 lowercase italic">distribución de carga ia</p>
                 </div>
-                <Box className="h-5 w-5 text-primary" />
+                <Box className="h-6 w-6 text-[#ff0071] opacity-20" />
              </div>
              <div className="h-[240px] w-full">
                <ResponsiveContainer width="100%" height="100%">
@@ -305,19 +309,18 @@ const Dashboard = () => {
                      dataKey="name" 
                      type="category" 
                      axisLine={false} 
-                     tickLine={false} 
-                     tick={{ fill: '#f8fafc', fontSize: 12, fontWeight: 'bold' }}
-                     width={80}
-                   />
-                   <Tooltip 
-                     cursor={{ fill: 'transparent' }}
-                     contentStyle={{ backgroundColor: '#1e293b', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                   />
-                   <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={24} animationDuration={2000}>
-                     {toolData.map((entry, index) => (
-                       <Cell key={`cell-${index}`} fill={entry.color} />
-                     ))}
-                   </Bar>
+                     tickLine={false}                      tick={{ fill: '#64748b', fontSize: 13, fontWeight: '700' }}
+                      width={90}
+                    />
+                    <Tooltip 
+                      cursor={{ fill: '#f8fafc' }}
+                      contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #f1f5f9', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)' }}
+                    />
+                    <Bar dataKey="value" radius={[0, 12, 12, 0]} barSize={28} animationDuration={2500}>
+                      {toolData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color === '#3b82f6' ? '#ff0071' : entry.color === '#10b981' ? '#1e293b' : '#94a3b8'} />
+                      ))}
+                    </Bar>
                  </BarChart>
                </ResponsiveContainer>
              </div>
@@ -325,46 +328,47 @@ const Dashboard = () => {
         </div>
 
         {/* Action Hub */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid lg:grid-cols-3 gap-10 mb-20">
           {/* Main Studio Access */}
           <div 
             onClick={() => navigate("/formarketing")}
-            className="lg:col-span-2 group relative overflow-hidden rounded-[32px] border border-primary/20 bg-gradient-to-br from-primary/10 via-card to-card p-10 cursor-pointer transition-all hover:border-primary/40 hover:shadow-3xl hover:shadow-primary/10"
+            className="lg:col-span-2 group relative overflow-hidden rounded-[3.5rem] border border-slate-100 bg-white p-12 cursor-pointer transition-all hover:border-[#ff0071]/20 hover:shadow-2xl hover:shadow-[#ff0071]/5"
           >
-             <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/20 blur-[100px] transition-all group-hover:bg-primary/30" />
-             <div className="relative z-10 space-y-4">
-                <Badge className="bg-primary/20 text-primary border-primary/30 py-1 px-4 rounded-full text-[10px] font-bold uppercase tracking-widest">Blueprint Flow V4.2</Badge>
-                <h2 className="text-4xl font-black tracking-tighter">Formarketing Studio</h2>
-                <p className="text-muted-foreground text-lg max-w-md leading-relaxed">
-                   Diseña flujos de marketing visual, genera interfaces UX/UI y assets generativos en un mismo entorno industrial.
+             <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-[#ff0071]/5 blur-[120px] transition-all group-hover:bg-[#ff0071]/10" />
+             <div className="relative z-10 space-y-5">
+                <Badge className="bg-[#ff0071]/10 text-[#ff0071] border-transparent py-1.5 px-5 rounded-full text-[10px] font-bold lowercase tracking-tight">blueprint_flow_v6.2</Badge>
+                <h2 className="text-6xl font-bold tracking-tight text-slate-900 lowercase">formarketing studio</h2>
+                <p className="text-slate-400 text-xl max-w-md leading-relaxed lowercase font-medium">
+                   diseña flujos de marketing visual, genera interfaces ux/ui y assets generativos en un mismo entorno industrial.
                 </p>
-                <Button className="mt-4 bg-foreground text-background hover:bg-foreground/90 rounded-2xl px-8 h-12 font-bold group">
-                   Entrar al Estudio
-                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <Button className="mt-6 bg-slate-900 text-white hover:bg-[#ff0071] rounded-2xl px-10 h-14 font-bold lowercase transition-all active:scale-95 shadow-xl shadow-slate-900/10 hover:shadow-[#ff0071]/20">
+                   entrar al estudio
+                   <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />
                 </Button>
              </div>
-             <div className="absolute bottom-10 right-10 opacity-20 transition-all group-hover:opacity-40 group-hover:scale-110 duration-500">
-                <Palette className="h-40 w-40 text-primary" />
+             <div className="absolute bottom-12 right-12 opacity-10 transition-all group-hover:opacity-30 group-hover:scale-110 duration-700">
+                <Palette className="h-56 w-56 text-[#ff0071]" />
              </div>
           </div>
 
           {/* Quick Tools Panel */}
-          <div className="rounded-[32px] border border-white/5 bg-card/60 p-8 flex flex-col backdrop-blur-xl transition-all hover:border-white/10">
-             <div className="flex items-center justify-between mb-8">
-                <h3 className="font-bold text-xl tracking-tight">Acceso Rápido</h3>
-                <Settings className="h-5 w-5 text-muted-foreground opacity-40" />
+          <div className="rounded-[3.5rem] border border-slate-100 bg-white p-10 flex flex-col shadow-sm transition-all hover:shadow-xl hover:shadow-[#ff0071]/5">
+             <div className="flex items-center justify-between mb-10">
+                <h3 className="font-bold text-2xl tracking-tight text-slate-800 lowercase">acceso rápido</h3>
+                <Zap className="h-6 w-6 text-[#ff0071] animate-pulse" />
              </div>
-             <div className="grid grid-cols-2 gap-4 flex-1">
+             <div className="grid grid-cols-2 gap-5 flex-1">
                 {quickActions.map((action) => (
                    <button 
                       key={action.label}
                       onClick={() => navigate(action.path)}
-                      className="group flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border border-white/5 bg-white/5 transition-all hover:bg-primary/10 hover:border-primary/20"
+                      aria-label={`ejecutar ${action.label}`}
+                      className="group flex flex-col items-center justify-center gap-4 p-5 rounded-[2rem] border border-slate-50 bg-slate-50/50 transition-all hover:bg-white hover:border-[#ff0071]/20 hover:shadow-lg hover:shadow-[#ff0071]/5 active:scale-[0.98]"
                    >
-                      <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${action.accent} shadow-sm group-hover:scale-110 transition-transform`}>
-                         <action.icon className="h-5 w-5" />
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${action.accent.replace('primary', '[#ff0071]')} shadow-sm group-hover:scale-110 transition-transform`}>
+                         <action.icon className="h-6 w-6" />
                       </div>
-                      <span className="text-[10px] font-bold text-center uppercase tracking-wider opacity-80">{action.label}</span>
+                      <span className="text-[12px] font-bold text-center lowercase tracking-tight text-slate-500 group-hover:text-slate-800">{action.label}</span>
                    </button>
                 ))}
              </div>
@@ -429,7 +433,7 @@ const Dashboard = () => {
             </Dialog>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             {spaces.length === 0 ? (
               <div className="col-span-full border-2 border-dashed border-white/5 rounded-[32px] p-12 flex flex-col items-center justify-center text-center bg-white/2 cursor-pointer hover:bg-white/5 transition-all" onClick={() => setIsCreatingSpace(true)}>
                 <div className="h-16 w-16 rounded-3xl bg-white/5 flex items-center justify-center mb-4 text-muted-foreground/40">
@@ -470,30 +474,30 @@ const Dashboard = () => {
         </div>
 
         {/* AI Applications Section */}
-        <div className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-               <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                  <Sparkles className="h-4 w-4" />
+        <div className="mb-20">
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-4">
+               <div className="h-10 w-10 rounded-[1.25rem] bg-[#ff0071]/10 flex items-center justify-center text-[#ff0071] shadow-sm">
+                  <Sparkles className="h-5 w-5" />
                </div>
-               <h2 className="text-2xl font-black tracking-tight">Aplicaciones <span className="gradient-text">IA</span></h2>
+               <h2 className="text-3xl font-bold tracking-tight text-slate-800 lowercase">aplicaciones <span className="text-[#ff0071]">ia</span></h2>
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {aiApps.map((app) => (
               <button
                 key={app.label}
                 onClick={() => navigate(app.path)}
-                className="group flex items-start gap-4 rounded-[24px] border border-white/5 bg-card/40 p-5 transition-all hover:border-primary/20 hover:bg-card/60 text-left backdrop-blur-sm"
+                className="group flex items-start gap-5 rounded-[2.5rem] border border-slate-100 bg-white p-6 transition-all hover:border-[#ff0071]/20 hover:shadow-2xl hover:shadow-[#ff0071]/5 text-left active:scale-95"
               >
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${app.accent} transition-transform group-hover:scale-110 shadow-sm`}>
-                  <app.icon className="h-6 w-6" />
+                <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.5rem] ${app.accent.replace('primary', '[#ff0071]')} transition-transform group-hover:scale-110 shadow-sm shadow-[#ff0071]/5`}>
+                  <app.icon className="h-7 w-7" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">
+                <div className="pt-1">
+                  <h3 className="text-[15px] font-bold text-slate-800 group-hover:text-[#ff0071] transition-colors lowercase">
                     {app.label}
                   </h3>
-                  <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed opacity-70 group-hover:opacity-100">{app.desc}</p>
+                  <p className="mt-1 text-[12px] text-slate-400 font-medium leading-relaxed lowercase">{app.desc}</p>
                 </div>
               </button>
             ))}
@@ -514,7 +518,7 @@ const Dashboard = () => {
                  Ver galería <ArrowRight className="h-3.5 w-3.5" />
                </Button>
             </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
               {recentAssets.map((asset) => (
                 <div
                   key={asset.id}
@@ -538,19 +542,18 @@ const Dashboard = () => {
       </main>
       
       {/* Footer */}
-      <footer className="mt-20 border-t border-white/5 bg-card/40 backdrop-blur-xl">
-         <div className="container mx-auto px-6 py-12 flex flex-col items-center gap-6 max-w-7xl">
-            <div className="flex items-center gap-2.5">
-               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 border border-primary/20">
-                  <Sparkles className="h-4 w-4 text-primary" />
+      <footer className="mt-32 border-t border-slate-50 bg-slate-50/50">
+         <div className="container mx-auto px-6 py-16 flex flex-col items-center gap-8 max-w-7xl">
+            <div className="flex items-center gap-3">
+               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff0071]/10 border border-[#ff0071]/20">
+                  <Sparkles className="h-5 w-5 text-[#ff0071]" />
                </div>
-               <span className="text-sm font-bold tracking-tight">
-                  <span className="gradient-text">Creator IA</span>
-                  <span className="text-foreground"> Pro</span>
+               <span className="text-lg font-bold tracking-tight text-slate-800 lowercase">
+                  creator_ia <span className="text-[#ff0071]">pro</span>
                </span>
             </div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-medium opacity-50">
-               © {new Date().getFullYear()} Industrial Generation Suite • V3.1
+            <p className="text-[11px] text-slate-400 lowercase tracking-tight font-medium opacity-60">
+               © {new Date().getFullYear()} industrial generation suite • pulse v6.2
             </p>
          </div>
       </footer>
