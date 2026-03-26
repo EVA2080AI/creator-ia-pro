@@ -73,54 +73,51 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
   };
 
   return (
-    <>
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0a0b]/80 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          {/* Logo */}
-          <button
-            onClick={() => navigate("/dashboard")}
-            aria-label="ir al inicio"
-            className="flex items-center gap-4 hover:opacity-80 transition-opacity group"
-          >
-            <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-[#ff0071] shadow-xl shadow-[#ff0071]/20 group-hover:scale-105 transition-transform rotate-0">
-              <Sparkles className="h-6 w-6 text-white" />
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-xl font-black hidden sm:inline text-white leading-none tracking-tighter">
-                creator_ia <span className="text-[#ff0071]">pro</span>
-              </span>
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2 hidden sm:inline">V7.0 PULSE</span>
-            </div>
-          </button>
+    <header className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-[95%] max-w-[1200px] animate-in slide-in-from-top-8 duration-700">
+      <div className="nebula-glass rounded-[2rem] px-8 py-4 flex items-center justify-between shadow-3xl bg-[#080809]/80 backdrop-blur-3xl border border-white/5">
+        
+        {/* Logo Section */}
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="flex items-center gap-4 hover:opacity-80 transition-all group shrink-0"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#d4ff00] shadow-2xl shadow-[#d4ff00]/20 group-hover:rotate-12 transition-transform">
+             <Rocket className="h-5 w-5 text-[#020203]" />
+          </div>
+          <div className="hidden lg:flex flex-col text-left">
+             <h1 className="text-lg font-black tracking-tighter text-white leading-none">nexo<span className="text-[#d4ff00]">_</span>terminal</h1>
+             <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.4em] mt-1.5">Nebula V8.0</span>
+          </div>
+        </button>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            <NavigationMenu>
-              <NavigationMenuList>
-                {menuGroups.map((group) => (
-                  <NavigationMenuItem key={group.label}>
-                    <NavigationMenuTrigger className="bg-transparent text-slate-400 hover:text-white font-black lowercase tracking-widest text-[10px] h-10 px-4 rounded-full transition-all">
-                      <group.icon className="h-3.5 w-3.5 mr-2 text-[#ff0071]" />
-                      {group.label}
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                      <ul className="grid w-[400px] gap-3 p-6 grid-cols-1 bg-[#0a0a0b]/95 border border-white/5 backdrop-blur-3xl rounded-[2rem] shadow-3xl">
+        {/* Center Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-1">
+          <NavigationMenu>
+            <NavigationMenuList className="gap-2">
+              {menuGroups.map((group) => (
+                <NavigationMenuItem key={group.label}>
+                  <NavigationMenuTrigger className="bg-transparent text-slate-400 hover:text-white font-black lowercase tracking-[0.15em] text-[10px] h-9 px-4 rounded-xl transition-all border-none focus:bg-white/5 data-[state=open]:bg-white/5">
+                    {group.label}
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[450px] gap-4 p-8 grid-cols-1 bg-[#080809]/95 border border-white/5 backdrop-blur-3xl rounded-[2.5rem] shadow-3xl">
+                      <div className="grid grid-cols-1 gap-2">
                         {group.items.map((item) => (
                            <li key={item.path}>
                               <NavigationMenuLink asChild>
                                 <button
                                   onClick={() => handleNav(item.path)}
                                   className={cn(
-                                    "flex w-full items-center gap-4 select-none space-y-1 rounded-2xl p-4 leading-none no-underline outline-none transition-all hover:bg-white/5 group/item",
-                                    location.pathname === item.path && "bg-[#ff0071]/10 border-[#ff0071]/20"
+                                    "flex w-full items-center gap-5 select-none space-y-1 rounded-2xl p-4 leading-none no-underline outline-none transition-all hover:bg-white/5 group/item",
+                                    location.pathname === item.path && "bg-[#d4ff00]/5 border-[#d4ff00]/10"
                                   )}
                                 >
-                                  <div className="p-2.5 rounded-xl bg-white/5 group-hover/item:scale-110 group-hover/item:bg-[#ff0071]/10 transition-all shadow-lg">
-                                    <item.icon className="h-4.5 w-4.5 text-[#ff0071]" />
+                                  <div className="p-3 rounded-xl bg-white/5 group-hover/item:scale-110 group-hover/item:bg-[#d4ff00]/10 transition-all">
+                                    <item.icon className="h-4.5 w-4.5 text-[#d4ff00]" />
                                   </div>
                                   <div className="flex flex-col text-left">
                                     <span className="text-[11px] font-black leading-none text-white lowercase tracking-widest">{item.label}</span>
-                                    <p className="line-clamp-2 text-[9px] leading-snug text-slate-500 mt-1.5 lowercase italic tracking-tight">
+                                    <p className="line-clamp-1 text-[10px] leading-snug text-slate-500 mt-2 lowercase italic font-medium">
                                       {item.description}
                                     </p>
                                   </div>
@@ -128,115 +125,82 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                               </NavigationMenuLink>
                            </li>
                         ))}
-                      </ul>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                ))}
-                
-                {isAdmin && (
-                  <NavigationMenuItem>
-                    <NavigationMenuTrigger className="bg-transparent text-destructive hover:text-destructive font-black lowercase tracking-widest text-[10px] h-10 px-4 rounded-full">
-                      <Shield className="h-3.5 w-3.5 mr-2" />
-                      Admin
-                    </NavigationMenuTrigger>
-                    <NavigationMenuContent>
-                       <ul className="grid w-[200px] gap-2 p-4 bg-[#0a0a0b]/95 border border-white/5 backdrop-blur-3xl rounded-2xl shadow-3xl">
-                          {adminItems.map(item => (
-                             <li key={item.path}>
-                                <button onClick={() => handleNav(item.path)} className="flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-[10px] font-black lowercase tracking-widest text-slate-400 hover:text-white">
-                                   <item.icon className="h-3.5 w-3.5" />
-                                   {item.label}
-                                </button>
-                             </li>
-                          ))}
-                       </ul>
-                    </NavigationMenuContent>
-                  </NavigationMenuItem>
-                )}
-              </NavigationMenuList>
-            </NavigationMenu>
-          </nav>
+                      </div>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+              ))}
+            </NavigationMenuList>
+          </NavigationMenu>
+        </nav>
 
-          {/* Credits + Profile */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/pricing")}
-              className="flex items-center gap-2.5 rounded-full border border-white/5 bg-white/5 px-4 py-2 text-[10px] font-black text-slate-400 hover:bg-white/10 hover:border-[#ff0071]/30 hover:text-white transition-all shadow-2xl"
-            >
-              <Coins className="h-3.5 w-3.5 text-[#ff0071]" />
-              <span className="font-mono tracking-tighter">
-                {profile?.credits_balance ?? 0}
-              </span>
-            </button>
-            
-            <div className="h-4 w-px bg-white/10 mx-2" />
-
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={onSignOut} 
-              aria-label="cerrar sesión"
-              className="text-slate-300 hover:text-[#ff0071] hover:bg-[#ff0071]/5 h-9 w-9 p-0 rounded-full hidden md:flex transition-all"
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-            
-            {/* Mobile hamburger */}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? "cerrar menú" : "abrir menú"}
-              className="md:hidden text-slate-400 hover:text-slate-900 h-9 w-9 p-0 rounded-xl bg-slate-50"
-            >
-              {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-            </Button>
+        {/* Right Actions */}
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-xl border border-white/5 mr-2">
+             <Coins className="h-3.5 w-3.5 text-[#d4ff00]" />
+             <span className="text-[10px] font-black text-white tracking-widest leading-none">1,240</span>
           </div>
-        </div>
-      </header>
 
-      {/* Mobile Nav Overlay */}
+          <button
+            onClick={() => navigate("/profile")}
+            className="flex items-center gap-3 p-1.5 pr-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all group shrink-0"
+          >
+            <div className="h-7 w-7 rounded-lg bg-slate-800 flex items-center justify-center overflow-hidden">
+               <User className="h-4 w-4 text-slate-400 group-hover:text-[#d4ff00] transition-colors" />
+            </div>
+            <span className="hidden sm:block text-[10px] font-black text-white lowercase tracking-tighter">perfil_id</span>
+          </button>
+
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-white hover:bg-white/10 transition-all border border-white/5"
+          >
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Terminal Menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden bg-[#050506]/60 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="absolute inset-0" onClick={() => setMobileOpen(false)} />
-          <nav className="absolute top-[68px] left-4 right-4 border border-white/5 bg-[#0a0a0b]/95 backdrop-blur-3xl p-4 rounded-[2rem] space-y-4 shadow-2xl animate-in slide-in-from-top-4 duration-500 z-50 max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 z-40 md:hidden bg-[#020203]/90 backdrop-blur-xl animate-in fade-in duration-500">
+          <div className="absolute inset-x-4 top-[100px] nebula-glass rounded-[2.5rem] p-8 space-y-8 shadow-3xl animate-in slide-in-from-top-8 duration-700">
             {menuGroups.map((group) => (
-              <div key={group.label} className="space-y-2">
-                 <div className="px-5 py-2 flex items-center gap-3">
-                    <group.icon className="h-4 w-4 text-[#ff0071]" />
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{group.label}</span>
+              <div key={group.label} className="space-y-4">
+                 <div className="px-2 flex items-center gap-3">
+                    <group.icon className="h-4 w-4 text-[#d4ff00]" />
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em]">{group.label}</span>
                  </div>
-                 {group.items.map((item) => {
-                   const isActive = location.pathname === item.path;
-                   return (
+                 <div className="grid grid-cols-1 gap-2">
+                   {group.items.map((item) => (
                      <button
                        key={item.path}
                        onClick={() => handleNav(item.path)}
-                       className={`flex w-full items-center gap-4 rounded-2xl px-5 py-3 text-[10px] font-black lowercase tracking-widest transition-all ${
-                         isActive
-                           ? "bg-[#ff0071] text-white shadow-xl shadow-[#ff0071]/20"
+                       className={cn(
+                         "flex w-full items-center gap-5 rounded-2xl px-5 py-4 text-[10px] font-black lowercase tracking-widest transition-all",
+                         location.pathname === item.path
+                           ? "bg-[#d4ff00] text-[#020203] shadow-2xl shadow-[#d4ff00]/20"
                            : "text-slate-400 hover:text-white hover:bg-white/5"
-                       }`}
+                       )}
                      >
-                       <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-[#ff0071]'}`} />
+                       <item.icon className="h-4.5 w-4.5" />
                        {item.label}
                      </button>
-                   );
-                 })}
+                   ))}
+                 </div>
               </div>
             ))}
-            <div className="border-t border-white/5 pt-2 mt-2">
+            <div className="pt-6 border-t border-white/5">
               <button
                 onClick={() => { onSignOut(); setMobileOpen(false); }}
-                className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-xs font-black lowercase tracking-widest text-destructive hover:bg-destructive/10 transition-all"
+                className="flex w-full items-center gap-5 rounded-2xl px-5 py-4 text-[10px] font-black lowercase tracking-widest text-red-500 hover:bg-red-500/10 transition-all"
               >
-                <LogOut className="h-4 w-4" />
-                cerrar sesión
+                <LogOut className="h-4.5 w-4.5" />
+                cerrar_sesion_terminal
               </button>
             </div>
-          </nav>
+          </div>
         </div>
       )}
-    </>
+    </header>
   );
 }

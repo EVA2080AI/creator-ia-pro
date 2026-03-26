@@ -6,33 +6,35 @@
 
 @layer base {
   :root {
-    --background: 240 10% 2%; /* Industrial Ebony #050506 */
+    --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
-    --card: 240 10% 4%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 4%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 335 100% 50%; /* Magenta Pulse #ff0071 */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 240 4% 12%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 5% 10%;
-    --muted-foreground: 240 5% 60%;
-    --accent: 335 100% 50%;
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5% 15%;
-    --input: 240 5% 15%;
-    --ring: 335 100% 50%;
-    --radius: 2.5rem;
+    /* Nebula V8.0 Minimalist Flux Palette */
+    --nebula-bg: #020203;
+    --nebula-card: #080809;
+    --nebula-primary: #d4ff00; /* Cyber Lime */
+    --nebula-secondary: #00d1ff; /* Azure Flux */
+    --nebula-gloss: rgba(255, 255, 255, 0.03);
+    --nebula-border: rgba(255, 255, 255, 0.05);
+    --nebula-glow: rgba(212, 255, 0, 0.15);
     
-    /* V7.0 Pulse Industrial Tokens */
-    --pulse-magenta: #ff0071;
-    --pulse-ebony: #050506;
-    --pulse-slate: #64748b;
-    --pulse-glass: rgba(5, 5, 6, 0.8);
-    --pulse-border: rgba(255, 255, 255, 0.05);
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 65 100% 50%; /* Cyber Lime HSL approx */
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 65 100% 50%;
+    --radius: 1.5rem;
   }
 
   * {
@@ -72,65 +74,97 @@
   --xy-selection-background-color-default: rgba(255, 0, 113, 0.1);
 }
 
-.react-flow__background {
-  background-image: 
-    radial-gradient(#1e293b 1px, transparent 1px) !important;
-  background-size: 24px 24px !important;
+/* Nebula V8.0 Utilities */
+.nebula-glass {
+  background: var(--nebula-gloss);
+  backdrop-filter: blur(80px);
+  -webkit-backdrop-filter: blur(80px);
+  border: 1px solid var(--nebula-border);
+}
+
+.nebula-card {
+  background: var(--nebula-card);
+  border: 1px solid var(--nebula-border);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.nebula-glow {
+  box-shadow: 0 0 40px var(--nebula-glow);
+}
+
+.text-nebula-primary {
+  color: var(--nebula-primary);
+}
+
+.bg-nebula-primary {
+  background-color: var(--nebula-primary);
+}
+
+/* React Flow Minimalist Adjustments */
+.react-flow__node {
+  border-radius: 2rem !important;
+  border: none !important;
+  padding: 0 !important;
 }
 
 .react-flow__handle {
-  width: 12px !important;
-  height: 12px !important;
-  border: 3px solid #050506 !important;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  width: 10px !important;
+  height: 10px !important;
+  background-color: var(--nebula-primary) !important;
+  border: 3px solid var(--nebula-bg) !important;
 }
 
-.react-flow__handle:hover {
-  background-color: #ff0071 !important;
-  transform: scale(1.2);
+.react-flow__edge-path {
+  stroke-width: 2;
+  stroke: rgba(212, 255, 0, 0.3) !important;
 }
 
 .react-flow__controls {
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  background-color: rgba(5, 5, 6, 0.8) !important;
-  backdrop-filter: blur(20px) !important;
-  border-radius: 1rem !important;
-  overflow: hidden;
+  box-shadow: none !important;
+  border: 1px solid var(--nebula-border) !important;
+  background: var(--nebula-card) !important;
 }
 
 .react-flow__controls-button {
   background: transparent !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
-  color: #64748b !important;
-  transition: all 0.2s;
+  border-bottom: 1px solid var(--nebula-border) !important;
+  color: #555 !important;
 }
 
 .react-flow__controls-button:hover {
-  background: rgba(255, 0, 113, 0.1) !important;
-  color: #ff0071 !important;
+  background: rgba(212, 255, 0, 0.05) !important;
+  color: var(--nebula-primary) !important;
 }
 
-.react-flow__minimap {
-  background-color: rgba(5, 5, 6, 0.8) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
-  border-radius: 1.5rem !important;
+/* Global Typography High-End */
+body {
+  font-family: 'Inter Tight', 'Inter', sans-serif;
+  background-color: var(--nebula-bg);
+  color: white;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbar V7.0 Industrial */
+h1, h2, h3, h4 {
+  font-weight: 900;
+  letter-spacing: -0.05em;
+}
+
+/* Minimalist Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #050506;
+  background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: var(--nebula-border);
   border-radius: 10px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #ff0071;
+  background: var(--nebula-primary);
 }
 
 /* Animations */

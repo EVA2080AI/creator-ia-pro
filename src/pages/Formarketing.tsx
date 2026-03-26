@@ -17,6 +17,7 @@ import VideoModelNode from '@/components/formarketing/VideoModelNode';
 import LayoutBuilderNode from '@/components/formarketing/LayoutBuilderNode';
 import CampaignManagerNode from '@/components/formarketing/CampaignManagerNode';
 import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
+import AntigravityBridgeNode from '@/components/formarketing/AntigravityBridgeNode';
 import { ArrowLeft, Rocket, Trash2, Zap, LogOut, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ const nodeTypes = {
   videoModel: VideoModelNode,
   layoutBuilder: LayoutBuilderNode,
   campaignManager: CampaignManagerNode,
+  antigravityBridge: AntigravityBridgeNode,
 };
 
 const initialNodes: Node[] = [
@@ -142,7 +144,7 @@ function FormarketingContent() {
     };
 
     loadData();
-  }, [user, spaceId]);
+  }, [user, spaceId, setNodes, setEdges]);
 
   // Persist Changes (Positions)
   const handleNodesChange = useCallback(
@@ -446,6 +448,51 @@ function FormarketingContent() {
     toast.success("Flujo completo procesado.");
   };
 
+  // Listen for template injection - Moved here to ensure executeNode/Variation are defined
+  useEffect(() => {
+    const handleAddTemplate = async (e: any) => {
+      const template = e.detail;
+      const basePos = { x: 100, y: 100 };
+      
+      const newNodes: Node[] = template.nodes.map((nodeData: any, index: number) => {
+        const newNodeId = crypto.randomUUID();
+        return {
+          id: newNodeId,
+          type: nodeData.type,
+          position: { x: basePos.x + (index * 350), y: basePos.y + (index * 50) },
+          data: { 
+            ...nodeData.data,
+            onExecute: () => executeNode(newNodeId),
+            onVariation: () => executeVariation(newNodeId)
+          }
+        };
+      });
+
+      setNodes((nds) => nds.concat(newNodes));
+
+      if (spaceId && user) {
+        for (const node of newNodes) {
+          await supabase.from('canvas_nodes').insert({
+             id: node.id,
+             space_id: spaceId,
+             user_id: user.id,
+             type: node.type,
+             pos_x: node.position.x,
+             pos_y: node.position.y,
+             prompt: (node.data.title as string) || node.type,
+             status: 'idle',
+             data_payload: node.data as any
+          });
+        }
+      }
+      
+      toast.success(`Inyectado pack: ${template.title}`);
+    };
+
+    window.addEventListener('add-template', handleAddTemplate);
+    return () => window.removeEventListener('add-template', handleAddTemplate);
+  }, [user, spaceId, setNodes, executeNode, executeVariation]);
+
   const handleManualAddNode = useCallback((type: string, label: string, assetUrl?: string) => {
     const newNodeId = crypto.randomUUID();
     const position = { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 };
@@ -559,64 +606,62 @@ function FormarketingContent() {
           }
         })));
      }
-  }, [nodes.length]);
+  }, [nodes, setNodes, executeNode, executeVariation]);
 
   return (
-    <div className="flex h-screen w-full flex-col bg-[#0a0a0b] text-white overflow-hidden font-sans selection:bg-[#ff0071]/30">
-      {/* V7.0 Industrial Pulse Header */}
-      <div className="flex h-16 w-full items-center justify-between border-b border-white/5 bg-[#0a0a0b]/80 px-8 backdrop-blur-2xl shrink-0 z-[100]">
-         <div className="flex items-center gap-6">
+    <div className="flex h-screen w-full flex-col bg-[#020203] text-white overflow-hidden font-sans selection:bg-[#d4ff00]/30 selection:text-[#020203]">
+      {/* Nebula V8.0 Minimalist Studio Header */}
+      <div className="flex h-20 w-full items-center justify-between border-b border-white/5 bg-[#020203]/40 px-10 backdrop-blur-3xl shrink-0 z-[90]">
+         <div className="flex items-center gap-8">
              <button
                 onClick={() => navigate("/dashboard")}
-                className="flex items-center gap-4 hover:opacity-80 transition-opacity group"
+                className="flex items-center gap-5 hover:opacity-80 transition-all group"
              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-[#ff0071] shadow-2xl shadow-[#ff0071]/20 group-hover:scale-105 transition-transform">
-                   <Rocket className="h-6 w-6 text-white" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-[1.2rem] bg-[#d4ff00] shadow-2xl shadow-[#d4ff00]/20 group-hover:rotate-6 transition-transform">
+                   <Rocket className="h-5.5 w-5.5 text-[#020203]" />
                 </div>
                 <div className="flex flex-col text-left">
-                   <h1 className="text-xl font-black tracking-tighter text-white leading-none">creator_ia <span className="text-[#ff0071]">pro</span></h1>
-                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2">V7.0 PULSE</span>
+                   <h1 className="text-xl font-black tracking-tighter text-white leading-none">nexus<span className="text-[#d4ff00]">_</span>studio</h1>
+                   <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.5em] mt-2">Nebula V8.0 Minimalist</span>
                 </div>
              </button>
-            <div className="h-4 w-px bg-white/10 mx-2" />
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-xl w-10 h-10 text-slate-500 hover:text-white transition-all">
-               <ArrowLeft className="h-4 w-4" />
+            <div className="h-6 w-px bg-white/10 mx-2" />
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-2xl w-11 h-11 text-slate-500 hover:text-[#d4ff00] transition-all">
+               <ArrowLeft className="h-5 w-5" />
             </Button>
          </div>
 
-         <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-full border border-white/5 mr-4 shadow-2xl">
-               <div className="w-1.5 h-1.5 rounded-full bg-[#ff0071] shadow-[0_0_10px_#ff0071]" />
-               <span className="text-[10px] font-black text-slate-400 lowercase tracking-widest">industrial_sync_active</span>
+         <div className="flex items-center gap-5">
+            <div className="hidden md:flex items-center gap-3 bg-[#d4ff00]/5 px-5 py-2.5 rounded-2xl border border-[#d4ff00]/10 shadow-2xl">
+               <div className="w-2 h-2 rounded-full bg-[#d4ff00] shadow-[0_0_15px_#d4ff00] animate-pulse" />
+               <span className="text-[10px] font-black text-[#d4ff00] lowercase tracking-[0.2em]">nebula_link_stable</span>
             </div>
 
             <Button 
                variant="ghost" 
                onClick={handleClear} 
                disabled={nodes.length === 0 && edges.length === 0}
-               aria-label="borrar lienzo"
-               className="text-slate-500 hover:text-destructive hover:bg-destructive/10 rounded-2xl px-5 h-10 text-[10px] font-black lowercase tracking-widest gap-2 transition-all disabled:opacity-20"
+               className="text-slate-500 hover:text-white hover:bg-white/5 rounded-2xl px-6 h-11 text-[11px] font-black lowercase tracking-widest gap-3 transition-all disabled:opacity-20"
             >
-               <Trash2 className="w-3.5 h-3.5" />
-               limpiar_canvas
+               <Trash2 className="w-4 h-4" />
+               limpiar_lienzo
             </Button>
             
             <Button 
                onClick={handleExecute} 
                disabled={nodes.length === 0}
-               aria-label="ejecutar flujo"
-               className="h-11 bg-[#ff0071] text-white hover:bg-[#e60066] rounded-2xl gap-3 font-black px-8 shadow-2xl shadow-[#ff0071]/20 text-[10px] lowercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
+               className="h-12 bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] rounded-2xl gap-3 font-black px-10 shadow-2xl shadow-[#d4ff00]/20 text-[11px] lowercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
             >
-               <Zap className="w-4 h-4" />
-               run_nexus_engine
+               <Zap className="w-4.5 h-4.5" />
+               ejecutar_flujo_genius
             </Button>
 
-            <div className="h-4 w-px bg-slate-100 mx-2" />
+            <div className="h-6 w-px bg-white/10 mx-2" />
             
-            <button onClick={signOut} className="p-2 hover:bg-slate-50 rounded-full text-slate-400 hover:text-slate-900 transition-all">
-               <LogOut className="h-3.5 w-3.5" />
+            <button onClick={signOut} className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl text-slate-400 hover:text-white transition-all">
+               <LogOut className="h-4 w-4" />
             </button>
-         </div>
+      </div>
       </div>
 
       <div className="relative h-full w-full flex-1" ref={reactFlowWrapper}>
@@ -631,29 +676,30 @@ function FormarketingContent() {
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           fitView
-          className="pulse-canvas bg-[#0a0a0b]"
+          className="nebula-canvas bg-[#020203]"
           colorMode="dark"
           defaultEdgeOptions={{ 
             type: 'smoothstep', 
             animated: true,
-            style: { stroke: '#ff007180', strokeWidth: 2 }
+            style: { stroke: '#d4ff0040', strokeWidth: 2 }
           }}
         >
           <Background 
-            color="#ffffff05" 
-            variant={BackgroundVariant.Dots} 
-            gap={40} 
+            color="#d4ff0010" 
+            variant={BackgroundVariant.Lines} 
+            gap={60} 
             size={1} 
           />
-          <Controls className="!bg-[#0a0a0b] !border-white/5 !fill-slate-500 !bottom-10 !left-8 rounded-[1.5rem] overflow-hidden scale-110 shadow-3xl backdrop-blur-3xl" />
+          <Controls className="!bg-[#080809]/80 !border-white/5 !fill-slate-500 !bottom-12 !left-10 rounded-[2rem] overflow-hidden scale-125 shadow-3xl backdrop-blur-3xl" />
           <MiniMap 
-            className="!bg-[#0a0a0b]/80 border !border-white/5 !rounded-[2rem] overflow-hidden backdrop-blur-3xl !bottom-10 !right-8 shadow-3xl opacity-40 hover:opacity-100 transition-opacity" 
-            maskColor="rgba(10,10,11,0.8)" 
+            className="!bg-[#080809]/80 border !border-white/5 !rounded-[2.5rem] overflow-hidden backdrop-blur-3xl !bottom-12 !right-10 shadow-3xl opacity-30 hover:opacity-100 transition-opacity" 
+            maskColor="rgba(2,2,3,0.8)" 
             nodeColor={(n) => {
-               if (n.type === 'characterBreakdown') return '#ff007160';
-               if (n.type === 'modelView') return '#ffffff20';
-               if (n.type === 'videoModel') return '#ff007140';
-               return '#222';
+               if (n.type === 'characterBreakdown') return '#d4ff0040';
+               if (n.type === 'modelView') return '#ffffff10';
+               if (n.type === 'videoModel') return '#d4ff0060';
+               if (n.type === 'antigravityBridge') return '#d4ff0080';
+               return '#111';
             }}
           />
         </ReactFlow>

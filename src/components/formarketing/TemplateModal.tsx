@@ -7,7 +7,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles, LayoutGrid, Zap, Video, Image as ImageIcon, Rocket } from "lucide-react";
+import { Sparkles, LayoutGrid, Zap, Video, Image as ImageIcon, Rocket, ChevronRight } from "lucide-react";
 
 interface Template {
   id: string;
@@ -21,6 +21,21 @@ interface Template {
 }
 
 const templates: Template[] = [
+  {
+    id: 'antigravityPack',
+    title: 'Antigravity Ecosystem',
+    description: 'Motor de clonación de interfaces. Conecta una URL de referencia y genera el Brand Context completo para Antigravity.',
+    icon: Rocket,
+    color: 'text-[#ff0071]',
+    bg: 'bg-[#ff0071]/10',
+    previewUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop',
+    nodes: [
+        { type: 'antigravityBridge', data: { title: 'Reference Hub', status: 'idle' } },
+        { type: 'characterBreakdown', data: { title: 'Brand Identity', flavor: 'derived_from_url', description: 'Contexto visual extraído...' } },
+        { type: 'modelView', data: { title: 'Site Visuals', prompt: 'Hero vision based on brand context' } },
+        { type: 'layoutBuilder', data: { title: 'UI Skeleton', platform: 'web' } }
+    ]
+  },
   {
     id: 'metaPack',
     title: 'Meta Ads Pack',
@@ -48,21 +63,6 @@ const templates: Template[] = [
         { type: 'characterBreakdown', data: { title: 'Value Prop', description: 'Define la propuesta de valor...' } },
         { type: 'layoutBuilder', data: { title: 'Wireframe Layout', platform: 'web' } }
     ]
-  },
-  {
-    id: 'videoPack',
-    title: 'Master Video Sequence',
-    description: 'Secuencia de video industrial para anuncios de alto impacto. Tres escenas coordinadas por un guion central.',
-    icon: Video,
-    color: 'text-purple-500',
-    bg: 'bg-purple-500/10',
-    previewUrl: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?q=80&w=1000&auto=format&fit=crop',
-    nodes: [
-        { type: 'characterBreakdown', data: { title: 'Video Script', description: 'Guion base de la secuencia...' } },
-        { type: 'videoModel', data: { title: 'Escena 1', status: 'pending' } },
-        { type: 'videoModel', data: { title: 'Escena 2', status: 'pending' } },
-        { type: 'videoModel', data: { title: 'Escena 3', status: 'pending' } }
-    ]
   }
 ];
 
@@ -82,54 +82,54 @@ export function TemplateModal({ onSelect, trigger }: TemplateModalProps) {
             </button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px] bg-white border border-slate-100 backdrop-blur-3xl text-slate-800 rounded-[2.5rem] p-0 overflow-hidden shadow-2xl">
-        <DialogHeader className="p-10 border-b border-slate-50 bg-slate-50/30">
-          <div className="flex items-center gap-4 mb-2">
-             <div className="p-3 bg-[#ff0071]/10 rounded-2xl">
-                <Rocket className="w-6 h-6 text-[#ff0071]" />
+      <DialogContent className="sm:max-w-[900px] bg-[#050506] border border-white/5 backdrop-blur-3xl text-white rounded-[3rem] p-0 overflow-hidden shadow-3xl">
+        <DialogHeader className="p-12 border-b border-white/5 bg-white/[0.02]">
+          <div className="flex items-center gap-6 mb-2">
+             <div className="p-4 bg-[#ff0071]/10 rounded-2xl shadow-xl shadow-[#ff0071]/10">
+                <Rocket className="w-8 h-8 text-[#ff0071]" />
              </div>
              <div className="flex flex-col">
-                <DialogTitle className="text-2xl font-bold lowercase tracking-tight text-slate-800">biblioteca de plantillas</DialogTitle>
-                <DialogDescription className="text-[11px] font-bold text-slate-400 lowercase tracking-tight">pulse v6.2 elite workspaces</DialogDescription>
+                <DialogTitle className="text-3xl font-black lowercase tracking-tighter text-white">biblioteca_nexo</DialogTitle>
+                <DialogDescription className="text-[12px] font-black text-slate-500 lowercase tracking-[0.2em] mt-2">Pulse V7.0 Industrial Templates</DialogDescription>
              </div>
           </div>
         </DialogHeader>
         
-        <div className="p-10 max-h-[600px] overflow-y-auto scrollbar-hide">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="p-10 max-h-[650px] overflow-y-auto scrollbar-hide bg-[#050506]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             {templates.map((template) => (
               <div 
                 key={template.id}
-                className="group relative flex flex-col gap-5 p-6 rounded-[2.5rem] bg-white border border-slate-100 hover:border-[#ff0071]/20 transition-all hover:shadow-2xl hover:shadow-[#ff0071]/5 overflow-hidden"
+                className="group relative flex flex-col gap-6 p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 hover:border-[#ff0071]/30 transition-all hover:shadow-3xl hover:shadow-[#ff0071]/5 overflow-hidden active:scale-[0.99] duration-500"
               >
-                <div className="relative aspect-video rounded-3xl overflow-hidden mb-2">
-                   <img src={template.previewUrl} alt={template.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-100" />
-                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent" />
-                   <div className={`absolute top-5 left-5 p-2.5 rounded-2xl bg-white/90 backdrop-blur-md shadow-lg`}>
+                <div className="relative aspect-video rounded-[2rem] overflow-hidden mb-2">
+                   <img src={template.previewUrl} alt={template.title} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 grayscale-[0.5] group-hover:grayscale-0" />
+                   <div className="absolute inset-0 bg-gradient-to-t from-[#050506]/80 to-transparent" />
+                   <div className={`absolute top-6 left-6 p-3 rounded-2xl bg-[#050506]/80 backdrop-blur-md border border-white/10 shadow-2xl`}>
                       <template.icon className={`w-5 h-5 text-[#ff0071]`} />
                    </div>
                 </div>
 
-                <div className="flex flex-col gap-2 px-1">
-                  <h3 className="text-xl font-bold lowercase tracking-tight text-slate-800 group-hover:text-[#ff0071] transition-colors line-clamp-1">
+                <div className="flex flex-col gap-3 px-1">
+                  <h3 className="text-2xl font-black lowercase tracking-tighter text-white group-hover:text-[#ff0071] transition-colors">
                     {template.title}
                   </h3>
-                  <p className="text-[12px] leading-relaxed text-slate-400 font-medium line-clamp-2 lowercase italic">
+                  <p className="text-[11px] leading-relaxed text-slate-500 font-bold lowercase tracking-tight">
                     {template.description}
                   </p>
                 </div>
 
-                <div className="mt-2 flex items-center justify-between px-1">
-                   <div className="flex items-center gap-2 bg-slate-50 px-4 py-2 rounded-full border border-slate-100">
-                      <Zap className="w-3.5 h-3.5 text-[#ff0071]" />
-                      <span className="text-[10px] font-bold lowercase tracking-tight text-slate-500">{template.nodes.length} nodos ia</span>
+                <div className="mt-4 flex items-center justify-between px-1">
+                   <div className="flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-full border border-white/5">
+                      <Zap className="w-4 h-4 text-[#ff0071]" />
+                      <span className="text-[10px] font-black lowercase tracking-widest text-slate-400">{template.nodes.length} nexus_nodes</span>
                    </div>
                    <Button 
                      onClick={() => onSelect(template)}
-                     className="bg-[#ff0071] hover:bg-[#e60066] text-white rounded-2xl text-[11px] font-bold lowercase tracking-tight h-11 px-6 gap-3 shadow-lg shadow-[#ff0071]/20 active:scale-95 transition-all"
+                     className="bg-[#ff0071] hover:bg-[#e60066] text-white rounded-[1.5rem] text-[11px] font-black lowercase tracking-widest h-12 px-8 gap-3 shadow-2xl shadow-[#ff0071]/20 transition-all"
                    >
-                     inyectar
-                     <Sparkles className="w-4 h-4" />
+                     inject_pack
+                     <ChevronRight className="w-4 h-4" />
                    </Button>
                 </div>
               </div>
@@ -137,8 +137,8 @@ export function TemplateModal({ onSelect, trigger }: TemplateModalProps) {
           </div>
         </div>
         
-        <div className="p-8 border-t border-slate-50 bg-slate-50/50 flex items-center justify-center">
-            <p className="text-[11px] font-bold text-slate-300 lowercase tracking-tight">formarketing pulse engine v6.2</p>
+        <div className="p-10 border-t border-white/5 bg-white/[0.02] flex items-center justify-center">
+            <p className="text-[10px] font-black text-slate-600 lowercase tracking-[0.3em]">nexus_orchestrator v7.0 industrial</p>
         </div>
       </DialogContent>
     </Dialog>

@@ -65,6 +65,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
     { label: 'avatar de marca', icon: Video, type: 'videoModel', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'video con ia para campañas' },
     { label: 'web/app builder', icon: LayoutTemplate, type: 'layoutBuilder', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'diseña estructuras web' },
     { label: 'campaña social', icon: Share2, type: 'campaignManager', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'gestiona distribución' },
+    { label: 'antigravity bridge', icon: Rocket, type: 'antigravityBridge', color: 'text-white', bg: 'bg-[#ff0071]', description: 'clonación de ecosistemas' },
   ].filter(item => 
     item.label.toLowerCase().includes(search.toLowerCase()) && 
     (activeCategory === null || (activeCategory === 6 && item.icon === Type) || (activeCategory === 3 && item.icon === Image) || (activeCategory === 4 && item.icon === Video))
