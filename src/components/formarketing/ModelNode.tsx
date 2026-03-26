@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 interface ModelNodeData {
   title?: string;
   prompt?: string;
+  model?: string;
   assetUrl?: string;
   status?: 'idle' | 'loading' | 'executing' | 'ready' | 'error';
   onVariation?: () => void;
@@ -30,14 +31,33 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
     );
   }, [id, setNodes]);
 
-  const persistChange = async (val: string) => {
+  const persistChange = async (val: string, field: 'prompt' | 'model' = 'prompt') => {
+    const updateData = field === 'prompt' 
+      ? { prompt: val, data_payload: { ...data, prompt: val } as any }
+      : { data_payload: { ...data, model: val } as any };
+
     const { error } = await supabase
       .from('canvas_nodes')
-      .update({ prompt: val, data_payload: { ...data, prompt: val } as any })
+      .update(updateData)
       .eq('id', id);
     
-    if (error) console.error("Error syncing model prompt:", error);
+    if (error) console.error(`Error syncing model ${field}:`, error);
   };
+
+  const updateModel = useCallback((val: string) => {
+    setNodes((nds) => 
+      nds.map((node) => {
+        if (node.id === id) {
+          return {
+            ...node,
+            data: { ...node.data, model: val }
+          };
+        }
+        return node;
+      })
+    );
+    persistChange(val, 'model');
+  }, [id, data, setNodes]);
 
   const deleteNode = async () => {
     const { error } = await supabase.from('canvas_nodes').delete().eq('id', id);
@@ -124,9 +144,32 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                  onChange={(e) => updatePrompt(e.target.value)}
                  onBlur={(e) => persistChange(e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-xs leading-relaxed text-slate-300 bg-white/5 border border-white/5 p-4 rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#d4ff00]/20 border-white/10 transition-all resize-none min-h-[80px] font-bold placeholder:text-slate-800"
+                 className="w-full text-xs font-medium leading-relaxed text-slate-300 bg-white/5 border border-white/5 p-4 rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#d4ff00]/20 border-white/10 transition-all resize-none min-h-[80px] placeholder:text-slate-800"
                  placeholder="nebula prompt engine..."
               />
+              
+              <div className="space-y-2">
+                 <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest px-1">Motor de Respaldo (Industrial Fallback)</span>
+                 <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { id: 'nano-banana-pro', name: 'image_pro_v8' },
+                      { id: 'nano-banana-2', name: 'image_flash_v8' },
+                      { id: 'nano-banana-25', name: 'image_eco_v8' }
+                    ].map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => updateModel(m.id)}
+                        className={`px-3 py-2 rounded-xl border text-[9px] font-black lowercase tracking-wider transition-all ${
+                          (data.model || 'nano-banana-pro') === m.id 
+                          ? 'bg-[#d4ff00]/10 border-[#d4ff00]/30 text-[#d4ff00]' 
+                          : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10'
+                        }`}
+                      >
+                        {m.name}
+                      </button>
+                    ))}
+                 </div>
+              </div>
            </div>
         </div>
       )}

@@ -218,6 +218,7 @@ function FormarketingContent() {
           title: label || 'Nuevo Elemento',
           status: 'idle',
           prompt: '',
+          model: type === 'modelView' ? 'nano-banana-pro' : type === 'videoModel' ? 'nano-banana-video' : undefined,
           description: type === 'characterBreakdown' ? 'Describe tu personaje...' : ''
         },
       };
@@ -346,7 +347,7 @@ function FormarketingContent() {
             const result = await aiService.processAction({
               action: 'image',
               prompt: finalPrompt,
-              model: 'nano-banana-pro',
+              model: (node.data as any).model || 'nano-banana-pro',
               node_id: (spaceId && isPersisted) ? node.id : undefined 
             });
             
@@ -373,9 +374,15 @@ function FormarketingContent() {
             rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'loading' } } : n));
             await new Promise(resolve => setTimeout(resolve, 3000));
             const videoUrl = 'https://cdn.pixabay.com/video/2023/10/20/185834-876356744_tiny.mp4';
+            const selectedModel = (node.data as any).model || 'nano-banana-video';
             rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'ready', assetUrl: videoUrl } } : n));
-            await supabase.from('canvas_nodes').update({ asset_url: videoUrl, status: 'ready', prompt: node.data.title || 'video' }).eq('id', node.id);
-            toast.success("Video renderizado correctamente");
+            await supabase.from('canvas_nodes').update({ 
+               asset_url: videoUrl, 
+               status: 'ready', 
+               prompt: node.data.title || 'video',
+               data_payload: { ...node.data, assetUrl: videoUrl, status: 'ready', model: selectedModel }
+            }).eq('id', node.id);
+            toast.success(`Video renderizado con ${selectedModel}`);
           } catch (error: any) {
             toast.error("Error al renderizar video");
           }
@@ -399,7 +406,7 @@ function FormarketingContent() {
             action: 'image',
             tool: 'variation',
             prompt: `variación de estilo de la imagen de referencia: ${(node.data as any).prompt || 'estética industrial'}`,
-            model: 'nano-banana-pro',
+            model: (node.data as any).model || 'nano-banana-pro',
             image: node.data.assetUrl as string,
             node_id: (spaceId && isPersisted) ? node.id : undefined 
           });

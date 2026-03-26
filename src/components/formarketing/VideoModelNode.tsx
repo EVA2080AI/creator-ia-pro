@@ -9,6 +9,7 @@ interface VideoNodeData {
   status?: 'idle' | 'rendering' | 'executing' | 'ready' | 'error';
   duration?: string;
   assetUrl?: string;
+  model?: string;
   dataPayload?: Record<string, any>;
 }
 
@@ -42,6 +43,27 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
     a.download = `creator-ia-video-${Date.now()}.mp4`;
     a.target = '_blank';
     a.click();
+  };
+
+  const updateModel = async (val: string) => {
+    setNodes((nds) => 
+      nds.map((node) => {
+        if (node.id === id) {
+          return {
+            ...node,
+            data: { ...node.data, model: val }
+          };
+        }
+        return node;
+      })
+    );
+
+    const { error } = await supabase
+      .from('canvas_nodes')
+      .update({ data_payload: { ...data, model: val } as any })
+      .eq('id', id);
+    
+    if (error) console.error("Error syncing video model:", error);
   };
 
   return (
@@ -147,6 +169,29 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
               <span className="text-[10px] text-red-400/70">Error al renderizar</span>
             </div>
           )}
+
+          {/* Industrial Fallback Selector */}
+          <div className="pt-2 border-t border-white/5 space-y-2">
+            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] px-1">Industrial Fallback Engine</span>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'nano-banana-video', name: 'video_standard' },
+                { id: 'nano-banana-cinema', name: 'video_cinema_v8' }
+              ].map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => updateModel(m.id)}
+                  className={`px-3 py-2 rounded-xl border text-[9px] font-bold lowercase tracking-wider transition-all ${
+                    (data.model || 'nano-banana-video') === m.id 
+                    ? 'bg-[#00c2ff]/10 border-[#00c2ff]/30 text-[#00c2ff]' 
+                    : 'bg-white/5 border-white/5 text-white/20 hover:bg-white/10'
+                  }`}
+                >
+                  {m.name}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Status pill */}
           <div className="flex items-center justify-between px-0.5">

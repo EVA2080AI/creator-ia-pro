@@ -135,7 +135,8 @@ const Tools = () => {
       await refreshProfile();
     } catch (err: any) {
       console.error("Tool Error:", err);
-      toast.error(`${err.message} (Tools V3.4)` || "Error al procesar (V3.4)", { duration: 5000 });
+      const msg = err?.message ? `${err.message} (Tools V3.4)` : "Error al procesar (V3.4)";
+      toast.error(msg, { duration: 5000 });
     } finally {
       setProcessing(false);
     }
@@ -253,15 +254,35 @@ const Tools = () => {
                 </div>
               )
             ) : (
-              <div className="space-y-2">
-                <Label className="text-muted-foreground text-sm">Tu prompt</Label>
-                <textarea
-                  value={textPrompt}
-                  onChange={(e) => setTextPrompt(e.target.value)}
-                  placeholder={currentTool.placeholder}
-                  rows={5}
-                  className="w-full resize-none rounded-xl border border-border bg-card p-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-                />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label className="text-muted-foreground text-sm">Tu prompt</Label>
+                  <textarea
+                    value={textPrompt}
+                    onChange={(e) => setTextPrompt(e.target.value)}
+                    placeholder={currentTool.placeholder}
+                    rows={5}
+                    className="w-full resize-none rounded-xl border border-border bg-card p-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+                </div>
+                
+                {activeTool === "generate" && (
+                  <div className="space-y-2">
+                    <Label className="text-muted-foreground text-sm">Estilos Visuales</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {["Fotorealista", "3D Render", "Cyberpunk", "Anime", "Acuarela", "Minimalista"].map(style => (
+                        <Badge 
+                           key={style}
+                           variant="outline" 
+                           className="cursor-pointer hover:bg-primary/20 hover:text-primary transition-colors border-white/5"
+                           onClick={() => setTextPrompt(prev => prev ? `${prev}, estilo ${style}` : `En estilo ${style}: `)}
+                        >
+                          {style}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -275,16 +296,39 @@ const Tools = () => {
             <Button
               onClick={handleProcess}
               disabled={processing || (currentTool.needsUpload ? !imagePreview : !textPrompt.trim())}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-12 rounded-xl text-md"
+              className="w-full bg-gradient-to-r from-[#bd00ff] to-[#ff0071] hover:opacity-90 text-white gap-2 h-12 rounded-xl text-md shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)]"
             >
               {processing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-              {processing ? "Procesando con IA..." : `Generar (${category === "ai-app" ? (AVAILABLE_MODELS.find(m => m.id === selectedModelId)?.tokenCost || 1) : currentTool.credits} Créditos)`}
+              {processing ? "Generando Magia..." : `Generar (${category === "ai-app" ? (AVAILABLE_MODELS.find(m => m.id === selectedModelId)?.tokenCost || 1) : currentTool.credits} Créditos)`}
             </Button>
           </div>
 
           <div className="space-y-4">
             <h2 className="font-semibold text-foreground">Resultado</h2>
-            {resultImage ? (
+            
+            {processing && currentTool.category === "image" ? (
+              <div className="flex h-64 w-full flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-primary/30 bg-primary/5">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
+                  <Loader2 className="relative h-10 w-10 text-primary animate-spin" />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-primary animate-pulse">Renderizando píxeles...</p>
+                  <p className="text-[10px] text-primary/60 mt-1 uppercase tracking-widest">Esto puede tomar unos segundos</p>
+                </div>
+              </div>
+            ) : processing && currentTool.category === "ai-app" ? (
+               <div className="flex h-64 w-full flex-col items-center justify-center gap-4 rounded-3xl border border-dashed border-primary/30 bg-primary/5">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
+                  <Type className="relative h-10 w-10 text-primary animate-bounce" />
+                </div>
+                <div className="text-center">
+                  <p className="text-sm font-bold text-primary animate-pulse">Escribiendo contenido...</p>
+                  <p className="text-[10px] text-primary/60 mt-1 uppercase tracking-widest">Modelando lingüística</p>
+                </div>
+              </div>
+            ) : resultImage ? (
               <div className="space-y-4">
                 <div className="overflow-hidden rounded-2xl border border-border bg-card">
                   <img src={resultImage} alt="Resultado" className="h-56 w-full object-contain bg-muted/20" />
