@@ -383,13 +383,53 @@ function FormarketingContent() {
     });
   };
 
+  const executeVariation = async (nodeId: string) => {
+    const isPersisted = await ensureNodePersisted(nodeId);
+    setNodes((currentNodes) => {
+      const node = currentNodes.find((n) => n.id === nodeId);
+      if (!node || !node.data.assetUrl) return currentNodes;
+
+      (async () => {
+        try {
+          rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'executing' } } : n));
+          
+          const result = await aiService.processAction({
+            action: 'image',
+            tool: 'variation',
+            prompt: `variación de estilo de la imagen de referencia: ${(node.data as any).prompt || 'estética industrial'}`,
+            model: 'nano-banana-pro',
+            image: node.data.assetUrl as string,
+            node_id: (spaceId && isPersisted) ? node.id : undefined 
+          });
+          
+          rfSetNodes((nds) => nds.map((n) => 
+            n.id === node.id 
+              ? { ...n, data: { ...n.data, status: 'ready', assetUrl: result.url } } 
+              : n
+          ));
+
+          await supabase.from('canvas_nodes').update({ 
+            asset_url: result.url, 
+            status: 'ready' 
+          }).eq('id', node.id);
+
+          toast.success("Variación generada correctamente");
+        } catch (error: any) {
+          rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'error' } } : n));
+          toast.error(`Error: ${error.message}`);
+        }
+      })();
+      return currentNodes;
+    });
+  };
+
   const handleExecute = async () => {
     if (nodes.length === 0) {
       toast.error("No hay nodos que ejecutar");
       return;
     }
 
-    toast.info("Iniciando motor de ejecución V5.3 Industrial...");
+    toast.info("Iniciando motor de ejecución Nexus V7.0 Industrial...");
     
     const imageNodes = nodes.filter(n => n.type === 'modelView');
     for (const node of imageNodes) {
@@ -421,7 +461,8 @@ function FormarketingContent() {
         prompt: '',
         assetUrl: assetUrl || null,
         description: type === 'characterBreakdown' ? 'Describe tu personaje...' : '',
-        onExecute: () => executeNode(newNodeId)
+        onExecute: () => executeNode(newNodeId),
+        onVariation: () => executeVariation(newNodeId)
       },
     };
 
@@ -457,7 +498,8 @@ function FormarketingContent() {
           data: { 
             ...data.data,
             title: data.data?.title || 'Generado por IA',
-            onExecute: () => executeNode(newNodeId)
+            onExecute: () => executeNode(newNodeId),
+            onVariation: () => executeVariation(newNodeId)
           },
         };
 
@@ -510,38 +552,42 @@ function FormarketingContent() {
      if (nodes.length > 0 && !nodes[0].data.onExecute) {
         setNodes(nds => nds.map(n => ({
           ...n,
-          data: { ...n.data, onExecute: () => executeNode(n.id) }
+          data: { 
+            ...n.data, 
+            onExecute: () => executeNode(n.id),
+            onVariation: () => executeVariation(n.id)
+          }
         })));
      }
   }, [nodes.length]);
 
   return (
-    <div className="flex h-screen w-full flex-col bg-white text-slate-900 overflow-hidden font-sans">
-      {/* V6.2 Minimalist Pulse Header */}
-      <div className="flex h-14 w-full items-center justify-between border-b border-slate-100 bg-white/80 px-6 backdrop-blur-xl shrink-0 z-[100]">
-         <div className="flex items-center gap-4">
+    <div className="flex h-screen w-full flex-col bg-[#0a0a0b] text-white overflow-hidden font-sans selection:bg-[#ff0071]/30">
+      {/* V7.0 Industrial Pulse Header */}
+      <div className="flex h-16 w-full items-center justify-between border-b border-white/5 bg-[#0a0a0b]/80 px-8 backdrop-blur-2xl shrink-0 z-[100]">
+         <div className="flex items-center gap-6">
             <button
                onClick={() => navigate("/dashboard")}
-               className="flex items-center gap-2.5 hover:opacity-80 transition-opacity group"
+               className="flex items-center gap-3.5 hover:opacity-80 transition-opacity group"
             >
-               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#ff0071] shadow-[0_4px_12px_rgba(255,0,113,0.2)] group-hover:scale-105 transition-transform">
-                  <Rocket className="h-4 w-4 text-white" />
+               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff0071] shadow-2xl shadow-[#ff0071]/20 group-hover:scale-105 transition-transform">
+                  <Rocket className="h-5 w-5 text-white" />
                </div>
-               <div className="flex flex-col">
-                  <h1 className="text-[11px] font-bold tracking-tight text-slate-900 leading-none lowercase">nexus_studio</h1>
-                  <span className="text-[8px] font-medium text-slate-400 uppercase tracking-widest mt-1">Pulse V6.2</span>
+               <div className="flex flex-col text-left">
+                  <h1 className="text-sm font-black tracking-tighter text-white leading-none lowercase">nexus_studio_v7</h1>
+                  <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1.5">Pulse_Ebony</span>
                </div>
             </button>
-            <div className="h-4 w-px bg-slate-100 mx-1" />
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-slate-50 rounded-lg w-8 h-8 text-slate-400 hover:text-slate-900 transition-all">
-               <ArrowLeft className="h-3.5 w-3.5" />
+            <div className="h-4 w-px bg-white/10 mx-2" />
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-xl w-10 h-10 text-slate-500 hover:text-white transition-all">
+               <ArrowLeft className="h-4 w-4" />
             </Button>
          </div>
 
-         <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-100 mr-4">
-               <div className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse" />
-               <span className="text-[9px] font-bold text-slate-500 lowercase tracking-tight">live_sync_active</span>
+         <div className="flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-2.5 bg-white/5 px-4 py-2 rounded-full border border-white/5 mr-4 shadow-2xl">
+               <div className="w-1.5 h-1.5 rounded-full bg-[#ff0071] shadow-[0_0_10px_#ff0071]" />
+               <span className="text-[10px] font-black text-slate-400 lowercase tracking-widest">industrial_sync_active</span>
             </div>
 
             <Button 
@@ -549,20 +595,20 @@ function FormarketingContent() {
                onClick={handleClear} 
                disabled={nodes.length === 0 && edges.length === 0}
                aria-label="borrar lienzo"
-               className="text-slate-400 hover:text-destructive hover:bg-destructive/[0.03] rounded-full px-4 h-8 text-[10px] font-bold lowercase tracking-tight gap-2 transition-all disabled:opacity-30"
+               className="text-slate-500 hover:text-destructive hover:bg-destructive/10 rounded-2xl px-5 h-10 text-[10px] font-black lowercase tracking-widest gap-2 transition-all disabled:opacity-20"
             >
-               <Trash2 className="w-3 h-3" />
-               purge
+               <Trash2 className="w-3.5 h-3.5" />
+               limpiar_canvas
             </Button>
             
             <Button 
                onClick={handleExecute} 
                disabled={nodes.length === 0}
                aria-label="ejecutar flujo"
-               className="h-9 bg-[#ff0071] text-white hover:bg-[#e60066] rounded-full gap-2 font-bold px-6 shadow-lg shadow-[#ff0071]/20 text-[10px] lowercase tracking-tight transition-all active:scale-95 disabled:opacity-50 disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
+               className="h-11 bg-[#ff0071] text-white hover:bg-[#e60066] rounded-2xl gap-3 font-black px-8 shadow-2xl shadow-[#ff0071]/20 text-[10px] lowercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
             >
-               <Zap className="w-3.5 h-3.5" />
-               engage_nexus
+               <Zap className="w-4 h-4" />
+               run_nexus_engine
             </Button>
 
             <div className="h-4 w-px bg-slate-100 mx-2" />
@@ -585,19 +631,29 @@ function FormarketingContent() {
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           fitView
-          className="pulse-canvas"
-          defaultEdgeOptions={{ type: 'smoothstep', animated: true }}
+          className="pulse-canvas bg-[#0a0a0b]"
+          colorMode="dark"
+          defaultEdgeOptions={{ 
+            type: 'smoothstep', 
+            animated: true,
+            style: { stroke: '#ff007180', strokeWidth: 2 }
+          }}
         >
-          <Background color="#cbd5e1" variant={BackgroundVariant.Dots} gap={20} size={1} />
-          <Controls className="!bg-white !border-slate-100 !fill-slate-400 !bottom-10 !left-8 rounded-2xl overflow-hidden scale-110 shadow-[0_10px_40px_rgba(0,0,0,0.06)]" />
+          <Background 
+            color="#ffffff05" 
+            variant={BackgroundVariant.Dots} 
+            gap={40} 
+            size={1} 
+          />
+          <Controls className="!bg-[#0a0a0b] !border-white/5 !fill-slate-500 !bottom-10 !left-8 rounded-[1.5rem] overflow-hidden scale-110 shadow-3xl backdrop-blur-3xl" />
           <MiniMap 
-            className="bg-[#0a0a0b]/90 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-3xl !bottom-10 !right-8 shadow-2xl opacity-60 hover:opacity-100 transition-opacity" 
-            maskColor="rgba(0,0,0,0.8)" 
+            className="!bg-[#0a0a0b]/80 border !border-white/5 !rounded-[2rem] overflow-hidden backdrop-blur-3xl !bottom-10 !right-8 shadow-3xl opacity-40 hover:opacity-100 transition-opacity" 
+            maskColor="rgba(10,10,11,0.8)" 
             nodeColor={(n) => {
-               if (n.type === 'characterBreakdown') return '#10b981';
-               if (n.type === 'modelView') return '#3b82f6';
-               if (n.type === 'videoModel') return '#f59e0b';
-               return '#333';
+               if (n.type === 'characterBreakdown') return '#ff007160';
+               if (n.type === 'modelView') return '#ffffff20';
+               if (n.type === 'videoModel') return '#ff007140';
+               return '#222';
             }}
           />
         </ReactFlow>

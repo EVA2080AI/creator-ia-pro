@@ -44,36 +44,39 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
   };
 
   return (
-    <div className="group relative pulse-node w-[280px] animate-in zoom-in duration-200 nodrag shadow-xl">
+    <div className="group relative rounded-[2rem] border border-white/10 bg-black/50 backdrop-blur-3xl w-[300px] animate-in zoom-in duration-300 nodrag shadow-2xl transition-all hover:border-[#ff0071]/50">
       {/* V6.2 Pulse Header */}
-      <div className="pulse-node-header justify-between gap-2">
-        <div className="flex items-center gap-2 overflow-hidden">
-            <Layout className="w-4 h-4 text-[#ff0071] shrink-0" />
+      {/* V7.0 Industrial Header */}
+      <div className="flex items-center justify-between p-4 border-b border-white/5 bg-white/[0.01]">
+        <div className="flex items-center gap-2.5 overflow-hidden">
+            <div className="p-1.5 rounded-lg bg-[#ff0071]/10">
+              <Layout className="w-3.5 h-3.5 text-[#ff0071] shrink-0" />
+            </div>
             <input 
               value={data.title || ""} 
               onChange={(e) => updateField('title', e.target.value)}
-              className="bg-transparent border-none p-0 m-0 text-[11px] font-bold lowercase tracking-tight text-slate-800 focus:outline-none w-full truncate"
-              placeholder="structure hub"
+              className="bg-transparent border-none p-0 m-0 text-[10px] font-black lowercase tracking-widest text-white focus:outline-none w-full truncate transition-all"
+              placeholder="nexus_layout_v7"
             />
         </div>
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button 
             onClick={() => (data as any).onExecute?.()}
-            className="p-1 hover:bg-[#ff0071]/10 text-[#ff0071] rounded-md transition-all active:scale-95"
+            className="p-1.5 hover:bg-[#ff0071]/20 text-[#ff0071] rounded-xl transition-all active:scale-95 shadow-lg shadow-[#ff0071]/10"
           >
-             <Zap className="w-3.5 h-3.5" />
+             <Zap className="w-3.5 h-3.5 font-black" />
           </button>
-          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-slate-100 text-slate-400 rounded-md transition-all">
+          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 hover:bg-white/5 text-slate-500 rounded-xl transition-all">
              {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
-          <button onClick={deleteNode} className="p-1 hover:bg-destructive/5 text-destructive/30 hover:text-destructive rounded-md transition-all">
+          <button onClick={deleteNode} className="p-1.5 hover:bg-destructive/10 text-slate-600 hover:text-destructive rounded-xl transition-all">
              <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
       {isExpanded && (
-        <div className="p-4 space-y-4 animate-in slide-in-from-top-2 duration-200 bg-white">
+        <div className="p-5 space-y-5 animate-in fade-in duration-500 bg-[#0a0a0b]/40 backdrop-blur-xl">
           <div className="flex gap-2">
              {[
                { id: 'mobile', icon: Smartphone },
@@ -83,37 +86,37 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
                <button 
                  key={p.id}
                  onClick={() => { setPlatform(p.id as any); updateField('platform', p.id); }}
-                 className={`flex-1 flex flex-col items-center gap-2 p-3 rounded-2xl border transition-all ${platform === p.id ? 'bg-[#ff0071]/[0.03] border-[#ff0071]/30 text-[#ff0071] shadow-sm' : 'bg-slate-50/50 border-slate-100 text-slate-400 hover:bg-slate-50'}`}
+                 className={`flex-1 flex flex-col items-center gap-2.5 p-4 rounded-3xl border transition-all ${platform === p.id ? 'bg-[#ff0071]/10 border-[#ff0071]/30 text-[#ff0071] shadow-[0_0_20px_rgba(255,0,113,0.1)]' : 'bg-white/[0.02] border-white/5 text-slate-600 hover:bg-white/5'}`}
                >
-                 <p.icon className="w-3.5 h-3.5" />
-                 <span className="text-[9px] font-bold lowercase tracking-tight">{p.id}</span>
+                 <p.icon className="w-4 h-4" />
+                 <span className="text-[10px] font-black lowercase tracking-[0.2em]">{p.id}</span>
                </button>
              ))}
           </div>
 
-          <div className="bg-slate-50/50 rounded-2xl border border-slate-100 p-4 aspect-[16/10] relative group/preview overflow-hidden">
-             <div className="absolute inset-x-4 top-3 h-1.5 bg-slate-200/50 rounded-full" />
-             <div className="grid grid-cols-2 gap-3 mt-8">
-                <div className="h-10 bg-white shadow-sm rounded-xl border border-slate-100 animate-pulse" />
-                <div className="h-10 bg-white shadow-sm rounded-xl border border-slate-100 animate-pulse" />
-                <div className="h-14 col-span-2 bg-white shadow-sm rounded-xl border border-slate-100 animate-pulse" />
+          <div className="bg-white/[0.02] rounded-3xl border border-white/5 p-5 aspect-[16/10] relative group/preview overflow-hidden shadow-inner">
+             <div className="absolute inset-x-5 top-4 h-2 bg-white/5 rounded-full" />
+             <div className="grid grid-cols-2 gap-4 mt-10">
+                <div className="h-12 bg-white/5 shadow-2xl rounded-2xl border border-white/5 animate-pulse" />
+                <div className="h-12 bg-white/5 shadow-2xl rounded-2xl border border-white/5 animate-pulse" />
+                <div className="h-16 col-span-2 bg-[#ff0071]/5 shadow-2xl rounded-2xl border border-[#ff0071]/10 animate-pulse" />
              </div>
           </div>
 
-          <div className="space-y-1.5">
-             <span className="text-[10px] font-bold text-slate-400 lowercase tracking-tight px-1 text-center block">structure engine</span>
+          <div className="space-y-3">
+             <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest block text-center">nexus_logic_structure</span>
              <textarea
                 value={data.structure || ""}
                 onChange={(e) => updateField('structure', e.target.value)}
-                className="w-full text-xs leading-relaxed text-slate-600 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 min-h-[60px] focus:outline-none focus:border-[#ff0071]/20 resize-none transition-all"
-                placeholder="metadata..."
+                className="w-full text-xs leading-relaxed text-slate-300 bg-white/5 p-4 rounded-3xl border border-white/5 min-h-[80px] focus:outline-none focus:border-[#ff0071]/30 resize-none transition-all font-bold placeholder:text-slate-800"
+                placeholder="metadata sequence..."
              />
           </div>
         </div>
       )}
 
-      <Handle type="target" position={Position.Left} className="!w-3 !h-3 !-left-1.5 !bg-slate-300 !border-2 !border-white !shadow-sm !z-20" />
-      <Handle type="source" position={Position.Right} className="!w-3 !h-3 !-left-1.5 !bg-slate-300 !border-2 !border-white !shadow-sm !z-20" />
+      <Handle type="target" position={Position.Left} className="!w-4 !h-4 !-left-2 !bg-slate-800 !border-4 !border-[#0a0a0b] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
+      <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-[#ff0071] !border-4 !border-[#0a0a0b] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
     </div>
   );
 };

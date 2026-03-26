@@ -184,7 +184,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 overflow-hidden">
+    <div className="min-h-screen bg-[#0a0a0b] text-white overflow-hidden selection:bg-[#ff0071]/30">
       <AppHeader userId={user?.id} onSignOut={signOut} />
       
       <main className="container mx-auto px-6 py-10 max-w-7xl animate-fade-in">
@@ -192,13 +192,13 @@ const Dashboard = () => {
           <div className="space-y-3">
             <div className="flex items-center gap-2.5 text-[#ff0071] font-bold tracking-tight text-[11px] lowercase">
                <div className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse" />
-               industrial_system_active
+               industrial_system_v7.0_active
             </div>
-            <h1 className="text-5xl font-bold md:text-6xl lg:text-7xl tracking-tight text-slate-900 lowercase">
+            <h1 className="text-5xl font-black md:text-6xl lg:text-8xl tracking-tighter text-white lowercase leading-none">
               hola, <span className="text-[#ff0071]">{profile?.display_name?.split(' ')[0] || 'creador'}</span>
             </h1>
-            <p className="text-slate-400 text-lg max-w-xl leading-relaxed lowercase font-medium">
-              bienvenido a tu suite de diseño industrial. tienes el control total de <span className="text-slate-900 font-bold">{assetsCount} assets</span> y <span className="text-slate-900 font-bold">{spacesCount} espacios</span>.
+            <p className="text-slate-400 text-xl max-w-xl leading-relaxed lowercase font-medium">
+              bienvenido a tu suite de diseño <span className="text-white">v7_industrial</span>. tienes el control total de <span className="text-white font-bold">{assetsCount} assets</span> y <span className="text-white font-bold">{spacesCount} espacios</span> activos.
             </p>
           </div>
           
@@ -232,30 +232,26 @@ const Dashboard = () => {
             <div 
               key={stat.label} 
               role="status"
-              aria-label={`${stat.label}: ${stat.value}`}
-              className="group relative rounded-[2.5rem] border border-slate-100 bg-white p-7 shadow-[0_10px_40px_rgba(0,0,0,0.04)] transition-all hover:border-[#ff0071]/20 hover:shadow-2xl hover:shadow-[#ff0071]/5 overflow-hidden"
+              className="group relative rounded-[3rem] border border-white/5 bg-white/5 p-8 backdrop-blur-3xl shadow-2xl transition-all hover:bg-white/[0.08] hover:border-[#ff0071]/30 hover:-translate-y-1 overflow-hidden"
             >
-              <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-3xl ${stat.accent.replace('primary', '[#ff0071]')} shadow-sm transition-transform group-hover:scale-110`}>
-                <stat.icon className="h-7 w-7" />
+              <div className={`mb-6 flex h-16 w-16 items-center justify-center rounded-[1.5rem] ${stat.accent.replace('primary', '[#ff0071]').replace('bg-gold/10 text-gold', 'bg-[#ff0071]/10 text-[#ff0071]')} transition-transform group-hover:scale-110`}>
+                <stat.icon className="h-8 w-8" />
               </div>
-              <p className="text-[11px] font-bold text-slate-400 lowercase tracking-tight opacity-80">{stat.label}</p>
-              <h3 className="text-4xl font-bold mt-1 tabular-nums text-slate-800">{stat.value}</h3>
-              <div className="absolute top-6 right-8 h-1.5 w-10 rounded-full bg-slate-50 overflow-hidden">
-                 <div className="h-full bg-[#ff0071]/20 w-1/2 group-hover:w-full transition-all duration-1000" />
-              </div>
+              <p className="text-[10px] font-bold text-slate-500 lowercase tracking-widest opacity-80 pl-1">{stat.label}</p>
+              <h3 className="text-5xl font-black mt-2 tabular-nums text-white tracking-tighter">{stat.value}</h3>
             </div>
           ))}
         </div>
 
         {/* Industrial Analytics Section */}
         <div className="grid lg:grid-cols-2 gap-10 mb-20">
-          <div className="rounded-[3rem] border border-slate-100 bg-white p-10 shadow-[0_10px_40px_rgba(0,0,0,0.03)] transition-all hover:border-[#ff0071]/10">
-             <div className="flex items-center justify-between mb-10">
+          <div className="rounded-[3.5rem] border border-white/5 bg-white/5 p-12 backdrop-blur-2xl shadow-3xl hover:bg-white/[0.07] transition-all group">
+             <div className="flex items-center justify-between mb-12">
                 <div>
-                   <h3 className="text-2xl font-bold tracking-tight text-slate-800 lowercase">flujo de créditos</h3>
-                   <p className="text-[11px] font-medium text-slate-400 lowercase italic">consumo industrial - últimos 7 días</p>
+                   <h3 className="text-3xl font-black tracking-tighter text-white lowercase">flujo_créditos</h3>
+                   <p className="text-[10px] font-bold text-slate-500 lowercase tracking-widest">consumo industrial_v7</p>
                 </div>
-                <TrendingUp className="h-6 w-6 text-[#ff0071] opacity-20" />
+                <TrendingUp className="h-6 w-6 text-[#ff0071] group-hover:scale-110 transition-transform" />
              </div>
              <div className="h-[240px] w-full">
                <ResponsiveContainer width="100%" height="100%">
@@ -293,13 +289,13 @@ const Dashboard = () => {
              </div>
           </div>
 
-          <div className="rounded-[3rem] border border-slate-100 bg-white p-10 shadow-[0_10px_40px_rgba(0,0,0,0.03)] transition-all hover:border-[#ff0071]/10">
-             <div className="flex items-center justify-between mb-10">
+          <div className="rounded-[3.5rem] border border-white/5 bg-white/5 p-12 backdrop-blur-2xl shadow-3xl hover:bg-white/[0.07] transition-all group">
+             <div className="flex items-center justify-between mb-12">
                 <div>
-                   <h3 className="text-2xl font-bold tracking-tight text-slate-800 lowercase">actividad por herramienta</h3>
-                   <p className="text-[11px] font-medium text-slate-400 lowercase italic">distribución de carga ia</p>
+                   <h3 className="text-3xl font-black tracking-tighter text-white lowercase">carga_ia</h3>
+                   <p className="text-[10px] font-bold text-slate-500 lowercase tracking-widest">distribución carga motor nexus</p>
                 </div>
-                <Box className="h-6 w-6 text-[#ff0071] opacity-20" />
+                <Box className="h-6 w-6 text-[#ff0071] group-hover:scale-110 transition-transform" />
              </div>
              <div className="h-[240px] w-full">
                <ResponsiveContainer width="100%" height="100%">
@@ -332,43 +328,42 @@ const Dashboard = () => {
           {/* Main Studio Access */}
           <div 
             onClick={() => navigate("/formarketing")}
-            className="lg:col-span-2 group relative overflow-hidden rounded-[3.5rem] border border-slate-100 bg-white p-12 cursor-pointer transition-all hover:border-[#ff0071]/20 hover:shadow-2xl hover:shadow-[#ff0071]/5"
+            className="lg:col-span-2 group relative overflow-hidden rounded-[4rem] border border-white/5 bg-white/5 p-16 cursor-pointer transition-all hover:bg-white/[0.08] hover:border-[#ff0071]/30 hover:shadow-3xl"
           >
-             <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-[#ff0071]/5 blur-[120px] transition-all group-hover:bg-[#ff0071]/10" />
-             <div className="relative z-10 space-y-5">
-                <Badge className="bg-[#ff0071]/10 text-[#ff0071] border-transparent py-1.5 px-5 rounded-full text-[10px] font-bold lowercase tracking-tight">blueprint_flow_v6.2</Badge>
-                <h2 className="text-6xl font-bold tracking-tight text-slate-900 lowercase">formarketing studio</h2>
-                <p className="text-slate-400 text-xl max-w-md leading-relaxed lowercase font-medium">
-                   diseña flujos de marketing visual, genera interfaces ux/ui y assets generativos en un mismo entorno industrial.
+             <div className="absolute -right-32 -top-32 h-80 w-80 rounded-full bg-[#ff0071]/10 blur-[120px] transition-all group-hover:bg-[#ff0071]/20 duration-1000" />
+             <div className="relative z-10 space-y-8">
+                <Badge className="bg-[#ff0071]/10 text-[#ff0071] border-transparent py-1.5 px-6 rounded-full text-[10px] font-black lowercase tracking-widest">nexus_studio_pro_v7.0</Badge>
+                <h2 className="text-7xl font-black tracking-tighter text-white lowercase leading-[0.9]">formarketing<br /><span className="text-[#ff0071]">studio</span></h2>
+                <p className="text-slate-400 text-2xl max-w-md leading-relaxed lowercase font-medium">
+                   el núcleo de tu producción industrial. flujos infinitos, ia generativa y diseño ux en un solo motor.
                 </p>
-                <Button className="mt-6 bg-slate-900 text-white hover:bg-[#ff0071] rounded-2xl px-10 h-14 font-bold lowercase transition-all active:scale-95 shadow-xl shadow-slate-900/10 hover:shadow-[#ff0071]/20">
-                   entrar al estudio
-                   <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-1" />
+                <Button className="mt-8 bg-[#ff0071] text-white hover:bg-[#e60066] rounded-2xl px-12 h-16 text-sm font-black lowercase transition-all active:scale-95 shadow-2xl shadow-[#ff0071]/20">
+                   inicializar_estudio
+                   <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-2" />
                 </Button>
              </div>
-             <div className="absolute bottom-12 right-12 opacity-10 transition-all group-hover:opacity-30 group-hover:scale-110 duration-700">
-                <Palette className="h-56 w-56 text-[#ff0071]" />
+             <div className="absolute bottom-12 right-12 opacity-5 transition-all group-hover:opacity-10 group-hover:scale-110 duration-1000 grayscale group-hover:grayscale-0">
+                <Palette className="h-72 w-72 text-[#ff0071]" />
              </div>
           </div>
 
           {/* Quick Tools Panel */}
-          <div className="rounded-[3.5rem] border border-slate-100 bg-white p-10 flex flex-col shadow-sm transition-all hover:shadow-xl hover:shadow-[#ff0071]/5">
-             <div className="flex items-center justify-between mb-10">
-                <h3 className="font-bold text-2xl tracking-tight text-slate-800 lowercase">acceso rápido</h3>
+          <div className="rounded-[4rem] border border-white/5 bg-white/5 p-12 flex flex-col backdrop-blur-3xl shadow-3xl hover:bg-white/[0.08] transition-all">
+             <div className="flex items-center justify-between mb-12">
+                <h3 className="font-black text-3xl tracking-tighter text-white lowercase">dock_ia</h3>
                 <Zap className="h-6 w-6 text-[#ff0071] animate-pulse" />
              </div>
-             <div className="grid grid-cols-2 gap-5 flex-1">
+             <div className="grid grid-cols-2 gap-6 flex-1">
                 {quickActions.map((action) => (
                    <button 
                       key={action.label}
                       onClick={() => navigate(action.path)}
-                      aria-label={`ejecutar ${action.label}`}
-                      className="group flex flex-col items-center justify-center gap-4 p-5 rounded-[2rem] border border-slate-50 bg-slate-50/50 transition-all hover:bg-white hover:border-[#ff0071]/20 hover:shadow-lg hover:shadow-[#ff0071]/5 active:scale-[0.98]"
+                      className="group flex flex-col items-center justify-center gap-4 p-6 rounded-[2.5rem] border border-white/5 bg-white/5 transition-all hover:bg-white/[0.1] hover:border-[#ff0071]/30 active:scale-95"
                    >
-                      <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${action.accent.replace('primary', '[#ff0071]')} shadow-sm group-hover:scale-110 transition-transform`}>
-                         <action.icon className="h-6 w-6" />
+                      <div className={`flex h-14 w-14 items-center justify-center rounded-[1.25rem] ${action.accent.replace('primary', '[#ff0071]').replace('bg-gold/10 text-gold', 'bg-[#ff0071]/10 text-[#ff0071]')} transition-transform group-hover:scale-110`}>
+                         <action.icon className="h-7 w-7" />
                       </div>
-                      <span className="text-[12px] font-bold text-center lowercase tracking-tight text-slate-500 group-hover:text-slate-800">{action.label}</span>
+                      <span className="text-[11px] font-bold text-center lowercase tracking-widest text-slate-500 group-hover:text-white transition-colors">{action.label}</span>
                    </button>
                 ))}
              </div>
@@ -542,18 +537,18 @@ const Dashboard = () => {
       </main>
       
       {/* Footer */}
-      <footer className="mt-32 border-t border-slate-50 bg-slate-50/50">
-         <div className="container mx-auto px-6 py-16 flex flex-col items-center gap-8 max-w-7xl">
-            <div className="flex items-center gap-3">
-               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff0071]/10 border border-[#ff0071]/20">
-                  <Sparkles className="h-5 w-5 text-[#ff0071]" />
+      <footer className="mt-40 border-t border-white/5 bg-white/2 pb-24 pt-24">
+         <div className="container mx-auto px-6 flex flex-col items-center gap-10 max-w-7xl">
+            <div className="flex items-center gap-4">
+               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#ff0071]/10 border border-[#ff0071]/20 shadow-2xl shadow-[#ff0071]/10">
+                  <Sparkles className="h-6 w-6 text-[#ff0071]" />
                </div>
-               <span className="text-lg font-bold tracking-tight text-slate-800 lowercase">
+               <span className="text-2xl font-black tracking-tighter text-white lowercase">
                   creator_ia <span className="text-[#ff0071]">pro</span>
                </span>
             </div>
-            <p className="text-[11px] text-slate-400 lowercase tracking-tight font-medium opacity-60">
-               © {new Date().getFullYear()} industrial generation suite • pulse v6.2
+            <p className="text-[10px] text-slate-600 font-bold lowercase tracking-[0.3em] opacity-80">
+               © {new Date().getFullYear()} industrial generation suite • pulse v7.0 industrial ebony
             </p>
          </div>
       </footer>

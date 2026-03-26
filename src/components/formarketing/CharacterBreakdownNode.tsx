@@ -59,22 +59,22 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
   };
 
   return (
-    <div className={`group relative pulse-node w-[280px] animate-in zoom-in duration-200 nodrag shadow-xl transition-all ${data.status === 'executing' ? 'ring-2 ring-[#ff0071] shadow-[0_0_20px_rgba(255,0,113,0.15)] animate-pulse' : ''}`}>
+    <div className={`group relative rounded-[2rem] border border-white/10 bg-black/50 backdrop-blur-3xl w-[300px] animate-in zoom-in duration-300 nodrag shadow-2xl transition-all hover:border-[#ff0071]/50 ${data.status === 'executing' ? 'ring-2 ring-[#ff0071] shadow-[0_0_30px_rgba(255,0,113,0.2)] animate-pulse' : ''}`}>
       {/* V6.2 Pulse Header */}
       <div className="pulse-node-header justify-between gap-2">
         <div className="flex items-center gap-2 overflow-hidden">
             <UserCircle className="w-4 h-4 text-[#ff0071] shrink-0" />
-            <input 
+             <input 
               value={localTitle} 
               onChange={(e) => setLocalTitle(e.target.value)}
               onBlur={(e) => persistChange('title', e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
-              className="bg-transparent border-none p-0 m-0 text-[11px] font-bold lowercase tracking-tight text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#ff0071]/20 rounded px-1 -ml-1 w-full truncate"
-              placeholder="nexus profile"
+              className="bg-transparent border-none p-0 m-0 text-[11px] font-black lowercase tracking-widest text-white focus:outline-none focus:ring-2 focus:ring-[#ff0071]/20 rounded-lg px-2 -ml-2 w-full truncate transition-all"
+              placeholder="nexus_profile"
             />
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-slate-100 text-slate-400 rounded-md transition-all">
+          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 hover:bg-white/5 text-slate-500 rounded-xl transition-all">
              {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
           <button onClick={deleteNode} className="p-1 hover:bg-destructive/5 text-destructive/30 hover:text-destructive rounded-md transition-all">
@@ -90,42 +90,42 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
                   flavor
                </span>
             </div>
-             <input
-                value={localFlavor}
-                onChange={(e) => setLocalFlavor(e.target.value)}
-                onBlur={(e) => persistChange('flavor', e.target.value)}
-                onKeyDown={(e) => e.stopPropagation()}
-                className="w-full text-xs text-slate-600 bg-slate-50 border border-slate-100 p-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ff0071]/10 focus:border-[#ff0071]/30 transition-all font-medium"
-                placeholder="ej: cyberpunk..."
-             />
+              <input
+                 value={localFlavor}
+                 onChange={(e) => setLocalFlavor(e.target.value)}
+                 onBlur={(e) => persistChange('flavor', e.target.value)}
+                 onKeyDown={(e) => e.stopPropagation()}
+                 className="w-full text-xs text-slate-200 bg-white/5 border border-white/5 p-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#ff0071]/10 focus:border-[#ff0071]/30 transition-all font-bold placeholder:text-slate-700"
+                 placeholder="ej: cyberpunk..."
+              />
         </div>
 
         {isExpanded && (localDescription || !localDescription) && (
           <div className="space-y-1.5 animate-in slide-in-from-top-2 duration-200">
              <span className="text-[10px] font-bold text-slate-400 lowercase tracking-tight px-0.5">narrative data</span>
-             <textarea
-                value={localDescription}
-                onChange={(e) => setLocalDescription(e.target.value)}
-                onBlur={(e) => persistChange('description', e.target.value)}
-                onKeyDown={(e) => e.stopPropagation()}
-                className="w-full text-xs leading-relaxed text-slate-500 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 min-h-[70px] focus:outline-none focus:border-[#ff0071]/30 resize-none transition-all"
-                placeholder="contexto..."
-             />
+              <textarea
+                 value={localDescription}
+                 onChange={(e) => setLocalDescription(e.target.value)}
+                 onBlur={(e) => persistChange('description', e.target.value)}
+                 onKeyDown={(e) => e.stopPropagation()}
+                 className="w-full text-xs leading-relaxed text-slate-400 bg-white/[0.02] p-4 rounded-3xl border border-white/5 min-h-[90px] focus:outline-none focus:border-[#ff0071]/30 resize-none transition-all font-medium placeholder:text-slate-800"
+                 placeholder="contexto narrativo..."
+              />
           </div>
         )}
 
         <div className="bg-[#ff0071]/[0.02] p-3 rounded-2xl border border-[#ff0071]/5 transition-all">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold text-[#ff0071]/60 lowercase tracking-tight flex items-center gap-2">
-               <span className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse" />
-               nexus status
+            <p className="text-[10px] font-black text-[#ff0071] lowercase tracking-widest flex items-center gap-2.5">
+               <span className="w-2 h-2 rounded-full bg-[#ff0071] shadow-[0_0_8px_#ff0071]" />
+               nexus_engine_ready
             </p>
-            <span className="text-[9px] font-bold tracking-tight uppercase text-[#ff0071]/40">READY</span>
+            <span className="text-[9px] font-black tracking-widest uppercase text-slate-600">V7.0</span>
           </div>
         </div>
       </div>
 
-      <Handle type="source" position={Position.Right} className="!w-3 !h-3 !-right-1.5 !bg-slate-300 !border-2 !border-white !shadow-sm !z-20" />
+      <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-[#ff0071] !border-4 !border-[#0a0a0b] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
     </div>
   );
 };

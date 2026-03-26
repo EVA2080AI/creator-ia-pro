@@ -22,6 +22,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Space {
   id: string;
@@ -30,6 +40,11 @@ interface Space {
   thumbnail_url: string | null;
   created_at: string;
   updated_at: string;
+  settings?: {
+    brand_context?: string;
+    primary_color?: string;
+    theme?: string;
+  };
 }
 
 const Spaces = () => {
@@ -39,6 +54,9 @@ const Spaces = () => {
   const [spaces, setSpaces] = useState<Space[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingSpace, setEditingSpace] = useState<Space | null>(null);
+  const [formData, setFormData] = useState({ name: "", description: "" });
   const [creating, setCreating] = useState(false);
 
   const fetchSpaces = useCallback(async () => {
@@ -58,23 +76,53 @@ const Spaces = () => {
     if (user) fetchSpaces();
   }, [user, fetchSpaces]);
 
-  const handleCreate = async () => {
-    if (!user) return;
+  const handleOpenCreate = () => {
+    setEditingSpace(null);
+    setFormData({ name: "", description: "" });
+    setIsDialogOpen(true);
+  };
+
+  const handleOpenEdit = (space: Space) => {
+    setEditingSpace(space);
+    setFormData({ name: space.name, description: space.description || "" });
+    setIsDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!user || !formData.name) return;
     setCreating(true);
-    const name = prompt("Nombre del Space:", "Mi Espacio");
-    if (!name) {
-      setCreating(false);
-      return;
-    }
-    const { error } = await supabase
-      .from("spaces")
-      .insert({ user_id: user.id, name });
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Space creado");
+
+    try {
+      if (editingSpace) {
+        const { error } = await supabase
+          .from("spaces")
+          .update({ 
+            name: formData.name, 
+            description: formData.description,
+            settings: { ...editingSpace.settings, brand_context: formData.description }
+          })
+          .eq("id", editingSpace.id);
+        if (error) throw error;
+        toast.success("Space actualizado");
+      } else {
+        const { error } = await supabase
+          .from("spaces")
+          .insert({ 
+            user_id: user.id, 
+            name: formData.name, 
+            description: formData.description,
+            settings: { brand_context: formData.description }
+          });
+        if (error) throw error;
+        toast.success("Space creado");
+      }
+      setIsDialogOpen(false);
       fetchSpaces();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setCreating(false);
     }
-    setCreating(false);
   };
 
   const handleDelete = async (id: string) => {
@@ -87,16 +135,6 @@ const Spaces = () => {
     }
   };
 
-  const handleRename = async (id: string, currentName: string) => {
-    const name = prompt("Nuevo nombre:", currentName);
-    if (!name) return;
-    const { error } = await supabase.from("spaces").update({ name }).eq("id", id);
-    if (error) toast.error(error.message);
-    else {
-      toast.success("Renombrado");
-      fetchSpaces();
-    }
-  };
 
   const filtered = spaces.filter((s) =>
     s.name.toLowerCase().includes(search.toLowerCase())
@@ -125,12 +163,12 @@ const Spaces = () => {
             <p className="mt-1 text-muted-foreground">Organiza tus proyectos generativos</p>
           </div>
           <Button
-            onClick={handleCreate}
+            onClick={handleOpenCreate}
             disabled={creating}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+            className="bg-[#ff0071] text-white hover:bg-[#e60066] gap-2 rounded-2xl shadow-lg shadow-[#ff0071]/10 px-6"
           >
             {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-            Nuevo Space
+            nuevo_space
           </Button>
         </div>
 
@@ -190,9 +228,9 @@ const Spaces = () => {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="bg-card border-border">
-                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleRename(space.id, space.name); }}>
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleOpenEdit(space); }}>
                         <Pencil className="mr-2 h-3.5 w-3.5" />
-                        Renombrar
+                        configuración
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={(e) => { e.stopPropagation(); handleDelete(space.id); }}
@@ -208,6 +246,57 @@ const Spaces = () => {
             ))}
           </div>
         )}
+        {/* Space Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent className="bg-white border-slate-50 sm:max-w-[425px] rounded-[2.5rem] !pt-10">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold lowercase tracking-tight">
+                {editingSpace ? "editar_space" : "crear_nuevo_space"}
+              </DialogTitle>
+              <DialogDescription className="text-slate-400 lowercase font-medium">
+                define el contexto creativo para que la ia entienda tu visión.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6 py-4 lowercase font-sans">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-[11px] font-bold text-slate-400 opacity-60 uppercase tracking-widest pl-1">nombre del proyecto</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="ej: marca x - campaña 2026"
+                  className="rounded-2xl border-slate-50 bg-slate-50/50 focus:ring-[#ff0071]/20 h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description" className="text-[11px] font-bold text-slate-400 opacity-60 uppercase tracking-widest pl-1">brand context (guía para ia)</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="ej: estética futurista, alto contraste, bordes redondeados (12px), colores neón..."
+                  className="rounded-2xl border-slate-50 bg-slate-50/50 min-h-[120px] focus:ring-[#ff0071]/20 p-4 leading-relaxed"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2 sm:gap-0 mt-4">
+              <Button 
+                variant="ghost" 
+                onClick={() => setIsDialogOpen(false)}
+                className="rounded-2xl font-bold lowercase hover:bg-slate-50 text-slate-400"
+              >
+                cancelar
+              </Button>
+              <Button 
+                onClick={handleSave} 
+                className="bg-[#ff0071] text-white hover:bg-[#e60066] rounded-2xl font-bold lowercase px-8 shadow-lg shadow-[#ff0071]/10"
+                disabled={creating}
+              >
+                {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : editingSpace ? "guardar_cambios" : "crear_space"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

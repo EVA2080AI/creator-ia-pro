@@ -24,7 +24,7 @@ const MODEL_COSTS: Record<string, number> = {
   "deepseek-chat": 1, "gemini-3-flash": 1, "gemini-3.1-pro-low": 1,
   "gemini-3.1-pro-high": 3, "claude-3.5-sonnet": 4, "claude-3-opus": 5,
   "gpt-oss-120b": 2, "nano-banana-2": 2, "nano-banana-pro": 4, "nano-banana-25": 1,
-  "upscale": 3, "background": 1, "enhance": 2, "restore": 3,
+  "upscale": 3, "background": 1, "enhance": 2, "restore": 3, "variation": 4,
 };
 
 export interface AIActionParams {
@@ -82,7 +82,7 @@ export const aiService = {
       // 3. Route to correct AI provider
       let result: any = { error: "Acción no soportada" };
 
-      if (tool && ["upscale", "background", "enhance", "restore", "eraser"].includes(tool)) {
+      if (tool && ["upscale", "background", "enhance", "restore", "eraser", "variation"].includes(tool)) {
         if (!image) throw new Error(`La herramienta "${tool}" requiere una imagen de origen.`);
         result = await this.handleMediaProxy(tool, image);
       } else if (action === "image" || IMAGE_MODEL_IDS.has(model) || tool === "generate") {
