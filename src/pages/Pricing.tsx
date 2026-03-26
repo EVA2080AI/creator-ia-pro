@@ -29,7 +29,7 @@ const plans = [
     cta: "Empezar Gratis",
     badge: null,
     icon: Zap,
-    color: "#00c2ff",
+    color: "#FA8214",
     stripeTier: null,
   },
   {
@@ -49,7 +49,7 @@ const plans = [
     cta: "Plan Estudiante",
     badge: "50% Off",
     icon: GraduationCap,
-    color: "#00e5a0",
+    color: "#EC4699",
     stripeTier: "educacion" as const,
   },
   {
@@ -69,7 +69,7 @@ const plans = [
     cta: "Suscribirme - Pro",
     badge: "Más Popular",
     icon: Star,
-    color: "#bd00ff",
+    color: "#FA8214",
     stripeTier: "pro" as const,
   },
   {
@@ -89,7 +89,7 @@ const plans = [
     cta: "Plan Business",
     badge: "Agencias",
     icon: Crown,
-    color: "#ffb800",
+    color: "#EC4699",
     stripeTier: "business" as const,
   },
 ];
@@ -186,11 +186,11 @@ export default function Pricing() {
         
         {/* FOMO Promo Banner */}
         <div className="w-full max-w-[1400px] mt-6 mx-auto">
-          <div className="rounded-2xl bg-gradient-to-r from-[#bd00ff]/20 via-[#ff0071]/20 to-[#ffb800]/20 border border-white/10 p-1 flex relative overflow-hidden">
+          <div className="rounded-2xl bg-gradient-to-r from-[#EC4699]/20 via-[#FA8214]/20 to-[#EC4699]/20 border border-white/10 p-1 flex relative overflow-hidden">
             <div className="absolute inset-0 bg-white/5 animate-pulse" />
             <div className="relative z-10 w-full flex flex-col sm:flex-row items-center justify-between px-6 py-3 gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#ff0071] flex items-center justify-center shadow-[0_0_15px_#ff0071]">
+                <div className="w-8 h-8 rounded-full bg-[#EC4699] flex items-center justify-center shadow-[0_0_15px_#EC4699]">
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
                 <div>
@@ -199,13 +199,13 @@ export default function Pricing() {
                 </div>
               </div>
               <div className="flex items-center gap-2 bg-[#050506] px-4 py-2 rounded-xl border border-white/10">
-                <Clock className="w-4 h-4 text-[#ffb800] animate-pulse" />
+                <Clock className="w-4 h-4 text-[#FA8214] animate-pulse" />
                 <div className="flex items-center gap-1 text-sm font-black tabular-nums">
                   <span className="text-white">{String(timeLeft.hours).padStart(2, '0')}</span>
                   <span className="text-white/40">:</span>
                   <span className="text-white">{String(timeLeft.minutes).padStart(2, '0')}</span>
                   <span className="text-white/40">:</span>
-                  <span className="text-[#ff0071]">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                  <span className="text-[#EC4699]">{String(timeLeft.seconds).padStart(2, '0')}</span>
                 </div>
               </div>
             </div>
@@ -213,13 +213,13 @@ export default function Pricing() {
         </div>
 
         <div className="text-center mt-20 mb-16">
-          <Badge className="mb-6 bg-white/5 text-white/70 border-white/10 px-4 py-1 rounded-full text-xs font-semibold tracking-widest uppercase">
+          <Badge className="mb-6 bg-white/5 text-white/70 border-white/10 px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">
             Planes Transparentes
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6">
-            Poder de IA, <span className="brand-gradient-text">escalable.</span>
+          <h1 className="text-6xl md:text-9xl font-display tracking-tight mb-6 uppercase">
+            Poder de IA, <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">escalable.</span>
           </h1>
-          <p className="max-w-xl mx-auto text-lg text-white/50 font-medium leading-relaxed">
+          <p className="max-w-xl mx-auto text-sm text-slate-500 font-bold uppercase tracking-widest leading-relaxed">
             Diseñado para creadores, optimizado para equipos. Elige el plan que mejor se adapte a tu ecosistema.
           </p>
         </div>
@@ -230,7 +230,7 @@ export default function Pricing() {
             <div
               key={plan.name}
               className={`relative flex flex-col rounded-[2rem] border bg-[#0f0f12] p-8 transition-all duration-300 hover:-translate-y-2
-                ${plan.name === 'Pro' ? 'border-[#bd00ff]/30 shadow-2xl shadow-[#bd00ff]/10 ring-1 ring-[#bd00ff]/20' : 'border-white/8 hover:border-white/20 shadow-xl'}`}
+                ${plan.name === 'Pro' ? 'border-[#FA8214]/30 shadow-2xl shadow-[#FA8214]/10 ring-1 ring-[#FA8214]/20' : 'border-white/8 hover:border-white/20 shadow-xl'}`}
             >
               {plan.badge && (
                 <div 
@@ -245,18 +245,18 @@ export default function Pricing() {
                 <plan.icon className="h-6 w-6" style={{ color: plan.color }} />
               </div>
 
-              <h2 className="text-2xl font-black text-white">{plan.name}</h2>
-              <p className="mt-2 text-sm text-white/40 font-medium leading-relaxed h-10">{plan.description}</p>
+              <h2 className="text-2xl font-display text-white uppercase">{plan.name}</h2>
+              <p className="mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-wide leading-relaxed h-10">{plan.description}</p>
 
               <div className="mt-6 flex items-baseline gap-1.5">
-                <span className="text-5xl font-black tracking-tighter" style={{ color: plan.name === 'Pro' ? '#bd00ff' : 'white' }}>
+                <span className="text-6xl font-display tracking-tight" style={{ color: plan.name === 'Pro' ? '#FA8214' : 'white' }}>
                   {plan.price}
                 </span>
-                <span className="text-xs font-semibold text-white/40 uppercase tracking-widest">{plan.period}</span>
+                <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">{plan.period}</span>
               </div>
               
               <div 
-                className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white/5 border border-white/5 px-4 py-2.5 text-xs font-bold"
+                className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-white/[0.03] border border-white/5 px-4 py-3 text-[10px] font-bold uppercase tracking-widest"
                 style={{ color: plan.color }}
               >
                 <Sparkles className="h-3.5 w-3.5" />
@@ -265,7 +265,7 @@ export default function Pricing() {
 
               <ul className="mt-8 flex-1 space-y-4">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-3 text-sm text-white/60 font-medium">
+                  <li key={feature} className="flex items-start gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-wide">
                     <Check className="mt-0.5 h-4 w-4 shrink-0" style={{ color: plan.color }} />
                     {feature}
                   </li>
@@ -275,12 +275,12 @@ export default function Pricing() {
               <Button
                 onClick={() => handleSubscribe(plan)}
                 disabled={loadingPlan === plan.key}
-                className={`mt-10 h-12 w-full rounded-xl font-bold text-sm shadow-xl transition-all active:scale-95 flex items-center gap-2
+                className={`mt-10 h-14 w-full rounded-md font-bold text-[10px] uppercase tracking-[0.2em] shadow-xl transition-all active:scale-95 flex items-center justify-center gap-3
                   ${plan.name === "Pro" || plan.name === "Educación" || plan.name === "Business"
-                    ? "text-[#050506] hover:opacity-90"
+                    ? "text-white hover:opacity-90"
                     : "bg-white/5 text-white hover:bg-white/10 shadow-none border border-white/10"
                 }`}
-                style={plan.name !== "Starter" ? { background: plan.color, boxShadow: `0 4px 14px ${plan.color}30` } : undefined}
+                style={plan.name !== "Starter" ? { background: `linear-gradient(135deg, ${plan.color} 0%, ${plan.color}CC 100%)`, boxShadow: `0 8px 20px -5px ${plan.color}50` } : undefined}
               >
                 {loadingPlan === plan.key ? <Loader2 className="h-5 w-5 animate-spin" /> : plan.cta}
                 {plan.name !== "Starter" && !loadingPlan && <ArrowRight className="w-4 h-4" />}
@@ -291,24 +291,24 @@ export default function Pricing() {
         
         {/* Credit Packs */}
         <div className="mt-32 w-full max-w-[1400px]">
-           <div className="flex flex-col items-center mb-12">
-              <Badge className="mb-4 bg-[#ffb800]/10 text-[#ffb800] border-[#ffb800]/20 px-4 py-1.5 rounded-full text-[10px] font-bold tracking-widest uppercase">
+            <div className="flex flex-col items-center mb-16">
+              <Badge className="mb-6 bg-[#FA8214]/10 text-[#FA8214] border-[#FA8214]/20 px-6 py-2 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase">
                 Recargas Instantáneas
               </Badge>
-              <h2 className="text-3xl md:text-4xl font-black tracking-tighter text-white">Packs de Créditos Adicionales.</h2>
-              <p className="mt-4 text-white/50 font-medium text-base text-center max-w-xl">
+              <h2 className="text-5xl md:text-7xl font-display tracking-tight text-white uppercase">Packs de <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">Créditos</span> Adicionales.</h2>
+              <p className="mt-8 text-slate-500 font-bold uppercase tracking-widest text-xs text-center max-w-xl leading-loose">
                  Recarga tu balance industrial sin compromisos ni suscripciones mensuales adicionales.
               </p>
-           </div>
+            </div>
            
            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {CREDIT_PACKS.map((pack) => (
-                 <div key={pack.id} className="group relative flex flex-col items-center rounded-[2rem] border border-white/8 bg-[#0f0f12] p-8 transition-all hover:bg-white/[0.04] hover:border-[#ffb800]/30 shadow-xl hover:shadow-[#ffb800]/10">
-                    <div className="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#ffb800]/10 text-[#ffb800] group-hover:scale-110 group-hover:bg-[#ffb800] group-hover:text-[#050506] transition-all duration-300">
-                       <Coins className="h-7 w-7" />
+                  <div key={pack.id} className="group relative flex flex-col items-center rounded-[2rem] border border-white/8 bg-[#0f0f12] p-8 transition-all hover:bg-white/[0.04] hover:border-[#FA8214]/30 shadow-xl hover:shadow-[#FA8214]/10">
+                    <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FA8214]/10 text-[#FA8214] group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:from-[#EC4699] group-hover:to-[#FA8214] group-hover:text-white transition-all duration-300">
+                       <Coins className="h-8 w-8" />
                     </div>
-                    <h3 className="text-xl font-bold text-white tracking-tight">{pack.name}</h3>
-                    <p className="mt-1 text-[11px] font-bold text-[#ffb800] uppercase tracking-widest">{pack.credits} créditos</p>
+                    <h3 className="text-xl font-display text-white tracking-tight uppercase">{pack.name}</h3>
+                    <p className="mt-2 text-[10px] font-bold text-[#FA8214] uppercase tracking-widest">{pack.credits} créditos</p>
                     
                     <div className="mt-6 flex items-baseline gap-1 relative">
                        <span className="text-4xl font-black text-white tracking-tighter">${pack.price}</span>
@@ -318,7 +318,7 @@ export default function Pricing() {
                     <Button 
                        onClick={() => handleBuyCredits(pack)}
                        disabled={loadingPack === pack.id}
-                       className="mt-8 w-full h-11 bg-white/5 border border-white/10 text-white hover:bg-[#ffb800] hover:text-[#050506] hover:border-[#ffb800] rounded-xl font-bold text-xs tracking-wide transition-all shadow-sm active:scale-95"
+                       className="mt-10 w-full h-12 bg-white/5 border border-white/10 text-white hover:bg-gradient-to-r hover:from-[#EC4699] hover:to-[#FA8214] hover:text-white hover:border-[#EC4699] rounded-md font-bold text-[10px] uppercase tracking-[0.2em] transition-all shadow-sm active:scale-95"
                     >
                        {loadingPack === pack.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Comprar Ahora"}
                     </Button>
@@ -328,22 +328,22 @@ export default function Pricing() {
         </div>
 
         {/* FAQ */}
-        <div className="mt-32 w-full max-w-4xl">
-          <h2 className="text-center text-3xl font-black text-white mb-10 tracking-tighter">
-            Preguntas Frecuentes
+        <div className="mt-40 w-full max-w-4xl">
+          <h2 className="text-center text-4xl md:text-6xl font-display text-white mb-16 tracking-tight uppercase">
+            Preguntas <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">Frecuentes</span>
           </h2>
           <div className="grid md:grid-cols-2 gap-4">
             {faqs.map((faq) => (
-              <div key={faq.q} className="rounded-2xl border border-white/8 bg-[#0f0f12] p-6 shadow-xl hover:border-white/20 transition-all">
-                <h3 className="text-[13px] font-bold text-white leading-snug">{faq.q}</h3>
-                <p className="mt-3 text-xs text-white/50 font-medium leading-relaxed">{faq.a}</p>
+              <div key={faq.q} className="rounded-2xl border border-white/5 bg-[#09090b] p-8 shadow-xl hover:border-[#EC4699]/30 transition-all group">
+                <h3 className="text-xs font-bold text-white leading-snug uppercase tracking-widest group-hover:text-[#EC4699] transition-colors">{faq.q}</h3>
+                <p className="mt-4 text-[11px] text-slate-500 font-bold uppercase tracking-wide leading-loose">{faq.a}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <p className="mt-20 text-xs font-medium text-white/40 text-center bg-white/5 border border-white/5 px-6 py-3 rounded-full">
-          ¿Problemas con el pago? Contáctanos en <span className="text-[#00c2ff]">billing@creator-ia.com</span>
+        <p className="mt-20 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500 text-center bg-white/[0.03] border border-white/5 px-10 py-4 rounded-full">
+          ¿Problemas con el pago? Contáctanos en <span className="text-[#EC4699]">billing@creator-ia.com</span>
         </p>
       </main>
     </div>

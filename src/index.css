@@ -1,18 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ============================================
-   CREATOR IA PRO v2.0 — DEEP DARK PREMIUM
+   CREATOR IA PRO v2.1 — PICLINK AESTHETIC
    Design Tokens & Global Styles
    ============================================ */
 
 @layer base {
   :root {
     /* Core surfaces */
-    --background: 240 8% 2%;         /* #050506 */
+    --background: 240 10% 4%;         /* #09090B */
     --foreground: 0 0% 98%;
 
     --card: 240 6% 8%;               /* #121215 */
@@ -21,8 +21,8 @@
     --popover: 240 6% 7%;
     --popover-foreground: 0 0% 98%;
 
-    /* Brand — Purple → Magenta gradient */
-    --primary: 289 100% 50%;         /* #bd00ff purple */
+    /* Brand — Pink → Orange gradient (PicLink) */
+    --primary: 330 81% 60%;         /* #EC4699 Pink */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 240 4% 12%;
@@ -31,7 +31,7 @@
     --muted: 240 4% 14%;
     --muted-foreground: 240 5% 50%;
 
-    --accent: 289 100% 50%;
+    --accent: 25 95% 53%;           /* #FA8214 Orange */
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 70% 50%;
@@ -39,29 +39,30 @@
 
     --border: 240 4% 10%;
     --input: 240 4% 10%;
-    --ring: 289 100% 50%;
-    --radius: 1rem;
+    --ring: 330 81% 60%;
+    --radius: 0.75rem;
 
-    /* Creator IA Pro Design Tokens */
-    --creator-bg: #050506;
-    --creator-canvas: #030304;
-    --creator-card: #0f0f12;
-    --creator-card-hover: #141418;
-    --creator-border: rgba(255, 255, 255, 0.06);
-    --creator-border-hover: rgba(189, 0, 255, 0.3);
+    /* Creator IA Pro Design Tokens (PicLink Aesthetic) */
+    --creator-bg: #09090b;
+    --creator-canvas: #050506;
+    --creator-card: #121215;
+    --creator-card-hover: #18181b;
+    --creator-border: rgba(255, 255, 255, 0.08);
+    --creator-border-hover: rgba(236, 70, 153, 0.3);
+    --creator-pink: #EC4699;
+    --creator-orange: #FA8214;
     --creator-purple: #bd00ff;
     --creator-magenta: #ff0071;
     --creator-gold: #ffb800;
-    --creator-blue: #00c2ff;
-    --creator-glow-purple: rgba(189, 0, 255, 0.35);
-    --creator-glow-magenta: rgba(255, 0, 113, 0.3);
-    --creator-glow-gold: rgba(255, 184, 0, 0.4);
+    --creator-blue: #0ea5e9;
+    --creator-glow-pink: rgba(236, 70, 153, 0.35);
+    --creator-glow-orange: rgba(250, 130, 20, 0.3);
 
     /* Canvas specific */
-    --canvas: 240 8% 2%;
+    --canvas: 240 10% 4%;
     --node-bg: 240 6% 7%;
     --node-border: 240 4% 12%;
-    --node-glow: 289 100% 50%;
+    --node-glow: 330 81% 60%;
 
     /* Feedback */
     --success: 142 72% 45%;
@@ -73,20 +74,20 @@
     --gold-muted: 43 60% 30%;
 
     /* Sidebar */
-    --sidebar-background: 240 8% 4%;
+    --sidebar-background: 240 10% 5%;
     --sidebar-foreground: 240 5% 85%;
-    --sidebar-primary: 289 100% 50%;
+    --sidebar-primary: 330 81% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4% 10%;
+    --sidebar-accent: 240 4% 12%;
     --sidebar-accent-foreground: 240 5% 85%;
-    --sidebar-border: 240 4% 8%;
-    --sidebar-ring: 289 100% 50%;
+    --sidebar-border: 240 4% 10%;
+    --sidebar-ring: 330 81% 60%;
   }
 }
 
 @layer base {
   * {
-    @apply border-[rgba(255,255,255,0.06)];
+    @apply border-[rgba(255,255,255,0.08)];
     box-sizing: border-box;
   }
 
@@ -96,28 +97,30 @@
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    selection-background-color: rgba(189, 0, 255, 0.3);
+    selection-background-color: rgba(236, 70, 153, 0.3);
   }
 
   *::selection {
-    background: rgba(189, 0, 255, 0.25);
+    background: rgba(236, 70, 153, 0.25);
     color: white;
   }
 
   *:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--creator-purple), 0 0 0 4px rgba(189, 0, 255, 0.15);
+    box-shadow: 0 0 0 2px var(--creator-pink), 0 0 0 4px rgba(236, 70, 153, 0.15);
   }
 
   h1, h2, h3, h4, h5 {
-    font-weight: 800;
-    letter-spacing: -0.03em;
+    font-family: 'Bebas Neue', sans-serif;
+    font-weight: 400; /* Bebas Neue is a single weight font */
+    letter-spacing: 0.02em;
     color: white;
+    text-transform: uppercase;
   }
 
-  h1 { font-size: 2.5rem; line-height: 1.1; }
-  h2 { font-size: 1.75rem; line-height: 1.15; }
-  h3 { font-size: 1.25rem; line-height: 1.2; }
+  h1 { font-size: 4rem; line-height: 1; }
+  h2 { font-size: 2.5rem; line-height: 1.1; }
+  h3 { font-size: 1.5rem; line-height: 1.2; }
 }
 
 /* ============================================
@@ -129,27 +132,27 @@
   .creator-bg    { background-color: var(--creator-bg); }
   .creator-card  { background-color: var(--creator-card); }
   .creator-glass {
-    background: rgba(15, 15, 18, 0.7);
+    background: rgba(18, 18, 21, 0.7);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid var(--creator-border);
   }
 
-  /* --- Brand Gradient --- */
+  /* --- Brand Gradient (PicLink) --- */
   .brand-gradient {
-    background: linear-gradient(135deg, var(--creator-purple) 0%, var(--creator-magenta) 100%);
+    background: linear-gradient(135deg, var(--creator-pink) 0%, var(--creator-orange) 100%);
   }
   .brand-gradient-text {
-    background: linear-gradient(135deg, var(--creator-purple) 0%, var(--creator-magenta) 100%);
+    background: linear-gradient(135deg, var(--creator-pink) 0%, var(--creator-orange) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .brand-glow {
-    box-shadow: 0 0 25px -5px var(--creator-glow-purple), 0 0 50px -20px var(--creator-glow-magenta);
+    box-shadow: 0 0 25px -5px var(--creator-glow-pink), 0 0 50px -20px var(--creator-glow-orange);
   }
   .brand-glow-sm {
-    box-shadow: 0 0 15px -5px var(--creator-glow-purple);
+    box-shadow: 0 0 15px -5px var(--creator-glow-pink);
   }
 
   /* --- Stat Cards --- */
@@ -161,26 +164,26 @@
     transition: all 0.3s ease;
   }
   .stat-card:hover {
-    border-color: rgba(189, 0, 255, 0.2);
+    border-color: rgba(236, 70, 153, 0.2);
     background: var(--creator-card-hover);
     transform: translateY(-2px);
   }
 
   /* --- Buttons --- */
   .btn-brand {
-    background: linear-gradient(135deg, var(--creator-purple) 0%, var(--creator-magenta) 100%);
+    background: linear-gradient(135deg, var(--creator-pink) 0%, var(--creator-orange) 100%);
     color: white;
     font-weight: 700;
     font-size: 0.8125rem;
     padding: 0.625rem 1.25rem;
-    border-radius: 0.75rem;
+    border-radius: 0.5rem;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 15px -5px var(--creator-glow-purple);
+    box-shadow: 0 4px 15px -5px var(--creator-glow-pink);
   }
   .btn-brand:hover {
-    box-shadow: 0 6px 25px -5px var(--creator-glow-purple), 0 0 0 1px rgba(189, 0, 255, 0.4);
+    box-shadow: 0 6px 25px -5px var(--creator-glow-pink), 0 0 0 1px rgba(236, 70, 153, 0.4);
     transform: translateY(-1px);
   }
   .btn-brand:active { transform: scale(0.98); }

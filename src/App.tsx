@@ -31,10 +31,10 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Hub = lazy(() => import("./pages/Hub"));
 
 const LoadingScreen = () => (
-  <div className="flex h-screen w-screen items-center justify-center bg-background">
+  <div className="flex h-screen w-screen items-center justify-center bg-[#09090b]">
     <div className="relative">
-      <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
-      <Loader2 className="relative h-10 w-10 animate-spin-slow text-primary" />
+      <div className="absolute inset-0 bg-[#EC4699]/20 blur-2xl rounded-full animate-pulse" />
+      <Loader2 className="relative h-10 w-10 animate-spin-slow text-[#EC4699]" />
     </div>
   </div>
 );

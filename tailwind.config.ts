@@ -15,7 +15,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Outfit', 'sans-serif'],
+        display: ['Bebas Neue', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
@@ -31,12 +31,14 @@ export default {
         'node-glow': 'hsl(var(--node-glow))',
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
-        // Creator IA Pro v2.0 Brand Tokens
+        // Creator IA Pro v2.0 Brand Tokens (PicLink Aesthetic)
         creator: {
           bg: '#050506',
           canvas: '#030304',
           card: '#0f0f12',
           'card-hover': '#141418',
+          pink: '#EC4699',
+          orange: '#FA8214',
           purple: '#bd00ff',
           magenta: '#ff0071',
           gold: '#ffb800',

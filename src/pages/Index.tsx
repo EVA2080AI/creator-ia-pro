@@ -61,63 +61,63 @@ const Index = () => {
         <meta property="og:description" content="Automatiza y potencia tu agencia con IA multimodal. Flujos de alto rendimiento." />
       </Helmet>
       
-      <div className="min-h-screen bg-[#050506] font-inter text-slate-100 overflow-hidden relative selection:bg-[#bd00ff]/30">
-      {/* Ambient blurs - Deep Magenta/Purple */}
+      <div className="min-h-screen bg-[#09090b] font-inter text-slate-100 overflow-hidden relative selection:bg-[#EC4699]/30">
+      {/* Ambient blurs - PicLink Pink/Orange */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/4 h-[700px] w-[700px] rounded-full bg-[#bd00ff]/10 blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-[#ff0071]/5 blur-[100px]" />
+        <div className="absolute -top-40 left-1/4 h-[700px] w-[700px] rounded-full bg-[#EC4699]/10 blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-[#FA8214]/5 blur-[100px]" />
       </div>
 
       {/* Nav */}
-      <header className="relative z-10 flex items-center justify-between px-8 py-6 sm:px-12">
+      <header className="relative z-50 flex items-center justify-between px-8 py-6 sm:px-12 sticky top-0 bg-[#09090b]/40 backdrop-blur-md border-b border-white/5">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#bd00ff] to-[#ff0071] shadow-lg shadow-[#bd00ff]/20">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-lg shadow-[#EC4699]/20">
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="text-base font-black text-white tracking-tight lowercase">
-              creator<span className="text-[#ff0071]">_</span>ia
+            <span className="text-xl font-display text-white tracking-tight uppercase leading-none">
+              creator ia <span className="text-[#FA8214]">pro</span>
             </span>
-            <span className="text-[9px] font-black text-[#ffb800] uppercase tracking-widest mt-0.5">V2.1 INDUSTRIAL</span>
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mt-1">V2.1 industrial</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5 hidden sm:flex text-sm font-bold lowercase transition-colors">
-            precios
+          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5 hidden sm:flex text-sm font-medium transition-colors">
+            Precios
           </Button>
-          <Button onClick={() => navigate("/auth")} className="bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white hover:opacity-90 rounded-full px-8 h-12 shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)] font-black lowercase tracking-normal active:scale-95 transition-all">
-            empezar gratis
+          <Button onClick={() => navigate("/auth")} className="bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 rounded-md px-8 h-12 shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] font-bold active:scale-95 transition-all">
+            Empezar Gratis
           </Button>
         </div>
       </header>
 
       <main className="relative z-10 flex flex-col items-center px-8 pt-24 pb-40">
         {/* Pulse Badge */}
-        <div className="mb-10 flex items-center gap-3 rounded-full border border-[#bd00ff]/20 bg-[#bd00ff]/5 px-6 py-2.5 text-[11px] text-slate-300 font-bold lowercase animate-in fade-in slide-in-from-bottom-2 duration-700">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse shadow-[0_0_8px_#ff0071]" />
-          ecosistema creativo industrial
+        <div className="mb-10 flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-6 py-2.5 text-[11px] text-slate-300 font-bold uppercase tracking-wider animate-in fade-in slide-in-from-bottom-2 duration-700">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#EC4699] animate-pulse shadow-[0_0_8px_#EC4699]" />
+          Ecosistema Creativo Industrial
         </div>
 
         {/* Hero */}
-        <h1 className="max-w-5xl text-center text-6xl font-black leading-[1.05] tracking-tighter animate-in fade-in slide-in-from-bottom-4 duration-1000 md:text-8xl lg:text-9xl text-white lowercase">
-          crea con <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#bd00ff] to-[#ff0071]">ia</span>
+        <h1 className="max-w-5xl text-center text-8xl font-display leading-[0.9] tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-1000 md:text-9xl lg:text-[10rem] text-white">
+          Crea con <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">IA</span>
           <br />
-          <span className="text-slate-700">sin límites.</span>
+          <span className="text-slate-700">Sin límites.</span>
         </h1>
 
-        <p className="mt-10 max-w-2xl text-center text-xl text-slate-400 lowercase font-bold animate-in fade-in slide-in-from-bottom-6 duration-1000 leading-relaxed tracking-tight">
-          genera imágenes, mejora fotos, crea textos de marketing, logos y flows visuales.
-          <strong className="text-white font-black"> 12+ herramientas profesionales</strong> en una sola plataforma.
+        <p className="mt-10 max-w-2xl text-center text-xl text-slate-400 font-medium animate-in fade-in slide-in-from-bottom-6 duration-1000 leading-relaxed tracking-tight">
+          Genera imágenes, mejora fotos, crea textos de marketing, logos y flows visuales.
+          <strong className="text-white font-bold"> 12+ herramientas profesionales</strong> en una sola plataforma.
         </p>
 
         <div className="mt-12 flex flex-col sm:flex-row gap-5 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <Button onClick={() => navigate("/auth")} size="lg" className="bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white hover:opacity-90 gap-3 text-lg px-12 rounded-[2rem] h-16 shadow-[0_0_30px_-5px_rgba(189,0,255,0.5)] font-black lowercase active:scale-95 transition-all">
-            crear cuenta gratis
+          <Button onClick={() => navigate("/auth")} size="lg" className="bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 gap-3 text-lg px-12 rounded-md h-16 shadow-[0_0_30px_-5px_rgba(236,70,153,0.5)] font-bold active:scale-95 transition-all">
+            Crear cuenta gratis
             <ArrowRight className="h-5 w-5" />
           </Button>
-          <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 gap-3 text-lg px-10 rounded-[2rem] h-16 font-black lowercase shadow-sm transition-all focus:ring-0">
+          <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 gap-3 text-lg px-10 rounded-md h-16 font-bold shadow-sm transition-all focus:ring-0">
             <Crown className="h-5 w-5 text-[#ffb800]" />
-            ver planes
+            Ver planes
           </Button>
         </div>
 
@@ -130,52 +130,54 @@ const Index = () => {
             { value: "3", label: "plataformas" },
           ].map((s) => (
             <div key={s.label} className="text-center group">
-              <p className="text-6xl font-black text-white group-hover:text-[#ff0071] transition-colors duration-500 tracking-tighter">{s.value}</p>
-              <p className="mt-3 text-[10px] text-[#bd00ff] font-bold uppercase tracking-[0.2em]">{s.label}</p>
+              <p className="text-7xl font-display text-white group-hover:text-[#EC4699] transition-colors duration-500 tracking-tight">{s.value}</p>
+              <p className="mt-2 text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">{s.label}</p>
             </div>
           ))}
         </div>
 
-        {/* Features Row */}
-
-        <div className="mt-24 w-full max-w-5xl grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in">
-          {features.map((f) => (
-            <div key={f.title} className="rounded-2xl border border-border bg-card/50 p-5 text-center backdrop-blur-sm">
-              <f.icon className="mx-auto h-6 w-6 text-primary mb-3" />
-              <h3 className="text-sm font-semibold text-foreground">{f.title}</h3>
-              <p className="mt-1 text-xs text-muted-foreground">{f.desc}</p>
+        {/* Features Row - PicLink Numbered Cards */}
+        <div className="mt-24 w-full max-w-5xl grid grid-cols-1 md:grid-cols-4 gap-4 animate-fade-in">
+          {features.map((f, i) => (
+            <div key={f.title} className="relative group rounded-xl border border-white/5 bg-white/[0.02] p-8 backdrop-blur-sm hover:bg-white/[0.04] transition-all overflow-hidden">
+              <span className="absolute -right-4 -bottom-8 text-9xl font-display text-white/[0.03] pointer-events-none group-hover:text-white/[0.05] transition-colors">
+                0{i + 1}
+              </span>
+              <f.icon className="h-6 w-6 text-[#EC4699] mb-6" />
+              <h3 className="text-xl font-display text-white mb-2">{f.title}</h3>
+              <p className="text-sm text-slate-500 leading-relaxed uppercase tracking-wide font-bold">{f.desc}</p>
             </div>
           ))}
         </div>
 
         {/* Tools Grid — All Accessible */}
-        <div className="mt-28 w-full max-w-6xl">
-          <div className="mb-12 text-center">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">Suite Completa</Badge>
-            <h2 className="text-3xl font-bold text-foreground md:text-5xl">
-              Todo lo que necesitas, <span className="gradient-text">en un solo lugar</span>
+        <div className="mt-32 w-full max-w-6xl">
+          <div className="mb-16 text-center">
+            <Badge className="mb-4 bg-[#EC4699]/10 text-[#EC4699] border-[#EC4699]/20 hover:bg-[#EC4699]/10 uppercase tracking-widest px-4 py-1">Suite Completa</Badge>
+            <h2 className="text-5xl font-display text-white md:text-7xl">
+              Todo lo que necesitas, <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">en un solo lugar</span>
             </h2>
-            <p className="mt-4 text-muted-foreground max-w-xl mx-auto">
+            <p className="mt-4 text-slate-500 max-w-xl mx-auto uppercase text-xs font-bold tracking-widest">
               Haz clic en cualquier herramienta para empezar a crear.
             </p>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 animate-fade-in">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 animate-fade-in">
             {aiTools.map((tool) => (
               <button
                 key={tool.name}
                 onClick={() => navigate(tool.path)}
-                className="group rounded-2xl border border-border bg-card/60 p-5 text-left backdrop-blur-sm
-                  hover:border-primary/30 hover:-translate-y-1 hover:shadow-[0_8px_30px_-10px_hsl(262_83%_58%/0.2)]
-                  transition-all duration-200"
+                className="group rounded-xl border border-white/5 bg-white/[0.02] p-8 text-left backdrop-blur-sm
+                  hover:border-[#EC4699]/30 hover:-translate-y-1 hover:shadow-[0_8px_30px_-10px_rgba(236,70,153,0.2)]
+                  transition-all duration-300 relative overflow-hidden"
               >
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                  <tool.icon className="h-5 w-5 text-primary" />
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-lg bg-white/5 group-hover:bg-[#EC4699]/10 transition-colors">
+                  <tool.icon className="h-6 w-6 text-slate-400 group-hover:text-[#EC4699] transition-colors" />
                 </div>
-                <h3 className="text-sm font-semibold text-foreground">{tool.name}</h3>
-                <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{tool.desc}</p>
-                <div className="mt-3 flex items-center gap-1 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity">
-                  Abrir <ArrowRight className="h-3 w-3" />
+                <h3 className="text-lg font-display text-white mb-2">{tool.name}</h3>
+                <p className="text-xs text-slate-500 leading-relaxed font-bold uppercase tracking-wide">{tool.desc}</p>
+                <div className="mt-6 flex items-center gap-2 text-[10px] font-bold text-[#EC4699] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0">
+                  Abrir Herramienta <ArrowRight className="h-3 w-3" />
                 </div>
               </button>
             ))}
@@ -183,94 +185,60 @@ const Index = () => {
         </div>
 
         {/* Formaketing Highlight */}
-        <div className="mt-28 w-full max-w-5xl">
-          <div className="rounded-3xl border border-primary/20 bg-card/60 overflow-hidden node-shadow backdrop-blur-sm">
+        <div className="mt-32 w-full max-w-6xl">
+          <div className="rounded-2xl border border-white/5 bg-white/[0.02] overflow-hidden backdrop-blur-sm">
             <div className="grid md:grid-cols-2">
-              <div className="p-8 md:p-12 flex flex-col justify-center">
-                <Badge className="w-fit mb-4 bg-[#bd00ff]/10 text-[#bd00ff] border-[#bd00ff]/20 hover:bg-[#bd00ff]/10">Formaketing Studio</Badge>
-                <h2 className="text-3xl font-bold text-foreground md:text-4xl">
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#bd00ff] to-[#ff0071]">Marketing Visual</span> con IA
+              <div className="p-12 md:p-20 flex flex-col justify-center">
+                <Badge className="w-fit mb-6 bg-[#EC4699]/10 text-[#EC4699] border-[#EC4699]/20 hover:bg-[#EC4699]/10 uppercase tracking-widest px-4 py-1">Formaketing Studio</Badge>
+                <h2 className="text-5xl font-display text-white md:text-7xl leading-tight">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">Marketing Visual</span> con IA
                 </h2>
-                <p className="mt-4 text-muted-foreground leading-relaxed">
-                  El lienzo infinito para marketing. Crea flows de campañas, conecta nodos, genera assets y construye funnels completos con inteligencia artificial.
+                <p className="mt-6 text-slate-500 leading-relaxed font-bold uppercase text-xs tracking-widest">
+                  EL LIENZO INFINITO PARA CREATIVOS. Crea flujos de campañas, conecta nodos, genera assets y construye funnels completos.
                 </p>
-                <ul className="mt-5 space-y-2.5">
+                <ul className="mt-8 space-y-4">
                   {["Lienzo infinito con nodos conectables", "Generación de imágenes inline", "Flows de marketing visual", "Exporta a código (Prompt-to-UI)"].map((f) => (
-                    <li key={f} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-[#bd00ff] shrink-0" />{f}
+                    <li key={f} className="flex items-center gap-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                      <CheckCircle2 className="h-4 w-4 text-[#EC4699] shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
-                <Button onClick={() => navigate("/auth")} className="mt-8 w-fit bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white hover:opacity-90 gap-2 rounded-full px-8 shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)]">
-                  <Palette className="h-4 w-4" />
-                  Probar Formaketing
+                <Button onClick={() => navigate("/auth")} className="mt-12 w-fit bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 gap-3 rounded-md px-10 h-14 shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] font-bold uppercase text-xs tracking-widest">
+                  <Palette className="h-5 w-5" />
+                  Probar Studio
                 </Button>
               </div>
-              <div className="flex items-center justify-center bg-muted/10 p-8 min-h-[320px]">
-                <div className="relative">
-                  <div className="absolute -inset-6 rounded-3xl bg-primary/5 blur-2xl" />
-                  <div className="relative grid grid-cols-2 gap-4">
-                    {[Megaphone, Image, Type, TrendingUp].map((Icon, i) => (
-                      <div key={i} className="flex h-24 w-24 items-center justify-center rounded-2xl border border-border bg-card node-shadow hover:border-primary/20 transition-colors">
-                        <Icon className="h-9 w-9 text-primary/50" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="absolute top-12 left-[92px] w-10 h-0.5 bg-accent/40" />
-                  <div className="absolute top-[92px] left-12 h-10 w-0.5 bg-accent/40" />
+              <div className="flex items-center justify-center bg-white/[0.01] p-12 min-h-[400px] relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-[#EC4699]/5 to-transparent pointer-events-none" />
+                <div className="relative grid grid-cols-2 gap-6">
+                  {[Megaphone, Image, Type, TrendingUp].map((Icon, i) => (
+                    <div key={i} className="flex h-32 w-32 items-center justify-center rounded-xl border border-white/5 bg-[#09090b] shadow-2xl hover:border-[#EC4699]/20 transition-colors group">
+                      <Icon className="h-10 w-10 text-slate-700 group-hover:text-[#EC4699] transition-colors" />
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Download Section */}
-        <div className="mt-28 w-full max-w-5xl">
-          <div className="rounded-3xl border border-[#bd00ff]/20 bg-[#121215]/80 p-10 text-center backdrop-blur-sm node-shadow relative overflow-hidden">
-            <div className="absolute -top-40 left-1/4 h-[300px] w-[300px] rounded-full bg-[#bd00ff]/10 blur-[80px] pointer-events-none" />
-            <Badge className="mb-4 bg-[#bd00ff]/10 text-[#bd00ff] border-[#bd00ff]/20 hover:bg-[#bd00ff]/10 relative z-10">Multiplataforma</Badge>
-            <h2 className="text-3xl font-bold text-foreground md:text-4xl relative z-10">
-              Descarga <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#bd00ff] to-[#ff0071]">Creator IA Pro</span>
-            </h2>
-            <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-              Disponible en Windows, macOS y Android. Tu cuenta se sincroniza en todos los dispositivos.
-            </p>
-            <div className="mt-6 flex flex-wrap justify-center gap-3">
-              {[
-                { icon: Monitor, name: "Windows" },
-                { icon: Apple, name: "macOS" },
-                { icon: Smartphone, name: "Android" },
-              ].map((p) => (
-                <div key={p.name} className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-5 py-2.5 hover:bg-white/10 transition-colors cursor-pointer">
-                  <p.icon className="h-4 w-4 text-[#ffb800]" />
-                  <span className="text-sm font-medium text-foreground">{p.name}</span>
-                </div>
-              ))}
-            </div>
-            <Button onClick={() => navigate("/descargar")} size="lg" className="mt-8 bg-[#121215] border border-white/10 text-white hover:bg-white/5 gap-2 rounded-full px-10 relative z-10">
-              <Download className="h-4 w-4" />
-              Ver Descargas
-            </Button>
           </div>
         </div>
 
         {/* Testimonials */}
-        <div className="mt-28 w-full max-w-5xl">
-          <h2 className="text-center text-3xl font-bold text-foreground mb-12 md:text-4xl">
-            Lo que dicen nuestros <span className="gradient-text">creadores</span>
+        <div className="mt-32 w-full max-w-6xl">
+          <h2 className="text-center text-5xl font-display text-white mb-16 md:text-7xl">
+            Lo que dicen nuestros <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">creadores</span>
           </h2>
-          <div className="grid gap-5 md:grid-cols-3 animate-fade-in">
+          <div className="grid gap-6 md:grid-cols-3 animate-fade-in">
             {testimonials.map((t) => (
-              <div key={t.name} className="rounded-2xl border border-border bg-card/60 p-6 backdrop-blur-sm">
-                <div className="flex gap-1 mb-4">
+              <div key={t.name} className="rounded-xl border border-white/5 bg-white/[0.02] p-10 backdrop-blur-sm">
+                <div className="flex gap-1 mb-6">
                   {[1,2,3,4,5].map((s) => (
-                    <Star key={s} className="h-4 w-4 fill-gold text-gold" />
+                    <Star key={s} className="h-4 w-4 fill-[#FA8214] text-[#FA8214]" />
                   ))}
                 </div>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-5">"{t.text}"</p>
-                <div>
-                  <p className="text-sm font-semibold text-foreground">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">{t.role}</p>
+                <p className="text-lg text-slate-300 leading-relaxed font-medium mb-8">"{t.text}"</p>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-display text-white uppercase tracking-wider">{t.name}</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">{t.role}</p>
                 </div>
               </div>
             ))}
@@ -278,27 +246,27 @@ const Index = () => {
         </div>
 
         {/* Final CTA */}
-        <div className="mt-28 w-full max-w-2xl rounded-3xl border border-[#bd00ff]/20 bg-[#121215]/80 p-12 text-center node-shadow backdrop-blur-sm animate-fade-in relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#bd00ff]/5 to-[#ff0071]/5 pointer-events-none" />
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#bd00ff] to-[#ff0071] shadow-lg shadow-[#bd00ff]/20 relative z-10">
-            <Sparkles className="h-8 w-8 text-white" />
+        <div className="mt-40 w-full max-w-4xl rounded-2xl border border-white/5 bg-[#09090b] p-16 md:p-24 text-center shadow-2xl animate-fade-in relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#EC4699]/10 via-transparent to-[#FA8214]/10 pointer-events-none" />
+          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-2xl shadow-[#EC4699]/20 relative z-10">
+            <Sparkles className="h-10 w-10 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground md:text-4xl relative z-10">
-            Empieza a crear <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#bd00ff] to-[#ff0071]">hoy</span>
+          <h2 className="text-6xl font-display text-white md:text-8xl relative z-10 leading-none">
+            EMPIEZA A CREAR <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">HOY MISMO</span>
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-md mx-auto relative z-10">
-            Únete a miles de creadores de alto nivel en Creator IA Pro. 10 créditos gratis, sin tarjeta de crédito.
+          <p className="mt-8 text-slate-500 max-w-md mx-auto relative z-10 uppercase text-xs font-bold tracking-[0.2em] leading-loose">
+            ÚNETE A MILES DE CREADORES DE ALTO NIVEL. 10 CRÉDITOS GRATIS. SIN TARJETA DE CRÉDITO.
           </p>
-          <Button onClick={() => navigate("/auth")} size="lg" className="mt-8 bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white hover:opacity-90 gap-2 px-12 rounded-full h-14 text-lg font-bold shadow-[0_0_30px_-5px_rgba(189,0,255,0.4)] relative z-10 transition-all hover:scale-105 active:scale-95">
+          <Button onClick={() => navigate("/auth")} size="lg" className="mt-12 bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 gap-3 px-16 rounded-md h-16 text-sm font-bold uppercase tracking-widest shadow-[0_0_30px_-5px_rgba(236,70,153,0.5)] relative z-10 transition-all hover:scale-105 active:scale-95">
             Comenzar Gratis
             <ArrowRight className="h-5 w-5" />
           </Button>
         </div>
 
         {/* Footer */}
-        <footer className="mt-24 w-full max-w-5xl border-t border-border pt-8 text-center text-xs text-muted-foreground space-y-2">
-          <p>© {new Date().getFullYear()} Creator IA Pro. Todos los derechos reservados.</p>
-          <p className="text-muted-foreground/50">Plataforma de IA generativa para creadores del futuro 🚀</p>
+        <footer className="mt-32 w-full max-w-6xl border-t border-white/5 pt-12 text-center text-[10px] text-slate-600 space-y-4 pb-20">
+          <p className="uppercase tracking-[0.3em] font-bold">© {new Date().getFullYear()} Creator IA Pro. Todos los derechos reservados.</p>
+          <p className="text-slate-700 uppercase tracking-[0.1em] font-bold">PLATAFORMA DE IA GENERATIVA PARA CREADORES DEL FUTURO 🚀</p>
         </footer>
       </main>
     </div>

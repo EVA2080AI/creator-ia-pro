@@ -89,29 +89,29 @@ const Dashboard = () => {
   };
 
   const stats = [
-    { label: "CRÉDITOS", value: profile?.credits_balance ?? 0, icon: Coins, color: "#ffb800", bg: "rgba(255,184,0,0.1)", border: "rgba(255,184,0,0.2)" },
-    { label: "PLAN", value: tierLabels[currentTier] || "Free", icon: CreditCard, color: "#bd00ff", bg: "rgba(189,0,255,0.1)", border: "rgba(189,0,255,0.2)" },
-    { label: "ESPACIOS", value: spacesCount, icon: LayoutGrid, color: "#00c2ff", bg: "rgba(0,194,255,0.1)", border: "rgba(0,194,255,0.2)" },
-    { label: "ASSETS", value: assetsCount, icon: Image, color: "#00e5a0", bg: "rgba(0,229,160,0.1)", border: "rgba(0,229,160,0.2)" },
+    { label: "CRÉDITOS", value: profile?.credits_balance ?? 0, icon: Coins, color: "#FA8214", bg: "rgba(250,130,20,0.1)", border: "rgba(250,130,20,0.2)" },
+    { label: "PLAN", value: tierLabels[currentTier] || "Free", icon: CreditCard, color: "#EC4699", bg: "rgba(236,70,153,0.1)", border: "rgba(236,70,153,0.2)" },
+    { label: "ESPACIOS", value: spacesCount, icon: LayoutGrid, color: "#EC4699", bg: "rgba(236,70,153,0.1)", border: "rgba(236,70,153,0.2)" },
+    { label: "ASSETS", value: assetsCount, icon: Image, color: "#FA8214", bg: "rgba(250,130,20,0.1)", border: "rgba(250,130,20,0.2)" },
   ];
 
   const quickTools = [
-    { icon: Image, label: "Generar Imagen", desc: "Crea desde texto", path: "/formarketing", color: "#bd00ff" },
-    { icon: Wand2, label: "Mejorar Foto", desc: "IA enhancement", path: "/tools", color: "#00c2ff" },
-    { icon: ZoomIn, label: "Ampliar 4x", desc: "Upscale con IA", path: "/tools", color: "#ffb800" },
-    { icon: Eraser, label: "Borrar Objetos", desc: "Elimina lo que sobra", path: "/tools", color: "#ff0071" },
-    { icon: ImagePlus, label: "Quitar Fondo", desc: "Automático con IA", path: "/tools", color: "#00e5a0" },
-    { icon: RotateCcw, label: "Restaurar Foto", desc: "Revive fotos antiguas", path: "/tools", color: "#bd00ff" },
+    { icon: Image, label: "Generar Imagen", desc: "Crea desde texto", path: "/formarketing", color: "#EC4699" },
+    { icon: Wand2, label: "Mejorar Foto", desc: "IA enhancement", path: "/tools", color: "#FA8214" },
+    { icon: ZoomIn, label: "Ampliar 4x", desc: "Upscale con IA", path: "/tools", color: "#EC4699" },
+    { icon: Eraser, label: "Borrar Objetos", desc: "Elimina lo que sobra", path: "/tools", color: "#FA8214" },
+    { icon: ImagePlus, label: "Quitar Fondo", desc: "Automático con IA", path: "/tools", color: "#EC4699" },
+    { icon: RotateCcw, label: "Restaurar Foto", desc: "Revive fotos antiguas", path: "/tools", color: "#FA8214" },
   ];
 
   const aiApps = [
-    { icon: Megaphone, label: "Formarketing Studio", desc: "Lienzo infinito de marketing visual", path: "/formarketing", color: "#bd00ff" },
-    { icon: MessageSquare, label: "AI Copywriter", desc: "Textos de marketing y ads", path: "/tools", color: "#00c2ff" },
-    { icon: PenTool, label: "Logo Maker", desc: "Logos con IA generativa", path: "/tools", color: "#ffb800" },
-    { icon: Hash, label: "Social Media Kit", desc: "Contenido para redes sociales", path: "/tools", color: "#00e5a0" },
-    { icon: FileText, label: "AI Blog Writer", desc: "Artículos SEO con IA", path: "/tools", color: "#ff0071" },
-    { icon: Type, label: "Ad Generator", desc: "Anuncios para Meta y Google Ads", path: "/tools", color: "#bd00ff" },
-    { icon: Monitor, label: "ShareScreen Pro", desc: "Extiende tu pantalla a dispositivos", path: "/sharescreen", color: "#00c2ff" },
+    { icon: Megaphone, label: "Formarketing Studio", desc: "Lienzo infinito de marketing visual", path: "/formarketing", color: "#EC4699" },
+    { icon: MessageSquare, label: "AI Copywriter", desc: "Textos de marketing y ads", path: "/tools", color: "#FA8214" },
+    { icon: PenTool, label: "Logo Maker", desc: "Logos con IA generativa", path: "/tools", color: "#EC4699" },
+    { icon: Hash, label: "Social Media Kit", desc: "Contenido para redes sociales", path: "/tools", color: "#FA8214" },
+    { icon: FileText, label: "AI Blog Writer", desc: "Artículos SEO con IA", path: "/tools", color: "#EC4699" },
+    { icon: Type, label: "Ad Generator", desc: "Anuncios para Meta y Google Ads", path: "/tools", color: "#FA8214" },
+    { icon: Monitor, label: "ShareScreen Pro", desc: "Extiende tu pantalla a dispositivos", path: "/sharescreen", color: "#EC4699" },
   ];
 
   const usageData = [
@@ -120,15 +120,15 @@ const Dashboard = () => {
   ];
 
   const toolData = [
-    { name: 'Imagen', value: 45, color: '#00c2ff' },
-    { name: 'Copy', value: 30, color: '#00e5a0' },
-    { name: 'Studio', value: 25, color: '#bd00ff' },
+    { name: 'Imagen', value: 45, color: '#EC4699' },
+    { name: 'Copy', value: 30, color: '#FA8214' },
+    { name: 'Studio', value: 25, color: '#EC4699' },
   ];
 
   if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#050506]">
-        <div className="w-8 h-8 rounded-full border-2 border-[#bd00ff] border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-[#EC4699] border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -144,11 +144,11 @@ const Dashboard = () => {
           <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#bd00ff] animate-pulse shadow-[0_0_8px_rgba(189,0,255,0.8)]" />
-                <span className="text-xs font-semibold text-[#bd00ff] uppercase tracking-widest">INDUSTRIAL SYSTEM ACTIVE</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#EC4699] animate-pulse shadow-[0_0_8px_rgba(236,70,153,0.8)]" />
+                <span className="text-xs font-semibold text-[#EC4699] uppercase tracking-widest">INDUSTRIAL SYSTEM ACTIVE</span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-2">
-                Hola, <span className="brand-gradient-text">{profile?.display_name?.split(' ')[0] || 'Creador'}</span>
+              <h1 className="text-4xl md:text-6xl font-display text-white tracking-tight mb-2 uppercase">
+                Hola, <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">{profile?.display_name?.split(' ')[0] || 'Creador'}</span>
               </h1>
               <p className="text-sm text-white/45 font-medium">
                 Bienvenido a tu suite de diseño industrial. Tienes el control total de{' '}
@@ -190,8 +190,8 @@ const Dashboard = () => {
                   </div>
                   <div className="w-5 h-1 rounded-full bg-white/10" />
                 </div>
-                <p className="text-[10px] font-bold tracking-widest text-white/35 mb-1">{stat.label}</p>
-                <p className="text-2xl font-black text-white tracking-tight">{stat.value}</p>
+                <p className="text-[10px] font-bold tracking-[0.2em] text-white/35 mb-2 uppercase">{stat.label}</p>
+                <p className="text-3xl font-display text-white tracking-tight">{stat.value}</p>
               </div>
             ))}
           </div>
@@ -202,18 +202,18 @@ const Dashboard = () => {
             <div className="stat-card">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h3 className="text-base font-bold text-white">Flujo de Créditos</h3>
-                  <p className="text-xs text-white/40 mt-0.5">Consumo industrial · Últimos 7 días</p>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest">Flujo de Créditos</h3>
+                  <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wide">Consumo industrial · Últimos 7 días</p>
                 </div>
-                <TrendingUp className="w-4 h-4 text-[#00c2ff]" />
+                <TrendingUp className="w-4 h-4 text-[#FA8214]" />
               </div>
               <div className="h-44">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={usageData}>
                     <defs>
                       <linearGradient id="creditsGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#00c2ff" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="#00c2ff" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#FA8214" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="#FA8214" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 10 }} dy={8} />
@@ -223,7 +223,7 @@ const Dashboard = () => {
                       labelStyle={{ color: 'rgba(255,255,255,0.6)' }}
                       itemStyle={{ color: '#00c2ff' }}
                     />
-                    <Area type="monotone" dataKey="credits" stroke="#00c2ff" strokeWidth={2} fill="url(#creditsGrad)" dot={false} />
+                    <Area type="monotone" dataKey="credits" stroke="#FA8214" strokeWidth={2} fill="url(#creditsGrad)" dot={false} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -233,17 +233,17 @@ const Dashboard = () => {
             <div className="stat-card">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h3 className="text-base font-bold text-white">Actividad por Herramienta</h3>
-                  <p className="text-xs text-white/40 mt-0.5">Distribución de carga IA</p>
+                  <h3 className="text-sm font-bold text-white uppercase tracking-widest">Actividad por Herramienta</h3>
+                  <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wide">Distribución de carga IA</p>
                 </div>
-                <Box className="w-4 h-4 text-[#bd00ff]" />
+                <Box className="w-4 h-4 text-[#EC4699]" />
               </div>
               <div className="space-y-4">
                 {toolData.map((item) => (
                   <div key={item.name}>
-                    <div className="flex justify-between text-xs mb-1.5">
-                      <span className="text-white/60 font-medium">{item.name}</span>
-                      <span className="font-semibold text-white/80">{item.value}%</span>
+                    <div className="flex justify-between text-[10px] font-bold uppercase tracking-widest mb-2">
+                      <span className="text-white/60">{item.name}</span>
+                      <span className="text-white/80">{item.value}%</span>
                     </div>
                     <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                       <div
@@ -260,7 +260,7 @@ const Dashboard = () => {
           {/* Quick Tools */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white">Herramientas de Imagen</h2>
+              <h2 className="text-xl font-display text-white uppercase">Herramientas de Imagen</h2>
               <button onClick={() => navigate("/tools")} className="flex items-center gap-1 text-xs text-white/45 hover:text-white transition-colors">
                 Ver todo <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -276,8 +276,8 @@ const Dashboard = () => {
                     style={{ background: `${tool.color}15`, border: `1px solid ${tool.color}25` }}>
                     <tool.icon className="w-4 h-4" style={{ color: tool.color }} />
                   </div>
-                  <p className="text-xs font-semibold text-white mb-1 leading-tight">{tool.label}</p>
-                  <p className="text-[10px] text-white/40 leading-tight">{tool.desc}</p>
+                  <p className="text-sm font-display text-white mb-1 leading-tight uppercase">{tool.label}</p>
+                  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide leading-tight">{tool.desc}</p>
                 </button>
               ))}
             </div>
@@ -286,7 +286,7 @@ const Dashboard = () => {
           {/* AI Apps / Apps IA */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white">Apps de IA</h2>
+              <h2 className="text-xl font-display text-white uppercase">Apps de IA</h2>
               <button onClick={() => navigate("/hub")} className="flex items-center gap-1 text-xs text-white/45 hover:text-white transition-colors">
                 Ver todo <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -303,8 +303,8 @@ const Dashboard = () => {
                     <app.icon className="w-4.5 h-4.5" style={{ color: app.color }} />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white mb-0.5">{app.label}</p>
-                    <p className="text-[11px] text-white/40 leading-snug">{app.desc}</p>
+                    <p className="text-base font-display text-white mb-0.5 uppercase">{app.label}</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide leading-snug">{app.desc}</p>
                   </div>
                 </button>
               ))}
@@ -314,10 +314,10 @@ const Dashboard = () => {
           {/* Spaces / Projects */}
           <div className="mb-10">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-white">Mis Espacios</h2>
+              <h2 className="text-xl font-display text-white uppercase">Mis Espacios</h2>
               <button
                 onClick={() => setIsCreatingSpace(true)}
-                className="btn-brand flex items-center gap-1.5 text-xs"
+                className="bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-md transition-all active:scale-95"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Nuevo Espacio
@@ -325,11 +325,11 @@ const Dashboard = () => {
             </div>
             {spaces.length === 0 ? (
               <div
-                className="rounded-2xl border border-dashed border-white/10 bg-white/2 p-10 text-center cursor-pointer hover:border-[rgba(189,0,255,0.3)] hover:bg-[rgba(189,0,255,0.03)] transition-all group"
+                className="rounded-2xl border border-dashed border-white/5 bg-white/[0.02] p-12 text-center cursor-pointer hover:border-[#EC4699]/30 hover:bg-[#EC4699]/5 transition-all group"
                 onClick={() => setIsCreatingSpace(true)}
               >
-                <div className="w-12 h-12 rounded-2xl bg-[rgba(189,0,255,0.1)] border border-[rgba(189,0,255,0.2)] flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                  <FolderPlus className="w-5 h-5 text-[#bd00ff]" />
+                <div className="w-14 h-14 rounded-2xl bg-[#EC4699]/10 border border-[#EC4699]/20 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                  <FolderPlus className="w-6 h-6 text-[#EC4699]" />
                 </div>
                 <p className="text-sm font-semibold text-white mb-1">Crea tu primer espacio</p>
                 <p className="text-xs text-white/35">Organiza tus proyectos y campañas en un lienzo infinito</p>
@@ -342,14 +342,14 @@ const Dashboard = () => {
                     onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
                     className="tool-card text-left group"
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#bd00ff]/20 to-[#ff0071]/20 border border-[rgba(189,0,255,0.2)] flex items-center justify-center">
-                        <LayoutGrid className="w-4 h-4 text-[#bd00ff]" />
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#EC4699]/20 to-[#FA8214]/20 border border-[#EC4699]/20 flex items-center justify-center">
+                        <LayoutGrid className="w-5 h-5 text-[#EC4699]" />
                       </div>
                       <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-white/60 transition-colors" />
                     </div>
-                    <p className="text-sm font-semibold text-white mb-1 truncate">{space.name}</p>
-                    <p className="text-xs text-white/35 truncate">{space.description || "Sin descripción"}</p>
+                    <p className="text-base font-display text-white mb-1 truncate uppercase">{space.name}</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wide truncate">{space.description || "Sin descripción"}</p>
                   </button>
                 ))}
               </div>
@@ -363,7 +363,7 @@ const Dashboard = () => {
       <Dialog open={isCreatingSpace} onOpenChange={setIsCreatingSpace}>
         <DialogContent className="bg-[#0f0f12] border-[rgba(255,255,255,0.08)] rounded-2xl text-white max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-bold">Nuevo Espacio</DialogTitle>
+            <DialogTitle className="text-xl font-display text-white uppercase">Nuevo Espacio</DialogTitle>
             <DialogDescription className="text-white/45 text-sm">
               Crea un espacio de trabajo para organizar tus proyectos y campañas.
             </DialogDescription>
@@ -371,31 +371,31 @@ const Dashboard = () => {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-xs font-semibold text-white/60 uppercase tracking-wider">Nombre del espacio</Label>
-              <Input
-                id="name"
-                value={newSpaceName}
-                onChange={(e) => setNewSpaceName(e.target.value)}
-                placeholder="Ej: Campaña Q2 2025"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/25 rounded-xl focus:border-[rgba(189,0,255,0.4)] focus:ring-[rgba(189,0,255,0.15)]"
-                onKeyDown={(e) => e.key === "Enter" && handleCreateSpace()}
-              />
+                <Input
+                  id="name"
+                  value={newSpaceName}
+                  onChange={(e) => setNewSpaceName(e.target.value)}
+                  placeholder="Ej: Campaña Q2 2025"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/25 rounded-md focus:border-[#EC4699]/40 focus:ring-[#EC4699]/10"
+                  onKeyDown={(e) => e.key === "Enter" && handleCreateSpace()}
+                />
             </div>
             <div className="space-y-2">
               <Label htmlFor="desc" className="text-xs font-semibold text-white/60 uppercase tracking-wider">Descripción (opcional)</Label>
-              <Input
-                id="desc"
-                value={newSpaceDesc}
-                onChange={(e) => setNewSpaceDesc(e.target.value)}
-                placeholder="Describe el propósito de este espacio..."
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/25 rounded-xl focus:border-[rgba(189,0,255,0.4)]"
-              />
+                <Input
+                  id="desc"
+                  value={newSpaceDesc}
+                  onChange={(e) => setNewSpaceDesc(e.target.value)}
+                  placeholder="Describe el propósito de este espacio..."
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/25 rounded-md focus:border-[#EC4699]/40 focus:ring-[#EC4699]/10"
+                />
             </div>
           </div>
           <DialogFooter className="gap-2">
             <button onClick={() => setIsCreatingSpace(false)} className="btn-ghost">
               Cancelar
             </button>
-            <button onClick={handleCreateSpace} className="btn-brand flex items-center gap-1.5">
+            <button onClick={handleCreateSpace} className="bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-6 py-2 rounded-md transition-all active:scale-95">
               <Plus className="w-3.5 h-3.5" />
               Crear Espacio
             </button>

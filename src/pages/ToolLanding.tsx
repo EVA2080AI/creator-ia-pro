@@ -390,13 +390,12 @@ const ToolLanding = () => {
       {/* Nav */}
       <header className="relative z-50 flex items-center justify-between px-6 py-4 sm:px-8 border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/15 border border-primary/20">
-              <Sparkles className="h-5 w-5 text-primary" />
+          <button onClick={() => navigate("/")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-[0_0_15px_rgba(236,70,153,0.3)]">
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
-            <span className="text-lg font-bold hidden sm:inline">
-              <span className="gradient-text">Creator IA</span>
-              <span className="text-foreground"> Pro</span>
+            <span className="text-lg font-display text-white tracking-wide hidden sm:inline uppercase">
+              Creator <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">IA Pro</span>
             </span>
           </button>
 
@@ -486,7 +485,7 @@ const ToolLanding = () => {
               Iniciar Sesión
             </Button>
           )}
-          <Button onClick={handleCTA} className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6">
+          <Button onClick={handleCTA} className="bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 rounded-full px-6 shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] font-bold">
             {isLoggedIn ? "Ir a la App" : "Empezar Gratis"}
           </Button>
         </div>
@@ -494,30 +493,30 @@ const ToolLanding = () => {
 
       <main className="relative z-10 flex flex-col items-center px-6 pt-12 pb-32">
         {/* Hero */}
-        <Badge className="mb-6 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">
+        <Badge className="mb-6 bg-[#EC4699]/10 text-[#EC4699] border-[#EC4699]/20 hover:bg-[#EC4699]/10 font-bold uppercase tracking-widest px-4 py-1">
           <tool.icon className="mr-1.5 h-3.5 w-3.5" />
           {tool.name}
         </Badge>
 
-        <h1 className="max-w-3xl text-center text-4xl font-bold leading-[1.1] tracking-tight animate-fade-in md:text-6xl">
+        <h1 className="max-w-4xl text-center text-6xl font-display leading-[0.9] tracking-tight animate-fade-in md:text-8xl lg:text-9xl uppercase text-white">
           <span className="gradient-text">{tool.headline}</span>
         </h1>
 
-        <p className="mt-6 max-w-2xl text-center text-lg text-muted-foreground animate-fade-in leading-relaxed">
+        <p className="mt-8 max-w-2xl text-center text-xl text-slate-400 font-medium animate-fade-in leading-relaxed tracking-tight">
           {tool.description}
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3 animate-fade-in">
-          <Button onClick={() => document.getElementById("try-demo")?.scrollIntoView({ behavior: "smooth" })} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 text-base px-10 rounded-full h-12">
+          <Button onClick={() => document.getElementById("try-demo")?.scrollIntoView({ behavior: "smooth" })} size="lg" className="bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 gap-2 text-base px-10 rounded-md h-14 shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] font-bold active:scale-95 transition-all">
             <Play className="h-4 w-4" />
             Probar Ahora — Gratis
           </Button>
-          <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-border text-foreground hover:bg-muted gap-2 text-base px-8 rounded-full h-12">
+          <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 gap-2 text-base px-8 rounded-md h-14 font-bold shadow-sm transition-all focus:ring-0">
             Ver Planes
           </Button>
         </div>
 
-        <p className="mt-4 text-xs text-muted-foreground">
+        <p className="mt-6 text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">
           1 prueba gratis sin registro • Luego {tool.credits} crédito{tool.credits > 1 ? "s" : ""} por uso
         </p>
 
@@ -540,12 +539,12 @@ const ToolLanding = () => {
         {/* ========== TRY IT FREE SECTION ========== */}
         <div id="try-demo" className="mt-24 w-full max-w-4xl scroll-mt-8">
           <div className="text-center mb-10">
-            <Badge className="mb-4 bg-accent/10 text-accent border-accent/20 hover:bg-accent/10">
+            <Badge className="mb-4 bg-[#FA8214]/10 text-[#FA8214] border-[#FA8214]/20 hover:bg-[#FA8214]/10 font-bold uppercase tracking-widest px-4 py-1">
               <Sparkles className="mr-1.5 h-3.5 w-3.5" />
               Demo Interactiva
             </Badge>
-            <h2 className="text-3xl font-bold text-foreground">
-              Prueba <span className="gradient-text">{tool.name}</span> ahora mismo
+            <h2 className="text-5xl font-display text-white md:text-7xl uppercase">
+              Prueba <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">{tool.name}</span> ahora mismo
             </h2>
             <p className="mt-3 text-muted-foreground">
               Una prueba gratis sin necesidad de registrarte. Experimenta el poder de la IA.
@@ -555,8 +554,8 @@ const ToolLanding = () => {
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Input side */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/15 text-xs font-bold text-primary">1</span>
+              <h3 className="text-xs font-bold text-slate-500 flex items-center gap-2 uppercase tracking-widest">
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#EC4699]/10 text-[10px] font-bold text-[#EC4699]">1</span>
                 {tool.tryItType === "image-upload" ? "Sube tu imagen" : "Escribe tu prompt"}
               </h3>
 
@@ -612,7 +611,7 @@ const ToolLanding = () => {
               <Button
                 onClick={handleTryDemo}
                 disabled={demoing || (tool.tryItType === "image-upload" ? !tryItImage : !tryItInput.trim())}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 rounded-xl h-11"
+                className="w-full bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 gap-2 rounded-md h-12 font-bold uppercase text-xs tracking-widest shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)]"
               >
                 {demoing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -621,14 +620,14 @@ const ToolLanding = () => {
                 ) : (
                   <Sparkles className="h-4 w-4" />
                 )}
-                {demoing ? "Procesando con IA..." : !isLoggedIn && demoUsed ? "Límite alcanzado" : `Probar ${tool.name}${isLoggedIn ? "" : " Gratis"}`}
+                {demoing ? "Procesando..." : !isLoggedIn && demoUsed ? "Límite alcanzado" : `Probar ${tool.name}${isLoggedIn ? "" : " Gratis"}`}
               </Button>
             </div>
 
             {/* Result side */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-accent/15 text-xs font-bold text-accent">2</span>
+              <h3 className="text-xs font-bold text-slate-500 flex items-center gap-2 uppercase tracking-widest">
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#FA8214]/10 text-[10px] font-bold text-[#FA8214]">2</span>
                 Resultado
               </h3>
 
@@ -683,14 +682,14 @@ const ToolLanding = () => {
 
         {/* ========== FEATURES ========== */}
         <div className="mt-24 w-full max-w-4xl">
-          <h2 className="text-center text-3xl font-bold text-foreground mb-10">
-            Características <span className="gradient-text">principales</span>
+          <h2 className="text-center text-5xl font-display text-white mb-12 md:text-7xl uppercase">
+            Características <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">principales</span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {tool.features.map((f) => (
               <div key={f} className="flex items-start gap-3 rounded-2xl border border-border bg-card/60 p-5 backdrop-blur-sm">
-                <Check className="mt-0.5 h-5 w-5 text-accent shrink-0" />
-                <span className="text-sm text-foreground">{f}</span>
+                <Check className="mt-0.5 h-5 w-5 text-[#EC4699] shrink-0" />
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wide">{f}</span>
               </div>
             ))}
           </div>
@@ -698,14 +697,14 @@ const ToolLanding = () => {
 
         {/* Use Cases */}
         <div className="mt-20 w-full max-w-4xl">
-          <h2 className="text-center text-3xl font-bold text-foreground mb-10">
-            Casos de <span className="gradient-text">uso</span>
+          <h2 className="text-center text-5xl font-display text-white mb-12 md:text-7xl uppercase">
+            Casos de <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">uso</span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {tool.useCases.map((uc) => (
               <div key={uc} className="flex items-center gap-3 rounded-2xl border border-border bg-card/60 p-5 backdrop-blur-sm">
-                <Zap className="h-5 w-5 text-primary shrink-0" />
-                <span className="text-sm text-foreground">{uc}</span>
+                <Zap className="h-5 w-5 text-[#FA8214] shrink-0" />
+                <span className="text-xs text-slate-400 font-bold uppercase tracking-wide">{uc}</span>
               </div>
             ))}
           </div>
@@ -713,8 +712,8 @@ const ToolLanding = () => {
 
         {/* How it works */}
         <div className="mt-20 w-full max-w-4xl">
-          <h2 className="text-center text-3xl font-bold text-foreground mb-10">
-            Cómo <span className="gradient-text">funciona</span>
+          <h2 className="text-center text-5xl font-display text-white mb-12 md:text-7xl uppercase">
+            Cómo <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">funciona</span>
           </h2>
           <div className="grid gap-6 sm:grid-cols-3">
             {[
@@ -723,11 +722,11 @@ const ToolLanding = () => {
               { step: "3", title: "Descarga", desc: "Descarga tu resultado en alta calidad." },
             ].map((s) => (
               <div key={s.step} className="text-center">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/15 text-lg font-bold text-primary">
+                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-xl font-display text-white group-hover:bg-[#EC4699]/10 transition-colors">
                   {s.step}
                 </div>
-                <h3 className="text-base font-semibold text-foreground">{s.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{s.desc}</p>
+                <h3 className="text-xl font-display text-white mb-2 uppercase">{s.title}</h3>
+                <p className="mt-2 text-xs text-slate-500 font-bold uppercase tracking-widest">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -750,22 +749,23 @@ const ToolLanding = () => {
         </div>
 
         {/* CTA */}
-        <div className="mt-24 w-full max-w-3xl rounded-3xl border border-primary/20 bg-card/60 p-12 text-center node-shadow backdrop-blur-sm">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15">
-            <tool.icon className="h-7 w-7 text-primary" />
+        <div className="mt-40 w-full max-w-4xl rounded-2xl border border-white/5 bg-[#09090b] p-16 md:p-24 text-center shadow-2xl animate-fade-in relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#EC4699]/10 via-transparent to-[#FA8214]/10 pointer-events-none" />
+          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-2xl shadow-[#EC4699]/20 relative z-10">
+            <tool.icon className="h-10 w-10 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground">
-            Empieza a usar <span className="gradient-text">{tool.name}</span>
+          <h2 className="text-6xl font-display text-white md:text-8xl relative z-10 leading-none uppercase">
+            Empieza a usar <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">{tool.name}</span>
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-md mx-auto">
+          <p className="mt-8 text-slate-500 max-w-md mx-auto relative z-10 uppercase text-xs font-bold tracking-[0.2em] leading-loose">
             Regístrate gratis y obtén 10 créditos para probar todas las herramientas. Sin tarjeta de crédito.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button onClick={handleCTA} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-10 rounded-full h-12">
+          <div className="mt-12 flex flex-col sm:flex-row gap-5 justify-center relative z-10">
+            <Button onClick={handleCTA} size="lg" className="bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 gap-3 px-12 rounded-md h-16 shadow-[0_0_30px_-5px_rgba(236,70,153,0.5)] font-bold uppercase text-xs tracking-widest active:scale-95 transition-all">
               {isLoggedIn ? `Abrir ${tool.name}` : "Crear Cuenta Gratis"}
               <ArrowRight className="h-4 w-4" />
             </Button>
-            <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-border rounded-full h-12 px-8">
+            <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 gap-2 px-10 rounded-md h-16 font-bold shadow-sm transition-all focus:ring-0 uppercase text-xs tracking-widest">
               Ver todos los planes
             </Button>
           </div>

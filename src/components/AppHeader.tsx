@@ -47,11 +47,11 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           onClick={() => navigate("/dashboard")}
           className="flex items-center gap-2.5 shrink-0 group"
         >
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#bd00ff] to-[#ff0071] flex items-center justify-center shadow-[0_0_12px_rgba(189,0,255,0.5)] group-hover:shadow-[0_0_20px_rgba(189,0,255,0.7)] transition-all">
-            <Sparkles className="w-3.5 h-3.5 text-white" />
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#EC4699] to-[#FA8214] flex items-center justify-center shadow-[0_0_15px_rgba(236,70,153,0.4)] group-hover:shadow-[0_0_25px_rgba(236,70,153,0.6)] transition-all">
+            <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <span className="text-sm font-bold text-white tracking-tight hidden sm:block">
-            Creator <span className="brand-gradient-text">IA Pro</span>
+          <span className="text-lg font-display text-white tracking-wide hidden sm:block uppercase">
+            Creator <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">IA Pro</span>
           </span>
         </button>
 
@@ -71,7 +71,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                     : "text-white/55 hover:text-white hover:bg-white/5"
                 )}
               >
-                <item.icon className={cn("w-3.5 h-3.5", isActive && "text-[#bd00ff]")} />
+                <item.icon className={cn("w-3.5 h-3.5", isActive && "text-[#EC4699]")} />
                 {item.label}
               </button>
             );
@@ -93,7 +93,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           {/* Credits */}
           <button
             onClick={() => handleNav("/pricing")}
-            className="hidden sm:flex items-center gap-1.5 bg-[rgba(255,184,0,0.1)] border border-[rgba(255,184,0,0.2)] rounded-full px-3 py-1 text-xs font-bold text-[#ffb800] hover:bg-[rgba(255,184,0,0.15)] transition-all"
+            className="hidden sm:flex items-center gap-1.5 bg-[rgba(250,130,20,0.1)] border border-[rgba(250,130,20,0.2)] rounded-full px-3 py-1 text-xs font-bold text-[#FA8214] hover:bg-[rgba(250,130,20,0.15)] transition-all"
           >
             <Coins className="w-3 h-3" />
             {profile?.credits_balance?.toLocaleString() ?? "0"}
@@ -114,7 +114,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="flex items-center gap-2 p-1 pr-2.5 rounded-xl bg-white/5 border border-white/8 hover:bg-white/8 transition-all"
             >
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#bd00ff]/30 to-[#ff0071]/30 flex items-center justify-center overflow-hidden border border-white/10">
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#EC4699]/30 to-[#FA8214]/30 flex items-center justify-center overflow-hidden border border-white/10">
                 {profile?.avatar_url
                   ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
                   : <User className="w-3.5 h-3.5 text-white/70" />
@@ -152,7 +152,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                 <div className="p-1.5 border-t border-white/5">
                   <button
                     onClick={() => { onSignOut(); setUserMenuOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs text-[#ff0071]/80 hover:text-[#ff0071] hover:bg-[rgba(255,0,113,0.08)] transition-all"
+                    className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs text-[#EC4699]/80 hover:text-[#EC4699] hover:bg-[rgba(236,70,153,0.08)] transition-all"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     Cerrar sesión
@@ -185,11 +185,11 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                   className={cn(
                     "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all",
                     isActive
-                      ? "bg-gradient-to-r from-[#bd00ff]/15 to-[#ff0071]/10 text-white border border-[rgba(189,0,255,0.2)]"
+                      ? "bg-gradient-to-r from-[#EC4699]/15 to-[#FA8214]/10 text-white border border-[rgba(236,70,153,0.2)]"
                       : "text-white/60 hover:text-white hover:bg-white/5"
                   )}
                 >
-                  <item.icon className={cn("w-4 h-4", isActive && "text-[#bd00ff]")} />
+                  <item.icon className={cn("w-4 h-4", isActive && "text-[#EC4699]")} />
                   {item.label}
                 </button>
               );
@@ -197,7 +197,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
             <div className="pt-3 border-t border-white/5 mt-3">
               <button
                 onClick={() => { onSignOut(); setMobileOpen(false); }}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-[#ff0071]/80 hover:text-[#ff0071] hover:bg-[rgba(255,0,113,0.08)] transition-all"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-[#EC4699]/80 hover:text-[#EC4699] hover:bg-[rgba(236,70,153,0.08)] transition-all"
               >
                 <LogOut className="w-4 h-4" />
                 Cerrar sesión

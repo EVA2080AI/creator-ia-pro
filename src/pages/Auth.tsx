@@ -67,51 +67,51 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#050506] lowercase font-sans selection:bg-[#bd00ff]/30 selection:text-white">
+    <div className="flex min-h-screen bg-[#050506] font-sans selection:bg-[#EC4699]/30 selection:text-white">
       {/* Left — Features (hidden mobile) */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-24 relative overflow-hidden bg-[#121215]">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 -left-40 h-[700px] w-[700px] rounded-full bg-[#bd00ff]/10 blur-[150px]" />
-          <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-[#ff0071]/10 blur-[120px]" />
+          <div className="absolute -top-40 -left-40 h-[700px] w-[700px] rounded-full bg-[#EC4699]/10 blur-[150px]" />
+          <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-[#FA8214]/10 blur-[120px]" />
         </div>
         <div className="relative z-10 space-y-10">
           <button onClick={() => navigate("/")} className="flex items-center gap-5 mb-14 group transition-all">
-            <div className="flex h-13 w-13 items-center justify-center rounded-[1.2rem] bg-gradient-to-br from-[#bd00ff] to-[#ff0071] shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)] group-hover:rotate-6 transition-transform">
+            <div className="flex h-13 w-13 items-center justify-center rounded-[1.2rem] bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] group-hover:rotate-6 transition-transform">
               <Sparkles className="h-6 w-6 text-white" />
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-xl font-black text-white tracking-tighter leading-none">
-                creator<span className="text-[#ff0071]">_</span>ia
+              <span className="text-2xl font-display text-white tracking-tight leading-none uppercase">
+                creator <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">ia pro</span>
               </span>
-              <span className="text-[9px] font-black text-[#ffb800] uppercase tracking-[0.4em] mt-2">V2.1 Industrial</span>
+              <span className="text-[10px] font-bold text-[#FA8214] uppercase tracking-[0.4em] mt-2">V2.1 Industrial</span>
             </div>
           </button>
 
-          <h2 className="text-7xl font-black text-white leading-none tracking-tighter">
+          <h2 className="text-7xl md:text-8xl font-display text-white leading-[0.9] tracking-tight uppercase">
             tu estudio de
             <br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#bd00ff] to-[#ff0071]">ecosistemas ia</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">marketing ia</span>
             <br />
-            autónomos.
+            autónomo.
           </h2>
 
-          <p className="mt-8 text-slate-400 text-xl max-w-md leading-relaxed font-bold tracking-tight">
+          <p className="mt-8 text-slate-500 text-lg max-w-md leading-relaxed font-bold tracking-tight uppercase">
             clona, genera y despliega interfaces de alto impacto con el puente antigravity.
           </p>
 
           <div className="mt-12 space-y-6">
             {features.map((f) => (
               <div key={f.text} className="flex items-center gap-5 group">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 border border-white/5 text-[#bd00ff] transition-all group-hover:bg-[#bd00ff]/10 group-hover:scale-110">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 border border-white/5 text-[#EC4699] transition-all group-hover:bg-[#EC4699]/10 group-hover:scale-110">
                   <f.icon className="h-5 w-5" />
                 </div>
-                <span className="text-sm font-black text-slate-300 lowercase tracking-tight">{f.text}</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em]">{f.text}</span>
               </div>
             ))}
           </div>
 
-          <div className="mt-16 flex items-center gap-4 text-[11px] font-black text-slate-500 lowercase tracking-[0.2em]">
-            <div className="w-2 h-2 rounded-full bg-[#ff0071] shadow-[0_0_12px_#ff0071]" />
+          <div className="mt-16 flex items-center gap-4 text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em]">
+            <div className="w-2 h-2 rounded-full bg-[#EC4699] shadow-[0_0_12px_#EC4699]" />
             acceso_total_industrial
           </div>
         </div>
@@ -122,48 +122,48 @@ const Auth = () => {
         <div className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-right-4 duration-700">
           {/* Mobile logo */}
           <div className="mb-14 text-center lg:hidden">
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#bd00ff] to-[#ff0071] shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)] cursor-pointer" onClick={() => navigate("/")}>
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] cursor-pointer" onClick={() => navigate("/")}>
               <Sparkles className="h-7 w-7 text-white" />
             </div>
-            <h1 className="text-3xl font-black text-white tracking-tighter lowercase">
-              creator<span className="text-[#ff0071]">_</span>ia
+            <h1 className="text-3xl font-display text-white tracking-tight uppercase">
+              creator <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">ia pro</span>
             </h1>
           </div>
 
-          <div className="rounded-[3rem] border border-white/5 bg-[#121215]/80 backdrop-blur-3xl p-12 shadow-[0_0_50px_-12px_rgba(189,0,255,0.15)]">
-            <h2 className="mb-3 text-3xl font-black text-white tracking-tighter lowercase">
+          <div className="rounded-[3rem] border border-white/5 bg-[#121215]/80 backdrop-blur-3xl p-12 shadow-[0_0_50px_-12px_rgba(236,70,153,0.15)]">
+            <h2 className="mb-3 text-3xl font-display text-white tracking-tight uppercase">
               {mode === "login" ? "acceso_nexus" : mode === "signup" ? "inicializar_cuenta" : "recuperar_acceso"}
             </h2>
-            <p className="mb-12 text-[11px] text-slate-500 font-black lowercase tracking-[0.1em]">
+            <p className="mb-12 text-[10px] text-slate-600 font-bold uppercase tracking-[0.2em]">
               {mode === "login" ? "bienvenido al ecosistema industrial" : mode === "signup" ? "crea tu perfil de ingeniería creativa" : "recuperación de enlace estable"}
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {mode === "signup" && (
                 <div className="space-y-3">
-                  <Label htmlFor="displayName" className="text-slate-500 text-[10px] font-black lowercase tracking-[0.2em] ml-2">nombre</Label>
+                  <Label htmlFor="displayName" className="text-slate-600 text-[9px] font-bold uppercase tracking-[0.3em] ml-2">nombre</Label>
                   <div className="relative">
                     <User className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-700" />
-                    <Input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="tu nombre" className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#bd00ff]/30 rounded-2xl pl-12 h-13 text-xs font-bold text-white transition-all ring-0" />
+                    <Input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="TU NOMBRE" className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#EC4699]/30 rounded-2xl pl-12 h-13 text-[10px] font-bold text-white transition-all ring-0 uppercase" />
                   </div>
                 </div>
               )}
 
               <div className="space-y-3">
-                <Label htmlFor="email" className="text-slate-500 text-[10px] font-black lowercase tracking-[0.2em] ml-2">email</Label>
+                <Label htmlFor="email" className="text-slate-600 text-[9px] font-bold uppercase tracking-[0.3em] ml-2">email</Label>
                 <div className="relative">
                   <Mail className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-700" />
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#bd00ff]/30 rounded-2xl pl-12 h-13 text-xs font-bold text-white transition-all ring-0" />
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="TU@EMAIL.COM" required className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#EC4699]/30 rounded-2xl pl-12 h-13 text-[10px] font-bold text-white transition-all ring-0 uppercase" />
                 </div>
               </div>
 
               {mode !== "forgot" && (
                 <div className="space-y-3">
-                  <Label htmlFor="password" className="text-slate-500 text-[10px] font-black lowercase tracking-[0.2em] ml-2">clave_personal</Label>
+                  <Label htmlFor="password" className="text-slate-600 text-[9px] font-bold uppercase tracking-[0.3em] ml-2">clave_personal</Label>
                   <div className="relative">
                     <Lock className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-700" />
-                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#bd00ff]/30 rounded-2xl pl-12 pr-12 h-13 text-xs font-bold text-white transition-all ring-0" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-700 hover:text-[#bd00ff] transition-colors">
+                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#EC4699]/30 rounded-2xl pl-12 pr-12 h-13 text-xs font-bold text-white transition-all ring-0" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-700 hover:text-[#EC4699] transition-colors">
                       {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                     </button>
                   </div>
@@ -172,19 +172,19 @@ const Auth = () => {
 
               {mode === "login" && (
                 <div className="text-right">
-                  <button type="button" onClick={() => setMode("forgot")} className="text-[10px] font-black text-slate-600 hover:text-[#bd00ff] transition-colors lowercase tracking-tight">
+                  <button type="button" onClick={() => setMode("forgot")} className="text-[9px] font-bold text-slate-600 hover:text-[#EC4699] transition-colors uppercase tracking-widest">
                     ¿_olvidaste_clave?
                   </button>
                 </div>
               )}
 
-              <Button type="submit" disabled={loading} className="w-full h-15 bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white hover:opacity-90 rounded-2xl gap-4 font-black lowercase text-xs shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)] transition-all active:scale-95 disabled:opacity-50 mt-4">
+              <Button type="submit" disabled={loading} className="w-full h-15 bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 rounded-2xl gap-4 font-bold uppercase text-[10px] tracking-[0.3em] shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] transition-all active:scale-95 disabled:opacity-50 mt-4">
                 {loading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
                   <>
                     {mode === "login" ? "conectar_estudio" : mode === "signup" ? "solicitar_acceso" : "enviar_enlace"}
-                    <ArrowRight className="h-5.5 w-5.5" />
+                    <ArrowRight className="h-5 w-5" />
                   </>
                 )}
               </Button>
@@ -196,7 +196,7 @@ const Auth = () => {
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-white/5" />
                   </div>
-                  <span className="relative bg-[#121215] px-4 text-[10px] font-black text-slate-600 lowercase tracking-widest">o_continuar_con</span>
+                  <span className="relative bg-[#121215] px-4 text-[9px] font-bold text-slate-700 uppercase tracking-[0.2em]">o_continuar_con</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -254,11 +254,11 @@ const Auth = () => {
 
             <div className="mt-10 text-center">
               {mode === "forgot" ? (
-                <button onClick={() => setMode("login")} className="text-[10px] font-black text-slate-600 hover:text-white transition-colors lowercase tracking-wider">
+                <button onClick={() => setMode("login")} className="text-[10px] font-bold text-slate-600 hover:text-white transition-colors uppercase tracking-widest">
                   ← volver_al_login
                 </button>
               ) : (
-                <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-[10px] font-black text-slate-600 hover:text-white transition-colors lowercase tracking-wider">
+                <button onClick={() => setMode(mode === "login" ? "signup" : "login")} className="text-[10px] font-bold text-slate-600 hover:text-white transition-colors uppercase tracking-widest">
                   {mode === "login" ? "¿no_tienes_cuenta?_regístrate" : "¿ya_tienes_cuenta?_inicia_sesión"}
                 </button>
               )}
@@ -266,7 +266,7 @@ const Auth = () => {
           </div>
 
           <div className="mt-8 text-center">
-            <button onClick={() => navigate("/pricing")} className="text-[10px] font-black text-white hover:text-white transition-colors lowercase tracking-[0.3em] bg-gradient-to-r from-[#bd00ff]/10 to-[#ff0071]/10 px-6 py-3 rounded-2xl border border-[#bd00ff]/30 shadow-2xl shadow-[#bd00ff]/5">
+            <button onClick={() => navigate("/pricing")} className="text-[9px] font-bold text-white hover:text-white transition-colors uppercase tracking-[0.3em] bg-gradient-to-r from-[#EC4699]/10 to-[#FA8214]/10 px-8 py-3.5 rounded-2xl border border-[#EC4699]/30 shadow-2xl shadow-[#EC4699]/5 transition-all active:scale-95">
               ver_planes_precios →
             </button>
           </div>
