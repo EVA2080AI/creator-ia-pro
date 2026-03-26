@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Sparkles, Zap, Image, ArrowRight, Coins,
@@ -7,7 +8,7 @@ import {
   Star, MessageSquare, PenTool,
   Hash, FileText, Type, Megaphone, TrendingUp,
   Monitor, Apple, Smartphone, Download, CheckCircle2,
-  Globe, Users, Layers, Shield,
+  Globe, Users, Layers, Shield, Crown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -52,31 +53,39 @@ const Index = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-[#020203] overflow-hidden text-white font-sans selection:bg-[#d4ff00]/30 selection:text-[#020203]">
-      {/* Ambient blurs - Nebula Lime */}
+    <>
+      <Helmet>
+        <title>Creator IA Pro | Ecosistema Industrial de Creación Multimodal</title>
+        <meta name="description" content="Domina tu contenido con Creator IA Pro. Herramientas avanzadas de edición de imagen, copywriting y flujos de marketing visual impulsados por inteligencia artificial de primer nivel." />
+        <meta property="og:title" content="Creator IA Pro | Ecosistema Industrial" />
+        <meta property="og:description" content="Automatiza y potencia tu agencia con IA multimodal. Flujos de alto rendimiento." />
+      </Helmet>
+      
+      <div className="min-h-screen bg-[#050506] font-inter text-slate-100 overflow-hidden relative selection:bg-[#bd00ff]/30">
+      {/* Ambient blurs - Deep Magenta/Purple */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/4 h-[700px] w-[700px] rounded-full bg-[#d4ff00]/5 blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-slate-900/20 blur-[100px]" />
+        <div className="absolute -top-40 left-1/4 h-[700px] w-[700px] rounded-full bg-[#bd00ff]/10 blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-[#ff0071]/5 blur-[100px]" />
       </div>
 
       {/* Nav */}
       <header className="relative z-10 flex items-center justify-between px-8 py-6 sm:px-12">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#d4ff00] shadow-2xl shadow-[#d4ff00]/20">
-            <Sparkles className="h-5 w-5 text-[#020203]" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-[#bd00ff] to-[#ff0071] shadow-lg shadow-[#bd00ff]/20">
+            <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
             <span className="text-base font-black text-white tracking-tight lowercase">
-              nexus<span className="text-[#d4ff00]">_</span>studio
+              creator<span className="text-[#ff0071]">_</span>ia
             </span>
-            <span className="text-[9px] font-black text-[#d4ff00]/60 uppercase tracking-widest mt-0.5">V8.0 NEBULA</span>
+            <span className="text-[9px] font-black text-[#ffb800] uppercase tracking-widest mt-0.5">V2.1 INDUSTRIAL</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-slate-400 hover:text-[#d4ff00] hover:bg-[#d4ff00]/5 hidden sm:flex text-sm font-black lowercase">
+          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-slate-400 hover:text-white hover:bg-white/5 hidden sm:flex text-sm font-bold lowercase transition-colors">
             precios
           </Button>
-          <Button onClick={() => navigate("/auth")} className="bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] rounded-full px-8 h-12 shadow-2xl shadow-[#d4ff00]/20 font-black lowercase tracking-normal active:scale-95 transition-all">
+          <Button onClick={() => navigate("/auth")} className="bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white hover:opacity-90 rounded-full px-8 h-12 shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)] font-black lowercase tracking-normal active:scale-95 transition-all">
             empezar gratis
           </Button>
         </div>
@@ -84,14 +93,14 @@ const Index = () => {
 
       <main className="relative z-10 flex flex-col items-center px-8 pt-24 pb-40">
         {/* Pulse Badge */}
-        <div className="mb-10 flex items-center gap-3 rounded-full border border-white/5 bg-white/5 px-6 py-2.5 text-[11px] text-slate-400 font-black lowercase animate-in fade-in slide-in-from-bottom-2 duration-700">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#d4ff00] animate-pulse shadow-[0_0_8px_#d4ff00]" />
-          disponible en windows, macos y android
+        <div className="mb-10 flex items-center gap-3 rounded-full border border-[#bd00ff]/20 bg-[#bd00ff]/5 px-6 py-2.5 text-[11px] text-slate-300 font-bold lowercase animate-in fade-in slide-in-from-bottom-2 duration-700">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse shadow-[0_0_8px_#ff0071]" />
+          ecosistema creativo industrial
         </div>
 
         {/* Hero */}
         <h1 className="max-w-5xl text-center text-6xl font-black leading-[1.05] tracking-tighter animate-in fade-in slide-in-from-bottom-4 duration-1000 md:text-8xl lg:text-9xl text-white lowercase">
-          crea con <span className="text-[#d4ff00]">ia</span>
+          crea con <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#bd00ff] to-[#ff0071]">ia</span>
           <br />
           <span className="text-slate-700">sin límites.</span>
         </h1>
@@ -102,13 +111,13 @@ const Index = () => {
         </p>
 
         <div className="mt-12 flex flex-col sm:flex-row gap-5 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <Button onClick={() => navigate("/auth")} size="lg" className="bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] gap-3 text-lg px-12 rounded-[2rem] h-16 shadow-2xl shadow-[#d4ff00]/20 font-black lowercase active:scale-95 transition-all">
+          <Button onClick={() => navigate("/auth")} size="lg" className="bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white hover:opacity-90 gap-3 text-lg px-12 rounded-[2rem] h-16 shadow-[0_0_30px_-5px_rgba(189,0,255,0.5)] font-black lowercase active:scale-95 transition-all">
             crear cuenta gratis
             <ArrowRight className="h-5 w-5" />
           </Button>
-          <Button onClick={() => navigate("/descargar")} size="lg" variant="outline" className="border-white/5 text-white hover:bg-white/5 gap-3 text-lg px-10 rounded-[2rem] h-16 font-black lowercase shadow-sm transition-all focus:ring-0">
-            <Download className="h-5 w-5" />
-            descargar app
+          <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 gap-3 text-lg px-10 rounded-[2rem] h-16 font-black lowercase shadow-sm transition-all focus:ring-0">
+            <Crown className="h-5 w-5 text-[#ffb800]" />
+            ver planes
           </Button>
         </div>
 
@@ -121,18 +130,14 @@ const Index = () => {
             { value: "3", label: "plataformas" },
           ].map((s) => (
             <div key={s.label} className="text-center group">
-              <p className="text-6xl font-black text-white group-hover:text-[#d4ff00] transition-colors duration-500 tracking-tighter">{s.value}</p>
-              <p className="mt-3 text-[10px] text-[#d4ff00]/60 font-black uppercase tracking-[0.2em]">{s.label}</p>
+              <p className="text-6xl font-black text-white group-hover:text-[#ff0071] transition-colors duration-500 tracking-tighter">{s.value}</p>
+              <p className="mt-3 text-[10px] text-[#bd00ff] font-bold uppercase tracking-[0.2em]">{s.label}</p>
             </div>
           ))}
         </div>
 
-        {/* Footer */}
-        <footer className="mt-40 w-full max-w-6xl border-t border-white/5 pt-10 text-center text-[10px] text-slate-500 font-black uppercase tracking-[0.3em] space-y-3 pb-20">
-          <p>© {new Date().getFullYear()} nexus studio • nebula v8.0 stable</p>
-          <p className="opacity-40">plataforma de ia generativa para creadores del futuro 🚀</p>
-        </footer>
-       {/* Features Row */}
+        {/* Features Row */}
+
         <div className="mt-24 w-full max-w-5xl grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in">
           {features.map((f) => (
             <div key={f.title} className="rounded-2xl border border-border bg-card/50 p-5 text-center backdrop-blur-sm">
@@ -182,21 +187,21 @@ const Index = () => {
           <div className="rounded-3xl border border-primary/20 bg-card/60 overflow-hidden node-shadow backdrop-blur-sm">
             <div className="grid md:grid-cols-2">
               <div className="p-8 md:p-12 flex flex-col justify-center">
-                <Badge className="w-fit mb-4 bg-accent/10 text-accent border-accent/20 hover:bg-accent/10">Formaketing</Badge>
+                <Badge className="w-fit mb-4 bg-[#bd00ff]/10 text-[#bd00ff] border-[#bd00ff]/20 hover:bg-[#bd00ff]/10">Formaketing Studio</Badge>
                 <h2 className="text-3xl font-bold text-foreground md:text-4xl">
-                  <span className="gradient-accent-text">Marketing Visual</span> con IA
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#bd00ff] to-[#ff0071]">Marketing Visual</span> con IA
                 </h2>
                 <p className="mt-4 text-muted-foreground leading-relaxed">
                   El lienzo infinito para marketing. Crea flows de campañas, conecta nodos, genera assets y construye funnels completos con inteligencia artificial.
                 </p>
                 <ul className="mt-5 space-y-2.5">
-                  {["Lienzo infinito con nodos conectables", "Generación de imágenes inline", "Flows de marketing visual", "Exporta campañas completas"].map((f) => (
+                  {["Lienzo infinito con nodos conectables", "Generación de imágenes inline", "Flows de marketing visual", "Exporta a código (Prompt-to-UI)"].map((f) => (
                     <li key={f} className="flex items-center gap-2.5 text-sm text-muted-foreground">
-                      <CheckCircle2 className="h-4 w-4 text-accent shrink-0" />{f}
+                      <CheckCircle2 className="h-4 w-4 text-[#bd00ff] shrink-0" />{f}
                     </li>
                   ))}
                 </ul>
-                <Button onClick={() => navigate("/auth")} className="mt-8 w-fit bg-accent text-accent-foreground hover:bg-accent/90 gap-2 rounded-full px-6">
+                <Button onClick={() => navigate("/auth")} className="mt-8 w-fit bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white hover:opacity-90 gap-2 rounded-full px-8 shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)]">
                   <Palette className="h-4 w-4" />
                   Probar Formaketing
                 </Button>
@@ -221,10 +226,11 @@ const Index = () => {
 
         {/* Download Section */}
         <div className="mt-28 w-full max-w-5xl">
-          <div className="rounded-3xl border border-primary/20 bg-card/60 p-10 text-center backdrop-blur-sm node-shadow">
-            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10">Multiplataforma</Badge>
-            <h2 className="text-3xl font-bold text-foreground md:text-4xl">
-              Descarga <span className="gradient-text">Creator IA Pro</span>
+          <div className="rounded-3xl border border-[#bd00ff]/20 bg-[#121215]/80 p-10 text-center backdrop-blur-sm node-shadow relative overflow-hidden">
+            <div className="absolute -top-40 left-1/4 h-[300px] w-[300px] rounded-full bg-[#bd00ff]/10 blur-[80px] pointer-events-none" />
+            <Badge className="mb-4 bg-[#bd00ff]/10 text-[#bd00ff] border-[#bd00ff]/20 hover:bg-[#bd00ff]/10 relative z-10">Multiplataforma</Badge>
+            <h2 className="text-3xl font-bold text-foreground md:text-4xl relative z-10">
+              Descarga <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#bd00ff] to-[#ff0071]">Creator IA Pro</span>
             </h2>
             <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
               Disponible en Windows, macOS y Android. Tu cuenta se sincroniza en todos los dispositivos.
@@ -235,13 +241,13 @@ const Index = () => {
                 { icon: Apple, name: "macOS" },
                 { icon: Smartphone, name: "Android" },
               ].map((p) => (
-                <div key={p.name} className="flex items-center gap-2 rounded-full border border-border bg-muted/30 px-5 py-2.5">
-                  <p.icon className="h-4 w-4 text-primary" />
+                <div key={p.name} className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-5 py-2.5 hover:bg-white/10 transition-colors cursor-pointer">
+                  <p.icon className="h-4 w-4 text-[#ffb800]" />
                   <span className="text-sm font-medium text-foreground">{p.name}</span>
                 </div>
               ))}
             </div>
-            <Button onClick={() => navigate("/descargar")} size="lg" className="mt-6 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 rounded-full px-10">
+            <Button onClick={() => navigate("/descargar")} size="lg" className="mt-8 bg-[#121215] border border-white/10 text-white hover:bg-white/5 gap-2 rounded-full px-10 relative z-10">
               <Download className="h-4 w-4" />
               Ver Descargas
             </Button>
@@ -272,19 +278,20 @@ const Index = () => {
         </div>
 
         {/* Final CTA */}
-        <div className="mt-28 w-full max-w-2xl rounded-3xl border border-primary/20 bg-card/60 p-12 text-center node-shadow backdrop-blur-sm animate-fade-in">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/15">
-            <Sparkles className="h-7 w-7 text-primary" />
+        <div className="mt-28 w-full max-w-2xl rounded-3xl border border-[#bd00ff]/20 bg-[#121215]/80 p-12 text-center node-shadow backdrop-blur-sm animate-fade-in relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#bd00ff]/5 to-[#ff0071]/5 pointer-events-none" />
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#bd00ff] to-[#ff0071] shadow-lg shadow-[#bd00ff]/20 relative z-10">
+            <Sparkles className="h-8 w-8 text-white" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground md:text-4xl">
-            Empieza a crear <span className="gradient-text">hoy</span>
+          <h2 className="text-3xl font-bold text-foreground md:text-4xl relative z-10">
+            Empieza a crear <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#bd00ff] to-[#ff0071]">hoy</span>
           </h2>
-          <p className="mt-4 text-muted-foreground max-w-md mx-auto">
-            Únete a miles de creadores que ya usan Creator IA Pro. 10 créditos gratis, sin tarjeta.
+          <p className="mt-4 text-muted-foreground max-w-md mx-auto relative z-10">
+            Únete a miles de creadores de alto nivel en Creator IA Pro. 10 créditos gratis, sin tarjeta de crédito.
           </p>
-          <Button onClick={() => navigate("/auth")} size="lg" className="mt-8 bg-primary text-primary-foreground hover:bg-primary/90 gap-2 px-10 rounded-full h-12 text-base">
-            Empezar Gratis
-            <ArrowRight className="h-4 w-4" />
+          <Button onClick={() => navigate("/auth")} size="lg" className="mt-8 bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white hover:opacity-90 gap-2 px-12 rounded-full h-14 text-lg font-bold shadow-[0_0_30px_-5px_rgba(189,0,255,0.4)] relative z-10 transition-all hover:scale-105 active:scale-95">
+            Comenzar Gratis
+            <ArrowRight className="h-5 w-5" />
           </Button>
         </div>
 
@@ -295,6 +302,7 @@ const Index = () => {
         </footer>
       </main>
     </div>
+    </>
   );
 };
 

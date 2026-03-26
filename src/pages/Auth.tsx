@@ -67,30 +67,30 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#020203] lowercase font-sans selection:bg-[#d4ff00]/30 selection:text-[#020203]">
+    <div className="flex min-h-screen bg-[#050506] lowercase font-sans selection:bg-[#bd00ff]/30 selection:text-white">
       {/* Left — Features (hidden mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-24 relative overflow-hidden bg-[#080809]">
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-24 relative overflow-hidden bg-[#121215]">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-40 -left-40 h-[700px] w-[700px] rounded-full bg-[#d4ff00]/5 blur-[150px]" />
-          <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-[#d4ff00]/2 blur-[120px]" />
+          <div className="absolute -top-40 -left-40 h-[700px] w-[700px] rounded-full bg-[#bd00ff]/10 blur-[150px]" />
+          <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-[#ff0071]/10 blur-[120px]" />
         </div>
         <div className="relative z-10 space-y-10">
           <button onClick={() => navigate("/")} className="flex items-center gap-5 mb-14 group transition-all">
-            <div className="flex h-13 w-13 items-center justify-center rounded-[1.2rem] bg-[#d4ff00] shadow-2xl shadow-[#d4ff00]/20 group-hover:rotate-6 transition-transform">
-              <Sparkles className="h-6.5 w-6.5 text-[#020203]" />
+            <div className="flex h-13 w-13 items-center justify-center rounded-[1.2rem] bg-gradient-to-br from-[#bd00ff] to-[#ff0071] shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)] group-hover:rotate-6 transition-transform">
+              <Sparkles className="h-6 w-6 text-white" />
             </div>
             <div className="flex flex-col text-left">
               <span className="text-xl font-black text-white tracking-tighter leading-none">
-                nexus<span className="text-[#d4ff00]">_</span>studio
+                creator<span className="text-[#ff0071]">_</span>ia
               </span>
-              <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em] mt-2">Nebula V8.0 Minimalist</span>
+              <span className="text-[9px] font-black text-[#ffb800] uppercase tracking-[0.4em] mt-2">V2.1 Industrial</span>
             </div>
           </button>
 
           <h2 className="text-7xl font-black text-white leading-none tracking-tighter">
             tu estudio de
             <br />
-            <span className="text-[#d4ff00]">ecosistemas ia</span>
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#bd00ff] to-[#ff0071]">ecosistemas ia</span>
             <br />
             autónomos.
           </h2>
@@ -102,7 +102,7 @@ const Auth = () => {
           <div className="mt-12 space-y-6">
             {features.map((f) => (
               <div key={f.text} className="flex items-center gap-5 group">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 border border-white/5 text-[#d4ff00] transition-all group-hover:bg-[#d4ff00]/10 group-hover:scale-110">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/5 border border-white/5 text-[#bd00ff] transition-all group-hover:bg-[#bd00ff]/10 group-hover:scale-110">
                   <f.icon className="h-5 w-5" />
                 </div>
                 <span className="text-sm font-black text-slate-300 lowercase tracking-tight">{f.text}</span>
@@ -111,26 +111,26 @@ const Auth = () => {
           </div>
 
           <div className="mt-16 flex items-center gap-4 text-[11px] font-black text-slate-500 lowercase tracking-[0.2em]">
-            <div className="w-2 h-2 rounded-full bg-[#d4ff00] shadow-[0_0_12px_#d4ff00]" />
+            <div className="w-2 h-2 rounded-full bg-[#ff0071] shadow-[0_0_12px_#ff0071]" />
             acceso_total_industrial
           </div>
         </div>
       </div>
 
       {/* Right — Form */}
-      <div className="flex flex-1 items-center justify-center px-6 relative bg-[#020203]">
+      <div className="flex flex-1 items-center justify-center px-6 relative bg-[#050506]">
         <div className="relative z-10 w-full max-w-md animate-in fade-in slide-in-from-right-4 duration-700">
           {/* Mobile logo */}
           <div className="mb-14 text-center lg:hidden">
-            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#d4ff00] shadow-2xl shadow-[#d4ff00]/20 cursor-pointer" onClick={() => navigate("/")}>
-              <Sparkles className="h-7 w-7 text-[#020203]" />
+            <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#bd00ff] to-[#ff0071] shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)] cursor-pointer" onClick={() => navigate("/")}>
+              <Sparkles className="h-7 w-7 text-white" />
             </div>
             <h1 className="text-3xl font-black text-white tracking-tighter lowercase">
-              nexus<span className="text-[#d4ff00]">_</span>studio
+              creator<span className="text-[#ff0071]">_</span>ia
             </h1>
           </div>
 
-          <div className="rounded-[3rem] border border-white/5 bg-[#080809]/80 backdrop-blur-3xl p-12 shadow-3xl">
+          <div className="rounded-[3rem] border border-white/5 bg-[#121215]/80 backdrop-blur-3xl p-12 shadow-[0_0_50px_-12px_rgba(189,0,255,0.15)]">
             <h2 className="mb-3 text-3xl font-black text-white tracking-tighter lowercase">
               {mode === "login" ? "acceso_nexus" : mode === "signup" ? "inicializar_cuenta" : "recuperar_acceso"}
             </h2>
@@ -144,16 +144,16 @@ const Auth = () => {
                   <Label htmlFor="displayName" className="text-slate-500 text-[10px] font-black lowercase tracking-[0.2em] ml-2">nombre</Label>
                   <div className="relative">
                     <User className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-700" />
-                    <Input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="tu nombre" className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#d4ff00]/20 rounded-2xl pl-12 h-13 text-xs font-bold text-white transition-all ring-0" />
+                    <Input id="displayName" type="text" value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="tu nombre" className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#bd00ff]/30 rounded-2xl pl-12 h-13 text-xs font-bold text-white transition-all ring-0" />
                   </div>
                 </div>
               )}
 
               <div className="space-y-3">
-                <Label htmlFor="email" className="text-slate-500 text-[10px] font-black lowercase tracking-[0.2em] ml-2">email_nexus</Label>
+                <Label htmlFor="email" className="text-slate-500 text-[10px] font-black lowercase tracking-[0.2em] ml-2">email</Label>
                 <div className="relative">
                   <Mail className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-700" />
-                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#d4ff00]/20 rounded-2xl pl-12 h-13 text-xs font-bold text-white transition-all ring-0" />
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" required className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#bd00ff]/30 rounded-2xl pl-12 h-13 text-xs font-bold text-white transition-all ring-0" />
                 </div>
               </div>
 
@@ -162,8 +162,8 @@ const Auth = () => {
                   <Label htmlFor="password" className="text-slate-500 text-[10px] font-black lowercase tracking-[0.2em] ml-2">clave_personal</Label>
                   <div className="relative">
                     <Lock className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-700" />
-                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#d4ff00]/20 rounded-2xl pl-12 pr-12 h-13 text-xs font-bold text-white transition-all ring-0" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-700 hover:text-[#d4ff00] transition-colors">
+                    <Input id="password" type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#bd00ff]/30 rounded-2xl pl-12 pr-12 h-13 text-xs font-bold text-white transition-all ring-0" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-700 hover:text-[#bd00ff] transition-colors">
                       {showPassword ? <EyeOff className="h-4.5 w-4.5" /> : <Eye className="h-4.5 w-4.5" />}
                     </button>
                   </div>
@@ -172,15 +172,15 @@ const Auth = () => {
 
               {mode === "login" && (
                 <div className="text-right">
-                  <button type="button" onClick={() => setMode("forgot")} className="text-[10px] font-black text-slate-600 hover:text-[#d4ff00] transition-colors lowercase tracking-tight">
+                  <button type="button" onClick={() => setMode("forgot")} className="text-[10px] font-black text-slate-600 hover:text-[#bd00ff] transition-colors lowercase tracking-tight">
                     ¿_olvidaste_clave?
                   </button>
                 </div>
               )}
 
-              <Button type="submit" disabled={loading} className="w-full h-15 bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] rounded-2xl gap-4 font-black lowercase text-xs shadow-2xl shadow-[#d4ff00]/20 transition-all active:scale-95 disabled:opacity-50 mt-4">
+              <Button type="submit" disabled={loading} className="w-full h-15 bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white hover:opacity-90 rounded-2xl gap-4 font-black lowercase text-xs shadow-[0_0_20px_-5px_rgba(189,0,255,0.4)] transition-all active:scale-95 disabled:opacity-50 mt-4">
                 {loading ? (
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#020203] border-t-transparent" />
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                 ) : (
                   <>
                     {mode === "login" ? "conectar_estudio" : mode === "signup" ? "solicitar_acceso" : "enviar_enlace"}
@@ -196,7 +196,7 @@ const Auth = () => {
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-white/5" />
                   </div>
-                  <span className="relative bg-[#080809] px-4 text-[10px] font-black text-slate-700 lowercase tracking-widest">o_continuar_con</span>
+                  <span className="relative bg-[#121215] px-4 text-[10px] font-black text-slate-600 lowercase tracking-widest">o_continuar_con</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -266,7 +266,7 @@ const Auth = () => {
           </div>
 
           <div className="mt-8 text-center">
-            <button onClick={() => navigate("/pricing")} className="text-[10px] font-black text-[#d4ff00] hover:text-[#c4eb00] transition-colors lowercase tracking-[0.3em] bg-[#d4ff00]/5 px-6 py-3 rounded-2xl border border-[#d4ff00]/10 shadow-2xl">
+            <button onClick={() => navigate("/pricing")} className="text-[10px] font-black text-white hover:text-white transition-colors lowercase tracking-[0.3em] bg-gradient-to-r from-[#bd00ff]/10 to-[#ff0071]/10 px-6 py-3 rounded-2xl border border-[#bd00ff]/30 shadow-2xl shadow-[#bd00ff]/5">
               ver_planes_precios →
             </button>
           </div>

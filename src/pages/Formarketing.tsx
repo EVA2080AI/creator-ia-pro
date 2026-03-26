@@ -1,12 +1,12 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from "react-helmet-async";
 import { 
   Background, Controls, MiniMap, ReactFlow, addEdge, 
   Connection, Edge, Node, ReactFlowProvider,
   useNodesState, useEdgesState, useReactFlow,
   type NodeChange, type EdgeChange, BackgroundVariant
 } from '@xyflow/react';
-import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import '@xyflow/react/dist/style.css';
 import { AppHeader } from "@/components/AppHeader";
@@ -609,7 +609,12 @@ function FormarketingContent() {
   }, [nodes, setNodes, executeNode, executeVariation]);
 
   return (
-    <div className="flex h-screen w-full flex-col bg-[#020203] text-white overflow-hidden font-sans selection:bg-[#d4ff00]/30 selection:text-[#020203]">
+    <>
+      <Helmet>
+        <title>Nexus Studio V2.0 | Formarketing</title>
+        <meta name="description" content="Lienzo infinito de inteligencia artificial multimodal. Crea, gestiona y escala campañas y flujos de marketing en tiempo real." />
+      </Helmet>
+      <div className="h-screen w-screen bg-[#050506] font-inter text-slate-100 flex flex-col overflow-hidden relative selection:bg-[#bd00ff]/30 selection:text-[#020203]">
       {/* Nebula V8.0 Minimalist Studio Header */}
       <div className="flex h-20 w-full items-center justify-between border-b border-white/5 bg-[#020203]/40 px-10 backdrop-blur-3xl shrink-0 z-[90]">
          <div className="flex items-center gap-8">
@@ -617,24 +622,24 @@ function FormarketingContent() {
                 onClick={() => navigate("/dashboard")}
                 className="flex items-center gap-5 hover:opacity-80 transition-all group"
              >
-                <div className="flex h-11 w-11 items-center justify-center rounded-[1.2rem] bg-[#d4ff00] shadow-2xl shadow-[#d4ff00]/20 group-hover:rotate-6 transition-transform">
-                   <Rocket className="h-5.5 w-5.5 text-[#020203]" />
+                <div className="flex h-11 w-11 items-center justify-center rounded-[1.2rem] bg-gradient-to-r from-[#bd00ff] to-[#ff0071] shadow-2xl shadow-[#bd00ff]/20 group-hover:rotate-6 transition-transform">
+                   <Rocket className="h-5.5 w-5.5 text-white" />
                 </div>
                 <div className="flex flex-col text-left">
-                   <h1 className="text-xl font-black tracking-tighter text-white leading-none">nexus<span className="text-[#d4ff00]">_</span>studio</h1>
-                   <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.5em] mt-2">Nebula V8.0 Minimalist</span>
+                   <h1 className="text-xl font-black tracking-tighter text-white leading-none">nexus<span className="brand-gradient-text">_</span>studio</h1>
+                   <span className="text-[8px] font-black text-[#bd00ff] uppercase tracking-[0.5em] mt-2">V2.0 Industrial</span>
                 </div>
              </button>
             <div className="h-6 w-px bg-white/10 mx-2" />
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-2xl w-11 h-11 text-slate-500 hover:text-[#d4ff00] transition-all">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-2xl w-11 h-11 text-slate-500 hover:text-white transition-all">
                <ArrowLeft className="h-5 w-5" />
             </Button>
          </div>
 
          <div className="flex items-center gap-5">
-            <div className="hidden md:flex items-center gap-3 bg-[#d4ff00]/5 px-5 py-2.5 rounded-2xl border border-[#d4ff00]/10 shadow-2xl">
-               <div className="w-2 h-2 rounded-full bg-[#d4ff00] shadow-[0_0_15px_#d4ff00] animate-pulse" />
-               <span className="text-[10px] font-black text-[#d4ff00] lowercase tracking-[0.2em]">nebula_link_stable</span>
+            <div className="hidden md:flex items-center gap-3 bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 shadow-2xl">
+               <div className="w-2 h-2 rounded-full bg-[#ffb800] shadow-[0_0_15px_#ffb800] animate-pulse" />
+               <span className="text-[10px] font-black text-[#ffb800] lowercase tracking-[0.2em]">en línea</span>
             </div>
 
             <Button 
@@ -650,10 +655,10 @@ function FormarketingContent() {
             <Button 
                onClick={handleExecute} 
                disabled={nodes.length === 0}
-               className="h-12 bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] rounded-2xl gap-3 font-black px-10 shadow-2xl shadow-[#d4ff00]/20 text-[11px] lowercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
+               className="h-12 bg-gradient-to-r from-[#bd00ff] to-[#ff0071] hover:opacity-90 text-white rounded-2xl gap-3 font-black px-10 shadow-2xl shadow-[#bd00ff]/20 text-[11px] lowercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
             >
                <Zap className="w-4.5 h-4.5" />
-               ejecutar_flujo_genius
+               Sincronizar Flujo
             </Button>
 
             <div className="h-6 w-px bg-white/10 mx-2" />
@@ -676,30 +681,30 @@ function FormarketingContent() {
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           fitView
-          className="nebula-canvas bg-[#020203]"
+          className="nebula-canvas bg-[#050506]"
           colorMode="dark"
           defaultEdgeOptions={{ 
             type: 'smoothstep', 
             animated: true,
-            style: { stroke: '#d4ff0040', strokeWidth: 2 }
+            style: { stroke: '#bd00ff80', strokeWidth: 2 }
           }}
         >
           <Background 
-            color="#d4ff0010" 
-            variant={BackgroundVariant.Lines} 
-            gap={60} 
-            size={1} 
+            color="#ffffff05" 
+            variant={BackgroundVariant.Dots} 
+            gap={40} 
+            size={1.5} 
           />
-          <Controls className="!bg-[#080809]/80 !border-white/5 !fill-slate-500 !bottom-12 !left-10 rounded-[2rem] overflow-hidden scale-125 shadow-3xl backdrop-blur-3xl" />
+          <Controls className="!bg-[#0f0f12]/90 !border-white/5 !fill-slate-500 !bottom-12 !left-10 rounded-2xl overflow-hidden scale-110 shadow-3xl backdrop-blur-xl" />
           <MiniMap 
-            className="!bg-[#080809]/80 border !border-white/5 !rounded-[2.5rem] overflow-hidden backdrop-blur-3xl !bottom-12 !right-10 shadow-3xl opacity-30 hover:opacity-100 transition-opacity" 
-            maskColor="rgba(2,2,3,0.8)" 
+            className="!bg-[#0f0f12]/90 border !border-white/5 !rounded-2xl overflow-hidden backdrop-blur-xl !bottom-12 !right-10 shadow-3xl opacity-50 hover:opacity-100 transition-opacity" 
+            maskColor="rgba(5,5,6,0.8)" 
             nodeColor={(n) => {
-               if (n.type === 'characterBreakdown') return '#d4ff0040';
-               if (n.type === 'modelView') return '#ffffff10';
-               if (n.type === 'videoModel') return '#d4ff0060';
-               if (n.type === 'antigravityBridge') return '#d4ff0080';
-               return '#111';
+               if (n.type === 'characterBreakdown') return '#00c2ff80';
+               if (n.type === 'modelView') return '#ffffff20';
+               if (n.type === 'videoModel') return '#ff007180';
+               if (n.type === 'antigravityBridge') return '#bd00ff80';
+               return '#222';
             }}
           />
         </ReactFlow>
@@ -707,6 +712,7 @@ function FormarketingContent() {
 
       <GeniusAssistant onAction={handleAssistantAction} />
     </div>
+    </>
   );
 }
 

@@ -60,12 +60,12 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
   };
 
   const menuItems = [
-    { label: 'copywriting ai', icon: Type, type: 'characterBreakdown', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'genera textos persuasivos' },
-    { label: 'imagen flux hq', icon: Image, type: 'modelView', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'generación industrial hq' },
+    { label: 'copywriting ai', icon: Type, type: 'characterBreakdown', color: 'text-[#00c2ff]', bg: 'bg-[#00c2ff]/10', description: 'genera textos persuasivos' },
+    { label: 'imagen flux hq', icon: Image, type: 'modelView', color: 'text-white', bg: 'bg-white/10', description: 'generación industrial hq' },
     { label: 'avatar de marca', icon: Video, type: 'videoModel', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'video con ia para campañas' },
-    { label: 'web/app builder', icon: LayoutTemplate, type: 'layoutBuilder', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'diseña estructuras web' },
-    { label: 'campaña social', icon: Share2, type: 'campaignManager', color: 'text-[#ff0071]', bg: 'bg-[#ff0071]/10', description: 'gestiona distribución' },
-    { label: 'antigravity bridge', icon: Rocket, type: 'antigravityBridge', color: 'text-white', bg: 'bg-[#ff0071]', description: 'clonación de ecosistemas' },
+    { label: 'web/app builder', icon: LayoutTemplate, type: 'layoutBuilder', color: 'text-[#ffb800]', bg: 'bg-[#ffb800]/10', description: 'diseña estructuras web' },
+    { label: 'campaña social', icon: Share2, type: 'campaignManager', color: 'text-[#00e5a0]', bg: 'bg-[#00e5a0]/10', description: 'gestiona distribución' },
+    { label: 'antigravity bridge', icon: Rocket, type: 'antigravityBridge', color: 'text-white', bg: 'bg-[#bd00ff]', description: 'clonación de ecosistemas' },
   ].filter(item => 
     item.label.toLowerCase().includes(search.toLowerCase()) && 
     (activeCategory === null || (activeCategory === 6 && item.icon === Type) || (activeCategory === 3 && item.icon === Image) || (activeCategory === 4 && item.icon === Video))
@@ -107,11 +107,11 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
     <div className="absolute left-4 top-20 z-10 flex gap-3 animate-fade-in items-start h-[calc(100vh-120px)] pointer-events-none">
       
       {/* Vertical Pulse Toolbar */}
-      <div className="flex flex-col items-center gap-3 rounded-[2rem] border border-white/5 bg-[#0a0a0b]/80 w-[56px] py-6 shadow-2xl backdrop-blur-2xl shrink-0 h-fit pointer-events-auto">
+      <div className="flex flex-col items-center gap-3 rounded-[2rem] border border-white/8 bg-[#0f0f12]/90 w-[56px] py-6 shadow-2xl backdrop-blur-xl shrink-0 h-fit pointer-events-auto">
         {/* Menu Toggle */}
         <button 
            onClick={() => setMenuOpen(!menuOpen)}
-           className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-all duration-500 ${menuOpen ? 'bg-[#ff0071] text-white rotate-90 shadow-xl shadow-[#ff0071]/30' : 'bg-white/5 text-slate-500 hover:bg-white/10 hover:text-white'}`}
+           className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-all duration-500 ${menuOpen ? 'bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white rotate-90 shadow-xl shadow-[#bd00ff]/30' : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white'}`}
         >
           {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-5 w-5" />}
         </button>
@@ -119,15 +119,15 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
         <div className="w-8 h-px bg-white/5 my-2" />
 
         {/* Play Button */}
-        <button className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-xl hover:scale-105 active:scale-95 transition-all group/play">
-          <Play className="h-5 w-5 fill-[#ff0071] text-[#ff0071] ml-0.5 group-hover:scale-110 transition-transform" />
+        <button className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/5 text-white shadow-xl hover:scale-105 active:scale-95 transition-all group/play border border-white/10">
+          <Play className="h-5 w-5 fill-[#bd00ff] text-[#bd00ff] ml-0.5 group-hover:scale-110 transition-transform" />
         </button>
 
         {/* Other Tools */}
         {toolbarIcons.map((Tool, i) => (
           <button 
             key={i} 
-            className={`flex h-11 w-11 items-center justify-center rounded-2xl text-slate-500 hover:bg-white/5 hover:text-[#ff0071] transition-all group ${Tool.id === 'settings' ? 'mt-8' : ''}`}
+            className={`flex h-11 w-11 items-center justify-center rounded-xl text-white/40 hover:bg-white/5 hover:text-[#00c2ff] transition-all group ${Tool.id === 'settings' ? 'mt-8' : ''}`}
           >
             <Tool.icon className="h-4.5 w-4.5 group-hover:scale-110 transition-transform" />
           </button>
@@ -136,7 +136,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
 
       {/* Expanded Pulse Menu */}
       {menuOpen && (
-        <div className="w-64 rounded-[2.5rem] border border-white/5 bg-[#0a0a0b]/90 p-5 shadow-3xl backdrop-blur-3xl flex flex-col gap-6 max-h-full overflow-y-auto scrollbar-hide animate-in slide-in-from-left-4 duration-500 pointer-events-auto">
+        <div className="w-64 rounded-[2.5rem] border border-white/8 bg-[#0f0f12]/95 p-5 shadow-3xl backdrop-blur-xl flex flex-col gap-6 max-h-full overflow-y-auto no-scrollbar animate-in slide-in-from-left-4 duration-500 pointer-events-auto">
           
           {/* Search Bar */}
           <div className="relative mb-2">
@@ -145,14 +145,14 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                value={search}
                onChange={(e) => setSearch(e.target.value)}
                placeholder="buscar herramientas..." 
-               className="pl-11 bg-white/5 border-transparent focus:border-[#ff0071]/30 rounded-2xl h-12 text-xs lowercase font-bold text-white placeholder:text-slate-700"
+               className="pl-11 bg-white/5 border-transparent focus:border-[#bd00ff]/50 rounded-xl h-12 text-xs font-bold text-white placeholder:text-white/30"
             />
           </div>
 
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between px-2">
-                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">plantillas elite</h3>
-                <Sparkles className="w-3.5 h-3.5 text-[#ff0071]" />
+                <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">Nodos de Flujo</h3>
+                <span className="text-[10px] text-white/20 font-medium">({menuItems.length})</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
                <TemplateModal 
@@ -162,22 +162,22 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                    window.dispatchEvent(event);
                  }} 
                  trigger={
-                     <button className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-[#ff0071]/[0.02] border border-[#ff0071]/10 hover:bg-[#ff0071]/[0.05] transition-all group/btn shadow-sm">
-                        <div className="p-1.5 rounded-lg bg-[#ff0071]/10 group-hover/btn:scale-110 transition-all">
-                           <Zap className="h-3.5 w-3.5 text-[#ff0071]" />
+                     <button className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-gradient-to-br from-[#bd00ff]/10 to-[#ff0071]/10 border border-[#bd00ff]/20 hover:border-[#ff0071]/20 transition-all group/btn shadow-sm">
+                        <div className="p-1.5 rounded-lg bg-gradient-to-br from-[#bd00ff]/20 to-[#ff0071]/20 group-hover/btn:scale-110 transition-all">
+                           <Zap className="h-3.5 w-3.5 text-white" />
                         </div>
-                        <span className="text-[8px] font-bold text-center text-slate-800 uppercase tracking-tighter leading-none">ads packs</span>
+                        <span className="text-[8px] font-bold text-center text-white/80 uppercase tracking-tighter leading-none">ads packs</span>
                      </button>
                  }
                />
                <button 
                   onClick={() => handleAddTemplate('landingPack')}
-                  className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-slate-50/50 hover:bg-slate-50 border border-slate-100 hover:border-slate-200 transition-all group/btn shadow-sm"
+                  className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl bg-white/[0.02] hover:bg-white/5 border border-white/10 hover:border-white/20 transition-all group/btn shadow-sm"
                >
-                  <div className="p-1.5 rounded-lg bg-slate-100 group-hover/btn:scale-110 transition-all">
-                    <Rocket className="h-3.5 w-3.5 text-slate-400 group-hover:text-[#ff0071]" />
+                  <div className="p-1.5 rounded-lg bg-white/10 group-hover/btn:scale-110 transition-all">
+                    <Rocket className="h-3.5 w-3.5 text-white/60 group-hover:text-white" />
                   </div>
-                  <span className="text-[8px] font-bold text-center text-slate-400 uppercase tracking-tighter leading-none group-hover:text-slate-800">landing base</span>
+                  <span className="text-[8px] font-bold text-center text-white/60 uppercase tracking-tighter leading-none group-hover:text-white">landing base</span>
                </button>
             </div>
           </div>
@@ -185,7 +185,9 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
         {/* Basics Menu */}
         <TooltipProvider>
           <div className="flex flex-col gap-2">
-            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] px-2 mb-2">herramientas nexus</h3>
+            <p className="text-center text-[9px] font-bold text-white/30 tracking-widest uppercase mt-4">
+              Creator IA Pro v2.0
+            </p>
            {menuItems.map((item, idx) => (
              <div key={idx} className="group/item relative">
                <Tooltip>
@@ -194,16 +196,16 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                       draggable
                       onDragStart={(e) => onDragStart(e, item.type, item.label)}
                       onClick={() => onAddNode(item.type, item.label)}
-                      className="flex flex-col gap-1 w-full p-3 rounded-2xl hover:bg-white/5 transition-all text-left group border border-transparent hover:border-white/5 active:scale-[0.98] duration-300"
+                      className="flex flex-col gap-1.5 p-3 rounded-xl border border-dashed border-white/10 bg-white/[0.02] items-center justify-center cursor-pointer hover:bg-white/5 hover:border-[#bd00ff]/30 transition-all text-white/40 hover:text-white"
                     >
                       <div className="flex items-center gap-4">
-                        <div className={`p-2.5 rounded-xl ${item.bg} group-hover:scale-110 transition-transform shadow-lg`}>
-                          <item.icon className={`h-4.5 w-4.5 ${item.color}`} />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[12px] font-black text-white group-hover:text-[#ff0071] transition-colors">{item.label}</span>
-                          <span className="text-[9px] text-slate-500 line-clamp-1 lowercase font-medium">{item.description}</span>
-                        </div>
+                        <div className={`p-2 rounded-xl flex items-center justify-center shrink-0 ${item.bg}`}>
+                        <item.icon className={`h-4 w-4 ${item.color}`} />
+                      </div>
+                      <div className="flex flex-col text-left">
+                        <span className="text-xs font-bold text-white group-hover:text-white transition-colors">{item.label}</span>
+                        <span className="text-[10px] font-medium text-white/40 leading-tight">{item.description}</span>
+                      </div>
                       </div>
                     </button>
                  </TooltipTrigger>

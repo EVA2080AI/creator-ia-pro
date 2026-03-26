@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
+import { HelmetProvider } from "react-helmet-async";
 
 // Lazy loading of pages for bundle optimization (V3.3)
 const Index = lazy(() => import("./pages/Index"));
@@ -56,8 +57,9 @@ const App = () => {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
+    <HelmetProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -91,6 +93,7 @@ const App = () => {
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
+  </HelmetProvider>
   );
 };
 

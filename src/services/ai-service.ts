@@ -149,6 +149,10 @@ export const aiService = {
     const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
     const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
 
+    if (!openRouterKey && !geminiKey) {
+      throw new Error("API Keys (OpenRouter/Gemini) no configuradas en el frontend.");
+    }
+
     const userTier = profile?.subscription_tier?.toUpperCase() || "FREE";
     const userCredits = profile?.credits_balance || 0;
 
@@ -243,7 +247,7 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
   },
 
   async callGeminiDirect(action: string, prompt: string, systemPrompt: string, geminiKey: string | undefined) {
-    if (!geminiKey) throw new Error("No se encontró API key de IA. Configura VITE_GEMINI_API_KEY.");
+    if (!geminiKey || geminiKey.trim() === "") throw new Error("No se encontró API key de Gemini. Configura VITE_GEMINI_API_KEY.");
 
     const activeGeminiModel = "gemini-1.5-flash";
     const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${activeGeminiModel}:generateContent?key=${geminiKey}`;
@@ -329,7 +333,7 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
     } catch (err: any) {
       console.error("Media Proxy Failure:", err.message);
       // Fallback: If proxy fails or is misconfigured, fail hard to trigger credit refund
-      throw new Error(`El motor de procesamiento para "${tool}" requiere REPLICATE_API_TOKEN. Funcionalidad en desarrollo.`);
+      throw new Error(`Error en motor de procesamiento de medios ("${tool}"): ${err.message}`);
     }
   },
 };
