@@ -8,6 +8,8 @@ interface LayoutNodeData {
   title?: string;
   platform?: 'mobile' | 'web' | 'desktop';
   structure?: string;
+  model?: string;
+  status?: 'idle' | 'executing' | 'ready' | 'error';
 }
 
 const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) => {
@@ -100,6 +102,31 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
                  <div className="h-10 bg-white/5 shadow-2xl rounded-xl border border-white/5" />
                  <div className="h-12 col-span-2 bg-gradient-to-br from-[#bd00ff]/10 to-[#ff0071]/10 shadow-2xl rounded-xl border border-[#bd00ff]/20 animate-pulse" />
               </div>
+          </div>
+
+          {/* Industrial Fallback Selector */}
+          <div className="pt-2 border-t border-white/5 space-y-2">
+            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] px-1">UX/UI Logic Engine</span>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'claude-3.5-sonnet', name: 'claude_sonnet' },
+                { id: 'deepseek-chat', name: 'deepseek_v3' },
+                { id: 'gemini-3.1-pro-low', name: 'gemini_pro' },
+                { id: 'gpt-oss-120b', name: 'llama_maverick' }
+              ].map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => updateField('model', m.id)}
+                  className={`px-3 py-2 rounded-xl border text-[9px] font-bold lowercase tracking-wider transition-all ${
+                    (data.model || 'claude-3.5-sonnet') === m.id 
+                    ? 'bg-[#ffb800]/10 border-[#ffb800]/30 text-[#ffb800]' 
+                    : 'bg-white/5 border-white/5 text-white/20 hover:bg-white/10'
+                  }`}
+                >
+                  {m.name}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-3">

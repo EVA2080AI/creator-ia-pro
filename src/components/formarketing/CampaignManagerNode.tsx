@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 
 interface CampaignNodeData {
   title?: string;
+  model?: string;
   status?: 'pending' | 'processing' | 'ready' | 'error';
   platforms?: Record<string, 'pending' | 'ready' | 'error'>;
 }
@@ -91,14 +92,32 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
                 </div>
             </div>
 
-            <div className="bg-[#bd00ff]/5 p-4 rounded-[1.5rem] border border-[#bd00ff]/10 transition-all shadow-2xl shadow-[#bd00ff]/5">
-               <div className="flex items-center justify-between">
-                <p className="text-[10px] font-black text-[#bd00ff] lowercase tracking-widest flex items-center gap-3">
-                     <span className="w-2 h-2 rounded-full bg-[#bd00ff] shadow-[0_0_10px_rgba(189,0,255,0.8)]" />
-                     nexus_network
-                  </p>
-                  <span className="text-[9px] font-black tracking-widest uppercase text-[#bd00ff]/40">LIVE</span>
-               </div>
+            {/* Industrial Fallback Selector */}
+            <div className="pt-2 border-t border-white/5 space-y-2">
+              <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] px-1">Campaign Strategy Engine</span>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { id: 'deepseek-chat', name: 'strategy_v3' },
+                  { id: 'gemini-3.1-pro-low', name: 'gemini_pro_v8' },
+                  { id: 'claude-3.5-sonnet', name: 'claude_lead' },
+                  { id: 'gpt-oss-120b', name: 'llama_oss' }
+                ].map((m) => (
+                  <button
+                    key={m.id}
+                    onClick={async () => {
+                      setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, model: m.id } } : n));
+                      await supabase.from('canvas_nodes').update({ data_payload: { ...data, model: m.id } as any }).eq('id', id);
+                    }}
+                    className={`px-3 py-2 rounded-xl border text-[9px] font-bold lowercase tracking-wider transition-all ${
+                      (data.model || 'deepseek-chat') === m.id 
+                      ? 'bg-[#bd00ff]/10 border-[#bd00ff]/30 text-[#bd00ff]' 
+                      : 'bg-white/5 border-white/5 text-white/20 hover:bg-white/10'
+                    }`}
+                  >
+                    {m.name}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

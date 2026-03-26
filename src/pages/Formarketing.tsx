@@ -218,7 +218,7 @@ function FormarketingContent() {
           title: label || 'Nuevo Elemento',
           status: 'idle',
           prompt: '',
-          model: type === 'modelView' ? 'nano-banana-pro' : type === 'videoModel' ? 'nano-banana-video' : undefined,
+          model: type === 'modelView' ? 'nano-banana-pro' : type === 'videoModel' ? 'nano-banana-video' : type === 'layoutBuilder' ? 'claude-3.5-sonnet' : 'deepseek-chat',
           description: type === 'characterBreakdown' ? 'Describe tu personaje...' : ''
         },
       };
@@ -322,9 +322,28 @@ function FormarketingContent() {
         (async () => {
           try {
             rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' } } : n));
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'ready' } } : n));
-            toast.success(`Análisis de ${node.data.title || 'personaje'} completado`);
+            
+            const selectedModel = (node.data as any).model || 'deepseek-chat';
+            const profilePrompt = `Analiza este perfil de personaje y genera una descripción senior detallada: ${node.data.title}. Contexto: ${node.data.flavor}. Estilo: ${node.data.description}`;
+            
+            const result = await aiService.processAction({
+              action: 'chat',
+              prompt: profilePrompt,
+              model: selectedModel,
+              node_id: (spaceId && isPersisted) ? node.id : undefined
+            });
+
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId 
+              ? { ...n, data: { ...n.data, status: 'ready', description: result.text } } 
+              : n
+            ));
+
+            await supabase.from('canvas_nodes').update({ 
+               status: 'ready',
+               data_payload: { ...node.data, status: 'ready', description: result.text, model: selectedModel }
+            }).eq('id', nodeId);
+
+            toast.success(`${node.data.title || 'Personaje'} analizado con ${selectedModel}`);
           } catch (e) {
             rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' } } : n));
           }
@@ -385,6 +404,37 @@ function FormarketingContent() {
             toast.success(`Video renderizado con ${selectedModel}`);
           } catch (error: any) {
             toast.error("Error al renderizar video");
+          }
+        })();
+      } else if (node.type === 'layoutBuilder') {
+        (async () => {
+          try {
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' } } : n));
+            
+            const selectedModel = (node.data as any).model || 'claude-3.5-sonnet';
+            const layoutPrompt = `Genera un mapa de componentes React/Tailwind para una landing page de tipo ${node.data.title}. Plataforma: ${node.data.platform}. Estructura deseada: ${node.data.structure}`;
+            
+            const result = await aiService.processAction({
+              action: 'ui',
+              prompt: layoutPrompt,
+              model: selectedModel,
+              node_id: (spaceId && isPersisted) ? node.id : undefined
+            });
+
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId 
+              ? { ...n, data: { ...n.data, status: 'ready', structure: JSON.stringify(result.ui || result, null, 2) } } 
+              : n
+            ));
+
+            await supabase.from('canvas_nodes').update({ 
+               status: 'ready',
+               data_payload: { ...node.data, status: 'ready', structure: JSON.stringify(result.ui || result, null, 2), model: selectedModel }
+            }).eq('id', nodeId);
+
+            toast.success(`Layout ${node.data.title} generado con ${selectedModel}`);
+          } catch (e) {
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' } } : n));
+            toast.error("Error al generar layout");
           }
         })();
       }

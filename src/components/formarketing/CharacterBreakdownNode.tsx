@@ -8,6 +8,7 @@ interface CharacterNodeData {
   title?: string;
   flavor?: string;
   description?: string;
+  model?: string;
   status?: 'idle' | 'executing' | 'ready' | 'error';
 }
 
@@ -114,13 +115,31 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
           </div>
         )}
 
-        <div className="bg-[#d4ff00]/[0.05] p-3 rounded-[1.5rem] border border-[#d4ff00]/10 transition-all">
-          <div className="flex items-center justify-between">
-            <p className="text-[10px] font-black text-[#d4ff00] lowercase tracking-widest flex items-center gap-2.5">
-               <span className="w-2 h-2 rounded-full bg-[#d4ff00] shadow-[0_0_8px_#d4ff00]" />
-               nexus_engine_stable
-            </p>
-            <span className="text-[9px] font-black tracking-widest uppercase text-slate-600">V8.0</span>
+        {/* Industrial Fallback Selector */}
+        <div className="pt-2 border-t border-white/5 space-y-2">
+          <div className="flex items-center justify-between px-1">
+             <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">nexus_engine</span>
+             <span className="text-[8px] font-bold text-[#d4ff00]/40 tracking-widest">industrial_fallback</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { id: 'deepseek-chat', name: 'deepseek_v3' },
+              { id: 'gemini-3-flash', name: 'gemini_flash' },
+              { id: 'claude-3.5-sonnet', name: 'claude_sonnet' },
+              { id: 'gpt-oss-120b', name: 'llama_maverick' }
+            ].map((m) => (
+              <button
+                key={m.id}
+                onClick={() => persistChange('model', m.id)}
+                className={`px-3 py-2 rounded-xl border text-[9px] font-black lowercase tracking-wider transition-all ${
+                  (data.model || 'deepseek-chat') === m.id 
+                  ? 'bg-[#d4ff00]/10 border-[#d4ff00]/30 text-[#d4ff00]' 
+                  : 'bg-white/5 border-white/5 text-slate-500 hover:bg-white/10'
+                }`}
+              >
+                {m.name}
+              </button>
+            ))}
           </div>
         </div>
       </div>
