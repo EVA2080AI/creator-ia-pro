@@ -191,13 +191,13 @@ export function FormarketingSidebar() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar" 
-          className="pl-9 bg-white/5 border-transparent focus:border-white/10 rounded-xl h-10 text-sm"
+          className="pl-8 bg-white/5 border-transparent focus:border-white/10 rounded-lg h-8 text-[11px]"
         />
       </div>
 
       {/* Top Icons Row */}
       <TooltipProvider>
-        <div className="flex items-center justify-between px-1 overflow-x-auto pb-2 scrollbar-none gap-2">
+        <div className="flex items-center justify-start px-1 overflow-x-auto pb-3 scrollbar-hide gap-1.5 min-h-[44px]">
           {topIcons.map((item, idx) => (
             <Tooltip key={idx}>
               <TooltipTrigger asChild>
