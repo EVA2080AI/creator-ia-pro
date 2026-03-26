@@ -5,8 +5,19 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { Button } from "@/components/ui/button";
 import {
   Sparkles, LayoutGrid, Wand2, Image, Coins, Shield,
-  CreditCard, LogOut, Palette, Home, Menu, X, Activity, MonitorDown, Code, User
+  CreditCard, LogOut, Palette, Home, Menu, X, Activity, MonitorDown, Code, User,
+  ChevronDown, Zap, Rocket, BookOpen, Layers, Settings
 } from "lucide-react";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 
 interface AppHeaderProps {
   userId?: string;
@@ -20,16 +31,33 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
   const { isAdmin } = useAdmin(userId);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const navItems = [
-    { path: "/dashboard", label: "Inicio", icon: Home },
-    { path: "/tools", label: "Herramientas", icon: Wand2 },
-    { path: "/formarketing", label: "Formarketing", icon: Palette },
-    { path: "/spaces", label: "Espacios", icon: LayoutGrid },
-    { path: "/assets", label: "Assets", icon: Image },
-    { path: "/pricing", label: "Planes", icon: CreditCard },
-    { path: "/descargar", label: "Descargas", icon: MonitorDown },
-    { path: "/developer", label: "Desarrollo", icon: Code },
-    { path: "/profile", label: "Perfil", icon: User },
+  const menuGroups = [
+    {
+      label: "Nexus Studio",
+      icon: Rocket,
+      items: [
+        { path: "/formarketing", label: "Studio", icon: Palette, description: "Lienzo industrial de creación" },
+        { path: "/spaces", label: "Espacios", icon: LayoutGrid, description: "Organiza proyectos y marcas" },
+        { path: "/tools", label: "Herramientas", icon: Wand2, description: "Utilidades de IA rápida" },
+      ]
+    },
+    {
+      label: "Recursos",
+      icon: BookOpen,
+      items: [
+        { path: "/assets", label: "Biblioteca", icon: Image, description: "Tus generaciones guardadas" },
+        { path: "/descargar", label: "Presets", icon: MonitorDown, description: "Centro de descargas" },
+      ]
+    },
+    {
+      label: "Cuenta",
+      icon: User,
+      items: [
+        { path: "/pricing", label: "Planes", icon: CreditCard, description: "Suscripción y créditos" },
+        { path: "/profile", label: "Perfil", icon: Settings, description: "Ajustes de Nexus V7" },
+        { path: "/developer", label: "API", icon: Code, description: "Acceso para desarrolladores" },
+      ]
+    }
   ];
 
   const adminItems = isAdmin
@@ -38,8 +66,6 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
         { path: "/system-status", label: "Sistema", icon: Activity },
       ]
     : [];
-
-  const allItems = [...navItems, ...adminItems];
 
   const handleNav = (path: string) => {
     navigate(path);
@@ -69,24 +95,66 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path ||
-                (item.path === "/tools" && location.pathname.startsWith("/apps"));
-              return (
-                <Button
-                  key={item.path}
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => navigate(item.path)}
-                  className={`shrink-0 h-10 px-5 rounded-full text-[10px] font-black lowercase tracking-widest transition-all duration-300 ${
-                    isActive ? "text-white bg-[#ff0071] shadow-xl shadow-[#ff0071]/20 hover:bg-[#e60066]" : "text-slate-500 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <item.icon className="h-4 w-4 mr-2" />
-                  {item.label}
-                </Button>
-              );
-            })}
+            <NavigationMenu>
+              <NavigationMenuList>
+                {menuGroups.map((group) => (
+                  <NavigationMenuItem key={group.label}>
+                    <NavigationMenuTrigger className="bg-transparent text-slate-400 hover:text-white font-black lowercase tracking-widest text-[10px] h-10 px-4 rounded-full transition-all">
+                      <group.icon className="h-3.5 w-3.5 mr-2 text-[#ff0071]" />
+                      {group.label}
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="grid w-[400px] gap-3 p-6 grid-cols-1 bg-[#0a0a0b]/95 border border-white/5 backdrop-blur-3xl rounded-[2rem] shadow-3xl">
+                        {group.items.map((item) => (
+                           <li key={item.path}>
+                              <NavigationMenuLink asChild>
+                                <button
+                                  onClick={() => handleNav(item.path)}
+                                  className={cn(
+                                    "flex w-full items-center gap-4 select-none space-y-1 rounded-2xl p-4 leading-none no-underline outline-none transition-all hover:bg-white/5 group/item",
+                                    location.pathname === item.path && "bg-[#ff0071]/10 border-[#ff0071]/20"
+                                  )}
+                                >
+                                  <div className="p-2.5 rounded-xl bg-white/5 group-hover/item:scale-110 group-hover/item:bg-[#ff0071]/10 transition-all shadow-lg">
+                                    <item.icon className="h-4.5 w-4.5 text-[#ff0071]" />
+                                  </div>
+                                  <div className="flex flex-col text-left">
+                                    <span className="text-[11px] font-black leading-none text-white lowercase tracking-widest">{item.label}</span>
+                                    <p className="line-clamp-2 text-[9px] leading-snug text-slate-500 mt-1.5 lowercase italic tracking-tight">
+                                      {item.description}
+                                    </p>
+                                  </div>
+                                </button>
+                              </NavigationMenuLink>
+                           </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                ))}
+                
+                {isAdmin && (
+                  <NavigationMenuItem>
+                    <NavigationMenuTrigger className="bg-transparent text-destructive hover:text-destructive font-black lowercase tracking-widest text-[10px] h-10 px-4 rounded-full">
+                      <Shield className="h-3.5 w-3.5 mr-2" />
+                      Admin
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                       <ul className="grid w-[200px] gap-2 p-4 bg-[#0a0a0b]/95 border border-white/5 backdrop-blur-3xl rounded-2xl shadow-3xl">
+                          {adminItems.map(item => (
+                             <li key={item.path}>
+                                <button onClick={() => handleNav(item.path)} className="flex w-full items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-[10px] font-black lowercase tracking-widest text-slate-400 hover:text-white">
+                                   <item.icon className="h-3.5 w-3.5" />
+                                   {item.label}
+                                </button>
+                             </li>
+                          ))}
+                       </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                )}
+              </NavigationMenuList>
+            </NavigationMenu>
           </nav>
 
           {/* Credits + Profile */}
@@ -131,24 +199,32 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden bg-[#050506]/60 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="absolute inset-0" onClick={() => setMobileOpen(false)} />
-          <nav className="absolute top-[68px] left-4 right-4 border border-white/5 bg-[#0a0a0b]/95 backdrop-blur-3xl p-4 rounded-[2rem] space-y-1.5 shadow-2xl animate-in slide-in-from-top-4 duration-500 z-50">
-            {allItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <button
-                  key={item.path}
-                  onClick={() => handleNav(item.path)}
-                  className={`flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-xs font-black lowercase tracking-widest transition-all ${
-                    isActive
-                      ? "bg-[#ff0071] text-white shadow-xl shadow-[#ff0071]/20"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-[#ff0071]'}`} />
-                  {item.label}
-                </button>
-              );
-            })}
+          <nav className="absolute top-[68px] left-4 right-4 border border-white/5 bg-[#0a0a0b]/95 backdrop-blur-3xl p-4 rounded-[2rem] space-y-4 shadow-2xl animate-in slide-in-from-top-4 duration-500 z-50 max-h-[80vh] overflow-y-auto">
+            {menuGroups.map((group) => (
+              <div key={group.label} className="space-y-2">
+                 <div className="px-5 py-2 flex items-center gap-3">
+                    <group.icon className="h-4 w-4 text-[#ff0071]" />
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">{group.label}</span>
+                 </div>
+                 {group.items.map((item) => {
+                   const isActive = location.pathname === item.path;
+                   return (
+                     <button
+                       key={item.path}
+                       onClick={() => handleNav(item.path)}
+                       className={`flex w-full items-center gap-4 rounded-2xl px-5 py-3 text-[10px] font-black lowercase tracking-widest transition-all ${
+                         isActive
+                           ? "bg-[#ff0071] text-white shadow-xl shadow-[#ff0071]/20"
+                           : "text-slate-400 hover:text-white hover:bg-white/5"
+                       }`}
+                     >
+                       <item.icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-[#ff0071]'}`} />
+                       {item.label}
+                     </button>
+                   );
+                 })}
+              </div>
+            ))}
             <div className="border-t border-white/5 pt-2 mt-2">
               <button
                 onClick={() => { onSignOut(); setMobileOpen(false); }}
