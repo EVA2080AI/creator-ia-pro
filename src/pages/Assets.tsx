@@ -190,16 +190,16 @@ const Assets = () => {
 
   if (authLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin-slow text-primary" />
+      <div className="flex h-screen items-center justify-center bg-[#020203]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#d4ff00]" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0b] text-white selection:bg-[#ff0071]/30">
+    <div className="min-h-screen bg-[#020203] text-white selection:bg-[#d4ff00]/30 selection:text-[#020203]">
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-accent/5 blur-[150px]" />
+        <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-[#d4ff00]/5 blur-[150px]" />
       </div>
 
       <AppHeader userId={user?.id} onSignOut={signOut} />
@@ -207,15 +207,15 @@ const Assets = () => {
       <main className="relative z-10 mx-auto max-w-6xl px-6 py-8">
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-10">
           <div className="space-y-4">
-            <Badge className="bg-[#ff0071]/10 text-[#ff0071] border-transparent font-bold px-3 py-1 rounded-full text-[10px] tracking-widest uppercase">
-              asset_nexus_v7.0
+            <Badge className="bg-[#d4ff00]/10 text-[#d4ff00] border-transparent font-black px-3 py-1 rounded-full text-[10px] tracking-widest uppercase">
+              asset_nexus_v8.0
             </Badge>
-            <h1 className="text-5xl font-black text-white tracking-tighter lowercase leading-none">mi_biblioteca_<span className="text-[#ff0071]">industrial</span></h1>
-            <p className="text-slate-400 font-medium max-w-md lowercase leading-relaxed">tus generaciones guardadas, recursos curados y activos de marca persistentes.</p>
+            <h1 className="text-5xl font-black text-white tracking-tighter lowercase leading-none">mi_biblioteca_<span className="text-[#d4ff00]">industrial</span></h1>
+            <p className="text-slate-400 font-bold max-w-md lowercase leading-relaxed">tus generaciones guardadas, recursos curados y activos de marca persistentes.</p>
           </div>
           <Button 
             onClick={() => setIsImportOpen(true)}
-            className="bg-[#ff0071] text-white hover:bg-[#e60066] rounded-2xl gap-3 font-bold lowercase h-12 px-8 shadow-2xl shadow-[#ff0071]/20 transition-all active:scale-95"
+            className="bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] rounded-2xl gap-3 font-black lowercase h-12 px-8 shadow-2xl shadow-[#d4ff00]/20 transition-all active:scale-95"
           >
             <Plus className="h-4 w-4" />
             importar_nuevo_recurso
@@ -224,12 +224,12 @@ const Assets = () => {
 
         <div className="mb-8 flex flex-col sm:flex-row items-center gap-4">
           <div className="relative flex-1 w-full group">
-            <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500 group-hover:text-[#ff0071] transition-colors" />
+            <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500 group-hover:text-[#d4ff00] transition-colors" />
             <Input
               placeholder="buscar por prompt o tags..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-white/5 border-white/5 pl-12 rounded-2xl h-14 text-white placeholder:text-slate-600 focus:ring-[#ff0071]/20 focus:border-[#ff0071]/40 font-bold transition-all"
+              className="bg-white/5 border-white/5 pl-12 rounded-2xl h-14 text-white placeholder:text-slate-600 focus:ring-[#d4ff00]/20 focus:border-[#d4ff00]/40 font-black transition-all lowercase"
             />
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -238,22 +238,22 @@ const Assets = () => {
               onClick={() => {
                 toast.info("Genius Search interpretando: '" + search + "'");
               }}
-              className="h-14 px-6 rounded-2xl bg-white/5 text-slate-300 hover:bg-white/[0.08] hover:text-white border-white/5 font-bold lowercase gap-3 shadow-2xl transition-all"
+              className="h-14 px-6 rounded-2xl bg-white/5 text-slate-300 hover:bg-white/[0.08] hover:text-white border-white/5 font-black lowercase gap-3 shadow-2xl transition-all"
               disabled={!search}
             >
-              <Sparkles className="h-4 w-4 text-[#ff0071]" />
+              <Sparkles className="h-4 w-4 text-[#d4ff00]" />
               genius_search
             </Button>
             <Select value={selectedSpace} onValueChange={setSelectedSpace}>
-              <SelectTrigger className="w-full sm:w-[220px] rounded-2xl bg-white/5 border-white/5 h-14 text-xs font-black lowercase text-slate-400 focus:ring-[#ff0071]/20">
+              <SelectTrigger className="w-full sm:w-[220px] rounded-2xl bg-white/5 border-white/5 h-14 text-xs font-black lowercase text-slate-400 focus:ring-[#d4ff00]/20">
                 <Layers className="mr-3 h-4 w-4 text-slate-500" />
                 <SelectValue placeholder="filtrar por space" />
               </SelectTrigger>
-              <SelectContent className="rounded-2xl border-white/5 bg-[#0a0a0b] text-white">
-                <SelectItem value="all" className="text-xs font-bold lowercase hover:bg-white/5">todos los espacios</SelectItem>
-                <SelectItem value="none" className="text-xs font-bold lowercase hover:bg-white/5">sin espacio asignando</SelectItem>
+              <SelectContent className="rounded-2xl border-white/5 bg-[#020203] text-white">
+                <SelectItem value="all" className="text-xs font-black lowercase hover:bg-white/5">todos los espacios</SelectItem>
+                <SelectItem value="none" className="text-xs font-black lowercase hover:bg-white/5">sin espacio asignando</SelectItem>
                 {spaces.map(s => (
-                  <SelectItem key={s.id} value={s.id} className="text-xs font-bold lowercase hover:bg-white/5">{s.name}</SelectItem>
+                  <SelectItem key={s.id} value={s.id} className="text-xs font-black lowercase hover:bg-white/5">{s.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -262,11 +262,11 @@ const Assets = () => {
               onClick={() => setFilterFav(!filterFav)}
               className={`h-14 px-8 rounded-2xl font-black lowercase transition-all duration-500 ${
                 filterFav 
-                  ? "bg-[#ff0071] text-white hover:bg-[#e60066] border-transparent shadow-xl shadow-[#ff0071]/20" 
+                  ? "bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] border-transparent shadow-xl shadow-[#d4ff00]/20" 
                   : "bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
               }`}
             >
-              <Star className={`mr-3 h-4 w-4 ${filterFav ? "fill-white" : "text-[#ff0071]"}`} />
+              <Star className={`mr-3 h-4 w-4 ${filterFav ? "fill-[#020203]" : "text-[#d4ff00]"}`} />
               favoritos
             </Button>
           </div>
@@ -274,13 +274,13 @@ const Assets = () => {
 
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin-slow text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#d4ff00]" />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="flex h-64 flex-col items-center justify-center text-muted-foreground">
-            <ImageOff className="mb-4 h-12 w-12 opacity-40" />
-            <p className="text-lg font-medium">
-              {search || filterFav ? "Sin resultados" : "Tu biblioteca está vacía"}
+          <div className="flex h-64 flex-col items-center justify-center text-slate-500">
+            <ImageOff className="mb-4 h-12 w-12 opacity-20" />
+            <p className="text-lg font-black lowercase tracking-tight">
+              {search || filterFav ? "sin resultados" : "tu biblioteca está vacía"}
             </p>
             <p className="text-sm">
               {search || filterFav
@@ -293,7 +293,7 @@ const Assets = () => {
             {filtered.map((asset) => (
               <div
                 key={asset.id}
-                className="group relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-white/5 backdrop-blur-3xl shadow-2xl transition-all hover:bg-white/[0.08] hover:border-[#ff0071]/30 hover:-translate-y-2 duration-500"
+                className="group relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-[#080809]/60 backdrop-blur-3xl shadow-2xl transition-all hover:bg-white/[0.08] hover:border-[#d4ff00]/30 hover:-translate-y-2 duration-500"
               >
                 <div className="aspect-square relative overflow-hidden">
                   <img
@@ -302,7 +302,7 @@ const Assets = () => {
                     className="h-full w-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
                     loading="lazy"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0b] via-transparent to-transparent opacity-80 group-hover:opacity-40 transition-opacity" />
+                   <div className="absolute inset-0 bg-gradient-to-t from-[#020203] via-transparent to-transparent opacity-80 group-hover:opacity-40 transition-opacity" />
                 </div>
 
                 <div className="absolute inset-0 flex flex-col justify-between bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3">
@@ -313,9 +313,9 @@ const Assets = () => {
                       className="h-8 w-8 bg-card/80 backdrop-blur-sm"
                       onClick={() => toggleFav(asset.id, asset.is_favorite)}
                     >
-                      <Heart
+                       <Heart
                         className={`h-4 w-4 ${
-                          asset.is_favorite ? "fill-gold text-gold" : "text-foreground"
+                          asset.is_favorite ? "fill-[#d4ff00] text-[#d4ff00]" : "text-white"
                         }`}
                       />
                     </Button>
@@ -373,36 +373,36 @@ const Assets = () => {
         )}
         {/* Import Dialog */}
         <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
-          <DialogContent className="bg-white border-slate-50 sm:max-w-[425px] rounded-[3rem] !pt-12">
+          <DialogContent className="bg-[#020203] border-white/10 sm:max-w-[425px] rounded-[3rem] !pt-12 text-white">
             <DialogHeader>
-              <DialogTitle className="text-3xl font-bold text-slate-900 tracking-tight lowercase">importar_recurso</DialogTitle>
-              <DialogDescription className="text-slate-400 font-medium lowercase pt-2 leading-relaxed">
+              <DialogTitle className="text-3xl font-black text-white tracking-tighter lowercase">importar_recurso</DialogTitle>
+              <DialogDescription className="text-slate-500 font-bold lowercase pt-2 leading-relaxed">
                 guarda activos externos en tu biblioteca para usarlos en el estudio. la ia extraerá la paleta de colores automáticamente.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-6 py-6 lowercase">
               <div className="space-y-2.5">
-                <Label className="text-[10px] uppercase tracking-[0.15em] font-bold text-slate-400 pl-1">url del activo</Label>
+                <Label className="text-[10px] uppercase tracking-[0.15em] font-black text-slate-600 pl-1">url del activo</Label>
                 <div className="relative">
-                  <Link className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-300" />
+                  <Link className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-700" />
                   <Input
                     value={importUrl}
                     onChange={(e) => setImportUrl(e.target.value)}
                     placeholder="https://ejemplo.com/imagen.png"
-                    className="pl-12 rounded-2xl border-slate-50 bg-slate-50/50 h-13 focus:ring-[#ff0071]/10 font-medium shadow-sm"
+                    className="pl-12 rounded-2xl border-white/5 bg-white/5 h-13 focus:ring-[#d4ff00]/10 font-bold shadow-sm"
                   />
                 </div>
               </div>
               <div className="space-y-2.5">
-                <Label className="text-[10px] uppercase tracking-[0.15em] font-bold text-slate-400 pl-1">asignar a space</Label>
+                <Label className="text-[10px] uppercase tracking-[0.15em] font-black text-slate-600 pl-1">asignar a space</Label>
                 <Select value={importSpace} onValueChange={setImportSpace}>
-                  <SelectTrigger className="rounded-2xl border-slate-50 bg-slate-50/50 h-13 focus:ring-[#ff0071]/10 font-medium lowercase shadow-sm">
+                  <SelectTrigger className="rounded-2xl border-white/5 bg-white/5 h-13 focus:ring-[#d4ff00]/10 font-bold lowercase shadow-sm text-slate-400">
                     <SelectValue placeholder="selecciona un espacio (opcional)" />
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl border-slate-50 bg-white">
-                    <SelectItem value="none_direct" className="lowercase">sin espacio asignado</SelectItem>
+                  <SelectContent className="rounded-2xl border-white/5 bg-[#020203] text-white">
+                    <SelectItem value="none_direct" className="lowercase font-bold">sin espacio asignado</SelectItem>
                     {spaces.map(s => (
-                      <SelectItem key={s.id} value={s.id} className="lowercase">{s.name}</SelectItem>
+                      <SelectItem key={s.id} value={s.id} className="lowercase font-bold">{s.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -412,14 +412,14 @@ const Assets = () => {
                <Button 
                 variant="ghost" 
                 onClick={() => setIsImportOpen(false)}
-                className="rounded-2xl font-bold lowercase text-slate-400 hover:bg-slate-50 px-6 h-13"
+                className="rounded-2xl font-black lowercase text-slate-500 hover:bg-white/5 px-6 h-13"
               >
                 cancelar
               </Button>
               <Button 
                 onClick={handleImport}
                 disabled={importing || !importUrl}
-                className="bg-[#ff0071] text-white hover:bg-[#e60066] rounded-2xl h-13 px-8 font-bold lowercase shadow-xl shadow-[#ff0071]/20 active:scale-95 transition-all"
+                className="bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] rounded-2xl h-13 px-8 font-black lowercase shadow-2xl shadow-[#d4ff00]/20 active:scale-95 transition-all"
               >
                 {importing ? <Loader2 className="h-5 w-5 animate-spin" /> : (
                   <div className="flex items-center gap-2">

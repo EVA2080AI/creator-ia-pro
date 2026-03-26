@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import Peer, { MediaConnection, DataConnection } from "peerjs";
 import { QRCodeSVG } from "qrcode.react";
 import { Monitor, Smartphone, Video, Copy, Maximize2, X, ArrowLeft } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function ShareScreen() {
@@ -169,90 +170,91 @@ export default function ShareScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 lowercase font-sans">
+    <div className="min-h-screen bg-[#020203] text-white selection:bg-[#d4ff00]/30 selection:text-[#020203] lowercase font-sans">
       <AppHeader userId={user?.id} onSignOut={signOut} />
       
       <main className="mx-auto max-w-4xl px-4 py-8">
-        <div className="mb-6 flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} aria-label="volver al dashboard" className="hover:bg-slate-50 rounded-xl">
+        <div className="mb-6 flex items-center gap-4">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} aria-label="volver al dashboard" className="hover:bg-white/5 rounded-xl text-slate-400 hover:text-white">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight text-slate-900">sharescreen <span className="text-[#ff0071]">pro</span></h1>
-            <p className="text-sm font-medium text-slate-400">extiende tu espacio de trabajo a cualquier dispositivo p2p</p>
+          <div className="space-y-1">
+             <Badge className="bg-[#d4ff00]/10 text-[#d4ff00] border-transparent font-black px-3 py-0.5 rounded-full text-[9px] tracking-widest uppercase mb-1">p2p_nexus_v8.0</Badge>
+             <h1 className="text-4xl font-black tracking-tighter text-white">sharescreen_<span className="text-[#d4ff00]">pro</span></h1>
+             <p className="text-sm font-bold text-slate-500 lowercase">extiende tu espacio de trabajo a cualquier dispositivo p2p</p>
           </div>
         </div>
 
         {/* MODO SELECTOR */}
         {!mode ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-            <button onClick={initHost} className="flex flex-col items-center gap-6 p-10 rounded-[2.5rem] border border-slate-100 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.02)] hover:border-[#ff0071]/20 hover:shadow-2xl hover:shadow-[#ff0071]/5 transition-all cursor-pointer group">
-              <div className="w-16 h-16 rounded-2xl bg-[#ff0071]/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm shadow-[#ff0071]/5">
-                <Monitor className="h-8 w-8 text-[#ff0071]" />
+            <button onClick={initHost} className="flex flex-col items-center gap-6 p-10 rounded-[2.5rem] border border-white/5 bg-[#080809]/60 shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-[#d4ff00]/20 hover:shadow-2xl hover:shadow-[#d4ff00]/5 transition-all cursor-pointer group">
+              <div className="w-16 h-16 rounded-2xl bg-[#d4ff00]/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl shadow-[#d4ff00]/10">
+                <Monitor className="h-8 w-8 text-[#d4ff00]" />
               </div>
               <div className="text-center">
-                <h3 className="text-2xl font-bold text-slate-800">modo host <span className="text-[10px] bg-[#ff0071]/10 text-[#ff0071] px-3 py-1 rounded-full ml-2 lowercase font-bold tracking-tight">1 crédito</span></h3>
-                <p className="text-sm text-slate-400 font-medium mt-3 leading-relaxed">compartir pantalla desde este dispositivo. genera un código para el espectador.</p>
+                <h3 className="text-2xl font-black text-white">modo host <span className="text-[10px] bg-[#d4ff00]/10 text-[#d4ff00] px-3 py-1 rounded-full ml-2 lowercase font-black tracking-tight">1 crédito</span></h3>
+                <p className="text-sm text-slate-500 font-bold mt-3 leading-relaxed">compartir pantalla desde este dispositivo. genera un código para el espectador.</p>
               </div>
             </button>
-            <button onClick={initViewer} className="flex flex-col items-center gap-6 p-10 rounded-[2.5rem] border border-slate-100 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.02)] hover:border-[#ff0071]/20 hover:shadow-2xl hover:shadow-[#ff0071]/5 transition-all cursor-pointer group">
-               <div className="w-16 h-16 rounded-2xl bg-slate-900/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
-                <Smartphone className="h-8 w-8 text-slate-900" />
+            <button onClick={initViewer} className="flex flex-col items-center gap-6 p-10 rounded-[2.5rem] border border-white/5 bg-[#080809]/60 shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-[#d4ff00]/20 hover:shadow-2xl hover:shadow-[#d4ff00]/5 transition-all cursor-pointer group">
+               <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
+                <Smartphone className="h-8 w-8 text-white" />
               </div>
               <div className="text-center">
-                <h3 className="text-2xl font-bold text-slate-800">modo viewer <span className="text-[10px] bg-slate-100 text-slate-400 px-3 py-1 rounded-full ml-2 lowercase font-bold tracking-tight">gratis</span></h3>
-                <p className="text-sm text-slate-400 font-medium mt-3 leading-relaxed">ver la pantalla de otro dispositivo. requiere ingresar el código del host.</p>
+                <h3 className="text-2xl font-black text-white">modo viewer <span className="text-[10px] bg-white/10 text-slate-500 px-3 py-1 rounded-full ml-2 lowercase font-black tracking-tight">gratis</span></h3>
+                <p className="text-sm text-slate-500 font-bold mt-3 leading-relaxed">ver la pantalla de otro dispositivo. requiere ingresar el código del host.</p>
               </div>
             </button>
           </div>
         ) : mode === "host" ? (
           /* MODO HOST PANEL */
-          <div className="max-w-md mx-auto p-6 rounded-3xl border border-border bg-card node-shadow mt-10 space-y-6">
-            <div className="flex justify-between items-center border-b border-border pb-4">
-              <h2 className="text-xl font-bold text-foreground">Panel de Emisión</h2>
-              <span className="text-xs font-semibold px-3 py-1 bg-primary/10 text-primary rounded-full">{status}</span>
+          <div className="max-w-md mx-auto p-8 rounded-[2.5rem] border border-white/10 bg-[#080809]/80 backdrop-blur-3xl shadow-2xl mt-10 space-y-6">
+            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <h2 className="text-xl font-black text-white lowercase">panel_emisión</h2>
+              <span className="text-[10px] font-black px-3 py-1 bg-[#d4ff00]/10 text-[#d4ff00] rounded-full uppercase tracking-widest">{status}</span>
             </div>
             
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">1. Inicia la captura de pantalla de la ventana que deseas compartir.</p>
-              <Button onClick={startSharing} disabled={!!streamRef.current} className="w-full bg-primary text-primary-foreground hover:bg-primary/90 gap-2 h-12 rounded-xl">
-                <Video className="h-5 w-5" /> {streamRef.current ? "Grabando pantalla" : "Iniciar Captura"}
+              <p className="text-xs text-slate-500 font-bold">1. inicia la captura de pantalla de la ventana que deseas compartir.</p>
+              <Button onClick={startSharing} disabled={!!streamRef.current} className="w-full bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] gap-2 h-14 rounded-2xl font-black lowercase shadow-2xl shadow-[#d4ff00]/10">
+                <Video className="h-5 w-5" /> {streamRef.current ? "grabando_pantalla" : "iniciar_captura"}
               </Button>
             </div>
 
             {peerId && (
-              <div className="p-6 rounded-2xl border border-primary/20 bg-primary/5 flex flex-col items-center gap-4 mt-8 animate-in fade-in zoom-in duration-300">
-                <p className="text-sm font-medium text-center text-primary">2. Comparte este código o escanea el QR en el dispositivo Viewer:</p>
-                <div className="p-3 bg-white rounded-xl shadow-sm">
+              <div className="p-6 rounded-2xl border border-[#d4ff00]/20 bg-[#d4ff00]/5 flex flex-col items-center gap-4 mt-8 animate-in fade-in zoom-in duration-300">
+                <p className="text-[10px] font-black text-center text-[#d4ff00] uppercase tracking-widest">2. comparte este código o escanea el qr:</p>
+                <div className="p-3 bg-white rounded-2xl shadow-sm">
                   <QRCodeSVG value={peerId} size={160} />
                 </div>
                 <div className="flex items-center gap-2 mt-2 w-full">
-                  <code className="flex-1 text-center py-3 bg-background rounded-xl font-mono text-2xl font-bold text-foreground border border-border">{peerId}</code>
-                  <Button variant="outline" size="icon" onClick={copyCode} className="h-14 w-14 rounded-xl shrink-0"><Copy className="h-5 w-5" /></Button>
+                  <code className="flex-1 text-center py-3 bg-[#020203] rounded-2xl font-mono text-2xl font-black text-white border border-white/10">{peerId}</code>
+                  <Button variant="outline" size="icon" onClick={copyCode} className="h-14 w-14 rounded-2xl shrink-0 border-white/10 hover:bg-white/5 active:scale-95 transition-all"><Copy className="h-5 w-5" /></Button>
                 </div>
               </div>
             )}
           </div>
         ) : (
           /* MODO VIEWER PANEL */
-          <div className="max-w-md mx-auto p-6 rounded-3xl border border-border bg-card node-shadow mt-10 space-y-6">
-            <div className="flex justify-between items-center border-b border-border pb-4">
-              <h2 className="text-xl font-bold text-foreground">Receptor</h2>
-              <span className="text-xs font-semibold px-3 py-1 bg-accent/10 text-accent rounded-full">{status}</span>
+          <div className="max-w-md mx-auto p-8 rounded-[2.5rem] border border-white/10 bg-[#080809]/80 backdrop-blur-3xl shadow-2xl mt-10 space-y-6">
+            <div className="flex justify-between items-center border-b border-white/5 pb-4">
+              <h2 className="text-xl font-black text-white lowercase">receptor</h2>
+              <span className="text-[10px] font-black px-3 py-1 bg-blue-500/10 text-blue-500 rounded-full uppercase tracking-widest">{status}</span>
             </div>
             <div className="space-y-6 pt-2">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Código de Conexión del Host</label>
+                <label className="text-[10px] font-black text-slate-600 uppercase tracking-widest pl-1">código_del_host</label>
                 <Input 
-                  placeholder="Ej: A1B2C3" 
+                  placeholder="A1B2C3" 
                   value={targetId}
                   onChange={e => setTargetId(e.target.value.toUpperCase())}
                   maxLength={6}
-                  className="font-mono uppercase text-center text-2xl h-16 rounded-xl border-border bg-background focus:ring-accent"
+                  className="font-mono uppercase text-center text-2xl h-16 rounded-2xl border-white/5 bg-white/5 focus:ring-[#d4ff00]/20 text-white"
                 />
               </div>
-              <Button onClick={connectToHost} className="w-full h-12 rounded-xl bg-accent text-accent-foreground hover:bg-accent/90 text-md font-semibold">🔗 Conectar al Host</Button>
-              <p className="text-xs text-center text-muted-foreground">Para un streaming fluido, asegúrate de estar en la misma red Wi-Fi o con buena señal 4G/5G.</p>
+              <Button onClick={connectToHost} className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-[#d4ff00] hover:text-[#020203] hover:border-[#d4ff00] text-sm font-black lowercase transition-all active:scale-95 shadow-2xl shadow-[#d4ff00]/5">🔗 conectar_al_host</Button>
+              <p className="text-[10px] text-center text-slate-500 font-bold leading-relaxed">transmisión fluida garantizada en redes de alta velocidad.</p>
             </div>
           </div>
         )}
@@ -260,12 +262,12 @@ export default function ShareScreen() {
         {/* PANTALLA COMPLETA RECIBIENDO STREAM */}
         {mode === "viewer" && isReceiving && (
           <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center animate-in fade-in duration-500">
-            <div className="absolute top-4 right-4 z-50 flex items-center gap-3 opacity-20 hover:opacity-100 transition-opacity p-2 bg-black/60 backdrop-blur-md rounded-2xl">
-               <span className="text-xs font-mono text-white/50 px-2">{stats}</span>
-               <Button variant="secondary" size="icon" onClick={() => videoRef.current?.requestFullscreen()} className="rounded-xl"><Maximize2 className="h-4 w-4" /></Button>
-               <Button variant="destructive" size="icon" onClick={stopConnection} className="rounded-xl"><X className="h-4 w-4" /></Button>
-            </div>
-            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-contain pointer-events-none" />
+             <div className="absolute top-4 right-4 z-50 flex items-center gap-3 opacity-20 hover:opacity-100 transition-opacity p-2 bg-[#020203]/60 backdrop-blur-md rounded-2xl border border-white/10">
+                <span className="text-[10px] font-black font-mono text-[#d4ff00] px-2">{stats}</span>
+                <Button variant="ghost" size="icon" onClick={() => videoRef.current?.requestFullscreen()} className="rounded-xl hover:bg-white/5"><Maximize2 className="h-4 w-4" /></Button>
+                <Button variant="destructive" size="icon" onClick={stopConnection} className="rounded-xl"><X className="h-4 w-4" /></Button>
+             </div>
+             <video ref={videoRef} autoPlay playsInline className="w-full h-full object-contain pointer-events-none" />
           </div>
         )}
 

@@ -3,7 +3,7 @@ import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
 import type { CanvasNodeData } from "@/store/useCanvasStore";
 import { useCanvasStore } from "@/store/useCanvasStore";
-import { Image, Video, Loader2, AlertTriangle, Trash2, Play } from "lucide-react";
+import { Image, Video, Loader2, AlertTriangle, Trash2, Play, Sparkles } from "lucide-react";
 
 function AINodeComponent({ data, id }: NodeProps) {
   const nodeData = data as unknown as CanvasNodeData;
@@ -26,8 +26,9 @@ function AINodeComponent({ data, id }: NodeProps) {
   return (
     <div className="relative">
       {/* Label above node */}
-      <div className="absolute -top-6 left-0 text-xs font-medium text-muted-foreground truncate max-w-[260px]">
-        {isImage ? "Image" : "Video"} • {label}
+      {/* Label above node */}
+      <div className="absolute -top-6 left-0 text-[10px] font-black text-slate-500 truncate max-w-[260px] uppercase tracking-widest">
+        {isImage ? "industrial_image" : "industrial_video"} // {label}
       </div>
 
       {/* Input handle (left) */}
@@ -46,34 +47,34 @@ function AINodeComponent({ data, id }: NodeProps) {
 
       <div
         className={`
-          group relative w-[280px] rounded-2xl border glass overflow-hidden node-shadow transition-all duration-300
-          ${isLoading ? "border-primary/40 animate-pulse-glow" : ""}
-          ${isError ? "border-destructive/50" : ""}
-          ${isReady && !isSelected ? "border-white/5 hover:border-primary/30" : ""}
-          ${isSelected ? "border-primary ring-4 ring-primary/10 shadow-2xl shadow-primary/20" : ""}
+          group relative w-[280px] rounded-[1.8rem] border bg-[#080809]/80 backdrop-blur-3xl overflow-hidden shadow-2xl transition-all duration-500
+          ${isLoading ? "border-[#d4ff00]/40 shadow-[#d4ff00]/5" : ""}
+          ${isError ? "border-red-500/50" : ""}
+          ${isReady && !isSelected ? "border-white/5 hover:border-[#d4ff00]/30" : ""}
+          ${isSelected ? "border-[#d4ff00] ring-4 ring-[#d4ff00]/10 shadow-2xl shadow-[#d4ff00]/20 scale-[1.02]" : ""}
         `}
       >
         {/* Header bar */}
-        <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3 bg-gradient-to-r from-primary/10 to-transparent backdrop-blur-xl">
+        <div className="flex items-center gap-3 border-b border-white/5 px-4 py-4 bg-gradient-to-r from-[#d4ff00]/5 to-transparent backdrop-blur-3xl">
           <div
-            className={`flex h-7 w-7 items-center justify-center rounded-xl shadow-inner shadow-white/5 ${
+            className={`flex h-8 w-8 items-center justify-center rounded-xl shadow-inner border border-white/5 transition-all group-hover:bg-[#d4ff00] group-hover:text-[#020203] duration-500 ${
               isImage
-                ? "bg-primary/20 text-primary"
-                : "bg-accent/20 text-accent"
+                ? "bg-[#d4ff00]/10 text-[#d4ff00]"
+                : "bg-blue-500/10 text-blue-500"
             }`}
           >
             {isImage ? (
-              <Image className="h-3.5 w-3.5" />
+              <Image className="h-4 w-4" />
             ) : (
-              <Video className="h-3.5 w-3.5" />
+              <Video className="h-4 w-4" />
             )}
           </div>
           <div className="flex flex-col flex-1 min-w-0">
-            <span className="truncate text-[11px] font-black text-foreground uppercase tracking-tighter leading-none">
+            <span className="truncate text-[11px] font-black text-white uppercase tracking-tighter leading-none">
               {nodeData.name || (isImage ? "Imagen IA" : "Video IA")}
             </span>
-            <span className="text-[8px] text-muted-foreground uppercase tracking-widest opacity-50">
-              V4.5 Industrial Engine
+            <span className="text-[7px] text-slate-500 uppercase tracking-widest mt-1.5 font-black">
+              Nebula Engine V8.0
             </span>
           </div>
           
@@ -93,14 +94,14 @@ function AINodeComponent({ data, id }: NodeProps) {
         {/* Content area */}
         <div className="relative aspect-[4/3] flex items-center justify-center bg-canvas/30">
           {isLoading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/40 backdrop-blur-[2px]">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#020203]/40 backdrop-blur-[4px]">
               <div className="relative">
-                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
-                <Loader2 className="relative h-10 w-10 animate-spin-slow text-primary" />
+                <div className="absolute inset-0 bg-[#d4ff00]/20 blur-2xl rounded-full animate-pulse" />
+                <Loader2 className="relative h-10 w-10 animate-spin text-[#d4ff00]" />
               </div>
               <div className="text-center">
-                <span className="text-xs font-bold text-foreground block">Procesando...</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1 opacity-60">Motor Generativo V3</span>
+                <span className="text-[10px] font-black text-white block lowercase tracking-widest">procesando_activos...</span>
+                <span className="text-[8px] text-slate-500 uppercase tracking-[0.3em] mt-2 block font-black">Flux Engine V8</span>
               </div>
             </div>
           )}
@@ -140,11 +141,11 @@ function AINodeComponent({ data, id }: NodeProps) {
         </div>
 
         {/* Bottom badge bar */}
-        <div className="flex items-center gap-1 border-t border-border px-3 py-1.5">
-          <span className="flex h-4 w-4 items-center justify-center rounded border border-gold-muted bg-gold-muted/30 text-gold">
-            <Image className="h-2.5 w-2.5" />
+        <div className="flex items-center gap-2 border-t border-white/5 px-4 py-2.5 bg-white/[0.02]">
+          <span className="flex h-5 w-5 items-center justify-center rounded-lg border border-white/5 bg-white/5 text-slate-500 group-hover:text-[#d4ff00] transition-colors">
+            <Sparkles className="h-3 w-3" />
           </span>
-          <span className="text-[10px] text-muted-foreground font-mono truncate flex-1">
+          <span className="text-[9px] text-slate-500 font-bold truncate flex-1 lowercase tracking-tight">
             {nodeData.prompt.slice(0, 35)}{nodeData.prompt.length > 35 ? "…" : ""}
           </span>
         </div>

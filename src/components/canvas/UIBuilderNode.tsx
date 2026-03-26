@@ -23,7 +23,7 @@ const UIRenderer = ({ element }: { element: any }) => {
       return (
         <div 
           style={styleObj} 
-          className={`flex flex-col gap-2 overflow-hidden ${isCard ? 'p-4 rounded-xl border border-white/10 bg-white/5 shadow-xl' : ''}`}
+          className={`flex flex-col gap-2 overflow-hidden ${isCard ? 'p-6 rounded-[2rem] border border-white/5 bg-white/5 shadow-2xl backdrop-blur-3xl' : ''}`}
         >
           {children?.map((child: any, i: number) => (
             <UIRenderer key={i} element={child} />
@@ -44,7 +44,7 @@ const UIRenderer = ({ element }: { element: any }) => {
       return (
         <button 
           style={styleObj} 
-          className="rounded-xl px-4 py-2 bg-primary/20 border border-primary/30 text-primary text-[10px] font-bold uppercase tracking-wider hover:bg-primary/30 transition-all active:scale-95"
+          className="rounded-2xl px-5 py-2.5 bg-[#d4ff00] text-[#020203] border border-[#d4ff00] text-[10px] font-black uppercase tracking-widest hover:bg-[#c4eb00] transition-all active:scale-95 shadow-lg shadow-[#d4ff00]/10"
         >
           {content}
         </button>
@@ -79,8 +79,8 @@ function UIBuilderNodeComponent({ data, id }: NodeProps) {
 
   return (
     <div className="relative">
-      <div className="absolute -top-6 left-0 text-xs font-medium text-muted-foreground truncate max-w-[400px]">
-        UI Design • {nodeData.prompt}
+      <div className="absolute -top-6 left-0 text-[10px] font-black text-slate-500 truncate max-w-[400px] uppercase tracking-widest">
+        UI_ENGINE_V8.0 // {nodeData.prompt}
       </div>
 
       <Handle type="target" position={Position.Left} className="!-left-[6px]" />
@@ -88,24 +88,24 @@ function UIBuilderNodeComponent({ data, id }: NodeProps) {
 
       <div
         className={`
-          group relative ${nodeWidth} rounded-2xl border glass overflow-hidden node-shadow transition-all duration-300
-          ${isLoading ? "border-primary/40 animate-pulse-glow" : ""}
-          ${isError ? "border-destructive/50" : ""}
-          ${isReady && !isSelected ? "border-white/5 hover:border-primary/30" : ""}
-          ${isSelected ? "border-primary ring-4 ring-primary/10 shadow-2xl shadow-primary/20" : ""}
+          group relative ${nodeWidth} rounded-[2rem] border bg-[#080809]/80 backdrop-blur-3xl overflow-hidden shadow-3xl transition-all duration-500
+          ${isLoading ? "border-[#d4ff00]/40 shadow-[#d4ff00]/5" : ""}
+          ${isError ? "border-red-500/50" : ""}
+          ${isReady && !isSelected ? "border-white/5 hover:border-[#d4ff00]/30" : ""}
+          ${isSelected ? "border-[#d4ff00] ring-4 ring-[#d4ff00]/10 shadow-2xl shadow-[#d4ff00]/20 scale-[1.01]" : ""}
         `}
       >
         {/* Header bar */}
-        <div className="flex items-center gap-2 border-b border-white/5 px-4 py-3 bg-gradient-to-r from-primary/10 to-transparent backdrop-blur-xl">
-          <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/20 text-primary shadow-inner shadow-white/5">
-            <Layout className="h-3.5 w-3.5" />
+        <div className="flex items-center gap-3 border-b border-white/5 px-5 py-4 bg-gradient-to-r from-[#d4ff00]/5 to-transparent backdrop-blur-3xl">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#d4ff00]/10 text-[#d4ff00] border border-white/5 shadow-2xl shadow-[#d4ff00]/10 transition-all group-hover:bg-[#d4ff00] group-hover:text-[#020203] duration-500">
+            <Layout className="h-4 w-4" />
           </div>
           <div className="flex flex-col flex-1 min-w-0">
-            <span className="truncate text-[11px] font-black text-foreground uppercase tracking-tighter leading-none">
-              {nodeData.name || `${device} System`}
+            <span className="truncate text-[11px] font-black text-white uppercase tracking-tighter leading-none">
+              {nodeData.name || `${device}_system`}
             </span>
-            <span className="text-[8px] text-muted-foreground uppercase tracking-widest opacity-50">
-              V3.0 Industrial Layout
+            <span className="text-[7px] text-slate-500 uppercase tracking-widest mt-1.5 font-black">
+              Nebula Layout V8.0
             </span>
           </div>
           
@@ -128,14 +128,14 @@ function UIBuilderNodeComponent({ data, id }: NodeProps) {
         {/* Content area */}
         <div className="relative min-h-[300px] max-h-[600px] overflow-y-auto bg-canvas/30 p-4">
           {isLoading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-background/40 backdrop-blur-[2px]">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#020203]/40 backdrop-blur-[6px]">
               <div className="relative">
-                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
-                <Loader2 className="relative h-10 w-10 animate-spin-slow text-primary" />
+                <div className="absolute inset-0 bg-[#d4ff00]/20 blur-3xl rounded-full animate-pulse" />
+                <Loader2 className="relative h-12 w-12 animate-spin text-[#d4ff00]" />
               </div>
               <div className="text-center">
-                <span className="text-xs font-bold text-foreground block">Dibujando Interfaz...</span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1 opacity-60">IA en progreso</span>
+                <span className="text-[10px] font-black text-white block lowercase tracking-widest">dibujando_interfaz_ecosistema...</span>
+                <span className="text-[8px] text-slate-500 uppercase tracking-[0.3em] mt-3 block font-black">Cybernetic Flow V8</span>
               </div>
             </div>
           )}
@@ -162,12 +162,12 @@ function UIBuilderNodeComponent({ data, id }: NodeProps) {
         </div>
 
         {/* Footer info */}
-        <div className="flex items-center gap-2 border-t border-white/5 px-4 py-2 bg-white/5">
-           <div className="flex h-5 w-5 items-center justify-center rounded bg-gold/10 text-gold">
+        <div className="flex items-center gap-2 border-t border-white/5 px-5 py-3 bg-white/[0.02]">
+           <div className="flex h-5 w-5 items-center justify-center rounded-lg bg-[#d4ff00]/10 text-[#d4ff00]">
               <Sparkles className="h-3 w-3" />
            </div>
-           <span className="text-[10px] text-muted-foreground font-medium truncate flex-1 uppercase tracking-wider">
-             Genedado por Gemini Architecture Pro
+           <span className="text-[9px] text-slate-500 font-black truncate flex-1 uppercase tracking-widest">
+             Genedado por Nebula Architecture V8 Pro
            </span>
         </div>
       </div>

@@ -52,31 +52,31 @@ const Index = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-white overflow-hidden text-slate-900 font-sans">
-      {/* Ambient blurs - Pulse Magenta */}
+    <div className="min-h-screen bg-[#020203] overflow-hidden text-white font-sans selection:bg-[#d4ff00]/30 selection:text-[#020203]">
+      {/* Ambient blurs - Nebula Lime */}
       <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/4 h-[700px] w-[700px] rounded-full bg-[#ff0071]/3 blur-[120px]" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-slate-50 blur-[100px]" />
+        <div className="absolute -top-40 left-1/4 h-[700px] w-[700px] rounded-full bg-[#d4ff00]/5 blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[500px] rounded-full bg-slate-900/20 blur-[100px]" />
       </div>
 
       {/* Nav */}
       <header className="relative z-10 flex items-center justify-between px-8 py-6 sm:px-12">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#ff0071] shadow-xl shadow-[#ff0071]/20">
-            <Sparkles className="h-5 w-5 text-white" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#d4ff00] shadow-2xl shadow-[#d4ff00]/20">
+            <Sparkles className="h-5 w-5 text-[#020203]" />
           </div>
           <div className="flex flex-col">
-            <span className="text-base font-bold text-slate-900 tracking-tight lowercase">
-              creator_ia <span className="text-[#ff0071]">pro</span>
+            <span className="text-base font-black text-white tracking-tight lowercase">
+              nexus<span className="text-[#d4ff00]">_</span>studio
             </span>
-            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">V6.2 Pulse</span>
+            <span className="text-[9px] font-black text-[#d4ff00]/60 uppercase tracking-widest mt-0.5">V8.0 NEBULA</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-slate-400 hover:text-[#ff0071] hover:bg-[#ff0071]/5 hidden sm:flex text-sm font-bold lowercase">
+          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-slate-400 hover:text-[#d4ff00] hover:bg-[#d4ff00]/5 hidden sm:flex text-sm font-black lowercase">
             precios
           </Button>
-          <Button onClick={() => navigate("/auth")} className="bg-[#ff0071] text-white hover:bg-[#e60066] rounded-full px-8 h-12 shadow-xl shadow-[#ff0071]/20 font-bold lowercase tracking-normal active:scale-95 transition-all">
+          <Button onClick={() => navigate("/auth")} className="bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] rounded-full px-8 h-12 shadow-2xl shadow-[#d4ff00]/20 font-black lowercase tracking-normal active:scale-95 transition-all">
             empezar gratis
           </Button>
         </div>
@@ -84,29 +84,29 @@ const Index = () => {
 
       <main className="relative z-10 flex flex-col items-center px-8 pt-24 pb-40">
         {/* Pulse Badge */}
-        <div className="mb-10 flex items-center gap-3 rounded-full border border-slate-100 bg-slate-50/50 px-6 py-2.5 text-[11px] text-slate-500 font-bold lowercase animate-in fade-in slide-in-from-bottom-2 duration-700">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#ff0071] animate-pulse" />
+        <div className="mb-10 flex items-center gap-3 rounded-full border border-white/5 bg-white/5 px-6 py-2.5 text-[11px] text-slate-400 font-black lowercase animate-in fade-in slide-in-from-bottom-2 duration-700">
+          <div className="w-1.5 h-1.5 rounded-full bg-[#d4ff00] animate-pulse shadow-[0_0_8px_#d4ff00]" />
           disponible en windows, macos y android
         </div>
 
         {/* Hero */}
-        <h1 className="max-w-5xl text-center text-6xl font-bold leading-[1.05] tracking-tight animate-in fade-in slide-in-from-bottom-4 duration-1000 md:text-8xl lg:text-9xl text-slate-900 lowercase">
-          crea con <span className="text-[#ff0071]">ia</span>
+        <h1 className="max-w-5xl text-center text-6xl font-black leading-[1.05] tracking-tighter animate-in fade-in slide-in-from-bottom-4 duration-1000 md:text-8xl lg:text-9xl text-white lowercase">
+          crea con <span className="text-[#d4ff00]">ia</span>
           <br />
-          <span className="text-slate-200">sin límites.</span>
+          <span className="text-slate-700">sin límites.</span>
         </h1>
 
-        <p className="mt-10 max-w-2xl text-center text-xl text-slate-400 lowercase font-medium animate-in fade-in slide-in-from-bottom-6 duration-1000 leading-relaxed">
+        <p className="mt-10 max-w-2xl text-center text-xl text-slate-400 lowercase font-bold animate-in fade-in slide-in-from-bottom-6 duration-1000 leading-relaxed tracking-tight">
           genera imágenes, mejora fotos, crea textos de marketing, logos y flows visuales.
-          <strong className="text-slate-900 font-bold"> 12+ herramientas profesionales</strong> en una sola plataforma.
+          <strong className="text-white font-black"> 12+ herramientas profesionales</strong> en una sola plataforma.
         </p>
 
         <div className="mt-12 flex flex-col sm:flex-row gap-5 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <Button onClick={() => navigate("/auth")} size="lg" className="bg-[#ff0071] text-white hover:bg-[#e60066] gap-3 text-lg px-12 rounded-[2rem] h-16 shadow-2xl shadow-[#ff0071]/20 font-bold lowercase active:scale-95 transition-all">
+          <Button onClick={() => navigate("/auth")} size="lg" className="bg-[#d4ff00] text-[#020203] hover:bg-[#c4eb00] gap-3 text-lg px-12 rounded-[2rem] h-16 shadow-2xl shadow-[#d4ff00]/20 font-black lowercase active:scale-95 transition-all">
             crear cuenta gratis
             <ArrowRight className="h-5 w-5" />
           </Button>
-          <Button onClick={() => navigate("/descargar")} size="lg" variant="outline" className="border-slate-100 text-slate-600 hover:bg-slate-50 gap-3 text-lg px-10 rounded-[2rem] h-16 font-bold lowercase shadow-sm transition-all">
+          <Button onClick={() => navigate("/descargar")} size="lg" variant="outline" className="border-white/5 text-white hover:bg-white/5 gap-3 text-lg px-10 rounded-[2rem] h-16 font-black lowercase shadow-sm transition-all focus:ring-0">
             <Download className="h-5 w-5" />
             descargar app
           </Button>
@@ -121,15 +121,15 @@ const Index = () => {
             { value: "3", label: "plataformas" },
           ].map((s) => (
             <div key={s.label} className="text-center group">
-              <p className="text-6xl font-bold text-slate-900 group-hover:text-[#ff0071] transition-colors duration-500">{s.value}</p>
-              <p className="mt-3 text-[10px] text-slate-300 font-bold uppercase tracking-[0.2em]">{s.label}</p>
+              <p className="text-6xl font-black text-white group-hover:text-[#d4ff00] transition-colors duration-500 tracking-tighter">{s.value}</p>
+              <p className="mt-3 text-[10px] text-[#d4ff00]/60 font-black uppercase tracking-[0.2em]">{s.label}</p>
             </div>
           ))}
         </div>
 
         {/* Footer */}
-        <footer className="mt-40 w-full max-w-6xl border-t border-slate-50 pt-10 text-center text-[10px] text-slate-300 font-bold uppercase tracking-[0.2em] space-y-3">
-          <p>© {new Date().getFullYear()} creator ia pro • pulse engine v6.2</p>
+        <footer className="mt-40 w-full max-w-6xl border-t border-white/5 pt-10 text-center text-[10px] text-slate-500 font-black uppercase tracking-[0.3em] space-y-3 pb-20">
+          <p>© {new Date().getFullYear()} nexus studio • nebula v8.0 stable</p>
           <p className="opacity-40">plataforma de ia generativa para creadores del futuro 🚀</p>
         </footer>
        {/* Features Row */}

@@ -41,11 +41,11 @@
     @apply border-white/5;
   }
   body {
-    @apply bg-[#050506] text-white font-sans antialiased selection:bg-[#ff0071]/30;
+    @apply bg-[#050506] text-white font-sans antialiased selection:bg-[#d4ff00]/30;
     font-family: 'Inter', sans-serif;
   }
   *:focus-visible {
-    @apply outline-none ring-2 ring-[#ff0071]/40 ring-offset-2 ring-offset-[#050506];
+    @apply outline-none ring-2 ring-[#d4ff00]/40 ring-offset-2 ring-offset-[#050506];
   }
 }
 
@@ -54,12 +54,12 @@
     @apply bg-[#050506]/80 backdrop-blur-3xl border border-white/5 shadow-2xl;
   }
   
-  .nexus-gradient-magenta {
-    background: linear-gradient(135deg, #ff0071 0%, #e60066 100%);
+  .nexus-gradient-lime {
+    background: linear-gradient(135deg, #d4ff00 0%, #a3c400 100%);
   }
 
   .nexus-text-glow {
-    text-shadow: 0 0 20px rgba(255, 0, 113, 0.5);
+    text-shadow: 0 0 20px rgba(212, 255, 0, 0.5);
   }
 }
 
@@ -68,10 +68,10 @@
   background-color: #050506 !important;
   --xy-edge-stroke-default: #1e293b;
   --xy-edge-stroke-width-default: 2;
-  --xy-edge-stroke-selected-default: #ff0071;
+  --xy-edge-stroke-selected-default: #d4ff00;
   --xy-handle-background-color-default: #1e293b;
   --xy-handle-border-color-default: #050506;
-  --xy-selection-background-color-default: rgba(255, 0, 113, 0.1);
+  --xy-selection-background-color-default: rgba(212, 255, 0, 0.1);
 }
 
 /* Nebula V8.0 Utilities */

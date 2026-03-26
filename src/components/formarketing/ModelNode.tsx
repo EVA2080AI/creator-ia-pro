@@ -124,15 +124,14 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                  onChange={(e) => updatePrompt(e.target.value)}
                  onBlur={(e) => persistChange(e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-xs leading-relaxed text-slate-300 bg-white/5 border border-white/5 p-4 rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#00ff41]/20 border-white/10 transition-all resize-none min-h-[80px] font-bold placeholder:text-slate-800"
+                 className="w-full text-xs leading-relaxed text-slate-300 bg-white/5 border border-white/5 p-4 rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#d4ff00]/20 border-white/10 transition-all resize-none min-h-[80px] font-bold placeholder:text-slate-800"
                  placeholder="nebula prompt engine..."
               />
            </div>
         </div>
       )}
 
-      <Handle type="target" position={Position.Left} className="!w-4 !h-4 !-left-2 !bg-[#020203] !border-4 !border-[#00ff41] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
-      <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-[#00ff41] !border-4 !border-[#020203] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
+      <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-[#d4ff00] !border-4 !border-[#020203] !shadow-2xl !z-20 hover:scale-125 transition-transform" />
     </div>
   );
 };

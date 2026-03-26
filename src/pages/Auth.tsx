@@ -229,7 +229,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-12 gap-3 border-slate-100 bg-white hover:bg-slate-50 rounded-2xl text-xs font-bold lowercase transition-all active:scale-95"
+                    className="h-13 gap-3 border-white/5 bg-white/5 hover:bg-white/10 rounded-2xl text-[10px] font-black text-white lowercase transition-all active:scale-95"
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
