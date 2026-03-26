@@ -54,16 +54,16 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           <button
             onClick={() => navigate("/dashboard")}
             aria-label="ir al inicio"
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity group"
+            className="flex items-center gap-4 hover:opacity-80 transition-opacity group"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff0071] shadow-lg shadow-[#ff0071]/20 group-hover:scale-105 transition-transform">
-              <Sparkles className="h-5 w-5 text-white" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-[#ff0071] shadow-xl shadow-[#ff0071]/20 group-hover:scale-105 transition-transform rotate-0">
+              <Sparkles className="h-6 w-6 text-white" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-sm font-black hidden sm:inline text-white leading-none lowercase tracking-tighter">
+            <div className="flex flex-col text-left">
+              <span className="text-xl font-black hidden sm:inline text-white leading-none tracking-tighter">
                 creator_ia <span className="text-[#ff0071]">pro</span>
               </span>
-              <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1.5 hidden sm:inline">Pulse V7.0_EBONY</span>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2 hidden sm:inline">V7.0 PULSE</span>
             </div>
           </button>
 

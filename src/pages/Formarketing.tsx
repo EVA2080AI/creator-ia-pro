@@ -566,18 +566,18 @@ function FormarketingContent() {
       {/* V7.0 Industrial Pulse Header */}
       <div className="flex h-16 w-full items-center justify-between border-b border-white/5 bg-[#0a0a0b]/80 px-8 backdrop-blur-2xl shrink-0 z-[100]">
          <div className="flex items-center gap-6">
-            <button
-               onClick={() => navigate("/dashboard")}
-               className="flex items-center gap-3.5 hover:opacity-80 transition-opacity group"
-            >
-               <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#ff0071] shadow-2xl shadow-[#ff0071]/20 group-hover:scale-105 transition-transform">
-                  <Rocket className="h-5 w-5 text-white" />
-               </div>
-               <div className="flex flex-col text-left">
-                  <h1 className="text-sm font-black tracking-tighter text-white leading-none lowercase">nexus_studio_v7</h1>
-                  <span className="text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1.5">Pulse_Ebony</span>
-               </div>
-            </button>
+             <button
+                onClick={() => navigate("/dashboard")}
+                className="flex items-center gap-4 hover:opacity-80 transition-opacity group"
+             >
+                <div className="flex h-12 w-12 items-center justify-center rounded-[1.2rem] bg-[#ff0071] shadow-2xl shadow-[#ff0071]/20 group-hover:scale-105 transition-transform">
+                   <Rocket className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex flex-col text-left">
+                   <h1 className="text-xl font-black tracking-tighter text-white leading-none">creator_ia <span className="text-[#ff0071]">pro</span></h1>
+                   <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] mt-2">V7.0 PULSE</span>
+                </div>
+             </button>
             <div className="h-4 w-px bg-white/10 mx-2" />
             <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-xl w-10 h-10 text-slate-500 hover:text-white transition-all">
                <ArrowLeft className="h-4 w-4" />
