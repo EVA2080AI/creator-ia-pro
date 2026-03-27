@@ -44,14 +44,18 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
         {/* Logo */}
         <button
           onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-4 shrink-0 group"
+          className="flex items-center gap-3 shrink-0 group"
         >
-          <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-105 transition-all">
+          <div className="relative w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-all">
             <Sparkles className="w-4.5 h-4.5 text-black" />
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-aether-purple shadow-[0_0_8px_rgba(168,85,247,1)] animate-pulse" />
           </div>
-          <span className="text-xl font-bold text-white tracking-tighter hidden sm:block font-display uppercase">
-            Aether <span className="opacity-40">Evolution</span>
-          </span>
+          <div className="hidden sm:flex flex-col">
+            <span className="text-sm font-bold text-white tracking-tight font-display uppercase leading-none">
+              Creator <span className="text-aether-purple">IA</span> Pro
+            </span>
+            <span className="text-[8px] text-white/20 font-bold uppercase tracking-[0.3em] font-display leading-none mt-0.5">v8.0 Neural Core</span>
+          </div>
         </button>
 
         {/* Desktop Nav */}

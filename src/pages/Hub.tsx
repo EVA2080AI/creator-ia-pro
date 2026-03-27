@@ -281,41 +281,48 @@ const Hub = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050506] text-white">
+    <div className="min-h-screen bg-[#050506] text-white font-sans">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      <main className="pt-14">
-        <div className="max-w-[1400px] mx-auto px-6 py-10">
+      <main className="pt-20">
+        <div className="max-w-[1440px] mx-auto px-8 py-12">
 
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#bd00ff]" />
-              <span className="text-xs font-semibold text-[#bd00ff] uppercase tracking-widest">HUB DE PLANTILLAS</span>
+          <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
+              </div>
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display">
+                Proyectos & <span className="brand-gradient-text">Plantillas</span>
+              </h1>
+              <p className="text-sm text-white/40 font-medium">
+                {TEMPLATES.length} plantillas profesionales — 1 clic para abrir en el Studio.
+              </p>
             </div>
-            <h1 className="text-3xl font-black text-white tracking-tight mb-2">
-              Proyectos & <span className="brand-gradient-text">Plantillas</span>
-            </h1>
-            <p className="text-sm text-white/45">
-              {TEMPLATES.length} plantillas profesionales → 1 clic para abrir en el Studio.
-            </p>
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold text-white/30 uppercase tracking-widest font-display">
+                {filtered.length} resultados
+              </div>
+            </div>
           </div>
 
-          {/* Category Filter */}
-          <div className="flex gap-2 mb-8 overflow-x-auto no-scrollbar pb-1">
+          {/* Category Filter — Tailwind UI style pill tabs */}
+          <div className="flex gap-2 mb-10 overflow-x-auto no-scrollbar pb-1">
             {TEMPLATE_CATEGORIES.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
+                className={`px-5 py-2.5 rounded-2xl text-[10px] font-bold whitespace-nowrap transition-all duration-300 font-display uppercase tracking-widest ${
                   category === cat
-                    ? "bg-gradient-to-r from-[#bd00ff] to-[#ff0071] text-white shadow-lg shadow-[#bd00ff]/20"
-                    : "bg-white/5 border border-white/8 text-white/50 hover:text-white hover:bg-white/8"
+                    ? "bg-white text-black shadow-[0_8px_24px_rgba(255,255,255,0.1)]"
+                    : "bg-white/[0.03] border border-white/5 text-white/30 hover:text-white/60 hover:bg-white/5"
                 }`}
               >
                 {cat}
                 {cat !== "Todos" && (
-                  <span className="ml-1.5 text-[10px] opacity-60">
+                  <span className={`ml-2 text-[9px] tabular-nums ${category === cat ? "opacity-40" : "opacity-40"}`}>
                     {TEMPLATES.filter(t => t.category === cat).length}
                   </span>
                 )}
@@ -323,8 +330,8 @@ const Hub = () => {
             ))}
           </div>
 
-          {/* Template Grid */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {/* Template Grid — Tailwind UI card grid pattern */}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {/* Create from scratch card */}
             <button
               onClick={() => {
@@ -335,80 +342,81 @@ const Hub = () => {
                     else navigate("/formarketing");
                   });
               }}
-              className="tool-card border-dashed border-white/12 text-left group flex flex-col items-center justify-center py-10 gap-3 hover:border-[#bd00ff]/30"
+              className="aether-card rounded-[2rem] border border-dashed border-white/8 group flex flex-col items-center justify-center py-12 gap-4 hover:border-aether-purple/30 hover:bg-aether-purple/5 transition-all duration-500 active:scale-95"
             >
-              <div className="w-12 h-12 rounded-2xl bg-white/5 border border-dashed border-white/12 flex items-center justify-center group-hover:bg-[#bd00ff]/10 group-hover:border-[#bd00ff]/30 transition-all">
-                <Plus className="w-5 h-5 text-white/30 group-hover:text-[#bd00ff]" />
+              <div className="w-12 h-12 rounded-2xl bg-white/5 border border-dashed border-white/10 flex items-center justify-center group-hover:bg-aether-purple/10 group-hover:border-aether-purple/30 transition-all">
+                <Plus className="w-5 h-5 text-white/20 group-hover:text-aether-purple transition-colors" />
               </div>
-              <div className="text-center">
-                <p className="text-sm font-semibold text-white/40 group-hover:text-white transition-colors">Lienzo en Blanco</p>
-                <p className="text-xs text-white/25 mt-1">Empieza desde cero</p>
+              <div className="text-center space-y-1">
+                <p className="text-xs font-bold text-white/40 group-hover:text-white transition-colors uppercase tracking-widest font-display">Lienzo en Blanco</p>
+                <p className="text-[10px] text-white/20 font-display uppercase tracking-[0.15em]">Empieza desde cero</p>
               </div>
             </button>
 
-            {filtered.map((template) => (
+            {filtered.map((template, idx) => (
               <div
                 key={template.id}
-                className="tool-card group flex flex-col gap-4"
+                className="aether-card rounded-[2rem] border border-white/5 group flex flex-col gap-5 p-6 hover:border-white/10 hover:scale-[1.02] transition-all duration-400"
+                style={{ animationDelay: `${idx * 30}ms` }}
               >
                 {/* Card header */}
                 <div className="flex items-start justify-between">
                   <div
                     className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: `${template.color}15`, border: `1px solid ${template.color}25` }}
+                    style={{ background: `${template.color}12`, border: `1px solid ${template.color}20` }}
                   >
                     <template.icon className="w-5 h-5" style={{ color: template.color }} />
                   </div>
                   <span
-                    className="text-[10px] font-bold px-2.5 py-1 rounded-full"
-                    style={{ background: `${template.color}12`, color: template.color, border: `1px solid ${template.color}20` }}
+                    className="text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest font-display"
+                    style={{ background: `${template.color}10`, color: template.color, border: `1px solid ${template.color}15` }}
                   >
                     {template.category}
                   </span>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1">
-                  <h3 className="text-sm font-bold text-white mb-1.5 leading-tight">{template.title}</h3>
-                  <p className="text-xs text-white/40 leading-relaxed truncate-2">{template.desc}</p>
+                <div className="flex-1 space-y-2">
+                  <h3 className="text-sm font-bold text-white leading-tight font-display tracking-tight">{template.title}</h3>
+                  <p className="text-[11px] text-white/35 leading-relaxed truncate-2">{template.desc}</p>
                 </div>
 
                 {/* Tags */}
                 <div className="flex gap-1.5 flex-wrap">
                   {template.tags.map(tag => (
-                    <span key={tag} className="text-[10px] px-2 py-0.5 rounded-full bg-white/4 border border-white/6 text-white/35">
+                    <span key={tag} className="text-[9px] px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/5 text-white/30 font-bold uppercase tracking-widest font-display">
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                {/* Footer */}
-                <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                  <span className="text-[10px] text-white/25 font-medium">{template.nodes} nodos</span>
+                {/* Footer — Tailwind UI divider + action pattern */}
+                <div className="flex items-center justify-between pt-3 border-t border-white/5">
+                  <span className="text-[10px] text-white/20 font-bold font-display uppercase tracking-widest">{template.nodes} nodos</span>
                   <button
                     onClick={() => handleUseTemplate(template)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all group-hover:shadow-md"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[10px] font-bold transition-all duration-300 active:scale-95 uppercase tracking-widest font-display"
                     style={{
-                      background: `${template.color}15`,
+                      background: `${template.color}12`,
                       color: template.color,
-                      border: `1px solid ${template.color}25`
+                      border: `1px solid ${template.color}20`
                     }}
                     onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = `${template.color}25`;
+                      (e.currentTarget as HTMLElement).style.background = `${template.color}22`;
                     }}
                     onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.background = `${template.color}15`;
+                      (e.currentTarget as HTMLElement).style.background = `${template.color}12`;
                     }}
                   >
-                    Usar plantilla <ArrowRight className="w-3 h-3" />
+                    Usar <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
               </div>
             ))}
           </div>
 
-          <p className="text-center text-xs text-white/20 mt-10 font-medium">
-            {TEMPLATES.length} plantillas disponibles · Más en camino con cada actualización
+          <p className="text-center text-[10px] text-white/15 mt-12 font-bold uppercase tracking-[0.3em] font-display">
+            {TEMPLATES.length} plantillas disponibles · Más con cada actualización
           </p>
         </div>
       </main>

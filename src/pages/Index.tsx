@@ -53,8 +53,8 @@ const Index = () => {
   return (
     <>
       <Helmet>
-        <title>Aether Evolution | Industrial Multimodal Creative Ecosystem</title>
-        <meta name="description" content="Orchestrate high-fidelity visual assets, marketing narratives, and infinite creative flows with the Aether Evolution design system." />
+        <title>Creator IA Pro | Industrial Multimodal Creative Ecosystem</title>
+        <meta name="description" content="Orchestrate high-fidelity visual assets, marketing narratives, and infinite creative flows with the Creator IA Pro design system." />
       </Helmet>
       
       <div className="min-h-screen bg-[#050506] font-sans text-slate-100 overflow-hidden relative selection:bg-aether-purple/30 selection:text-white">
@@ -68,14 +68,18 @@ const Index = () => {
       {/* Navigation */}
       <header className="relative z-50 flex items-center justify-between px-10 py-8 sm:px-16 sticky top-0 bg-[#050506]/40 backdrop-blur-2xl border-b border-white/[0.05]">
         <div className="flex items-center gap-5">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2.5xl bg-white shadow-[0_0_30px_rgba(255,255,255,0.15)]">
-            <Sparkles className="h-6 w-6 text-black" />
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-[0_0_20px_rgba(255,255,255,0.15)] group">
+            <div className="absolute -inset-2 bg-gradient-to-r from-aether-purple to-aether-blue rounded-[2rem] opacity-0 group-hover:opacity-20 blur-xl transition-all duration-700 pointer-events-none" />
+            <div className="absolute right-[-4px] top-[-4px] h-3 w-3 rounded-full bg-aether-purple shadow-[0_0_10px_rgba(168,85,247,0.8)] animate-pulse" />
+            <Sparkles className="h-5 w-5 text-black" />
           </div>
           <div className="flex flex-col">
-            <span className="text-2xl font-bold text-white tracking-tighter font-display uppercase leading-none">
-              Aether <span className="opacity-40">Evolution</span>
+            <span className="text-xl font-bold text-white tracking-tight font-display uppercase leading-none">
+              Creator <span className="text-aether-purple">IA</span> Pro
             </span>
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.5em] mt-2">V8.0 Production Core</span>
+            <span className="text-[9px] font-bold text-white/40 uppercase tracking-[0.4em] mt-1.5 flex items-center gap-1.5">
+              V8.0 <span className="px-1.5 py-0.5 rounded-sm bg-aether-purple/20 text-aether-purple text-[8px]">Neural Core</span>
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-8">
@@ -96,10 +100,10 @@ const Index = () => {
         </div>
 
         {/* Hero Title */}
-        <h1 className="max-w-7xl text-center text-8xl font-bold leading-[0.85] tracking-tight animate-in fade-in slide-in-from-bottom-6 duration-1000 md:text-9xl lg:text-[11rem] text-white font-display">
-          Design <span className="bg-gradient-to-r from-white via-white to-white/20 bg-clip-text text-transparent">the Future</span>
+        <h1 className="max-w-6xl text-center text-7xl font-bold leading-[0.9] tracking-tight animate-in fade-in slide-in-from-bottom-6 duration-1000 md:text-8xl lg:text-[7rem] text-white font-display">
+          Design <span className="bg-gradient-to-r from-aether-purple via-white to-aether-blue bg-clip-text text-transparent">the Future</span>
           <br />
-          <span className="opacity-10">without limits.</span>
+          <span className="opacity-40">without limits.</span>
         </h1>
 
         <p className="mt-14 max-w-2xl text-center text-lg text-white/30 font-medium animate-in fade-in slide-in-from-bottom-8 duration-1000 leading-relaxed tracking-tight font-display">
@@ -126,8 +130,8 @@ const Index = () => {
             { value: "∞", label: "Canvas Depth" },
           ].map((s) => (
             <div key={s.label} className="group">
-              <p className="text-7xl font-bold text-white/10 group-hover:text-white transition-all duration-700 tracking-tighter font-display tabular-nums">{s.value}</p>
-              <p className="mt-4 text-[10px] text-white/20 font-bold uppercase tracking-[0.4em] font-display">{s.label}</p>
+              <p className="text-6xl font-bold text-white/20 group-hover:text-white transition-all duration-700 tracking-tighter font-display tabular-nums">{s.value}</p>
+              <p className="mt-4 text-[10px] text-white/40 font-bold uppercase tracking-[0.4em] font-display">{s.label}</p>
             </div>
           ))}
         </div>
@@ -152,10 +156,10 @@ const Index = () => {
         <div className="mt-56 w-full max-w-7xl">
           <div className="mb-24 text-center space-y-4">
             <Badge className="bg-aether-purple/10 text-aether-purple border-aether-purple/20 hover:bg-aether-purple/20 uppercase tracking-[0.5em] px-8 py-3 rounded-full font-bold text-[10px] font-display">Industrial Suite</Badge>
-            <h2 className="text-6xl font-bold text-white md:text-8xl tracking-tight leading-none font-display">
-              Neural <span className="opacity-40">Arsenal.</span>
+            <h2 className="text-5xl font-bold text-white md:text-7xl tracking-tight leading-none font-display">
+              Neural <span className="text-aether-blue">Arsenal.</span>
             </h2>
-            <p className="text-white/20 max-w-xl mx-auto uppercase text-[10px] font-bold tracking-[0.4em] font-display">
+            <p className="text-white/40 max-w-xl mx-auto uppercase text-[10px] font-bold tracking-[0.4em] font-display">
               Professional modules for multidimensional production.
             </p>
           </div>
@@ -186,12 +190,12 @@ const Index = () => {
         <div className="mt-56 w-full max-w-7xl">
           <div className="rounded-[4rem] aether-card border border-white/5 overflow-hidden shadow-4xl relative">
             <div className="grid lg:grid-cols-2 lg:items-center">
-              <div className="p-20 lg:p-28 flex flex-col justify-center space-y-10 relative z-10">
-                <Badge className="w-fit bg-aether-blue/10 text-aether-blue border-aether-blue/20 hover:bg-aether-blue/20 uppercase tracking-[0.5em] px-8 py-3 rounded-full font-bold text-[10px] font-display text-xs">Production Studio</Badge>
-                <h2 className="text-6xl font-bold text-white md:text-8xl leading-[0.85] tracking-tight font-display">
-                  Infinite <span className="opacity-40">Canvas.</span>
+              <div className="p-16 lg:p-24 flex flex-col justify-center space-y-10 relative z-10">
+                <Badge className="w-fit bg-aether-blue/10 text-aether-blue border-aether-blue/20 hover:bg-aether-blue/20 uppercase tracking-[0.5em] px-8 py-3 rounded-full font-bold text-[10px] font-display">Production Studio</Badge>
+                <h2 className="text-5xl font-bold text-white md:text-7xl leading-[0.9] tracking-tight font-display">
+                  Infinite <span className="text-aether-purple">Canvas.</span>
                 </h2>
-                <p className="text-white/30 leading-relaxed font-medium text-lg font-display max-w-lg">
+                <p className="text-white/60 leading-relaxed font-medium text-base font-display max-w-lg">
                   A high-fidelity node-based environment for elite creators. Orchestrate global campaigns, connect neural clusters, and manifest vision in real-time.
                 </p>
                 <ul className="space-y-6">
@@ -225,8 +229,8 @@ const Index = () => {
 
         {/* Operator Network */}
         <div className="mt-56 w-full max-w-7xl">
-          <h2 className="text-center text-6xl font-bold text-white mb-28 md:text-8xl tracking-tight font-display">
-            Global <span className="opacity-40">Network.</span>
+          <h2 className="text-center text-5xl font-bold text-white mb-20 md:text-7xl tracking-tight font-display">
+            Global <span className="text-aether-blue">Network.</span>
           </h2>
           <div className="grid gap-10 md:grid-cols-3">
             {testimonials.map((t) => (
@@ -247,15 +251,15 @@ const Index = () => {
         </div>
 
         {/* Final Evolution CTA */}
-        <div className="mt-64 w-full max-w-5xl rounded-[5rem] aether-card border border-white/10 p-28 md:p-40 text-center shadow-5xl animate-fade-in relative overflow-hidden group">
+        <div className="mt-48 w-full max-w-5xl rounded-[4rem] aether-card border border-white/10 p-20 md:p-32 text-center shadow-5xl animate-fade-in relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-tr from-aether-purple/5 via-transparent to-aether-blue/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-          <div className="mx-auto mb-14 flex h-28 w-28 items-center justify-center rounded-[2.5rem] bg-white shadow-4xl relative z-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
-            <Sparkles className="h-14 w-14 text-black" />
+          <div className="mx-auto mb-10 flex h-24 w-24 items-center justify-center rounded-[2rem] bg-white shadow-4xl relative z-10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
+            <Sparkles className="h-10 w-10 text-black" />
           </div>
-          <h2 className="text-7xl font-bold text-white md:text-9xl relative z-10 leading-[0.85] tracking-tight font-display mb-14">
-            Start <br /> <span className="opacity-40">Evolution.</span>
+          <h2 className="text-6xl font-bold text-white md:text-8xl relative z-10 leading-[0.9] tracking-tight font-display mb-10">
+            Creator <br /> <span className="text-aether-purple">IA Pro.</span>
           </h2>
-          <p className="text-white/20 max-w-md mx-auto relative z-10 uppercase text-[11px] font-bold tracking-[0.5em] leading-[2.5] font-display">
+          <p className="text-white/40 max-w-md mx-auto relative z-10 uppercase text-[11px] font-bold tracking-[0.5em] leading-[2.5] font-display">
             Join the elite circle of creative operators. Initial protocols active. 
           </p>
           <Button onClick={() => navigate("/auth")} size="lg" className="mt-20 bg-white text-black hover:bg-white/90 gap-6 px-24 rounded-[2rem] h-24 text-xs font-bold uppercase tracking-[0.4em] shadow-5xl relative z-10 transition-all hover:scale-105 active:scale-95 font-display">
@@ -267,12 +271,12 @@ const Index = () => {
         </div>
 
         {/* Global Footer */}
-        <footer className="mt-56 w-full max-w-7xl border-t border-white/[0.05] pt-20 text-center text-[10px] text-white/10 space-y-8 pb-32 font-display">
-          <p className="uppercase tracking-[0.6em] font-bold">© {new Date().getFullYear()} Aether Evolution Ecosystem. All nodes operational.</p>
-          <div className="flex items-center justify-center gap-12 opacity-40 uppercase tracking-[0.2em] font-extrabold text-[9px]">
+        <footer className="mt-48 w-full max-w-7xl border-t border-white/[0.05] pt-16 text-center text-[10px] text-white/40 space-y-6 pb-24 font-display">
+          <p className="uppercase tracking-[0.6em] font-bold">© {new Date().getFullYear()} Creator IA Pro Ecosystem. All nodes operational.</p>
+          <div className="flex items-center justify-center gap-12 opacity-60 uppercase tracking-[0.2em] font-extrabold text-[9px]">
              <span className="hover:text-white transition-colors cursor-pointer">Security Protocol</span>
              <span className="hover:text-white transition-colors cursor-pointer">API Manifest</span>
-             <span className="hover:text-white transition-colors cursor-pointer">System Status</span>
+             <span className="hover:text-white transition-colors cursor-pointer">System Docs v8.0</span>
           </div>
         </footer>
       </main>

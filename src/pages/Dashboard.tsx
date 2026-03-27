@@ -11,7 +11,7 @@ import {
   Palette, Image, Video, LayoutGrid, ArrowRight, Coins,
   TrendingUp, MessageSquare, FileText, PenTool, Megaphone,
   Type, Hash, CreditCard, Settings, Monitor, Zap, Plus,
-  FolderPlus, Star, Box, Eye, ChevronRight
+  FolderPlus, Star, Box, Eye, ChevronRight, Rocket
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -105,7 +105,7 @@ const Dashboard = () => {
   ];
 
   const aiApps = [
-    { icon: Megaphone, label: "Aether Studio", desc: "Infinite creative canvas", path: "/formarketing" },
+    { icon: Megaphone, label: "Creator Studio", desc: "Infinite creative canvas", path: "/formarketing" },
     { icon: MessageSquare, label: "Copy Orchestrator", desc: "Semantic copy engine", path: "/tools" },
     { icon: PenTool, label: "Vector Gen", desc: "Neural brand design", path: "/tools" },
     { icon: Hash, label: "Social Hub", desc: "Campaign distribution", path: "/tools" },
@@ -148,7 +148,7 @@ const Dashboard = () => {
                   <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] font-display">System Active</span>
                 </div>
               </div>
-              <h1 className="text-5xl md:text-8xl font-bold tracking-tight mb-4 font-display">
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 font-display">
                 Hello, <span className="bg-gradient-to-r from-white via-white to-white/30 bg-clip-text text-transparent">{profile?.display_name?.split(' ')[0] || 'Creator'}</span>
               </h1>
               <p className="text-base text-white/40 max-w-2xl leading-relaxed font-medium">
@@ -170,7 +170,7 @@ const Dashboard = () => {
                 className="px-10 py-4 bg-white text-black rounded-2xl flex items-center gap-3 text-xs font-bold uppercase tracking-widest hover:bg-white/90 transition-all active:scale-95 shadow-[0_20px_40px_rgba(255,255,255,0.1)] group"
               >
                 <Zap className="w-4 h-4 group-hover:fill-current" />
-                Evolution Pro
+                Creator Pro Plus
               </button>
             </div>
           </div>

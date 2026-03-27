@@ -1,18 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { 
-  User, Mail, Shield, Coins, CreditCard, 
-  Settings, LogOut, Loader2, Save, Cloud, 
-  ChevronRight, Sparkles, Bell, Zap, Cpu, History
+import {
+  User, Mail, Shield, Coins,
+  Settings, LogOut, Loader2, Save, Cloud,
+  ChevronRight, Bell, Zap, Cpu, History, Camera
 } from "lucide-react";
 import {
   Select,
@@ -24,10 +24,14 @@ import {
 
 const Profile = () => {
   const { user, signOut } = useAuth("/auth");
+  const navigate = useNavigate();
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [displayName, setDisplayName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [settings, setSettings] = useState<any>({
     nexus_mode: 'creative',
     default_resolution: '1024x1024',
@@ -46,6 +50,7 @@ const Profile = () => {
       if (data) {
         setProfile(data);
         setDisplayName(data.display_name || "");
+        setAvatarUrl(data.avatar_url || null);
         if ((data as any).user_settings) {
           setSettings({ ...settings, ...(data as any).user_settings });
         }
@@ -54,6 +59,37 @@ const Profile = () => {
     };
     fetchProfile();
   }, [user]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    if (!file.type.startsWith("image/")) { toast.error("Solo se permiten imágenes"); return; }
+    if (file.size > 2 * 1024 * 1024) { toast.error("Máximo 2MB para el avatar"); return; }
+
+    setUploadingAvatar(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const filePath = `avatars/${user.id}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true, contentType: file.type });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
+      const publicUrl = urlData.publicUrl + `?t=${Date.now()}`;
+
+      await supabase.from("profiles").update({ avatar_url: publicUrl } as any).eq("user_id", user.id);
+      setAvatarUrl(publicUrl);
+      toast.success("Avatar sincronizado con éxito");
+    } catch (err: any) {
+      toast.error(err?.message || "Error al subir avatar");
+    } finally {
+      setUploadingAvatar(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  };
 
   const handleUpdateProfile = async () => {
     setSaving(true);
@@ -74,14 +110,7 @@ const Profile = () => {
   };
 
   const handleRecharge = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 1500)),
-      {
-        loading: 'Connecting with billing nexus...',
-        success: 'Redirecting to industrial checkout v8.0...',
-        error: 'Connection interrupted',
-      }
-    );
+    navigate("/pricing");
   };
 
   if (loading) {
@@ -133,6 +162,46 @@ const Profile = () => {
                 <CardTitle className="text-4xl font-bold tracking-tight uppercase text-white font-display">Core Identity</CardTitle>
               </CardHeader>
               <CardContent className="p-0 space-y-10">
+                {/* Avatar Upload */}
+                <div className="flex items-center gap-8">
+                  <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                  <button
+                    onClick={() => avatarInputRef.current?.click()}
+                    className="avatar-upload-zone w-20 h-20 rounded-[1.5rem] border border-white/10 overflow-hidden bg-white/5 flex-shrink-0"
+                    disabled={uploadingAvatar}
+                  >
+                    {uploadingAvatar ? (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Loader2 className="w-6 h-6 text-aether-purple animate-spin" />
+                      </div>
+                    ) : avatarUrl ? (
+                      <>
+                        <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+                        <div className="avatar-overlay">
+                          <Camera className="w-5 h-5 text-white" />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <User className="w-8 h-8 text-white/20" />
+                        <div className="avatar-overlay">
+                          <Camera className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                  <div className="space-y-1">
+                    <p className="text-xs font-bold text-white/60 uppercase tracking-widest font-display">Avatar Operador</p>
+                    <p className="text-[10px] text-white/20 font-display uppercase tracking-widest">PNG, JPG — Máx 2MB</p>
+                    <button
+                      onClick={() => avatarInputRef.current?.click()}
+                      className="text-[10px] font-bold text-aether-purple hover:text-white transition-colors uppercase tracking-widest font-display flex items-center gap-1.5 mt-2"
+                    >
+                      <Camera className="w-3 h-3" /> Cambiar Foto
+                    </button>
+                  </div>
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-10 md:gap-16">
                   <div className="space-y-4">
                     <Label htmlFor="email" className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] ml-4 font-display">Nexus Endpoint</Label>

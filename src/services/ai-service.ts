@@ -124,9 +124,9 @@ export const aiService = {
       return result;
 
     } catch (err: any) {
-      console.error("AI Service Error [V3.92]:", err.message);
+      console.error("[Creator IA] Error del servicio de IA:", err.message);
 
-      // Attempt credit refund on AI failure
+      // Intentar reembolso de créditos si hubo fallo de la IA
       try {
         const { data: { user: currentUser } } = await supabase.auth.getUser();
         if (currentUser) {
@@ -134,12 +134,13 @@ export const aiService = {
             _amount: cost,
             _user_id: currentUser.id,
           });
+          console.log("[Creator IA] Créditos reembolsados:", cost);
         }
       } catch (refundErr) {
-        console.error("Credit refund failed:", refundErr);
+        console.error("[Creator IA] Fallo en reembolso de créditos:", refundErr);
       }
 
-      throw new Error(`[IA V3.92] ${err.message}`);
+      throw new Error(err.message || "Error desconocido. Por favor intenta de nuevo.");
     }
   },
 
@@ -206,40 +207,54 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
 
     // Route via OpenRouter for all non-Gemini-direct models
     if (openRouterModel && openRouterKey) {
-      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${openRouterKey}`,
-          "HTTP-Referer": "https://creatoria.pro",
-          "X-Title": "Creator IA Pro",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: openRouterModel,
-          messages,
-          temperature: 0.85,
-          max_tokens: 4096,
-        }),
-      });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      if (!res.ok) {
-        const errBody = await res.text();
-        if (res.status === 402) {
-          console.warn("OpenRouter 402: Falling back to Gemini Flash...");
-          return this.callGeminiDirect(action, prompt, systemPrompt, geminiKey);
+      try {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Authorization": `Bearer ${openRouterKey}`,
+            "HTTP-Referer": "https://creator-ia.com",
+            "X-Title": "Creator IA Pro",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: openRouterModel,
+            messages,
+            temperature: 0.85,
+            max_tokens: 4096,
+          }),
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          const errBody = await res.text();
+          if (res.status === 402) {
+            console.warn("[AI] OpenRouter 402 — usando Gemini como respaldo...");
+            return this.callGeminiDirect(action, prompt, systemPrompt, geminiKey);
+          }
+          if (res.status === 429) {
+            throw new Error("Límite de uso alcanzado. Intenta en unos segundos.");
+          }
+          throw new Error(`Error del proveedor de IA (${res.status}). Por favor intenta con otro modelo.`);
         }
-        throw new Error(`OpenRouter error ${res.status}: ${errBody.slice(0, 200)}`);
-      }
 
-      const data = await res.json();
-      let text = data.choices?.[0]?.message?.content;
-      if (!text) throw new Error("Respuesta vacía de OpenRouter");
+        const data = await res.json();
+        let text = data.choices?.[0]?.message?.content;
+        if (!text) throw new Error("La IA devolvió una respuesta vacía. Intenta reformular.");
 
-      if (action === "ui") {
-        text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-        try { return JSON.parse(text); } catch { return { text }; }
+        if (action === "ui") {
+          text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+          try { return JSON.parse(text); } catch { return { text }; }
+        }
+        return { text };
+      } catch (err: any) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') throw new Error("Tiempo de espera agotado. Verifica tu conexión e intenta de nuevo.");
+        throw err;
       }
-      return { text };
     }
 
     // Fallback: Gemini Flash direct
@@ -247,7 +262,7 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
   },
 
   async callGeminiDirect(action: string, prompt: string, systemPrompt: string, geminiKey: string | undefined) {
-    if (!geminiKey || geminiKey.trim() === "") throw new Error("No se encontró API key de Gemini. Configura VITE_GEMINI_API_KEY.");
+    if (!geminiKey || geminiKey.trim() === "") throw new Error("API key de Gemini no configurada. Agrega VITE_GEMINI_API_KEY en tu archivo .env.");
 
     const activeGeminiModel = "gemini-1.5-flash";
     const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${activeGeminiModel}:generateContent?key=${geminiKey}`;
@@ -256,23 +271,34 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
       ? [{ parts: [{ text: `${systemPrompt}\n\nUSER PROMPT: ${prompt}` }] }]
       : [{ parts: [{ text: prompt }] }];
 
-    const res = await fetch(GEMINI_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: geminiMessages }),
-    });
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-    if (!res.ok) throw new Error(`Gemini error ${res.status}`);
+    try {
+      const res = await fetch(GEMINI_URL, {
+        method: "POST",
+        signal: controller.signal,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: geminiMessages }),
+      });
+      clearTimeout(timeoutId);
 
-    const data = await res.json();
-    let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error("Respuesta vacía de Gemini");
+      if (!res.ok) throw new Error(`Error de Gemini (${res.status}). Por favor intenta de nuevo.`);
 
-    if (action === "ui") {
-      text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      try { return JSON.parse(text); } catch { return { text }; }
+      const data = await res.json();
+      let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error("Gemini devolvió una respuesta vacía. Intenta reformular tu prompt.");
+
+      if (action === "ui") {
+        text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+        try { return JSON.parse(text); } catch { return { text }; }
+      }
+      return { text };
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      if (err.name === 'AbortError') throw new Error("Tiempo de espera agotado con Gemini. Verifica tu conexión.");
+      throw err;
     }
-    return { text };
   },
 
   // ─── IMAGE GENERATION ────────────────────────────────────────────────────────
