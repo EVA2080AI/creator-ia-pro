@@ -162,17 +162,6 @@ const Tools = () => {
   const fileRef    = useRef<HTMLInputElement>(null);
   const resultRef  = useRef<HTMLDivElement>(null);
 
-  if (authLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-[#050506]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-aether-purple animate-spin" />
-          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Sincronizando Nexus...</p>
-        </div>
-      </div>
-    );
-  }
-
   useEffect(() => {
     if (appId && appIdToToolId[appId]) {
       const tool = tools.find((t) => t.id === appIdToToolId[appId])!;
@@ -187,6 +176,32 @@ const Tools = () => {
       resultRef.current.scrollTop = resultRef.current.scrollHeight;
     }
   }, [resultText, streaming]);
+
+  const handleCopyImage = useCallback(async (url: string) => {
+    setCopyingImage(true);
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+      toast.success("Imagen copiada al portapapeles");
+    } catch {
+      navigator.clipboard.writeText(url);
+      toast.success("URL copiada");
+    } finally {
+      setCopyingImage(false);
+    }
+  }, []);
+
+  if (authLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-[#050506]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-aether-purple animate-spin" />
+          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Sincronizando Nexus...</p>
+        </div>
+      </div>
+    );
+  }
 
   const currentTool     = tools.find((t) => t.id === activeTool)!;
   const filteredTools   = tools.filter((t) => t.category === category);
@@ -346,20 +361,6 @@ const Tools = () => {
     }
   };
 
-  const handleCopyImage = useCallback(async (url: string) => {
-    setCopyingImage(true);
-    try {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
-      toast.success("Imagen copiada al portapapeles");
-    } catch {
-      navigator.clipboard.writeText(url);
-      toast.success("URL copiada");
-    } finally {
-      setCopyingImage(false);
-    }
-  }, []);
 
   const styleList = activeTool === "logo" ? LOGO_STYLES : IMAGE_STYLES;
 
