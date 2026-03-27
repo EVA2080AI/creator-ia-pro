@@ -36,6 +36,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [assetsCount, setAssetsCount] = useState(0);
   const [spacesCount, setSpacesCount] = useState(0);
+  const [usageData, setUsageData] = useState<{ name: string; credits: number }[]>([]);
+  const [toolData, setToolData] = useState<{ name: string; value: number; color: string }[]>([]);
 
   useEffect(() => {
     if (searchParams.get("checkout") === "success") {
@@ -54,16 +56,45 @@ const Dashboard = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [assetsCountData, spacesCountData, recentAssetsData, spacesData] = await Promise.all([
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+        const [assetsCountData, spacesCountData, recentAssetsData, spacesData, txnsData] = await Promise.all([
           supabase.from("saved_assets").select("id", { count: "exact", head: true }).eq("user_id", user.id),
           supabase.from("spaces").select("id", { count: "exact", head: true }).eq("user_id", user.id),
           supabase.from("canvas_nodes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
           supabase.from("spaces").select("*").eq("user_id", user.id).order("updated_at", { ascending: false }),
+          supabase.from("credit_transactions").select("amount, type, description, created_at")
+            .eq("user_id", user.id).gte("created_at", sevenDaysAgo)
+            .not("type", "in", '("subscription_reload","credit_purchase")'),
         ]);
         setAssetsCount(assetsCountData.count || 0);
         setSpacesCount(spacesCountData.count || 0);
         setSpaces(spacesData.data || []);
         setRecentAssets(recentAssetsData.data || []);
+
+        // Build 7-day usage chart from real transactions
+        const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+        const dayMap: Record<string, { name: string; credits: number }> = {};
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+          dayMap[d.toDateString()] = { name: DAY_LABELS[d.getDay()], credits: 0 };
+        }
+        let visual = 0, copy = 0, system = 0;
+        (txnsData.data || []).forEach((tx: any) => {
+          const key = new Date(tx.created_at).toDateString();
+          if (dayMap[key]) dayMap[key].credits += Math.abs(tx.amount || 0);
+          const desc = (tx.description || "").toLowerCase();
+          if (desc.includes("image") || desc.includes("imagen") || desc.includes("logo") || desc.includes("video")) visual++;
+          else if (desc.includes("text") || desc.includes("texto") || desc.includes("copy") || desc.includes("blog") || desc.includes("social") || desc.includes("ads") || desc.includes("chat")) copy++;
+          else system++;
+        });
+        setUsageData(Object.values(dayMap));
+
+        const total = visual + copy + system || 1;
+        setToolData([
+          { name: 'Visual', value: Math.round((visual / total) * 100), color: 'bg-aether-purple' },
+          { name: 'Copy',   value: Math.round((copy   / total) * 100), color: 'bg-aether-blue' },
+          { name: 'System', value: Math.round((system / total) * 100), color: 'bg-rose-400' },
+        ]);
       } catch (e) {
         console.error("Error fetching dashboard data", e);
       } finally {
@@ -111,17 +142,6 @@ const Dashboard = () => {
     { icon: Hash, label: "Redes sociales", desc: "Contenido para Instagram", path: "/tools" },
     { icon: FileText, label: "Escribir artículo", desc: "Artículos SEO", path: "/tools" },
     { icon: Type, label: "Crear anuncio", desc: "Ads para Meta y Google", path: "/tools" },
-  ];
-
-  const usageData = [
-    { name: 'Mon', credits: 12 }, { name: 'Tue', credits: 18 }, { name: 'Wed', credits: 15 },
-    { name: 'Thu', credits: 25 }, { name: 'Fri', credits: 32 }, { name: 'Sat', credits: 28 }, { name: 'Sun', credits: 40 },
-  ];
-
-  const toolData = [
-    { name: 'Visual', value: 45, color: 'bg-aether-purple' },
-    { name: 'Copy', value: 30, color: 'bg-aether-blue' },
-    { name: 'System', value: 25, color: 'bg-rose-400' },
   ];
 
   if (authLoading) {
@@ -258,10 +278,9 @@ const Dashboard = () => {
                   </div>
                 ))}
               </div>
-              <div className="mt-12 p-6 rounded-3xl bg-white/[0.02] border border-white/5 text-center">
-                 <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Eficiencia</p>
-                 <p className="text-3xl font-bold mt-2 font-display text-white">98.4%</p>
-              </div>
+              {toolData.every(d => d.value === 0) && (
+                <p className="text-[10px] text-white/20 text-center font-bold uppercase tracking-widest mt-4">Sin actividad reciente</p>
+              )}
             </div>
           </div>
 

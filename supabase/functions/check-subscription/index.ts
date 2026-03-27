@@ -73,7 +73,7 @@ serve(async (req) => {
 
     const subscription = subscriptions.data[0];
     const productId = subscription.items.data[0]?.price?.product as string;
-    const tierInfo = TIERS[productId] || { name: "pro", credits: 1000 };
+    const tierInfo = TIERS[productId] || { name: "free", credits: 0 };
 
     let subscriptionEnd: string | null = null;
     try {

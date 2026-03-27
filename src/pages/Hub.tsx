@@ -266,14 +266,26 @@ const Hub = () => {
     try {
       const { data: space, error } = await supabase
         .from("spaces")
-        .insert({
-          user_id: user.id,
-          name: template.title,
-          description: template.desc,
-        })
+        .insert({ user_id: user.id, name: template.title, description: template.desc })
         .select().single();
       if (error) throw error;
-      toast.success(`Plantilla "${template.title}" cargada en nuevo Espacio`);
+
+      // Seed canvas nodes from preset
+      if (template.preset.length > 0) {
+        const nodes = template.preset.map((node: any, i: number) => ({
+          user_id: user.id,
+          space_id: space.id,
+          type: node.type || "model",
+          name: node.data?.title || `Nodo ${i + 1}`,
+          position_x: 120 + i * 300,
+          position_y: 200,
+          status: "idle",
+          data_payload: node.data || {},
+        }));
+        await supabase.from("canvas_nodes").insert(nodes);
+      }
+
+      toast.success(`Plantilla "${template.title}" cargada`);
       navigate(`/formarketing?spaceId=${space.id}`);
     } catch {
       toast.error("Error al crear espacio desde plantilla");

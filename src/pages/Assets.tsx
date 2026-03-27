@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { AppHeader } from "@/components/AppHeader";
 import {
-  Search, Loader2, Heart, Download, Trash2, ImageOff,
-  Star, Plus, Link, Layers, Sparkles, Cloud, Ghost
+  Search, Loader2, Heart, Download, Trash2,
+  Star, Plus, Link, Layers, Sparkles, Copy, Ghost
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter,
@@ -47,6 +47,11 @@ const Assets = () => {
   const [importUrl, setImportUrl] = useState("");
   const [importSpace, setImportSpace] = useState("");
   const [importing, setImporting] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+
+  const PAGE_SIZE = 24;
 
   const fetchSpaces = useCallback(async () => {
     if (!user) return;
@@ -54,30 +59,36 @@ const Assets = () => {
     if (data) setSpaces(data);
   }, [user]);
 
-  const fetchAssets = useCallback(async () => {
+  const fetchAssets = useCallback(async (reset = false) => {
     if (!user) return;
     setLoading(true);
+    const currentPage = reset ? 0 : page;
+    const from = currentPage * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
     try {
-      let r;
-      if (selectedSpace === "all") {
-        r = await (supabase.from("saved_assets") as any).select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-      } else if (selectedSpace === "none") {
-        r = await (supabase.from("saved_assets") as any).select("*").eq("user_id", user.id).is("space_id", null).order("created_at", { ascending: false });
-      } else {
-        r = await (supabase.from("saved_assets") as any).select("*").eq("user_id", user.id).eq("space_id", selectedSpace).order("created_at", { ascending: false });
-      }
+      let q = (supabase.from("saved_assets") as any).select("*").eq("user_id", user.id).order("created_at", { ascending: false }).range(from, to);
+      if (selectedSpace === "none") q = q.is("space_id", null);
+      else if (selectedSpace !== "all") q = q.eq("space_id", selectedSpace);
+      const r = await q;
       if (r.error) throw r.error;
-      setAssets((r.data as any) || []);
+      const newData = (r.data as any) || [];
+      setAssets(prev => reset || currentPage === 0 ? newData : [...prev, ...newData]);
+      setHasMore(newData.length === PAGE_SIZE);
+      if (reset) setPage(0);
     } catch {
       toast.error("Error loading assets");
     } finally {
       setLoading(false);
     }
+  }, [user, selectedSpace, page, PAGE_SIZE]);
+
+  useEffect(() => {
+    if (user) { fetchAssets(true); fetchSpaces(); }
   }, [user, selectedSpace]);
 
   useEffect(() => {
-    if (user) { fetchAssets(); fetchSpaces(); }
-  }, [user, fetchAssets, fetchSpaces]);
+    if (user && page > 0) fetchAssets(false);
+  }, [page]);
 
   const handleImport = async () => {
     if (!user || !importUrl) return;
@@ -110,24 +121,19 @@ const Assets = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this asset?")) return;
     const { error } = await supabase.from("saved_assets").delete().eq("id", id);
     if (error) toast.error(error.message);
-    else { toast.success("Asset deleted"); setAssets((prev) => prev.filter((a) => a.id !== id)); }
+    else { toast.success("Asset eliminado"); setAssets((prev) => prev.filter((a) => a.id !== id)); }
+    setDeleteTargetId(null);
   };
 
-  const handleSaveToDrive = async (asset: SavedAsset) => {
-    toast.promise(
-      async () => {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        return { name: asset.prompt?.slice(0, 20) || "nexus_asset" };
-      },
-      {
-        loading: "Uploading to Google Drive...",
-        success: (d) => `"${d.name}" saved to Drive`,
-        error: "Error connecting to Google",
-      }
-    );
+  const handleCopyUrl = async (asset: SavedAsset) => {
+    try {
+      await navigator.clipboard.writeText(asset.asset_url);
+      toast.success("URL copiada al portapapeles");
+    } catch {
+      toast.error("No se pudo copiar la URL");
+    }
   };
 
   const filtered = assets.filter((a) => {
@@ -254,10 +260,10 @@ const Assets = () => {
                 <div className="absolute inset-0 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
                   <div className="flex justify-end gap-1.5">
                     {[
-                      { icon: Heart, onClick: () => toggleFav(asset.id, asset.is_favorite), active: asset.is_favorite, activeClass: "text-rose-400 fill-rose-400" },
-                      { icon: Cloud, onClick: () => handleSaveToDrive(asset), active: false, activeClass: "" },
-                      { icon: Download, onClick: () => window.open(asset.asset_url, "_blank"), active: false, activeClass: "" },
-                      { icon: Trash2, onClick: () => handleDelete(asset.id), active: false, activeClass: "hover:text-rose-400" },
+                      { icon: Heart,     onClick: () => toggleFav(asset.id, asset.is_favorite), active: asset.is_favorite, activeClass: "text-rose-400 fill-rose-400" },
+                      { icon: Copy,      onClick: () => handleCopyUrl(asset),                   active: false,             activeClass: "" },
+                      { icon: Download,  onClick: () => window.open(asset.asset_url, "_blank"),  active: false,             activeClass: "" },
+                      { icon: Trash2,    onClick: () => setDeleteTargetId(asset.id),             active: false,             activeClass: "hover:text-rose-400" },
                     ].map((btn, i) => (
                       <button
                         key={i}
@@ -292,7 +298,42 @@ const Assets = () => {
             ))}
           </div>
         )}
+
+        {/* Load More */}
+        {!loading && hasMore && filtered.length >= PAGE_SIZE && (
+          <div className="flex justify-center mt-10">
+            <button
+              onClick={() => setPage(p => p + 1)}
+              className="px-10 py-4 rounded-2xl border border-white/10 text-xs font-bold uppercase tracking-widest text-white/40 hover:text-white hover:border-white/20 transition-all font-display"
+            >
+              Cargar más
+            </button>
+          </div>
+        )}
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTargetId} onOpenChange={(o) => !o && setDeleteTargetId(null)}>
+        <DialogContent className="bg-[#0a0a0b]/95 backdrop-blur-3xl border-white/10 sm:max-w-[380px] rounded-[3rem] p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+          <DialogHeader>
+            <div className="h-14 w-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6">
+              <Trash2 className="h-7 w-7 text-rose-400" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-white tracking-tight font-display">Eliminar activo</DialogTitle>
+            <DialogDescription className="text-white/30 font-medium leading-relaxed mt-2">
+              Esta acción no se puede deshacer. El activo se eliminará permanentemente de tu biblioteca.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-4 mt-8">
+            <button onClick={() => setDeleteTargetId(null)} className="flex-1 px-6 py-4 rounded-2xl border border-white/5 text-xs font-bold uppercase tracking-widest text-white/30 hover:text-white transition-all font-display">
+              Cancelar
+            </button>
+            <button onClick={() => deleteTargetId && handleDelete(deleteTargetId)} className="flex-1 px-6 py-4 bg-rose-500 text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-rose-400 active:scale-95 transition-all font-display">
+              Eliminar
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Import Dialog */}
       <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>

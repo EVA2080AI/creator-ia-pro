@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { stripeService } from "@/services/billing-service";
 import { STRIPE_TIERS } from "@/lib/stripe-tiers";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
-import { Sparkles, Check, Zap, Crown, Star, GraduationCap, Loader2, Coins, Clock, ShieldCheck, Image, FileText, Video } from "lucide-react";
+import { Sparkles, Check, Zap, Crown, Star, GraduationCap, Loader2, Coins, ShieldCheck, Image, FileText, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -108,23 +108,12 @@ export default function Pricing() {
   const [userId, setUserId] = useState<string | undefined>();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [loadingPack, setLoadingPack] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState({ hours: 23, minutes: 59, seconds: 59 });
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setIsLoggedIn(!!session);
       setUserId(session?.user?.id);
     });
-
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return { hours: 24, minutes: 0, seconds: 0 };
-      });
-    }, 1000);
-    return () => clearInterval(timer);
   }, []);
 
   const handleSubscribe = async (plan: typeof plans[number]) => {
@@ -180,34 +169,6 @@ export default function Pricing() {
 
       <main className="pt-24 relative z-10 flex flex-col items-center px-8 pb-48">
         
-        {/* Promo Banner */}
-        <div className="w-full max-w-[1440px] mb-16 animate-in fade-in slide-in-from-top-4 duration-1000">
-           <div className="aether-card rounded-3xl border border-white/10 p-1 group relative overflow-hidden">
-             <div className="absolute inset-0 bg-gradient-to-r from-aether-purple/10 via-aether-blue/10 to-aether-purple/10 animate-pulse" />
-             <div className="relative z-10 w-full flex flex-col sm:flex-row items-center justify-between px-8 py-4 gap-6 backdrop-blur-3xl">
-                <div className="flex items-center gap-5">
-                   <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-4xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                      <Sparkles className="w-6 h-6 text-black" />
-                   </div>
-                   <div>
-                      <h3 className="text-base font-bold text-white tracking-tight font-display uppercase">Oferta de lanzamiento — doble créditos</h3>
-                      <p className="text-[11px] text-white/30 font-bold uppercase tracking-widest mt-1">Usa el código <strong className="text-white bg-white/5 py-1 px-2 rounded-lg border border-white/10 ml-1">EVOLVE20</strong> al suscribirte</p>
-                   </div>
-                </div>
-                <div className="flex items-center gap-4 bg-[#050506] px-6 py-3 rounded-2xl border border-white/5 shadow-inner">
-                   <Clock className="w-4 h-4 text-aether-purple animate-pulse" />
-                   <div className="flex items-center gap-2 text-sm font-bold tabular-nums font-display tracking-[0.1em]">
-                      <span className="text-white">{String(timeLeft.hours).padStart(2, '0')}</span>
-                      <span className="text-white/20">:</span>
-                      <span className="text-white">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                      <span className="text-white/20">:</span>
-                      <span className="text-aether-purple">{String(timeLeft.seconds).padStart(2, '0')}</span>
-                   </div>
-                </div>
-             </div>
-           </div>
-        </div>
-
         {/* Credit cost reference */}
         <div className="w-full max-w-[1440px] mb-16">
           <div className="grid sm:grid-cols-3 gap-4">

@@ -42,6 +42,8 @@ const Spaces = () => {
   const [editingSpace, setEditingSpace] = useState<Space | null>(null);
   const [formData, setFormData] = useState({ name: "", description: "" });
   const [creating, setCreating] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchSpaces = useCallback(async () => {
     if (!user) return;
@@ -98,10 +100,12 @@ const Spaces = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Delete this space?")) return;
+    setDeleting(true);
     const { error } = await supabase.from("spaces").delete().eq("id", id);
+    setDeleting(false);
+    setDeleteTargetId(null);
     if (error) toast.error(error.message);
-    else { toast.success("Space deleted"); fetchSpaces(); }
+    else { toast.success("Espacio eliminado"); fetchSpaces(); }
   };
 
   const filtered = spaces.filter((s) =>
@@ -229,7 +233,7 @@ const Spaces = () => {
                         <Pencil className="mr-2 h-3.5 w-3.5" /> Configurar
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={(e) => { e.stopPropagation(); handleDelete(space.id); }}
+                        onClick={(e) => { e.stopPropagation(); setDeleteTargetId(space.id); }}
                         className="rounded-xl text-[11px] font-bold text-rose-500/60 focus:bg-rose-500/10 focus:text-rose-400 py-2.5 cursor-pointer uppercase tracking-widest font-display"
                       >
                         <Trash2 className="mr-2 h-3.5 w-3.5" /> Eliminar
@@ -251,6 +255,33 @@ const Spaces = () => {
           </div>
         )}
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!deleteTargetId} onOpenChange={(o) => !o && setDeleteTargetId(null)}>
+        <DialogContent className="bg-[#0a0a0b]/95 backdrop-blur-3xl border-white/10 sm:max-w-[380px] rounded-[3rem] p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+          <DialogHeader>
+            <div className="h-14 w-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6">
+              <Trash2 className="h-7 w-7 text-rose-400" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-white tracking-tight font-display">Eliminar espacio</DialogTitle>
+            <DialogDescription className="text-white/30 font-medium leading-relaxed mt-2">
+              Se eliminará este espacio y todos sus nodos del canvas. Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-4 mt-8">
+            <button onClick={() => setDeleteTargetId(null)} className="flex-1 px-6 py-4 rounded-2xl border border-white/5 text-xs font-bold uppercase tracking-widest text-white/30 hover:text-white transition-all font-display">
+              Cancelar
+            </button>
+            <button
+              onClick={() => deleteTargetId && handleDelete(deleteTargetId)}
+              disabled={deleting}
+              className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-rose-500 text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-rose-400 active:scale-95 transition-all disabled:opacity-50 font-display"
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Eliminar"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Space Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
