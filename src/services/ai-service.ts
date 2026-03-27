@@ -171,22 +171,21 @@ export const aiService = {
   },
 
   async callAiProxy(provider: "openrouter" | "gemini", path: string, body: any, signal?: AbortSignal) {
-    const { data: { session } } = await supabase.auth.getSession();
-    const res = await fetch("https://zfzkohjdwggctogehlkw.supabase.co/functions/v1/ai-proxy", {
-      method: "POST",
-      signal,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${session?.access_token || ""}`,
-      },
-      body: JSON.stringify({ provider, path, body }),
+    const { data, error } = await supabase.functions.invoke("ai-proxy", {
+      body: { provider, path, body },
     });
     
-    if (!res.ok) {
-        const text = await res.text();
-        throw new Error(`${provider} Error (${res.status}): ${text}`);
+    // Si error no es null, hubo un problema de red, auth (401), o del proxy
+    if (error) {
+      throw new Error(`${provider} Proxy Error: ${error.message} (Asegúrate de haber iniciado sesión y configurado los Supabase Secrets)`);
     }
-    return res.json();
+
+    // Si la función reenvía errores (4xx, 5xx), los mandamos tal cual
+    if (data && data.error) {
+      throw new Error(`${provider} API Error: ${data.error}`);
+    }
+
+    return data;
   },
 
   // ─── TEXT GENERATION ─────────────────────────────────────────────────────────
@@ -374,24 +373,19 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
   // ─── MEDIA PROXY (IMAGE EDITING) ──────────────────────────────────────────
   async handleMediaProxy(tool: string, imageUrl: string) {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const res = await fetch("https://zfzkohjdwggctogehlkw.supabase.co/functions/v1/media-proxy", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session?.access_token || ""}`,
-        },
-        body: JSON.stringify({ tool, image_url: imageUrl }),
+      const { data, error } = await supabase.functions.invoke("media-proxy", {
+        body: { tool, image_url: imageUrl },
       });
 
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || `Proxy error ${res.status}`);
+      if (error) {
+        throw new Error(error.message || `Proxy error (Asegúrate de haber iniciado sesión y configurado los Supabase Secrets)`);
       }
 
-      const result = await res.json();
-      return result;
+      if (data && data.error) {
+        throw new Error(data.error);
+      }
+
+      return data;
     } catch (err: any) {
       console.error("Media Proxy Failure:", err.message);
       // Fallback: If proxy fails or is misconfigured, fail hard to trigger credit refund
