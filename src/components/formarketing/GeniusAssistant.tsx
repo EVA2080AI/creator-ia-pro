@@ -357,6 +357,35 @@ export const GeniusAssistant = ({ onAction }: { onAction?: (action: string, data
     ];
 
     let fullText = '';
+
+    // Helper: read SSE stream and accumulate text
+    const readStream = async (res: Response): Promise<string> => {
+      if (!res.body) throw new Error('No body');
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let text = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const payload = line.slice(6).trim();
+          if (payload === '[DONE]') return text;
+          try {
+            const j = JSON.parse(payload);
+            const chunk = j.choices?.[0]?.delta?.content;
+            if (chunk) { text += chunk; setStreamingText(t => t + chunk); }
+          } catch { /* skip */ }
+        }
+      }
+      return text;
+    };
+
+    // ── Attempt 1: via Supabase proxy (streaming) ────────────────────────────
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token;
@@ -372,79 +401,86 @@ export const GeniusAssistant = ({ onAction }: { onAction?: (action: string, data
         body: JSON.stringify({
           provider: 'openrouter',
           path: 'chat/completions',
-          body: {
-            model: currentModel.openrouter,
-            messages: contextMessages,
-            temperature: 0.85,
-            max_tokens: 4096,
-            stream: true,
-          },
+          body: { model: currentModel.openrouter, messages: contextMessages, temperature: 0.85, max_tokens: 4096, stream: true },
         }),
       });
 
-      if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+        throw new Error(errJson?.error || `HTTP ${res.status}`);
+      }
+      fullText = await readStream(res);
+    } catch (proxyErr) {
+      console.warn('[Chat] Proxy stream falló:', proxyErr);
+      setStreamingText('');
+    }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const payload = line.slice(6).trim();
-          if (payload === '[DONE]') break;
-          try {
-            const json = JSON.parse(payload);
-            const chunk = json.choices?.[0]?.delta?.content;
-            if (chunk) { fullText += chunk; setStreamingText(ft => ft + chunk); }
-          } catch { /* malformed SSE line */ }
+    // ── Attempt 2: direct OpenRouter from client (VITE key) ──────────────────
+    if (!fullText) {
+      const directKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+      if (directKey) {
+        console.info('[Chat] Usando OpenRouter directo (client-side key)');
+        try {
+          const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${directKey}`,
+              'HTTP-Referer': 'https://creator-ia.com',
+              'X-Title': 'Creator IA Pro',
+            },
+            body: JSON.stringify({
+              model: currentModel.openrouter,
+              messages: contextMessages,
+              temperature: 0.85,
+              max_tokens: 4096,
+              stream: true,
+            }),
+          });
+          if (!res.ok) throw new Error(`OpenRouter directo HTTP ${res.status}`);
+          fullText = await readStream(res);
+        } catch (directErr) {
+          console.warn('[Chat] OpenRouter directo también falló:', directErr);
+          setStreamingText('');
         }
       }
+    }
 
-      // Handle non-streaming response (some proxy configs)
-      if (!fullText) {
-        const json = await res.clone().json().catch(() => null);
-        fullText = json?.choices?.[0]?.message?.content ?? '';
+    // ── Attempt 3: direct Gemini from client (VITE key) ──────────────────────
+    if (!fullText) {
+      const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (geminiKey) {
+        console.info('[Chat] Usando Gemini directo (client-side key)');
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`;
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: contextMessages.filter(m => m.role !== 'system').map(m => ({
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: m.content }],
+              })),
+              systemInstruction: { parts: [{ text: contextMessages[0]?.content ?? '' }] },
+            }),
+          });
+          const d = await res.json();
+          fullText = d.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+          if (fullText) setStreamingText(fullText);
+        } catch (geminiErr) {
+          console.error('[Chat] Gemini directo también falló:', geminiErr);
+        }
       }
+    }
 
-    } catch (streamErr) {
-      console.warn('[Chat] Stream falló, intentando fallback Gemini:', streamErr);
-      // Refund on stream error
+    // ── All attempts failed → refund ─────────────────────────────────────────
+    if (!fullText) {
       try {
         const { data: { user: u } } = await supabase.auth.getUser();
         if (u) await (supabase.rpc as any)('refund_credits', { _amount: cost, _user_id: u.id });
       } catch { /* silent */ }
-      // Fallback: Gemini via proxy (non-streaming)
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const token = session?.access_token;
-        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-        const res2 = await fetch(`${supabaseUrl}/functions/v1/ai-proxy`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          },
-          body: JSON.stringify({
-            provider: 'gemini',
-            path: 'models/gemini-1.5-flash:generateContent',
-            body: { contents: contextMessages.map(m => ({ parts: [{ text: m.content }] })) },
-          }),
-        });
-        const d2 = await res2.json();
-        fullText = d2.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
-        if (fullText) setStreamingText(fullText);
-      } catch (fallbackErr) {
-        console.error('[Chat] Fallback Gemini también falló:', fallbackErr);
-        fullText = 'Error de conexión. Verifica tu red e intenta de nuevo.';
-        setStreamingText(fullText);
-      }
+      fullText = '❌ No se pudo conectar con ningún motor de IA. Verifica tu conexión o configura los secretos en Supabase.';
+      setStreamingText(fullText);
     }
 
     // Persist assistant message

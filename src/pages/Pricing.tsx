@@ -5,109 +5,145 @@ import { supabase } from "@/integrations/supabase/client";
 import { stripeService } from "@/services/billing-service";
 import { STRIPE_TIERS } from "@/lib/stripe-tiers";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
-import { Sparkles, Check, Zap, Crown, Star, GraduationCap, Loader2, Coins, ShieldCheck, Image, FileText, Video } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { CATEGORY_CONFIG } from "@/lib/models.config";
+import {
+  Sparkles, Check, Zap, Crown, Rocket, Loader2,
+  Coins, Shield, Code2, Megaphone, MessageSquare,
+  ChevronDown, ChevronUp, Bolt,
+} from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
 import { cn } from "@/lib/utils";
 
-const plans = [
+// ─── Plan definitions ─────────────────────────────────────────────────────────
+const PLANS = [
   {
     key: "starter" as const,
-    name: "Gratis",
-    price: "$0",
-    period: "siempre",
-    credits: 10,
-    creditsLabel: "10 créditos de prueba",
-    description: "Prueba la plataforma sin gastar nada.",
-    features: [
-      "10 créditos para empezar",
-      "Crea 2 imágenes o 10 textos",
-      "Acceso a todas las herramientas",
-      "Resolución estándar",
-    ],
-    cta: "Empezar gratis",
-    badge: null,
+    name: "Starter",
+    price: 12,
+    priceLabel: "$12",
+    period: "/mes",
+    credits: 100_000,
+    creditsLabel: "100K créditos",
+    description: "Para creadores que están comenzando su viaje con IA.",
+    color: "#4ADE80",
+    gradient: "from-emerald-500/10 to-emerald-500/5",
+    border: "border-emerald-500/20",
     icon: Zap,
-    color: "text-white",
-    stripeTier: null,
+    badge: null,
+    category: "ECO",
+    stripeTier: "starter" as const,
+    features: [
+      { label: "100,000 créditos/mes", highlight: true },
+      { label: "Modelos ECO (Gemini Flash, Llama, Mistral)", highlight: false },
+      { label: "Studio Canvas", highlight: false },
+      { label: "AI Tools (imágenes, textos)", highlight: false },
+      { label: "Aether Chat con IA", highlight: false },
+      { label: "Soporte email", highlight: false },
+    ],
+    lockedFeatures: ["Modelos PRO y ULTRA", "Brand Voice"],
+    psychNote: "Prueba sin compromiso · cancela cuando quieras",
   },
   {
-    key: "educacion" as const,
-    name: "Estudiante",
-    price: "$4.99",
+    key: "creator" as const,
+    name: "Creator",
+    price: 29,
+    priceLabel: "$29",
     period: "/mes",
-    credits: 500,
-    creditsLabel: "500 créditos/mes",
-    description: "Precio especial para estudiantes y docentes.",
-    features: [
-      "500 créditos mensuales",
-      "Crea ~100 imágenes al mes",
-      "Acceso al Studio Canvas",
-      "Verificación académica requerida",
-    ],
-    cta: "Soy estudiante",
-    badge: "50% menos",
-    icon: GraduationCap,
-    color: "text-rose-400",
-    stripeTier: "educacion" as const,
-  },
-  {
-    key: "pro" as const,
-    name: "Pro",
-    price: "$9.99",
-    period: "/mes",
-    credits: 1000,
-    creditsLabel: "1,000 créditos/mes",
-    description: "Para creadores que producen contenido constantemente.",
-    features: [
-      "1,000 créditos mensuales",
-      "Crea ~200 imágenes al mes",
-      "Genera video con IA",
-      "Acceso completo al Studio",
-    ],
-    cta: "Ir a Pro",
+    credits: 500_000,
+    creditsLabel: "500K créditos",
+    description: "El sweet spot para creadores profesionales. Incluye Claude y GPT-4o.",
+    color: "#A855F7",
+    gradient: "from-aether-purple/15 to-aether-purple/5",
+    border: "border-aether-purple/30",
+    icon: Rocket,
     badge: "Más popular",
-    icon: Star,
-    color: "text-aether-purple",
-    stripeTier: "pro" as const,
+    category: "PRO",
+    stripeTier: "creator" as const,
+    features: [
+      { label: "500,000 créditos/mes", highlight: true },
+      { label: "Modelos ECO + PRO", highlight: true },
+      { label: "Claude 3.5 Sonnet · GPT-4o · Gemini Pro", highlight: false },
+      { label: "Brand Voice personalizado", highlight: true },
+      { label: "Todo lo del plan Starter", highlight: false },
+      { label: "Soporte prioritario", highlight: false },
+    ],
+    lockedFeatures: ["Modelos ULTRA (Claude Opus)"],
+    psychNote: "$29 = el café de un mes en Starbucks × 4 🚀",
   },
   {
-    key: "business" as const,
-    name: "Agencia",
-    price: "$49.99",
+    key: "agency" as const,
+    name: "Agency",
+    price: 79,
+    priceLabel: "$79",
     period: "/mes",
-    credits: 5000,
-    creditsLabel: "5,000 créditos/mes",
-    description: "Para agencias y equipos con alta producción.",
-    features: [
-      "5,000 créditos mensuales",
-      "Crea ~1,000 imágenes al mes",
-      "Espacios ilimitados",
-      "Soporte prioritario 24/7",
-    ],
-    cta: "Para mi agencia",
-    badge: "Máximo volumen",
+    credits: 2_000_000,
+    creditsLabel: "2M créditos",
+    description: "Para agencias y equipos. Acceso total. Modelos ULTRA incluidos.",
+    color: "#F59E0B",
+    gradient: "from-amber-500/15 to-amber-500/5",
+    border: "border-amber-500/30",
     icon: Crown,
-    color: "text-aether-blue",
-    stripeTier: "business" as const,
+    badge: "Máximo volumen",
+    category: "ULTRA",
+    stripeTier: "agency" as const,
+    features: [
+      { label: "2,000,000 créditos/mes", highlight: true },
+      { label: "TODOS los modelos (ECO + PRO + ULTRA)", highlight: true },
+      { label: "Claude Opus · GPT-4o Ultra · Mistral Large", highlight: false },
+      { label: "Soporte prioritario 24/7", highlight: true },
+      { label: "Todo lo del plan Creator", highlight: false },
+      { label: "API access (próximamente)", highlight: false },
+    ],
+    lockedFeatures: [],
+    psychNote: "Las agencias facturan $79 en 15 minutos de trabajo con IA.",
   },
 ];
 
-const faqs = [
-  { q: "¿Cómo funciona el descuento de estudiante?", a: "Verificamos tu correo académico (.edu o .ac) para activar el 50% de descuento automáticamente." },
-  { q: "¿Puedo cambiar de plan cuando quiera?", a: "Sí. Puedes subir o bajar de plan en cualquier momento. Los créditos restantes se ajustan automáticamente." },
-  { q: "¿Qué pasa si se me acaban los créditos?", a: "Puedes comprar un paquete de créditos extra o esperar a que se renueven en tu próximo ciclo de facturación." },
-  { q: "¿Quién es dueño de lo que creo?", a: "Tú. El 100% de los activos generados en planes de pago son de tu propiedad." },
+// ─── Comparison table rows ────────────────────────────────────────────────────
+const COMPARISON_ROWS = [
+  { label: "Créditos/mes",       starter: "100K",  creator: "500K",  agency: "2M" },
+  { label: "Modelos ECO",        starter: true,    creator: true,    agency: true },
+  { label: "Modelos PRO",        starter: false,   creator: true,    agency: true },
+  { label: "Modelos ULTRA",      starter: false,   creator: false,   agency: true },
+  { label: "Aether Chat IA",     starter: true,    creator: true,    agency: true },
+  { label: "Studio Canvas",      starter: true,    creator: true,    agency: true },
+  { label: "Brand Voice",        starter: false,   creator: true,    agency: true },
+  { label: "Soporte",            starter: "Email", creator: "Prior", agency: "24/7" },
 ];
 
+// ─── Lightning bolts component ────────────────────────────────────────────────
+function Bolts({ count, color }: { count: number; color: string }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Zap key={i} className="h-3 w-3" style={{ color: i < count ? color : 'rgba(255,255,255,0.1)' }} />
+      ))}
+    </div>
+  );
+}
+
+// ─── Model category pill ──────────────────────────────────────────────────────
+function CategoryPill({ category }: { category: keyof typeof CATEGORY_CONFIG }) {
+  const cfg = CATEGORY_CONFIG[category];
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
+      style={{ background: cfg.bgColor, color: cfg.color, border: `1px solid ${cfg.color}30` }}
+    >
+      <Bolts count={cfg.bolts} color={cfg.color} />
+      {cfg.label}
+    </span>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 export default function Pricing() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<string | undefined>();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [loadingPack, setLoadingPack] = useState<string | null>(null);
+  const [showComparison, setShowComparison] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -116,44 +152,26 @@ export default function Pricing() {
     });
   }, []);
 
-  const handleSubscribe = async (plan: typeof plans[number]) => {
-    if (!plan.stripeTier) {
-      navigate(isLoggedIn ? "/dashboard" : "/auth");
-      return;
-    }
+  const handleSubscribe = async (plan: typeof PLANS[number]) => {
     if (!isLoggedIn) {
       toast.info("Necesitas iniciar sesión para suscribirte.");
       navigate("/auth");
       return;
     }
+    const tier = STRIPE_TIERS[plan.stripeTier];
+    if (tier.price_id.includes('REPLACE_ME')) {
+      toast.error("Este plan aún no está activado. Configura los Stripe price IDs.");
+      return;
+    }
     setLoadingPlan(plan.key);
     try {
-      const tier = STRIPE_TIERS[plan.stripeTier];
       const data = await stripeService.createCheckout(tier.price_id);
       if (data?.url) window.location.href = data.url;
       else throw new Error("No se pudo generar el enlace de pago.");
-    } catch (err: any) {
-      toast.error(err.message || "Error al procesar el pago.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Error al procesar el pago.");
     } finally {
       setLoadingPlan(null);
-    }
-  };
-
-  const handleBuyCredits = async (pack: typeof CREDIT_PACKS[number]) => {
-    if (!isLoggedIn) {
-      toast.info("Necesitas iniciar sesión para comprar créditos.");
-      navigate("/auth");
-      return;
-    }
-    setLoadingPack(pack.id);
-    try {
-      const data = await stripeService.buyCredits(pack.price_id);
-      if (data?.url) window.location.href = data.url;
-      else throw new Error("No se pudo generar el enlace de pago.");
-    } catch (err: any) {
-      toast.error(err.message || "Error al procesar la compra.");
-    } finally {
-      setLoadingPack(null);
     }
   };
 
@@ -161,189 +179,234 @@ export default function Pricing() {
     <>
       <Helmet>
         <title>Planes y Precios | Creator IA Pro</title>
-        <meta name="description" content="Elige el plan que mejor se adapta a tu ritmo de creación. Compra créditos extra cuando los necesites." />
+        <meta name="description" content="Starter $12 · Creator $29 · Agency $79. Créditos mensuales para generar con los mejores modelos de IA." />
       </Helmet>
-      
-      <div className="min-h-screen bg-[#050506] text-white selection:bg-aether-purple/30 selection:text-white font-sans overflow-hidden relative">
-      <AppHeader userId={userId} onSignOut={() => supabase.auth.signOut()} />
 
-      <main className="pt-24 relative z-10 flex flex-col items-center px-8 pb-48">
-        
-        {/* Credit cost reference */}
-        <div className="w-full max-w-[1440px] mb-16">
-          <div className="grid sm:grid-cols-3 gap-4">
-            {[
-              { icon: FileText, label: "1 texto generado", cost: "1 crédito", color: "text-white" },
-              { icon: Image, label: "1 imagen generada", cost: "5 créditos", color: "text-aether-purple" },
-              { icon: Video, label: "1 video generado", cost: "20 créditos", color: "text-aether-blue" },
-            ].map((item) => (
-              <div key={item.label} className="aether-card rounded-2xl border border-white/5 px-6 py-4 flex items-center gap-4">
-                <item.icon className={cn("w-5 h-5 shrink-0", item.color)} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-medium text-white/40">{item.label}</p>
-                </div>
-                <span className={cn("text-xs font-bold shrink-0", item.color)}>{item.cost}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="min-h-screen bg-[#050506] text-white selection:bg-aether-purple/30">
+        <AppHeader userId={userId} onSignOut={() => supabase.auth.signOut()} />
 
-        <div className="text-center mb-24 space-y-6">
-          <Badge className="bg-white/5 text-white/30 border-white/10 px-6 py-2 rounded-full text-[10px] font-bold tracking-[0.4em] uppercase font-display">
-            Precios claros y transparentes
-          </Badge>
-          <h1 className="text-6xl md:text-9xl font-bold tracking-tight uppercase font-display">
-            Elige tu <br /> <span className="bg-gradient-to-r from-white via-white to-white/20 bg-clip-text text-transparent">plan.</span>
-          </h1>
-          <p className="max-w-xl mx-auto text-sm text-white/30 font-medium leading-relaxed">
-            Paga mensual y cancela cuando quieras. Los créditos se renuevan cada mes.
-          </p>
-        </div>
+        <main className="pt-20 pb-40">
 
-        {/* Protocol Grid */}
-        <div className="grid w-full max-w-[1440px] gap-8 md:grid-cols-2 lg:grid-cols-4 items-stretch">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={cn(
-                "relative flex flex-col rounded-[3rem] p-10 transition-all duration-700 hover:-translate-y-4 group",
-                plan.key === 'pro'
-                  ? "aether-card border-aether-purple/30 shadow-5xl shadow-aether-purple/10 aether-border-glow"
-                  : "aether-card border-white/5"
-              )}
-            >
-              <div className="mb-10 flex h-16 w-16 items-center justify-center rounded-2.5xl bg-white/5 border border-white/5 group-hover:scale-110 transition-transform duration-500 shadow-inner">
-                <plan.icon className={cn("h-7 w-7", plan.color)} />
-              </div>
-
-              <div className="space-y-2 mb-8">
-                 <h2 className="text-2xl font-bold text-white uppercase font-display tracking-tight">{plan.name}</h2>
-                 <p className="text-sm text-white/30 font-medium leading-relaxed">{plan.description}</p>
-              </div>
-
-              <div className="mb-10 flex items-baseline gap-2">
-                <span className={cn("text-6xl font-bold tracking-tighter font-display", plan.key === 'pro' ? "text-white" : "text-white/60")}>
-                  {plan.price}
-                </span>
-                <span className="text-[11px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">{plan.period}</span>
-              </div>
-              
-              <div className="mb-10 flex items-center justify-center gap-3 rounded-2xl bg-white/[0.03] border border-white/5 px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] font-display text-white/40 group-hover:text-white transition-colors duration-500">
-                <Sparkles className={cn("h-4 w-4", plan.color)} />
-                {plan.creditsLabel}
-              </div>
-
-              <ul className="flex-1 space-y-5 px-2">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-4 text-sm text-white/40 font-medium group-hover:text-white/60 transition-colors">
-                    <Check className={cn("h-4 w-4 shrink-0", plan.color)} />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                onClick={() => handleSubscribe(plan)}
-                disabled={loadingPlan === plan.key}
-                className={cn(
-                  "mt-12 h-18 w-full rounded-2.5xl font-bold text-[11px] uppercase tracking-[0.3em] font-display transition-all active:scale-[0.98] shadow-4xl group-hover:scale-[1.02] duration-500",
-                  plan.key === "starter"
-                    ? "bg-white/5 text-white/40 border border-white/5 hover:bg-white/10 hover:text-white"
-                    : "bg-white text-black hover:bg-white/90"
-                )}
-              >
-                {loadingPlan === plan.key ? <Loader2 className="h-5 w-5 animate-spin" /> : plan.cta}
-              </Button>
-              
-              {plan.badge && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-6 py-2 rounded-full text-[9px] font-bold uppercase tracking-widest bg-white text-black shadow-5xl animate-bounce">
-                  {plan.badge}
-                </div>
-              )}
+          {/* ── Hero ────────────────────────────────────────────────────────── */}
+          <section className="text-center px-6 pt-12 pb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-black uppercase tracking-[0.4em] text-white/40 mb-8">
+              <Sparkles className="h-3 w-3 text-aether-purple" />
+              Precios claros · Cancela cuando quieras
             </div>
-          ))}
-        </div>
-        
-        {/* Credit Packs */}
-        <div className="mt-32 w-full max-w-[1440px]">
-             <div className="flex flex-col items-center mb-16 text-center space-y-4">
-                 <Badge className="bg-aether-blue/10 text-aether-blue border-aether-blue/20 px-8 py-3 rounded-full text-[10px] font-bold tracking-[0.5em] uppercase font-display">
-                    Créditos extra
-                 </Badge>
-                 <h2 className="text-5xl md:text-7xl font-bold tracking-tight text-white uppercase font-display">Compra <span className="opacity-40">créditos.</span></h2>
-                 <p className="text-white/30 font-medium text-sm max-w-md leading-relaxed">
-                    Sin cambiar tu plan. Se suman a tus créditos actuales y no tienen vencimiento.
-                 </p>
-             </div>
+            <h1 className="text-5xl sm:text-7xl md:text-9xl font-black tracking-tighter uppercase font-display mb-6">
+              Elige tu{" "}
+              <span className="bg-gradient-to-br from-white via-white to-white/20 bg-clip-text text-transparent">
+                plan.
+              </span>
+            </h1>
+            <p className="max-w-lg mx-auto text-[15px] text-white/35 leading-relaxed">
+              Créditos basados en tokens. ECO · PRO · ULTRA.{" "}
+              <span className="text-white/60 font-semibold">Los multiplicadores protegen tu margen.</span>
+            </p>
+          </section>
 
-           <div className="grid gap-6 sm:grid-cols-3">
-              {CREDIT_PACKS.map((pack) => (
-                  <div key={pack.id} className="group aether-card rounded-[2.5rem] border border-white/5 p-10 transition-all duration-500 hover:border-aether-blue/30 hover:scale-[1.03] text-center relative overflow-hidden">
-                    <div className="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10 mx-auto shadow-inner group-hover:bg-white transition-all duration-500">
-                       <Coins className="h-8 w-8 text-white/20 group-hover:text-black transition-colors" />
-                    </div>
-                    <h3 className="text-xl font-bold text-white tracking-tight uppercase font-display">{pack.name}</h3>
-                    <p className="mt-1.5 text-xs font-bold text-aether-blue uppercase tracking-widest font-display">{pack.credits} créditos</p>
-
-                    {/* Cost per credit */}
-                    <p className="mt-2 text-[10px] text-white/20 font-medium">
-                      ≈ ${(parseFloat(pack.price.replace('$','')) / pack.credits).toFixed(3)} por crédito
-                    </p>
-
-                    <div className="mt-8 flex items-baseline justify-center gap-1">
-                       <span className="text-4xl font-bold text-white tracking-tighter font-display tabular-nums">{pack.price}</span>
-                       <span className="text-[11px] font-bold text-white/20 uppercase tracking-widest font-display">USD</span>
-                    </div>
-
-                    <Button
-                       onClick={() => handleBuyCredits(pack)}
-                       disabled={loadingPack === pack.id}
-                       className="mt-10 w-full h-14 bg-white/[0.03] border border-white/5 text-white/40 hover:bg-white hover:text-black hover:border-white rounded-2xl font-bold text-[10px] uppercase tracking-widest transition-all active:scale-95 font-display"
-                    >
-                       {loadingPack === pack.id ? <Loader2 className="h-5 w-5 animate-spin" /> : "Comprar ahora"}
-                    </Button>
-                 </div>
+          {/* ── Model category explanation (bento row) ────────────────────── */}
+          <section className="px-6 mb-12 max-w-5xl mx-auto">
+            <div className="grid grid-cols-3 gap-3">
+              {(Object.entries(CATEGORY_CONFIG) as [keyof typeof CATEGORY_CONFIG, typeof CATEGORY_CONFIG[keyof typeof CATEGORY_CONFIG]][]).map(([key, cfg]) => (
+                <div key={key} className="rounded-2xl border p-5" style={{ borderColor: cfg.color + '20', background: cfg.bgColor }}>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-black uppercase tracking-widest" style={{ color: cfg.color }}>{cfg.label}</span>
+                    <Bolts count={cfg.bolts} color={cfg.color} />
+                  </div>
+                  <p className="text-[11px] text-white/40 leading-relaxed">{cfg.description}</p>
+                  <p className="text-xs font-bold text-white/60 mt-2">{cfg.multiplier}× multiplicador</p>
+                </div>
               ))}
-           </div>
-        </div>
+            </div>
+          </section>
 
-        {/* FAQs */}
-        <div className="mt-32 w-full max-w-4xl">
-          <h2 className="text-center text-4xl md:text-6xl font-bold text-white mb-16 tracking-tight uppercase font-display">
-            Preguntas <span className="opacity-40">frecuentes.</span>
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {faqs.map((faq) => (
-              <div key={faq.q} className="aether-card rounded-[2rem] border border-white/5 p-8 hover:border-aether-purple/20 transition-all group duration-500">
-                <h3 className="text-sm font-bold text-white leading-relaxed font-display group-hover:text-aether-purple transition-colors mb-4">{faq.q}</h3>
-                <p className="text-[13px] text-white/30 font-medium leading-relaxed group-hover:text-white/50 transition-colors">{faq.a}</p>
+          {/* ── Pricing cards (bento grid) ───────────────────────────────── */}
+          <section className="px-6 mb-8">
+            <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6 items-start">
+              {PLANS.map((plan) => {
+                const Icon = plan.icon;
+                const isLoading = loadingPlan === plan.key;
+                const isPopular = plan.badge === "Más popular";
+                return (
+                  <div
+                    key={plan.key}
+                    className={cn(
+                      "relative rounded-[2rem] border p-8 flex flex-col transition-all duration-300 hover:-translate-y-1",
+                      isPopular
+                        ? "bg-gradient-to-b " + plan.gradient + " " + plan.border + " shadow-[0_0_60px_rgba(168,85,247,0.15)]"
+                        : "bg-white/[0.02] " + plan.border
+                    )}
+                  >
+                    {/* Popular badge */}
+                    {plan.badge && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
+                        style={{ background: plan.color, color: '#000' }}>
+                        {plan.badge}
+                      </div>
+                    )}
+
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-6">
+                      <div>
+                        <div className="flex items-center gap-2.5 mb-2">
+                          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
+                            style={{ background: plan.color + '20' }}>
+                            <Icon className="h-4.5 w-4.5" style={{ color: plan.color }} />
+                          </div>
+                          <span className="text-base font-black text-white font-display">{plan.name}</span>
+                        </div>
+                        <CategoryPill category={plan.category as keyof typeof CATEGORY_CONFIG} />
+                      </div>
+                    </div>
+
+                    {/* Price */}
+                    <div className="mb-2">
+                      <span className="text-5xl font-black text-white font-display tracking-tight">{plan.priceLabel}</span>
+                      <span className="text-white/30 text-sm ml-1">{plan.period}</span>
+                    </div>
+
+                    {/* Credits */}
+                    <div className="flex items-center gap-2 mb-5 px-3 py-2 rounded-xl" style={{ background: plan.color + '10' }}>
+                      <Coins className="h-4 w-4 shrink-0" style={{ color: plan.color }} />
+                      <span className="text-sm font-black" style={{ color: plan.color }}>{plan.creditsLabel}/mes</span>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-[12px] text-white/40 mb-5 leading-relaxed">{plan.description}</p>
+
+                    {/* Features */}
+                    <ul className="space-y-2.5 mb-6 flex-1">
+                      {plan.features.map(f => (
+                        <li key={f.label} className="flex items-start gap-2.5">
+                          <Check className="h-4 w-4 shrink-0 mt-0.5" style={{ color: f.highlight ? plan.color : 'rgba(255,255,255,0.25)' }} />
+                          <span className={cn("text-[12px] leading-relaxed", f.highlight ? "text-white/85 font-semibold" : "text-white/45")}>
+                            {f.label}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* CTA */}
+                    <button
+                      onClick={() => handleSubscribe(plan)}
+                      disabled={isLoading}
+                      className={cn(
+                        "w-full py-3.5 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50",
+                        isPopular
+                          ? "bg-white text-black hover:bg-white/90 shadow-lg"
+                          : "border text-white hover:bg-white/5"
+                      )}
+                      style={!isPopular ? { borderColor: plan.color + '40', color: plan.color } : undefined}
+                    >
+                      {isLoading
+                        ? <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                        : `Activar ${plan.name}`}
+                    </button>
+
+                    {/* Psych note */}
+                    {plan.psychNote && (
+                      <p className="text-center text-[9px] text-white/20 mt-3 font-medium">{plan.psychNote}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* ── Comparison table toggle ──────────────────────────────────── */}
+          <section className="px-6 max-w-5xl mx-auto mb-12">
+            <button
+              onClick={() => setShowComparison(v => !v)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-[11px] font-bold uppercase tracking-widest text-white/40 hover:text-white/70 hover:bg-white/[0.05] transition-all"
+            >
+              {showComparison ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {showComparison ? "Ocultar comparación" : "Ver tabla comparativa completa"}
+            </button>
+
+            {showComparison && (
+              <div className="mt-4 rounded-2xl border border-white/[0.06] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-white/[0.06]">
+                      <th className="text-left px-5 py-3.5 text-[10px] font-bold text-white/25 uppercase tracking-widest w-2/5">Feature</th>
+                      {PLANS.map(p => (
+                        <th key={p.key} className="px-4 py-3.5 text-center">
+                          <span className="text-[11px] font-black" style={{ color: p.color }}>{p.name}</span>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COMPARISON_ROWS.map((row, i) => (
+                      <tr key={row.label} className={cn("border-b border-white/[0.04]", i % 2 === 0 && "bg-white/[0.01]")}>
+                        <td className="px-5 py-3 text-[12px] text-white/50">{row.label}</td>
+                        {(['starter', 'creator', 'agency'] as const).map(tier => {
+                          const val = row[tier];
+                          return (
+                            <td key={tier} className="px-4 py-3 text-center">
+                              {typeof val === 'boolean' ? (
+                                val
+                                  ? <Check className="h-4 w-4 text-emerald-400 mx-auto" />
+                                  : <span className="text-white/15 text-lg">—</span>
+                              ) : (
+                                <span className="text-[11px] font-bold text-white/70">{val}</span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            ))}
-          </div>
-        </div>
+            )}
+          </section>
 
-        {/* Support */}
-        <div className="mt-20 p-8 rounded-[2.5rem] aether-card border border-white/5 flex flex-col md:flex-row items-center gap-6 px-12 group hover:border-aether-purple/10 duration-500">
-           <div className="p-4 rounded-2xl bg-white/5 border border-white/5 text-aether-purple group-hover:scale-110 transition-transform">
-              <ShieldCheck className="w-7 h-7" />
-           </div>
-           <div className="text-center md:text-left flex-1">
-              <p className="text-xs font-bold uppercase tracking-widest text-white/20 font-display mb-1">¿Tienes algún problema?</p>
-              <p className="text-base font-bold text-white font-display">Escríbenos a <span className="text-aether-purple">soporte@creatorIA.pro</span></p>
-           </div>
-           <Button className="bg-white/5 text-white/40 hover:text-white hover:bg-white/10 rounded-2xl px-8 h-12 font-display font-bold uppercase tracking-widest text-[10px]">Contactar soporte</Button>
-        </div>
-      </main>
-      
-      {/* Background Evolution Glows */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-          <div className="absolute top-1/2 left-1/4 h-[700px] w-[700px] rounded-full bg-aether-purple/5 blur-[120px] animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 h-[600px] w-[600px] rounded-full bg-aether-blue/5 blur-[100px]" />
+          {/* ── Credit packs ─────────────────────────────────────────────── */}
+          {CREDIT_PACKS && CREDIT_PACKS.length > 0 && (
+            <section className="px-6 max-w-5xl mx-auto mb-12">
+              <h2 className="text-lg font-black text-white/60 uppercase tracking-widest mb-4 text-center">
+                Créditos extra · Top-up cuando los necesites
+              </h2>
+              <div className="grid sm:grid-cols-3 gap-4">
+                {CREDIT_PACKS.map((pack) => (
+                  <div key={pack.id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 flex items-center gap-4">
+                    <Coins className="h-5 w-5 text-aether-purple shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-white/80">{pack.name ?? `${pack.credits?.toLocaleString()} créditos`}</p>
+                      <p className="text-[10px] text-white/30">Pago único · no expiran</p>
+                    </div>
+                    <span className="text-sm font-black text-aether-purple shrink-0">{pack.price}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── FAQ ──────────────────────────────────────────────────────── */}
+          <section className="px-6 max-w-3xl mx-auto">
+            <h2 className="text-center text-lg font-black text-white/40 uppercase tracking-widest mb-6">
+              Preguntas frecuentes
+            </h2>
+            <div className="space-y-3">
+              {[
+                { q: "¿Qué son los multiplicadores ECO/PRO/ULTRA?", a: "Son factores que determinan cuántos créditos consume cada modelo. Un modelo ECO (1×) usa 1 crédito por ~100 tokens. Un modelo PRO (5×) usa 5 créditos. ULTRA (20×) usa 20. Esto refleja el costo real de inferencia y protege la rentabilidad del servicio." },
+                { q: "¿Puedo cambiar de plan cuando quiera?", a: "Sí. Puedes subir o bajar de plan en cualquier momento. Los créditos del ciclo actual se mantienen." },
+                { q: "¿Qué pasa si se me acaban los créditos?", a: "Puedes comprar un pack extra (top-up) sin cambiar de plan, o esperar tu renovación mensual." },
+                { q: "¿Los créditos expiran?", a: "Los créditos mensuales se renuevan cada ciclo de facturación. Los packs de top-up no expiran." },
+                { q: "¿Quién es dueño de lo que genero?", a: "Tú. El 100% de los activos generados en planes de pago son de tu propiedad." },
+              ].map(faq => (
+                <div key={faq.q} className="rounded-2xl border border-white/[0.06] px-6 py-4">
+                  <p className="text-[13px] font-bold text-white/70 mb-2">{faq.q}</p>
+                  <p className="text-[12px] text-white/35 leading-relaxed">{faq.a}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+        </main>
       </div>
-
-      {/* Grain overlay */}
-      <div className="pointer-events-none fixed inset-0 z-10 opacity-[0.02] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
-    </div>
     </>
   );
 }

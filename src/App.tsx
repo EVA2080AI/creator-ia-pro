@@ -10,6 +10,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { GeniusAssistant } from "@/components/formarketing/GeniusAssistant";
+import { CreditProgressBar } from "@/components/CreditProgressBar";
 
 // Global floating chat bubble — visible on all authenticated pages except /chat and /formarketing
 function GlobalChat() {
@@ -130,6 +131,7 @@ const App = () => {
             <AuthWatcher />
             <GlobalAmbient />
             <GlobalChat />
+            <CreditProgressBar />
             <Suspense fallback={<LoadingScreen />}>
               <Routes>
                 <Route path="/" element={<Index />} />
