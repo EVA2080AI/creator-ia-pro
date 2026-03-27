@@ -8,9 +8,14 @@ const corsHeaders = {
 };
 
 const TIERS: Record<string, { name: string; credits: number }> = {
+  // Legacy tiers
   "prod_U6xj2kgXVmXSBX": { name: "educacion", credits: 500 },
-  "prod_U6xjReaTzoFveY": { name: "pro", credits: 1000 },
-  "prod_U6xkDNO9PA3C9C": { name: "business", credits: 5000 },
+  "prod_U6xjReaTzoFveY": { name: "pro",        credits: 1_000 },
+  "prod_U6xkDNO9PA3C9C": { name: "business",   credits: 5_000 },
+  // v2 tiers
+  "prod_UE2MjSRJAsKDnj": { name: "starter",    credits: 100_000 },
+  "prod_UE2NGBRjcHbZPk": { name: "creator",    credits: 500_000 },
+  "prod_UE2NDJ9HS6wxBF": { name: "agency",     credits: 2_000_000 },
 };
 
 const logStep = (step: string, details?: any) => {

@@ -66,20 +66,20 @@ const appIdToToolId: Record<string, ToolId> = {
 
 function parseMarkdown(text: string): string {
   return text
-    .replace(/^### (.+)$/gm, "<h3>$1</h3>")
-    .replace(/^## (.+)$/gm, "<h2>$1</h2>")
-    .replace(/^# (.+)$/gm, "<h1>$1</h1>")
-    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*(.+?)\*/g, "<em>$1</em>")
-    .replace(/`(.+?)`/g, "<code>$1</code>")
-    .replace(/^---+$/gm, "<hr />")
-    .replace(/^> (.+)$/gm, "<blockquote>$1</blockquote>")
-    .replace(/^\s*[-*•] (.+)$/gm, "<li>$1</li>")
-    .replace(/(<li>.*<\/li>(\n|$))+/g, (m) => `<ul>${m}</ul>`)
-    .replace(/^\d+\. (.+)$/gm, "<li>$1</li>")
-    .replace(/\n\n/g, "</p><p>")
-    .replace(/(.+)(?<!\>)$/gm, (line) =>
-      !line.match(/^<[h1-6ul]|^<li|^<hr|^<blockquote/) ? `<p>${line}</p>` : line
+    .replace(/^### (.+)$/gm, '<h3 class="text-sm font-bold text-white mt-4 mb-1.5">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="text-base font-bold text-white mt-5 mb-2">$1</h2>')
+    .replace(/^# (.+)$/gm,  '<h1 class="text-lg font-bold text-white mt-6 mb-2">$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-white">$1</strong>')
+    .replace(/\*(.+?)\*/g,     '<em class="italic text-white/80">$1</em>')
+    .replace(/`([^`\n]+)`/g,   '<code class="bg-white/[0.08] text-sky-300 px-1.5 py-0.5 rounded text-[12px] font-mono">$1</code>')
+    .replace(/^---+$/gm,       '<hr class="border-white/10 my-4" />')
+    .replace(/^> (.+)$/gm,     '<blockquote class="border-l-2 border-aether-purple/50 pl-4 my-3 text-white/60 italic">$1</blockquote>')
+    .replace(/^\s*[-*•] (.+)$/gm, '<li class="flex gap-2 my-1"><span class="text-aether-purple mt-1 shrink-0">›</span><span class="text-white/80">$1</span></li>')
+    .replace(/(<li[\s\S]*?<\/li>\n?)+/g, m => `<ul class="my-3 space-y-0.5">${m}</ul>`)
+    .replace(/^\d+\. (.+)$/gm, '<li class="flex gap-2 my-1"><span class="text-white/30 shrink-0 tabular-nums">·</span><span class="text-white/80">$1</span></li>')
+    .replace(/\n\n/g, '</p><p class="mt-3 text-white/75 leading-relaxed">')
+    .replace(/^(?!<[hublpei])(.+)$/gm, line =>
+      line.trim() ? `<p class="text-white/75 leading-relaxed">${line}</p>` : ''
     );
 }
 
@@ -269,7 +269,7 @@ const Tools = () => {
     try {
       const { error } = await supabase.from("saved_assets").insert({
         user_id: user.id,
-        asset_type: "image",
+        type: "image",
         asset_url: resultImage,
         prompt: `${currentTool.name} — ${textPrompt.slice(0, 40) || "generado"}`,
         tags: [activeTool, "ai-generated"],

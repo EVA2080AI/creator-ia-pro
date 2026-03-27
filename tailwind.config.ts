@@ -70,7 +70,7 @@ export default {
           canvas: '#010102',
           card: 'rgba(10, 10, 12, 0.8)',
           'card-hover': 'rgba(15, 15, 18, 0.9)',
-          purple: '#bd00ff',
+          purple: '#A855F7',
           blue: '#00c2ff',
           rose: '#ff0071',
           glass: 'rgba(255, 255, 255, 0.03)',

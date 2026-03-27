@@ -82,7 +82,8 @@ const Profile = () => {
     );
   }
 
-  const tierLabel = profile?.subscription_tier === "pro" ? "Pro" : profile?.subscription_tier === "premium" ? "Premium" : "Gratuito";
+  const TIER_LABELS: Record<string, string> = { free: "Free", starter: "Starter", creator: "Creator", agency: "Agency", educacion: "Educación", pro: "Pro", business: "Business" };
+  const tierLabel = TIER_LABELS[profile?.subscription_tier ?? "free"] ?? "Free";
   const joinDate = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" }) : "—";
 
   return (
@@ -234,12 +235,12 @@ const Profile = () => {
                   <p className="text-xs text-white/30">Plan activo</p>
                 </div>
               </div>
-              {tierLabel === "Gratuito" && (
+              {tierLabel === "Free" && (
                 <button
                   onClick={() => navigate("/pricing")}
                   className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-aether-purple/10 border border-aether-purple/20 text-aether-purple text-sm font-bold hover:bg-aether-purple/20 transition-all"
                 >
-                  Actualizar a Pro
+                  Actualizar a Starter o superior
                   <ChevronRight className="w-4 h-4" />
                 </button>
               )}

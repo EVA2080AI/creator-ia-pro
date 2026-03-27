@@ -38,24 +38,24 @@ export const STRIPE_TIERS = {
   // TODO: Replace price_id with real Stripe IDs after creating products
   starter: {
     name: 'Starter',
-    price_id: 'price_starter_REPLACE_ME',   // ← Create in Stripe dashboard
-    product_id: 'prod_starter_REPLACE_ME',
+    price_id: 'price_1TFaHzHXiILe6LmrJ2KTUaGx',
+    product_id: 'prod_UE2MjSRJAsKDnj',
     credits: 100_000,
     price: '$12',
     tier_key: 'starter',
   },
   creator: {
     name: 'Creator',
-    price_id: 'price_creator_REPLACE_ME',   // ← Create in Stripe dashboard
-    product_id: 'prod_creator_REPLACE_ME',
+    price_id: 'price_1TFaIYHXiILe6LmrYe9kJoFT',
+    product_id: 'prod_UE2NGBRjcHbZPk',
     credits: 500_000,
     price: '$29',
     tier_key: 'creator',
   },
   agency: {
     name: 'Agency',
-    price_id: 'price_agency_REPLACE_ME',    // ← Create in Stripe dashboard
-    product_id: 'prod_agency_REPLACE_ME',
+    price_id: 'price_1TFaIaHXiILe6LmrYwfqWW3Z',
+    product_id: 'prod_UE2NDJ9HS6wxBF',
     credits: 2_000_000,
     price: '$79',
     tier_key: 'agency',

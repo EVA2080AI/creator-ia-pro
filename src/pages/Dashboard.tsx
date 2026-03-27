@@ -60,7 +60,7 @@ const Dashboard = () => {
           supabase.from("saved_assets").select("id", { count: "exact", head: true }).eq("user_id", user.id),
           supabase.from("spaces").select("id", { count: "exact", head: true }).eq("user_id", user.id),
           supabase.from("spaces").select("*").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(8),
-          supabase.from("credit_transactions").select("amount, type, description, created_at")
+          supabase.from("transactions").select("amount, type, description, created_at")
             .eq("user_id", user.id).gte("created_at", sevenDaysAgo)
             .not("type", "in", '("subscription_reload","credit_purchase")'),
         ]);
@@ -99,7 +99,7 @@ const Dashboard = () => {
     fetchData();
   }, [user]);
 
-  const tierLabels: Record<string, string> = { free: "Starter", educacion: "Educación", pro: "Premium", business: "Enterprise" };
+  const tierLabels: Record<string, string> = { free: "Free", starter: "Starter", creator: "Creator", agency: "Agency", educacion: "Educación", pro: "Pro", business: "Business" };
   const currentTier = profile?.subscription_tier || "free";
 
   const handleCreateSpace = async () => {
@@ -171,7 +171,7 @@ const Dashboard = () => {
                 className="px-5 py-2 bg-white text-black rounded-xl flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest hover:bg-white/90 transition-all active:scale-95"
               >
                 <Zap className="w-3.5 h-3.5" />
-                Pro Plus
+                Upgrade
               </button>
             </div>
           </div>
