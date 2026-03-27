@@ -267,11 +267,11 @@ const Tools = () => {
     if (!resultImage || !user) return;
     setSavingAsset(true);
     try {
-      const { error } = await supabase.from("assets").insert({
+      const { error } = await supabase.from("saved_assets").insert({
         user_id: user.id,
-        type: "image",
-        url: resultImage,
-        name: `${currentTool.name} — ${textPrompt.slice(0, 40) || "generado"}`,
+        asset_type: "image",
+        asset_url: resultImage,
+        prompt: `${currentTool.name} — ${textPrompt.slice(0, 40) || "generado"}`,
         tags: [activeTool, "ai-generated"],
       } as any);
       if (error) throw error;
@@ -305,10 +305,32 @@ const Tools = () => {
     <div className="h-screen flex flex-col bg-[#050506] text-white font-sans overflow-hidden selection:bg-aether-purple/30">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      <div className="flex flex-1 overflow-hidden" style={{ marginTop: "64px" }}>
+      <div className="flex flex-1 flex-col overflow-hidden" style={{ marginTop: "64px" }}>
+
+        {/* ── Mobile tool selector (visible only on small screens) ── */}
+        <div className="md:hidden flex flex-col bg-[#070708] border-b border-white/[0.05] shrink-0">
+          <div className="flex border-b border-white/[0.05]">
+            {categories.map((cat) => (
+              <button key={cat.id} onClick={() => switchCategory(cat.id)} className={cn("flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-bold uppercase tracking-widest transition-all", category === cat.id ? "bg-white text-black" : "text-white/30 hover:text-white/60")}>
+                <cat.icon className="h-3 w-3" />{cat.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex overflow-x-auto no-scrollbar gap-1 p-2">
+            {filteredTools.map((tool) => (
+              <button key={tool.id} onClick={() => switchTool(tool)} disabled={tool.disabled} className={cn("flex flex-col items-center gap-1 px-3 py-2 rounded-xl shrink-0 transition-all text-center", tool.disabled ? "opacity-40 cursor-not-allowed" : activeTool === tool.id ? "bg-white/[0.08] border border-white/[0.10] text-white" : "text-white/30 hover:text-white/60")}>
+                <tool.icon className="h-4 w-4" />
+                <span className="text-[9px] font-bold whitespace-nowrap">{tool.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Desktop: sidebar + main content ── */}
+        <div className="flex flex-1 overflow-hidden">
 
         {/* ── Left Sidebar ──────────────────────────────────── */}
-        <aside className="w-60 shrink-0 border-r border-white/[0.05] bg-[#070708] flex flex-col overflow-hidden">
+        <aside className="hidden md:flex w-60 shrink-0 border-r border-white/[0.05] bg-[#070708] flex-col overflow-hidden">
           {/* Category tabs */}
           <div className="p-3 border-b border-white/[0.05]">
             <div className="flex bg-white/[0.03] p-1 rounded-xl border border-white/[0.05] gap-1">
@@ -638,6 +660,7 @@ const Tools = () => {
               )}
             </div>
           </div>
+        </div>
         </div>
       </div>
     </div>

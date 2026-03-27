@@ -63,7 +63,7 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
   return (
     <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
       ${data.status === 'executing' ? 'aether-prism glow-purple' : 'aether-card'}
-      w-[260px] shadow-2xl nodrag
+      w-[260px] shadow-2xl
     `}>
       {/* Aether Character Header */}
       <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">

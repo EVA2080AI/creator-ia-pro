@@ -69,7 +69,7 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
   return (
     <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
       ${isRendering ? 'aether-prism glow-blue shadow-[0_0_40px_rgba(0,194,255,0.15)]' : 'aether-card'}
-      w-[260px] shadow-2xl nodrag
+      w-[260px] shadow-2xl
     `}>
 
       {/* Aether Node Header */}

@@ -206,17 +206,21 @@ ${userCredits < 3 ? '⚠️ Créditos bajos: menciona sutilmente que el Plan Pro
       } catch (e: any) { console.warn(`[Image] ${geminiModel} falló:`, e.message); }
     }
 
-    // 3. Pollinations via proxy (server-side, sin CORS)
+    // 3. Pollinations via proxy (server-side)
     const seed = Math.floor(Math.random() * 999999);
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (attempt > 0) await new Promise(r => setTimeout(r, 5000 * attempt));
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 3000));
       try {
         const data = await this.callAiProxy("pollinations", "image", { prompt: finalPrompt, seed, width: 1024, height: 1024 });
         if (data?.url) return { url: data.url };
-      } catch (e: any) { console.warn(`[Image] Pollinations intento ${attempt + 1} falló:`, e.message); }
+      } catch (e: any) { console.warn(`[Image] Pollinations proxy intento ${attempt + 1} falló:`, e.message); }
     }
 
-    throw new Error("No se pudo generar la imagen. Por favor intenta de nuevo.");
+    // 4. Pollinations DIRECT URL — CORS enabled, no proxy, guaranteed fallback
+    const directSeed = Math.floor(Math.random() * 999999);
+    return {
+      url: `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&seed=${directSeed}&nologo=true&model=flux`,
+    };
   },
 
   // ─── VIDEO GENERATION ────────────────────────────────────────────────────────

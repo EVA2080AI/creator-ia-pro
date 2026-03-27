@@ -76,7 +76,7 @@ Formatos de comando soportados:
     };
 
     return (
-        <div className="fixed bottom-32 right-8 z-[99999] isolation-auto">
+        <div className="fixed bottom-20 left-6 z-[99999] isolation-auto">
             {!isOpen && (
                 <button 
                   onClick={() => setIsOpen(true)}

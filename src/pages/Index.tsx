@@ -27,18 +27,18 @@ const GALLERY = [
 ];
 
 const aiTools = [
-  { icon: Wand2,       name: "Neural Enhancer",   desc: "Optimiza luz y detalles.",   cat: "image",     color: "from-purple-500/20 to-violet-500/10" },
-  { icon: ZoomIn,      name: "Quantum Upscale",   desc: "Escala a 4K sin pérdida.",   cat: "image",     color: "from-blue-500/20 to-cyan-500/10" },
-  { icon: Eraser,      name: "Object Eraser",     desc: "Elimina distracciones.",     cat: "image",     color: "from-rose-500/20 to-pink-500/10" },
-  { icon: ImagePlus,   name: "Alpha Matte",       desc: "Fondo perfecto removido.",   cat: "image",     color: "from-emerald-500/20 to-teal-500/10" },
-  { icon: RotateCcw,   name: "Photo Recovery",    desc: "Revive fotos dañadas.",      cat: "image",     color: "from-amber-500/20 to-yellow-500/10" },
-  { icon: Image,       name: "Vision Morph",      desc: "Genera activos del texto.",  cat: "image",     color: "from-purple-500/20 to-fuchsia-500/10" },
-  { icon: MessageSquare, name: "Copy Orchestrator", desc: "Copy de alta conversión.", cat: "marketing", color: "from-blue-500/20 to-indigo-500/10" },
-  { icon: PenTool,     name: "Identity Forge",    desc: "Logos y marca neural.",      cat: "marketing", color: "from-rose-500/20 to-red-500/10" },
-  { icon: Hash,        name: "Social Pulse",      desc: "Kit de redes optimizado.",   cat: "marketing", color: "from-cyan-500/20 to-sky-500/10" },
-  { icon: FileText,    name: "Semantic Writer",   desc: "Artículos SEO premium.",     cat: "marketing", color: "from-green-500/20 to-emerald-500/10" },
-  { icon: Type,        name: "Ad Synthesizer",    desc: "Ads para Google y Meta.",    cat: "marketing", color: "from-orange-500/20 to-amber-500/10" },
-  { icon: Palette,     name: "Aether Studio",     desc: "Canvas creativo infinito.",  cat: "studio",    color: "from-violet-500/20 to-purple-500/10" },
+  { icon: Wand2,       name: "Mejorar imagen",       desc: "Optimiza luz y detalles automáticamente.",   cat: "image",     color: "from-purple-500/20 to-violet-500/10" },
+  { icon: ZoomIn,      name: "Aumentar resolución",  desc: "Escala imágenes hasta 4K sin perder calidad.", cat: "image",   color: "from-blue-500/20 to-cyan-500/10" },
+  { icon: Eraser,      name: "Borrar objeto",        desc: "Elimina objetos de la imagen.",              cat: "image",     color: "from-rose-500/20 to-pink-500/10" },
+  { icon: ImagePlus,   name: "Quitar fondo",         desc: "Extrae el fondo con bordes perfectos.",      cat: "image",     color: "from-emerald-500/20 to-teal-500/10" },
+  { icon: RotateCcw,   name: "Restaurar foto",       desc: "Restaura fotos antiguas o dañadas.",         cat: "image",     color: "from-amber-500/20 to-yellow-500/10" },
+  { icon: Image,       name: "Crear imagen",         desc: "Genera imágenes desde texto con IA.",        cat: "image",     color: "from-purple-500/20 to-fuchsia-500/10" },
+  { icon: MessageSquare, name: "Crear texto",        desc: "Copy persuasivo para marketing y ventas.",   cat: "marketing", color: "from-blue-500/20 to-indigo-500/10" },
+  { icon: PenTool,     name: "Diseñar logo",         desc: "Genera logos e identidades de marca.",       cat: "marketing", color: "from-rose-500/20 to-red-500/10" },
+  { icon: Hash,        name: "Redes sociales",       desc: "Posts y estrategias para cada plataforma.",  cat: "marketing", color: "from-cyan-500/20 to-sky-500/10" },
+  { icon: FileText,    name: "Escribir artículo",    desc: "Artículos largos optimizados para SEO.",     cat: "marketing", color: "from-green-500/20 to-emerald-500/10" },
+  { icon: Type,        name: "Crear anuncio",        desc: "Anuncios para Google, Meta y más.",          cat: "marketing", color: "from-orange-500/20 to-amber-500/10" },
+  { icon: Palette,     name: "Studio Canvas",        desc: "Canvas creativo node-based infinito.",       cat: "studio",    color: "from-violet-500/20 to-purple-500/10" },
 ];
 
 const testimonials = [
@@ -77,6 +77,23 @@ const Index = () => {
           <div className="absolute -top-40 left-1/4 h-[800px] w-[800px] rounded-full bg-aether-purple/5 blur-[120px] animate-pulse" />
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-aether-blue/5 blur-[100px]" />
           <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-rose-500/4 blur-[120px]" />
+          {/* Floating particles */}
+          {[...Array(18)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute rounded-full animate-pulse"
+              style={{
+                width: `${1 + (i % 3)}px`,
+                height: `${1 + (i % 3)}px`,
+                left: `${(i * 5.5) % 100}%`,
+                top: `${(i * 7.3) % 100}%`,
+                background: i % 3 === 0 ? 'rgba(168,85,247,0.4)' : i % 3 === 1 ? 'rgba(0,194,255,0.3)' : 'rgba(255,255,255,0.15)',
+                animationDuration: `${2 + (i % 4)}s`,
+                animationDelay: `${i * 0.3}s`,
+                filter: `blur(${i % 2}px)`,
+              }}
+            />
+          ))}
         </div>
 
         {/* Nav */}
@@ -105,7 +122,22 @@ const Index = () => {
           </div>
         </header>
 
-        <main className="relative z-10 flex flex-col items-center px-6 pt-28 pb-40">
+        {/* Vendor Banner */}
+        <div className="relative z-50 bg-gradient-to-r from-aether-purple/15 via-aether-blue/10 to-aether-purple/15 border-b border-aether-purple/20 py-2.5 px-6 text-center">
+          <p className="text-[11px] font-bold text-white/60 uppercase tracking-[0.25em]">
+            <span className="text-aether-purple">Plan Pro</span> — Imágenes, textos y videos ilimitados por{" "}
+            <span className="text-white font-black">$19/mes</span>
+            {" · "}
+            <button
+              onClick={() => navigate("/pricing")}
+              className="text-aether-blue hover:text-white underline underline-offset-2 transition-colors"
+            >
+              Ver oferta →
+            </button>
+          </p>
+        </div>
+
+        <main className="relative z-10 flex flex-col items-center px-6 pt-20 pb-24">
 
           {/* Hero */}
           <div className="mb-10 flex items-center gap-3 rounded-full border border-white/5 bg-white/[0.03] px-6 py-2.5 text-[10px] text-white/40 font-bold uppercase tracking-[0.4em] animate-in fade-in duration-700 font-display">
@@ -113,7 +145,7 @@ const Index = () => {
             Ecosistema Multimodal con IA
           </div>
 
-          <h1 className="max-w-5xl text-center text-6xl font-bold leading-[0.9] tracking-tight animate-in fade-in duration-700 md:text-8xl lg:text-[7rem] text-white font-display">
+          <h1 className="max-w-5xl text-center text-4xl sm:text-6xl font-bold leading-[0.9] tracking-tight animate-in fade-in duration-700 md:text-8xl lg:text-[7rem] text-white font-display">
             Crea el futuro <br />
             <span className="bg-gradient-to-r from-aether-purple via-white to-aether-blue bg-clip-text text-transparent">sin límites.</span>
           </h1>
@@ -182,7 +214,7 @@ const Index = () => {
           </div>
 
           {/* ── Metrics ──────────────────────────────────────────────── */}
-          <div className="mt-24 grid grid-cols-2 gap-16 sm:grid-cols-4 text-center">
+          <div className="mt-16 grid grid-cols-2 gap-10 sm:grid-cols-4 text-center">
             {[
               { value: "12+", label: "Módulos IA" },
               { value: "10",  label: "Créditos gratis" },
@@ -211,8 +243,8 @@ const Index = () => {
           </div>
 
           {/* ── Sample Outputs Gallery ───────────────────────────────── */}
-          <div className="mt-40 w-full max-w-7xl">
-            <div className="text-center mb-14 space-y-3">
+          <div className="mt-24 w-full max-w-7xl">
+            <div className="text-center mb-10 space-y-3">
               <Badge className="bg-aether-purple/10 text-aether-purple border-aether-purple/20 uppercase tracking-[0.5em] px-6 py-2 rounded-full font-bold text-[10px] font-display">
                 Resultados reales
               </Badge>
@@ -256,10 +288,10 @@ const Index = () => {
           </div>
 
           {/* ── Neural Arsenal ───────────────────────────────────────── */}
-          <div className="mt-40 w-full max-w-7xl">
-            <div className="mb-14 text-center space-y-3">
+          <div className="mt-24 w-full max-w-7xl">
+            <div className="mb-10 text-center space-y-3">
               <Badge className="bg-aether-blue/10 text-aether-blue border-aether-blue/20 uppercase tracking-[0.5em] px-6 py-2 rounded-full font-bold text-[10px] font-display">
-                Suite completa
+                Herramientas
               </Badge>
               <h2 className="text-5xl font-bold text-white md:text-7xl tracking-tight leading-none font-display">
                 Arsenal <span className="text-aether-blue">Neural.</span>
@@ -290,7 +322,7 @@ const Index = () => {
           </div>
 
           {/* ── Studio Highlight ─────────────────────────────────────── */}
-          <div className="mt-40 w-full max-w-7xl">
+          <div className="mt-24 w-full max-w-7xl">
             <div className="rounded-[2.5rem] aether-card border border-white/5 overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.4)] relative">
               <div className="grid lg:grid-cols-2 lg:items-stretch">
                 {/* Left — text */}
@@ -335,7 +367,7 @@ const Index = () => {
           </div>
 
           {/* ── Testimonials ─────────────────────────────────────────── */}
-          <div className="mt-40 w-full max-w-6xl">
+          <div className="mt-20 w-full max-w-6xl">
             <h2 className="text-center text-4xl font-bold text-white mb-12 md:text-6xl tracking-tight font-display">
               Lo que dicen <span className="text-aether-blue">los creadores.</span>
             </h2>
@@ -361,7 +393,7 @@ const Index = () => {
           </div>
 
           {/* ── Final CTA ────────────────────────────────────────────── */}
-          <div className="mt-40 w-full max-w-4xl rounded-[3rem] aether-card border border-white/10 p-16 md:p-24 text-center relative overflow-hidden group">
+          <div className="mt-20 w-full max-w-4xl rounded-[3rem] aether-card border border-white/10 p-12 md:p-20 text-center relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-tr from-aether-purple/5 via-transparent to-aether-blue/5 pointer-events-none" />
             <div className="mx-auto mb-8 flex h-18 w-18 items-center justify-center rounded-[1.5rem] bg-white shadow-[0_20px_40px_rgba(255,255,255,0.1)] group-hover:scale-110 group-hover:rotate-6 transition-all duration-700">
               <Sparkles className="h-8 w-8 text-black" />

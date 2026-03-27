@@ -1017,7 +1017,7 @@ function FormarketingContent() {
             gap={40} 
             size={1} 
           />
-          <Controls className="!bg-[#0a0a0b]/90 !border-white/5 !fill-white/20 !bottom-12 !left-10 rounded-2xl overflow-hidden scale-110 shadow-3xl backdrop-blur-xl transition-all hover:bg-[#0a0a0b]" />
+          <Controls className="!bg-[#0a0a0b]/90 !border-white/5 !fill-white/20 !bottom-16 !right-40 !left-auto rounded-2xl overflow-hidden scale-110 shadow-3xl backdrop-blur-xl transition-all hover:bg-[#0a0a0b]" />
           <MiniMap 
             className="!bg-[#0a0a0b]/90 border !border-white/5 !rounded-2xl overflow-hidden backdrop-blur-xl !bottom-12 !right-10 shadow-3xl opacity-30 hover:opacity-100 transition-opacity" 
             maskColor="rgba(0,0,0,0.8)" 
