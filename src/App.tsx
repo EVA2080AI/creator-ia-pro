@@ -3,10 +3,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 import { HelmetProvider } from "react-helmet-async";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // Global ambient glassmorphism background — excluded on Studio/Canvas
 function GlobalAmbient() {
@@ -38,6 +40,25 @@ const CanvasRedirect = () => {
   const loc = useLocation();
   return <Navigate to={`/formarketing${loc.search}`} replace />;
 };
+
+// Global auth session watcher — handles token expiry and forced sign-out
+function AuthWatcher() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_OUT") {
+        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog"];
+        const isPublic = publicPaths.some(p => window.location.pathname === p || window.location.pathname.startsWith("/herramienta"));
+        if (!isPublic) {
+          toast.error("Tu sesión expiró. Por favor inicia sesión nuevamente.");
+          navigate("/auth", { replace: true });
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+  return null;
+}
 
 // Lazy loading of pages for bundle optimization (V3.3)
 const Index = lazy(() => import("./pages/Index"));
@@ -94,6 +115,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <AuthWatcher />
             <GlobalAmbient />
             <Suspense fallback={<LoadingScreen />}>
               <Routes>

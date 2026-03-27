@@ -34,6 +34,22 @@ serve(async (req: Request) => {
       if (!apiKey) throw new Error("GEMINI_API_KEY no configurada en los secretos de Supabase");
       
       fetchUrl = `https://generativelanguage.googleapis.com/v1beta/${path}?key=${apiKey}`;
+    } else if (provider === "pollinations") {
+      // No API key needed — proxy the image fetch server-side to avoid CORS
+      const { prompt, seed, width, height } = body;
+      const encoded = encodeURIComponent(prompt);
+      const url = `https://image.pollinations.ai/prompt/${encoded}?width=${width || 1024}&height=${height || 1024}&seed=${seed || 0}&nologo=true&enhance=true&model=flux`;
+      const imgRes = await fetch(url);
+      if (!imgRes.ok) throw new Error(`Pollinations error: ${imgRes.status}`);
+      const blob = await imgRes.blob();
+      if (blob.type.startsWith("text/")) throw new Error("Pollinations devolvió HTML, reintenta");
+      const buffer = await blob.arrayBuffer();
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+      const mime = blob.type.startsWith("image/") ? blob.type : "image/png";
+      return new Response(JSON.stringify({ url: `data:${mime};base64,${base64}` }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+
     } else {
       throw new Error(`Provider no soportado: ${provider}`);
     }
@@ -41,18 +57,15 @@ serve(async (req: Request) => {
     const res = await fetch(fetchUrl, {
       method: "POST",
       headers,
-      body: JSON.stringify(body)
+      body: JSON.stringify(body),
     });
 
     const data = await res.text();
-    
-    if (!res.ok) {
-        console.error(`Error from ${provider}:`, res.status, data);
-    }
-    
+    if (!res.ok) console.error(`Error from ${provider}:`, res.status, data);
+
     return new Response(data, {
       status: res.status,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
     
   } catch (error: any) {

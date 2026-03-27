@@ -87,7 +87,7 @@ serve(async (req) => {
             })
             .eq("user_id", user.id);
 
-          await supabaseAdmin.from("transactions").insert({
+          await supabaseAdmin.from("credit_transactions").insert({
             user_id: user.id,
             amount: tierInfo.credits,
             type: "subscription_reload",
@@ -154,7 +154,7 @@ serve(async (req) => {
               .update({ credits_balance: currentBalance + creditAmount })
               .eq("user_id", user.id);
 
-            await supabaseAdmin.from("transactions").insert({
+            await supabaseAdmin.from("credit_transactions").insert({
               user_id: user.id,
               amount: creditAmount,
               type: "credit_purchase",

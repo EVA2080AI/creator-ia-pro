@@ -24,10 +24,17 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom', 'react-router-dom'],
           'vendor-utils': ['@tanstack/react-query', 'lucide-react', 'clsx', 'tailwind-merge'],
           'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-ui': ['@xyflow/react', 'recharts']
+          'vendor-xyflow':   ['@xyflow/react'],
+          'vendor-recharts':  ['recharts'],
+          'vendor-radix':     [
+            '@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-select', '@radix-ui/react-tooltip',
+            '@radix-ui/react-popover', '@radix-ui/react-tabs',
+            '@radix-ui/react-accordion', '@radix-ui/react-avatar',
+          ],
         }
       }
     },
-    chunkSizeWarningLimit: 600
+    chunkSizeWarningLimit: 400
   }
 });

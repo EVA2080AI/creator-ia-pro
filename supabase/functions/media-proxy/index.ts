@@ -51,6 +51,12 @@ serve(async (req) => {
         modelVersion = "7de2ea26c61f15beb8d1a3ba5b583f721d09e519e48f7ee6f1a8c9918fb59dd3";
         input = { image: image_url, face_upsample: true, background_enhance: true, upsample: 2 };
         break;
+      case "video":
+        // Stable Video Diffusion — text-to-video via Replicate
+        modelSlug = "stability-ai/stable-video-diffusion";
+        input = { motion_bucket_id: 127, frames_per_second: 6, sizing_strategy: "maintain_aspect_ratio" };
+        if (image_url) input.input_image = image_url;
+        break;
       case "eraser":
         throw new Error("La herramienta borrar requiere una máscara de borrado que aún no está implementada en el canvas.");
       default:
