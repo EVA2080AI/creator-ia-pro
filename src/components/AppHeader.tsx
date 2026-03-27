@@ -33,6 +33,13 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleNav = (path: string) => {
+    // Chat IA opens the floating chat in fullscreen on the current page (no navigation)
+    if (path === "/chat") {
+      window.dispatchEvent(new CustomEvent("aether-chat-open-fullscreen"));
+      setMobileOpen(false);
+      setUserMenuOpen(false);
+      return;
+    }
     navigate(path);
     setMobileOpen(false);
     setUserMenuOpen(false);
