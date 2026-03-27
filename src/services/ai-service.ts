@@ -170,16 +170,28 @@ export const aiService = {
     }
   },
 
+  async callAiProxy(provider: "openrouter" | "gemini", path: string, body: any, signal?: AbortSignal) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch("https://zfzkohjdwggctogehlkw.supabase.co/functions/v1/ai-proxy", {
+      method: "POST",
+      signal,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session?.access_token || ""}`,
+      },
+      body: JSON.stringify({ provider, path, body }),
+    });
+    
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`${provider} Error (${res.status}): ${text}`);
+    }
+    return res.json();
+  },
+
   // ─── TEXT GENERATION ─────────────────────────────────────────────────────────
   async handleTextGen(action: string, prompt: string, model: string, profile?: any) {
-    const openRouterModel = OPENROUTER_MODEL_MAP[model];
-    const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-    if (!openRouterKey && !geminiKey) {
-      throw new Error("API Keys (OpenRouter/Gemini) no configuradas en el frontend.");
-    }
-
+    const openRouterModel = OPENROUTER_MODEL_MAP[model] || "google/gemini-2.0-flash-001";
     const userTier = profile?.subscription_tier?.toUpperCase() || "FREE";
     const userCredits = profile?.credits_balance || 0;
 
@@ -229,70 +241,40 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
 
     const messages = [];
     if (systemPrompt) messages.push({ role: "system", content: systemPrompt });
-    messages.push({ role: "user", content: `${systemPrompt ? "" : ""}${prompt}` });
+    messages.push({ role: "user", content: prompt });
 
-    // Route via OpenRouter for all non-Gemini-direct models
-    if (openRouterModel && openRouterKey) {
+    // 1. Intentar OpenRouter a través de Proxy
+    try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      try {
-        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-          method: "POST",
-          signal: controller.signal,
-          headers: {
-            "Authorization": `Bearer ${openRouterKey}`,
-            "HTTP-Referer": "https://creator-ia.com",
-            "X-Title": "Creator IA Pro",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: openRouterModel,
-            messages,
-            temperature: 0.85,
-            max_tokens: 4096,
-          }),
-        });
-        clearTimeout(timeoutId);
+      const data = await this.callAiProxy("openrouter", "chat/completions", {
+        model: openRouterModel,
+        messages,
+        temperature: 0.85,
+        max_tokens: 4096,
+      }, controller.signal);
+      
+      clearTimeout(timeoutId);
 
-        if (!res.ok) {
-          const errBody = await res.text();
-          if (res.status === 402) {
-            console.warn("[AI] OpenRouter 402 — usando Gemini como respaldo...");
-            return this.callGeminiDirect(action, prompt, systemPrompt, geminiKey);
-          }
-          if (res.status === 429) {
-            throw new Error("Límite de uso alcanzado. Intenta en unos segundos.");
-          }
-          throw new Error(`Error del proveedor de IA (${res.status}). Por favor intenta con otro modelo.`);
-        }
+      let text = data.choices?.[0]?.message?.content;
+      if (!text) throw new Error("La IA devolvió una respuesta vacía.");
 
-        const data = await res.json();
-        let text = data.choices?.[0]?.message?.content;
-        if (!text) throw new Error("La IA devolvió una respuesta vacía. Intenta reformular.");
-
-        if (action === "ui") {
-          text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-          try { return JSON.parse(text); } catch { return { text }; }
-        }
-        return { text };
-      } catch (err: any) {
-        clearTimeout(timeoutId);
-        if (err.name === 'AbortError') throw new Error("Tiempo de espera agotado. Verifica tu conexión e intenta de nuevo.");
-        throw err;
+      if (action === "ui") {
+        text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+        try { return JSON.parse(text); } catch { return { text }; }
       }
+      return { text };
+    } catch (err: any) {
+      console.warn("[AI] OpenRouter Proxy falló, intentando Gemini como respaldo...", err.message);
+      
+      // 2. Respaldo Gemini a través de Proxy
+      return this.callGeminiDirect(action, prompt, systemPrompt);
     }
-
-    // Fallback: Gemini Flash direct
-    return this.callGeminiDirect(action, prompt, systemPrompt, geminiKey);
   },
 
-  async callGeminiDirect(action: string, prompt: string, systemPrompt: string, geminiKey: string | undefined) {
-    if (!geminiKey || geminiKey.trim() === "") throw new Error("API key de Gemini no configurada. Agrega VITE_GEMINI_API_KEY en tu archivo .env.");
-
+  async callGeminiDirect(action: string, prompt: string, systemPrompt: string) {
     const activeGeminiModel = "gemini-1.5-flash";
-    const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${activeGeminiModel}:generateContent?key=${geminiKey}`;
-
     const geminiMessages = action === "ui"
       ? [{ parts: [{ text: `${systemPrompt}\n\nUSER PROMPT: ${prompt}` }] }]
       : [{ parts: [{ text: prompt }] }];
@@ -301,19 +283,14 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     try {
-      const res = await fetch(GEMINI_URL, {
-        method: "POST",
-        signal: controller.signal,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: geminiMessages }),
-      });
+      const data = await this.callAiProxy("gemini", `models/${activeGeminiModel}:generateContent`, {
+        contents: geminiMessages
+      }, controller.signal);
+      
       clearTimeout(timeoutId);
 
-      if (!res.ok) throw new Error(`Error de Gemini (${res.status}). Por favor intenta de nuevo.`);
-
-      const data = await res.json();
       let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) throw new Error("Gemini devolvió una respuesta vacía. Intenta reformular tu prompt.");
+      if (!text) throw new Error("Gemini devolvió una respuesta vacía.");
 
       if (action === "ui") {
         text = text.replace(/```json/g, "").replace(/```/g, "").trim();
@@ -322,17 +299,12 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
       return { text };
     } catch (err: any) {
       clearTimeout(timeoutId);
-      if (err.name === 'AbortError') throw new Error("Tiempo de espera agotado con Gemini. Verifica tu conexión.");
-      throw err;
+      throw new Error(`Error de generación (ambos proveedores fallaron). Detalles: ${err.message}`);
     }
   },
 
   // ─── IMAGE GENERATION ────────────────────────────────────────────────────────
   async handleImageGen(prompt: string, tool?: string) {
-    const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-    const geminiKey    = import.meta.env.VITE_GEMINI_API_KEY;
-
-    // Enhance prompt for logo tool
     let finalPrompt = prompt;
     if (tool === "logo") {
       finalPrompt = `${prompt}, professional logo design, clean vector style, white background, sharp edges, brand identity`;
@@ -340,103 +312,63 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
 
     const errors: string[] = [];
 
-    // ── 1. OpenRouter → Flux Schnell ───────────────────────────────────────
-    if (openRouterKey) {
-      try {
-        const controller = new AbortController();
-        const t = setTimeout(() => controller.abort(), 45000);
-        const res = await fetch("https://openrouter.ai/api/v1/images/generations", {
-          method: "POST",
-          signal: controller.signal,
-          headers: {
-            "Authorization": `Bearer ${openRouterKey}`,
-            "HTTP-Referer": "https://creator-ia.com",
-            "X-Title": "Creator IA Pro",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "black-forest-labs/flux-schnell",
-            prompt: finalPrompt,
-            n: 1,
-            size: "1024x1024",
-          }),
-        });
-        clearTimeout(t);
-        if (res.ok) {
-          const data = await res.json();
-          const item = data.data?.[0];
-          // b64_json → direct data URL (always works in <img>)
-          if (item?.b64_json) return { url: `data:image/png;base64,${item.b64_json}` };
-          // External URL → pre-fetch and convert to validated data URL
-          if (item?.url) {
-            const dataUrl = await urlToDataUrl(item.url, 30000);
-            return { url: dataUrl };
-          }
-        } else {
-          const errText = await res.text();
-          errors.push(`OpenRouter API: ${res.status} ${errText}`);
-        }
-      } catch (err: any) {
-        errors.push(`OpenRouter Falló: ${err.message}`);
-        console.warn("[Image Gen] OpenRouter Flux failed:", err);
+    // ── 1. OpenRouter → Flux Schnell (Proxy) ──────────────────────────────
+    try {
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), 45000);
+      
+      const data = await this.callAiProxy("openrouter", "images/generations", {
+        model: "black-forest-labs/flux-schnell",
+        prompt: finalPrompt,
+        n: 1,
+        size: "1024x1024",
+      }, controller.signal);
+      
+      clearTimeout(t);
+      
+      const item = data.data?.[0];
+      if (item?.b64_json) return { url: `data:image/png;base64,${item.b64_json}` };
+      if (item?.url) {
+        const dataUrl = await urlToDataUrl(item.url, 30000);
+        return { url: dataUrl };
       }
-    } else {
-      errors.push("OpenRouter API Key no configurada.");
+    } catch (err: any) {
+      errors.push(`OpenRouter Proxy Falló: ${err.message}`);
+      console.warn("[Image Gen] OpenRouter Proxy failed:", err.message);
     }
 
-    // ── 2. Gemini Image Generation ───────────────
-    if (geminiKey) {
-      let success = false;
-      for (const geminiImgModel of [
-        "gemini-2.0-flash-preview-image-generation",
-        "gemini-2.0-flash-exp",
-      ]) {
-        try {
-          const controller = new AbortController();
-          const t = setTimeout(() => controller.abort(), 60000);
-          const res = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${geminiImgModel}:generateContent?key=${geminiKey}`,
-            {
-              method: "POST",
-              signal: controller.signal,
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: finalPrompt }] }],
-                generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
-              }),
-            }
-          );
-          clearTimeout(t);
-          if (res.ok) {
-            const data = await res.json();
-            const parts = data.candidates?.[0]?.content?.parts ?? [];
-            const imgPart = parts.find((p: any) => p.inlineData?.data);
-            if (imgPart) {
-              const mime = imgPart.inlineData.mimeType || "image/png";
-              return { url: `data:${mime};base64,${imgPart.inlineData.data}` };
-            }
-          } else {
-            const errorMsg = await res.text();
-            errors.push(`Gemini API (${geminiImgModel}): ${res.status} ${errorMsg}`);
-          }
-        } catch (err: any) {
-          errors.push(`Gemini Falló (${geminiImgModel}): ${err.message}`);
-          console.warn(`[Image Gen] ${geminiImgModel} failed, trying next...`, err);
+    // ── 2. Gemini Image Generation (Proxy) ────────────────────────────────
+    let success = false;
+    for (const geminiImgModel of [
+      "gemini-2.0-flash-preview-image-generation",
+      "gemini-2.0-flash-exp",
+    ]) {
+      try {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), 60000);
+        
+        const data = await this.callAiProxy("gemini", `models/${geminiImgModel}:generateContent`, {
+          contents: [{ parts: [{ text: finalPrompt }] }],
+          generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
+        }, controller.signal);
+        
+        clearTimeout(t);
+        
+        const parts = data.candidates?.[0]?.content?.parts ?? [];
+        const imgPart = parts.find((p: any) => p.inlineData?.data);
+        if (imgPart) {
+          const mime = imgPart.inlineData.mimeType || "image/png";
+          return { url: `data:${mime};base64,${imgPart.inlineData.data}` };
         }
+      } catch (err: any) {
+        errors.push(`Gemini Proxy Falló (${geminiImgModel}): ${err.message}`);
+        console.warn(`[Image Gen] Gemini Proxy ${geminiImgModel} failed:`, err.message);
       }
-    } else {
-      errors.push("Gemini API Key no configurada.");
     }
 
     // ── 3. Handle Failure ────────────────────
-    // Pollinations fallback returned 401 as of late 2026, so we removed it.
-    console.error("[Image Gen] Fallaron todos los proveedores de imágenes:", errors);
-    
-    if (!openRouterKey && !geminiKey) {
-      throw new Error("No tienes APIs configuradas. Por favor, agrega tu VITE_OPENROUTER_API_KEY o VITE_GEMINI_API_KEY en tu archivo .env para generar imágenes.");
-    }
-    
-    throw new Error("No se pudo generar la imagen con los proveedores activos. Por favor verifica los logs de la consola.");
+    console.error("[Image Gen] Fallaron todos los proveedores de imágenes a través del proxy:", errors);
+    throw new Error(`Falló la generación de imagen (Problema en el servidor o falta configuración en Supabase Secrets). Verifica consola.`);
   },
 
   // ─── MEDIA PROXY (IMAGE EDITING) ──────────────────────────────────────────
