@@ -338,6 +338,8 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
       finalPrompt = `${prompt}, professional logo design, clean vector style, white background, sharp edges, brand identity`;
     }
 
+    const errors: string[] = [];
+
     // ── 1. OpenRouter → Flux Schnell ───────────────────────────────────────
     if (openRouterKey) {
       try {
@@ -370,14 +372,21 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
             const dataUrl = await urlToDataUrl(item.url, 30000);
             return { url: dataUrl };
           }
+        } else {
+          const errText = await res.text();
+          errors.push(`OpenRouter API: ${res.status} ${errText}`);
         }
-      } catch (err) {
-        console.warn("[Image Gen] OpenRouter Flux failed, trying Gemini...", err);
+      } catch (err: any) {
+        errors.push(`OpenRouter Falló: ${err.message}`);
+        console.warn("[Image Gen] OpenRouter Flux failed:", err);
       }
+    } else {
+      errors.push("OpenRouter API Key no configurada.");
     }
 
-    // ── 2. Gemini gemini-2.0-flash-preview-image-generation ───────────────
+    // ── 2. Gemini Image Generation ───────────────
     if (geminiKey) {
+      let success = false;
       for (const geminiImgModel of [
         "gemini-2.0-flash-preview-image-generation",
         "gemini-2.0-flash-exp",
@@ -406,22 +415,28 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
               const mime = imgPart.inlineData.mimeType || "image/png";
               return { url: `data:${mime};base64,${imgPart.inlineData.data}` };
             }
+          } else {
+            const errorMsg = await res.text();
+            errors.push(`Gemini API (${geminiImgModel}): ${res.status} ${errorMsg}`);
           }
-        } catch (err) {
+        } catch (err: any) {
+          errors.push(`Gemini Falló (${geminiImgModel}): ${err.message}`);
           console.warn(`[Image Gen] ${geminiImgModel} failed, trying next...`, err);
         }
       }
+    } else {
+      errors.push("Gemini API Key no configurada.");
     }
 
-    // ── 4. Pollinations fallback — validated blob fetch ────────────────────
-    const seed = Math.floor(Math.random() * 999999);
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true&model=flux`;
-    try {
-      const dataUrl = await urlToDataUrl(pollinationsUrl, 90000);
-      return { url: dataUrl };
-    } catch (err) {
-      throw new Error("No se pudo generar la imagen. Verifica tu conexión e intenta de nuevo.");
+    // ── 3. Handle Failure ────────────────────
+    // Pollinations fallback returned 401 as of late 2026, so we removed it.
+    console.error("[Image Gen] Fallaron todos los proveedores de imágenes:", errors);
+    
+    if (!openRouterKey && !geminiKey) {
+      throw new Error("No tienes APIs configuradas. Por favor, agrega tu VITE_OPENROUTER_API_KEY o VITE_GEMINI_API_KEY en tu archivo .env para generar imágenes.");
     }
+    
+    throw new Error("No se pudo generar la imagen con los proveedores activos. Por favor verifica los logs de la consola.");
   },
 
   // ─── MEDIA PROXY (IMAGE EDITING) ──────────────────────────────────────────
