@@ -210,7 +210,13 @@ function CanvasPanel({ code, lang, onClose }: { code: string; lang: string; onCl
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
-export const GeniusAssistant = () => {
+interface GeniusAssistantProps {
+  onAction?: (action: string, data: any) => void;
+  embedded?: boolean;   // true = panel inside Studio; false (default) = fullscreen /chat page
+  onClose?: () => void; // only used in embedded mode
+}
+
+export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusAssistantProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile } = useProfile(user?.id);
@@ -377,10 +383,13 @@ export const GeniusAssistant = () => {
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed top-16 left-0 right-0 bottom-0 z-[9000] flex bg-[#0a0a0b]">
+    <div className={embedded
+      ? "flex flex-col h-full bg-[#080809]"
+      : "fixed top-16 left-0 right-0 bottom-0 z-[9000] flex bg-[#0a0a0b]"
+    }>
 
-      {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
-      <aside className={cn(
+      {/* ── Sidebar — only in fullscreen page mode ───────────────────────────── */}
+      {!embedded && <aside className={cn(
         'flex-col bg-[#0a0a0b] border-r border-white/[0.06] transition-all duration-200 overflow-hidden shrink-0',
         sidebarOpen ? 'flex w-[260px]' : 'hidden',
       )}>
@@ -452,7 +461,7 @@ export const GeniusAssistant = () => {
             </span>
           </button>
         </div>
-      </aside>
+      </aside>}
 
       {/* ── Chat + Canvas ────────────────────────────────────────────────────── */}
       <div className="flex flex-1 overflow-hidden min-w-0">
@@ -462,11 +471,13 @@ export const GeniusAssistant = () => {
 
           {/* Top bar */}
           <div className="flex items-center gap-3 px-4 h-12 border-b border-white/[0.06] shrink-0">
-            {/* Sidebar toggle */}
-            <button onClick={() => setSidebarOpen(v => !v)}
-              className="p-1.5 rounded-lg text-white/25 hover:text-white hover:bg-white/[0.06] transition-all">
-              <ArrowLeft className={cn('h-4 w-4 transition-transform', !sidebarOpen && 'rotate-180')} />
-            </button>
+            {/* Sidebar toggle — only in page mode */}
+            {!embedded && (
+              <button onClick={() => setSidebarOpen(v => !v)}
+                className="p-1.5 rounded-lg text-white/25 hover:text-white hover:bg-white/[0.06] transition-all">
+                <ArrowLeft className={cn('h-4 w-4 transition-transform', !sidebarOpen && 'rotate-180')} />
+              </button>
+            )}
 
             {/* Model picker */}
             <div className="relative">
@@ -529,8 +540,9 @@ export const GeniusAssistant = () => {
               <Plus className="h-3.5 w-3.5" /> Nuevo
             </button>
 
-            {/* Close */}
-            <button onClick={() => navigate('/dashboard')}
+            {/* Close: embedded → close panel; page → go to dashboard */}
+            <button
+              onClick={() => embedded ? onClose?.() : navigate('/dashboard')}
               className="p-1.5 rounded-lg text-white/20 hover:text-white hover:bg-white/[0.06] transition-all">
               <X className="h-4 w-4" />
             </button>
@@ -686,8 +698,8 @@ export const GeniusAssistant = () => {
           </div>
         </div>
 
-        {/* ── Canvas panel ────────────────────────────────────────────────── */}
-        {canvas && (
+        {/* ── Canvas panel — only in fullscreen page mode ─────────────────── */}
+        {!embedded && canvas && (
           <CanvasPanel code={canvas.code} lang={canvas.lang} onClose={() => setCanvas(null)} />
         )}
       </div>

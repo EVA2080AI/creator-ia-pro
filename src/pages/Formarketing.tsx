@@ -21,7 +21,7 @@ import { FormarketingSidebar } from '@/components/formarketing/FormarketingSideb
 import { TEMPLATES, CATEGORIES, type Template } from '@/components/formarketing/TemplateModal';
 import AntigravityBridgeNode from '@/components/formarketing/AntigravityBridgeNode';
 import { CommandPalette } from '@/components/formarketing/CommandPalette';
-import { ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, LayoutDashboard, Circle } from 'lucide-react';
+import { ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, LayoutDashboard, Circle, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { aiService } from '@/services/ai-service';
@@ -89,6 +89,9 @@ function FormarketingContent() {
 
   // HU28 — Command palette
   const [cmdOpen, setCmdOpen]                 = useState(false);
+
+  // AI panel (embedded GeniusAssistant)
+  const [aiPanelOpen, setAiPanelOpen]         = useState(false);
 
   // HU33 — Execution status
   const [execStatus, setExecStatus]           = useState<'idle' | 'running' | 'success' | 'error'>('idle');
@@ -972,6 +975,16 @@ function FormarketingContent() {
             <Trash2 className="w-3.5 h-3.5" />
             <span className="hidden md:inline">Limpiar</span>
           </Button>
+          <div className="h-5 w-px bg-white/[0.06] mx-1" />
+          {/* AI Assistant panel toggle */}
+          <Button
+            variant="ghost"
+            onClick={() => setAiPanelOpen(v => !v)}
+            className={`h-8 px-3 rounded-xl gap-1.5 text-[10px] font-bold transition-all ${aiPanelOpen ? 'text-aether-purple bg-aether-purple/10 border border-aether-purple/20' : 'text-white/25 hover:text-white hover:bg-white/5'}`}
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">IA</span>
+          </Button>
           <Button
             onClick={handleExecute}
             disabled={nodes.length === 0 || execStatus === 'running'}
@@ -983,7 +996,8 @@ function FormarketingContent() {
         </div>
       </div>
 
-      <div className="relative h-full w-full flex-1" ref={reactFlowWrapper}>
+      <div className="flex flex-1 overflow-hidden">
+      <div className="relative flex-1" ref={reactFlowWrapper}>
         <FormarketingSidebar onAddNode={handleManualAddNode} />
         <ReactFlow
           nodes={nodes}
@@ -1032,7 +1046,13 @@ function FormarketingContent() {
         </ReactFlow>
       </div>
 
-      <GeniusAssistant onAction={handleAssistantAction} />
+      {/* ── AI Panel (embedded GeniusAssistant) ────────────────────────── */}
+      {aiPanelOpen && (
+        <div className="w-[380px] shrink-0 border-l border-white/[0.06] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
+          <GeniusAssistant embedded onAction={handleAssistantAction} onClose={() => setAiPanelOpen(false)} />
+        </div>
+      )}
+      </div>
 
       {/* HU28 — Command Palette */}
       <CommandPalette
