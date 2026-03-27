@@ -469,252 +469,282 @@ const Tools = () => {
   if (authLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#050506]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-aether-purple animate-spin" />
-          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em]">Cargando...</p>
-        </div>
+        <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-aether-purple animate-spin" />
       </div>
     );
   }
 
+  const imageTools = tools.filter(t => t.category === "image");
+  const textTools  = tools.filter(t => t.category === "text");
+
   return (
-    <div className="h-screen flex flex-col bg-[#050506] text-white font-sans overflow-hidden">
+    <div className="fixed inset-0 flex bg-[#0a0a0b] text-white font-sans overflow-hidden" style={{ top: "64px" }}>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      <div className="flex flex-1 overflow-hidden" style={{ marginTop: "64px" }}>
+      {/* ── Sidebar ───────────────────────────────────────────────────────── */}
+      <aside className="hidden md:flex w-[240px] shrink-0 flex-col border-r border-white/[0.06] bg-[#080809] overflow-hidden">
 
-        {/* ── Sidebar ─────────────────────────────────────────────────────── */}
-        <aside className="hidden md:flex w-60 shrink-0 border-r border-white/[0.04] bg-[#070708] flex-col overflow-hidden">
-          {/* Category tabs */}
-          <div className="p-3 border-b border-white/[0.04]">
-            <div className="flex bg-white/[0.03] p-1 rounded-xl border border-white/[0.04] gap-1">
-              {[
-                { id: "image" as const, label: "Imagen", icon: Image },
-                { id: "text"  as const, label: "Texto",  icon: FileText },
-              ].map((cat) => (
-                <button key={cat.id} onClick={() => switchCategory(cat.id)}
-                  className={cn("flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all",
-                    category === cat.id ? "bg-white text-black shadow-lg" : "text-white/30 hover:text-white/60")}>
-                  <cat.icon className="h-3 w-3" />{cat.label}
-                </button>
-              ))}
-            </div>
+        {/* Sidebar header */}
+        <div className="px-4 pt-5 pb-3 shrink-0">
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 font-display">Herramientas IA</p>
+        </div>
+
+        {/* Tool list */}
+        <nav className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
+
+          {/* Image section */}
+          <div className="px-2 pt-3 pb-1.5">
+            <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-white/20">
+              <Image className="h-3 w-3" /> Imagen
+            </span>
           </div>
+          {imageTools.map((tool) => {
+            const isActive = activeTool === tool.id;
+            return (
+              <button key={tool.id} onClick={() => switchTool(tool)} disabled={tool.disabled}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
+                  tool.disabled ? "opacity-25 cursor-not-allowed" :
+                  isActive
+                    ? "bg-white/[0.07] border border-white/[0.08] text-white"
+                    : "text-white/40 hover:text-white/75 hover:bg-white/[0.04]"
+                )}>
+                <div className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
+                  isActive ? "bg-aether-purple/20 text-aether-purple" : "bg-white/[0.04] text-white/20"
+                )}>
+                  {tool.disabled ? <Lock className="h-3.5 w-3.5" /> : <tool.icon className="h-3.5 w-3.5" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold truncate leading-none">{tool.name}</p>
+                  <p className="text-[10px] text-white/20 mt-0.5">
+                    {tool.disabled ? tool.disabledReason : `${tool.credits} crédito${tool.credits !== 1 ? "s" : ""}`}
+                  </p>
+                </div>
+                {isActive && <div className="w-1 h-4 rounded-full bg-aether-purple shrink-0 shadow-[0_0_6px_rgba(168,85,247,0.7)]" />}
+              </button>
+            );
+          })}
 
-          {/* Tool list */}
-          <nav className="flex-1 overflow-y-auto p-2 space-y-0.5">
-            {filteredTools.map((tool) => {
-              const isActive = activeTool === tool.id;
-              return (
-                <button key={tool.id} onClick={() => switchTool(tool)} disabled={tool.disabled}
-                  className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all group",
-                    tool.disabled ? "opacity-30 cursor-not-allowed" :
-                    isActive ? "bg-white/[0.08] text-white border border-white/[0.08]" :
-                               "text-white/40 hover:text-white/70 hover:bg-white/[0.04]")}>
-                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all",
-                    isActive ? cn("bg-white/10", tool.color) : "bg-white/[0.03] text-white/20")}>
-                    {tool.disabled ? <Lock className="h-3.5 w-3.5" /> : <tool.icon className="h-3.5 w-3.5" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold truncate leading-none">{tool.name}</p>
-                    <p className="text-[10px] text-white/25 mt-0.5 truncate">
-                      {tool.disabled ? tool.disabledReason : `${tool.credits} cr`}
-                    </p>
-                  </div>
-                  {isActive && !tool.disabled && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-aether-purple shrink-0 shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Profile footer */}
-          <div className="p-3 border-t border-white/[0.04]">
-            <button onClick={() => navigate("/profile")}
-              className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition-all group">
-              <div className="w-8 h-8 rounded-lg bg-white/[0.05] border border-white/[0.06] flex items-center justify-center overflow-hidden shrink-0">
-                {profile?.avatar_url
-                  ? <img src={profile.avatar_url} alt="User" className="w-full h-full object-cover" />
-                  : <User className="w-4 h-4 text-white/30" />}
-              </div>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-[12px] font-bold text-white truncate leading-none">
-                  {profile?.display_name?.split(' ')[0] || 'Mi Perfil'}
-                </p>
-                <p className="text-[10px] text-white/25 mt-0.5 flex items-center gap-1">
-                  <Coins className="h-3 w-3" />
-                  {(profile?.credits_balance ?? 0).toLocaleString()} cr
-                </p>
-              </div>
-            </button>
+          {/* Text section */}
+          <div className="px-2 pt-4 pb-1.5">
+            <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-white/20">
+              <FileText className="h-3 w-3" /> Texto & Copy
+            </span>
           </div>
-        </aside>
+          {textTools.map((tool) => {
+            const isActive = activeTool === tool.id;
+            return (
+              <button key={tool.id} onClick={() => switchTool(tool)} disabled={tool.disabled}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
+                  tool.disabled ? "opacity-25 cursor-not-allowed" :
+                  isActive
+                    ? "bg-white/[0.07] border border-white/[0.08] text-white"
+                    : "text-white/40 hover:text-white/75 hover:bg-white/[0.04]"
+                )}>
+                <div className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
+                  isActive ? "bg-aether-purple/20 text-aether-purple" : "bg-white/[0.04] text-white/20"
+                )}>
+                  {tool.disabled ? <Lock className="h-3.5 w-3.5" /> : <tool.icon className="h-3.5 w-3.5" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[12px] font-semibold truncate leading-none">{tool.name}</p>
+                  <p className="text-[10px] text-white/20 mt-0.5">{tool.credits} crédito{tool.credits !== 1 ? "s" : ""}</p>
+                </div>
+                {isActive && <div className="w-1 h-4 rounded-full bg-aether-purple shrink-0 shadow-[0_0_6px_rgba(168,85,247,0.7)]" />}
+              </button>
+            );
+          })}
+        </nav>
 
-        {/* ── Main workspace ──────────────────────────────────────────────── */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-
-          {/* Tool title bar */}
-          <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.04] bg-[#050506] shrink-0">
-            <div className="flex items-center gap-3">
-              <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center bg-white/[0.05] border border-white/[0.06] shrink-0", currentTool.color)}>
-                <currentTool.icon className="h-4 w-4" />
-              </div>
-              <div>
-                <h2 className="text-[13px] font-bold text-white tracking-tight">{currentTool.name}</h2>
-                <p className="text-[10px] text-white/25">{currentTool.desc}</p>
-              </div>
+        {/* Credits footer */}
+        <div className="p-3 border-t border-white/[0.06] shrink-0">
+          <button onClick={() => navigate("/profile")}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-all">
+            <div className="w-7 h-7 rounded-lg bg-white/[0.05] border border-white/[0.07] flex items-center justify-center overflow-hidden shrink-0">
+              {profile?.avatar_url
+                ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                : <User className="w-3.5 h-3.5 text-white/30" />}
             </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06]">
-                <Zap className="h-3 w-3 text-aether-purple" />
-                <span className="text-[11px] font-bold text-white/50">{requiredCredits} crédito{requiredCredits > 1 ? "s" : ""}</span>
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-[11px] font-bold text-white/60 truncate leading-none">
+                {profile?.display_name?.split(" ")[0] || "Mi perfil"}
+              </p>
+              <p className="text-[10px] text-white/25 mt-0.5 flex items-center gap-1">
+                <Coins className="h-2.5 w-2.5 text-aether-purple" />
+                {(profile?.credits_balance ?? 0).toLocaleString()} créditos
+              </p>
+            </div>
+          </button>
+        </div>
+      </aside>
+
+      {/* ── Main area ─────────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
+
+        {/* Result / Canvas — fills all space */}
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+          {renderCanvas()}
+        </div>
+
+        {/* ── Input bar (same pattern as Chat IA) ─────────────────────────── */}
+        <div className="shrink-0 border-t border-white/[0.06] bg-[#0a0a0b] px-5 py-4">
+
+          {/* Contextual settings row — always visible, compact */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
+
+            {/* Model chip */}
+            {category === "image" && !currentTool.needsUpload ? (
+              <div className="relative">
+                <button onClick={() => setShowSettings(v => !v)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all",
+                    showSettings
+                      ? "border-aether-purple/40 bg-aether-purple/10 text-aether-purple"
+                      : "border-white/[0.08] bg-white/[0.03] text-white/40 hover:text-white/70 hover:border-white/15"
+                  )}>
+                  <Sparkles className="h-3 w-3" />
+                  {imageModelObj.name}
+                  <ChevronDown className={cn("h-3 w-3 transition-transform", showSettings && "rotate-180")} />
+                </button>
               </div>
-              {/* Mobile category toggle */}
-              <div className="md:hidden flex bg-white/[0.03] p-0.5 rounded-lg border border-white/[0.04] gap-0.5">
-                {[
-                  { id: "image" as const, icon: Image },
-                  { id: "text"  as const, icon: FileText },
-                ].map(c => (
-                  <button key={c.id} onClick={() => switchCategory(c.id)}
-                    className={cn("p-1.5 rounded-md transition-all",
-                      category === c.id ? "bg-white text-black" : "text-white/30")}>
-                    <c.icon className="h-3.5 w-3.5" />
+            ) : category === "text" ? (
+              <button onClick={() => setShowSettings(v => !v)}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all",
+                  showSettings
+                    ? "border-aether-purple/40 bg-aether-purple/10 text-aether-purple"
+                    : "border-white/[0.08] bg-white/[0.03] text-white/40 hover:text-white/70 hover:border-white/15"
+                )}>
+                <Sparkles className="h-3 w-3" />
+                {textModelObj.name}
+                <ChevronDown className={cn("h-3 w-3 transition-transform", showSettings && "rotate-180")} />
+              </button>
+            ) : null}
+
+            {/* Aspect ratio chips (always visible for image tools) */}
+            {category === "image" && !currentTool.needsUpload && (
+              <div className="flex gap-1">
+                {ASPECT_RATIOS.map((ar) => (
+                  <button key={ar.label} onClick={() => setAspectRatio(ar)}
+                    className={cn(
+                      "px-2.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all",
+                      aspectRatio.label === ar.label
+                        ? "bg-white/10 border-white/20 text-white"
+                        : "bg-white/[0.02] border-white/[0.06] text-white/25 hover:text-white/50"
+                    )}>
+                    {ar.label}
                   </button>
                 ))}
               </div>
+            )}
+
+            {/* Credits cost badge */}
+            <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <Zap className="h-3 w-3 text-aether-purple" />
+              <span className="text-[10px] font-bold text-white/30">{requiredCredits} cr</span>
             </div>
           </div>
 
-          {/* Canvas — takes all remaining space */}
-          <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFileSelect} />
-
-            {/* Canvas area */}
-            <div className="flex-1 min-h-0 flex flex-col">
-              {renderCanvas()}
-            </div>
-
-            {/* Controls bar — prompt + settings */}
-            <div className="shrink-0 border-t border-white/[0.04] bg-[#060608] px-4 py-3">
-
-              {/* Settings row */}
-              {showSettings && (
-                <div className="mb-3 flex flex-wrap items-end gap-3 pb-3 border-b border-white/[0.04]">
-
-                  {category === "image" && !currentTool.needsUpload && (
-                    <>
-                      {/* Image model */}
-                      <div className="flex-1 min-w-[180px] max-w-[220px] space-y-1.5">
-                        <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest">Motor</p>
-                        <ModelSelector selectedModelId={selectedImageModel} onModelChange={setSelectedImageModel} filterType="image" />
-                      </div>
-                      {/* Aspect ratio */}
-                      <div className="space-y-1.5">
-                        <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest">Proporción</p>
-                        <div className="flex gap-1">
-                          {ASPECT_RATIOS.map((ar) => (
-                            <button key={ar.label} onClick={() => setAspectRatio(ar)}
-                              className={cn("px-3 py-2 rounded-lg border text-[11px] font-bold transition-all",
-                                aspectRatio.label === ar.label
-                                  ? "bg-white/10 border-white/20 text-white"
-                                  : "bg-white/[0.02] border-white/[0.06] text-white/25 hover:text-white/50")}>
-                              {ar.label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {category === "text" && (
-                    <div className="flex-1 min-w-[180px] max-w-[280px] space-y-1.5">
-                      <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest">Modelo de IA</p>
-                      <ModelSelector selectedModelId={selectedTextModel} onModelChange={setSelectedTextModel} filterType="text" />
-                    </div>
-                  )}
-
-                  {/* Style pills for generate/logo */}
-                  {(activeTool === "generate" || activeTool === "logo") && (
-                    <div className="w-full space-y-1.5">
-                      <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest">Estilo rápido</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {styleList.map((style) => (
-                          <button key={style}
-                            onClick={() => setTextPrompt(p => p ? `${p}, estilo ${style}` : `Estilo ${style}: `)}
-                            className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05] text-[11px] font-medium text-white/30 hover:text-white hover:bg-white/[0.08] transition-all">
-                            {style}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+          {/* Expandable model selector */}
+          {showSettings && (
+            <div className="mb-3 p-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] space-y-3">
+              {category === "image" && !currentTool.needsUpload && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest">Motor de imagen</p>
+                  <ModelSelector selectedModelId={selectedImageModel} onModelChange={setSelectedImageModel} filterType="image" />
                 </div>
               )}
-
-              {/* Prompt + generate */}
-              <div className="flex items-end gap-2">
-                {/* Upload trigger when needsUpload */}
-                {currentTool.needsUpload && (
-                  <button onClick={() => fileRef.current?.click()}
-                    className="h-12 px-3 rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/30 hover:text-white hover:bg-white/[0.08] transition-all flex items-center justify-center shrink-0">
-                    <Upload className="h-4 w-4" />
-                  </button>
-                )}
-
-                {/* Prompt textarea */}
-                <div className="flex-1 relative">
-                  <textarea
-                    value={textPrompt}
-                    onChange={(e) => setTextPrompt(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !currentTool.needsUpload) { e.preventDefault(); handleProcess(); } }}
-                    placeholder={currentTool.placeholder || `Describe lo que quieres generar...`}
-                    rows={1}
-                    maxLength={1000}
-                    className="w-full resize-none rounded-2xl border border-white/[0.07] bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-aether-purple/25 focus:bg-white/[0.05] transition-all leading-relaxed"
-                    style={{ minHeight: "48px", maxHeight: "120px", overflowY: "auto" }}
-                  />
-                  <span className="absolute bottom-2 right-3 text-[9px] text-white/12 pointer-events-none">
-                    {textPrompt.length}/1000
-                  </span>
+              {category === "text" && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest">Modelo de IA</p>
+                  <ModelSelector selectedModelId={selectedTextModel} onModelChange={setSelectedTextModel} filterType="text" />
                 </div>
-
-                {/* Settings toggle */}
-                <button onClick={() => setShowSettings(v => !v)}
-                  className={cn("h-12 w-12 rounded-xl border transition-all flex items-center justify-center shrink-0",
-                    showSettings ? "border-aether-purple/30 bg-aether-purple/10 text-aether-purple"
-                                 : "border-white/[0.07] bg-white/[0.03] text-white/30 hover:text-white hover:bg-white/[0.06]")}>
-                  <SlidersHorizontal className="h-4 w-4" />
-                </button>
-
-                {/* Generate button */}
-                <Button
-                  onClick={handleProcess}
-                  disabled={isRunning || currentTool.disabled || (currentTool.needsUpload ? !imagePreview : !textPrompt.trim())}
-                  className="h-12 px-6 rounded-2xl bg-white text-black font-bold text-sm shadow-[0_4px_20px_rgba(255,255,255,0.08)] hover:bg-white/90 active:scale-[0.97] transition-all disabled:opacity-35 shrink-0 flex items-center gap-2"
-                >
-                  {isRunning ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" />{streaming ? "Escribiendo..." : "Generando..."}</>
-                  ) : (
-                    <><Sparkles className="h-4 w-4" />Generar</>
-                  )}
-                </Button>
-              </div>
-
-              {/* Mobile tool scroller */}
-              <div className="md:hidden flex overflow-x-auto no-scrollbar gap-1 pt-2 mt-2 border-t border-white/[0.04]">
-                {filteredTools.map(tool => (
-                  <button key={tool.id} onClick={() => switchTool(tool)} disabled={tool.disabled}
-                    className={cn("flex flex-col items-center gap-1 px-3 py-2 rounded-xl shrink-0 transition-all",
-                      tool.disabled ? "opacity-30 cursor-not-allowed" :
-                      activeTool === tool.id ? "bg-white/[0.08] border border-white/[0.10] text-white" :
-                                               "text-white/30 hover:text-white/60")}>
-                    <tool.icon className="h-4 w-4" />
-                    <span className="text-[9px] font-bold whitespace-nowrap">{tool.name}</span>
-                  </button>
-                ))}
-              </div>
+              )}
+              {(activeTool === "generate" || activeTool === "logo") && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest">Estilo rápido</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {styleList.map((style) => (
+                      <button key={style}
+                        onClick={() => setTextPrompt(p => p ? `${p}, estilo ${style}` : `Estilo ${style}: `)}
+                        className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05] text-[11px] font-medium text-white/30 hover:text-white hover:bg-white/[0.07] transition-all">
+                        {style}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
+          )}
+
+          {/* Prompt bar */}
+          <div className="flex items-end gap-2">
+            {/* Upload button (if tool needs image) */}
+            {currentTool.needsUpload && (
+              <button onClick={() => fileRef.current?.click()}
+                className={cn(
+                  "h-12 px-3.5 rounded-2xl border transition-all flex items-center justify-center shrink-0",
+                  imagePreview
+                    ? "border-aether-purple/40 bg-aether-purple/10 text-aether-purple"
+                    : "border-white/[0.08] bg-white/[0.04] text-white/30 hover:text-white hover:bg-white/[0.08]"
+                )}>
+                <Upload className="h-4 w-4" />
+              </button>
+            )}
+
+            {/* Textarea */}
+            <div className="flex-1 relative">
+              <textarea
+                value={textPrompt}
+                onChange={(e) => setTextPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey && !currentTool.needsUpload) {
+                    e.preventDefault();
+                    handleProcess();
+                  }
+                }}
+                placeholder={
+                  currentTool.needsUpload
+                    ? imagePreview ? "Describe qué quieres hacer con esta imagen..." : "Sube una imagen primero..."
+                    : (currentTool.placeholder || "Describe lo que quieres generar...")
+                }
+                rows={1}
+                maxLength={1000}
+                className="w-full resize-none rounded-2xl border border-white/[0.07] bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-aether-purple/30 focus:bg-white/[0.05] transition-all leading-relaxed"
+                style={{ minHeight: "48px", maxHeight: "140px", overflowY: "auto" }}
+              />
+            </div>
+
+            {/* Generate button */}
+            <Button
+              onClick={handleProcess}
+              disabled={isRunning || currentTool.disabled || (currentTool.needsUpload ? !imagePreview : !textPrompt.trim())}
+              className="h-12 w-12 rounded-2xl bg-white text-black shadow-[0_4px_20px_rgba(255,255,255,0.08)] hover:bg-white/90 active:scale-[0.97] transition-all disabled:opacity-30 shrink-0 flex items-center justify-center p-0"
+            >
+              {isRunning
+                ? <Loader2 className="h-4 w-4 animate-spin" />
+                : <Sparkles className="h-4 w-4" />}
+            </Button>
+          </div>
+
+          {/* Mobile tool scroll */}
+          <div className="md:hidden flex overflow-x-auto no-scrollbar gap-1.5 pt-3 mt-3 border-t border-white/[0.06]">
+            {tools.filter(t => !t.disabled).map(tool => (
+              <button key={tool.id} onClick={() => switchTool(tool)}
+                className={cn(
+                  "flex flex-col items-center gap-1 px-3 py-2 rounded-xl shrink-0 transition-all",
+                  activeTool === tool.id
+                    ? "bg-white/[0.08] border border-white/[0.10] text-white"
+                    : "text-white/30 hover:text-white/60"
+                )}>
+                <tool.icon className="h-4 w-4" />
+                <span className="text-[9px] font-bold whitespace-nowrap">{tool.name}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>

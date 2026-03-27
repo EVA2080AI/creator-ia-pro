@@ -5,7 +5,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import {
   Sparkles, LayoutGrid, Wand2, Image, Shield, CreditCard, LogOut,
   Palette, Home, Menu, X, User, Download,
-  ChevronDown, Coins, Monitor, MessageSquare, Layers
+  ChevronDown, Coins, Monitor, MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +18,6 @@ const NAV_ITEMS = [
   { path: "/dashboard",    label: "Inicio",        icon: Home           },
   { path: "/chat",         label: "Chat IA",       icon: MessageSquare  },
   { path: "/tools",        label: "Herramientas",  icon: Wand2          },
-  { path: "/hub",          label: "Plantillas",    icon: Layers         },
   { path: "/formarketing", label: "Studio",        icon: Palette        },
   { path: "/spaces",       label: "Espacios",      icon: LayoutGrid     },
   { path: "/pricing",      label: "Precios",       icon: CreditCard     },
