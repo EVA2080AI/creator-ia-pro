@@ -9,6 +9,8 @@ const OPENROUTER_MODEL_MAP: Record<string, string> = {
   "claude-3.5-sonnet":   "anthropic/claude-sonnet-4-5",
   "claude-3-opus":       "anthropic/claude-opus-4-5",
   "gpt-oss-120b":        "meta-llama/llama-4-maverick",
+  "mistral-large":       "mistralai/mistral-large",
+  "mistral-small":       "mistralai/mistral-small-3.1-24b-instruct",
 };
 
 // Image models (NanoBanana family)
@@ -18,7 +20,7 @@ const IMAGE_MODEL_IDS = new Set(["nano-banana-2", "nano-banana-pro", "nano-banan
 const MODEL_COSTS: Record<string, number> = {
   "deepseek-chat": 1, "gemini-3-flash": 1, "gemini-3.1-pro-low": 1,
   "gemini-3.1-pro-high": 3, "claude-3.5-sonnet": 4, "claude-3-opus": 5,
-  "gpt-oss-120b": 2, "nano-banana-2": 2, "nano-banana-pro": 4, "nano-banana-25": 1,
+  "gpt-oss-120b": 2, "mistral-large": 2, "mistral-small": 1, "nano-banana-2": 2, "nano-banana-pro": 4, "nano-banana-25": 1,
   "upscale": 3, "background": 1, "enhance": 2, "restore": 3, "variation": 4, "video": 5,
 };
 
