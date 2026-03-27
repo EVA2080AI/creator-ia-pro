@@ -5,7 +5,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import {
   Sparkles, LayoutGrid, Wand2, Image, Shield, CreditCard, LogOut,
   Palette, Home, Menu, X, User, Download,
-  ChevronDown, Coins, Monitor
+  ChevronDown, Coins, Monitor, MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,12 +15,13 @@ interface AppHeaderProps {
 }
 
 const NAV_ITEMS = [
-  { path: "/dashboard",    label: "Inicio",        icon: Home        },
-  { path: "/tools",        label: "Herramientas",  icon: Wand2       },
-  { path: "/formarketing", label: "Studio",         icon: Palette     },
-  { path: "/spaces",       label: "Espacios",      icon: LayoutGrid  },
-  { path: "/assets",       label: "Activos",       icon: Image       },
-  { path: "/pricing",      label: "Precios",       icon: CreditCard  },
+  { path: "/dashboard",    label: "Inicio",        icon: Home           },
+  { path: "/chat",         label: "Chat IA",       icon: MessageSquare  },
+  { path: "/tools",        label: "Herramientas",  icon: Wand2          },
+  { path: "/formarketing", label: "Studio",        icon: Palette        },
+  { path: "/spaces",       label: "Espacios",      icon: LayoutGrid     },
+  { path: "/assets",       label: "Activos",       icon: Image          },
+  { path: "/pricing",      label: "Precios",       icon: CreditCard     },
 ];
 
 export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
@@ -73,10 +74,10 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                   "flex items-center gap-2.5 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all duration-300 font-display",
                   isActive
                     ? "text-white bg-white/5 shadow-inner border border-white/5"
-                    : "text-white/20 hover:text-white/60"
+                    : "text-white/45 hover:text-white/80"
                 )}
               >
-                <item.icon className={cn("w-3.5 h-3.5", isActive ? "text-aether-purple" : "text-white/10")} />
+                <item.icon className={cn("w-3.5 h-3.5", isActive ? "text-aether-purple" : "text-white/30")} />
                 {item.label}
               </button>
             );
@@ -214,6 +215,8 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                     "w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-sm font-semibold transition-all",
                     isActive
                       ? "bg-white text-black shadow-lg"
+                      : item.path === "/chat"
+                      ? "text-aether-purple/80 bg-aether-purple/5 border border-aether-purple/15 hover:text-aether-purple hover:bg-aether-purple/10"
                       : "text-white/60 bg-white/[0.03] border border-white/5 hover:text-white hover:bg-white/[0.06]"
                   )}
                 >
