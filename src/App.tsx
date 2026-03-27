@@ -65,7 +65,6 @@ function AuthWatcher() {
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Canvas = lazy(() => import("./pages/Canvas"));
 const Pricing = lazy(() => import("./pages/Pricing"));
 const Spaces = lazy(() => import("./pages/Spaces"));
 const Assets = lazy(() => import("./pages/Assets"));

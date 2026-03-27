@@ -5,7 +5,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import {
   Sparkles, LayoutGrid, Wand2, Image, Shield, CreditCard, LogOut,
   Palette, Home, Menu, X, User, Download,
-  ChevronDown, Coins, Monitor, MessageSquare
+  ChevronDown, Coins, Monitor, MessageSquare, Layers
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,9 +18,9 @@ const NAV_ITEMS = [
   { path: "/dashboard",    label: "Inicio",        icon: Home           },
   { path: "/chat",         label: "Chat IA",       icon: MessageSquare  },
   { path: "/tools",        label: "Herramientas",  icon: Wand2          },
+  { path: "/hub",          label: "Plantillas",    icon: Layers         },
   { path: "/formarketing", label: "Studio",        icon: Palette        },
   { path: "/spaces",       label: "Espacios",      icon: LayoutGrid     },
-  { path: "/assets",       label: "Activos",       icon: Image          },
   { path: "/pricing",      label: "Precios",       icon: CreditCard     },
 ];
 
@@ -33,13 +33,6 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleNav = (path: string) => {
-    // Chat IA opens the floating chat in fullscreen on the current page (no navigation)
-    if (path === "/chat") {
-      window.dispatchEvent(new CustomEvent("aether-chat-open-fullscreen"));
-      setMobileOpen(false);
-      setUserMenuOpen(false);
-      return;
-    }
     navigate(path);
     setMobileOpen(false);
     setUserMenuOpen(false);
