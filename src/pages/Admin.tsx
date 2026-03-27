@@ -323,6 +323,11 @@ function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () => void 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.reload();
+  };
+
   const handleBootstrap = async () => {
     setLoading(true);
     const { data, error } = await supabase.rpc("bootstrap_admin" as any);
@@ -346,6 +351,13 @@ function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () => void 
           </p>
           <p className="text-xs text-white/25 mt-1 font-mono">{user?.email}</p>
         </div>
+
+        <button
+          onClick={handleSignOut}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/40 text-xs hover:text-white/60 hover:bg-white/[0.07] transition-all"
+        >
+          Cambiar cuenta
+        </button>
 
         {result === "admin_exists" ? (
           <div className="space-y-3 text-left">
