@@ -415,6 +415,40 @@ export const GeniusAssistant = ({ onAction }: { onAction?: (action: string, data
       setStreamingText('');
     }
 
+    // ── Attempt 1b: same proxy, non-streaming fallback ───────────────────────
+    if (!fullText) {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+        const res = await fetch(`${supabaseUrl}/functions/v1/ai-proxy`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            provider: 'openrouter',
+            path: 'chat/completions',
+            body: { model: currentModel.openrouter, messages: contextMessages, temperature: 0.85, max_tokens: 4096, stream: false },
+          }),
+        });
+
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+          throw new Error(errJson?.error || `HTTP ${res.status}`);
+        }
+        const d = await res.json();
+        const t = d.choices?.[0]?.message?.content;
+        if (t) { fullText = t; setStreamingText(t); }
+      } catch (e2) {
+        console.warn('[Chat] Proxy non-stream falló:', e2);
+        setStreamingText('');
+      }
+    }
+
     // ── Attempt 2: direct OpenRouter from client (VITE key) ──────────────────
     if (!fullText) {
       const directKey = import.meta.env.VITE_OPENROUTER_API_KEY;

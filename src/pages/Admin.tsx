@@ -348,8 +348,23 @@ function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () => void 
         </div>
 
         {result === "admin_exists" ? (
-          <div className="rounded-2xl bg-rose-500/10 border border-rose-500/20 p-4 text-sm text-rose-400">
-            Ya existe un administrador en el sistema. Pídele que te otorgue acceso desde el panel.
+          <div className="space-y-3 text-left">
+            <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 text-xs text-amber-400/80 space-y-2">
+              <p className="font-bold text-amber-400">Ya existe un administrador</p>
+              <p>Si eres el propietario del proyecto, ejecuta este SQL en el <a href="https://supabase.com/dashboard/project/zfzkohjdwggctogehlkw/sql/new" target="_blank" rel="noopener noreferrer" className="underline text-amber-300">Editor SQL de Supabase</a> para otorgarte acceso:</p>
+              <pre className="bg-black/40 rounded-xl p-3 text-[10px] text-green-400 font-mono break-all whitespace-pre-wrap select-all">
+{`INSERT INTO public.user_roles (user_id, role)
+VALUES ('${user?.id}', 'admin')
+ON CONFLICT DO NOTHING;`}
+              </pre>
+              <p className="text-white/30">Tu ID: <span className="text-white/50 font-mono select-all">{user?.id}</span></p>
+            </div>
+            <button
+              onClick={onSuccess}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/[0.06] border border-white/10 text-white/60 font-semibold text-sm hover:bg-white/[0.09] transition-all"
+            >
+              <RotateCcw className="h-4 w-4" /> Ya lo hice — Recargar
+            </button>
           </div>
         ) : result?.startsWith("error:") ? (
           <div className="rounded-2xl bg-rose-500/10 border border-rose-500/20 p-4 text-sm text-rose-400">
