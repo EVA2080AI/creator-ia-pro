@@ -88,9 +88,12 @@ export function ModelSelector({ selectedModelId, onModelChange, filterType }: Mo
       </PopoverTrigger>
 
       <PopoverContent
-        className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[420px] p-0 border-white/10 bg-[#0d0d0f]/95 backdrop-blur-3xl rounded-2xl shadow-2xl overflow-hidden mt-2 z-[200]"
+        className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[420px] p-0 border-white/10 bg-[#0d0d0f]/95 backdrop-blur-3xl rounded-2xl shadow-2xl overflow-hidden z-[9999]"
         align="start"
-        sideOffset={4}
+        side="bottom"
+        sideOffset={6}
+        avoidCollisions
+        collisionPadding={16}
       >
         <Command className="bg-transparent border-none">
           <div className="flex items-center border-b border-white/[0.06] px-4">

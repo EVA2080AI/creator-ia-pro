@@ -242,6 +242,67 @@ function CreditModal({
   );
 }
 
+// ─── Admin Bootstrap ──────────────────────────────────────────────────────────
+// Shown when the logged-in user has no admin role.
+// Calls bootstrap_admin() RPC which only succeeds when 0 admins exist.
+
+function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
+
+  const handleBootstrap = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.rpc("bootstrap_admin" as any);
+    setLoading(false);
+    if (error) { setResult("error:" + error.message); return; }
+    if (data === "ok") { toast.success("¡Admin activado! Recargando..."); setTimeout(onSuccess, 1200); }
+    else if (data === "admin_exists") setResult("admin_exists");
+    else setResult("error:" + data);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#050506] flex items-center justify-center p-6">
+      <div className="w-full max-w-md rounded-3xl border border-white/[0.06] bg-white/[0.02] p-10 text-center space-y-6">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#A855F7]/10 border border-[#A855F7]/20 mx-auto">
+          <Shield className="h-8 w-8 text-[#A855F7]" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight">Panel Admin</h1>
+          <p className="text-sm text-white/40 mt-2">
+            Tu cuenta aún no tiene el rol de administrador.
+          </p>
+          <p className="text-xs text-white/25 mt-1 font-mono">{user?.email}</p>
+        </div>
+
+        {result === "admin_exists" ? (
+          <div className="rounded-2xl bg-rose-500/10 border border-rose-500/20 p-4 text-sm text-rose-400">
+            Ya existe un administrador en el sistema. Pídele que te otorgue acceso desde el panel.
+          </div>
+        ) : result?.startsWith("error:") ? (
+          <div className="rounded-2xl bg-rose-500/10 border border-rose-500/20 p-4 text-sm text-rose-400">
+            {result.replace("error:", "")}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 text-xs text-amber-400/80 text-left space-y-1">
+              <p className="font-bold text-amber-400">Primera configuración</p>
+              <p>Si aún no hay ningún administrador en el sistema, puedes activar tu cuenta como admin aquí. Esta opción se deshabilita automáticamente una vez que existe un admin.</p>
+            </div>
+            <button
+              onClick={handleBootstrap}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#A855F7] text-white font-bold text-sm hover:bg-[#9333EA] transition-all active:scale-95 disabled:opacity-50"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+              Activar mi cuenta como Admin
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const Admin = () => {
@@ -273,12 +334,7 @@ const Admin = () => {
     if (isAdmin) fetchUsers();
   }, [isAdmin, fetchUsers]);
 
-  useEffect(() => {
-    if (!authLoading && !adminLoading && !isAdmin) {
-      toast.error("Acceso denegado");
-      navigate("/dashboard");
-    }
-  }, [authLoading, adminLoading, isAdmin, navigate]);
+  // No automatic redirect — show bootstrap screen if not admin
 
   const handleChangeTier = async (targetUserId: string, newTier: string) => {
     setActionLoading(targetUserId + "-tier");
@@ -363,6 +419,11 @@ const Admin = () => {
         <Loader2 className="h-8 w-8 animate-spin text-[#A855F7]" />
       </div>
     );
+  }
+
+  // ── Bootstrap screen: user is logged in but has no admin role ──────────────
+  if (!isAdmin) {
+    return <AdminBootstrap user={user} onSuccess={() => window.location.reload()} />;
   }
 
   return (

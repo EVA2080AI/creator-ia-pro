@@ -539,7 +539,7 @@ export const GeniusAssistant = ({ onAction }: { onAction?: (action: string, data
     const isEmpty = msgs.length === 0 && !streaming;
 
     return (
-      <div className="fixed bottom-6 right-6 z-[9000] w-[420px] h-[580px] bg-[#09090c]/98 backdrop-blur-3xl border border-white/[0.08] rounded-[1.5rem] shadow-[0_0_80px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
+      <div className="fixed bottom-6 right-6 z-[9000] w-[420px] h-[580px] bg-[#09090c]/98 backdrop-blur-3xl border border-white/[0.08] rounded-[1.5rem] shadow-[0_0_80px_rgba(0,0,0,0.9)] flex flex-col animate-in fade-in zoom-in-95 duration-200 origin-bottom-right">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-white/[0.06] shrink-0">
@@ -565,7 +565,7 @@ export const GeniusAssistant = ({ onAction }: { onAction?: (action: string, data
         </div>
 
         {/* Messages */}
-        <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 py-4">
+        <div ref={scrollRef} className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-4">
           {isEmpty ? (
             <div className="flex flex-col items-center justify-center h-full text-center py-8">
               <div className="w-12 h-12 rounded-2xl bg-white/[0.05] border border-white/[0.06] flex items-center justify-center mb-4">
@@ -621,7 +621,7 @@ export const GeniusAssistant = ({ onAction }: { onAction?: (action: string, data
                 {currentModel.name} <ChevronDown className="h-2.5 w-2.5 text-white/20" />
               </button>
               {showModels && (
-                <div className="absolute bottom-full left-0 mb-2 bg-[#0d0d12] border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl w-52">
+                <div className="absolute bottom-full left-0 mb-2 bg-[#0d0d12] border border-white/10 rounded-xl overflow-hidden z-[9999] shadow-2xl w-52">
                   {CHAT_MODELS.map(m => (
                     <button key={m.id} onClick={() => { setSelectedModel(m.id); setShowModels(false); }}
                       className={cn("w-full flex items-center gap-2.5 px-3 py-2.5 text-left hover:bg-white/5 transition-all", selectedModel === m.id && "bg-white/[0.07]")}>
@@ -640,7 +640,7 @@ export const GeniusAssistant = ({ onAction }: { onAction?: (action: string, data
                 {currentPersonality.name} <ChevronDown className="h-2.5 w-2.5 text-white/20" />
               </button>
               {showPersonalities && (
-                <div className="absolute bottom-full left-0 mb-2 bg-[#0d0d12] border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl w-52">
+                <div className="absolute bottom-full left-0 mb-2 bg-[#0d0d12] border border-white/10 rounded-xl overflow-hidden z-[9999] shadow-2xl w-52">
                   {PERSONALITIES.map(p => (
                     <button key={p.id} onClick={() => { setSelectedPersonality(p.id); setShowPersonalities(false); }}
                       className={cn("w-full flex items-center gap-2.5 px-3 py-2.5 text-left hover:bg-white/5 transition-all", selectedPersonality === p.id && "bg-white/[0.07]")}>
@@ -716,7 +716,7 @@ export const GeniusAssistant = ({ onAction }: { onAction?: (action: string, data
               <ChevronDown className="h-3 w-3 text-white/25" />
             </button>
             {showModels && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#0d0d12] border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl w-64">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#0d0d12] border border-white/10 rounded-2xl overflow-hidden z-[9999] shadow-2xl w-64">
                 <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest px-4 pt-3 pb-1">Motor de IA</p>
                 <div className="p-2">
                   {CHAT_MODELS.map(m => (
@@ -740,7 +740,7 @@ export const GeniusAssistant = ({ onAction }: { onAction?: (action: string, data
               <ChevronDown className="h-3 w-3 text-white/25" />
             </button>
             {showPersonalities && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#0d0d12] border border-white/10 rounded-2xl overflow-hidden z-50 shadow-2xl w-60">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#0d0d12] border border-white/10 rounded-2xl overflow-hidden z-[9999] shadow-2xl w-60">
                 <p className="text-[9px] font-bold text-white/25 uppercase tracking-widest px-4 pt-3 pb-1">Personalidad</p>
                 <div className="p-2">
                   {PERSONALITIES.map(p => (
