@@ -88,6 +88,46 @@ const categories = [
   { id: "text"  as const, label: "Texto",  icon: FileText },
 ];
 
+function ImageWithFallback({ src, onRetry }: { src: string; onRetry: () => void }) {
+  const [status, setStatus] = useState<"loading" | "ok" | "error">("loading");
+
+  return (
+    <div className="relative w-full min-h-[200px]">
+      {status === "loading" && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/[0.02]">
+          <Loader2 className="h-8 w-8 text-aether-purple animate-spin" />
+        </div>
+      )}
+      {status === "error" ? (
+        <div className="flex flex-col items-center justify-center gap-4 py-16 px-8 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center">
+            <X className="h-7 w-7 text-rose-400" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white/60">La imagen no se pudo cargar</p>
+            <p className="text-xs text-white/25 mt-1">El motor de imagen puede estar saturado</p>
+          </div>
+          <button
+            onClick={onRetry}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-bold text-sm hover:bg-white/90 active:scale-95 transition-all"
+          >
+            <RotateCcw className="h-4 w-4" /> Intentar de nuevo
+          </button>
+        </div>
+      ) : (
+        <img
+          src={src}
+          alt="Imagen generada"
+          className="w-full object-contain max-h-[420px]"
+          onLoad={() => setStatus("ok")}
+          onError={() => setStatus("error")}
+          style={{ display: status === "loading" ? "none" : "block" }}
+        />
+      )}
+    </div>
+  );
+}
+
 const Tools = () => {
   const { user, signOut } = useAuth("/auth");
   const { profile, refreshProfile } = useProfile(user?.id);
@@ -573,14 +613,7 @@ const Tools = () => {
               ) : resultImage ? (
                 <div className="flex flex-col gap-4 animate-in fade-in duration-500 overflow-y-auto">
                   <div className="rounded-2xl overflow-hidden border border-white/[0.08] bg-black relative">
-                    <img
-                      src={resultImage}
-                      alt="Imagen generada"
-                      className="w-full object-contain max-h-[420px]"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23111' width='400' height='300'/%3E%3Ctext fill='%23555' font-size='14' x='50%25' y='50%25' text-anchor='middle'%3EError al cargar%3C/text%3E%3C/svg%3E";
-                      }}
-                    />
+                    <ImageWithFallback src={resultImage} onRetry={handleProcess} />
                   </div>
                   <div className="flex gap-2 flex-wrap">
                     <a href={resultImage} download={`creator-ia-${activeTool}-${Date.now()}.png`} target="_blank" rel="noreferrer" className="flex-1">

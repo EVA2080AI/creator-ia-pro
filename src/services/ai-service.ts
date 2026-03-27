@@ -218,11 +218,29 @@ ${userCredits < 3 ? '⚠️ Créditos bajos: menciona sutilmente que el Plan Pro
       } catch (e: any) { console.warn(`[Image] Pollinations proxy intento ${attempt + 1} falló:`, e.message); }
     }
 
-    // 4. Pollinations DIRECT URL — CORS enabled, no proxy, guaranteed fallback
-    const directSeed = Math.floor(Math.random() * 999999);
-    return {
-      url: `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&seed=${directSeed}&nologo=true&model=flux`,
-    };
+    // 4. Pollinations DIRECT — fetch, verify it's an image, convert to data URL
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const directSeed = Math.floor(Math.random() * 999999);
+      const polUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&seed=${directSeed}&nologo=true&model=flux`;
+      try {
+        const res = await fetch(polUrl, { signal: AbortSignal.timeout(30_000) });
+        if (res.ok) {
+          const blob = await res.blob();
+          if (blob.type.startsWith("image/")) {
+            const dataUrl = await new Promise<string>((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+            return { url: dataUrl };
+          }
+        }
+      } catch { /* retry */ }
+      if (attempt < 2) await new Promise(r => setTimeout(r, 2000));
+    }
+
+    throw new Error("No se pudo generar la imagen. Todos los motores fallaron. Intenta de nuevo.");
   },
 
   // ─── VIDEO GENERATION ────────────────────────────────────────────────────────
