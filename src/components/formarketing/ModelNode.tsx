@@ -3,6 +3,7 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Image as ImageIcon, Trash2, Wand2, Zap, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { NodeNextAction } from './NodeNextAction';
 
 interface ModelNodeData {
   title?: string;
@@ -180,6 +181,7 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
       )}
 
       <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#020203] hover:scale-125 transition-transform" />
+      <NodeNextAction nodeId={id} />
     </div>
   );
 };

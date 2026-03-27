@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -7,16 +7,18 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { aiService } from "@/services/ai-service";
 import {
-  Wand2, ZoomIn, Eraser, ImagePlus, RotateCcw, Sparkles,
+  Wand2, ZoomIn, ImagePlus, RotateCcw, Sparkles,
   Upload, Loader2, Download, Coins, MessageSquare,
-  PenTool, Hash, Image, FileText, Megaphone, Copy, X, Zap
+  PenTool, Hash, Image, FileText, Megaphone, Copy, X, Zap,
+  ClipboardCopy
 } from "lucide-react";
 import { ModelSelector, AVAILABLE_MODELS } from "@/components/ModelSelector";
 import { cn } from "@/lib/utils";
 
 type ToolId =
   | "enhance" | "upscale" | "eraser" | "background" | "restore" | "generate"
-  | "copywriter" | "logo" | "social" | "blog" | "ads";
+  | "logo"
+  | "copywriter" | "social" | "blog" | "ads";
 
 interface Tool {
   id: ToolId;
@@ -31,18 +33,23 @@ interface Tool {
 }
 
 const tools: Tool[] = [
-  { id: "enhance",    name: "Mejorar imagen",       desc: "Mejora iluminación y detalles automáticamente.",      icon: Wand2,       credits: 2, category: "image", needsUpload: true,  color: "text-aether-purple" },
-  { id: "upscale",    name: "Aumentar resolución",  desc: "Escala imágenes hasta 4K sin perder calidad.",        icon: ZoomIn,      credits: 3, category: "image", needsUpload: true,  color: "text-aether-blue"   },
-  { id: "eraser",     name: "Borrar objeto",         desc: "Elimina cualquier objeto de la imagen sin rastros.",  icon: Eraser,      credits: 2, category: "image", needsUpload: true,  color: "text-rose-400"      },
-  { id: "background", name: "Quitar fondo",          desc: "Extrae el fondo con bordes perfectos.",               icon: ImagePlus,   credits: 1, category: "image", needsUpload: true,  color: "text-emerald-400"   },
-  { id: "restore",    name: "Restaurar foto",        desc: "Restaura fotos antiguas o dañadas.",                  icon: RotateCcw,   credits: 3, category: "image", needsUpload: true,  color: "text-amber-400"     },
-  { id: "generate",   name: "Crear imagen",          desc: "Genera imágenes desde texto con IA.",                 icon: Image,       credits: 1, category: "image", needsUpload: false, placeholder: "Ej. Un gato astronauta en Marte al atardecer, estilo fotorrealista...", color: "text-white" },
-  { id: "copywriter", name: "Crear texto",           desc: "Genera textos y copy para marketing.",                icon: MessageSquare, credits: 1, category: "text", needsUpload: false, placeholder: "Ej. Escribe un mensaje persuasivo para vender zapatos deportivos en Instagram...", color: "text-aether-purple" },
-  { id: "logo",       name: "Diseñar logo",          desc: "Crea logos e identidades de marca.",                  icon: PenTool,     credits: 2, category: "text", needsUpload: false, placeholder: "Ej. Logo minimalista para una cafetería llamada 'Origen', tonos cálidos...", color: "text-aether-blue" },
-  { id: "social",     name: "Contenido para redes",  desc: "Crea posts y estrategias para redes sociales.",       icon: Hash,        credits: 2, category: "text", needsUpload: false, placeholder: "Ej. 5 ideas de contenido para Instagram de una marca de ropa sostenible...", color: "text-rose-400" },
-  { id: "blog",       name: "Escribir artículo",     desc: "Artículos largos optimizados para SEO.",              icon: FileText,    credits: 1, category: "text", needsUpload: false, placeholder: "Ej. Artículo completo sobre los beneficios del café de especialidad en 2025...", color: "text-emerald-400" },
-  { id: "ads",        name: "Crear anuncio",         desc: "Anuncios para Google, Meta y más.",                   icon: Megaphone,   credits: 1, category: "text", needsUpload: false, placeholder: "Ej. Anuncio de Google Ads para un servicio de consultoría de marketing digital...", color: "text-white" },
+  // ── Imagen ──────────────────────────────────────────────────────────────────
+  { id: "generate",   name: "Crear imagen",         desc: "Genera imágenes desde texto con IA.",                  icon: Image,       credits: 2, category: "image", needsUpload: false, placeholder: "Ej. Un gato astronauta en Marte al atardecer, estilo fotorrealista, luz dramática...", color: "text-white" },
+  { id: "logo",       name: "Diseñar logo",          desc: "Genera logos e identidades de marca con IA.",          icon: PenTool,     credits: 3, category: "image", needsUpload: false, placeholder: "Ej. Logo minimalista para una cafetería llamada Origen, tonos cálidos, fondo blanco...", color: "text-aether-blue" },
+  { id: "enhance",    name: "Mejorar imagen",        desc: "Mejora iluminación y detalles automáticamente.",       icon: Wand2,       credits: 2, category: "image", needsUpload: true,  color: "text-aether-purple" },
+  { id: "upscale",    name: "Aumentar resolución",   desc: "Escala imágenes hasta 4K sin perder calidad.",         icon: ZoomIn,      credits: 3, category: "image", needsUpload: true,  color: "text-aether-blue" },
+  { id: "eraser",     name: "Borrar objeto",         desc: "Elimina cualquier objeto de la imagen sin rastros.",   icon: X,           credits: 2, category: "image", needsUpload: true,  color: "text-rose-400" },
+  { id: "background", name: "Quitar fondo",          desc: "Extrae el fondo con bordes perfectos.",                icon: ImagePlus,   credits: 1, category: "image", needsUpload: true,  color: "text-emerald-400" },
+  { id: "restore",    name: "Restaurar foto",        desc: "Restaura fotos antiguas o dañadas.",                   icon: RotateCcw,   credits: 3, category: "image", needsUpload: true,  color: "text-amber-400" },
+  // ── Texto ───────────────────────────────────────────────────────────────────
+  { id: "copywriter", name: "Crear texto",           desc: "Genera textos y copy para marketing.",                 icon: MessageSquare, credits: 1, category: "text", needsUpload: false, placeholder: "Ej. Escribe un mensaje persuasivo para vender zapatos deportivos en Instagram...", color: "text-aether-purple" },
+  { id: "social",     name: "Contenido para redes",  desc: "Crea posts y estrategias para redes sociales.",        icon: Hash,          credits: 2, category: "text", needsUpload: false, placeholder: "Ej. 5 ideas de contenido para Instagram de una marca de ropa sostenible...", color: "text-rose-400" },
+  { id: "blog",       name: "Escribir artículo",     desc: "Artículos largos optimizados para SEO.",               icon: FileText,      credits: 1, category: "text", needsUpload: false, placeholder: "Ej. Artículo completo sobre los beneficios del café de especialidad en 2025...", color: "text-emerald-400" },
+  { id: "ads",        name: "Crear anuncio",         desc: "Anuncios para Google, Meta y más.",                    icon: Megaphone,     credits: 1, category: "text", needsUpload: false, placeholder: "Ej. Anuncio de Google Ads para un servicio de consultoría de marketing digital...", color: "text-white" },
 ];
+
+const IMAGE_STYLES = ["Fotorrealista", "Minimalista", "Anime", "Acuarela", "Cyberpunk", "Bauhaus", "3D", "Vintage"];
+const LOGO_STYLES  = ["Minimalista", "Tipográfico", "Vintage", "Geométrico", "Moderno", "Playful", "Lujo", "Tech"];
 
 const appIdToToolId: Record<string, ToolId> = {
   copywriter: "copywriter", logo: "logo", social: "social", blog: "blog", ads: "ads",
@@ -78,27 +85,33 @@ const Tools = () => {
   const navigate = useNavigate();
   const { appId } = useParams();
 
-  const [activeTool, setActiveTool]     = useState<ToolId>("enhance");
-  const [category, setCategory]         = useState<"image" | "text">("image");
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [resultImage, setResultImage]   = useState<string | null>(null);
-  const [resultText, setResultText]     = useState<string | null>(null);
-  const [processing, setProcessing]     = useState(false);
-  const [textPrompt, setTextPrompt]     = useState("");
-  const [selectedModelId, setSelectedModelId] = useState("deepseek-chat");
+  const [activeTool, setActiveTool]         = useState<ToolId>("generate");
+  const [category, setCategory]             = useState<"image" | "text">("image");
+  const [imagePreview, setImagePreview]     = useState<string | null>(null);
+  const [resultImage, setResultImage]       = useState<string | null>(null);
+  const [resultText, setResultText]         = useState<string | null>(null);
+  const [processing, setProcessing]         = useState(false);
+  const [copyingImage, setCopyingImage]     = useState(false);
+  const [textPrompt, setTextPrompt]         = useState("");
+  const [selectedImageModel, setSelectedImageModel] = useState("nano-banana-2");
+  const [selectedTextModel,  setSelectedTextModel]  = useState("deepseek-chat");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (appId && appIdToToolId[appId]) {
-      setActiveTool(appIdToToolId[appId]);
-      setCategory("text");
+      const tool = tools.find((t) => t.id === appIdToToolId[appId])!;
+      setActiveTool(tool.id);
+      setCategory(tool.category);
     }
   }, [appId]);
 
   const currentTool    = tools.find((t) => t.id === activeTool)!;
   const filteredTools  = tools.filter((t) => t.category === category);
-  const modelObj       = AVAILABLE_MODELS.find((m) => m.id === selectedModelId) || AVAILABLE_MODELS[0];
-  const requiredCredits = category === "text" ? modelObj.tokenCost : currentTool.credits;
+  const activeModel    = category === "image" ? selectedImageModel : selectedTextModel;
+  const modelObj       = AVAILABLE_MODELS.find((m) => m.id === activeModel) || AVAILABLE_MODELS[0];
+  const requiredCredits = category === "image"
+    ? currentTool.credits
+    : modelObj.tokenCost;
 
   const switchTool = (tool: Tool) => {
     setActiveTool(tool.id);
@@ -129,11 +142,12 @@ const Tools = () => {
   const handleProcess = async () => {
     if (!user) return;
     if (currentTool.needsUpload && !imagePreview) { toast.error("Sube una imagen primero"); return; }
-    if (!currentTool.needsUpload && !textPrompt.trim()) { toast.error("Escribe una instrucción para continuar"); return; }
+    if (!currentTool.needsUpload && !textPrompt.trim()) { toast.error("Escribe una descripción para continuar"); return; }
 
     const credits = profile?.credits_balance ?? 0;
     if (credits < requiredCredits) {
-      toast.error(`Sin créditos suficientes. Necesitas ${requiredCredits} y tienes ${credits}.`);
+      toast.error(`Sin créditos. Necesitas ${requiredCredits} y tienes ${credits}.`);
+      navigate("/pricing");
       return;
     }
 
@@ -146,16 +160,16 @@ const Tools = () => {
         action: category === "text" ? "chat" : "image",
         tool: activeTool,
         prompt: textPrompt,
-        model: selectedModelId,
+        model: activeModel,
         image: imagePreview || undefined,
       });
 
-      if (data?.text) {
-        setResultText(data.text);
-        toast.success("¡Listo!");
-      } else if (data?.url) {
+      if (data?.url) {
         setResultImage(data.url);
         toast.success("¡Imagen generada!");
+      } else if (data?.text) {
+        setResultText(data.text);
+        toast.success("¡Listo!");
       } else {
         throw new Error("La IA no devolvió resultado. Intenta de nuevo.");
       }
@@ -167,13 +181,34 @@ const Tools = () => {
     }
   };
 
+  // Copy image blob to clipboard
+  const handleCopyImage = useCallback(async (url: string) => {
+    setCopyingImage(true);
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      await navigator.clipboard.write([
+        new ClipboardItem({ [blob.type]: blob }),
+      ]);
+      toast.success("Imagen copiada al portapapeles");
+    } catch {
+      // Fallback: copy URL
+      navigator.clipboard.writeText(url);
+      toast.success("URL de imagen copiada");
+    } finally {
+      setCopyingImage(false);
+    }
+  }, []);
+
+  const styleList = activeTool === "logo" ? LOGO_STYLES : IMAGE_STYLES;
+
   return (
     <div className="h-screen flex flex-col bg-[#050506] text-white font-sans overflow-hidden selection:bg-aether-purple/30">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <div className="flex flex-1 overflow-hidden" style={{ marginTop: "64px" }}>
 
-        {/* ── Left Sidebar ─────────────────────────────── */}
+        {/* ── Left Sidebar ──────────────────────────────────────── */}
         <aside className="w-60 shrink-0 border-r border-white/[0.05] bg-[#070708] flex flex-col overflow-hidden">
           {/* Category tabs */}
           <div className="p-3 border-b border-white/[0.05]">
@@ -229,7 +264,7 @@ const Tools = () => {
             })}
           </nav>
 
-          {/* Credits at bottom */}
+          {/* Credits */}
           <div className="p-3 border-t border-white/[0.05]">
             <button
               onClick={() => navigate("/pricing")}
@@ -246,7 +281,7 @@ const Tools = () => {
           </div>
         </aside>
 
-        {/* ── Main: Input + Result ──────────────────────── */}
+        {/* ── Main: Input + Result ──────────────────────────────── */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
 
           {/* Input Panel */}
@@ -254,7 +289,7 @@ const Tools = () => {
             {/* Tool header */}
             <div className="flex items-center gap-3">
               <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 border border-white/[0.08] shrink-0", currentTool.color)}>
-                <currentTool.icon className="h-4.5 w-4.5" />
+                <currentTool.icon className="h-5 w-5" />
               </div>
               <div>
                 <h2 className="text-base font-bold text-white tracking-tight">{currentTool.name}</h2>
@@ -262,13 +297,31 @@ const Tools = () => {
               </div>
             </div>
 
-            {/* Model selector — only for text / generate */}
-            {(category === "text" || activeTool === "generate") && (
+            {/* Model selector */}
+            {category === "text" && (
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold text-white/30 uppercase tracking-widest flex items-center gap-1.5">
                   <Zap className="h-3 w-3 text-aether-purple" /> Modelo de IA
                 </p>
-                <ModelSelector selectedModelId={selectedModelId} onModelChange={setSelectedModelId} />
+                <ModelSelector
+                  selectedModelId={selectedTextModel}
+                  onModelChange={setSelectedTextModel}
+                  filterType="text"
+                />
+              </div>
+            )}
+
+            {/* Image model selector */}
+            {category === "image" && !currentTool.needsUpload && (
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold text-white/30 uppercase tracking-widest flex items-center gap-1.5">
+                  <Zap className="h-3 w-3 text-aether-purple" /> Motor de imagen
+                </p>
+                <ModelSelector
+                  selectedModelId={selectedImageModel}
+                  onModelChange={setSelectedImageModel}
+                  filterType="image"
+                />
               </div>
             )}
 
@@ -318,12 +371,13 @@ const Tools = () => {
                   value={textPrompt}
                   onChange={(e) => setTextPrompt(e.target.value)}
                   placeholder={currentTool.placeholder}
-                  rows={8}
+                  rows={7}
                   className="flex-1 w-full resize-none rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 text-sm text-white placeholder:text-white/15 focus:outline-none focus:border-aether-purple/30 focus:bg-white/[0.03] transition-all leading-relaxed"
                 />
-                {activeTool === "generate" && (
+                {/* Style pills */}
+                {(activeTool === "generate" || activeTool === "logo") && (
                   <div className="flex flex-wrap gap-2">
-                    {["Fotorrealista", "Cinema 4D", "Surrealista", "Anime", "Minimalista", "Cyberpunk"].map((style) => (
+                    {styleList.map((style) => (
                       <button
                         key={style}
                         onClick={() =>
@@ -346,7 +400,7 @@ const Tools = () => {
               className="w-full h-12 rounded-2xl bg-white text-black font-semibold text-sm shadow-[0_4px_20px_rgba(255,255,255,0.1)] hover:bg-white/90 active:scale-[0.98] transition-all disabled:opacity-40 mt-auto flex items-center gap-2"
             >
               {processing ? (
-                <><Loader2 className="h-4 w-4 animate-spin" /> Procesando...</>
+                <><Loader2 className="h-4 w-4 animate-spin" /> Generando...</>
               ) : (
                 <><Sparkles className="h-4 w-4" /> Generar · {requiredCredits} crédito{requiredCredits > 1 ? "s" : ""}</>
               )}
@@ -376,28 +430,57 @@ const Tools = () => {
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm font-semibold text-white/40">Generando con IA...</p>
-                    <p className="text-xs text-white/20">Esto puede tomar unos segundos</p>
+                    <p className="text-xs text-white/20">Puede tomar unos segundos</p>
                   </div>
                 </div>
+
               ) : resultImage ? (
                 <div className="flex flex-col gap-4 animate-in fade-in duration-500">
-                  <div className="rounded-2xl overflow-hidden border border-white/[0.08] bg-black">
-                    <img src={resultImage} alt="Imagen generada" className="w-full object-contain max-h-[480px]" />
+                  <div className="rounded-2xl overflow-hidden border border-white/[0.08] bg-black relative group">
+                    <img
+                      src={resultImage}
+                      alt="Imagen generada"
+                      className="w-full object-contain max-h-[480px]"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23111' width='400' height='300'/%3E%3Ctext fill='%23555' font-size='14' x='50%25' y='50%25' text-anchor='middle'%3EError al cargar imagen%3C/text%3E%3C/svg%3E";
+                      }}
+                    />
                   </div>
-                  <div className="flex gap-3">
-                    <a href={resultImage} download className="flex-1">
-                      <button className="w-full h-11 rounded-xl border border-white/[0.08] bg-white/[0.04] text-sm font-medium text-white/70 hover:text-white hover:bg-white/[0.08] transition-all flex items-center justify-center gap-2">
+                  {/* Action buttons */}
+                  <div className="flex gap-2">
+                    {/* Download */}
+                    <a
+                      href={resultImage}
+                      download={`creator-ia-${activeTool}-${Date.now()}.png`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex-1"
+                    >
+                      <button className="w-full h-11 rounded-xl border border-white/[0.08] bg-white/[0.04] text-sm font-semibold text-white/70 hover:text-white hover:bg-white/[0.10] transition-all flex items-center justify-center gap-2">
                         <Download className="h-4 w-4" /> Descargar
                       </button>
                     </a>
+                    {/* Copy image */}
+                    <button
+                      onClick={() => handleCopyImage(resultImage)}
+                      disabled={copyingImage}
+                      title="Copiar imagen"
+                      className="h-11 px-4 rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/40 hover:text-white hover:bg-white/[0.10] transition-all flex items-center gap-2 text-sm font-semibold disabled:opacity-50"
+                    >
+                      {copyingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ClipboardCopy className="h-4 w-4" />}
+                      Copiar
+                    </button>
+                    {/* Copy URL */}
                     <button
                       onClick={() => { navigator.clipboard.writeText(resultImage); toast.success("URL copiada"); }}
-                      className="h-11 w-11 rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/40 hover:text-white hover:bg-white/[0.08] transition-all flex items-center justify-center"
+                      title="Copiar URL"
+                      className="h-11 w-11 rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/20 hover:text-white/60 transition-all flex items-center justify-center"
                     >
                       <Copy className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
+
               ) : resultText ? (
                 <div className="flex flex-col gap-4 animate-in fade-in duration-500 flex-1">
                   <div className="flex-1 rounded-2xl border border-white/[0.06] bg-white/[0.01] p-5 overflow-y-auto min-h-[280px]">
@@ -413,6 +496,7 @@ const Tools = () => {
                     <Copy className="h-4 w-4" /> Copiar texto
                   </button>
                 </div>
+
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center gap-4 text-center rounded-2xl border border-dashed border-white/[0.05] min-h-[300px] p-8">
                   <div className="w-14 h-14 rounded-2xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-center">

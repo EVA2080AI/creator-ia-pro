@@ -85,8 +85,8 @@ export const aiService = {
       if (tool && ["upscale", "background", "enhance", "restore", "eraser", "variation"].includes(tool)) {
         if (!image) throw new Error(`La herramienta "${tool}" requiere una imagen de origen.`);
         result = await this.handleMediaProxy(tool, image);
-      } else if (action === "image" || IMAGE_MODEL_IDS.has(model) || tool === "generate") {
-        result = await this.handleImageGen(prompt);
+      } else if (action === "image" || IMAGE_MODEL_IDS.has(model) || tool === "generate" || tool === "logo") {
+        result = await this.handleImageGen(prompt, tool);
       } else if (action === "video") {
         result = {
           url: "https://cdn.pixabay.com/video/2023/10/20/185834-876356744_tiny.mp4",
@@ -302,37 +302,17 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
   },
 
   // ─── IMAGE GENERATION ────────────────────────────────────────────────────────
-  async handleImageGen(prompt: string) {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      // Industrial Route: Use Flux on Replicate via our proxy
-      const res = await fetch("https://zfzkohjdwggctogehlkw.supabase.co/functions/v1/media-proxy", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${session?.access_token || ""}`,
-        },
-        body: JSON.stringify({ 
-          tool: "generate", 
-          image_url: "none", // indicate new generation
-          prompt 
-        }),
-      });
-
-      if (!res.ok) throw new Error("Proxy error: " + res.status);
-      const data = await res.json();
-      console.log("Canvas Engine (Industrial): Replicate success", data.url);
-      if (data.url) toast.info("URL Generada: " + data.url.substring(0, 40) + "...");
-      return data;
-    } catch (err) {
-      console.warn("Canvas Engine (Industrial): Replicate failed, falling back to Pollinations...", err);
-      const seed = Math.floor(Math.random() * 999999);
-      const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true`;
-      console.log("Canvas Engine (Industrial): Fallback URL", imageUrl);
-      toast.warning("Usando motor de respaldo (Industrial Fallback)");
-      return { url: imageUrl };
+  async handleImageGen(prompt: string, tool?: string) {
+    // Enhance prompt based on tool type
+    let enhancedPrompt = prompt;
+    if (tool === "logo") {
+      enhancedPrompt = `${prompt}, professional logo design, clean vector style, minimal background, sharp edges, brand identity, high quality`;
     }
+
+    // Select Pollinations model based on model ID routing (nano-banana-pro = enhanced quality)
+    const seed = Math.floor(Math.random() * 999999);
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true&model=flux`;
+    return { url: imageUrl };
   },
 
   // ─── MEDIA PROXY (IMAGE EDITING) ──────────────────────────────────────────

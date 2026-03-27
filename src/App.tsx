@@ -8,6 +8,31 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 import { HelmetProvider } from "react-helmet-async";
 
+// Global ambient glassmorphism background — excluded on Studio/Canvas
+function GlobalAmbient() {
+  const loc = useLocation();
+  const isCanvas = loc.pathname.startsWith("/formarketing") || loc.pathname === "/canvas";
+  if (isCanvas) return null;
+  return (
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
+      {/* Purple top-left orb */}
+      <div className="absolute -top-[20%] -left-[10%] h-[70vh] w-[70vh] rounded-full bg-aether-purple/[0.06] blur-[130px]" />
+      {/* Blue top-right orb */}
+      <div className="absolute top-[10%] right-[-5%] h-[50vh] w-[50vh] rounded-full bg-aether-blue/[0.04] blur-[110px]" />
+      {/* Rose bottom-center orb */}
+      <div className="absolute bottom-[5%] left-[30%] h-[40vh] w-[40vh] rounded-full bg-rose-500/[0.03] blur-[100px] animate-pulse" />
+      {/* Noise grain */}
+      <div
+        className="fixed inset-0 opacity-[0.025] mix-blend-overlay"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
+          backgroundSize: "200px 200px",
+        }}
+      />
+    </div>
+  );
+}
+
 // Redirect /canvas → /formarketing preserving query params
 const CanvasRedirect = () => {
   const loc = useLocation();
@@ -70,6 +95,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <GlobalAmbient />
             <Suspense fallback={<LoadingScreen />}>
               <Routes>
                 <Route path="/" element={<Index />} />

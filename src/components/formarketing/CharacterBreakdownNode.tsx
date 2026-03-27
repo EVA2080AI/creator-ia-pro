@@ -3,6 +3,7 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { UserCircle, Trash2, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { NodeNextAction } from './NodeNextAction';
 
 interface CharacterNodeData {
   title?: string;
@@ -147,6 +148,7 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
       </div>
 
       <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#020203] hover:scale-125 transition-transform" />
+      <NodeNextAction nodeId={id} />
     </div>
   );
 };

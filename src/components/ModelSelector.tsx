@@ -1,4 +1,4 @@
-import { Check, ChevronsUpDown, Sparkles, BrainCircuit, Zap, Image as ImageIcon, Flame, Cpu } from "lucide-react";
+import { Check, ChevronsUpDown, Sparkles, Zap, Image as ImageIcon, Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -28,29 +28,40 @@ export interface AIModel {
 }
 
 export const AVAILABLE_MODELS: AIModel[] = [
-  // ─── TEXTO / CHAT (via OpenRouter) ──────────────────────────────────────────
-  { id: "deepseek-chat",       name: "DeepSeek V3",              provider: "DeepSeek",    tokenCost: 1,  badge: "Best Value 🔥", description: "DeepSeek-V3 · Peak performance ratio.",        type: "text" },
-  { id: "gemini-3-flash",      name: "Gemini 2.0 Flash",         provider: "Google",      tokenCost: 1,  description: "Gemini-2.0-Flash · Sub-second latency processing.",         type: "text" },
-  { id: "gemini-3.1-pro-low",  name: "Gemini 2.5 Pro",           provider: "Google",      tokenCost: 1,  badge: "New",          description: "Gemini-2.5-Pro · Balanced intelligence nexus.",         type: "text" },
-  { id: "gemini-3.1-pro-high", name: "Gemini 2.5 Pro (Max)",     provider: "Google",      tokenCost: 3,  badge: "High-IQ",      description: "Gemini-2.5-Pro · Deep reasoning & complex logic.",        type: "text" },
-  { id: "claude-3.5-sonnet",   name: "Claude Sonnet 4.5",        provider: "Anthropic",   tokenCost: 4,  badge: "Thinking ⚡",  description: "Claude-Sonnet-4.5 · Advanced coding & logic.",             type: "text" },
-  { id: "claude-3-opus",       name: "Claude Opus 4.5",          provider: "Anthropic",   tokenCost: 5,  badge: "Genius 🧠",    description: "Claude-Opus-4.5 · The pinnacle of Anthropic reasoning.",          type: "text" },
-  { id: "gpt-oss-120b",        name: "Llama 4 Maverick",         provider: "OpenSource",  tokenCost: 2,  badge: "Open 🦙",     description: "Llama-4-Maverick · High-performance open-source core.",             type: "text" },
-  // ─── IMAGEN (via Pollinations.ai) ───────────────────────────────────────────
-  { id: "nano-banana-2",       name: "Image Flash (HD)",         provider: "NanoBanana",  tokenCost: 2,  badge: "Visual ✨",    description: "Pollinations · 1024x1024 high-fidelity generation.",       type: "image" },
-  { id: "nano-banana-pro",     name: "Image Pro (Studio)",      provider: "NanoBanana",  tokenCost: 4,  badge: "Studio 🎨",    description: "Pollinations + Enhance · Studio-grade visual manifestation.",    type: "image" },
-  { id: "nano-banana-25",      name: "Image Rapid (Eco)",       provider: "NanoBanana",  tokenCost: 1,  badge: "Eco 🍌",       description: "Pollinations · Fast, low-latency visual sketching.",                    type: "image" },
+  // ─── TEXTO ───────────────────────────────────────────────────────────────────
+  { id: "deepseek-chat",       name: "DeepSeek V3",          provider: "DeepSeek",    tokenCost: 1,  badge: "Mejor valor",   description: "Rendimiento excepcional al menor costo.",     type: "text" },
+  { id: "gemini-3-flash",      name: "Gemini 2.0 Flash",     provider: "Google",      tokenCost: 1,  description: "Respuestas ultrarrápidas de Google.",               type: "text" },
+  { id: "gemini-3.1-pro-low",  name: "Gemini 2.5 Pro",       provider: "Google",      tokenCost: 1,  badge: "Nuevo",         description: "Inteligencia avanzada de Google.",             type: "text" },
+  { id: "gemini-3.1-pro-high", name: "Gemini 2.5 Pro Max",   provider: "Google",      tokenCost: 3,  badge: "Alta IQ",       description: "Razonamiento profundo y lógica compleja.",     type: "text" },
+  { id: "claude-3.5-sonnet",   name: "Claude Sonnet 4.5",    provider: "Anthropic",   tokenCost: 4,  badge: "Thinking",      description: "Código avanzado y análisis de Anthropic.",     type: "text" },
+  { id: "claude-3-opus",       name: "Claude Opus 4.5",      provider: "Anthropic",   tokenCost: 5,  badge: "Genius",        description: "El modelo más capaz de Anthropic.",            type: "text" },
+  { id: "gpt-oss-120b",        name: "Llama 4 Maverick",     provider: "OpenSource",  tokenCost: 2,  badge: "Open Source",   description: "Modelo open source de alto rendimiento.",      type: "text" },
+  // ─── IMAGEN ───────────────────────────────────────────────────────────────────
+  { id: "nano-banana-2",       name: "Imagen HD",            provider: "NanoBanana",  tokenCost: 2,  badge: "Recomendado",   description: "Generación de alta fidelidad 1024×1024.",      type: "image" },
+  { id: "nano-banana-pro",     name: "Imagen Pro",           provider: "NanoBanana",  tokenCost: 4,  badge: "Studio",        description: "Calidad de estudio con mejora automática.",    type: "image" },
+  { id: "nano-banana-25",      name: "Imagen Rápida",        provider: "NanoBanana",  tokenCost: 1,  badge: "Eco",           description: "Generación instantánea, baja latencia.",       type: "image" },
 ];
 
 interface ModelSelectorProps {
   selectedModelId: string;
   onModelChange: (modelId: string) => void;
+  filterType?: "text" | "image";
 }
 
-export function ModelSelector({ selectedModelId, onModelChange }: ModelSelectorProps) {
+export function ModelSelector({ selectedModelId, onModelChange, filterType }: ModelSelectorProps) {
   const [open, setOpen] = useState(false);
-  
-  const selectedModel = AVAILABLE_MODELS.find((m) => m.id === selectedModelId) || AVAILABLE_MODELS[0];
+
+  const visibleModels = filterType
+    ? AVAILABLE_MODELS.filter((m) => m.type === filterType)
+    : AVAILABLE_MODELS;
+
+  const selectedModel =
+    visibleModels.find((m) => m.id === selectedModelId) ||
+    AVAILABLE_MODELS.find((m) => m.id === selectedModelId) ||
+    visibleModels[0];
+
+  const imageModels = visibleModels.filter((m) => m.provider === "NanoBanana");
+  const textModels  = visibleModels.filter((m) => m.provider !== "NanoBanana");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -59,41 +70,78 @@ export function ModelSelector({ selectedModelId, onModelChange }: ModelSelectorP
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between aether-card border-white/5 hover:border-white/10 h-16 rounded-2xl px-5 transition-all duration-300 shadow-inner group"
+          className="w-full justify-between aether-card border-white/5 hover:border-white/10 h-14 rounded-xl px-4 transition-all duration-300 shadow-inner group"
         >
-          <div className="flex items-center gap-4">
-            <div className="p-2 rounded-xl bg-white/5 border border-white/5 group-hover:bg-aether-purple/10 group-hover:border-aether-purple/20 transition-all">
-              <Sparkles className="h-4 w-4 text-aether-purple" />
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="p-1.5 rounded-lg bg-white/5 border border-white/5 group-hover:bg-aether-purple/10 group-hover:border-aether-purple/20 transition-all shrink-0">
+              <Sparkles className="h-3.5 w-3.5 text-aether-purple" />
             </div>
-            <div className="flex flex-col items-start truncate text-left">
-              <span className="text-[13px] font-bold text-white font-display tracking-tight uppercase">{selectedModel.name}</span>
-              <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest mt-1">
-                 Manifestation Charge: {selectedModel.tokenCost} units
+            <div className="flex flex-col items-start min-w-0">
+              <span className="text-[13px] font-semibold text-white truncate">{selectedModel.name}</span>
+              <span className="text-[10px] text-white/25 mt-0.5">
+                {selectedModel.tokenCost} crédito{selectedModel.tokenCost > 1 ? "s" : ""}
               </span>
             </div>
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 text-white/10 group-hover:text-white/40 transition-colors" />
+          <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 text-white/20 group-hover:text-white/50 transition-colors" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[400px] p-0 border-white/10 bg-[#0a0a0b]/90 backdrop-blur-3xl rounded-[2rem] shadow-5xl overflow-hidden mt-3 z-[110]">
+
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] min-w-[280px] max-w-[420px] p-0 border-white/10 bg-[#0d0d0f]/95 backdrop-blur-3xl rounded-2xl shadow-2xl overflow-hidden mt-2 z-[200]"
+        align="start"
+        sideOffset={4}
+      >
         <Command className="bg-transparent border-none">
-          <div className="flex items-center border-b border-white/5 px-6">
-             <CommandInput placeholder="Search neural models..." className="h-14 font-display text-sm border-none bg-transparent focus:ring-0" />
+          <div className="flex items-center border-b border-white/[0.06] px-4">
+            <CommandInput
+              placeholder="Buscar modelo..."
+              className="h-11 text-sm border-none bg-transparent focus:ring-0 placeholder:text-white/20"
+            />
           </div>
-          <CommandList className="max-h-[400px] custom-scrollbar p-3">
-            <CommandEmpty className="py-10 text-center text-xs text-white/20 font-bold uppercase tracking-widest font-display">No neural matches found.</CommandEmpty>
-            
-            <CommandGroup heading={<span className="text-[10px] font-bold text-white/10 uppercase tracking-[0.3em] px-3 mb-2 flex items-center gap-2"><ImageIcon className="w-3 h-3"/> visual manifestation</span>}>
-              {AVAILABLE_MODELS.filter(m => m.provider === "NanoBanana").map((model) => (
-                <ModelItem key={model.id} model={model} selectedId={selectedModelId} onSelect={(id) => { onModelChange(id); setOpen(false); }} />
-              ))}
-            </CommandGroup>
-            
-            <CommandGroup heading={<span className="text-[10px] font-bold text-white/10 uppercase tracking-[0.3em] px-3 mt-4 mb-2 flex items-center gap-2"><Cpu className="w-3 h-3"/> industrial intelligence</span>}>
-              {AVAILABLE_MODELS.filter(m => m.provider !== "NanoBanana").map((model) => (
-                <ModelItem key={model.id} model={model} selectedId={selectedModelId} onSelect={(id) => { onModelChange(id); setOpen(false); }} />
-              ))}
-            </CommandGroup>
+
+          <CommandList className="max-h-[320px] overflow-y-auto p-2">
+            <CommandEmpty className="py-8 text-center text-xs text-white/20 font-medium">
+              Sin resultados.
+            </CommandEmpty>
+
+            {imageModels.length > 0 && (
+              <CommandGroup
+                heading={
+                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.25em] px-2 py-1 flex items-center gap-1.5">
+                    <ImageIcon className="w-3 h-3" /> Imagen
+                  </span>
+                }
+              >
+                {imageModels.map((model) => (
+                  <ModelItem
+                    key={model.id}
+                    model={model}
+                    selectedId={selectedModelId}
+                    onSelect={(id) => { onModelChange(id); setOpen(false); }}
+                  />
+                ))}
+              </CommandGroup>
+            )}
+
+            {textModels.length > 0 && (
+              <CommandGroup
+                heading={
+                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.25em] px-2 py-1 flex items-center gap-1.5">
+                    <Cpu className="w-3 h-3" /> Texto
+                  </span>
+                }
+              >
+                {textModels.map((model) => (
+                  <ModelItem
+                    key={model.id}
+                    model={model}
+                    selectedId={selectedModelId}
+                    onSelect={(id) => { onModelChange(id); setOpen(false); }}
+                  />
+                ))}
+              </CommandGroup>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>
@@ -101,39 +149,55 @@ export function ModelSelector({ selectedModelId, onModelChange }: ModelSelectorP
   );
 }
 
-function ModelItem({ model, selectedId, onSelect }: { model: AIModel, selectedId: string, onSelect: (id: string) => void }) {
+function ModelItem({
+  model,
+  selectedId,
+  onSelect,
+}: {
+  model: AIModel;
+  selectedId: string;
+  onSelect: (id: string) => void;
+}) {
   const isSelected = selectedId === model.id;
-  
+
   return (
     <CommandItem
-      key={model.id}
       value={model.id}
       onSelect={() => onSelect(model.id)}
       className={cn(
-        "flex justify-between items-center px-4 py-4 cursor-pointer rounded-2xl mb-1.5 transition-all duration-300",
-        isSelected ? "bg-white/5 border-white/10" : "hover:bg-white/[0.03] border-transparent"
+        "flex items-center justify-between px-3 py-3 cursor-pointer rounded-xl mb-0.5 transition-all duration-200",
+        isSelected
+          ? "bg-white/[0.07] border border-white/[0.08]"
+          : "hover:bg-white/[0.04] border border-transparent"
       )}
     >
-      <div className="flex flex-col gap-1.5 flex-1 min-w-0">
-        <div className="flex items-center gap-3">
-          <div className={cn(
-             "w-2 h-2 rounded-full transition-all duration-500",
-             isSelected ? "bg-aether-purple shadow-[0_0_10px_rgba(168,85,247,0.8)]" : "bg-white/5"
-          )} />
-          <span className={cn("text-xs font-bold font-display tracking-tight uppercase", isSelected ? "text-white" : "text-white/40")}>
-            {model.name}
-          </span>
-          {model.badge && (
-             <Badge className="text-[8px] h-4 px-2 py-0 bg-white/5 text-white/30 border-none font-bold uppercase tracking-widest">{model.badge}</Badge>
-          )}
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {/* Active dot */}
+        <div className={cn(
+          "w-1.5 h-1.5 rounded-full shrink-0 transition-all",
+          isSelected ? "bg-aether-purple shadow-[0_0_8px_rgba(168,85,247,0.8)]" : "bg-white/10"
+        )} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className={cn("text-[13px] font-semibold truncate", isSelected ? "text-white" : "text-white/50")}>
+              {model.name}
+            </span>
+            {model.badge && (
+              <Badge className="text-[9px] h-4 px-2 py-0 bg-white/5 text-white/30 border-none font-semibold">
+                {model.badge}
+              </Badge>
+            )}
+          </div>
+          <p className="text-[10px] text-white/20 mt-0.5 truncate">{model.description}</p>
         </div>
-        <p className="text-[10px] text-white/10 font-medium ml-5 truncate max-w-[220px] italic">{model.description}</p>
       </div>
-      <div className="flex flex-col items-end gap-1 shrink-0 ml-4">
-        <div className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-lg">
-           <Zap className="h-2.5 w-2.5 text-aether-purple" />
-           <span className="text-[10px] font-bold text-white/40 tabular-nums">{model.tokenCost} units</span>
+
+      <div className="flex items-center gap-2 shrink-0 ml-3">
+        <div className="flex items-center gap-1 bg-white/[0.04] px-2 py-0.5 rounded-lg">
+          <Zap className="h-2.5 w-2.5 text-aether-purple" />
+          <span className="text-[10px] font-bold text-white/30 tabular-nums">{model.tokenCost}</span>
         </div>
+        {isSelected && <Check className="h-3.5 w-3.5 text-aether-purple" />}
       </div>
     </CommandItem>
   );

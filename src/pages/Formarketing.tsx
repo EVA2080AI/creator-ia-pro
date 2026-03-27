@@ -98,8 +98,19 @@ function FormarketingContent() {
         },
       } as Node;
     });
+
+    // Auto-connect nodes sequentially so the flow is pre-wired
+    const newEdges: Edge[] = newNodes.slice(0, -1).map((node, i) => ({
+      id: `e-${node.id}-${newNodes[i + 1].id}`,
+      source: node.id,
+      target: newNodes[i + 1].id,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: 'rgba(168,85,247,0.35)', strokeWidth: 2 },
+    }));
+
     setNodes(newNodes);
-    setEdges([]);
+    setEdges(newEdges);
     setShowLanding(false);
   }, [setNodes, setEdges]);
 
@@ -574,6 +585,64 @@ function FormarketingContent() {
     window.addEventListener('add-template', handleAddTemplate);
     return () => window.removeEventListener('add-template', handleAddTemplate);
   }, [user, spaceId, setNodes, executeNode, executeVariation]);
+
+  // Handle "add next node" suggestion from NodeNextAction component
+  useEffect(() => {
+    const handleAddNextNode = async (e: any) => {
+      const { sourceId, nodeType, nodeLabel } = e.detail;
+      const newNodeId = crypto.randomUUID();
+
+      // Find source node to position relative to it
+      const currentNodes = rfGetNodes();
+      const sourceNode = currentNodes.find(n => n.id === sourceId);
+      const sourcePos = sourceNode?.position || { x: 200, y: 200 };
+
+      const newNode: Node = {
+        id: newNodeId,
+        type: nodeType,
+        position: { x: sourcePos.x + 380, y: sourcePos.y },
+        data: {
+          title: nodeLabel,
+          status: 'idle',
+          prompt: '',
+          onExecute: () => executeNode(newNodeId),
+          onVariation: () => executeVariation(newNodeId),
+        },
+      };
+
+      // Add new edge connecting source → new node
+      const newEdge: Edge = {
+        id: `e-${sourceId}-${newNodeId}`,
+        source: sourceId,
+        target: newNodeId,
+        type: 'smoothstep',
+        animated: true,
+        style: { stroke: 'rgba(168,85,247,0.35)', strokeWidth: 2 },
+      };
+
+      setNodes((nds) => nds.concat(newNode));
+      setEdges((eds) => addEdge(newEdge, eds));
+
+      if (spaceId && user) {
+        await supabase.from('canvas_nodes').insert({
+          id: newNodeId,
+          space_id: spaceId,
+          user_id: user.id,
+          type: nodeType,
+          pos_x: newNode.position.x,
+          pos_y: newNode.position.y,
+          prompt: nodeLabel,
+          status: 'idle',
+          data_payload: newNode.data as any,
+        });
+      }
+
+      toast.success(`${nodeLabel} añadido`);
+    };
+
+    window.addEventListener('add-next-node', handleAddNextNode);
+    return () => window.removeEventListener('add-next-node', handleAddNextNode);
+  }, [user, spaceId, setNodes, setEdges, rfGetNodes, executeNode, executeVariation]);
 
   const handleManualAddNode = useCallback((type: string, label: string, assetUrl?: string) => {
     const newNodeId = crypto.randomUUID();
