@@ -128,7 +128,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
             {/* Dropdown */}
             {userMenuOpen && (
-              <div className="absolute right-0 top-full mt-3 w-64 aether-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-[200] p-2 backdrop-blur-3xl">
+              <div className="absolute right-0 top-full mt-3 w-64 bg-[#0d0d10] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-[200] p-2">
                 {/* User info header */}
                 <div className="px-4 py-3 border-b border-white/[0.06] mb-1">
                   <p className="text-sm font-semibold text-white truncate">

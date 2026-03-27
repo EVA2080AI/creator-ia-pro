@@ -19,6 +19,7 @@ serve(async (req) => {
       throw new Error("Falta el parámetro tool.");
     }
 
+    let modelSlug = "";
     let modelVersion = "";
     let input: any = {};
 
@@ -26,8 +27,8 @@ serve(async (req) => {
     switch (tool) {
       case "generate":
         // Flux Schnell (black-forest-labs/flux-schnell)
-        modelVersion = "f340869680327f12e84180803525b6a715f5904d0c95a287955c4d09852277d3";
-        input = { prompt: prompt || "A professional creative design", aspect_ratio: "1:1" };
+        modelSlug = "black-forest-labs/flux-schnell";
+        input = { prompt: prompt || "A professional creative design" };
         break;
       case "background":
         if (!image_url) throw new Error("Falta image_url");
@@ -51,7 +52,6 @@ serve(async (req) => {
         input = { image: image_url, face_upsample: true, background_enhance: true, upsample: 2 };
         break;
       case "eraser":
-        // Default to a basic pass or throw if no mask is supported yet in UI
         throw new Error("La herramienta borrar requiere una máscara de borrado que aún no está implementada en el canvas.");
       default:
         throw new Error(`Tool "${tool}" no está soportada por el proxy de medios.`);
@@ -60,22 +60,23 @@ serve(async (req) => {
     console.log(`[Media Proxy] Llamando a Replicate para herramienta: ${tool}`);
 
     // Call Replicate API to start prediction
-    const res = await fetch(`https://api.replicate.com/v1/predictions`, {
+    const apiUrl = modelSlug 
+      ? `https://api.replicate.com/v1/models/${modelSlug}/predictions`
+      : `https://api.replicate.com/v1/predictions`;
+
+    const res = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Authorization": `Token ${replicateApiToken}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        version: modelVersion,
-        input: input,
-      }),
+      body: JSON.stringify(modelSlug ? { input } : { version: modelVersion, input }),
     });
 
     if (!res.ok) {
       const errorText = await res.text();
       console.error("Replicate Error:", errorText);
-      throw new Error(`Replicate error: ${res.status}`);
+      throw new Error(`Replicate error: ${res.status} - ${errorText}`);
     }
 
     const prediction = await res.json();
@@ -103,7 +104,6 @@ serve(async (req) => {
       throw new Error("Timeout: La IA tardó demasiado en procesar la imagen.");
     }
 
-    // Replicate sometimes returns an array of output strings (e.g. [ "https://..." ]) or a single string
     const finalImageUrl = Array.isArray(resultUrl) ? resultUrl[0] : resultUrl;
 
     return new Response(JSON.stringify({ url: finalImageUrl }), {

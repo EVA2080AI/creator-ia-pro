@@ -97,17 +97,37 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
              ))}
           </div>
 
-          <div className="bg-[#050506] rounded-2xl border border-white/5 p-3 aspect-[16/10] relative group/preview overflow-hidden shadow-inner flex flex-col justify-center">
-             <div className="absolute inset-x-4 top-3 h-1 bg-white/5 rounded-full" />
-              <div className="grid grid-cols-2 gap-2 mt-4 px-1">
-                 <div className="h-8 bg-white/5 rounded-lg border border-white/5 shadow-2xi" />
-                 <div className="h-8 bg-white/5 rounded-lg border border-white/5 shadow-2xi" />
-                 <div className="h-10 col-span-2 bg-white/10 rounded-lg border border-white/20 animate-pulse" />
+          {/* Preview: show structure if ready, otherwise show wireframe placeholder */}
+          <div className="bg-[#050506] rounded-2xl border border-white/5 aspect-[16/10] relative overflow-hidden shadow-inner">
+            {data.structure && data.status === 'ready' ? (
+              <div className="p-3 h-full overflow-hidden">
+                <div className="flex items-center gap-1 mb-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                  <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">Vista previa generada</span>
+                </div>
+                {/* Render parsed structure sections */}
+                <div className="space-y-1.5">
+                  {data.structure.split(/[>|\n,]/).filter(Boolean).slice(0, 5).map((section: string, i: number) => (
+                    <div key={i} className={`h-4 rounded-md flex items-center px-2 ${i === 0 ? 'bg-aether-purple/20 border border-aether-purple/20 w-full' : i % 2 === 0 ? 'bg-white/5 border border-white/5 w-3/4' : 'bg-white/[0.03] border border-white/5 w-full'}`}>
+                      <span className="text-[7px] text-white/30 truncate capitalize">{section.trim()}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
+            ) : (
+              <div className="p-3 flex flex-col justify-center h-full">
+                <div className="absolute inset-x-4 top-3 h-1 bg-white/5 rounded-full" />
+                <div className="grid grid-cols-2 gap-2 mt-4 px-1">
+                  <div className="h-8 bg-white/5 rounded-lg border border-white/5" />
+                  <div className="h-8 bg-white/5 rounded-lg border border-white/5" />
+                  <div className="h-10 col-span-2 bg-white/10 rounded-lg border border-white/20 animate-pulse" />
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="pt-2 border-t border-white/5 space-y-1.5">
-            <span className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em] px-1 text-center block">Logic engine</span>
+            <span className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em] px-1 text-center block">Motor de diseño</span>
             <div className="grid grid-cols-2 gap-1.5">
               {[
                 { id: 'claude-3.5-sonnet', name: 'claude_v3' },
@@ -131,12 +151,12 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
           </div>
 
           <div className="space-y-1.5">
-             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest block px-1">Structure Core</span>
+             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest block px-1">Estructura</span>
               <textarea
                  value={data.structure || ""}
                  onChange={(e) => updateField('structure', e.target.value)}
                  className="w-full text-[10px] leading-relaxed text-white/50 bg-white/[0.02] p-2.5 rounded-xl border border-white/5 min-h-[70px] focus:outline-none focus:border-white/20 resize-none transition-all font-medium placeholder:text-white/10"
-                 placeholder="Hero > Features > Pricing..."
+                 placeholder="Hero > Características > Precios..."
               />
           </div>
         </div>

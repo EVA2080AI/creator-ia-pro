@@ -1,11 +1,12 @@
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
-import { 
-  Background, Controls, MiniMap, ReactFlow, addEdge, 
+import {
+  Background, Controls, MiniMap, ReactFlow, addEdge,
   Connection, Edge, Node, ReactFlowProvider,
   useNodesState, useEdgesState, useReactFlow,
-  type NodeChange, type EdgeChange, BackgroundVariant
+  type NodeChange, type EdgeChange, BackgroundVariant,
+  SelectionMode,
 } from '@xyflow/react';
 import { useSearchParams } from 'react-router-dom';
 import '@xyflow/react/dist/style.css';
@@ -19,7 +20,8 @@ import CampaignManagerNode from '@/components/formarketing/CampaignManagerNode';
 import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
 import { TEMPLATES, CATEGORIES, type Template } from '@/components/formarketing/TemplateModal';
 import AntigravityBridgeNode from '@/components/formarketing/AntigravityBridgeNode';
-import { ArrowLeft, Trash2, Zap, Monitor } from 'lucide-react';
+import { CommandPalette } from '@/components/formarketing/CommandPalette';
+import { ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, LayoutDashboard, Circle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { aiService } from '@/services/ai-service';
@@ -80,19 +82,133 @@ function FormarketingContent() {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   // Show template landing only when no spaceId (fresh session)
   const [showLanding, setShowLanding] = useState(!spaceId);
-  const { screenToFlowPosition, setNodes: rfSetNodes, setEdges: rfSetEdges, getNodes: rfGetNodes, getEdges: rfGetEdges } = useReactFlow();
+  const { screenToFlowPosition, setNodes: rfSetNodes, setEdges: rfSetEdges, getNodes: rfGetNodes, getEdges: rfGetEdges, fitView } = useReactFlow();
+
+  // HU25/26 — Snap & zoom state
+  const [snapEnabled, setSnapEnabled]         = useState(false);
+
+  // HU28 — Command palette
+  const [cmdOpen, setCmdOpen]                 = useState(false);
+
+  // HU33 — Execution status
+  const [execStatus, setExecStatus]           = useState<'idle' | 'running' | 'success' | 'error'>('idle');
+  const [execNodeCount, setExecNodeCount]     = useState(0);
+  const [execDone, setExecDone]               = useState(0);
+
+  // HU34 — Undo/Redo history
+  const history   = useRef<{ nodes: Node[]; edges: Edge[] }[]>([]);
+  const historyIdx = useRef(-1);
+  const skipHistory = useRef(false);
+
+  const pushHistory = useCallback((ns: Node[], es: Edge[]) => {
+    if (skipHistory.current) return;
+    // Trim forward history
+    history.current = history.current.slice(0, historyIdx.current + 1);
+    history.current.push({ nodes: ns, edges: es });
+    historyIdx.current = history.current.length - 1;
+  }, []);
+
+  const undo = useCallback(() => {
+    if (historyIdx.current <= 0) return;
+    historyIdx.current--;
+    const snap = history.current[historyIdx.current];
+    skipHistory.current = true;
+    setNodes(snap.nodes);
+    setEdges(snap.edges);
+    skipHistory.current = false;
+    toast.info("Cambio deshecho");
+  }, [setNodes, setEdges]);
+
+  const redo = useCallback(() => {
+    if (historyIdx.current >= history.current.length - 1) return;
+    historyIdx.current++;
+    const snap = history.current[historyIdx.current];
+    skipHistory.current = true;
+    setNodes(snap.nodes);
+    setEdges(snap.edges);
+    skipHistory.current = false;
+    toast.info("Cambio rehecho");
+  }, [setNodes, setEdges]);
+
+  // Auto-layout: arrange nodes left-to-right based on edge topology
+  const autoLayout = useCallback(() => {
+    const ns = rfGetNodes();
+    const es = rfGetEdges();
+    if (ns.length === 0) return;
+
+    // Build adjacency: find roots (no incoming edges)
+    const hasIncoming = new Set(es.map(e => e.target));
+    const roots = ns.filter(n => !hasIncoming.has(n.id));
+    const rootIds = new Set(roots.map(n => n.id));
+
+    const levels: string[][] = [[]];
+    const visited = new Set<string>();
+
+    // BFS from roots
+    const queue: { id: string; level: number }[] = roots.map(n => ({ id: n.id, level: 0 }));
+    if (queue.length === 0) queue.push({ id: ns[0].id, level: 0 });
+
+    while (queue.length) {
+      const { id, level } = queue.shift()!;
+      if (visited.has(id)) continue;
+      visited.add(id);
+      if (!levels[level]) levels[level] = [];
+      levels[level].push(id);
+      es.filter(e => e.source === id).forEach(e => {
+        if (!visited.has(e.target)) queue.push({ id: e.target, level: level + 1 });
+      });
+    }
+
+    // Remaining unvisited nodes (disconnected)
+    const disconnected = ns.filter(n => !visited.has(n.id));
+    if (disconnected.length) levels.push(disconnected.map(n => n.id));
+
+    const COL_GAP = 400;
+    const ROW_GAP = 300;
+    const nodeMap = new Map(ns.map(n => [n.id, n]));
+
+    const positioned = levels.flatMap((col, ci) =>
+      col.map((id, ri) => {
+        const node = nodeMap.get(id)!;
+        return { ...node, position: { x: 80 + ci * COL_GAP, y: 80 + ri * ROW_GAP } };
+      })
+    );
+
+    rfSetNodes(positioned);
+    setTimeout(() => fitView({ padding: 0.15, duration: 600 }), 50);
+    toast.success("Canvas organizado automáticamente");
+  }, [rfGetNodes, rfGetEdges, rfSetNodes, fitView]);
 
   // Handle template selection from landing page
   const handleTemplateSelect = useCallback((template: { title: string; nodes: Array<{ type: string; data: Record<string, any> }> }) => {
+    // Demo content so templates load looking alive
+    const DEMO_VIDEO = 'https://cdn.pixabay.com/video/2023/10/20/185834-876356744_tiny.mp4';
+    const DEMO_IMAGES = [
+      'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&q=80',
+      'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80',
+      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
+      'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80',
+    ];
+    let imgIdx = 0;
+
     const newNodes: Node[] = template.nodes.map((nodeData, index) => {
       const newNodeId = crypto.randomUUID();
+      // Pre-populate with demo content so the canvas looks ready
+      let demoData: Record<string, any> = {};
+      if (nodeData.type === 'videoModel') {
+        demoData = { assetUrl: DEMO_VIDEO, status: 'ready' };
+      } else if (nodeData.type === 'modelView') {
+        demoData = { assetUrl: DEMO_IMAGES[imgIdx++ % DEMO_IMAGES.length], status: 'ready' };
+      } else if (nodeData.type === 'layoutBuilder') {
+        demoData = { structure: 'Hero > Características > Testimonios > Precios > CTA', status: 'idle' };
+      }
       return {
         id: newNodeId,
         type: nodeData.type,
-        position: { x: 120 + (index % 3) * 380, y: 120 + Math.floor(index / 3) * 280 },
+        position: { x: 120 + (index % 3) * 380, y: 120 + Math.floor(index / 3) * 290 },
         data: {
           ...nodeData.data,
-          status: 'idle',
+          ...demoData,
           onExecute: () => {},
           onVariation: () => {},
         },
@@ -224,7 +340,35 @@ function FormarketingContent() {
     [onEdgesChange, edges, spaceId, user]
   );
 
-  const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+  const onConnect = useCallback((params: Connection) => {
+    setEdges((eds) => {
+      const next = addEdge(params, eds);
+      pushHistory(rfGetNodes(), next);
+      return next;
+    });
+  }, [setEdges, pushHistory, rfGetNodes]);
+
+  // HU28 + HU34 — Global keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable;
+
+      // Ctrl/Cmd+Z → Undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
+      // Ctrl/Cmd+Y or Ctrl+Shift+Z → Redo
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return; }
+
+      if (isInput) return;
+
+      // Space → Command palette
+      if (e.key === ' ') { e.preventDefault(); setCmdOpen(true); return; }
+      // Shift+A → Command palette
+      if (e.shiftKey && e.key === 'A') { e.preventDefault(); setCmdOpen(true); return; }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [undo, redo]);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -519,26 +663,28 @@ function FormarketingContent() {
   };
 
   const handleExecute = async () => {
-    if (nodes.length === 0) {
-      toast.error("No hay nodos que ejecutar");
-      return;
-    }
+    if (nodes.length === 0) { toast.error("No hay nodos que ejecutar"); return; }
 
-    toast.info("Synchronizing Aether V8.0 Neural Engine...");
-    
-    const imageNodes = nodes.filter(n => n.type === 'modelView');
-    for (const node of imageNodes) {
-      await executeNode(node.id);
-      
-      const videoEdges = edges.filter(e => e.source === node.id);
-      const targetVideoNodes = videoEdges.map(e => nodes.find(n => n.id === e.target)).filter(n => n?.type === 'videoModel');
+    const ORDER = ['characterBreakdown', 'modelView', 'videoModel', 'layoutBuilder', 'campaignManager', 'antigravityBridge'];
+    const sorted = [...nodes].sort((a, b) => ORDER.indexOf(a.type as string) - ORDER.indexOf(b.type as string));
 
-      for (const vNode of targetVideoNodes) {
-        if (vNode) await executeNode(vNode.id);
+    setExecStatus('running');
+    setExecNodeCount(sorted.length);
+    setExecDone(0);
+    toast.info(`Ejecutando ${sorted.length} nodo${sorted.length > 1 ? 's' : ''}...`);
+
+    try {
+      for (let i = 0; i < sorted.length; i++) {
+        await executeNode(sorted[i].id);
+        setExecDone(i + 1);
       }
+      setExecStatus('success');
+      toast.success("Flujo completado.");
+      setTimeout(() => setExecStatus('idle'), 4000);
+    } catch {
+      setExecStatus('error');
+      setTimeout(() => setExecStatus('idle'), 4000);
     }
-
-    toast.success("Flujo completo procesado.");
   };
 
   // Listen for template injection - Moved here to ensure executeNode/Variation are defined
@@ -768,52 +914,73 @@ function FormarketingContent() {
       <AppHeader userId={user?.id} onSignOut={signOut} />
       <div className="w-screen bg-[#020203] font-sans text-white/90 flex flex-col overflow-hidden relative selection:bg-aether-purple/20" style={{ height: 'calc(100vh - 64px)', marginTop: '64px' }}>
       {/* Canvas Toolbar */}
-      <div className="flex h-14 w-full items-center justify-between border-b border-white/[0.08] bg-black/40 px-6 backdrop-blur-3xl shrink-0 z-[90]">
-         <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-xl w-9 h-9 text-white/30 hover:text-white transition-all">
-               <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div className="h-6 w-px bg-white/10" />
-            <button
-              onClick={() => setShowLanding(true)}
-              className="hidden sm:flex items-center gap-2 bg-white/[0.03] px-3 py-1.5 rounded-xl border border-white/5 hover:border-aether-purple/30 hover:bg-aether-purple/5 transition-all"
-            >
-               <div className="w-1.5 h-1.5 rounded-full bg-aether-blue shadow-[0_0_8px_rgba(0,194,255,0.4)] animate-pulse" />
-               <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none">Plantillas</span>
-            </button>
-         </div>
+      <div className="flex h-14 w-full items-center justify-between border-b border-white/[0.06] bg-[#050506]/80 px-5 backdrop-blur-3xl shrink-0 z-[90]">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-xl w-9 h-9 text-white/30 hover:text-white transition-all">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div className="h-5 w-px bg-white/[0.06]" />
+          {/* Templates */}
+          <button
+            onClick={() => setShowLanding(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.06] hover:border-aether-purple/30 hover:bg-aether-purple/5 transition-all"
+          >
+            <div className="w-1.5 h-1.5 rounded-full bg-aether-blue/70 animate-pulse" />
+            <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Plantillas</span>
+          </button>
+          {/* Quick-add node (HU28) */}
+          <button
+            onClick={() => setCmdOpen(true)}
+            title="Añadir nodo (Espacio)"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.06] hover:border-white/20 hover:bg-white/5 transition-all"
+          >
+            <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">+ Nodo</span>
+            <kbd className="text-[9px] font-mono text-white/15 border border-white/[0.06] px-1 rounded">Espacio</kbd>
+          </button>
+        </div>
 
-         <div className="flex items-center gap-2">
-            {/* Share screen */}
-            <Button
-               variant="ghost"
-               onClick={() => navigate('/sharescreen')}
-               className="hidden sm:flex items-center gap-2 text-aether-blue/50 hover:text-aether-blue hover:bg-aether-blue/5 rounded-xl px-3 h-9 text-xs font-bold transition-all"
-               title="Compartir pantalla"
-            >
-               <Monitor className="w-3.5 h-3.5" />
-               <span className="hidden md:inline">Compartir</span>
-            </Button>
-
-            <Button
-               variant="ghost"
-               onClick={handleClear}
-               disabled={nodes.length === 0 && edges.length === 0}
-               className="text-white/30 hover:text-white hover:bg-white/5 rounded-xl px-3 h-9 text-xs font-bold gap-2 transition-all disabled:opacity-20"
-            >
-               <Trash2 className="w-3.5 h-3.5" />
-               <span className="hidden md:inline">Limpiar</span>
-            </Button>
-
-            <Button
-               onClick={handleExecute}
-               disabled={nodes.length === 0}
-               className="h-9 bg-white hover:bg-white/90 text-black rounded-xl gap-2 font-bold px-5 shadow-xl shadow-white/5 text-xs transition-all active:scale-95 disabled:opacity-20 font-display"
-            >
-               <Zap className="w-3.5 h-3.5 fill-current" />
-               Ejecutar
-            </Button>
-      </div>
+        <div className="flex items-center gap-1.5">
+          {/* Undo/Redo (HU34) */}
+          <Button variant="ghost" size="icon" onClick={undo} title="Deshacer (Ctrl+Z)" className="w-8 h-8 rounded-lg text-white/25 hover:text-white hover:bg-white/5 transition-all">
+            <RotateCcw className="w-3.5 h-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={redo} title="Rehacer (Ctrl+Y)" className="w-8 h-8 rounded-lg text-white/25 hover:text-white hover:bg-white/5 transition-all">
+            <RotateCw className="w-3.5 h-3.5" />
+          </Button>
+          <div className="h-5 w-px bg-white/[0.06] mx-1" />
+          {/* Auto-layout */}
+          <Button variant="ghost" onClick={autoLayout} title="Auto-organizar (Dagre)" className="h-8 px-3 rounded-lg text-white/25 hover:text-white hover:bg-white/5 text-xs gap-1.5 transition-all">
+            <LayoutDashboard className="w-3.5 h-3.5" />
+            <span className="hidden md:inline text-[10px] font-bold uppercase tracking-wider">Organizar</span>
+          </Button>
+          {/* Snap grid toggle (HU26) */}
+          <Button
+            variant="ghost"
+            onClick={() => setSnapEnabled(s => !s)}
+            title="Snap a rejilla"
+            className={`h-8 px-3 rounded-lg text-xs gap-1.5 transition-all ${snapEnabled ? 'text-aether-purple bg-aether-purple/10' : 'text-white/25 hover:text-white hover:bg-white/5'}`}
+          >
+            <Grid3X3 className="w-3.5 h-3.5" />
+          </Button>
+          <div className="h-5 w-px bg-white/[0.06] mx-1" />
+          {/* Share screen */}
+          <Button variant="ghost" onClick={() => navigate('/sharescreen')} className="hidden sm:flex items-center gap-1.5 text-aether-blue/50 hover:text-aether-blue hover:bg-aether-blue/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all">
+            <Monitor className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Compartir</span>
+          </Button>
+          <Button variant="ghost" onClick={handleClear} disabled={nodes.length === 0 && edges.length === 0} className="text-white/25 hover:text-rose-400 hover:bg-rose-500/5 rounded-xl px-3 h-8 text-[10px] font-bold gap-1.5 transition-all disabled:opacity-20">
+            <Trash2 className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Limpiar</span>
+          </Button>
+          <Button
+            onClick={handleExecute}
+            disabled={nodes.length === 0 || execStatus === 'running'}
+            className="h-8 bg-white hover:bg-white/90 text-black rounded-xl gap-2 font-bold px-4 shadow-lg text-xs transition-all active:scale-95 disabled:opacity-30"
+          >
+            <Zap className={`w-3.5 h-3.5 fill-current ${execStatus === 'running' ? 'animate-pulse' : ''}`} />
+            {execStatus === 'running' ? `${execDone}/${execNodeCount}` : 'Ejecutar'}
+          </Button>
+        </div>
       </div>
 
       <div className="relative h-full w-full flex-1" ref={reactFlowWrapper}>
@@ -830,10 +997,18 @@ function FormarketingContent() {
           fitView
           className="aether-canvas"
           colorMode="dark"
-          defaultEdgeOptions={{ 
-            type: 'smoothstep', 
+          minZoom={0.1}
+          maxZoom={4}
+          snapToGrid={snapEnabled}
+          snapGrid={[20, 20]}
+          selectionMode={SelectionMode.Partial}
+          defaultEdgeOptions={{
+            type: 'smoothstep',
             animated: true,
-            style: { stroke: 'rgba(255,255,255,0.08)', strokeWidth: 2 }
+            style: {
+              stroke: execStatus === 'running' ? 'rgba(168,85,247,0.5)' : 'rgba(255,255,255,0.08)',
+              strokeWidth: execStatus === 'running' ? 2.5 : 2,
+            },
           }}
         >
           <Background 
@@ -858,6 +1033,40 @@ function FormarketingContent() {
       </div>
 
       <GeniusAssistant onAction={handleAssistantAction} />
+
+      {/* HU28 — Command Palette */}
+      <CommandPalette
+        open={cmdOpen}
+        onClose={() => setCmdOpen(false)}
+        onSelect={(type, label) => handleManualAddNode(type, label)}
+      />
+
+      {/* HU33 — Status Bar */}
+      <div className="absolute bottom-0 left-0 right-0 h-8 border-t border-white/[0.04] bg-[#020203]/80 backdrop-blur-sm flex items-center px-4 gap-4 z-[80] pointer-events-none">
+        <div className="flex items-center gap-2">
+          <Circle className={`w-2 h-2 fill-current shrink-0 ${
+            execStatus === 'running' ? 'text-amber-400 animate-pulse' :
+            execStatus === 'success' ? 'text-green-400' :
+            execStatus === 'error'   ? 'text-rose-400' : 'text-white/15'
+          }`} />
+          <span className={`text-[10px] font-medium ${
+            execStatus === 'running' ? 'text-amber-400/70' :
+            execStatus === 'success' ? 'text-green-400/70' :
+            execStatus === 'error'   ? 'text-rose-400/70' : 'text-white/20'
+          }`}>
+            {execStatus === 'running' ? `Ejecutando... ${execDone}/${execNodeCount}` :
+             execStatus === 'success' ? 'Flujo completado' :
+             execStatus === 'error'   ? 'Error en ejecución' : 'Listo'}
+          </span>
+        </div>
+        <div className="h-3 w-px bg-white/[0.06]" />
+        <span className="text-[10px] text-white/15">{nodes.length} nodo{nodes.length !== 1 ? 's' : ''} · {edges.length} conex.</span>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="text-[10px] text-white/10">Espacio: añadir nodo</span>
+          <span className="text-[10px] text-white/10">Ctrl+Z: deshacer</span>
+          {snapEnabled && <span className="text-[10px] text-aether-purple/50">Snap ON</span>}
+        </div>
+      </div>
 
       {/* Template Landing Overlay */}
       {showLanding && (

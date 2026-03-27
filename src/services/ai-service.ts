@@ -303,71 +303,97 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
   },
 
   // ─── IMAGE GENERATION ────────────────────────────────────────────────────────
+  // Routes: OpenRouter Flux → Gemini image models → Pollinations (retry + raw URL)
   async handleImageGen(prompt: string, tool?: string) {
+    const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+    const geminiKey     = import.meta.env.VITE_GEMINI_API_KEY;
+
     let finalPrompt = prompt;
     if (tool === "logo") {
       finalPrompt = `${prompt}, professional logo design, clean vector style, white background, sharp edges, brand identity`;
     }
 
-    const errors: string[] = [];
-
-    // ── 1. OpenRouter → Flux Schnell (Proxy) ──────────────────────────────
-    try {
-      const controller = new AbortController();
-      const t = setTimeout(() => controller.abort(), 45000);
-      
-      const data = await this.callAiProxy("openrouter", "images/generations", {
-        model: "black-forest-labs/flux-schnell",
-        prompt: finalPrompt,
-        n: 1,
-        size: "1024x1024",
-      }, controller.signal);
-      
-      clearTimeout(t);
-      
-      const item = data.data?.[0];
-      if (item?.b64_json) return { url: `data:image/png;base64,${item.b64_json}` };
-      if (item?.url) {
-        const dataUrl = await urlToDataUrl(item.url, 30000);
-        return { url: dataUrl };
-      }
-    } catch (err: any) {
-      errors.push(`OpenRouter Proxy Falló: ${err.message}`);
-      console.warn("[Image Gen] OpenRouter Proxy failed:", err.message);
-    }
-
-    // ── 2. Gemini Image Generation (Proxy) ────────────────────────────────
-    let success = false;
-    for (const geminiImgModel of [
-      "gemini-2.0-flash-preview-image-generation",
-      "gemini-2.0-flash-exp",
-    ]) {
+    // ── 1. OpenRouter → Flux Schnell ──────────────────────────────────────
+    if (openRouterKey) {
       try {
         const controller = new AbortController();
-        const t = setTimeout(() => controller.abort(), 60000);
-        
-        const data = await this.callAiProxy("gemini", `models/${geminiImgModel}:generateContent`, {
-          contents: [{ parts: [{ text: finalPrompt }] }],
-          generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
-        }, controller.signal);
-        
+        const t = setTimeout(() => controller.abort(), 45000);
+        const res = await fetch("https://openrouter.ai/api/v1/images/generations", {
+          method: "POST", signal: controller.signal,
+          headers: {
+            "Authorization": `Bearer ${openRouterKey}`,
+            "HTTP-Referer": "https://creator-ia.com",
+            "X-Title": "Creator IA Pro",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ model: "black-forest-labs/flux-schnell", prompt: finalPrompt, n: 1, size: "1024x1024" }),
+        });
         clearTimeout(t);
-        
-        const parts = data.candidates?.[0]?.content?.parts ?? [];
-        const imgPart = parts.find((p: any) => p.inlineData?.data);
-        if (imgPart) {
-          const mime = imgPart.inlineData.mimeType || "image/png";
-          return { url: `data:${mime};base64,${imgPart.inlineData.data}` };
+        if (res.ok) {
+          const json = await res.json();
+          const item = json.data?.[0];
+          if (item?.b64_json) return { url: `data:image/png;base64,${item.b64_json}` };
+          if (item?.url) {
+            try { return { url: await urlToDataUrl(item.url, 30000) }; } catch { /* fall through */ }
+          }
         }
-      } catch (err: any) {
-        errors.push(`Gemini Proxy Falló (${geminiImgModel}): ${err.message}`);
-        console.warn(`[Image Gen] Gemini Proxy ${geminiImgModel} failed:`, err.message);
+      } catch (err) { console.warn("[Image Gen] OpenRouter failed:", err); }
+    }
+
+    // ── 2. Gemini image generation ─────────────────────────────────────────
+    if (geminiKey) {
+      for (const geminiModel of ["gemini-2.0-flash-preview-image-generation", "gemini-2.0-flash-exp"]) {
+        try {
+          const controller = new AbortController();
+          const t = setTimeout(() => controller.abort(), 60000);
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiKey}`,
+            {
+              method: "POST", signal: controller.signal,
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: finalPrompt }] }],
+                generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
+              }),
+            }
+          );
+          clearTimeout(t);
+          if (res.ok) {
+            const json = await res.json();
+            const imgPart = (json.candidates?.[0]?.content?.parts ?? []).find((p: any) => p.inlineData?.data);
+            if (imgPart) return { url: `data:${imgPart.inlineData.mimeType || "image/png"};base64,${imgPart.inlineData.data}` };
+          }
+        } catch (err) { console.warn(`[Image Gen] ${geminiModel} failed:`, err); }
       }
     }
 
-    // ── 3. Handle Failure ────────────────────
-    console.error("[Image Gen] Fallaron todos los proveedores de imágenes a través del proxy:", errors);
-    throw new Error(`Falló la generación de imagen (Problema en el servidor o falta configuración en Supabase Secrets). Verifica consola.`);
+    // ── 3. Pollinations fallback — retry 3× then return raw URL ───────────
+    const seed = Math.floor(Math.random() * 999999);
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true&model=flux`;
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      if (attempt > 0) await new Promise(r => setTimeout(r, 5000 * attempt));
+      try {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), 45000);
+        const res = await fetch(pollinationsUrl, { signal: controller.signal });
+        clearTimeout(t);
+        if (!res.ok) continue;
+        const blob = await res.blob();
+        if (blob.type.startsWith("text/")) { console.warn(`[Pollinations] attempt ${attempt + 1}: HTML page, retrying...`); continue; }
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        if (!dataUrl.startsWith("data:image/")) return { url: `data:image/png;base64,${dataUrl.split(",")[1]}` };
+        return { url: dataUrl };
+      } catch (err) { console.warn(`[Pollinations] attempt ${attempt + 1} failed:`, err); }
+    }
+
+    // Last resort: return raw URL — browser <img> can load without CORS restriction
+    return { url: pollinationsUrl };
   },
 
   // ─── MEDIA PROXY (IMAGE EDITING) ──────────────────────────────────────────
