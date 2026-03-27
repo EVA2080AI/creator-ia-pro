@@ -1,5 +1,4 @@
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 // ─── MODEL ROUTING TABLE ──────────────────────────────────────────────────────
 // Maps internal model IDs → real API model names
@@ -13,8 +12,35 @@ const OPENROUTER_MODEL_MAP: Record<string, string> = {
   "gpt-oss-120b":       "meta-llama/llama-4-maverick",
 };
 
-// Models that bypass OpenRouter and call Gemini API directly (fast / low latency for UI gen)
-const DIRECT_GEMINI_MODELS = new Set(["gemini-1.5-flash"]);
+// ─── URL → validated image data URL ───────────────────────────────────────────
+// Fetches any image URL and converts to a base64 data URL so <img> always renders.
+// Rejects only clear non-image responses (text/html, text/plain).
+const urlToDataUrl = async (url: string, timeoutMs = 60000): Promise<string> => {
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(t);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    // Reject HTML/text error pages; accept image/* and application/octet-stream
+    if (blob.type.startsWith("text/")) throw new Error(`Respuesta no es imagen: ${blob.type}`);
+    const mime = blob.type.startsWith("image/") ? blob.type : "image/png";
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => {
+        const result = reader.result as string;
+        // If MIME was guessed, fix the data URL prefix
+        resolve(blob.type.startsWith("image/") ? result : `data:${mime};base64,${result.split(",")[1]}`);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (err: any) {
+    clearTimeout(t);
+    throw err;
+  }
+};
 
 // Image models (NanoBanana family) — all route to Pollinations
 const IMAGE_MODEL_IDS = new Set(["nano-banana-2", "nano-banana-pro", "nano-banana-25"]);
@@ -312,11 +338,11 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
       finalPrompt = `${prompt}, professional logo design, clean vector style, white background, sharp edges, brand identity`;
     }
 
-    // ── 1. OpenRouter → Flux Schnell (paid, ~$0.003/img) ───────────────────
+    // ── 1. OpenRouter → Flux Schnell ───────────────────────────────────────
     if (openRouterKey) {
       try {
         const controller = new AbortController();
-        const t = setTimeout(() => controller.abort(), 30000);
+        const t = setTimeout(() => controller.abort(), 45000);
         const res = await fetch("https://openrouter.ai/api/v1/images/generations", {
           method: "POST",
           signal: controller.signal,
@@ -337,62 +363,61 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
         if (res.ok) {
           const data = await res.json();
           const item = data.data?.[0];
-          const url = item?.url || (item?.b64_json ? `data:image/png;base64,${item.b64_json}` : null);
-          if (url) return { url };
+          // b64_json → direct data URL (always works in <img>)
+          if (item?.b64_json) return { url: `data:image/png;base64,${item.b64_json}` };
+          // External URL → pre-fetch and convert to validated data URL
+          if (item?.url) {
+            const dataUrl = await urlToDataUrl(item.url, 30000);
+            return { url: dataUrl };
+          }
         }
       } catch (err) {
         console.warn("[Image Gen] OpenRouter Flux failed, trying Gemini...", err);
       }
     }
 
-    // ── 2. Gemini Image Generation (gemini-2.0-flash-preview-image-generation) ─
+    // ── 2. Gemini gemini-2.0-flash-preview-image-generation ───────────────
     if (geminiKey) {
-      try {
-        const controller = new AbortController();
-        const t = setTimeout(() => controller.abort(), 40000);
-        const res = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${geminiKey}`,
-          {
-            method: "POST",
-            signal: controller.signal,
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: finalPrompt }] }],
-              generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
-            }),
+      for (const geminiImgModel of [
+        "gemini-2.0-flash-preview-image-generation",
+        "gemini-2.0-flash-exp",
+      ]) {
+        try {
+          const controller = new AbortController();
+          const t = setTimeout(() => controller.abort(), 60000);
+          const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${geminiImgModel}:generateContent?key=${geminiKey}`,
+            {
+              method: "POST",
+              signal: controller.signal,
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: finalPrompt }] }],
+                generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
+              }),
+            }
+          );
+          clearTimeout(t);
+          if (res.ok) {
+            const data = await res.json();
+            const parts = data.candidates?.[0]?.content?.parts ?? [];
+            const imgPart = parts.find((p: any) => p.inlineData?.data);
+            if (imgPart) {
+              const mime = imgPart.inlineData.mimeType || "image/png";
+              return { url: `data:${mime};base64,${imgPart.inlineData.data}` };
+            }
           }
-        );
-        clearTimeout(t);
-        if (res.ok) {
-          const data = await res.json();
-          const parts = data.candidates?.[0]?.content?.parts ?? [];
-          const imgPart = parts.find((p: any) => p.inlineData?.data);
-          if (imgPart) {
-            const mime = imgPart.inlineData.mimeType || "image/png";
-            return { url: `data:${mime};base64,${imgPart.inlineData.data}` };
-          }
+        } catch (err) {
+          console.warn(`[Image Gen] ${geminiImgModel} failed, trying next...`, err);
         }
-      } catch (err) {
-        console.warn("[Image Gen] Gemini image gen failed, using fallback...", err);
       }
     }
 
-    // ── 3. Pollinations fallback — pre-fetch as blob so it actually renders ─
+    // ── 4. Pollinations fallback — validated blob fetch ────────────────────
     const seed = Math.floor(Math.random() * 999999);
     const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&seed=${seed}&nologo=true&enhance=true&model=flux`;
     try {
-      const controller = new AbortController();
-      const t = setTimeout(() => controller.abort(), 60000);
-      const imgRes = await fetch(pollinationsUrl, { signal: controller.signal });
-      clearTimeout(t);
-      if (!imgRes.ok) throw new Error("Pollinations HTTP " + imgRes.status);
-      const blob = await imgRes.blob();
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload  = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
+      const dataUrl = await urlToDataUrl(pollinationsUrl, 90000);
       return { url: dataUrl };
     } catch (err) {
       throw new Error("No se pudo generar la imagen. Verifica tu conexión e intenta de nuevo.");
