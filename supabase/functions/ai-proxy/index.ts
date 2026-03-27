@@ -54,15 +54,29 @@ serve(async (req: Request) => {
       throw new Error(`Provider no soportado: ${provider}`);
     }
 
+    const streamMode = body?.stream === true;
+
     const res = await fetch(fetchUrl, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
     });
 
-    const data = await res.text();
-    if (!res.ok) console.error(`Error from ${provider}:`, res.status, data);
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error(`Error from ${provider}:`, res.status, errText);
+      return new Response(errText, { status: res.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
+    // Pipe stream directly for SSE (text/event-stream)
+    if (streamMode && res.body) {
+      return new Response(res.body, {
+        status: res.status,
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
+      });
+    }
+
+    const data = await res.text();
     return new Response(data, {
       status: res.status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

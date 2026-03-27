@@ -235,6 +235,78 @@ ${userCredits < 3 ? '⚠️ Créditos bajos: menciona sutilmente que el Plan Pro
     throw new Error("La generación de video está en proceso de activación. Tus créditos serán reembolsados.");
   },
 
+  // ─── STREAMING TEXT GENERATION ───────────────────────────────────────────────
+  // Returns an AsyncGenerator yielding text chunks as they arrive
+  async *streamTextGen(
+    tool: string,
+    prompt: string,
+    model: string,
+    profile: any,
+    onToken: (chunk: string) => void,
+  ): Promise<void> {
+    const openRouterModel = OPENROUTER_MODEL_MAP[model] || "google/gemini-2.0-flash-001";
+    const userTier    = profile?.subscription_tier?.toUpperCase() || "FREE";
+    const userCredits = profile?.credits_balance || 0;
+
+    const TOOL_PROMPTS: Record<string, string> = {
+      copywriter: `Eres un copywriter experto. Escribe copy persuasivo, claro y orientado a conversión. Usa fórmulas probadas (AIDA, PAS, FAB). Sé conciso y potente.`,
+      social: `Eres un estratega de redes sociales. Crea contenido nativo para cada plataforma. Incluye hooks, CTAs, hashtags relevantes y emojis estratégicos. Adapta el tono a la red.`,
+      blog: `Eres un escritor SEO senior. Estructura el artículo con H2/H3, incluye introducción, desarrollo y conclusión. Optimiza para intención de búsqueda. Usa datos y ejemplos concretos.`,
+      ads: `Eres un especialista en paid media. Crea anuncios que maximicen CTR y conversión. Incluye headline, descripción y CTA. Adapta al formato de la plataforma solicitada.`,
+      chat: `Eres Antigravity, IA de nivel Senior. Responde con precisión y valor. USER_PLAN: ${userTier}. CREDITS: ${userCredits}.`,
+    };
+
+    const systemPrompt = TOOL_PROMPTS[tool] || TOOL_PROMPTS.chat;
+    const messages = [
+      { role: "system", content: systemPrompt },
+      { role: "user",   content: prompt },
+    ];
+
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+    const res = await fetch(`${supabaseUrl}/functions/v1/ai-proxy`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+        "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({
+        provider: "openrouter",
+        path: "chat/completions",
+        body: { model: openRouterModel, messages, temperature: 0.85, max_tokens: 4096, stream: true },
+      }),
+    });
+
+    if (!res.ok || !res.body) {
+      throw new Error("Streaming no disponible. Intenta de nuevo.");
+    }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const payload = line.slice(6).trim();
+        if (payload === "[DONE]") return;
+        try {
+          const json = JSON.parse(payload);
+          const chunk = json.choices?.[0]?.delta?.content;
+          if (chunk) onToken(chunk);
+        } catch { /* skip malformed SSE lines */ }
+      }
+    }
+  },
+
   // ─── MEDIA PROXY (IMAGE EDITING) ─────────────────────────────────────────────
   async handleMediaProxy(tool: string, imageUrl: string) {
     const { data, error } = await supabase.functions.invoke("media-proxy", {

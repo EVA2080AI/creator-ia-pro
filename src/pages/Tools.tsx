@@ -10,9 +10,10 @@ import {
   Wand2, ZoomIn, ImagePlus, RotateCcw, Sparkles,
   Upload, Loader2, Download, Coins, MessageSquare,
   PenTool, Hash, Image, FileText, Megaphone, Copy, X, Zap,
-  ClipboardCopy
+  ClipboardCopy, BookmarkPlus, CheckCircle2, Lock,
 } from "lucide-react";
 import { ModelSelector, AVAILABLE_MODELS } from "@/components/ModelSelector";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 type ToolId =
@@ -30,26 +31,34 @@ interface Tool {
   needsUpload: boolean;
   placeholder?: string;
   color: string;
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
 const tools: Tool[] = [
   // ── Imagen ──────────────────────────────────────────────────────────────────
-  { id: "generate",   name: "Crear imagen",         desc: "Genera imágenes desde texto con IA.",                  icon: Image,       credits: 2, category: "image", needsUpload: false, placeholder: "Ej. Un gato astronauta en Marte al atardecer, estilo fotorrealista, luz dramática...", color: "text-white" },
-  { id: "logo",       name: "Diseñar logo",          desc: "Genera logos e identidades de marca con IA.",          icon: PenTool,     credits: 3, category: "image", needsUpload: false, placeholder: "Ej. Logo minimalista para una cafetería llamada Origen, tonos cálidos, fondo blanco...", color: "text-aether-blue" },
-  { id: "enhance",    name: "Mejorar imagen",        desc: "Mejora iluminación y detalles automáticamente.",       icon: Wand2,       credits: 2, category: "image", needsUpload: true,  color: "text-aether-purple" },
-  { id: "upscale",    name: "Aumentar resolución",   desc: "Escala imágenes hasta 4K sin perder calidad.",         icon: ZoomIn,      credits: 3, category: "image", needsUpload: true,  color: "text-aether-blue" },
-  { id: "eraser",     name: "Borrar objeto",         desc: "Elimina cualquier objeto de la imagen sin rastros.",   icon: X,           credits: 2, category: "image", needsUpload: true,  color: "text-rose-400" },
-  { id: "background", name: "Quitar fondo",          desc: "Extrae el fondo con bordes perfectos.",                icon: ImagePlus,   credits: 1, category: "image", needsUpload: true,  color: "text-emerald-400" },
-  { id: "restore",    name: "Restaurar foto",        desc: "Restaura fotos antiguas o dañadas.",                   icon: RotateCcw,   credits: 3, category: "image", needsUpload: true,  color: "text-amber-400" },
+  { id: "generate",   name: "Crear imagen",         desc: "Genera imágenes desde texto con IA.",                  icon: Image,         credits: 2, category: "image", needsUpload: false, placeholder: "Un gato astronauta en Marte al atardecer, estilo fotorrealista, luz dramática...", color: "text-white" },
+  { id: "logo",       name: "Diseñar logo",          desc: "Genera logos e identidades de marca con IA.",          icon: PenTool,       credits: 3, category: "image", needsUpload: false, placeholder: "Logo minimalista para una cafetería llamada Origen, tonos cálidos, fondo blanco...", color: "text-aether-blue" },
+  { id: "enhance",    name: "Mejorar imagen",        desc: "Mejora iluminación y detalles automáticamente.",       icon: Wand2,         credits: 2, category: "image", needsUpload: true,  color: "text-aether-purple" },
+  { id: "upscale",    name: "Aumentar resolución",   desc: "Escala imágenes hasta 4K sin perder calidad.",         icon: ZoomIn,        credits: 3, category: "image", needsUpload: true,  color: "text-aether-blue" },
+  { id: "background", name: "Quitar fondo",          desc: "Extrae el fondo con bordes perfectos.",                icon: ImagePlus,     credits: 1, category: "image", needsUpload: true,  color: "text-emerald-400" },
+  { id: "restore",    name: "Restaurar foto",        desc: "Restaura fotos antiguas o dañadas.",                   icon: RotateCcw,     credits: 3, category: "image", needsUpload: true,  color: "text-amber-400" },
+  { id: "eraser",     name: "Borrar objeto",         desc: "Elimina objetos de la imagen. Próximamente.",          icon: X,             credits: 2, category: "image", needsUpload: true,  color: "text-rose-400/40", disabled: true, disabledReason: "Próximamente" },
   // ── Texto ───────────────────────────────────────────────────────────────────
-  { id: "copywriter", name: "Crear texto",           desc: "Genera textos y copy para marketing.",                 icon: MessageSquare, credits: 1, category: "text", needsUpload: false, placeholder: "Ej. Escribe un mensaje persuasivo para vender zapatos deportivos en Instagram...", color: "text-aether-purple" },
-  { id: "social",     name: "Contenido para redes",  desc: "Crea posts y estrategias para redes sociales.",        icon: Hash,          credits: 2, category: "text", needsUpload: false, placeholder: "Ej. 5 ideas de contenido para Instagram de una marca de ropa sostenible...", color: "text-rose-400" },
-  { id: "blog",       name: "Escribir artículo",     desc: "Artículos largos optimizados para SEO.",               icon: FileText,      credits: 1, category: "text", needsUpload: false, placeholder: "Ej. Artículo completo sobre los beneficios del café de especialidad en 2025...", color: "text-emerald-400" },
-  { id: "ads",        name: "Crear anuncio",         desc: "Anuncios para Google, Meta y más.",                    icon: Megaphone,     credits: 1, category: "text", needsUpload: false, placeholder: "Ej. Anuncio de Google Ads para un servicio de consultoría de marketing digital...", color: "text-white" },
+  { id: "copywriter", name: "Crear texto",           desc: "Copy persuasivo para marketing y ventas.",             icon: MessageSquare, credits: 1, category: "text", needsUpload: false, placeholder: "Escribe un mensaje persuasivo para vender zapatos deportivos en Instagram...", color: "text-aether-purple" },
+  { id: "social",     name: "Contenido para redes",  desc: "Posts y estrategias para redes sociales.",             icon: Hash,          credits: 2, category: "text", needsUpload: false, placeholder: "5 ideas de contenido para Instagram de una marca de ropa sostenible...", color: "text-rose-400" },
+  { id: "blog",       name: "Escribir artículo",     desc: "Artículos largos optimizados para SEO.",               icon: FileText,      credits: 1, category: "text", needsUpload: false, placeholder: "Artículo completo sobre los beneficios del café de especialidad en 2025...", color: "text-emerald-400" },
+  { id: "ads",        name: "Crear anuncio",         desc: "Anuncios para Google, Meta y más.",                    icon: Megaphone,     credits: 1, category: "text", needsUpload: false, placeholder: "Anuncio de Google Ads para un servicio de consultoría de marketing digital...", color: "text-white" },
 ];
 
-const IMAGE_STYLES = ["Fotorrealista", "Minimalista", "Anime", "Acuarela", "Cyberpunk", "Bauhaus", "3D", "Vintage"];
-const LOGO_STYLES  = ["Minimalista", "Tipográfico", "Vintage", "Geométrico", "Moderno", "Playful", "Lujo", "Tech"];
+const IMAGE_STYLES  = ["Fotorrealista", "Minimalista", "Anime", "Acuarela", "Cyberpunk", "Bauhaus", "3D", "Vintage"];
+const LOGO_STYLES   = ["Minimalista", "Tipográfico", "Vintage", "Geométrico", "Moderno", "Playful", "Lujo", "Tech"];
+const ASPECT_RATIOS = [
+  { label: "1:1",  w: 1024, h: 1024 },
+  { label: "16:9", w: 1280, h: 720  },
+  { label: "9:16", w: 720,  h: 1280 },
+  { label: "4:5",  w: 820,  h: 1024 },
+];
 
 const appIdToToolId: Record<string, ToolId> = {
   copywriter: "copywriter", logo: "logo", social: "social", blog: "blog", ads: "ads",
@@ -85,17 +94,22 @@ const Tools = () => {
   const navigate = useNavigate();
   const { appId } = useParams();
 
-  const [activeTool, setActiveTool]         = useState<ToolId>("generate");
-  const [category, setCategory]             = useState<"image" | "text">("image");
-  const [imagePreview, setImagePreview]     = useState<string | null>(null);
-  const [resultImage, setResultImage]       = useState<string | null>(null);
-  const [resultText, setResultText]         = useState<string | null>(null);
-  const [processing, setProcessing]         = useState(false);
-  const [copyingImage, setCopyingImage]     = useState(false);
-  const [textPrompt, setTextPrompt]         = useState("");
+  const [activeTool, setActiveTool]           = useState<ToolId>("generate");
+  const [category, setCategory]               = useState<"image" | "text">("image");
+  const [imagePreview, setImagePreview]       = useState<string | null>(null);
+  const [resultImage, setResultImage]         = useState<string | null>(null);
+  const [resultText, setResultText]           = useState<string>("");
+  const [streaming, setStreaming]             = useState(false);
+  const [processing, setProcessing]           = useState(false);
+  const [copyingImage, setCopyingImage]       = useState(false);
+  const [savingAsset, setSavingAsset]         = useState(false);
+  const [savedAsset, setSavedAsset]           = useState(false);
+  const [textPrompt, setTextPrompt]           = useState("");
+  const [aspectRatio, setAspectRatio]         = useState(ASPECT_RATIOS[0]);
   const [selectedImageModel, setSelectedImageModel] = useState("nano-banana-2");
   const [selectedTextModel,  setSelectedTextModel]  = useState("deepseek-chat");
-  const fileRef = useRef<HTMLInputElement>(null);
+  const fileRef    = useRef<HTMLInputElement>(null);
+  const resultRef  = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (appId && appIdToToolId[appId]) {
@@ -105,26 +119,34 @@ const Tools = () => {
     }
   }, [appId]);
 
-  const currentTool    = tools.find((t) => t.id === activeTool)!;
-  const filteredTools  = tools.filter((t) => t.category === category);
-  const activeModel    = category === "image" ? selectedImageModel : selectedTextModel;
-  const modelObj       = AVAILABLE_MODELS.find((m) => m.id === activeModel) || AVAILABLE_MODELS[0];
-  const requiredCredits = category === "image"
-    ? currentTool.credits
-    : modelObj.tokenCost;
+  // Auto-scroll result panel while streaming
+  useEffect(() => {
+    if (streaming && resultRef.current) {
+      resultRef.current.scrollTop = resultRef.current.scrollHeight;
+    }
+  }, [resultText, streaming]);
+
+  const currentTool     = tools.find((t) => t.id === activeTool)!;
+  const filteredTools   = tools.filter((t) => t.category === category);
+  const activeModel     = category === "image" ? selectedImageModel : selectedTextModel;
+  const modelObj        = AVAILABLE_MODELS.find((m) => m.id === activeModel) || AVAILABLE_MODELS[0];
+  const requiredCredits = category === "image" ? currentTool.credits : modelObj.tokenCost;
+  const isRunning       = processing || streaming;
 
   const switchTool = (tool: Tool) => {
+    if (tool.disabled) return;
     setActiveTool(tool.id);
     setResultImage(null);
-    setResultText(null);
+    setResultText("");
     setImagePreview(null);
+    setSavedAsset(false);
     setTextPrompt("");
     if (fileRef.current) fileRef.current.value = "";
   };
 
   const switchCategory = (cat: "image" | "text") => {
     setCategory(cat);
-    const first = tools.find((t) => t.category === cat);
+    const first = tools.find((t) => t.category === cat && !t.disabled);
     if (first) switchTool(first);
   };
 
@@ -132,15 +154,18 @@ const Tools = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("Tipo de archivo no soportado"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Imagen demasiado grande. Máx 10MB"); return; }
     const reader = new FileReader();
     reader.onload = () => setImagePreview(reader.result as string);
     reader.readAsDataURL(file);
     setResultImage(null);
-    setResultText(null);
+    setResultText("");
+    setSavedAsset(false);
   };
 
   const handleProcess = async () => {
     if (!user) return;
+    if (currentTool.disabled) return;
     if (currentTool.needsUpload && !imagePreview) { toast.error("Sube una imagen primero"); return; }
     if (!currentTool.needsUpload && !textPrompt.trim()) { toast.error("Escribe una descripción para continuar"); return; }
 
@@ -151,13 +176,73 @@ const Tools = () => {
       return;
     }
 
-    setProcessing(true);
     setResultImage(null);
-    setResultText(null);
+    setResultText("");
+    setSavedAsset(false);
 
+    // ── TEXT: use streaming ───────────────────────────────────────────────────
+    if (category === "text") {
+      setStreaming(true);
+      // Optimistic credit deduct
+      try {
+        // Spend credits first
+        await (supabase.rpc as any)("spend_credits", {
+          _amount: requiredCredits,
+          _action: activeTool,
+          _model: activeModel,
+          _node_id: null,
+        });
+      } catch (err: any) {
+        setStreaming(false);
+        toast.error(err?.message || "Créditos insuficientes");
+        return;
+      }
+
+      let fullText = "";
+      try {
+        await aiService.streamTextGen(
+          activeTool,
+          textPrompt,
+          activeModel,
+          profile,
+          (chunk) => {
+            fullText += chunk;
+            setResultText(fullText);
+          },
+        );
+        await refreshProfile();
+      } catch (err: any) {
+        // Refund on error
+        const { data: { user: u } } = await supabase.auth.getUser();
+        if (u) await (supabase.rpc as any)("refund_credits", { _amount: requiredCredits, _user_id: u.id });
+        if (!fullText) {
+          // Streaming failed — fallback to regular
+          setStreaming(false);
+          setProcessing(true);
+          try {
+            const data = await aiService.processAction({
+              action: "chat", tool: activeTool, prompt: textPrompt, model: activeModel,
+            });
+            if (data?.text) setResultText(data.text);
+            await refreshProfile();
+          } catch (fallbackErr: any) {
+            toast.error(fallbackErr?.message || "Error al generar texto.");
+          } finally {
+            setProcessing(false);
+          }
+          return;
+        }
+      } finally {
+        setStreaming(false);
+      }
+      return;
+    }
+
+    // ── IMAGE: regular async ──────────────────────────────────────────────────
+    setProcessing(true);
     try {
       const data = await aiService.processAction({
-        action: category === "text" ? "chat" : "image",
+        action: "image",
         tool: activeTool,
         prompt: textPrompt,
         model: activeModel,
@@ -167,9 +252,6 @@ const Tools = () => {
       if (data?.url) {
         setResultImage(data.url);
         toast.success("¡Imagen generada!");
-      } else if (data?.text) {
-        setResultText(data.text);
-        toast.success("¡Listo!");
       } else {
         throw new Error("La IA no devolvió resultado. Intenta de nuevo.");
       }
@@ -181,20 +263,37 @@ const Tools = () => {
     }
   };
 
-  // Copy image blob to clipboard
+  const handleSaveToAssets = async () => {
+    if (!resultImage || !user) return;
+    setSavingAsset(true);
+    try {
+      const { error } = await supabase.from("assets").insert({
+        user_id: user.id,
+        type: "image",
+        url: resultImage,
+        name: `${currentTool.name} — ${textPrompt.slice(0, 40) || "generado"}`,
+        tags: [activeTool, "ai-generated"],
+      } as any);
+      if (error) throw error;
+      setSavedAsset(true);
+      toast.success("Guardado en Mis Activos");
+    } catch (err: any) {
+      toast.error("No se pudo guardar el activo");
+    } finally {
+      setSavingAsset(false);
+    }
+  };
+
   const handleCopyImage = useCallback(async (url: string) => {
     setCopyingImage(true);
     try {
       const res = await fetch(url);
       const blob = await res.blob();
-      await navigator.clipboard.write([
-        new ClipboardItem({ [blob.type]: blob }),
-      ]);
+      await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
       toast.success("Imagen copiada al portapapeles");
     } catch {
-      // Fallback: copy URL
       navigator.clipboard.writeText(url);
-      toast.success("URL de imagen copiada");
+      toast.success("URL copiada");
     } finally {
       setCopyingImage(false);
     }
@@ -208,7 +307,7 @@ const Tools = () => {
 
       <div className="flex flex-1 overflow-hidden" style={{ marginTop: "64px" }}>
 
-        {/* ── Left Sidebar ──────────────────────────────────────── */}
+        {/* ── Left Sidebar ──────────────────────────────────── */}
         <aside className="w-60 shrink-0 border-r border-white/[0.05] bg-[#070708] flex flex-col overflow-hidden">
           {/* Category tabs */}
           <div className="p-3 border-b border-white/[0.05]">
@@ -237,26 +336,29 @@ const Tools = () => {
                 <button
                   key={tool.id}
                   onClick={() => switchTool(tool)}
+                  disabled={tool.disabled}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all group",
-                    isActive
-                      ? "bg-white/[0.07] border border-white/[0.08] text-white"
-                      : "text-white/40 hover:text-white/70 hover:bg-white/[0.03]"
+                    tool.disabled
+                      ? "opacity-40 cursor-not-allowed"
+                      : isActive
+                        ? "bg-white/[0.07] border border-white/[0.08] text-white"
+                        : "text-white/40 hover:text-white/70 hover:bg-white/[0.03]"
                   )}
                 >
                   <div className={cn(
                     "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-all",
                     isActive ? cn("bg-white/10", tool.color) : "bg-white/[0.04] text-white/20"
                   )}>
-                    <tool.icon className="h-3.5 w-3.5" />
+                    {tool.disabled ? <Lock className="h-3 w-3" /> : <tool.icon className="h-3.5 w-3.5" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold truncate leading-none">{tool.name}</p>
                     <p className="text-[10px] text-white/25 mt-0.5 truncate">
-                      {tool.credits} crédito{tool.credits > 1 ? "s" : ""}
+                      {tool.disabled ? tool.disabledReason : `${tool.credits} crédito${tool.credits > 1 ? "s" : ""}`}
                     </p>
                   </div>
-                  {isActive && (
+                  {isActive && !tool.disabled && (
                     <div className="w-1.5 h-1.5 rounded-full bg-aether-purple shrink-0 shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
                   )}
                 </button>
@@ -268,7 +370,7 @@ const Tools = () => {
           <div className="p-3 border-t border-white/[0.05]">
             <button
               onClick={() => navigate("/pricing")}
-              className="w-full flex items-center gap-3 bg-white/[0.03] border border-white/[0.05] rounded-xl px-3 py-2.5 hover:bg-white/[0.06] transition-all group"
+              className="w-full flex items-center gap-3 bg-white/[0.03] border border-white/[0.05] rounded-xl px-3 py-2.5 hover:bg-white/[0.06] transition-all"
             >
               <Coins className="h-4 w-4 text-aether-purple shrink-0" />
               <div className="flex-1 min-w-0 text-left">
@@ -281,7 +383,7 @@ const Tools = () => {
           </div>
         </aside>
 
-        {/* ── Main: Input + Result ──────────────────────────────── */}
+        {/* ── Main: Input + Result ──────────────────────────── */}
         <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
 
           {/* Input Panel */}
@@ -303,25 +405,39 @@ const Tools = () => {
                 <p className="text-[11px] font-semibold text-white/30 uppercase tracking-widest flex items-center gap-1.5">
                   <Zap className="h-3 w-3 text-aether-purple" /> Modelo de IA
                 </p>
-                <ModelSelector
-                  selectedModelId={selectedTextModel}
-                  onModelChange={setSelectedTextModel}
-                  filterType="text"
-                />
+                <ModelSelector selectedModelId={selectedTextModel} onModelChange={setSelectedTextModel} filterType="text" />
               </div>
             )}
 
-            {/* Image model selector */}
             {category === "image" && !currentTool.needsUpload && (
               <div className="space-y-2">
                 <p className="text-[11px] font-semibold text-white/30 uppercase tracking-widest flex items-center gap-1.5">
                   <Zap className="h-3 w-3 text-aether-purple" /> Motor de imagen
                 </p>
-                <ModelSelector
-                  selectedModelId={selectedImageModel}
-                  onModelChange={setSelectedImageModel}
-                  filterType="image"
-                />
+                <ModelSelector selectedModelId={selectedImageModel} onModelChange={setSelectedImageModel} filterType="image" />
+              </div>
+            )}
+
+            {/* Aspect ratio (image gen only) */}
+            {category === "image" && !currentTool.needsUpload && (
+              <div className="space-y-2">
+                <p className="text-[11px] font-semibold text-white/30 uppercase tracking-widest">Proporción</p>
+                <div className="flex gap-1.5">
+                  {ASPECT_RATIOS.map((ar) => (
+                    <button
+                      key={ar.label}
+                      onClick={() => setAspectRatio(ar)}
+                      className={cn(
+                        "flex-1 py-1.5 rounded-lg border text-[11px] font-bold transition-all",
+                        aspectRatio.label === ar.label
+                          ? "bg-white/10 border-white/20 text-white"
+                          : "bg-white/[0.02] border-white/5 text-white/25 hover:text-white/50 hover:bg-white/[0.05]"
+                      )}
+                    >
+                      {ar.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -338,9 +454,7 @@ const Tools = () => {
                     <Upload className="h-6 w-6 text-white/20 group-hover:text-white/40 transition-colors" />
                   </div>
                   <div className="text-center">
-                    <p className="text-sm font-medium text-white/30 group-hover:text-white/50 transition-colors">
-                      Sube tu imagen aquí
-                    </p>
+                    <p className="text-sm font-medium text-white/30 group-hover:text-white/50 transition-colors">Sube tu imagen aquí</p>
                     <p className="text-xs text-white/15 mt-1">PNG, JPG, WEBP · Máx 10MB</p>
                   </div>
                 </button>
@@ -348,11 +462,7 @@ const Tools = () => {
                 <div className="relative rounded-2xl overflow-hidden border border-white/[0.08] bg-black flex-1 min-h-[200px]">
                   <img src={imagePreview} alt="Imagen subida" className="w-full h-full object-contain max-h-72" />
                   <button
-                    onClick={() => {
-                      setImagePreview(null);
-                      setResultImage(null);
-                      if (fileRef.current) fileRef.current.value = "";
-                    }}
+                    onClick={() => { setImagePreview(null); setResultImage(null); if (fileRef.current) fileRef.current.value = ""; }}
                     className="absolute right-3 top-3 rounded-xl bg-black/70 p-2 border border-white/10 hover:bg-rose-500/20 hover:text-rose-400 transition-all text-white/40"
                   >
                     <X className="h-4 w-4" />
@@ -367,22 +477,26 @@ const Tools = () => {
               )
             ) : (
               <div className="flex-1 flex flex-col gap-3">
-                <textarea
-                  value={textPrompt}
-                  onChange={(e) => setTextPrompt(e.target.value)}
-                  placeholder={currentTool.placeholder}
-                  rows={7}
-                  className="flex-1 w-full resize-none rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 text-sm text-white placeholder:text-white/15 focus:outline-none focus:border-aether-purple/30 focus:bg-white/[0.03] transition-all leading-relaxed"
-                />
+                <div className="relative flex-1">
+                  <textarea
+                    value={textPrompt}
+                    onChange={(e) => setTextPrompt(e.target.value)}
+                    placeholder={currentTool.placeholder}
+                    rows={7}
+                    maxLength={1000}
+                    className="flex-1 w-full resize-none rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 text-sm text-white placeholder:text-white/15 focus:outline-none focus:border-aether-purple/30 focus:bg-white/[0.03] transition-all leading-relaxed"
+                  />
+                  <span className="absolute bottom-3 right-4 text-[10px] text-white/15 pointer-events-none">
+                    {textPrompt.length}/1000
+                  </span>
+                </div>
                 {/* Style pills */}
                 {(activeTool === "generate" || activeTool === "logo") && (
                   <div className="flex flex-wrap gap-2">
                     {styleList.map((style) => (
                       <button
                         key={style}
-                        onClick={() =>
-                          setTextPrompt((prev) => (prev ? `${prev}, estilo ${style}` : `Estilo ${style}: `))
-                        }
+                        onClick={() => setTextPrompt((prev) => prev ? `${prev}, estilo ${style}` : `Estilo ${style}: `)}
                         className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05] text-[11px] font-medium text-white/30 hover:text-white hover:bg-white/[0.08] transition-all"
                       >
                         {style}
@@ -396,11 +510,11 @@ const Tools = () => {
             {/* Process button */}
             <Button
               onClick={handleProcess}
-              disabled={processing || (currentTool.needsUpload ? !imagePreview : !textPrompt.trim())}
+              disabled={isRunning || currentTool.disabled || (currentTool.needsUpload ? !imagePreview : !textPrompt.trim())}
               className="w-full h-12 rounded-2xl bg-white text-black font-semibold text-sm shadow-[0_4px_20px_rgba(255,255,255,0.1)] hover:bg-white/90 active:scale-[0.98] transition-all disabled:opacity-40 mt-auto flex items-center gap-2"
             >
-              {processing ? (
-                <><Loader2 className="h-4 w-4 animate-spin" /> Generando...</>
+              {isRunning ? (
+                <><Loader2 className="h-4 w-4 animate-spin" /> {streaming ? "Escribiendo..." : "Generando..."}</>
               ) : (
                 <><Sparkles className="h-4 w-4" /> Generar · {requiredCredits} crédito{requiredCredits > 1 ? "s" : ""}</>
               )}
@@ -408,12 +522,12 @@ const Tools = () => {
           </div>
 
           {/* Result Panel */}
-          <div className="flex-1 flex flex-col gap-4 overflow-y-auto p-6">
-            <div className="flex items-center justify-between">
+          <div className="flex-1 flex flex-col gap-4 overflow-hidden p-6">
+            <div className="flex items-center justify-between shrink-0">
               <p className="text-[11px] font-bold text-white/25 uppercase tracking-widest">Resultado</p>
-              {(resultImage || resultText) && (
+              {(resultImage || resultText) && !isRunning && (
                 <button
-                  onClick={() => { setResultImage(null); setResultText(null); }}
+                  onClick={() => { setResultImage(null); setResultText(""); setSavedAsset(false); }}
                   className="text-[11px] font-medium text-white/20 hover:text-white/50 transition-colors"
                 >
                   Limpiar
@@ -421,7 +535,7 @@ const Tools = () => {
               )}
             </div>
 
-            <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               {processing ? (
                 <div className="flex-1 flex flex-col items-center justify-center gap-5 text-center min-h-[300px]">
                   <div className="relative">
@@ -435,45 +549,45 @@ const Tools = () => {
                 </div>
 
               ) : resultImage ? (
-                <div className="flex flex-col gap-4 animate-in fade-in duration-500">
-                  <div className="rounded-2xl overflow-hidden border border-white/[0.08] bg-black relative group">
+                <div className="flex flex-col gap-4 animate-in fade-in duration-500 overflow-y-auto">
+                  <div className="rounded-2xl overflow-hidden border border-white/[0.08] bg-black relative">
                     <img
                       src={resultImage}
                       alt="Imagen generada"
-                      className="w-full object-contain max-h-[480px]"
+                      className="w-full object-contain max-h-[420px]"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23111' width='400' height='300'/%3E%3Ctext fill='%23555' font-size='14' x='50%25' y='50%25' text-anchor='middle'%3EError al cargar imagen%3C/text%3E%3C/svg%3E";
+                        (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='300'%3E%3Crect fill='%23111' width='400' height='300'/%3E%3Ctext fill='%23555' font-size='14' x='50%25' y='50%25' text-anchor='middle'%3EError al cargar%3C/text%3E%3C/svg%3E";
                       }}
                     />
                   </div>
-                  {/* Action buttons */}
-                  <div className="flex gap-2">
-                    {/* Download */}
-                    <a
-                      href={resultImage}
-                      download={`creator-ia-${activeTool}-${Date.now()}.png`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex-1"
-                    >
+                  <div className="flex gap-2 flex-wrap">
+                    <a href={resultImage} download={`creator-ia-${activeTool}-${Date.now()}.png`} target="_blank" rel="noreferrer" className="flex-1">
                       <button className="w-full h-11 rounded-xl border border-white/[0.08] bg-white/[0.04] text-sm font-semibold text-white/70 hover:text-white hover:bg-white/[0.10] transition-all flex items-center justify-center gap-2">
                         <Download className="h-4 w-4" /> Descargar
                       </button>
                     </a>
-                    {/* Copy image */}
+                    <button
+                      onClick={handleSaveToAssets}
+                      disabled={savingAsset || savedAsset}
+                      className={cn(
+                        "h-11 px-4 rounded-xl border text-sm font-semibold flex items-center gap-2 transition-all",
+                        savedAsset
+                          ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                          : "border-white/[0.08] bg-white/[0.04] text-white/40 hover:text-white hover:bg-white/[0.10]"
+                      )}
+                    >
+                      {savingAsset ? <Loader2 className="h-4 w-4 animate-spin" /> : savedAsset ? <CheckCircle2 className="h-4 w-4" /> : <BookmarkPlus className="h-4 w-4" />}
+                      {savedAsset ? "Guardado" : "Activos"}
+                    </button>
                     <button
                       onClick={() => handleCopyImage(resultImage)}
                       disabled={copyingImage}
-                      title="Copiar imagen"
-                      className="h-11 px-4 rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/40 hover:text-white hover:bg-white/[0.10] transition-all flex items-center gap-2 text-sm font-semibold disabled:opacity-50"
+                      className="h-11 w-11 rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/30 hover:text-white hover:bg-white/[0.10] transition-all flex items-center justify-center"
                     >
                       {copyingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <ClipboardCopy className="h-4 w-4" />}
-                      Copiar
                     </button>
-                    {/* Copy URL */}
                     <button
                       onClick={() => { navigator.clipboard.writeText(resultImage); toast.success("URL copiada"); }}
-                      title="Copiar URL"
                       className="h-11 w-11 rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/20 hover:text-white/60 transition-all flex items-center justify-center"
                     >
                       <Copy className="h-4 w-4" />
@@ -481,20 +595,34 @@ const Tools = () => {
                   </div>
                 </div>
 
-              ) : resultText ? (
-                <div className="flex flex-col gap-4 animate-in fade-in duration-500 flex-1">
-                  <div className="flex-1 rounded-2xl border border-white/[0.06] bg-white/[0.01] p-5 overflow-y-auto min-h-[280px]">
+              ) : (resultText || streaming) ? (
+                <div className="flex flex-col gap-4 animate-in fade-in duration-300 flex-1 overflow-hidden">
+                  <div
+                    ref={resultRef}
+                    className="flex-1 rounded-2xl border border-white/[0.06] bg-white/[0.01] p-5 overflow-y-auto min-h-[280px] relative"
+                  >
+                    {streaming && !resultText && (
+                      <div className="flex items-center gap-2 text-white/30 text-sm">
+                        <Loader2 className="h-4 w-4 animate-spin text-aether-purple" />
+                        <span>Escribiendo...</span>
+                      </div>
+                    )}
                     <div
                       className="result-prose text-sm leading-relaxed"
                       dangerouslySetInnerHTML={{ __html: parseMarkdown(resultText) }}
                     />
+                    {streaming && resultText && (
+                      <span className="inline-block w-2 h-4 bg-aether-purple/70 animate-pulse ml-0.5 rounded-sm" />
+                    )}
                   </div>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(resultText); toast.success("Texto copiado"); }}
-                    className="w-full h-11 rounded-xl bg-white text-black font-semibold text-sm flex items-center justify-center gap-2 hover:bg-white/90 active:scale-[0.98] transition-all"
-                  >
-                    <Copy className="h-4 w-4" /> Copiar texto
-                  </button>
+                  {!streaming && resultText && (
+                    <button
+                      onClick={() => { navigator.clipboard.writeText(resultText); toast.success("Texto copiado"); }}
+                      className="w-full h-11 rounded-xl bg-white text-black font-semibold text-sm flex items-center justify-center gap-2 hover:bg-white/90 active:scale-[0.98] transition-all shrink-0"
+                    >
+                      <Copy className="h-4 w-4" /> Copiar texto
+                    </button>
+                  )}
                 </div>
 
               ) : (
