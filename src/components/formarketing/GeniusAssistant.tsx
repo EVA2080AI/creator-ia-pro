@@ -377,7 +377,7 @@ export const GeniusAssistant = () => {
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 z-[9000] flex bg-[#0a0a0b]">
+    <div className="fixed top-16 left-0 right-0 bottom-0 z-[9000] flex bg-[#0a0a0b]">
 
       {/* ── Sidebar ─────────────────────────────────────────────────────────── */}
       <aside className={cn(
