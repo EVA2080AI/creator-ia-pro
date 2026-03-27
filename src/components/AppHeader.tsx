@@ -4,8 +4,8 @@ import { useProfile } from "@/hooks/useProfile";
 import { useAdmin } from "@/hooks/useAdmin";
 import {
   Sparkles, LayoutGrid, Wand2, Image, Shield, CreditCard, LogOut,
-  Palette, Home, Menu, X, Activity, MonitorDown, Code, User,
-  ChevronDown, Zap, BookOpen, Settings, Coins, BrainCircuit, Star
+  Palette, Home, Menu, X, Code, User,
+  ChevronDown, Coins, Monitor
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,12 +15,12 @@ interface AppHeaderProps {
 }
 
 const NAV_ITEMS = [
-  { path: "/dashboard", label: "Inicio", icon: Home },
-  { path: "/tools", label: "Herramientas", icon: Wand2 },
-  { path: "/formarketing", label: "Studio", icon: Palette },
-  { path: "/spaces", label: "Espacios", icon: LayoutGrid },
-  { path: "/assets", label: "Activos", icon: Image },
-  { path: "/pricing", label: "Precios", icon: CreditCard },
+  { path: "/dashboard",    label: "Inicio",        icon: Home        },
+  { path: "/tools",        label: "Herramientas",  icon: Wand2       },
+  { path: "/formarketing", label: "Studio",         icon: Palette     },
+  { path: "/spaces",       label: "Espacios",      icon: LayoutGrid  },
+  { path: "/assets",       label: "Activos",       icon: Image       },
+  { path: "/pricing",      label: "Precios",       icon: CreditCard  },
 ];
 
 export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
@@ -28,7 +28,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
   const location = useLocation();
   const { profile } = useProfile(userId);
   const { isAdmin } = useAdmin(userId);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen,  setMobileOpen]  = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleNav = (path: string) => {
@@ -36,6 +36,8 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
     setMobileOpen(false);
     setUserMenuOpen(false);
   };
+
+  const displayName = profile?.display_name?.split(" ")[0] || null;
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[100] h-16 flex items-center border-b border-white/5 bg-[#050506]/40 backdrop-blur-2xl">
@@ -80,8 +82,8 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
             );
           })}
           {isAdmin && (
-            <button 
-              onClick={() => handleNav("/admin")} 
+            <button
+              onClick={() => handleNav("/admin")}
               className="flex items-center gap-2.5 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-rose-500/40 hover:text-rose-500 transition-all font-display"
             >
               <Shield className="w-3.5 h-3.5" /> Admin
@@ -90,13 +92,14 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
         </nav>
 
         {/* Right Zone */}
-        <div className="flex items-center gap-4 ml-auto shrink-0">
+        <div className="flex items-center gap-3 ml-auto shrink-0">
+
           {/* Credits */}
           <button
             onClick={() => handleNav("/pricing")}
-            className="hidden sm:flex items-center gap-2 bg-white/[0.03] border border-white/5 rounded-xl px-4 py-2 text-[10px] font-bold text-white/40 hover:text-white transition-all uppercase tracking-widest font-display"
+            className="hidden sm:flex items-center gap-2 bg-white/[0.03] border border-white/5 rounded-xl px-3 py-2 text-xs font-semibold text-white/50 hover:text-white hover:bg-white/[0.06] transition-all"
           >
-            <Coins className="w-3.5 h-3.5 text-aether-purple" />
+            <Coins className="w-3.5 h-3.5 text-aether-purple shrink-0" />
             <span className="tabular-nums">{profile?.credits_balance?.toLocaleString() ?? "0"}</span>
           </button>
 
@@ -104,49 +107,62 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center gap-4 p-1.5 pr-4 rounded-xl aether-card border border-white/5 hover:border-white/10 transition-all active:scale-95 shadow-inner"
+              className="flex items-center gap-2.5 p-1.5 pr-3.5 rounded-xl aether-card border border-white/5 hover:border-white/15 transition-all active:scale-95"
             >
-              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 shadow-lg">
+              {/* Avatar */}
+              <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center overflow-hidden border border-white/10 shrink-0">
                 {profile?.avatar_url
                   ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                  : <User className="w-4 h-4 text-white/30" />
+                  : <User className="w-4 h-4 text-white/40" />
                 }
               </div>
-              <span className="hidden lg:block text-[11px] font-bold text-white/40 max-w-[100px] truncate uppercase tracking-widest font-display">
-                {profile?.display_name?.split(" ")[0] ?? "Operator"}
+              {/* Name or fallback */}
+              <span className="hidden lg:block text-sm font-semibold text-white/70 max-w-[110px] truncate">
+                {displayName ?? "Mi Perfil"}
               </span>
-              <ChevronDown className={cn("w-3.5 h-3.5 text-white/10 transition-transform duration-500", userMenuOpen && "rotate-180")} />
+              <ChevronDown className={cn(
+                "w-3.5 h-3.5 text-white/25 transition-transform duration-300 shrink-0",
+                userMenuOpen && "rotate-180"
+              )} />
             </button>
 
             {/* Dropdown */}
             {userMenuOpen && (
-              <div className="absolute right-0 top-full mt-4 w-60 aether-card border border-white/10 rounded-[2rem] shadow-5xl overflow-hidden animate-in fade-in zoom-in-95 duration-500 z-[100] p-3 backdrop-blur-3xl">
-                <div className="p-5 border-b border-white/5 bg-white/[0.01] rounded-2xl mb-2">
-                  <p className="text-[11px] font-bold text-white truncate uppercase tracking-tighter font-display">{profile?.display_name ?? "Operator"}</p>
-                  <p className="text-[9px] text-white/20 truncate mt-1.5 font-bold uppercase tracking-[0.1em] font-display">{profile?.email}</p>
+              <div className="absolute right-0 top-full mt-3 w-64 aether-card border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-[200] p-2 backdrop-blur-3xl">
+                {/* User info header */}
+                <div className="px-4 py-3 border-b border-white/[0.06] mb-1">
+                  <p className="text-sm font-semibold text-white truncate">
+                    {profile?.display_name ?? "Mi Perfil"}
+                  </p>
+                  <p className="text-xs text-white/40 truncate mt-0.5">{profile?.email ?? ""}</p>
                 </div>
-                <div className="space-y-1">
+
+                {/* Menu items */}
+                <div className="space-y-0.5">
                   {[
-                    { label: "Mi Perfil", icon: User, path: "/profile" },
-                    { label: "Mis Activos", icon: Image, path: "/assets" },
-                    { label: "Desarrollador", icon: Code, path: "/developer" },
+                    { label: "Mi Perfil",           icon: User,    path: "/profile" },
+                    { label: "Mis Activos",          icon: Image,   path: "/assets" },
+                    { label: "Compartir pantalla",   icon: Monitor, path: "/sharescreen" },
+                    { label: "Desarrollador",        icon: Code,    path: "/developer" },
                   ].map(item => (
                     <button
                       key={item.path}
                       onClick={() => handleNav(item.path)}
-                      className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[10px] font-bold text-white/30 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest font-display"
+                      className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white/50 hover:text-white hover:bg-white/5 transition-all text-left"
                     >
-                      <item.icon className="w-4 h-4 text-white/10" />
+                      <item.icon className="w-4 h-4 text-white/25 shrink-0" />
                       {item.label}
                     </button>
                   ))}
                 </div>
-                <div className="mt-2 pt-2 border-t border-white/5">
+
+                {/* Sign out */}
+                <div className="mt-1 pt-1 border-t border-white/[0.06]">
                   <button
                     onClick={() => { onSignOut(); setUserMenuOpen(false); }}
-                    className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[10px] font-bold text-rose-500/40 hover:text-rose-400 hover:bg-rose-500/5 transition-all uppercase tracking-widest font-display"
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-rose-400/60 hover:text-rose-400 hover:bg-rose-500/5 transition-all"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <LogOut className="w-4 h-4 shrink-0" />
                     Cerrar sesión
                   </button>
                 </div>
@@ -157,7 +173,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           {/* Mobile Toggle */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden flex items-center justify-center w-11 h-11 rounded-xl bg-white/5 border border-white/5 text-white/30"
+            className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white transition-all"
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -166,8 +182,28 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 top-16 z-40 md:hidden bg-[#050506]/98 backdrop-blur-3xl animate-in slide-in-from-top duration-500 px-6 py-8 overflow-y-auto">
-          <nav className="flex flex-col gap-2">
+        <div className="fixed inset-0 top-16 z-40 md:hidden bg-[#050506]/98 backdrop-blur-3xl animate-in slide-in-from-top duration-300 px-5 py-6 overflow-y-auto">
+          {/* User info */}
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.03] border border-white/5 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+              {profile?.avatar_url
+                ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                : <User className="w-5 h-5 text-white/30" />
+              }
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white truncate">{profile?.display_name ?? "Mi Perfil"}</p>
+              <p className="text-xs text-white/40 truncate">{profile?.email ?? ""}</p>
+            </div>
+            <div className="flex items-center gap-1.5 bg-white/5 border border-white/5 px-3 py-1.5 rounded-lg">
+              <Coins className="w-3 h-3 text-aether-purple" />
+              <span className="text-xs font-semibold text-white/50 tabular-nums">
+                {profile?.credits_balance?.toLocaleString() ?? "0"}
+              </span>
+            </div>
+          </div>
+
+          <nav className="flex flex-col gap-1.5">
             {NAV_ITEMS.map((item) => {
               const isActive = location.pathname === item.path;
               return (
@@ -175,36 +211,47 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                   key={item.path}
                   onClick={() => handleNav(item.path)}
                   className={cn(
-                    "w-full flex items-center justify-between px-6 py-4 rounded-2xl text-sm font-semibold transition-all duration-300",
+                    "w-full flex items-center justify-between px-5 py-3.5 rounded-2xl text-sm font-semibold transition-all",
                     isActive
-                      ? "bg-white text-black shadow-xl"
+                      ? "bg-white text-black shadow-lg"
                       : "text-white/60 bg-white/[0.03] border border-white/5 hover:text-white hover:bg-white/[0.06]"
                   )}
                 >
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3">
                     <item.icon className={cn("w-5 h-5", isActive ? "text-black" : "text-white/30")} />
-                    <span>{item.label}</span>
+                    {item.label}
                   </div>
                   <ChevronDown className="-rotate-90 w-4 h-4 opacity-30" />
                 </button>
               );
             })}
+
+            {/* Share Screen */}
+            <button
+              onClick={() => handleNav("/sharescreen")}
+              className="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl text-sm font-semibold text-aether-blue/70 bg-aether-blue/5 border border-aether-blue/10 hover:text-aether-blue transition-all"
+            >
+              <Monitor className="w-5 h-5" />
+              Compartir pantalla
+            </button>
+
             {isAdmin && (
               <button
                 onClick={() => handleNav("/admin")}
-                className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-semibold text-rose-400/70 bg-rose-500/5 border border-rose-500/10 hover:text-rose-400 transition-all"
+                className="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl text-sm font-semibold text-rose-400/70 bg-rose-500/5 border border-rose-500/10 hover:text-rose-400 transition-all"
               >
                 <Shield className="w-5 h-5" />
-                <span>Admin</span>
+                Admin
               </button>
             )}
-            <div className="mt-4 pt-4 border-t border-white/5">
+
+            <div className="mt-2 pt-2 border-t border-white/5">
               <button
                 onClick={() => { onSignOut(); setMobileOpen(false); }}
-                className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-semibold text-rose-400/60 bg-rose-500/5 border border-rose-500/10 hover:text-rose-400 transition-all"
+                className="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl text-sm font-semibold text-rose-400/60 bg-rose-500/5 border border-rose-500/10 hover:text-rose-400 transition-all"
               >
                 <LogOut className="w-5 h-5" />
-                <span>Cerrar sesión</span>
+                Cerrar sesión
               </button>
             </div>
           </nav>

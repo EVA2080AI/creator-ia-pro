@@ -19,7 +19,7 @@ import CampaignManagerNode from '@/components/formarketing/CampaignManagerNode';
 import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
 import { TEMPLATES, CATEGORIES, type Template } from '@/components/formarketing/TemplateModal';
 import AntigravityBridgeNode from '@/components/formarketing/AntigravityBridgeNode';
-import { ArrowLeft, Trash2, Zap } from 'lucide-react';
+import { ArrowLeft, Trash2, Zap, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { aiService } from '@/services/ai-service';
@@ -783,21 +783,32 @@ function FormarketingContent() {
             </button>
          </div>
 
-         <div className="flex items-center gap-3">
+         <div className="flex items-center gap-2">
+            {/* Share screen */}
+            <Button
+               variant="ghost"
+               onClick={() => navigate('/sharescreen')}
+               className="hidden sm:flex items-center gap-2 text-aether-blue/50 hover:text-aether-blue hover:bg-aether-blue/5 rounded-xl px-3 h-9 text-xs font-bold transition-all"
+               title="Compartir pantalla"
+            >
+               <Monitor className="w-3.5 h-3.5" />
+               <span className="hidden md:inline">Compartir</span>
+            </Button>
+
             <Button
                variant="ghost"
                onClick={handleClear}
                disabled={nodes.length === 0 && edges.length === 0}
-               className="text-white/30 hover:text-white hover:bg-white/5 rounded-xl px-4 h-9 text-xs font-bold gap-2 transition-all disabled:opacity-20"
+               className="text-white/30 hover:text-white hover:bg-white/5 rounded-xl px-3 h-9 text-xs font-bold gap-2 transition-all disabled:opacity-20"
             >
                <Trash2 className="w-3.5 h-3.5" />
-               Limpiar
+               <span className="hidden md:inline">Limpiar</span>
             </Button>
 
             <Button
                onClick={handleExecute}
                disabled={nodes.length === 0}
-               className="h-9 bg-white hover:bg-white/90 text-black rounded-xl gap-2 font-bold px-6 shadow-xl shadow-white/5 text-xs transition-all active:scale-95 disabled:opacity-20 font-display"
+               className="h-9 bg-white hover:bg-white/90 text-black rounded-xl gap-2 font-bold px-5 shadow-xl shadow-white/5 text-xs transition-all active:scale-95 disabled:opacity-20 font-display"
             >
                <Zap className="w-3.5 h-3.5 fill-current" />
                Ejecutar

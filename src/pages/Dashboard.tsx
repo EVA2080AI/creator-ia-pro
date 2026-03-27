@@ -82,35 +82,35 @@ const Dashboard = () => {
       .insert({ user_id: user.id, name: newSpaceName, description: newSpaceDesc })
       .select().single();
     if (error) { toast.error("Error creating space"); return; }
-    toast.success("Nexus Space Initialized");
+    toast.success("Espacio creado");
     setIsCreatingSpace(false);
     setNewSpaceName(""); setNewSpaceDesc("");
     navigate(`/formarketing?spaceId=${data.id}`);
   };
 
   const stats = [
-    { label: "Neural Credits", value: profile?.credits_balance ?? 0, icon: Coins, color: "text-aether-purple" },
-    { label: "System Tier", value: tierLabels[currentTier] || "Starter", icon: CreditCard, color: "text-aether-blue" },
-    { label: "Active Spaces", value: spacesCount, icon: LayoutGrid, color: "text-rose-400" },
-    { label: "Stored Assets", value: assetsCount, icon: Image, color: "text-emerald-400" },
+    { label: "Créditos", value: profile?.credits_balance ?? 0, icon: Coins, color: "text-aether-purple" },
+    { label: "Plan actual", value: tierLabels[currentTier] || "Gratis", icon: CreditCard, color: "text-aether-blue" },
+    { label: "Espacios", value: spacesCount, icon: LayoutGrid, color: "text-rose-400" },
+    { label: "Activos", value: assetsCount, icon: Image, color: "text-emerald-400" },
   ];
 
   const quickTools = [
-    { icon: Image, label: "Generate Asset", desc: "Text to image engine", path: "/formarketing" },
-    { icon: Wand2, label: "Neural Enhancer", desc: "AI quality v2", path: "/tools" },
-    { icon: ZoomIn, label: "Quantum Upscale", desc: "4K Industrial scaling", path: "/tools" },
-    { icon: Eraser, label: "Object Eraser", desc: "Neural removal", path: "/tools" },
-    { icon: ImagePlus, label: "Alpha Matte", desc: "Background removal", path: "/tools" },
-    { icon: RotateCcw, label: "Restoration", desc: "Asset recovery", path: "/tools" },
+    { icon: Image, label: "Crear imagen", desc: "Texto a imagen con IA", path: "/formarketing" },
+    { icon: Wand2, label: "Mejorar imagen", desc: "Mejora calidad con IA", path: "/tools" },
+    { icon: ZoomIn, label: "Aumentar resolución", desc: "Escala hasta 4K", path: "/tools" },
+    { icon: Eraser, label: "Borrar objeto", desc: "Elimina elementos", path: "/tools" },
+    { icon: ImagePlus, label: "Quitar fondo", desc: "Extrae el fondo", path: "/tools" },
+    { icon: RotateCcw, label: "Restaurar foto", desc: "Recupera imágenes", path: "/tools" },
   ];
 
   const aiApps = [
-    { icon: Megaphone, label: "Creator Studio", desc: "Infinite creative canvas", path: "/formarketing" },
-    { icon: MessageSquare, label: "Copy Orchestrator", desc: "Semantic copy engine", path: "/tools" },
-    { icon: PenTool, label: "Vector Gen", desc: "Neural brand design", path: "/tools" },
-    { icon: Hash, label: "Social Hub", desc: "Campaign distribution", path: "/tools" },
-    { icon: FileText, label: "Semantic Writer", desc: "Industrial SEO articles", path: "/tools" },
-    { icon: Type, label: "Ad Distributor", desc: "Meta/Google ad engine", path: "/tools" },
+    { icon: Megaphone, label: "Studio Canvas", desc: "Lienzo creativo infinito", path: "/formarketing" },
+    { icon: MessageSquare, label: "Crear texto", desc: "Copy para marketing", path: "/tools" },
+    { icon: PenTool, label: "Diseñar logo", desc: "Logos e identidad de marca", path: "/tools" },
+    { icon: Hash, label: "Redes sociales", desc: "Contenido para Instagram", path: "/tools" },
+    { icon: FileText, label: "Escribir artículo", desc: "Artículos SEO", path: "/tools" },
+    { icon: Type, label: "Crear anuncio", desc: "Ads para Meta y Google", path: "/tools" },
   ];
 
   const usageData = [
@@ -202,8 +202,8 @@ const Dashboard = () => {
             <div className="lg:col-span-2 p-10 aether-card rounded-[3rem] border border-white/5 relative overflow-hidden group">
               <div className="flex items-center justify-between mb-10">
                 <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-[0.3em] font-display">Neural Consumption</h3>
-                  <p className="text-[10px] text-white/20 mt-1 uppercase tracking-widest font-display">Real-time resource audit</p>
+                  <h3 className="text-xs font-bold text-white uppercase tracking-[0.3em] font-display">Uso de créditos</h3>
+                  <p className="text-[10px] text-white/20 mt-1 uppercase tracking-widest font-display">Últimos 7 días</p>
                 </div>
                 <div className="p-3 rounded-2xl bg-white/5">
                   <TrendingUp className="w-5 h-5 text-aether-purple" />
@@ -235,8 +235,8 @@ const Dashboard = () => {
             <div className="p-10 aether-card rounded-[3rem] border border-white/5">
               <div className="flex items-center justify-between mb-10">
                 <div>
-                  <h3 className="text-xs font-bold text-white uppercase tracking-[0.3em] font-display">Node Balance</h3>
-                  <p className="text-[10px] text-white/20 mt-1 uppercase tracking-widest font-display">Resource Allocation</p>
+                  <h3 className="text-xs font-bold text-white uppercase tracking-[0.3em] font-display">Distribución</h3>
+                  <p className="text-[10px] text-white/20 mt-1 uppercase tracking-widest font-display">Por tipo de uso</p>
                 </div>
                 <div className="p-3 rounded-2xl bg-white/5">
                   <Box className="w-5 h-5 text-aether-blue" />
@@ -259,7 +259,7 @@ const Dashboard = () => {
                 ))}
               </div>
               <div className="mt-12 p-6 rounded-3xl bg-white/[0.02] border border-white/5 text-center">
-                 <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Efficiency Rating</p>
+                 <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Eficiencia</p>
                  <p className="text-3xl font-bold mt-2 font-display text-white">98.4%</p>
               </div>
             </div>
@@ -269,7 +269,7 @@ const Dashboard = () => {
           <div className="mb-16">
             <div className="flex items-end justify-between mb-10 px-2">
               <div className="space-y-2">
-                <h2 className="text-xs font-bold text-white uppercase tracking-[0.5em] font-display">Industrial AI Clusters</h2>
+                <h2 className="text-xs font-bold text-white uppercase tracking-[0.5em] font-display">Herramientas IA</h2>
                 <div className="h-1 w-20 bg-aether-purple rounded-full" />
               </div>
               <button onClick={() => navigate("/hub")} className="flex items-center gap-2 text-[10px] font-bold text-white/30 hover:text-white transition-all tracking-widest uppercase">
@@ -299,7 +299,7 @@ const Dashboard = () => {
           <div className="mb-20">
             <div className="flex items-end justify-between mb-10 px-2">
                <div className="space-y-2">
-                 <h2 className="text-xs font-bold text-white uppercase tracking-[0.5em] font-display">Active Nexus Spaces</h2>
+                 <h2 className="text-xs font-bold text-white uppercase tracking-[0.5em] font-display">Mis Espacios</h2>
                  <div className="h-1 w-20 bg-aether-blue rounded-full" />
                </div>
               <button
@@ -307,7 +307,7 @@ const Dashboard = () => {
                 className="bg-white text-black hover:bg-white/90 flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest px-8 py-3.5 rounded-2xl transition-all active:scale-95 shadow-[0_20px_40px_rgba(255,255,255,0.1)]"
               >
                 <Plus className="w-4.5 h-4.5" />
-                Initialize Space
+                Nuevo espacio
               </button>
             </div>
             {spaces.length === 0 ? (
@@ -318,8 +318,8 @@ const Dashboard = () => {
                 <div className="w-20 h-20 rounded-[2rem] bg-white text-black flex items-center justify-center mx-auto mb-10 group-hover:scale-110 group-hover:rotate-12 transition-all shadow-3xl">
                   <FolderPlus className="w-10 h-10" />
                 </div>
-                <h3 className="text-3xl font-bold text-white mb-4 tracking-tight font-display">Initialize First Nexus Cluster</h3>
-                <p className="text-sm text-white/20 font-medium uppercase tracking-[0.2em] max-w-lg mx-auto leading-relaxed">Organize scripts, neural assets, and infinite canvas campaigns in persistent production clusters.</p>
+                <h3 className="text-3xl font-bold text-white mb-4 tracking-tight font-display">Crea tu primer espacio</h3>
+                <p className="text-sm text-white/30 font-medium max-w-md mx-auto leading-relaxed">Organiza tus proyectos, activos e ideas en espacios de trabajo independientes.</p>
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -339,7 +339,7 @@ const Dashboard = () => {
                     </div>
                     <div className="space-y-2">
                        <p className="text-2xl font-bold text-white tracking-tight font-display">{space.name}</p>
-                       <p className="text-xs text-white/30 font-medium line-clamp-2 leading-relaxed">{space.description || "Operational Nexus environment without a defined protocol."}</p>
+                       <p className="text-xs text-white/30 font-medium line-clamp-2 leading-relaxed">{space.description || "Sin descripción."}</p>
                     </div>
                     
                     {/* Visual noise background for cards */}
@@ -360,14 +360,14 @@ const Dashboard = () => {
             <div className="w-16 h-16 rounded-[1.5rem] bg-aether-blue/20 text-aether-blue flex items-center justify-center mx-auto mb-6 border border-aether-blue/20">
                <Rocket className="w-8 h-8" />
             </div>
-            <DialogTitle className="text-3xl font-bold text-white tracking-tight font-display">Initialize Nexus</DialogTitle>
+            <DialogTitle className="text-3xl font-bold text-white tracking-tight font-display">Nuevo espacio</DialogTitle>
             <DialogDescription className="text-white/30 text-sm font-medium leading-relaxed mt-4">
-              Create a high-fidelity environment for parallel creative orchestration and multimodal campaign production.
+              Crea un espacio para organizar tus proyectos creativos y campañas.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-8 py-2">
             <div className="space-y-3">
-              <Label htmlFor="name" className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] font-display ml-1">Space Protocol Identifier</Label>
+              <Label htmlFor="name" className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] font-display ml-1">Nombre del espacio</Label>
                 <Input
                   id="name"
                   value={newSpaceName}
@@ -378,7 +378,7 @@ const Dashboard = () => {
                 />
             </div>
             <div className="space-y-3">
-              <Label htmlFor="desc" className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] font-display ml-1">Operational Protocol</Label>
+              <Label htmlFor="desc" className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] font-display ml-1">Descripción (opcional)</Label>
                 <Input
                   id="desc"
                   value={newSpaceDesc}
@@ -390,11 +390,11 @@ const Dashboard = () => {
           </div>
           <DialogFooter className="gap-5 mt-12">
             <button onClick={() => setIsCreatingSpace(false)} className="px-8 py-4 rounded-2xl border border-white/5 text-xs font-bold uppercase tracking-widest text-white/20 hover:text-white hover:bg-white/5 transition-all flex-1">
-              Abort Mission
+              Cancelar
             </button>
             <button onClick={handleCreateSpace} className="flex-[1.5] px-10 py-4 bg-white text-black rounded-2xl flex items-center justify-center gap-3 text-xs font-bold uppercase tracking-widest hover:scale-105 transition-all active:scale-95 shadow-[0_20px_40px_rgba(255,255,255,0.1)]">
               <Plus className="w-5 h-5" />
-              Init Nexus Space
+              Crear espacio
             </button>
           </DialogFooter>
         </DialogContent>
