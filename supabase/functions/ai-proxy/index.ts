@@ -94,45 +94,72 @@ serve(async (req: Request) => {
       const { prompt, model, width = 1024, height = 1024 } = reqBody || {};
       if (!prompt) return json({ error: 'prompt is required' }, 400);
 
+      const apiKey = Deno.env.get('OPENROUTER_API_KEY');
+      if (!apiKey) return json({ error: 'OPENROUTER_API_KEY not configured.' }, 200);
+
       // Build model fallback list: requested model first, then defaults
       const tryModels = model
         ? [model, ...IMAGE_FALLBACK_MODELS.filter(m => m !== model)]
         : IMAGE_FALLBACK_MODELS;
 
+      const errors: string[] = [];
+
       for (const imageModel of tryModels) {
         try {
-          console.log(`[Image] Trying model: ${imageModel}`);
-          const res = await openrouterFetch('images/generations', {
-            model: imageModel,
-            prompt,
-            n: 1,
-            size: `${width}x${height}`,
-            response_format: 'url',
+          console.log(`[Image] Trying: ${imageModel}`);
+
+          const res = await fetch(`${OR_BASE}/images/generations`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`,
+              'HTTP-Referer': OR_REFERER,
+              'X-Title': OR_TITLE,
+            },
+            body: JSON.stringify({
+              model: imageModel,
+              prompt,
+              n: 1,
+              size: `${width}x${height}`,
+              response_format: 'url',
+            }),
           });
 
           const ct = res.headers.get('content-type') ?? '';
+
           if (ct.includes('text/html')) {
-            console.warn(`[Image] ${imageModel} returned HTML — skipping`);
-            continue;
-          }
-          if (!res.ok) {
-            const errData = await res.json().catch(() => ({}));
-            console.warn(`[Image] ${imageModel} error ${res.status}:`, JSON.stringify(errData).slice(0, 200));
+            errors.push(`${imageModel}: HTML response (${res.status})`);
             continue;
           }
 
-          const data = await res.json() as any;
+          const data = await res.json().catch(() => ({})) as any;
+
+          if (!res.ok) {
+            const msg = data?.error?.message || data?.error || `HTTP ${res.status}`;
+            console.warn(`[Image] ${imageModel} → ${res.status}: ${msg}`);
+            errors.push(`${imageModel}: ${msg}`);
+            continue;
+          }
+
+          // Standard OpenAI image response
           const item = data?.data?.[0];
           if (item?.b64_json) return json({ url: `data:image/png;base64,${item.b64_json}`, model: imageModel });
           if (item?.url)      return json({ url: item.url, model: imageModel });
 
-          console.warn(`[Image] ${imageModel} returned no image data`);
+          // Some providers return url at top level
+          if (data?.url) return json({ url: data.url, model: imageModel });
+
+          console.warn(`[Image] ${imageModel} → no image in response:`, JSON.stringify(data).slice(0, 200));
+          errors.push(`${imageModel}: no image data`);
         } catch (e: unknown) {
-          console.warn(`[Image] ${imageModel} threw:`, e instanceof Error ? e.message : e);
+          const msg = e instanceof Error ? e.message : String(e);
+          console.warn(`[Image] ${imageModel} threw: ${msg}`);
+          errors.push(`${imageModel}: ${msg}`);
         }
       }
 
-      return json({ error: 'All OpenRouter image models failed. Try again.' }, 502);
+      // Return 200 so the client receives the error message (not a thrown exception)
+      return json({ error: `Generación fallida: ${errors.slice(0, 2).join(' | ')}` }, 200);
     }
 
     // ── Gemini (fallback for chat) ────────────────────────────────────────────

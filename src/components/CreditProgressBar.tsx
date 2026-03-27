@@ -15,7 +15,7 @@ const TIER_CAPS: Record<string, number> = {
   business:  5_000,
 };
 
-const HIDDEN_PATHS = ['/', '/auth', '/descargar', '/product-backlog', '/reset-password'];
+const HIDDEN_PATHS = ['/', '/auth', '/descargar', '/product-backlog', '/reset-password', '/chat', '/formarketing'];
 
 export function CreditProgressBar() {
   const location = useLocation();

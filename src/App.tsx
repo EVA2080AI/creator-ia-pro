@@ -14,7 +14,7 @@ import { CreditProgressBar } from "@/components/CreditProgressBar";
 // Global ambient glassmorphism background — excluded on Studio/Canvas
 function GlobalAmbient() {
   const loc = useLocation();
-  const isCanvas = loc.pathname.startsWith("/formarketing") || loc.pathname === "/canvas";
+  const isCanvas = loc.pathname.startsWith("/formarketing") || loc.pathname === "/canvas" || loc.pathname === "/chat";
   if (isCanvas) return null;
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
