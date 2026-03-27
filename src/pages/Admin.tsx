@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -409,11 +408,11 @@ const Admin = () => {
   // No automatic redirect — Admin handles its own auth states
   const { user, loading: authLoading, signOut } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
-  const navigate = useNavigate();
 
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [search, setSearch] = useState("");
   const [loadingUsers, setLoadingUsers] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"users" | "overview" | "settings">("users");
   const [creditModalUser, setCreditModalUser] = useState<AdminUser | null>(null);
@@ -425,9 +424,13 @@ const Admin = () => {
 
   const fetchUsers = useCallback(async () => {
     setLoadingUsers(true);
+    setLoadError(null);
     const { data, error } = await supabase.rpc("admin_list_users");
-    if (error) toast.error("Error cargando usuarios");
-    else setUsers((data as AdminUser[]) || []);
+    if (error) {
+      setLoadError(error.message || "No se pudo cargar la lista de usuarios.");
+    } else {
+      setUsers((data as AdminUser[]) || []);
+    }
     setLoadingUsers(false);
   }, []);
 
@@ -536,123 +539,151 @@ const Admin = () => {
     <div className="min-h-screen bg-[#050506] text-white">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      {/* Credit modal */}
       {creditModalUser && (
         <CreditModal
           user={creditModalUser}
           onClose={() => setCreditModalUser(null)}
-          onDone={() => { fetchUsers(); }}
+          onDone={fetchUsers}
         />
       )}
 
-      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
-        {/* Page header */}
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#A855F7]/10">
-            <Shield className="h-4.5 w-4.5 text-[#A855F7]" />
+      <div className="mx-auto max-w-6xl px-4 pt-8 pb-20 sm:px-6 space-y-6">
+
+        {/* ── Header ── */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#A855F7]/10 border border-[#A855F7]/20">
+              <Shield className="h-5 w-5 text-[#A855F7]" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-white tracking-tight">Panel Admin</h1>
+              <p className="text-xs text-white/30 mt-0.5">{user?.email}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">Panel Admin</h1>
-            <p className="text-xs text-white/35">Creator IA Pro · Control total</p>
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:flex items-center gap-1.5 rounded-full bg-green-500/10 border border-green-500/20 px-3 py-1 text-[11px] font-semibold text-green-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+              Live
+            </span>
           </div>
         </div>
 
-        {/* Stats row */}
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {/* ── Stats ── */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: "Usuarios", value: users.length, icon: Users, color: "#A855F7" },
-            { label: "Pagos activos", value: paidUsers, icon: TrendingUp, color: "#4ADE80" },
+            { label: "Planes pagos", value: paidUsers, icon: TrendingUp, color: "#4ADE80" },
             { label: "Créditos totales", value: totalCredits.toLocaleString(), icon: Coins, color: "#F59E0B" },
-            { label: "Rutas activas", value: routes.length, icon: LayoutDashboard, color: "#60A5FA" },
+            { label: "Rutas", value: routes.length, icon: LayoutDashboard, color: "#60A5FA" },
           ].map((s) => {
             const Icon = s.icon;
             return (
-              <div key={s.label} className="flex items-center gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" style={{ background: s.color + "15" }}>
+              <div key={s.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 flex items-center gap-3">
+                <div className="h-9 w-9 shrink-0 rounded-xl flex items-center justify-center" style={{ background: s.color + "18" }}>
                   <Icon className="h-4 w-4" style={{ color: s.color }} />
                 </div>
-                <div className="min-w-0">
-                  <p className="font-mono text-lg font-bold text-white leading-none">{s.value}</p>
-                  <p className="text-[10px] text-white/35 mt-0.5">{s.label}</p>
+                <div>
+                  <p className="font-mono text-xl font-bold text-white leading-none">{s.value}</p>
+                  <p className="text-[10px] text-white/35 mt-0.5 leading-none">{s.label}</p>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Tier breakdown */}
-        <div className="mb-6 flex flex-wrap gap-2">
-          {Object.entries(TIERS).map(([key, cfg]) => {
-            const count = tierCounts[key] || 0;
-            if (!count) return null;
-            const Icon = cfg.icon;
-            return (
-              <div key={key} className="flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium"
-                style={{ borderColor: cfg.color + "30", color: cfg.color, background: cfg.color + "0A" }}>
-                <Icon className="h-3 w-3" />
-                {cfg.label} · {count}
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Tabs */}
-        <div className="mb-6 flex gap-1 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1">
-          {[
-            { key: "users" as const,    icon: Users,          label: "Usuarios" },
+        {/* ── Tabs ── */}
+        <div className="flex gap-1 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1 w-fit">
+          {([
+            { key: "users" as const,    icon: Users,           label: "Usuarios" },
             { key: "overview" as const, icon: LayoutDashboard, label: "Sistema" },
             { key: "settings" as const, icon: Settings,        label: "Config" },
-          ].map((tab) => {
+          ] as const).map((tab) => {
             const Icon = tab.icon;
-            const isActive = activeTab === tab.key;
+            const active = activeTab === tab.key;
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium transition-all"
-                style={{
-                  background: isActive ? "#A855F7" : "transparent",
-                  color: isActive ? "#fff" : "rgba(255,255,255,0.4)",
-                }}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
+                  active
+                    ? "bg-[#A855F7] text-white shadow-lg shadow-[#A855F7]/20"
+                    : "text-white/40 hover:text-white/70"
+                }`}
               >
                 <Icon className="h-4 w-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                {tab.label}
               </button>
             );
           })}
         </div>
-      </div>
 
-      <main className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
         {/* ── Users tab ── */}
         {activeTab === "users" && (
-          <div className="space-y-4">
-            {/* Search bar */}
-            <div className="flex items-center gap-2">
+          <div className="space-y-3">
+
+            {/* Tier pills */}
+            {users.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(TIERS).map(([key, cfg]) => {
+                  const count = tierCounts[key] || 0;
+                  if (!count) return null;
+                  const Icon = cfg.icon;
+                  return (
+                    <div
+                      key={key}
+                      className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+                      style={{ borderColor: cfg.color + "35", color: cfg.color, background: cfg.color + "0C" }}
+                    >
+                      <Icon className="h-3 w-3" />
+                      {cfg.label} · {count}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Search + refresh */}
+            <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25" />
+                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25 pointer-events-none" />
                 <input
                   placeholder="Buscar por email o nombre…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.07] bg-white/[0.03] py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/25 outline-none focus:border-white/15 transition-colors"
+                  className="w-full rounded-xl border border-white/[0.07] bg-white/[0.03] py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/25 outline-none focus:border-[#A855F7]/40 transition-colors"
                 />
               </div>
               <button
                 onClick={fetchUsers}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03] text-white/40 hover:text-white transition-colors"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03] text-white/40 hover:text-white hover:bg-white/[0.06] transition-all"
+                title="Recargar"
               >
                 <RefreshCw className={`h-4 w-4 ${loadingUsers ? "animate-spin" : ""}`} />
               </button>
             </div>
 
-            {/* User cards */}
+            {/* States */}
             {loadingUsers ? (
-              <div className="flex justify-center py-16">
-                <Loader2 className="h-6 w-6 animate-spin text-white/30" />
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <Loader2 className="h-6 w-6 animate-spin text-[#A855F7]" />
+                <p className="text-sm text-white/30">Cargando usuarios…</p>
+              </div>
+            ) : loadError ? (
+              <div className="rounded-2xl border border-rose-500/20 bg-rose-500/[0.06] p-6 text-center space-y-3">
+                <X className="h-6 w-6 text-rose-400 mx-auto" />
+                <p className="text-sm font-semibold text-rose-400">Error al cargar usuarios</p>
+                <p className="text-xs text-white/35 font-mono">{loadError}</p>
+                <button
+                  onClick={fetchUsers}
+                  className="inline-flex items-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/20 px-4 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/15 transition-colors"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" /> Reintentar
+                </button>
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="py-16 text-center text-sm text-white/30">Sin resultados</div>
+              <div className="py-16 text-center text-sm text-white/30">
+                {search ? "Sin resultados para esta búsqueda" : "No hay usuarios registrados"}
+              </div>
             ) : (
               <div className="space-y-2">
                 {filteredUsers.map((u) => {
@@ -660,111 +691,132 @@ const Admin = () => {
                   const TierIcon = tier.icon;
                   const isExpanded = expandedUser === u.user_id;
                   const isBusy = (key: string) => actionLoading === key;
+                  const initials = (u.display_name || u.email || "?")[0].toUpperCase();
 
                   return (
-                    <div key={u.user_id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden">
-                      {/* Row */}
-                      <div className="flex items-center gap-3 p-4">
+                    <div key={u.user_id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden transition-all">
+
+                      {/* Card row */}
+                      <div
+                        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-white/[0.01] transition-colors"
+                        onClick={() => setExpandedUser(isExpanded ? null : u.user_id)}
+                      >
                         {/* Avatar */}
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-bold" style={{ background: tier.color + "20", color: tier.color }}>
-                          {(u.display_name || u.email)?.[0]?.toUpperCase() || "?"}
+                        <div
+                          className="h-10 w-10 shrink-0 rounded-xl flex items-center justify-center text-sm font-bold"
+                          style={{ background: tier.color + "20", color: tier.color }}
+                        >
+                          {initials}
                         </div>
 
                         {/* Identity */}
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="truncate text-sm font-medium text-white">{u.display_name || u.email}</span>
-                            <span className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
-                              style={{ background: tier.color + "15", color: tier.color }}>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-semibold text-white truncate">
+                              {u.display_name || u.email}
+                            </span>
+                            <span
+                              className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase shrink-0"
+                              style={{ background: tier.color + "18", color: tier.color }}
+                            >
                               <TierIcon className="h-2.5 w-2.5" />
                               {tier.label}
                             </span>
                           </div>
-                          <p className="truncate text-xs text-white/35 font-mono">{u.email}</p>
+                          {u.display_name && (
+                            <p className="text-xs text-white/35 font-mono truncate mt-0.5">{u.email}</p>
+                          )}
                         </div>
 
-                        {/* Credits badge */}
-                        <div className="hidden sm:flex items-center gap-1.5 rounded-lg bg-white/[0.04] px-3 py-1.5">
+                        {/* Credits */}
+                        <div
+                          className="hidden sm:flex items-center gap-1.5 rounded-lg px-3 py-1.5 bg-amber-400/[0.07] border border-amber-400/10 shrink-0"
+                          onClick={(e) => { e.stopPropagation(); setCreditModalUser(u); }}
+                          title="Gestionar créditos"
+                        >
                           <Coins className="h-3.5 w-3.5 text-amber-400" />
                           <span className="font-mono text-sm font-bold text-white">{u.credits_balance.toLocaleString()}</span>
                         </div>
 
-                        {/* Actions */}
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => setCreditModalUser(u)}
-                            className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors"
-                            title="Gestionar créditos"
-                          >
-                            <Coins className="h-3.5 w-3.5" />
-                          </button>
-                          <button
-                            onClick={() => setExpandedUser(isExpanded ? null : u.user_id)}
-                            className="flex h-8 w-8 items-center justify-center rounded-xl text-white/30 hover:text-white hover:bg-white/[0.05] transition-colors"
-                          >
-                            {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                          </button>
+                        {/* Expand icon */}
+                        <div className="text-white/25">
+                          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                         </div>
                       </div>
 
                       {/* Expanded panel */}
                       {isExpanded && (
-                        <div className="border-t border-white/[0.05] bg-white/[0.01] p-4 space-y-4">
-                          {/* Meta */}
-                          <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs">
-                            <span className="text-white/35">Registro</span>
-                            <span className="text-white/70">{new Date(u.created_at).toLocaleDateString()}</span>
-                            <span className="text-white/35">Último login</span>
-                            <span className="text-white/70">{u.last_sign_in ? new Date(u.last_sign_in).toLocaleDateString() : "—"}</span>
-                            <span className="text-white/35">ID</span>
-                            <span className="text-white/40 font-mono truncate">{u.user_id}</span>
+                        <div className="border-t border-white/[0.05] bg-black/20 p-4 space-y-5">
+
+                          {/* Meta info */}
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs">
+                            <div>
+                              <p className="text-white/30 mb-0.5">Registro</p>
+                              <p className="text-white/70">{new Date(u.created_at).toLocaleDateString("es-CO")}</p>
+                            </div>
+                            <div>
+                              <p className="text-white/30 mb-0.5">Último acceso</p>
+                              <p className="text-white/70">{u.last_sign_in ? new Date(u.last_sign_in).toLocaleDateString("es-CO") : "—"}</p>
+                            </div>
+                            <div className="col-span-2 sm:col-span-1">
+                              <p className="text-white/30 mb-0.5">Créditos</p>
+                              <button
+                                onClick={() => setCreditModalUser(u)}
+                                className="flex items-center gap-1 text-amber-400 font-semibold hover:text-amber-300 transition-colors"
+                              >
+                                <Coins className="h-3 w-3" />
+                                {u.credits_balance.toLocaleString()} · Gestionar
+                              </button>
+                            </div>
+                            <div className="col-span-2">
+                              <p className="text-white/30 mb-0.5">User ID</p>
+                              <p className="text-white/40 font-mono text-[10px] break-all select-all">{u.user_id}</p>
+                            </div>
                           </div>
 
-                          {/* Change tier */}
+                          {/* Change plan */}
                           <div>
-                            <p className="mb-2 text-xs text-white/40">Cambiar plan</p>
+                            <p className="text-xs text-white/35 mb-2 font-medium">Cambiar plan</p>
                             <div className="flex flex-wrap gap-1.5">
                               {Object.entries(TIERS).map(([key, cfg]) => {
                                 const Icon = cfg.icon;
-                                const isActive = u.subscription_tier === key;
+                                const active = u.subscription_tier === key;
+                                const busy = isBusy(u.user_id + "-tier");
                                 return (
                                   <button
                                     key={key}
-                                    disabled={isActive || isBusy(u.user_id + "-tier")}
+                                    disabled={active || busy}
                                     onClick={() => handleChangeTier(u.user_id, key)}
-                                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium transition-all disabled:cursor-default"
+                                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all disabled:cursor-default"
                                     style={{
-                                      background: isActive ? cfg.color + "20" : "rgba(255,255,255,0.03)",
-                                      border: `1px solid ${isActive ? cfg.color + "50" : "rgba(255,255,255,0.07)"}`,
-                                      color: isActive ? cfg.color : "rgba(255,255,255,0.45)",
+                                      background: active ? cfg.color + "22" : "rgba(255,255,255,0.04)",
+                                      border: `1px solid ${active ? cfg.color + "55" : "rgba(255,255,255,0.08)"}`,
+                                      color: active ? cfg.color : "rgba(255,255,255,0.45)",
                                     }}
                                   >
-                                    {isBusy(u.user_id + "-tier") ? (
-                                      <Loader2 className="h-3 w-3 animate-spin" />
-                                    ) : (
-                                      <Icon className="h-3 w-3" />
-                                    )}
+                                    {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Icon className="h-3 w-3" />}
                                     {cfg.label}
+                                    {active && <span className="ml-0.5 opacity-60">✓</span>}
                                   </button>
                                 );
                               })}
                             </div>
                           </div>
 
-                          {/* Action buttons */}
-                          <div className="flex flex-wrap gap-2 pt-1">
+                          {/* Actions */}
+                          <div className="flex flex-wrap gap-2 pt-1 border-t border-white/[0.04]">
                             <button
                               disabled={isBusy(u.email + "-reset")}
                               onClick={() => handleResetPassword(u.email)}
-                              className="flex items-center gap-1.5 rounded-xl border border-white/[0.07] bg-white/[0.03] px-3 py-2 text-xs text-white/50 hover:text-white transition-colors disabled:opacity-40"
+                              className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs font-medium text-white/50 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-40"
                             >
                               {isBusy(u.email + "-reset") ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5" />}
-                              Reset password
+                              Enviar reset password
                             </button>
                             <button
                               disabled={isBusy(u.user_id + "-suspend")}
                               onClick={() => handleSuspend(u.user_id, false)}
-                              className="flex items-center gap-1.5 rounded-xl border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+                              className="flex items-center gap-1.5 rounded-xl border border-rose-500/20 bg-rose-500/[0.06] px-3 py-2 text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition-all disabled:opacity-40"
                             >
                               {isBusy(u.user_id + "-suspend") ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Ban className="h-3.5 w-3.5" />}
                               Suspender
@@ -772,10 +824,10 @@ const Admin = () => {
                             <button
                               disabled={isBusy(u.user_id + "-suspend")}
                               onClick={() => handleSuspend(u.user_id, true)}
-                              className="flex items-center gap-1.5 rounded-xl border border-green-500/20 bg-green-500/5 px-3 py-2 text-xs text-green-400 hover:bg-green-500/10 transition-colors disabled:opacity-40"
+                              className="flex items-center gap-1.5 rounded-xl border border-green-500/20 bg-green-500/[0.06] px-3 py-2 text-xs font-medium text-green-400 hover:bg-green-500/10 transition-all disabled:opacity-40"
                             >
                               {isBusy(u.user_id + "-suspend") ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserCheck className="h-3.5 w-3.5" />}
-                              Activar
+                              Activar cuenta
                             </button>
                           </div>
                         </div>
@@ -783,26 +835,26 @@ const Admin = () => {
                     </div>
                   );
                 })}
+
+                <p className="text-xs text-white/20 px-1">
+                  {filteredUsers.length} usuario{filteredUsers.length !== 1 ? "s" : ""}
+                  {search && ` · filtrado de ${users.length}`}
+                </p>
               </div>
             )}
-
-            <p className="text-xs text-white/25">
-              {filteredUsers.length} usuario{filteredUsers.length !== 1 ? "s" : ""}
-              {search && ` · filtrado de ${users.length}`}
-            </p>
           </div>
         )}
 
         {/* ── Overview tab ── */}
         {activeTab === "overview" && (
-          <div className="space-y-8">
+          <div className="space-y-6">
             <div>
-              <h2 className="mb-4 text-sm font-semibold text-white/60 uppercase tracking-widest">Rutas del Frontend</h2>
+              <h2 className="mb-3 text-xs font-bold text-white/40 uppercase tracking-widest">Rutas del Frontend</h2>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {routes.map((r) => (
                   <div key={r} className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
-                    <span className="font-mono text-sm text-white/70">{r}</span>
-                    <span className="flex items-center gap-1 rounded-full bg-green-500/10 px-2.5 py-0.5 text-[10px] font-bold text-green-400">
+                    <span className="font-mono text-sm text-white/60">{r}</span>
+                    <span className="flex items-center gap-1.5 rounded-full bg-green-500/10 border border-green-500/15 px-2.5 py-0.5 text-[10px] font-bold text-green-400">
                       <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
                       live
                     </span>
@@ -812,11 +864,11 @@ const Admin = () => {
             </div>
 
             <div>
-              <h2 className="mb-4 text-sm font-semibold text-white/60 uppercase tracking-widest">Tablas de Base de Datos</h2>
+              <h2 className="mb-3 text-xs font-bold text-white/40 uppercase tracking-widest">Tablas de Base de Datos</h2>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {tables.map((t) => (
                   <div key={t.name} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1.5">
                       <Database className="h-3.5 w-3.5 text-[#A855F7]" />
                       <span className="font-mono text-sm font-semibold text-white">{t.name}</span>
                     </div>
@@ -830,11 +882,10 @@ const Admin = () => {
 
         {/* ── Settings tab ── */}
         {activeTab === "settings" && (
-          <div className="max-w-xl space-y-4">
-            {/* Stripe key */}
+          <div className="max-w-lg space-y-4">
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 space-y-5">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#635BFF]/15">
+                <div className="h-9 w-9 rounded-xl bg-[#635BFF]/15 border border-[#635BFF]/20 flex items-center justify-center">
                   <Settings className="h-4 w-4 text-[#635BFF]" />
                 </div>
                 <div>
@@ -844,14 +895,14 @@ const Admin = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs text-white/50">Stripe Secret Key</label>
+                <label className="block text-xs font-medium text-white/50">Stripe Secret Key</label>
                 <div className="relative">
                   <input
                     type={showStripeKey ? "text" : "password"}
                     value={stripeKey}
                     onChange={(e) => setStripeKey(e.target.value)}
                     placeholder="sk_live_…"
-                    className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] py-2.5 pl-4 pr-10 text-sm text-white placeholder-white/20 outline-none focus:border-white/15 transition-colors"
+                    className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] py-2.5 pl-4 pr-10 text-sm text-white placeholder-white/20 outline-none focus:border-[#635BFF]/50 transition-colors"
                   />
                   <button
                     type="button"
@@ -861,20 +912,19 @@ const Admin = () => {
                     {showStripeKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <p className="text-[11px] text-white/25">Almacenada de forma segura, solo accesible desde backend.</p>
+                <p className="text-[11px] text-white/25">Almacenada cifrada. Nunca expuesta en el cliente.</p>
               </div>
 
               <button
                 onClick={handleSaveStripeKey}
                 disabled={savingSettings || !stripeKey.trim()}
-                className="flex items-center gap-2 rounded-xl bg-[#635BFF]/15 border border-[#635BFF]/30 px-4 py-2.5 text-sm font-semibold text-[#635BFF] hover:bg-[#635BFF]/20 transition-colors disabled:opacity-40"
+                className="flex items-center gap-2 rounded-xl bg-[#635BFF]/12 border border-[#635BFF]/30 px-4 py-2.5 text-sm font-semibold text-[#635BFF] hover:bg-[#635BFF]/18 transition-colors disabled:opacity-40"
               >
                 {savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Guardar clave
               </button>
             </div>
 
-            {/* Platform info */}
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 space-y-3">
               <p className="font-semibold text-white">Plataforma</p>
               {[
@@ -882,17 +932,17 @@ const Admin = () => {
                 ["Rutas activas", routes.length],
                 ["Tablas DB", tables.length],
                 ["Usuarios totales", users.length],
-                ["Planes activos (pagos)", paidUsers],
+                ["Planes pagos", paidUsers],
               ].map(([label, val]) => (
-                <div key={String(label)} className="flex justify-between text-sm">
+                <div key={String(label)} className="flex items-center justify-between text-sm py-0.5">
                   <span className="text-white/40">{label}</span>
-                  <span className="font-medium text-white">{String(val)}</span>
+                  <span className="font-semibold text-white">{String(val)}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };
