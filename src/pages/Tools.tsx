@@ -142,17 +142,6 @@ function ImageWithFallback({ src, onRetry }: { src: string; onRetry: () => void 
 const Tools = () => {
   const { user, signOut, loading: authLoading } = useAuth("/auth");
   const { profile, refreshProfile } = useProfile(user?.id);
-
-  if (authLoading) {
-    return (
-      <div className="h-screen w-screen flex items-center justify-center bg-[#050506]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-aether-purple animate-spin" />
-          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Sincronizando Nexus...</p>
-        </div>
-      </div>
-    );
-  }
   const navigate = useNavigate();
   const { appId } = useParams();
 
@@ -172,6 +161,17 @@ const Tools = () => {
   const [selectedTextModel,  setSelectedTextModel]  = useState("deepseek-chat");
   const fileRef    = useRef<HTMLInputElement>(null);
   const resultRef  = useRef<HTMLDivElement>(null);
+
+  if (authLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-[#050506]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-aether-purple animate-spin" />
+          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Sincronizando Nexus...</p>
+        </div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (appId && appIdToToolId[appId]) {
