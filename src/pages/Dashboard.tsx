@@ -122,12 +122,12 @@ const Dashboard = () => {
   ];
 
   const aiApps = [
-    { icon: Megaphone, label: "Studio Canvas", desc: "Lienzo creativo", path: "/formarketing" },
-    { icon: MessageSquare, label: "Crear texto", desc: "Copy marketing", path: "/tools" },
-    { icon: PenTool, label: "Diseñar logo", desc: "Identidad de marca", path: "/tools" },
-    { icon: Hash, label: "Redes sociales", desc: "Contenido social", path: "/tools" },
-    { icon: FileText, label: "Artículo SEO", desc: "Blog optimizado", path: "/tools" },
-    { icon: Type, label: "Crear anuncio", desc: "Ads Meta & Google", path: "/tools" },
+    { icon: Megaphone, label: "Studio Canvas", desc: "Lienzo creativo",   path: "/formarketing"    },
+    { icon: MessageSquare, label: "Crear texto",   desc: "Copy marketing",  path: "/apps/copywriter" },
+    { icon: PenTool,    label: "Diseñar logo",  desc: "Identidad de marca", path: "/apps/logo"       },
+    { icon: Hash,       label: "Redes sociales",desc: "Contenido social",   path: "/apps/social"     },
+    { icon: FileText,   label: "Artículo SEO",  desc: "Blog optimizado",    path: "/apps/blog"       },
+    { icon: Type,       label: "Crear anuncio", desc: "Ads Meta & Google",  path: "/apps/ads"        },
   ];
 
   if (authLoading) {

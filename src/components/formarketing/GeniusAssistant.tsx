@@ -384,14 +384,9 @@ export const GeniusAssistant = () => {
         'flex-col bg-[#0a0a0b] border-r border-white/[0.06] transition-all duration-200 overflow-hidden shrink-0',
         sidebarOpen ? 'flex w-[260px]' : 'hidden',
       )}>
-        {/* Logo + New chat */}
-        <div className="flex items-center justify-between px-4 h-14 border-b border-white/[0.06] shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center">
-              <Sparkles className="h-3.5 w-3.5 text-black" />
-            </div>
-            <span className="text-[13px] font-bold text-white tracking-tight">Aether Chat</span>
-          </div>
+        {/* Sidebar header */}
+        <div className="flex items-center justify-between px-4 h-12 border-b border-white/[0.06] shrink-0">
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/25">Conversaciones</span>
           <button onClick={newConv}
             className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all" title="Nueva conversación">
             <SquarePen className="h-4 w-4" />

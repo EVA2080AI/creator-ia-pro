@@ -261,7 +261,7 @@ export default function ShareScreen() {
 
         {/* PANTALLA COMPLETA RECIBIENDO STREAM */}
         {mode === "viewer" && isReceiving && (
-          <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center animate-in fade-in duration-500">
+          <div className="fixed inset-0 z-[110] bg-black flex flex-col items-center justify-center animate-in fade-in duration-500">
              <div className="absolute top-4 right-4 z-50 flex items-center gap-3 opacity-20 hover:opacity-100 transition-opacity p-2 bg-[#020203]/60 backdrop-blur-md rounded-2xl border border-white/10">
                 <span className="text-[10px] font-black font-mono text-[#d4ff00] px-2">{stats}</span>
                 <Button variant="ghost" size="icon" onClick={() => videoRef.current?.requestFullscreen()} className="rounded-xl hover:bg-white/5"><Maximize2 className="h-4 w-4" /></Button>

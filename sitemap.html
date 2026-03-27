@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sitemap — Creator IA Pro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #09090b;
+      color: #e4e4e7;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      padding: 40px 24px 80px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #71717a;
+      font-size: 13px;
+      margin-bottom: 52px;
+    }
+
+    /* ── Tree container ── */
+    .tree {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    /* ── ROOT node ── */
+    .root {
+      background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+      color: #fff;
+      border-radius: 14px;
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      box-shadow: 0 0 32px #a855f740;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* vertical line from root down */
+    .root-line {
+      width: 2px;
+      height: 40px;
+      background: #3f3f46;
+      margin: 0 auto;
+    }
+
+    /* ── Horizontal connector bar ── */
+    .h-bar-wrap {
+      width: 100%;
+      max-width: 1200px;
+      position: relative;
+      height: 2px;
+      background: #3f3f46;
+      margin: 0 auto;
+    }
+
+    /* ── Columns row ── */
+    .columns {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Column ── */
+    .col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      padding: 0 8px;
+    }
+
+    /* vertical line from h-bar to section header */
+    .v-line {
+      width: 2px;
+      height: 32px;
+      margin: 0 auto;
+    }
+
+    /* ── Section headers ── */
+    .section-header {
+      border-radius: 10px;
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      white-space: nowrap;
+      margin-bottom: 12px;
+    }
+
+    .public    .section-header { background: #1a2e1a; color: #4ade80; border: 1px solid #166534; }
+    .user-auth .section-header { background: #1e1b2e; color: #a78bfa; border: 1px solid #5b21b6; }
+    .admin-col .section-header { background: #2d1515; color: #f87171; border: 1px solid #991b1b; }
+    .flow-col  .section-header { background: #1a1f2e; color: #60a5fa; border: 1px solid #1d4ed8; }
+    .util-col  .section-header { background: #1e1e1e; color: #a1a1aa; border: 1px solid #3f3f46; }
+
+    .public    .v-line { background: #166534; }
+    .user-auth .v-line { background: #5b21b6; }
+    .admin-col .v-line { background: #991b1b; }
+    .flow-col  .v-line { background: #1d4ed8; }
+    .util-col  .v-line { background: #3f3f46; }
+
+    /* ── Page card ── */
+    .page-card {
+      width: 100%;
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 8px;
+      border: 1px solid;
+      position: relative;
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: default;
+    }
+
+    .page-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    .page-card .url {
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'Fira Code', 'Cascadia Code', monospace;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .page-card .name {
+      font-size: 12px;
+      font-weight: 600;
+      color: #e4e4e7;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .page-card .desc {
+      font-size: 10px;
+      color: #71717a;
+      line-height: 1.4;
+    }
+
+    /* Badge */
+    .badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+
+    /* Public cards */
+    .public .page-card {
+      background: #0d1f0d;
+      border-color: #166534;
+    }
+    .public .page-card .url { color: #4ade80; }
+    .public .badge { background: #166534; color: #4ade80; }
+
+    /* User auth cards */
+    .user-auth .page-card {
+      background: #12102a;
+      border-color: #3730a3;
+    }
+    .user-auth .page-card .url { color: #a78bfa; }
+    .user-auth .badge { background: #3730a3; color: #a78bfa; }
+
+    /* Admin cards */
+    .admin-col .page-card {
+      background: #1c0d0d;
+      border-color: #7f1d1d;
+    }
+    .admin-col .page-card .url { color: #f87171; }
+    .admin-col .badge { background: #7f1d1d; color: #f87171; }
+
+    /* Flow cards */
+    .flow-col .page-card {
+      background: #0d1327;
+      border-color: #1e3a8a;
+    }
+    .flow-col .page-card .url { color: #60a5fa; }
+    .flow-col .badge { background: #1e3a8a; color: #60a5fa; }
+
+    /* Util cards */
+    .util-col .page-card {
+      background: #141414;
+      border-color: #3f3f46;
+    }
+    .util-col .page-card .url { color: #a1a1aa; }
+    .util-col .badge { background: #27272a; color: #71717a; }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 52px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: #71717a;
+    }
+
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* ── Sub-section label ── */
+    .sub-label {
+      font-size: 9px;
+      color: #52525b;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 4px 0 6px;
+      width: 100%;
+      text-align: center;
+      padding-top: 4px;
+      border-top: 1px solid #27272a;
+    }
+
+    @media (max-width: 900px) {
+      .columns { grid-template-columns: repeat(2, 1fr); }
+      .h-bar-wrap { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Sitemap — Creator IA Pro</h1>
+  <p class="subtitle">creator-ia.com · v8.0 Aether · 20 rutas · 2026</p>
+
+  <div class="tree">
+
+    <!-- ROOT -->
+    <div class="root">creator-ia.com</div>
+    <div class="root-line"></div>
+    <div class="h-bar-wrap"></div>
+
+    <!-- COLUMNS -->
+    <div class="columns">
+
+      <!-- ── PÚBLICAS ── -->
+      <div class="col public">
+        <div class="v-line"></div>
+        <div class="section-header">Público</div>
+
+        <div class="page-card">
+          <span class="url">/</span>
+          <span class="name">Landing</span>
+          <span class="desc">Hero, galería de outputs, pricing callouts, testimonios</span>
+          <span class="badge">no auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/auth</span>
+          <span class="name">Login / Signup</span>
+          <span class="desc">Email + password, OAuth Google &amp; Apple, password reset</span>
+          <span class="badge">no auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/pricing</span>
+          <span class="name">Planes y Precios</span>
+          <span class="desc">Starter $12 · Creator $29 · Agency $79, credit packs, FAQ</span>
+          <span class="badge">no auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/herramienta/:slug</span>
+          <span class="name">Tool Landing</span>
+          <span class="desc">Página marketing individual por herramienta con demo + try-it</span>
+          <span class="badge">no auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/descargar</span>
+          <span class="name">Descargar</span>
+          <span class="desc">Web app · sin descarga nativa · compatibilidad dispositivos</span>
+          <span class="badge">no auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/product-backlog</span>
+          <span class="name">Product Backlog</span>
+          <span class="desc">Backlog público con features, sprints, estado y risk matrix</span>
+          <span class="badge">no auth</span>
+        </div>
+      </div>
+
+      <!-- ── USUARIO AUTENTICADO ── -->
+      <div class="col user-auth">
+        <div class="v-line"></div>
+        <div class="section-header">Usuario Auth</div>
+
+        <div class="page-card">
+          <span class="url">/dashboard</span>
+          <span class="name">Dashboard</span>
+          <span class="desc">Créditos, plan, spaces, assets, gráfico 7 días, quick tools</span>
+          <span class="badge">🔒 auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/chat</span>
+          <span class="name">Chat IA</span>
+          <span class="desc">Asistente IA fullscreen estilo Lovable — canvas de código a la derecha</span>
+          <span class="badge">🔒 auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/tools · /apps/:id</span>
+          <span class="name">Tools</span>
+          <span class="desc">13 herramientas IA: generar imagen, upscale, BG removal, texto…</span>
+          <span class="badge">🔒 auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/spaces</span>
+          <span class="name">Mis Espacios</span>
+          <span class="desc">CRUD de proyectos creativos con búsqueda y filtros</span>
+          <span class="badge">🔒 auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/assets</span>
+          <span class="name">Mi Biblioteca</span>
+          <span class="desc">Assets con favoritos, descarga, import por URL, filtro por space</span>
+          <span class="badge">🔒 auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/profile</span>
+          <span class="name">Perfil</span>
+          <span class="desc">Avatar, nombre, créditos, plan, historial transacciones, sign-out</span>
+          <span class="badge">🔒 auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/sharescreen</span>
+          <span class="name">ShareScreen</span>
+          <span class="desc">Screen sharing P2P con PeerJS, QR code, host/viewer (1 crédito)</span>
+          <span class="badge">🔒 auth</span>
+        </div>
+      </div>
+
+      <!-- ── FLOW CREATOR ── -->
+      <div class="col flow-col">
+        <div class="v-line"></div>
+        <div class="section-header">Flow Creator</div>
+
+        <div class="page-card">
+          <span class="url">/hub</span>
+          <span class="name">Hub / Plantillas</span>
+          <span class="desc">20+ plantillas de campaña (Ads/Landing/Social/SEO/Email/UI) 1-click</span>
+          <span class="badge">🔒 auth</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/formarketing</span>
+          <span class="name">Flow Creator Canvas</span>
+          <span class="desc">Canvas infinito con nodos para orquestar campañas IA (HU25-34)</span>
+          <span class="badge">🔒 auth</span>
+        </div>
+
+        <div class="sub-label">Nodos disponibles</div>
+
+        <div class="page-card">
+          <span class="url">node: character</span>
+          <span class="name">Character Breakdown</span>
+          <span class="desc">Definición de personaje / audiencia objetivo</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">node: model</span>
+          <span class="name">Modelo IA</span>
+          <span class="desc">Selector de modelo para generación en el canvas</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">node: video</span>
+          <span class="name">Video</span>
+          <span class="desc">Nodo de generación / edición de video</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">node: layout</span>
+          <span class="name">Layout</span>
+          <span class="desc">Estructura visual de la pieza creativa</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">node: campaign</span>
+          <span name="name">Campaign Manager</span>
+          <span class="desc">Orquestador central que conecta todos los nodos</span>
+        </div>
+      </div>
+
+      <!-- ── ADMIN ── -->
+      <div class="col admin-col">
+        <div class="v-line"></div>
+        <div class="section-header">Admin Only</div>
+
+        <div class="page-card">
+          <span class="url">/admin</span>
+          <span class="name">Admin Panel</span>
+          <span class="desc">Usuarios, créditos, tiers, historial de transacciones, ban/unban</span>
+          <span class="badge">🛡 admin</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/system-status</span>
+          <span class="name">Estado del Sistema</span>
+          <span class="desc">Salud: latencia, uptime, feature matrix, costo breakdown, métricas</span>
+          <span class="badge">🛡 admin</span>
+        </div>
+      </div>
+
+      <!-- ── UTILIDADES ── -->
+      <div class="col util-col">
+        <div class="v-line"></div>
+        <div class="section-header">Utilidades</div>
+
+        <div class="page-card">
+          <span class="url">/reset-password</span>
+          <span class="name">Reset Password</span>
+          <span class="desc">Nueva contraseña vía recovery link de email</span>
+          <span class="badge">token</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">/canvas</span>
+          <span class="name">Canvas (redirect)</span>
+          <span class="desc">Redirige automáticamente → /formarketing preservando query params</span>
+          <span class="badge">redirect</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">*</span>
+          <span class="name">404 Not Found</span>
+          <span class="desc">Error page futurista con botón de regreso a home</span>
+          <span class="badge">error</span>
+        </div>
+
+        <div class="sub-label">Infraestructura</div>
+
+        <div class="page-card">
+          <span class="url">Edge: ai-proxy</span>
+          <span class="name">AI Proxy</span>
+          <span class="desc">Supabase Edge Function: OpenRouter (chat + imagen) + Gemini fallback</span>
+          <span class="badge">deno</span>
+        </div>
+
+        <div class="sub-label">Globales</div>
+
+        <div class="page-card">
+          <span class="url">CreditProgressBar</span>
+          <span class="name">Credit Bar</span>
+          <span class="desc">Barra fija top-16, oculta en /, /auth, /chat, /formarketing</span>
+          <span class="badge">global</span>
+        </div>
+
+        <div class="page-card">
+          <span class="url">AuthWatcher</span>
+          <span class="name">Auth Watcher</span>
+          <span class="desc">Detecta SIGNED_OUT y redirige a /auth si ruta protegida</span>
+          <span class="badge">global</span>
+        </div>
+      </div>
+
+    </div><!-- /columns -->
+  </div><!-- /tree -->
+
+  <!-- LEGEND -->
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#4ade80"></div>
+      <span>Público (sin auth)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#a78bfa"></div>
+      <span>Usuario autenticado</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#60a5fa"></div>
+      <span>Flow Creator (HU25-34)</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#f87171"></div>
+      <span>Admin only</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#71717a"></div>
+      <span>Utilidades / Infra</span>
+    </div>
+  </div>
+
+</body>
+</html>
