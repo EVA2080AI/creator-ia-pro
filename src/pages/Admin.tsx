@@ -242,6 +242,79 @@ function CreditModal({
   );
 }
 
+// ─── Admin Login Gate ─────────────────────────────────────────────────────────
+// Shown when no session is active. Embeds a minimal email+password login
+// scoped to this page — no redirect away from /admin.
+
+function AdminLoginGate() {
+  const navigate = useNavigate();
+  const [email, setEmail]       = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState<string | null>(null);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (err) setError(err.message);
+    // On success, onAuthStateChange in useAuth() will update user → page re-renders
+  };
+
+  return (
+    <div className="min-h-screen bg-[#050506] flex items-center justify-center p-6">
+      <div className="w-full max-w-sm rounded-3xl border border-white/[0.06] bg-white/[0.02] p-10 space-y-6">
+        <div className="text-center space-y-2">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#A855F7]/10 border border-[#A855F7]/20 mx-auto">
+            <Shield className="h-7 w-7 text-[#A855F7]" />
+          </div>
+          <h1 className="text-xl font-bold text-white tracking-tight">Acceso Admin</h1>
+          <p className="text-xs text-white/30">Inicia sesión con tu cuenta de administrador</p>
+        </div>
+
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="email"
+            required
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#A855F7]/40 transition-colors"
+          />
+          <input
+            type="password"
+            required
+            placeholder="Contraseña"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#A855F7]/40 transition-colors"
+          />
+          {error && (
+            <p className="text-xs text-rose-400 text-center">{error}</p>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#A855F7] text-white font-bold text-sm hover:bg-[#9333EA] transition-all active:scale-95 disabled:opacity-50"
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+            Entrar al panel
+          </button>
+        </form>
+
+        <button
+          onClick={() => navigate("/")}
+          className="w-full text-xs text-white/20 hover:text-white/40 transition-colors text-center"
+        >
+          ← Volver al inicio
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Admin Bootstrap ──────────────────────────────────────────────────────────
 // Shown when the logged-in user has no admin role.
 // Calls bootstrap_admin() RPC which only succeeds when 0 admins exist.
@@ -306,7 +379,8 @@ function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () => void 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 const Admin = () => {
-  const { user, loading: authLoading, signOut } = useAuth("/auth");
+  // No automatic redirect — Admin handles its own auth states
+  const { user, loading: authLoading, signOut } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
   const navigate = useNavigate();
 
@@ -421,7 +495,12 @@ const Admin = () => {
     );
   }
 
-  // ── Bootstrap screen: user is logged in but has no admin role ──────────────
+  // ── Not logged in ──────────────────────────────────────────────────────────
+  if (!user) {
+    return <AdminLoginGate />;
+  }
+
+  // ── Logged in but no admin role → bootstrap or access denied ──────────────
   if (!isAdmin) {
     return <AdminBootstrap user={user} onSuccess={() => window.location.reload()} />;
   }
