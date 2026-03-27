@@ -122,7 +122,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                value={search}
                onChange={(e) => setSearch(e.target.value)}
                placeholder="Buscar nodos..."
-               className="pl-12 bg-white/[0.03] border-white/10 focus:border-aether-purple/40 rounded-2xl h-12 text-xs font-medium text-white placeholder:text-white/10 transition-all"
+               className="pl-12 bg-sidebar-accent/50 border-sidebar-border focus:border-sidebar-primary/40 rounded-2xl h-12 text-xs font-medium text-white placeholder:text-white/10 transition-all"
             />
           </div>
 
@@ -155,10 +155,10 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                   draggable
                   onDragStart={(e) => onDragStart(e, item.type, item.label)}
                   onClick={() => onAddNode(item.type, item.label)}
-                  className="flex w-full gap-4 rounded-3xl border border-white/[0.03] bg-white/[0.01] items-center p-4 cursor-pointer hover:bg-white/[0.05] hover:border-white/10 hover:scale-[1.02] transition-all group/item overflow-hidden relative"
+                  className="flex w-full gap-4 rounded-3xl border border-sidebar-border bg-sidebar-accent/20 items-center p-4 cursor-pointer hover:bg-sidebar-accent/50 hover:border-white/10 hover:scale-[1.02] transition-all group/item overflow-hidden relative"
                 >
-                    <div className={`p-2.5 rounded-2xl flex items-center justify-center shrink-0 bg-white/5 border border-white/5 group-hover/item:border-white/20 transition-all shadow-inner`}>
-                    <item.icon className={`h-5 w-5 text-white/40 group-hover/item:text-white transition-colors`} />
+                    <div className={`p-2.5 rounded-2xl flex items-center justify-center shrink-0 bg-sidebar-accent/50 border border-white/5 group-hover/item:border-white/20 transition-all shadow-inner`}>
+                    <item.icon className={`h-5 w-5 text-sidebar-foreground group-hover/item:text-white transition-colors`} />
                   </div>
                   <div className="flex flex-col text-left">
                     <span className="text-xs font-bold text-white/90 group-hover/item:text-white transition-colors font-display tracking-tight uppercase">{item.label}</span>

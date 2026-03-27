@@ -10,7 +10,7 @@ import {
   Wand2, ZoomIn, ImagePlus, RotateCcw, Sparkles,
   Upload, Loader2, Download, Coins, MessageSquare,
   PenTool, Hash, Image, FileText, Megaphone, Copy, X, Zap,
-  ClipboardCopy, BookmarkPlus, CheckCircle2, Lock,
+  ClipboardCopy, BookmarkPlus, CheckCircle2, Lock, Palette, ShoppingBag, User
 } from "lucide-react";
 import { ModelSelector, AVAILABLE_MODELS } from "@/components/ModelSelector";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 type ToolId =
   | "enhance" | "upscale" | "eraser" | "background" | "restore" | "generate"
-  | "logo"
+  | "logo" | "style" | "product"
   | "copywriter" | "social" | "blog" | "ads";
 
 interface Tool {
@@ -42,6 +42,8 @@ const tools: Tool[] = [
   { id: "enhance",    name: "Mejorar imagen",        desc: "Mejora iluminación y detalles automáticamente.",       icon: Wand2,         credits: 2, category: "image", needsUpload: true,  color: "text-aether-purple" },
   { id: "upscale",    name: "Aumentar resolución",   desc: "Escala imágenes hasta 4K sin perder calidad.",         icon: ZoomIn,        credits: 3, category: "image", needsUpload: true,  color: "text-aether-blue" },
   { id: "background", name: "Quitar fondo",          desc: "Extrae el fondo con bordes perfectos.",                icon: ImagePlus,     credits: 1, category: "image", needsUpload: true,  color: "text-emerald-400" },
+  { id: "style",      name: "Transferir estilo",     desc: "Aplica el estilo de una imagen a otra.",               icon: Palette,       credits: 2, category: "image", needsUpload: true,  color: "text-aether-purple" },
+  { id: "product",    name: "Mockup de producto",    desc: "Crea renders profesionales de producto.",              icon: ShoppingBag,   credits: 3, category: "image", needsUpload: true,  color: "text-amber-400" },
   { id: "restore",    name: "Restaurar foto",        desc: "Restaura fotos antiguas o dañadas.",                   icon: RotateCcw,     credits: 3, category: "image", needsUpload: true,  color: "text-amber-400" },
   { id: "eraser",     name: "Borrar objeto",         desc: "Elimina objetos de la imagen. Próximamente.",          icon: X,             credits: 2, category: "image", needsUpload: true,  color: "text-rose-400/40", disabled: true, disabledReason: "Próximamente" },
   // ── Texto ───────────────────────────────────────────────────────────────────
@@ -61,7 +63,16 @@ const ASPECT_RATIOS = [
 ];
 
 const appIdToToolId: Record<string, ToolId> = {
-  copywriter: "copywriter", logo: "logo", social: "social", blog: "blog", ads: "ads",
+  copywriter: "copywriter", 
+  logo: "logo", 
+  social: "social", 
+  blog: "blog", 
+  ads: "ads",
+  enhance: "enhance",
+  "remove-bg": "background",
+  style: "style",
+  upscale: "upscale",
+  product: "product"
 };
 
 function parseMarkdown(text: string): string {
@@ -129,8 +140,19 @@ function ImageWithFallback({ src, onRetry }: { src: string; onRetry: () => void 
 }
 
 const Tools = () => {
-  const { user, signOut } = useAuth("/auth");
+  const { user, signOut, loading: authLoading } = useAuth("/auth");
   const { profile, refreshProfile } = useProfile(user?.id);
+
+  if (authLoading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-[#050506]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-aether-purple animate-spin" />
+          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Sincronizando Nexus...</p>
+        </div>
+      </div>
+    );
+  }
   const navigate = useNavigate();
   const { appId } = useParams();
 
@@ -146,7 +168,7 @@ const Tools = () => {
   const [savedAsset, setSavedAsset]           = useState(false);
   const [textPrompt, setTextPrompt]           = useState("");
   const [aspectRatio, setAspectRatio]         = useState(ASPECT_RATIOS[0]);
-  const [selectedImageModel, setSelectedImageModel] = useState("nano-banana-2");
+  const [selectedImageModel, setSelectedImageModel] = useState("flux-schnell");
   const [selectedTextModel,  setSelectedTextModel]  = useState("deepseek-chat");
   const fileRef    = useRef<HTMLInputElement>(null);
   const resultRef  = useRef<HTMLDivElement>(null);
@@ -370,20 +392,22 @@ const Tools = () => {
         <div className="flex flex-1 overflow-hidden">
 
         {/* ── Left Sidebar ──────────────────────────────────── */}
-        <aside className="hidden md:flex w-60 shrink-0 border-r border-white/[0.05] bg-[#070708] flex-col overflow-hidden">
+        <aside className="hidden md:flex w-64 shrink-0 border-r border-sidebar bg-sidebar flex-col overflow-hidden">
           {/* Category tabs */}
-          <div className="p-3 border-b border-white/[0.05]">
-            <div className="flex bg-white/[0.03] p-1 rounded-xl border border-white/[0.05] gap-1">
+          <div className="p-3 border-b border-sidebar-border">
+            <div className="flex bg-white/[0.03] p-1 rounded-xl border border-white/5 gap-1">
               {categories.map((cat) => (
                 <button
                   key={cat.id}
                   onClick={() => switchCategory(cat.id)}
                   className={cn(
-                    "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all font-display",
-                    category === cat.id ? "bg-white text-black shadow" : "text-white/30 hover:text-white/60"
+                    "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all font-display",
+                    category === cat.id 
+                      ? "bg-white text-black shadow-lg" 
+                      : "text-sidebar-foreground hover:text-white hover:bg-white/[0.03]"
                   )}
                 >
-                  <cat.icon className="h-3 w-3" />
+                  <cat.icon className="h-3.5 w-3.5" />
                   {cat.label}
                 </button>
               ))}
@@ -400,12 +424,12 @@ const Tools = () => {
                   onClick={() => switchTool(tool)}
                   disabled={tool.disabled}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all group",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all group outline-none",
                     tool.disabled
-                      ? "opacity-40 cursor-not-allowed"
+                      ? "opacity-30 cursor-not-allowed"
                       : isActive
-                        ? "bg-white/[0.07] border border-white/[0.08] text-white"
-                        : "text-white/40 hover:text-white/70 hover:bg-white/[0.03]"
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground border border-sidebar-border shadow-inner"
+                        : "text-sidebar-foreground hover:text-sidebar-accent-foreground hover:bg-sidebar-accent/50"
                   )}
                 >
                   <div className={cn(
@@ -428,19 +452,23 @@ const Tools = () => {
             })}
           </nav>
 
-          {/* Credits */}
-          <div className="p-3 border-t border-white/[0.05]">
+          {/* Profile snippet footer (Tailwind UI pattern) */}
+          <div className="mt-auto p-4 border-t border-sidebar-border bg-white/[0.01]">
             <button
-              onClick={() => navigate("/pricing")}
-              className="w-full flex items-center gap-3 bg-white/[0.03] border border-white/[0.05] rounded-xl px-3 py-2.5 hover:bg-white/[0.06] transition-all"
+               onClick={() => navigate("/profile")}
+               className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-white/[0.03] transition-all group"
             >
-              <Coins className="h-4 w-4 text-aether-purple shrink-0" />
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-[12px] font-bold text-white/50 leading-none">
-                  {profile?.credits_balance?.toLocaleString() ?? "0"} créditos
-                </p>
-                <p className="text-[10px] text-white/20 mt-0.5">Recargar →</p>
-              </div>
+               <div className="w-8 h-8 rounded-lg bg-sidebar-accent border border-sidebar-border flex items-center justify-center overflow-hidden shrink-0 group-hover:border-white/20">
+                 {profile?.avatar_url ? (
+                   <img src={profile.avatar_url} alt="User" className="w-full h-full object-cover" />
+                 ) : (
+                   <User className="w-4 h-4 text-sidebar-foreground group-hover:text-white" />
+                 )}
+               </div>
+               <div className="flex-1 min-w-0 text-left">
+                 <p className="text-[12px] font-bold text-white truncate leading-none">{profile?.display_name?.split(' ')[0] || 'Mi Perfil'}</p>
+                 <p className="text-[10px] text-sidebar-foreground truncate mt-1">Ver perfil →</p>
+               </div>
             </button>
           </div>
         </aside>
@@ -456,8 +484,8 @@ const Tools = () => {
                 <currentTool.icon className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-base font-bold text-white tracking-tight">{currentTool.name}</h2>
-                <p className="text-xs text-white/30 mt-0.5">{currentTool.desc}</p>
+                <h2 className="text-base font-bold text-white tracking-tight font-display">{currentTool.name}</h2>
+                <p className="text-[11px] text-white/30 mt-0.5">{currentTool.desc}</p>
               </div>
             </div>
 

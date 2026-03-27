@@ -132,8 +132,11 @@ const Dashboard = () => {
 
   if (authLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#050506]">
-        <div className="w-8 h-8 rounded-full border-t-2 border-aether-purple animate-spin" />
+      <div className="h-screen w-screen flex items-center justify-center bg-[#050506]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-aether-purple animate-spin" />
+          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Accediendo al Nexus...</p>
+        </div>
       </div>
     );
   }
@@ -201,7 +204,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] font-display">Uso de créditos</h3>
-                  <p className="text-[10px] text-white/20 mt-0.5 uppercase tracking-widest font-display">Últimos 7 días</p>
+                  <p className="text-[9px] text-white/20 mt-0.5 uppercase tracking-widest font-display">Últimos 7 días</p>
                 </div>
                 <div className="p-2 rounded-xl bg-white/5">
                   <TrendingUp className="w-4 h-4 text-aether-purple" />
@@ -234,7 +237,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] font-display">Distribución</h3>
-                  <p className="text-[10px] text-white/20 mt-0.5 uppercase tracking-widest font-display">Por tipo</p>
+                  <p className="text-[9px] text-white/20 mt-0.5 uppercase tracking-widest font-display">Por tipo</p>
                 </div>
                 <div className="p-2 rounded-xl bg-white/5">
                   <Box className="w-4 h-4 text-aether-blue" />

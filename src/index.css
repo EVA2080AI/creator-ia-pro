@@ -36,6 +36,16 @@
     --input: 240 5% 8%;
     --ring: 270 100% 64%;
     --radius: 1.5rem;
+
+    /* Sidebar Tokens — Tailwind UI Compatible */
+    --sidebar-background: 240 10% 3%;
+    --sidebar-foreground: 240 5% 65%;
+    --sidebar-primary: 270 100% 64%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 8%;
+    --sidebar-accent-foreground: 240 5% 90%;
+    --sidebar-border: 240 5% 8%;
+    --sidebar-ring: 270 100% 64%;
   }
 }
 

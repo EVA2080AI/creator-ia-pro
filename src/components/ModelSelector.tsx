@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge";
 export interface AIModel {
   id: string;
   name: string;
-  provider: "Google" | "Anthropic" | "DeepSeek" | "OpenSource" | "OpenAI" | "NanoBanana";
+  provider: "Google" | "Anthropic" | "DeepSeek" | "OpenSource" | "OpenRouter";
   tokenCost: number;
   badge?: string;
   description: string;
@@ -28,18 +28,19 @@ export interface AIModel {
 }
 
 export const AVAILABLE_MODELS: AIModel[] = [
-  // ─── TEXTO ───────────────────────────────────────────────────────────────────
-  { id: "deepseek-chat",       name: "DeepSeek V3",          provider: "DeepSeek",    tokenCost: 1,  badge: "Mejor valor",   description: "Rendimiento excepcional al menor costo.",     type: "text" },
-  { id: "gemini-3-flash",      name: "Gemini 2.0 Flash",     provider: "Google",      tokenCost: 1,  description: "Respuestas ultrarrápidas de Google.",               type: "text" },
-  { id: "gemini-3.1-pro-low",  name: "Gemini 2.5 Pro",       provider: "Google",      tokenCost: 1,  badge: "Nuevo",         description: "Inteligencia avanzada de Google.",             type: "text" },
-  { id: "gemini-3.1-pro-high", name: "Gemini 2.5 Pro Max",   provider: "Google",      tokenCost: 3,  badge: "Alta IQ",       description: "Razonamiento profundo y lógica compleja.",     type: "text" },
-  { id: "claude-3.5-sonnet",   name: "Claude Sonnet 4.5",    provider: "Anthropic",   tokenCost: 4,  badge: "Thinking",      description: "Código avanzado y análisis de Anthropic.",     type: "text" },
-  { id: "claude-3-opus",       name: "Claude Opus 4.5",      provider: "Anthropic",   tokenCost: 5,  badge: "Genius",        description: "El modelo más capaz de Anthropic.",            type: "text" },
-  { id: "gpt-oss-120b",        name: "Llama 4 Maverick",     provider: "OpenSource",  tokenCost: 2,  badge: "Open Source",   description: "Modelo open source de alto rendimiento.",      type: "text" },
-  // ─── IMAGEN ───────────────────────────────────────────────────────────────────
-  { id: "nano-banana-2",       name: "Imagen HD",            provider: "NanoBanana",  tokenCost: 2,  badge: "Recomendado",   description: "Generación de alta fidelidad 1024×1024.",      type: "image" },
-  { id: "nano-banana-pro",     name: "Imagen Pro",           provider: "NanoBanana",  tokenCost: 4,  badge: "Studio",        description: "Calidad de estudio con mejora automática.",    type: "image" },
-  { id: "nano-banana-25",      name: "Imagen Rápida",        provider: "NanoBanana",  tokenCost: 1,  badge: "Eco",           description: "Generación instantánea, baja latencia.",       type: "image" },
+  // ─── TEXTO — vía OpenRouter ───────────────────────────────────────────────────
+  { id: "deepseek-chat",       name: "DeepSeek V3",          provider: "DeepSeek",    tokenCost: 1,  badge: "Mejor valor",   description: "Rendimiento excepcional al menor costo.",          type: "text" },
+  { id: "gemini-3-flash",      name: "Gemini 2.0 Flash",     provider: "Google",      tokenCost: 1,  description: "Respuestas ultrarrápidas de Google.",                    type: "text" },
+  { id: "gemini-3.1-pro-low",  name: "Gemini 2.5 Pro",       provider: "Google",      tokenCost: 1,  badge: "Nuevo",         description: "Inteligencia avanzada de Google.",                 type: "text" },
+  { id: "gemini-3.1-pro-high", name: "Gemini 2.5 Pro Max",   provider: "Google",      tokenCost: 3,  badge: "Alta IQ",       description: "Razonamiento profundo y lógica compleja.",         type: "text" },
+  { id: "claude-3.5-sonnet",   name: "Claude Sonnet 4.5",    provider: "Anthropic",   tokenCost: 4,  badge: "Thinking",      description: "Código avanzado y análisis de Anthropic.",         type: "text" },
+  { id: "claude-3-opus",       name: "Claude Opus 4.5",      provider: "Anthropic",   tokenCost: 5,  badge: "Genius",        description: "El modelo más capaz de Anthropic.",                type: "text" },
+  { id: "gpt-oss-120b",        name: "Llama 4 Maverick",     provider: "OpenSource",  tokenCost: 2,  badge: "Open Source",   description: "Modelo open source de alto rendimiento.",          type: "text" },
+  // ─── IMAGEN — FLUX y SDXL vía OpenRouter ─────────────────────────────────────
+  { id: "flux-schnell",        name: "FLUX Schnell",         provider: "OpenRouter",  tokenCost: 2,  badge: "Recomendado",   description: "FLUX.1 Schnell — rápido, 4 pasos, 1024×1024.",    type: "image" },
+  { id: "flux-pro",            name: "FLUX Pro",             provider: "OpenRouter",  tokenCost: 4,  badge: "Alta calidad",  description: "FLUX.1 Pro — máxima fidelidad y detalle.",         type: "image" },
+  { id: "flux-pro-1.1",        name: "FLUX Pro 1.1",         provider: "OpenRouter",  tokenCost: 4,  badge: "Más nuevo",     description: "FLUX.1.1 Pro — última versión, superior calidad.", type: "image" },
+  { id: "sdxl",                name: "SDXL",                 provider: "OpenRouter",  tokenCost: 2,  badge: "Alternativo",   description: "Stable Diffusion XL — versátil y creativo.",       type: "image" },
 ];
 
 interface ModelSelectorProps {
@@ -60,8 +61,8 @@ export function ModelSelector({ selectedModelId, onModelChange, filterType }: Mo
     AVAILABLE_MODELS.find((m) => m.id === selectedModelId) ||
     visibleModels[0];
 
-  const imageModels = visibleModels.filter((m) => m.provider === "NanoBanana");
-  const textModels  = visibleModels.filter((m) => m.provider !== "NanoBanana");
+  const imageModels = visibleModels.filter((m) => m.type === "image");
+  const textModels  = visibleModels.filter((m) => m.type !== "image");
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
