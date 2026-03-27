@@ -9,18 +9,7 @@ import { Loader2 } from "lucide-react";
 import { HelmetProvider } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { GeniusAssistant } from "@/components/formarketing/GeniusAssistant";
 import { CreditProgressBar } from "@/components/CreditProgressBar";
-
-// Global floating chat bubble — visible on all authenticated pages except /chat and /formarketing
-function GlobalChat() {
-  const loc = useLocation();
-  // Hide on pages that already have their own chat instance or public pages
-  const HIDDEN_PATHS = ["/chat", "/formarketing", "/auth", "/", "/descargar", "/product-backlog", "/reset-password"];
-  const isHidden = HIDDEN_PATHS.some(p => loc.pathname === p || (p.length > 1 && loc.pathname.startsWith(p + "/")));
-  if (isHidden) return null;
-  return <GeniusAssistant />;
-}
 
 // Global ambient glassmorphism background — excluded on Studio/Canvas
 function GlobalAmbient() {
@@ -130,7 +119,6 @@ const App = () => {
           <BrowserRouter>
             <AuthWatcher />
             <GlobalAmbient />
-            <GlobalChat />
             <CreditProgressBar />
             <Suspense fallback={<LoadingScreen />}>
               <Routes>

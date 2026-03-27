@@ -135,6 +135,31 @@ serve(async (req: Request) => {
       return json({ error: 'All OpenRouter image models failed. Try again.' }, 502);
     }
 
+    // ── Gemini (fallback for chat) ────────────────────────────────────────────
+    if (provider === 'gemini') {
+      const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('VITE_GEMINI_API_KEY');
+      if (!apiKey) return json({ error: 'GEMINI_API_KEY not configured in Supabase secrets.' }, 503);
+
+      const fetchUrl = `https://generativelanguage.googleapis.com/v1beta/${urlPath}?key=${apiKey}`;
+      const res = await fetch(fetchUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reqBody),
+      });
+
+      const ct = res.headers.get('content-type') ?? '';
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error(`[Gemini] ${res.status}:`, errText.slice(0, 200));
+        return json({ error: errText.slice(0, 200) }, res.status);
+      }
+      const data = ct.includes('application/json') ? await res.json() : await res.text();
+      return new Response(JSON.stringify(data), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     return json({ error: `Unknown provider: ${provider}` }, 400);
 
   } catch (error: unknown) {
