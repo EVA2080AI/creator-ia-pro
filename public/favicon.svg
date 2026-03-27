@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="aether-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D2FF00" />
+      <stop offset="100%" stop-color="#80A800" />
+    </linearGradient>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A1A1A" />
+      <stop offset="100%" stop-color="#050505" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="60" fill="url(#bg-grad)" />
+  <path d="M128 52 L204 100 L204 156 L128 204 L52 156 L52 100 Z" fill="none" stroke="url(#aether-grad)" stroke-width="18" stroke-linejoin="round"/>
+  <circle cx="128" cy="128" r="28" fill="url(#aether-grad)" />
+  <path d="M128 52 L128 204 M52 100 L204 156 M52 156 L204 100" stroke="url(#aether-grad)" stroke-width="6" stroke-opacity="0.3" />
+</svg>
