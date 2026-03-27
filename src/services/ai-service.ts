@@ -38,7 +38,7 @@ export const aiService = {
   // ─── PROXY CALL (todas las llamadas IA van aquí — sin keys en el cliente) ────
   async callAiProxy(provider: string, path: string, body: any) {
     const { data, error } = await supabase.functions.invoke("ai-proxy", {
-      body: { provider, path, body },
+      body: { provider, path: path || "", body },
     });
     if (error) throw new Error(`${provider}: ${error.message}`);
     if (data?.error) throw new Error(`${provider} API: ${data.error}`);
@@ -178,67 +178,37 @@ ${userCredits < 3 ? '⚠️ Créditos bajos: menciona sutilmente que el Plan Pro
   },
 
   // ─── IMAGE GENERATION ────────────────────────────────────────────────────────
-  // Todo pasa por el proxy — sin API keys expuestas en el cliente
   async handleImageGen(prompt: string, tool?: string) {
     let finalPrompt = prompt;
     if (tool === "logo") {
-      finalPrompt = `${prompt}, professional logo design, clean vector style, white background, sharp edges, brand identity`;
+      finalPrompt = `${prompt}, professional logo design, clean vector style, minimalist, white background, sharp edges, brand identity`;
     }
 
-    // 1. OpenRouter Flux Schnell via proxy
+    // 1. Replicate — FLUX Schnell (primary, reliable)
     try {
-      const data = await this.callAiProxy("openrouter", "images/generations", {
-        model: "black-forest-labs/flux-schnell",
-        prompt: finalPrompt, n: 1, size: "1024x1024",
-      });
-      const item = data.data?.[0];
-      if (item?.b64_json) return { url: `data:image/png;base64,${item.b64_json}` };
-      if (item?.url)      return { url: item.url };
-    } catch (e: any) { console.warn("[Image] OpenRouter falló:", e.message); }
+      const data = await this.callAiProxy("replicate", "", { prompt: finalPrompt, width: 1024, height: 1024 });
+      if (data?.url) return { url: data.url };
+    } catch (e: any) { console.warn("[Image] Replicate falló:", e.message); }
 
-    // 2. Gemini image generation via proxy
-    for (const geminiModel of ["gemini-2.0-flash-preview-image-generation", "gemini-2.0-flash-exp"]) {
+    // 2. Gemini image generation (gemini-2.5-flash-image)
+    for (const geminiModel of ["gemini-2.5-flash-image", "gemini-3-pro-image-preview", "gemini-3.1-flash-image-preview"]) {
       try {
         const data = await this.callAiProxy("gemini", `models/${geminiModel}:generateContent`, {
           contents: [{ parts: [{ text: finalPrompt }] }],
-          generationConfig: { responseModalities: ["IMAGE", "TEXT"] },
+          generationConfig: { responseModalities: ["IMAGE"] },
         });
         const imgPart = (data.candidates?.[0]?.content?.parts ?? []).find((p: any) => p.inlineData?.data);
         if (imgPart) return { url: `data:${imgPart.inlineData.mimeType || "image/png"};base64,${imgPart.inlineData.data}` };
-      } catch (e: any) { console.warn(`[Image] ${geminiModel} falló:`, e.message); }
+      } catch (e: any) { console.warn(`[Image] Gemini ${geminiModel} falló:`, e.message); }
     }
 
-    // 3. Pollinations via proxy (server-side)
-    const seed = Math.floor(Math.random() * 999999);
-    for (let attempt = 0; attempt < 2; attempt++) {
-      if (attempt > 0) await new Promise(r => setTimeout(r, 3000));
-      try {
-        const data = await this.callAiProxy("pollinations", "image", { prompt: finalPrompt, seed, width: 1024, height: 1024 });
-        if (data?.url) return { url: data.url };
-      } catch (e: any) { console.warn(`[Image] Pollinations proxy intento ${attempt + 1} falló:`, e.message); }
-    }
-
-    // 4. Pollinations DIRECT — fetch, verify it's an image, convert to data URL
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const directSeed = Math.floor(Math.random() * 999999);
-      const polUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&seed=${directSeed}&nologo=true&model=flux`;
-      try {
-        const res = await fetch(polUrl, { signal: AbortSignal.timeout(30_000) });
-        if (res.ok) {
-          const blob = await res.blob();
-          if (blob.type.startsWith("image/")) {
-            const dataUrl = await new Promise<string>((resolve, reject) => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result as string);
-              reader.onerror = reject;
-              reader.readAsDataURL(blob);
-            });
-            return { url: dataUrl };
-          }
-        }
-      } catch { /* retry */ }
-      if (attempt < 2) await new Promise(r => setTimeout(r, 2000));
-    }
+    // 3. Pollinations via proxy (server-side fetch)
+    try {
+      const data = await this.callAiProxy("pollinations", "image", {
+        prompt: finalPrompt, seed: Math.floor(Math.random() * 999999), width: 1024, height: 1024,
+      });
+      if (data?.url) return { url: data.url };
+    } catch (e: any) { console.warn("[Image] Pollinations proxy falló:", e.message); }
 
     throw new Error("No se pudo generar la imagen. Todos los motores fallaron. Intenta de nuevo.");
   },
