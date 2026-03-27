@@ -15,12 +15,12 @@ interface AppHeaderProps {
 }
 
 const NAV_ITEMS = [
-  { path: "/dashboard", label: "Nexus", icon: Home },
-  { path: "/tools", label: "Arsenal", icon: Wand2 },
+  { path: "/dashboard", label: "Inicio", icon: Home },
+  { path: "/tools", label: "Herramientas", icon: Wand2 },
   { path: "/formarketing", label: "Studio", icon: Palette },
-  { path: "/spaces", label: "Clusters", icon: LayoutGrid },
-  { path: "/assets", label: "Manifests", icon: Image },
-  { path: "/pricing", label: "Protocols", icon: CreditCard },
+  { path: "/spaces", label: "Espacios", icon: LayoutGrid },
+  { path: "/assets", label: "Activos", icon: Image },
+  { path: "/pricing", label: "Precios", icon: CreditCard },
 ];
 
 export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
@@ -54,7 +54,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
             <span className="text-sm font-bold text-white tracking-tight font-display uppercase leading-none">
               Creator <span className="text-aether-purple">IA</span> Pro
             </span>
-            <span className="text-[8px] text-white/20 font-bold uppercase tracking-[0.3em] font-display leading-none mt-0.5">v8.0 Neural Core</span>
+            <span className="text-[8px] text-white/20 font-bold uppercase tracking-[0.3em] font-display leading-none mt-0.5">v8.0</span>
           </div>
         </button>
 
@@ -84,7 +84,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
               onClick={() => handleNav("/admin")} 
               className="flex items-center gap-2.5 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest text-rose-500/40 hover:text-rose-500 transition-all font-display"
             >
-              <Shield className="w-3.5 h-3.5" /> root
+              <Shield className="w-3.5 h-3.5" /> Admin
             </button>
           )}
         </nav>
@@ -127,9 +127,9 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                 </div>
                 <div className="space-y-1">
                   {[
-                    { label: "Neural Profile", icon: User, path: "/profile" },
-                    { label: "Manifests", icon: Image, path: "/assets" },
-                    { label: "Developer Nexus", icon: Code, path: "/developer" },
+                    { label: "Mi Perfil", icon: User, path: "/profile" },
+                    { label: "Mis Activos", icon: Image, path: "/assets" },
+                    { label: "Desarrollador", icon: Code, path: "/developer" },
                   ].map(item => (
                     <button
                       key={item.path}
@@ -147,7 +147,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                     className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[10px] font-bold text-rose-500/40 hover:text-rose-400 hover:bg-rose-500/5 transition-all uppercase tracking-widest font-display"
                   >
                     <LogOut className="w-4 h-4" />
-                    Terminate session
+                    Cerrar sesión
                   </button>
                 </div>
               </div>
@@ -166,8 +166,8 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 top-16 z-40 md:hidden bg-[#050506]/95 backdrop-blur-3xl animate-in slide-in-from-top duration-700 p-8 pt-10">
-          <nav className="flex flex-col gap-3">
+        <div className="fixed inset-0 top-16 z-40 md:hidden bg-[#050506]/98 backdrop-blur-3xl animate-in slide-in-from-top duration-500 px-6 py-8 overflow-y-auto">
+          <nav className="flex flex-col gap-2">
             {NAV_ITEMS.map((item) => {
               const isActive = location.pathname === item.path;
               return (
@@ -175,27 +175,36 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                   key={item.path}
                   onClick={() => handleNav(item.path)}
                   className={cn(
-                    "w-full flex items-center justify-between px-8 py-5 rounded-[2rem] text-[11px] font-bold tracking-[0.2em] uppercase transition-all duration-500",
+                    "w-full flex items-center justify-between px-6 py-4 rounded-2xl text-sm font-semibold transition-all duration-300",
                     isActive
-                      ? "bg-white text-black shadow-4xl scale-[1.02]"
-                      : "text-white/20 bg-white/[0.02] border border-white/5"
+                      ? "bg-white text-black shadow-xl"
+                      : "text-white/60 bg-white/[0.03] border border-white/5 hover:text-white hover:bg-white/[0.06]"
                   )}
                 >
-                  <div className="flex items-center gap-5">
-                    <item.icon className={cn("w-5 h-5", isActive ? "text-black" : "text-white/10")} />
-                    {item.label}
+                  <div className="flex items-center gap-4">
+                    <item.icon className={cn("w-5 h-5", isActive ? "text-black" : "text-white/30")} />
+                    <span>{item.label}</span>
                   </div>
-                  <ChevronDown className="-rotate-90 w-4 h-4 opacity-20" />
+                  <ChevronDown className="-rotate-90 w-4 h-4 opacity-30" />
                 </button>
               );
             })}
-            <div className="mt-8 pt-8 border-t border-white/5">
+            {isAdmin && (
+              <button
+                onClick={() => handleNav("/admin")}
+                className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-semibold text-rose-400/70 bg-rose-500/5 border border-rose-500/10 hover:text-rose-400 transition-all"
+              >
+                <Shield className="w-5 h-5" />
+                <span>Admin</span>
+              </button>
+            )}
+            <div className="mt-4 pt-4 border-t border-white/5">
               <button
                 onClick={() => { onSignOut(); setMobileOpen(false); }}
-                className="w-full flex items-center gap-5 px-8 py-5 rounded-[2rem] text-[11px] font-bold text-rose-500/40 bg-rose-500/5 border border-rose-500/10 tracking-widest uppercase transition-all"
+                className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-semibold text-rose-400/60 bg-rose-500/5 border border-rose-500/10 hover:text-rose-400 transition-all"
               >
                 <LogOut className="w-5 h-5" />
-                Terminate Session
+                <span>Cerrar sesión</span>
               </button>
             </div>
           </nav>

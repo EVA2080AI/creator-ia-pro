@@ -17,8 +17,9 @@ import VideoModelNode from '@/components/formarketing/VideoModelNode';
 import LayoutBuilderNode from '@/components/formarketing/LayoutBuilderNode';
 import CampaignManagerNode from '@/components/formarketing/CampaignManagerNode';
 import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
+import { TEMPLATES, CATEGORIES, type Template } from '@/components/formarketing/TemplateModal';
 import AntigravityBridgeNode from '@/components/formarketing/AntigravityBridgeNode';
-import { ArrowLeft, Rocket, Trash2, Zap, LogOut, User } from 'lucide-react';
+import { ArrowLeft, Trash2, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { aiService } from '@/services/ai-service';
@@ -77,11 +78,35 @@ function FormarketingContent() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  // Show template landing only when no spaceId (fresh session)
+  const [showLanding, setShowLanding] = useState(!spaceId);
   const { screenToFlowPosition, setNodes: rfSetNodes, setEdges: rfSetEdges, getNodes: rfGetNodes, getEdges: rfGetEdges } = useReactFlow();
+
+  // Handle template selection from landing page
+  const handleTemplateSelect = useCallback((template: { title: string; nodes: Array<{ type: string; data: Record<string, any> }> }) => {
+    const newNodes: Node[] = template.nodes.map((nodeData, index) => {
+      const newNodeId = crypto.randomUUID();
+      return {
+        id: newNodeId,
+        type: nodeData.type,
+        position: { x: 120 + (index % 3) * 380, y: 120 + Math.floor(index / 3) * 280 },
+        data: {
+          ...nodeData.data,
+          status: 'idle',
+          onExecute: () => {},
+          onVariation: () => {},
+        },
+      } as Node;
+    });
+    setNodes(newNodes);
+    setEdges([]);
+    setShowLanding(false);
+  }, [setNodes, setEdges]);
 
   // Load from DB
   useEffect(() => {
     if (!user || !spaceId) {
+       if (!spaceId) return; // Landing will handle initial state
        setNodes(initialNodes);
        return;
     }
@@ -668,61 +693,46 @@ function FormarketingContent() {
   return (
     <>
       <Helmet>
-        <title>Aether Studio | AI Creative Engine</title>
-        <meta name="description" content="Ultimate AI creativity engine. Professional-grade multimodal canvas for industrial creative production." />
+        <title>Studio · Canvas | Creator IA Pro</title>
+        <meta name="description" content="Crea campañas visuales con IA. Conecta personajes, imágenes y videos en un lienzo intuitivo." />
       </Helmet>
-      <div className="h-screen w-screen bg-[#020203] font-sans text-white/90 flex flex-col overflow-hidden relative selection:bg-aether-purple/20">
-      {/* Aether Evolution Studio Header */}
-      <div className="flex h-20 w-full items-center justify-between border-b border-white/[0.08] bg-black/40 px-8 backdrop-blur-3xl shrink-0 z-[90]">
-         <div className="flex items-center gap-6">
-             <button
-                onClick={() => navigate("/dashboard")}
-                className="flex items-center gap-4 hover:opacity-90 transition-all group"
-             >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-black shadow-[0_0_30px_rgba(255,255,255,0.1)] group-hover:scale-110 transition-transform">
-                   <Rocket className="h-6 w-6" />
-                </div>
-                <div className="flex flex-col text-left">
-                   <h1 className="text-xl font-bold tracking-tight text-white leading-tight font-display">AETHER EDITION</h1>
-                   <span className="text-[10px] font-medium text-white/40 uppercase tracking-[0.3em]">Creative_Engine_v1.0</span>
-                </div>
-             </button>
-            <div className="h-8 w-px bg-white/10 mx-2" />
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-xl w-10 h-10 text-white/40 hover:text-white transition-all">
-               <ArrowLeft className="h-5 w-5" />
+      <AppHeader userId={user?.id} onSignOut={signOut} />
+      <div className="w-screen bg-[#020203] font-sans text-white/90 flex flex-col overflow-hidden relative selection:bg-aether-purple/20" style={{ height: 'calc(100vh - 64px)', marginTop: '64px' }}>
+      {/* Canvas Toolbar */}
+      <div className="flex h-14 w-full items-center justify-between border-b border-white/[0.08] bg-black/40 px-6 backdrop-blur-3xl shrink-0 z-[90]">
+         <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-xl w-9 h-9 text-white/30 hover:text-white transition-all">
+               <ArrowLeft className="h-4 w-4" />
             </Button>
+            <div className="h-6 w-px bg-white/10" />
+            <button
+              onClick={() => setShowLanding(true)}
+              className="hidden sm:flex items-center gap-2 bg-white/[0.03] px-3 py-1.5 rounded-xl border border-white/5 hover:border-aether-purple/30 hover:bg-aether-purple/5 transition-all"
+            >
+               <div className="w-1.5 h-1.5 rounded-full bg-aether-blue shadow-[0_0_8px_rgba(0,194,255,0.4)] animate-pulse" />
+               <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest leading-none">Plantillas</span>
+            </button>
          </div>
 
-         <div className="flex items-center gap-4">
-            <div className="hidden lg:flex items-center gap-3 bg-white/[0.03] px-4 py-2 rounded-xl border border-white/5">
-               <div className="w-2 h-2 rounded-full bg-aether-blue shadow-[0_0_12px_rgba(0,194,255,0.4)] animate-pulse" />
-               <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-none">Aether_Link_Active</span>
-            </div>
-
-            <Button 
-               variant="ghost" 
-               onClick={handleClear} 
+         <div className="flex items-center gap-3">
+            <Button
+               variant="ghost"
+               onClick={handleClear}
                disabled={nodes.length === 0 && edges.length === 0}
-               className="text-white/40 hover:text-white hover:bg-white/5 rounded-xl px-4 h-11 text-xs font-bold gap-2 transition-all disabled:opacity-20"
+               className="text-white/30 hover:text-white hover:bg-white/5 rounded-xl px-4 h-9 text-xs font-bold gap-2 transition-all disabled:opacity-20"
             >
-               <Trash2 className="w-4 h-4" />
-               Clear
-            </Button>
-            
-            <Button 
-               onClick={handleExecute} 
-               disabled={nodes.length === 0}
-               className="h-11 bg-white hover:bg-white/90 text-black rounded-xl gap-2.5 font-bold px-8 shadow-xl shadow-white/5 text-xs transition-all active:scale-95 disabled:opacity-20 font-display"
-            >
-               <Zap className="w-4 h-4 fill-current" />
-               Sync Engine
+               <Trash2 className="w-3.5 h-3.5" />
+               Limpiar
             </Button>
 
-            <div className="h-8 w-px bg-white/10 mx-2" />
-            
-            <button onClick={signOut} className="p-2.5 bg-white/5 hover:bg-white/10 rounded-xl text-white/40 hover:text-white transition-all">
-               <LogOut className="h-4.5 w-4.5" />
-            </button>
+            <Button
+               onClick={handleExecute}
+               disabled={nodes.length === 0}
+               className="h-9 bg-white hover:bg-white/90 text-black rounded-xl gap-2 font-bold px-6 shadow-xl shadow-white/5 text-xs transition-all active:scale-95 disabled:opacity-20 font-display"
+            >
+               <Zap className="w-3.5 h-3.5 fill-current" />
+               Ejecutar
+            </Button>
       </div>
       </div>
 
@@ -768,8 +778,120 @@ function FormarketingContent() {
       </div>
 
       <GeniusAssistant onAction={handleAssistantAction} />
+
+      {/* Template Landing Overlay */}
+      {showLanding && (
+        <TemplateLanding
+          onSelect={handleTemplateSelect}
+          onSkip={() => { setShowLanding(false); setNodes(initialNodes); }}
+        />
+      )}
     </div>
     </>
+  );
+}
+
+// ─── Template Landing Component ────────────────────────────────────────────
+function TemplateLanding({
+  onSelect,
+  onSkip,
+}: {
+  onSelect: (template: Template) => void;
+  onSkip: () => void;
+}) {
+  const [activeCategory, setActiveCategory] = useState('Todos');
+  const [search, setSearch] = useState('');
+
+  const filtered = TEMPLATES.filter((t) => {
+    const matchCat = activeCategory === 'Todos' || t.category === activeCategory;
+    const matchSearch = t.title.toLowerCase().includes(search.toLowerCase()) ||
+      t.description.toLowerCase().includes(search.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  return (
+    <div className="absolute inset-0 z-50 bg-[#050506]/98 backdrop-blur-2xl overflow-y-auto">
+      <div className="max-w-6xl mx-auto px-8 py-16">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+            <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Studio · Plantillas</span>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display mb-4">
+            Elige una <span className="bg-gradient-to-r from-aether-purple to-aether-blue bg-clip-text text-transparent">plantilla</span>
+          </h1>
+          <p className="text-sm text-white/30 font-medium max-w-md mx-auto">
+            Carga el flujo completo en segundos. Puedes editarlo como quieras.
+          </p>
+        </div>
+
+        {/* Search + Filter */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <div className="relative flex-1">
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar plantilla..."
+              className="w-full h-11 bg-white/[0.03] border border-white/5 rounded-2xl pl-4 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-aether-purple/30 transition-all"
+            />
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={`px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all font-display ${
+                  activeCategory === cat
+                    ? 'bg-white text-black'
+                    : 'bg-white/[0.03] border border-white/5 text-white/30 hover:text-white hover:bg-white/[0.06]'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Grid */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {filtered.map((template) => (
+            <button
+              key={template.id}
+              onClick={() => onSelect(template)}
+              className="group aether-card rounded-[2rem] border border-white/5 p-6 text-left hover:border-aether-purple/30 hover:scale-[1.02] transition-all duration-300 active:scale-[0.98]"
+            >
+              <div className="flex items-start gap-4 mb-4">
+                <div className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${template.color}`}>
+                  <template.icon className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-bold text-white truncate font-display tracking-tight">{template.title}</h3>
+                  <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{template.category}</span>
+                </div>
+              </div>
+              <p className="text-[12px] text-white/30 leading-relaxed line-clamp-2">{template.description}</p>
+              <div className="mt-4 flex items-center justify-between">
+                <span className="text-[10px] font-bold text-white/15 uppercase tracking-widest">
+                  {template.nodes.length} nodo{template.nodes.length !== 1 ? 's' : ''}
+                </span>
+                <span className="text-[10px] font-bold text-aether-purple opacity-0 group-hover:opacity-100 transition-opacity">Usar →</span>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Skip */}
+        <div className="mt-12 text-center">
+          <button
+            onClick={onSkip}
+            className="text-xs font-bold text-white/20 hover:text-white/50 transition-colors uppercase tracking-widest"
+          >
+            Empezar con canvas vacío →
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

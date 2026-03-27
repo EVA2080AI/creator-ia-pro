@@ -3,10 +3,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 import { HelmetProvider } from "react-helmet-async";
+
+// Redirect /canvas → /formarketing preserving query params
+const CanvasRedirect = () => {
+  const loc = useLocation();
+  return <Navigate to={`/formarketing${loc.search}`} replace />;
+};
 
 // Lazy loading of pages for bundle optimization (V3.3)
 const Index = lazy(() => import("./pages/Index"));
@@ -69,7 +75,7 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/canvas" element={<Canvas />} />
+                <Route path="/canvas" element={<CanvasRedirect />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/spaces" element={<Spaces />} />
                 <Route path="/assets" element={<Assets />} />

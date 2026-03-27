@@ -33,17 +33,17 @@ interface Tool {
 }
 
 const tools: Tool[] = [
-  { id: "enhance", name: "Neural Enhancer", desc: "Optimize lighting, clarity and details with high-fidelity AI.", icon: Wand2, credits: 2, category: "image", needsUpload: true, color: "text-aether-purple" },
-  { id: "upscale", name: "Quantum Upscale", desc: "Scale images up to 4K resolution without losing a single pixel.", icon: ZoomIn, credits: 3, category: "image", needsUpload: true, color: "text-aether-blue" },
-  { id: "eraser", name: "Neural Eraser", desc: "Seamlessly remove any object or distraction from your assets.", icon: Eraser, credits: 2, category: "image", needsUpload: true, color: "text-rose-400" },
-  { id: "background", name: "Alpha Matte", desc: "Instant background removal with perfect edges for any object.", icon: ImagePlus, credits: 1, category: "image", needsUpload: true, color: "text-emerald-400" },
-  { id: "restore", name: "Photo Recovery", desc: "Breathe new life into old or damaged photographic records.", icon: RotateCcw, credits: 3, category: "image", needsUpload: true, color: "text-amber-400" },
-  { id: "generate", name: "Vision Morph", desc: "Generate professional-grade visuals from natural language.", icon: Image, credits: 1, category: "image", needsUpload: false, placeholder: "Describe the vision you want to manifest...", color: "text-white" },
-  { id: "copywriter", name: "Copy Orchestrator", desc: "Generate high-converting marketing narratives and social copy.", icon: MessageSquare, credits: 1, category: "ai-app", needsUpload: false, placeholder: "e.g. Write a persuasive ad copy for a luxury watch brand...", color: "text-aether-purple" },
-  { id: "logo", name: "Identity Forge", desc: "Design minimalist, high-impact brand identities from scratch.", icon: PenTool, credits: 2, category: "ai-app", needsUpload: false, placeholder: "e.g. Minimalist logo for a quantum computing startup called 'Nova'...", color: "text-aether-blue" },
-  { id: "social", name: "Social Pulse", desc: "Optimized visual content sequences for global social distribution.", icon: Hash, credits: 2, category: "ai-app", needsUpload: false, placeholder: "e.g. 5-post carousel strategy for a high-end streetwear launch...", color: "text-rose-400" },
-  { id: "blog", name: "Semantic Writer", desc: "Full-length, SEO-optimized articles and industrial whitepapers.", icon: FileText, credits: 1, category: "ai-app", needsUpload: false, placeholder: "e.g. Deep dive into the future of decentralized AI in 2027...", color: "text-emerald-400" },
-  { id: "ads", name: "Ad Synthesizer", desc: "Targeted ad copy generation for Meta, Google, and beyond.", icon: Megaphone, credits: 1, category: "ai-app", needsUpload: false, placeholder: "e.g. High-CTR Google Search ad for a SaaS project management tool...", color: "text-white" },
+  { id: "enhance", name: "Mejorar imagen", desc: "Mejora iluminación, claridad y detalles con IA.", icon: Wand2, credits: 2, category: "image", needsUpload: true, color: "text-aether-purple" },
+  { id: "upscale", name: "Aumentar resolución", desc: "Escala imágenes a 4K sin perder calidad.", icon: ZoomIn, credits: 3, category: "image", needsUpload: true, color: "text-aether-blue" },
+  { id: "eraser", name: "Borrar objeto", desc: "Elimina cualquier objeto de la imagen sin rastros.", icon: Eraser, credits: 2, category: "image", needsUpload: true, color: "text-rose-400" },
+  { id: "background", name: "Quitar fondo", desc: "Extrae el fondo automáticamente con bordes perfectos.", icon: ImagePlus, credits: 1, category: "image", needsUpload: true, color: "text-emerald-400" },
+  { id: "restore", name: "Restaurar foto", desc: "Restaura fotos antiguas o dañadas.", icon: RotateCcw, credits: 3, category: "image", needsUpload: true, color: "text-amber-400" },
+  { id: "generate", name: "Crear imagen", desc: "Genera imágenes profesionales desde texto.", icon: Image, credits: 1, category: "image", needsUpload: false, placeholder: "Describe la imagen que quieres generar...", color: "text-white" },
+  { id: "copywriter", name: "Crear texto", desc: "Genera textos de marketing y redes sociales.", icon: MessageSquare, credits: 1, category: "ai-app", needsUpload: false, placeholder: "Ej. Escribe un copy persuasivo para una marca de relojes de lujo...", color: "text-aether-purple" },
+  { id: "logo", name: "Crear logo", desc: "Diseña logos e identidades de marca con IA.", icon: PenTool, credits: 2, category: "ai-app", needsUpload: false, placeholder: "Ej. Logo minimalista para una startup de tecnología llamada 'Nova'...", color: "text-aether-blue" },
+  { id: "social", name: "Contenido para redes", desc: "Secuencias de contenido optimizadas para redes.", icon: Hash, credits: 2, category: "ai-app", needsUpload: false, placeholder: "Ej. Estrategia de 5 posts para el lanzamiento de una marca de ropa...", color: "text-rose-400" },
+  { id: "blog", name: "Escribir artículo", desc: "Artículos largos y optimizados para SEO.", icon: FileText, credits: 1, category: "ai-app", needsUpload: false, placeholder: "Ej. Artículo sobre el futuro de la inteligencia artificial en 2027...", color: "text-emerald-400" },
+  { id: "ads", name: "Crear anuncio", desc: "Anuncios de alto rendimiento para Meta y Google.", icon: Megaphone, credits: 1, category: "ai-app", needsUpload: false, placeholder: "Ej. Anuncio de Google Ads para una herramienta SaaS de gestión de proyectos...", color: "text-white" },
 ];
 
 const appIdToToolId: Record<string, ToolId> = {
@@ -79,8 +79,8 @@ function parseMarkdown(text: string): string {
 }
 
 const categories = [
-  { id: "image", label: "Visual Processing", icon: Image },
-  { id: "ai-app", label: "Creative Apps", icon: Sparkles },
+  { id: "image", label: "Editar imagen", icon: Image },
+  { id: "ai-app", label: "Crear con IA", icon: Sparkles },
 ];
 
 const Tools = () => {
@@ -112,7 +112,7 @@ const Tools = () => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) { toast.error("File type not supported"); return; }
+    if (!file.type.startsWith("image/")) { toast.error("Tipo de archivo no soportado"); return; }
     const reader = new FileReader();
     reader.onload = () => setImagePreview(reader.result as string);
     reader.readAsDataURL(file);
@@ -122,15 +122,15 @@ const Tools = () => {
 
   const handleProcess = async () => {
     if (!user) return;
-    if (currentTool.needsUpload && !imagePreview) { toast.error("Please upload an image first"); return; }
-    if (!currentTool.needsUpload && !textPrompt.trim()) { toast.error("Mission requires a prompt"); return; }
+    if (currentTool.needsUpload && !imagePreview) { toast.error("Sube una imagen primero"); return; }
+    if (!currentTool.needsUpload && !textPrompt.trim()) { toast.error("Escribe una instrucción para continuar"); return; }
 
     const modelObj = AVAILABLE_MODELS.find(m => m.id === selectedModelId) || AVAILABLE_MODELS[0];
     const requiredCredits = category === "ai-app" ? modelObj.tokenCost : currentTool.credits;
 
     const credits = profile?.credits_balance ?? 0;
     if (credits < requiredCredits) {
-      toast.error(`Neural deficiency: Need ${requiredCredits} credits. Found ${credits}.`);
+      toast.error(`Sin créditos suficientes: Necesitas ${requiredCredits} créditos. Tienes ${credits}.`);
       return;
     }
 
@@ -154,7 +154,7 @@ const Tools = () => {
         setResultImage(data.url);
         toast.success("Visual Manifested");
       } else {
-        throw new Error("Invalid nexus response");
+        throw new Error("Respuesta inválida de la IA");
       }
       await refreshProfile();
     } catch (err: any) {
@@ -177,12 +177,12 @@ const Tools = () => {
               onClick={() => navigate("/dashboard")}
               className="flex items-center gap-2 text-[9px] font-bold text-white/40 hover:text-white transition-all uppercase tracking-[0.2em] font-display"
             >
-              <ArrowLeft className="w-3.5 h-3.5" /> Return to Nexus
+              <ArrowLeft className="w-3.5 h-3.5" /> ← Volver al inicio
             </button>
             <h1 className="text-3xl md:text-5xl font-bold tracking-tight font-display">
-              Neural <span className="bg-gradient-to-r from-aether-purple to-aether-blue bg-clip-text text-transparent">Arsenal</span>
+              Herramientas <span className="bg-gradient-to-r from-aether-purple to-aether-blue bg-clip-text text-transparent">IA</span>
             </h1>
-            <p className="text-xs text-white/40 font-medium max-w-sm">Equipping creators with production-grade AI modules for high-fidelity asset manifestation.</p>
+            <p className="text-xs text-white/40 font-medium max-w-sm">Crea imágenes, textos, logos y más con inteligencia artificial.</p>
           </div>
           
           <div className="flex bg-white/[0.03] p-1.5 rounded-2.5xl border border-white/5 backdrop-blur-xl">
@@ -247,7 +247,7 @@ const Tools = () => {
                 </div>
                 <div className="flex flex-col items-end gap-1">
                    <Badge className="bg-white/5 text-white/40 border-none px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-widest">
-                     {category === "ai-app" ? "Dynamic Sync" : "Static Charge"}
+                     {category === "ai-app" ? "Con IA" : "Con imagen"}
                    </Badge>
                 </div>
               </div>
@@ -257,7 +257,7 @@ const Tools = () => {
                   <div className="flex items-center gap-2 mb-1">
                     <Zap className="w-3.5 h-3.5 text-aether-purple" />
                     <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] font-display">
-                      Neural Model Selector
+                      Seleccionar modelo IA
                     </span>
                   </div>
                   <ModelSelector selectedModelId={selectedModelId} onModelChange={setSelectedModelId} />
@@ -278,8 +278,8 @@ const Tools = () => {
                       <Upload className="h-8 w-8 text-white/20 group-hover:text-white transition-colors" />
                     </div>
                     <div className="text-center">
-                       <span className="text-sm font-bold text-white/40 group-hover:text-white transition-colors block">Manifest Primary Asset</span>
-                       <span className="text-[10px] text-white/10 uppercase font-black tracking-widest mt-2 block">PNG, JPG, WEBP | MAX 10MB</span>
+                       <span className="text-sm font-bold text-white/40 group-hover:text-white transition-colors block">Subir imagen aquí</span>
+                       <span className="text-[10px] text-white/10 uppercase font-black tracking-widest mt-2 block">PNG, JPG, WEBP · Máx 10MB</span>
                     </div>
                   </button>
                 ) : (
@@ -289,14 +289,14 @@ const Tools = () => {
                       onClick={() => { setImagePreview(null); setResultImage(null); if (fileRef.current) fileRef.current.value = ""; }}
                       className="absolute right-6 top-6 rounded-2xl bg-black/60 p-3 backdrop-blur-xl border border-white/10 hover:bg-rose-500/20 hover:text-rose-500 transition-all text-white/40"
                     >
-                      <Eraser className="h-5 h-5" />
+                      <Eraser className="h-5 w-5" />
                     </button>
                   </div>
                 )
               ) : (
                 <div className="space-y-6">
                   <div className="space-y-3">
-                    <Label className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] ml-2 font-display">Input Narrative</Label>
+                    <Label className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] ml-2 font-display">Tu prompt / instrucción</Label>
                     <textarea
                       value={textPrompt}
                       onChange={(e) => setTextPrompt(e.target.value)}
@@ -308,9 +308,9 @@ const Tools = () => {
                   
                   {activeTool === "generate" && (
                     <div className="space-y-4">
-                      <Label className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] ml-2 font-display">Neural Archetypes</Label>
+                      <Label className="text-white/20 text-[10px] font-bold uppercase tracking-[0.2em] ml-2 font-display">Estilo visual</Label>
                       <div className="flex flex-wrap gap-2 px-2">
-                        {["Photorealistic", "Cinema 4D", "Surrealist", "Anime V3", "Hyper-Minimal", "Cybernetic"].map(style => (
+                        {["Fotorrealista", "Cinema 4D", "Surrealista", "Anime", "Minimalista", "Cyberpunk"].map(style => (
                           <button 
                              key={style}
                              onClick={() => setTextPrompt(prev => prev ? `${prev}, style: ${style}` : `Style: ${style} - `)}
@@ -334,12 +334,12 @@ const Tools = () => {
               {processing ? (
                  <div className="flex items-center gap-3">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    Manifesting Neural Sequence...
+                    Procesando...
                  </div>
               ) : (
                  <div className="flex items-center gap-3">
                     <Sparkles className="h-5 w-5 fill-current" />
-                    Execute Protocol ({category === "ai-app" ? (AVAILABLE_MODELS.find(m => m.id === selectedModelId)?.tokenCost || 1) : currentTool.credits} credits)
+                    Procesar ({category === "ai-app" ? (AVAILABLE_MODELS.find(m => m.id === selectedModelId)?.tokenCost || 1) : currentTool.credits} créditos)
                  </div>
               )}
             </Button>
@@ -349,7 +349,7 @@ const Tools = () => {
           </div>
 
           <div className="space-y-8">
-            <h2 className="text-xs font-bold text-white uppercase tracking-[0.5em] font-display ml-4">Manifested Output</h2>
+            <h2 className="text-xs font-bold text-white uppercase tracking-[0.5em] font-display ml-4">Resultado</h2>
             
             <div className="aether-card rounded-[3rem] border border-white/5 min-h-[460px] flex flex-col relative overflow-hidden group">
               {processing ? (
@@ -359,24 +359,24 @@ const Tools = () => {
                     <Loader2 className="h-12 w-12 text-aether-purple animate-spin relative z-10" />
                   </div>
                   <div className="space-y-2 relative z-10">
-                    <p className="text-lg font-bold text-white tracking-tight font-display italic">Synthesizing multidimensional data...</p>
-                    <p className="text-[10px] text-white/20 uppercase tracking-[0.3em] font-bold">Latency compensation active</p>
+                    <p className="text-lg font-bold text-white tracking-tight font-display italic">Generando resultado...</p>
+                    <p className="text-[10px] text-white/20 uppercase tracking-[0.3em] font-bold">Esto puede tomar unos segundos</p>
                   </div>
                 </div>
               ) : resultImage ? (
                 <div className="flex-1 flex flex-col p-8 gap-8 animate-in fade-in zoom-in duration-700">
                   <div className="flex-1 rounded-2.5xl overflow-hidden border border-white/10 bg-[#050506]">
-                    <img src={resultImage} alt="Manifestation" className="h-full w-full object-contain p-4" />
+                    <img src={resultImage} alt="Imagen generada" className="h-full w-full object-contain p-4" />
                   </div>
                   <div className="flex gap-4">
                      <a href={resultImage} download className="flex-1">
                         <Button className="w-full h-14 rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all font-display font-bold uppercase tracking-widest text-[10px] gap-3">
-                           <Download className="h-4 w-4" /> Export Asset
+                           <Download className="h-4 w-4" /> Descargar
                         </Button>
                      </a>
                      <Button 
                        variant="ghost" 
-                       onClick={() => { navigator.clipboard.writeText(resultImage); toast.success("URL copied to clipboard"); }}
+                       onClick={() => { navigator.clipboard.writeText(resultImage); toast.success("URL copiada al portapapeles"); }}
                        className="h-14 w-14 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-white"
                      >
                         <Copy className="h-4 w-4" />
@@ -392,10 +392,10 @@ const Tools = () => {
                     />
                   </div>
                   <Button
-                    onClick={() => { navigator.clipboard.writeText(resultText); toast.success("Copied to clipboard"); }}
+                    onClick={() => { navigator.clipboard.writeText(resultText); toast.success("Copiado al portapapeles"); }}
                     className="h-16 rounded-2xl bg-white text-black font-display font-bold uppercase tracking-widest text-[10px] gap-3 shadow-3xl hover:scale-[1.02] active:scale-[0.98] transition-all"
                   >
-                    <Copy className="h-4 w-4" /> Synchronize Context
+                    <Copy className="h-4 w-4" /> Copiar texto
                   </Button>
                 </div>
               ) : (
@@ -405,8 +405,8 @@ const Tools = () => {
                     <Rocket className="h-8 w-8 text-white/20 relative z-10" />
                   </div>
                   <div className="space-y-2">
-                    <p className="text-lg font-bold text-white tracking-tight font-display">Awaiting Evolution Command</p>
-                    <p className="text-[9px] text-white/30 uppercase tracking-[0.3em] font-bold max-w-[200px] leading-relaxed mx-auto">execute a protocol to manifest industrial assets</p>
+                    <p className="text-lg font-bold text-white tracking-tight font-display">Listo para generar</p>
+                    <p className="text-[9px] text-white/30 uppercase tracking-[0.3em] font-bold max-w-[200px] leading-relaxed mx-auto">Selecciona una herramienta y escribe tu instrucción</p>
                   </div>
                 </div>
               )}
