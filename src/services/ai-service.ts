@@ -242,63 +242,113 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
     if (systemPrompt) messages.push({ role: "system", content: systemPrompt });
     messages.push({ role: "user", content: prompt });
 
-    // 1. Intentar OpenRouter a través de Proxy
+    // ── 1. OpenRouter via Supabase Proxy ──────────────────────────────────
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
-
       const data = await this.callAiProxy("openrouter", "chat/completions", {
         model: openRouterModel,
         messages,
         temperature: 0.85,
         max_tokens: 4096,
       }, controller.signal);
-      
       clearTimeout(timeoutId);
-
       let text = data.choices?.[0]?.message?.content;
       if (!text) throw new Error("La IA devolvió una respuesta vacía.");
-
       if (action === "ui") {
         text = text.replace(/```json/g, "").replace(/```/g, "").trim();
         try { return JSON.parse(text); } catch { return { text }; }
       }
       return { text };
-    } catch (err: any) {
-      console.warn("[AI] OpenRouter Proxy falló, intentando Gemini como respaldo...", err.message);
-      
-      // 2. Respaldo Gemini a través de Proxy
-      return this.callGeminiDirect(action, prompt, systemPrompt);
+    } catch (proxyErr: any) {
+      console.warn("[AI] OpenRouter Proxy falló, intentando direct...", proxyErr.message);
     }
+
+    // ── 2. OpenRouter direct (VITE_OPENROUTER_API_KEY) ────────────────────
+    const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+    if (openRouterKey) {
+      try {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), 30000);
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST", signal: controller.signal,
+          headers: {
+            "Authorization": `Bearer ${openRouterKey}`,
+            "HTTP-Referer": "https://creator-ia.com",
+            "X-Title": "Creator IA Pro",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ model: openRouterModel, messages, temperature: 0.85, max_tokens: 4096 }),
+        });
+        clearTimeout(t);
+        if (res.ok) {
+          const json = await res.json();
+          let text = json.choices?.[0]?.message?.content;
+          if (text) {
+            if (action === "ui") {
+              text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+              try { return JSON.parse(text); } catch { return { text }; }
+            }
+            return { text };
+          }
+        }
+      } catch (err) { console.warn("[AI] OpenRouter direct falló:", err); }
+    }
+
+    // ── 3. Gemini direct (VITE_GEMINI_API_KEY) ────────────────────────────
+    return this.callGeminiDirect(action, prompt, systemPrompt);
   },
 
   async callGeminiDirect(action: string, prompt: string, systemPrompt: string) {
+    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
     const activeGeminiModel = "gemini-1.5-flash";
-    const geminiMessages = action === "ui"
+    const contents = action === "ui"
       ? [{ parts: [{ text: `${systemPrompt}\n\nUSER PROMPT: ${prompt}` }] }]
       : [{ parts: [{ text: prompt }] }];
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    // 3a. Try direct Gemini API
+    if (geminiKey) {
+      try {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), 30000);
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${activeGeminiModel}:generateContent?key=${geminiKey}`,
+          {
+            method: "POST", signal: controller.signal,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents }),
+          }
+        );
+        clearTimeout(t);
+        if (res.ok) {
+          const json = await res.json();
+          let text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            if (action === "ui") {
+              text = text.replace(/```json/g, "").replace(/```/g, "").trim();
+              try { return JSON.parse(text); } catch { return { text }; }
+            }
+            return { text };
+          }
+        }
+      } catch (err) { console.warn("[AI] Gemini direct falló:", err); }
+    }
 
+    // 3b. Gemini via Supabase proxy as final fallback
     try {
-      const data = await this.callAiProxy("gemini", `models/${activeGeminiModel}:generateContent`, {
-        contents: geminiMessages
-      }, controller.signal);
-      
-      clearTimeout(timeoutId);
-
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), 30000);
+      const data = await this.callAiProxy("gemini", `models/${activeGeminiModel}:generateContent`, { contents }, controller.signal);
+      clearTimeout(t);
       let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!text) throw new Error("Gemini devolvió una respuesta vacía.");
-
       if (action === "ui") {
         text = text.replace(/```json/g, "").replace(/```/g, "").trim();
         try { return JSON.parse(text); } catch { return { text }; }
       }
       return { text };
     } catch (err: any) {
-      clearTimeout(timeoutId);
-      throw new Error(`Error de generación (ambos proveedores fallaron). Detalles: ${err.message}`);
+      throw new Error(`Error de generación (todos los proveedores fallaron). Verifica tu conexión e intenta de nuevo.`);
     }
   },
 
@@ -402,20 +452,13 @@ Responde SOLO con el JSON raw, sin markdown, sin explicaciones.`;
       const { data, error } = await supabase.functions.invoke("media-proxy", {
         body: { tool, image_url: imageUrl },
       });
-
-      if (error) {
-        throw new Error(error.message || `Proxy error (Asegúrate de haber iniciado sesión y configurado los Supabase Secrets)`);
-      }
-
-      if (data && data.error) {
-        throw new Error(data.error);
-      }
-
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
       return data;
     } catch (err: any) {
-      console.error("Media Proxy Failure:", err.message);
-      // Fallback: If proxy fails or is misconfigured, fail hard to trigger credit refund
-      throw new Error(`Error en motor de procesamiento de medios ("${tool}"): ${err.message}`);
+      console.warn(`[Media Proxy] "${tool}" no disponible:`, err.message);
+      // Return the original image unchanged — credits will be refunded
+      throw new Error(`La herramienta "${tool}" no está disponible actualmente. Tus créditos serán reembolsados.`);
     }
   },
 };

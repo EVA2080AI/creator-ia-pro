@@ -4,7 +4,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useAdmin } from "@/hooks/useAdmin";
 import {
   Sparkles, LayoutGrid, Wand2, Image, Shield, CreditCard, LogOut,
-  Palette, Home, Menu, X, Code, User,
+  Palette, Home, Menu, X, User, Download,
   ChevronDown, Coins, Monitor
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -140,10 +140,10 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                 {/* Menu items */}
                 <div className="space-y-0.5">
                   {[
-                    { label: "Mi Perfil",           icon: User,    path: "/profile" },
-                    { label: "Mis Activos",          icon: Image,   path: "/assets" },
-                    { label: "Compartir pantalla",   icon: Monitor, path: "/sharescreen" },
-                    { label: "Desarrollador",        icon: Code,    path: "/developer" },
+                    { label: "Mi Perfil",           icon: User,     path: "/profile" },
+                    { label: "Mis Activos",          icon: Image,    path: "/assets" },
+                    { label: "Compartir pantalla",   icon: Monitor,  path: "/sharescreen" },
+                    { label: "Descargar App",        icon: Download, path: "/descargar" },
                   ].map(item => (
                     <button
                       key={item.path}

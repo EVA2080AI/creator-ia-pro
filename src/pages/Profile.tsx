@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import {
   User, Mail, Shield, Coins, Settings, LogOut, Loader2, Save,
   Camera, Calendar, CreditCard, ChevronRight, Bell, Check,
-  Image, MessageSquare, Zap
+  Image, MessageSquare, Zap, Download
 } from "lucide-react";
 
 const Profile = () => {
@@ -272,6 +272,18 @@ const Profile = () => {
                 </div>
               </div>
             </div>
+
+            {/* Download app */}
+            <button
+              onClick={() => navigate("/descargar")}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-white/[0.03] border border-white/5 text-sm font-medium text-white/50 hover:text-white hover:bg-white/[0.06] transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <Download className="w-4 h-4 text-aether-blue/60" />
+                Descargar App
+              </div>
+              <ChevronRight className="w-4 h-4 text-white/20" />
+            </button>
 
             {/* Sign out */}
             <button
