@@ -133,7 +133,7 @@ export default function Pricing() {
       return;
     }
     if (!isLoggedIn) {
-      toast.info("Authentication required for protocol synchronization");
+      toast.info("Necesitas iniciar sesión para suscribirte.");
       navigate("/auth");
       return;
     }
@@ -142,9 +142,9 @@ export default function Pricing() {
       const tier = STRIPE_TIERS[plan.stripeTier];
       const data = await stripeService.createCheckout(tier.price_id);
       if (data?.url) window.location.href = data.url;
-      else throw new Error("Nexus link failed");
+      else throw new Error("No se pudo generar el enlace de pago.");
     } catch (err: any) {
-      toast.error(err.message || "Protocol link error");
+      toast.error(err.message || "Error al procesar el pago.");
     } finally {
       setLoadingPlan(null);
     }
@@ -152,7 +152,7 @@ export default function Pricing() {
 
   const handleBuyCredits = async (pack: typeof CREDIT_PACKS[number]) => {
     if (!isLoggedIn) {
-      toast.info("Authentication required for credit manifestation");
+      toast.info("Necesitas iniciar sesión para comprar créditos.");
       navigate("/auth");
       return;
     }
@@ -160,9 +160,9 @@ export default function Pricing() {
     try {
       const data = await stripeService.buyCredits(pack.price_id);
       if (data?.url) window.location.href = data.url;
-      else throw new Error("Charge link failed");
+      else throw new Error("No se pudo generar el enlace de pago.");
     } catch (err: any) {
-      toast.error(err.message || "Charge manifestation error");
+      toast.error(err.message || "Error al procesar la compra.");
     } finally {
       setLoadingPack(null);
     }
@@ -246,8 +246,8 @@ export default function Pricing() {
               key={plan.name}
               className={cn(
                 "relative flex flex-col rounded-[3rem] p-10 transition-all duration-700 hover:-translate-y-4 group",
-                plan.name === 'Premium' 
-                  ? "aether-card border-aether-purple/30 shadow-5xl shadow-aether-purple/10 aether-border-glow" 
+                plan.key === 'pro'
+                  ? "aether-card border-aether-purple/30 shadow-5xl shadow-aether-purple/10 aether-border-glow"
                   : "aether-card border-white/5"
               )}
             >
@@ -257,11 +257,11 @@ export default function Pricing() {
 
               <div className="space-y-2 mb-8">
                  <h2 className="text-2xl font-bold text-white uppercase font-display tracking-tight">{plan.name}</h2>
-                 <p className="text-[11px] text-white/20 font-bold uppercase tracking-widest leading-relaxed">{plan.description}</p>
+                 <p className="text-sm text-white/30 font-medium leading-relaxed">{plan.description}</p>
               </div>
 
               <div className="mb-10 flex items-baseline gap-2">
-                <span className={cn("text-6xl font-bold tracking-tighter font-display", plan.name === 'Premium' ? "text-white" : "text-white/60")}>
+                <span className={cn("text-6xl font-bold tracking-tighter font-display", plan.key === 'pro' ? "text-white" : "text-white/60")}>
                   {plan.price}
                 </span>
                 <span className="text-[11px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">{plan.period}</span>
@@ -274,7 +274,7 @@ export default function Pricing() {
 
               <ul className="flex-1 space-y-5 px-2">
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-center gap-4 text-[11px] text-white/20 font-bold uppercase tracking-widest group-hover:text-white/40 transition-colors">
+                  <li key={feature} className="flex items-center gap-4 text-sm text-white/40 font-medium group-hover:text-white/60 transition-colors">
                     <Check className={cn("h-4 w-4 shrink-0", plan.color)} />
                     {feature}
                   </li>
@@ -286,8 +286,8 @@ export default function Pricing() {
                 disabled={loadingPlan === plan.key}
                 className={cn(
                   "mt-12 h-18 w-full rounded-2.5xl font-bold text-[11px] uppercase tracking-[0.3em] font-display transition-all active:scale-[0.98] shadow-4xl group-hover:scale-[1.02] duration-500",
-                  plan.name === "Starter" 
-                    ? "bg-white/5 text-white/40 border border-white/5 hover:bg-white/10 hover:text-white" 
+                  plan.key === "starter"
+                    ? "bg-white/5 text-white/40 border border-white/5 hover:bg-white/10 hover:text-white"
                     : "bg-white text-black hover:bg-white/90"
                 )}
               >
