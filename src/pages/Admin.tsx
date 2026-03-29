@@ -5,12 +5,15 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { AppHeader } from "@/components/AppHeader";
 import { adminService } from "@/services/billing-service";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
   Shield, Users, Search, Loader2, RefreshCw, Ban, CheckCircle,
   KeyRound, Coins, LayoutDashboard, Database, Zap, Settings,
   Eye, EyeOff, Save, Crown, GraduationCap, Building2, X,
   Plus, Minus, RotateCcw, History, ChevronDown, ChevronUp,
-  TrendingUp, UserCheck, Star, Package,
+  TrendingUp, UserCheck, Star, Package, BarChart2, Activity,
+  Code2, Image, Video, FileText, Terminal, CreditCard, Globe,
+  AlertTriangle, CheckCircle2, DollarSign, Users2, Layers,
 } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -247,6 +250,7 @@ function CreditModal({
 
 function AdminLoginGate() {
   const navigate = useNavigate();
+
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading]   = useState(false);
@@ -414,13 +418,22 @@ const Admin = () => {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"users" | "overview" | "settings">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "analytics" | "overview" | "settings">("users");
   const [creditModalUser, setCreditModalUser] = useState<AdminUser | null>(null);
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
 
   const [stripeKey, setStripeKey] = useState("");
   const [showStripeKey, setShowStripeKey] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
+
+  // Analytics state
+  const [analyticsData, setAnalyticsData] = useState<{
+    totalSpend: number;
+    recentUsers: number;
+    toolUsage: { name: string; count: number; color: string }[];
+    dailyCredits: { name: string; credits: number }[];
+  } | null>(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     setLoadingUsers(true);
@@ -434,9 +447,68 @@ const Admin = () => {
     setLoadingUsers(false);
   }, []);
 
+  const fetchAnalytics = useCallback(async () => {
+    setLoadingAnalytics(true);
+    try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const sevenDaysAgo  = new Date(Date.now() - 7  * 24 * 60 * 60 * 1000).toISOString();
+      const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+      const [txRes, newUsersRes] = await Promise.all([
+        supabase.from("transactions").select("amount, type, description, created_at")
+          .gte("created_at", thirtyDaysAgo)
+          .not("type", "in", '("subscription_reload","credit_purchase")'),
+        supabase.from("profiles").select("id", { count: "exact", head: true })
+          .gte("created_at", sevenDaysAgo),
+      ]);
+
+      const txs = txRes.data || [];
+      let totalSpend = 0;
+      let image = 0, video = 0, text = 0, canvas = 0, studio = 0;
+      const dayMap: Record<string, { name: string; credits: number }> = {};
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+        dayMap[d.toDateString()] = { name: DAY_LABELS[d.getDay()], credits: 0 };
+      }
+      txs.forEach((tx: any) => {
+        const abs = Math.abs(tx.amount || 0);
+        totalSpend += abs;
+        const desc = (tx.description || "").toLowerCase();
+        if (desc.includes("image") || desc.includes("imagen") || desc.includes("logo")) image++;
+        else if (desc.includes("video")) video++;
+        else if (desc.includes("studio") || desc.includes("code") || desc.includes("builderai")) studio++;
+        else if (desc.includes("canvas") || desc.includes("formarketing")) canvas++;
+        else text++;
+        const key = new Date(tx.created_at).toDateString();
+        if (dayMap[key]) dayMap[key].credits += abs;
+      });
+
+      setAnalyticsData({
+        totalSpend,
+        recentUsers: newUsersRes.count || 0,
+        toolUsage: [
+          { name: "Imagen IA",   count: image,  color: "#A855F7" },
+          { name: "Texto / Copy",count: text,   color: "#60A5FA" },
+          { name: "Video",       count: video,  color: "#F59E0B" },
+          { name: "BuilderAI",   count: studio, color: "#4ADE80" },
+          { name: "Canvas",      count: canvas, color: "#EC4899" },
+        ],
+        dailyCredits: Object.values(dayMap),
+      });
+    } catch (e) {
+      console.error("Analytics error:", e);
+    } finally {
+      setLoadingAnalytics(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (isAdmin) fetchUsers();
   }, [isAdmin, fetchUsers]);
+
+  useEffect(() => {
+    if (isAdmin && activeTab === "analytics") fetchAnalytics();
+  }, [isAdmin, activeTab, fetchAnalytics]);
 
   // No automatic redirect — show bootstrap screen if not admin
 
@@ -503,18 +575,49 @@ const Admin = () => {
   const paidUsers = users.filter(u => !["free", "educacion"].includes(u.subscription_tier)).length;
 
   const routes = [
-    "/", "/auth", "/dashboard", "/tools", "/formarketing", "/pricing",
-    "/spaces", "/assets", "/admin", "/system-status", "/reset-password",
-    "/descargar", "/herramienta/:slug", "/profile", "/hub", "/chat",
+    { path: "/",                  desc: "Landing pública" },
+    { path: "/auth",              desc: "Login / registro" },
+    { path: "/dashboard",         desc: "Panel del usuario" },
+    { path: "/chat",              desc: "Genesis — BuilderAI IDE" },
+    { path: "/studio",            desc: "Studio creativo" },
+    { path: "/spaces",            desc: "Mis espacios (Google Drive)" },
+    { path: "/formarketing",      desc: "Canvas IA (ReactFlow)" },
+    { path: "/hub",               desc: "Plantillas y templates" },
+    { path: "/tools",             desc: "Herramientas IA" },
+    { path: "/assets",            desc: "Biblioteca de activos" },
+    { path: "/pricing",           desc: "Planes y precios" },
+    { path: "/profile",           desc: "Perfil de usuario" },
+    { path: "/admin",             desc: "Panel administrativo" },
+    { path: "/system-status",     desc: "Estado del sistema" },
+    { path: "/reset-password",    desc: "Recuperar contraseña" },
+    { path: "/descargar",         desc: "Descargar app" },
+    { path: "/herramienta/:slug", desc: "Landing de herramienta" },
+    { path: "/sharescreen",       desc: "Compartir pantalla" },
   ];
 
   const tables = [
-    { name: "profiles",      desc: "Datos de usuario, créditos y plan" },
-    { name: "transactions",  desc: "Registro de débitos y créditos" },
-    { name: "user_roles",    desc: "Roles (admin / moderator / user)" },
-    { name: "canvas_nodes",  desc: "Nodos del lienzo" },
-    { name: "spaces",        desc: "Proyectos del usuario" },
-    { name: "saved_assets",  desc: "Biblioteca personal de assets" },
+    { name: "profiles",             desc: "Datos de usuario, créditos y plan",     rows: users.length },
+    { name: "transactions",         desc: "Registro de débitos y créditos",        rows: null },
+    { name: "user_roles",           desc: "Roles (admin / moderator / user)",      rows: null },
+    { name: "spaces",               desc: "Proyectos del usuario",                  rows: null },
+    { name: "saved_assets",         desc: "Biblioteca personal de assets",          rows: null },
+    { name: "canvas_nodes",         desc: "Nodos del lienzo ForMarketing",          rows: null },
+    { name: "studio_projects",      desc: "Proyectos BuilderAI (Genesis)",          rows: null },
+    { name: "studio_conversations", desc: "Conversaciones del IDE",                 rows: null },
+    { name: "studio_messages",      desc: "Mensajes del chat de Studio",            rows: null },
+    { name: "github_connections",   desc: "Repos conectados de GitHub",             rows: null },
+  ];
+
+  const edgeFunctions = [
+    { name: "ai-proxy",          desc: "Texto e imagen IA (OpenRouter)",      icon: Zap,      color: "#A855F7" },
+    { name: "media-proxy",       desc: "Edición de imagen (Replicate)",       icon: Image,    color: "#60A5FA" },
+    { name: "video-gen",         desc: "Generación de video (Replicate)",     icon: Video,    color: "#F59E0B" },
+    { name: "studio-generate",   desc: "BuilderAI — generación de código",    icon: Code2,    color: "#4ADE80" },
+    { name: "stripe-webhook",    desc: "Webhook de pagos Stripe",             icon: CreditCard, color: "#635BFF" },
+    { name: "create-checkout",   desc: "Crear sesión de pago Stripe",         icon: DollarSign, color: "#4ADE80" },
+    { name: "customer-portal",   desc: "Portal de cliente Stripe",            icon: Users2,   color: "#EC4899" },
+    { name: "admin-settings",    desc: "Guardar configuración de plataforma", icon: Settings, color: "#6B7280" },
+    { name: "deploy-hook",       desc: "Redeployment automático (Vercel)",    icon: Globe,    color: "#60A5FA" },
   ];
 
   if (authLoading || adminLoading) {
@@ -574,7 +677,7 @@ const Admin = () => {
             { label: "Usuarios", value: users.length, icon: Users, color: "#A855F7" },
             { label: "Planes pagos", value: paidUsers, icon: TrendingUp, color: "#4ADE80" },
             { label: "Créditos totales", value: totalCredits.toLocaleString(), icon: Coins, color: "#F59E0B" },
-            { label: "Rutas", value: routes.length, icon: LayoutDashboard, color: "#60A5FA" },
+            { label: "Conversión", value: users.length ? `${Math.round((paidUsers/users.length)*100)}%` : "0%", icon: BarChart2, color: "#60A5FA" },
           ].map((s) => {
             const Icon = s.icon;
             return (
@@ -592,11 +695,12 @@ const Admin = () => {
         </div>
 
         {/* ── Tabs ── */}
-        <div className="flex gap-1 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1 w-fit">
+        <div className="flex gap-1 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1 w-fit overflow-x-auto">
           {([
-            { key: "users" as const,    icon: Users,           label: "Usuarios" },
-            { key: "overview" as const, icon: LayoutDashboard, label: "Sistema" },
-            { key: "settings" as const, icon: Settings,        label: "Config" },
+            { key: "users" as const,     icon: Users,           label: "Usuarios" },
+            { key: "analytics" as const, icon: BarChart2,       label: "Analytics" },
+            { key: "overview" as const,  icon: LayoutDashboard, label: "Sistema" },
+            { key: "settings" as const,  icon: Settings,        label: "Config" },
           ] as const).map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.key;
@@ -845,16 +949,197 @@ const Admin = () => {
           </div>
         )}
 
+        {/* ── Analytics tab ── */}
+        {activeTab === "analytics" && (
+          <div className="space-y-6">
+            {loadingAnalytics ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="h-6 w-6 animate-spin text-[#A855F7]" />
+              </div>
+            ) : analyticsData ? (
+              <>
+                {/* KPIs */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { label: "Créditos consumidos (30d)", value: analyticsData.totalSpend.toLocaleString(), icon: Activity, color: "#A855F7" },
+                    { label: "Nuevos usuarios (7d)",     value: analyticsData.recentUsers, icon: Users, color: "#4ADE80" },
+                    { label: "Revenue estimado",          value: `$${(paidUsers * 19).toLocaleString()}`, icon: DollarSign, color: "#F59E0B" },
+                    { label: "Tasa conversión",           value: users.length ? `${Math.round((paidUsers/users.length)*100)}%` : "0%", icon: TrendingUp, color: "#60A5FA" },
+                  ].map((s) => {
+                    const Icon = s.icon;
+                    return (
+                      <div key={s.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 flex items-center gap-3">
+                        <div className="h-9 w-9 shrink-0 rounded-xl flex items-center justify-center" style={{ background: s.color + "18" }}>
+                          <Icon className="h-4 w-4" style={{ color: s.color }} />
+                        </div>
+                        <div>
+                          <p className="font-mono text-xl font-bold text-white leading-none">{s.value}</p>
+                          <p className="text-[10px] text-white/35 mt-0.5 leading-none">{s.label}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Credit usage per day (sparkline) */}
+                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em]">Consumo de créditos</h3>
+                      <p className="text-[9px] text-white/20 mt-0.5 uppercase tracking-widest">Últimos 7 días · todas las cuentas</p>
+                    </div>
+                    <Activity className="h-4 w-4 text-[#A855F7]" />
+                  </div>
+                  <div className="flex items-end gap-2 h-20">
+                    {analyticsData.dailyCredits.map((d, i) => {
+                      const max = Math.max(...analyticsData.dailyCredits.map(x => x.credits), 1);
+                      const pct = (d.credits / max) * 100;
+                      return (
+                        <div key={i} className="flex flex-1 flex-col items-center gap-1.5">
+                          <div
+                            className="w-full rounded-t-lg bg-[#A855F7]/40 hover:bg-[#A855F7]/70 transition-all min-h-[4px]"
+                            style={{ height: `${Math.max(pct, 5)}%` }}
+                            title={`${d.credits.toLocaleString()} créditos`}
+                          />
+                          <span className="text-[9px] text-white/25 font-bold">{d.name}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Tool usage breakdown */}
+                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em]">Uso por herramienta</h3>
+                      <p className="text-[9px] text-white/20 mt-0.5 uppercase tracking-widest">Últimos 30 días</p>
+                    </div>
+                    <Layers className="h-4 w-4 text-white/20" />
+                  </div>
+                  {analyticsData.toolUsage.every(t => t.count === 0) ? (
+                    <p className="text-xs text-white/30 text-center py-6">Sin actividad en este período</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {analyticsData.toolUsage.map((tool) => {
+                        const total = analyticsData.toolUsage.reduce((s, t) => s + t.count, 0) || 1;
+                        const pct = Math.round((tool.count / total) * 100);
+                        return (
+                          <div key={tool.name}>
+                            <div className="flex justify-between text-xs mb-1.5">
+                              <span className="text-white/50 font-medium">{tool.name}</span>
+                              <span className="text-white/30 font-mono">{tool.count} · {pct}%</span>
+                            </div>
+                            <div className="h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all duration-700"
+                                style={{ width: `${pct}%`, background: tool.color }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Tier distribution */}
+                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+                  <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] mb-4">Distribución de planes</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {Object.entries(TIERS).map(([key, cfg]) => {
+                      const count = tierCounts[key] || 0;
+                      const Icon = cfg.icon;
+                      return (
+                        <div
+                          key={key}
+                          className="flex items-center gap-2 rounded-xl px-3 py-2.5 border"
+                          style={{ borderColor: cfg.color + "25", background: cfg.color + "08" }}
+                        >
+                          <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: cfg.color }} />
+                          <div>
+                            <p className="text-sm font-bold text-white tabular-nums">{count}</p>
+                            <p className="text-[10px]" style={{ color: cfg.color + "AA" }}>{cfg.label}</p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="py-16 text-center">
+                <p className="text-sm text-white/30 mb-4">No se pudieron cargar los analytics</p>
+                <button onClick={fetchAnalytics} className="inline-flex items-center gap-2 text-xs text-[#A855F7] hover:underline">
+                  <RefreshCw className="h-3.5 w-3.5" /> Reintentar
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ── Overview tab ── */}
         {activeTab === "overview" && (
           <div className="space-y-6">
+
+            {/* Edge Functions */}
             <div>
-              <h2 className="mb-3 text-xs font-bold text-white/40 uppercase tracking-widest">Rutas del Frontend</h2>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest">Edge Functions · Supabase</h2>
+                <span className="flex items-center gap-1.5 rounded-full bg-green-500/10 border border-green-500/20 px-3 py-1 text-[11px] font-semibold text-green-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
+                  {edgeFunctions.length} activas
+                </span>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {edgeFunctions.map((fn) => {
+                  const Icon = fn.icon;
+                  return (
+                    <div key={fn.name} className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+                      <div className="h-8 w-8 shrink-0 rounded-lg flex items-center justify-center" style={{ background: fn.color + "15" }}>
+                        <Icon className="h-3.5 w-3.5" style={{ color: fn.color }} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-mono text-xs font-semibold text-white truncate">{fn.name}</p>
+                        <p className="text-[10px] text-white/30 truncate">{fn.desc}</p>
+                      </div>
+                      <CheckCircle2 className="h-3.5 w-3.5 text-green-400 shrink-0" />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* DB Tables */}
+            <div>
+              <h2 className="mb-3 text-xs font-bold text-white/40 uppercase tracking-widest">Tablas · PostgreSQL</h2>
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {tables.map((t) => (
+                  <div key={t.name} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Database className="h-3.5 w-3.5 text-[#A855F7]" />
+                      <span className="font-mono text-sm font-semibold text-white">{t.name}</span>
+                      {t.rows !== null && (
+                        <span className="ml-auto text-[10px] font-mono text-white/30">{t.rows}</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-white/35">{t.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Frontend routes */}
+            <div>
+              <h2 className="mb-3 text-xs font-bold text-white/40 uppercase tracking-widest">Rutas del Frontend · {routes.length} páginas</h2>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {routes.map((r) => (
-                  <div key={r} className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
-                    <span className="font-mono text-sm text-white/60">{r}</span>
-                    <span className="flex items-center gap-1.5 rounded-full bg-green-500/10 border border-green-500/15 px-2.5 py-0.5 text-[10px] font-bold text-green-400">
+                  <div key={r.path} className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 gap-3">
+                    <div className="min-w-0">
+                      <span className="font-mono text-xs text-white/70 block truncate">{r.path}</span>
+                      <span className="text-[10px] text-white/25 truncate">{r.desc}</span>
+                    </div>
+                    <span className="flex items-center gap-1.5 shrink-0 rounded-full bg-green-500/10 border border-green-500/15 px-2.5 py-0.5 text-[10px] font-bold text-green-400">
                       <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
                       live
                     </span>
@@ -863,20 +1148,6 @@ const Admin = () => {
               </div>
             </div>
 
-            <div>
-              <h2 className="mb-3 text-xs font-bold text-white/40 uppercase tracking-widest">Tablas de Base de Datos</h2>
-              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {tables.map((t) => (
-                  <div key={t.name} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <Database className="h-3.5 w-3.5 text-[#A855F7]" />
-                      <span className="font-mono text-sm font-semibold text-white">{t.name}</span>
-                    </div>
-                    <p className="text-xs text-white/35">{t.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         )}
 

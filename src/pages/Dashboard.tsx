@@ -122,12 +122,12 @@ const Dashboard = () => {
   ];
 
   const aiApps = [
-    { icon: Megaphone, label: "Studio Canvas", desc: "Lienzo creativo",   path: "/formarketing"    },
-    { icon: MessageSquare, label: "Crear texto",   desc: "Copy marketing",  path: "/apps/copywriter" },
-    { icon: PenTool,    label: "Diseñar logo",  desc: "Identidad de marca", path: "/apps/logo"       },
-    { icon: Hash,       label: "Redes sociales",desc: "Contenido social",   path: "/apps/social"     },
-    { icon: FileText,   label: "Artículo SEO",  desc: "Blog optimizado",    path: "/apps/blog"       },
-    { icon: Type,       label: "Crear anuncio", desc: "Ads Meta & Google",  path: "/apps/ads"        },
+    { icon: Zap,        label: "Genesis IDE",   desc: "BuilderAI · Lovable", path: "/chat"         },
+    { icon: Megaphone,  label: "Canvas IA",     desc: "Lienzo creativo",     path: "/formarketing" },
+    { icon: PenTool,    label: "Studio",        desc: "Herramientas creativas",path: "/studio"     },
+    { icon: MessageSquare, label: "Chat IA",   desc: "Copy & texto",        path: "/chat"          },
+    { icon: Hash,       label: "Hub",           desc: "Templates listos",    path: "/hub"           },
+    { icon: FileText,   label: "Mis Espacios",  desc: "Google Drive IA",     path: "/spaces"        },
   ];
 
   if (authLoading) {
@@ -266,10 +266,32 @@ const Dashboard = () => {
             </div>
           </div>
 
+          {/* Genesis CTA */}
+          <div
+            onClick={() => navigate("/chat")}
+            className="group cursor-pointer relative overflow-hidden rounded-2xl border border-aether-purple/20 bg-gradient-to-r from-aether-purple/10 via-aether-blue/5 to-transparent p-5 hover:border-aether-purple/40 transition-all duration-300"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-aether-purple/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+            <div className="relative flex items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_6px_rgba(168,85,247,0.9)]" />
+                  <span className="text-[10px] font-bold text-aether-purple/70 uppercase tracking-[0.2em] font-display">Genesis · BuilderAI</span>
+                </div>
+                <h2 className="text-xl font-bold text-white font-display tracking-tight">¿Qué vas a crear hoy?</h2>
+                <p className="text-xs text-white/30 mt-1">Describe tu idea y Genesis la construye en segundos</p>
+              </div>
+              <div className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-aether-purple text-white rounded-xl text-xs font-bold uppercase tracking-widest group-hover:bg-aether-purple/80 transition-all active:scale-95 font-display">
+                <Rocket className="w-3.5 h-3.5" />
+                Crear
+              </div>
+            </div>
+          </div>
+
           {/* AI Tools */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.4em] font-display">Herramientas IA</h2>
+              <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.4em] font-display">Accesos rápidos</h2>
               <button onClick={() => navigate("/hub")} className="flex items-center gap-1.5 text-[10px] font-bold text-white/30 hover:text-white transition-all tracking-widest uppercase font-display">
                 Hub <ArrowRight className="w-3 h-3" />
               </button>
