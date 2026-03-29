@@ -43,6 +43,35 @@ export interface AIActionParams {
   image?: string;
   tool?: string;
   node_id?: string;
+  onProgress?: (step: string, pct: number) => void;
+}
+
+// ─── ERROR CLASSIFIER ─────────────────────────────────────────────────────────
+export type ErrorType = 'credits' | 'rate_limit' | 'timeout' | 'model_down' | 'network' | 'unknown';
+export interface ClassifiedError {
+  type: ErrorType;
+  userMessage: string;
+  canRetry: boolean;
+}
+
+export function classifyError(msg: string): ClassifiedError {
+  const m = msg.toLowerCase();
+  if (m.includes('crédito') || m.includes('credit') || m.includes('insufficient') || m.includes('balance')) {
+    return { type: 'credits', userMessage: 'Créditos insuficientes. Recarga tu plan para continuar.', canRetry: false };
+  }
+  if (m.includes('rate limit') || m.includes('demasiadas') || m.includes('429')) {
+    return { type: 'rate_limit', userMessage: 'Demasiadas solicitudes. Espera un momento y vuelve a intentarlo.', canRetry: true };
+  }
+  if (m.includes('timeout') || m.includes('tardó') || m.includes('too long')) {
+    return { type: 'timeout', userMessage: 'La IA tardó demasiado. Tus créditos fueron reembolsados.', canRetry: true };
+  }
+  if (m.includes('unavailable') || m.includes('503') || m.includes('overloaded') || m.includes('not configured')) {
+    return { type: 'model_down', userMessage: 'El modelo de IA no está disponible ahora. Intenta con otro modelo.', canRetry: true };
+  }
+  if (m.includes('network') || m.includes('fetch') || m.includes('connection')) {
+    return { type: 'network', userMessage: 'Error de conexión. Verifica tu internet e intenta de nuevo.', canRetry: true };
+  }
+  return { type: 'unknown', userMessage: msg || 'Error desconocido. Intenta de nuevo.', canRetry: true };
 }
 
 export const aiService = {
@@ -94,7 +123,7 @@ export const aiService = {
 
       // 4. Route to correct handler
       let result: any;
-      if (tool && ["upscale", "background", "enhance", "restore", "eraser", "variation"].includes(tool)) {
+      if (tool && ["upscale", "background", "enhance", "restore", "eraser", "variation", "style", "product"].includes(tool)) {
         if (!image) throw new Error(`La herramienta "${tool}" requiere una imagen de origen.`);
         result = await this.handleMediaProxy(tool, image);
       } else if (action === "image" || IMAGE_MODEL_IDS.has(model) || tool === "generate" || tool === "logo") {
@@ -195,15 +224,36 @@ ${userCredits < 3 ? "⚠️ Créditos bajos — Plan Pro garantiza acceso contin
     throw new Error("No se pudo generar la imagen. Intenta de nuevo.");
   },
 
-  // ─── VIDEO GENERATION ─────────────────────────────────────────────────────────
-  async handleVideoGen(prompt: string) {
-    const { data, error } = await supabase.functions.invoke("media-proxy", {
-      body: { tool: "video", prompt },
-    });
-    if (error) throw new Error(error.message);
-    if ((data as any)?.error) throw new Error((data as any).error);
-    if ((data as any)?.url) return { url: (data as any).url, text: "Video generado con IA" };
-    throw new Error("La generación de video está en proceso de activación. Tus créditos serán reembolsados.");
+  // ─── VIDEO GENERATION — Replicate via media-proxy ────────────────────────────
+  async handleVideoGen(prompt: string, onProgress?: (step: string, pct: number) => void) {
+    const steps = [
+      ['Iniciando generación…', 5],
+      ['Enviando a Replicate…', 20],
+      ['Procesando frames…', 55],
+      ['Exportando video…', 85],
+    ] as [string, number][];
+
+    let stepIdx = 0;
+    onProgress?.(steps[0][0], steps[0][1]);
+    const progressTimer = setInterval(() => {
+      stepIdx = Math.min(stepIdx + 1, steps.length - 1);
+      onProgress?.(steps[stepIdx][0], steps[stepIdx][1]);
+    }, 12000);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("media-proxy", {
+        body: { tool: "video", prompt },
+      });
+      clearInterval(progressTimer);
+      onProgress?.('Listo', 100);
+      if (error) throw new Error(error.message);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      if ((data as any)?.url) return { url: (data as any).url, text: "Video generado con IA" };
+      throw new Error("La generación de video tardó demasiado. Tus créditos serán reembolsados.");
+    } catch (err) {
+      clearInterval(progressTimer);
+      throw err;
+    }
   },
 
   // ─── STREAMING TEXT (for ForMarketing tools) ──────────────────────────────────
@@ -278,12 +328,33 @@ ${userCredits < 3 ? "⚠️ Créditos bajos — Plan Pro garantiza acceso contin
   },
 
   // ─── MEDIA PROXY (image editing tools) ───────────────────────────────────────
-  async handleMediaProxy(tool: string, imageUrl: string) {
-    const { data, error } = await supabase.functions.invoke("media-proxy", {
-      body: { tool, image_url: imageUrl },
-    });
-    if (error) throw new Error(`La herramienta "${tool}" falló: ${error.message}`);
-    if ((data as any)?.error) throw new Error((data as any).error);
-    return data as any;
+  async handleMediaProxy(tool: string, imageUrl: string, onProgress?: (step: string, pct: number) => void) {
+    const steps = [
+      ['Iniciando…', 5],
+      ['Enviando imagen…', 20],
+      ['Procesando…', 60],
+      ['Finalizando…', 90],
+    ] as [string, number][];
+
+    let stepIdx = 0;
+    onProgress?.(steps[0][0], steps[0][1]);
+    const progressTimer = setInterval(() => {
+      stepIdx = Math.min(stepIdx + 1, steps.length - 1);
+      onProgress?.(steps[stepIdx][0], steps[stepIdx][1]);
+    }, 3000);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("media-proxy", {
+        body: { tool, image_url: imageUrl },
+      });
+      clearInterval(progressTimer);
+      onProgress?.('Listo', 100);
+      if (error) throw new Error(`La herramienta "${tool}" falló: ${error.message}`);
+      if ((data as any)?.error) throw new Error((data as any).error);
+      return data as any;
+    } catch (err) {
+      clearInterval(progressTimer);
+      throw err;
+    }
   },
 };
