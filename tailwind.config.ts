@@ -66,25 +66,25 @@ export default {
         warning: 'hsl(var(--warning))',
         // Zephyr Design System Tokens
         aether: {
-          bg:           '#080808',
-          canvas:       '#060606',
-          card:         '#101010',
-          'card-hover': '#181818',
-          purple:       '#4ADE80',   // brand green (replaces purple across all components)
+          bg:           '#16161b',
+          canvas:       '#131317',
+          card:         '#1c1c22',
+          'card-hover': '#222228',
+          purple:       '#8b5cf6',   // real purple — UI accent (Lovable-style)
           blue:         '#60A5FA',   // blue secondary
           rose:         '#F87171',
-          glass:        'rgba(16, 16, 16, 0.90)',
-          border:       'rgba(255, 255, 255, 0.10)',
-          'border-hover': 'rgba(255, 255, 255, 0.18)',
+          glass:        'rgba(22, 22, 27, 0.92)',
+          border:       'rgba(255, 255, 255, 0.08)',
+          'border-hover': 'rgba(255, 255, 255, 0.14)',
         },
         // Zephyr surfaces
         zephyr: {
-          base:    '#080808',
-          '1':     '#101010',
-          '2':     '#181818',
-          '3':     '#222222',
-          '4':     '#2C2C2C',
-          brand:   '#4ADE80',
+          base:    '#16161b',
+          '1':     '#1c1c22',
+          '2':     '#222228',
+          '3':     '#2a2a32',
+          '4':     '#32323c',
+          brand:   '#4ADE80',   // brand green — logo only
           blue:    '#60A5FA',
         },
         gold: {

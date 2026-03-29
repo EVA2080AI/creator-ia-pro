@@ -45,7 +45,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[100] h-[56px] flex items-center"
-      style={{ background: 'rgba(8,8,8,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      style={{ background: 'rgba(18,18,22,0.96)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
       <div className="w-full max-w-[1400px] mx-auto px-5 flex items-center gap-5">
 
         {/* Logo */}
@@ -78,13 +78,10 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                     ? "text-white"
                     : "text-white/40 hover:text-white/70"
                 )}
-                style={active ? { background: 'rgba(255,255,255,0.08)' } : undefined}
+                style={active ? { background: 'rgba(139,92,246,0.12)', color: 'white' } : undefined}
               >
-                <item.icon className="w-3.5 h-3.5 shrink-0" style={active && item.path === '/chat' ? { color: '#4ADE80' } : undefined} />
+                <item.icon className="w-3.5 h-3.5 shrink-0" />
                 {item.label}
-                {item.path === "/chat" && !active && (
-                  <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full" style={{ background: '#4ADE80' }} />
-                )}
               </button>
             );
           })}
@@ -150,7 +147,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
               <>
                 <div className="fixed inset-0 z-[150]" onClick={() => setUserMenuOpen(false)} />
                 <div className="absolute right-0 top-full mt-2 w-52 rounded-xl overflow-hidden z-[200]"
-                  style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 16px 40px rgba(0,0,0,0.6)' }}>
+                  style={{ background: '#1e1e26', border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 12px 32px rgba(0,0,0,0.5)' }}>
                   <div className="px-3 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                     <p className="text-[13px] font-semibold text-white truncate">{profile?.display_name ?? "Mi Perfil"}</p>
                     <p className="text-[11px] text-white/30 truncate mt-0.5">{profile?.email ?? ""}</p>
@@ -206,7 +203,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className="fixed inset-0 top-[56px] z-40 md:hidden overflow-y-auto px-4 py-5"
-          style={{ background: 'rgba(8,8,8,0.98)', backdropFilter: 'blur(20px)' }}>
+          style={{ background: 'rgba(18,18,22,0.99)', backdropFilter: 'blur(20px)' }}>
 
           {/* User */}
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-4"
