@@ -445,7 +445,7 @@ export default function Pricing() {
                       )}
                     >
                       {pack.popular && (
-                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-aether-purple text-black">
+                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-aether-purple text-white">
                           Más popular
                         </div>
                       )}
@@ -465,7 +465,7 @@ export default function Pricing() {
                         className={cn(
                           "w-full py-2.5 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50",
                           pack.popular
-                            ? "bg-aether-purple text-black hover:bg-aether-purple/90"
+                            ? "bg-aether-purple text-white hover:bg-aether-purple/90"
                             : "border border-white/[0.10] text-white/60 hover:text-white hover:border-white/25 hover:bg-white/[0.04]"
                         )}
                       >

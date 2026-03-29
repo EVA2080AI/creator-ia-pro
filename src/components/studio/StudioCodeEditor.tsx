@@ -119,16 +119,16 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange }: 
   };
 
   return (
-    <div className="flex h-full flex-col bg-[#020203]">
+    <div className="flex h-full flex-col bg-[#1c1c22]">
       {/* Tabs */}
-      <div className="flex items-center border-b border-white/[0.05] bg-[#030304] overflow-x-auto no-scrollbar">
+      <div className="flex items-center border-b border-white/[0.05] bg-[#16161b] overflow-x-auto no-scrollbar">
         {openTabs.filter((t) => projectFiles[t]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`group flex items-center gap-2 px-4 py-2.5 text-sm border-r border-white/[0.05] transition-colors shrink-0 ${
               activeTab === tab
-                ? 'bg-[#020203] text-white border-b-2 border-b-aether-purple'
+                ? 'bg-[#1c1c22] text-white border-b-2 border-b-aether-purple'
                 : 'text-white/30 hover:text-white/70 hover:bg-white/[0.02]'
             }`}
           >
@@ -145,7 +145,7 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange }: 
       {/* Editor area */}
       <div className="relative flex flex-1 overflow-hidden">
         {/* Line numbers */}
-        <div ref={lineNumbersRef} className="w-12 shrink-0 overflow-hidden bg-[#020203] py-4 text-right select-none border-r border-white/[0.03]">
+        <div ref={lineNumbersRef} className="w-12 shrink-0 overflow-hidden bg-[#1c1c22] py-4 text-right select-none border-r border-white/[0.03]">
           {lines.map((_, i) => (
             <div key={i} className="pr-3 text-[11px] leading-6 text-white/15 font-mono">{i + 1}</div>
           ))}
@@ -188,7 +188,7 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange }: 
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t border-white/[0.05] bg-[#030304] px-4 py-1 text-[10px] text-white/20 font-mono">
+      <div className="flex items-center justify-between border-t border-white/[0.05] bg-[#16161b] px-4 py-1 text-[10px] text-white/20 font-mono">
         <div className="flex items-center gap-4">
           <span>{file.language.toUpperCase()}</span>
           <span>UTF-8</span>

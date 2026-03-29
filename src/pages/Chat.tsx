@@ -424,7 +424,7 @@ export default function Chat() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#030304]">
+      <div className="flex h-screen items-center justify-center bg-[#16161b]">
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-aether-purple/30 to-aether-blue/20 border border-white/10 flex items-center justify-center animate-pulse">
             <Code2 className="h-5 w-5 text-aether-purple" />
@@ -438,7 +438,7 @@ export default function Chat() {
   // Show Welcome screen when no project is active
   if (!activeProject) {
     return (
-      <div className="flex flex-col h-screen" style={{ background: '#08080e' }}>
+      <div className="flex flex-col h-screen" style={{ background: '#16161b' }}>
         <AppHeader userId={user?.id} onSignOut={signOut} />
         <div className="flex-1 overflow-hidden pt-14">
           <WelcomeScreen
@@ -456,36 +456,43 @@ export default function Chat() {
 
   // Full IDE view
   return (
-    <div className="flex flex-col h-screen bg-[#020203] overflow-hidden">
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#16161b' }}>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      {/* Genesis Top Bar */}
-      <div className="flex h-11 items-center gap-3 px-3 border-b border-white/[0.05] bg-[#030304] shrink-0 z-10 mt-16">
-        {/* Project name */}
+      {/* Genesis Top Bar — Lovable-style */}
+      <div className="flex h-12 items-center gap-2 px-3 shrink-0 z-10 mt-14"
+        style={{ background: '#1a1a20', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+
+        {/* Left: back + project */}
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-aether-purple/10 border border-aether-purple/20">
-            <Code2 className="h-3.5 w-3.5 text-aether-purple shrink-0" />
-            <span className="text-[11px] font-bold text-white/80 truncate max-w-[200px] font-display">{activeProject.name}</span>
-          </div>
           <button
             onClick={() => setActiveProject(null as any)}
-            className="text-[10px] text-white/20 hover:text-white/60 transition-colors font-display uppercase tracking-widest"
+            className="flex items-center gap-1 text-[12px] text-white/35 hover:text-white transition-colors shrink-0"
           >
-            ← Proyectos
+            ← <span className="hidden sm:block ml-0.5">Proyectos</span>
           </button>
+          <div className="h-4 w-px shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
+          <div className="flex items-center gap-1.5 min-w-0">
+            <Code2 className="h-3.5 w-3.5 text-aether-purple shrink-0" />
+            <span className="text-[12px] font-medium text-white/60 truncate max-w-[150px]">{activeProject.name}</span>
+          </div>
         </div>
 
-        {/* View toggles */}
-        <div className="hidden md:flex items-center gap-0.5 bg-white/[0.03] rounded-xl p-0.5 border border-white/[0.05]">
-          {(['code', 'split', 'preview'] as PanelView[]).map((v) => (
+        {/* Center: view toggles */}
+        <div className="hidden md:flex items-center gap-0.5 rounded-lg p-0.5" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+          {([
+            { v: 'preview', label: 'Preview', Icon: Monitor },
+            { v: 'split',   label: 'Split',   Icon: Tablet  },
+            { v: 'code',    label: 'Code',     Icon: Code2   },
+          ] as { v: PanelView; label: string; Icon: any }[]).map(({ v, label, Icon }) => (
             <button
               key={v}
               onClick={() => setPanelView(v)}
-              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all font-display ${
-                panelView === v ? 'bg-aether-purple/20 text-aether-purple' : 'text-white/25 hover:text-white'
-              }`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all"
+              style={panelView === v ? { background: 'rgba(255,255,255,0.09)', color: 'white' } : { color: 'rgba(255,255,255,0.35)' }}
             >
-              {v}
+              <Icon className="h-3 w-3" />
+              {label}
             </button>
           ))}
         </div>
@@ -493,24 +500,45 @@ export default function Chat() {
         {/* Device */}
         <div className="hidden md:flex items-center gap-0.5">
           {([{ m: 'desktop', I: Monitor }, { m: 'tablet', I: Tablet }, { m: 'mobile', I: Smartphone }] as { m: DeviceMode; I: any }[]).map(({ m, I }) => (
-            <button key={m} onClick={() => setDeviceMode(m)} className={`p-1.5 rounded-lg transition-all ${deviceMode === m ? 'text-aether-blue bg-aether-blue/10' : 'text-white/20 hover:text-white hover:bg-white/5'}`}>
+            <button key={m} onClick={() => setDeviceMode(m)}
+              className="p-1.5 rounded-md transition-all"
+              style={deviceMode === m ? { color: '#8b5cf6', background: 'rgba(139,92,246,0.12)' } : { color: 'rgba(255,255,255,0.25)' }}>
               <I className="h-3.5 w-3.5" />
             </button>
           ))}
         </div>
 
-        <button
-          onClick={() => setSidebarView('github')}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[10px] font-bold text-white/30 hover:text-white hover:border-white/15 transition-all font-display"
-        >
-          <Github className="h-3.5 w-3.5" />
-          <span className="hidden sm:block">Push</span>
-        </button>
+        {/* Right: GitHub + Share + Publish */}
+        <div className="flex items-center gap-1.5 ml-1 shrink-0">
+          <button
+            onClick={() => setSidebarView('github')}
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white/40 hover:text-white transition-all"
+            style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <Github className="h-3.5 w-3.5" />
+            GitHub
+          </button>
+          <button
+            onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copiado'); }}
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white/40 hover:text-white transition-all"
+            style={{ border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            Share
+          </button>
+          <button
+            onClick={() => toast.success('Proyecto publicado')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-white transition-all active:scale-95"
+            style={{ background: '#8b5cf6' }}
+          >
+            <UploadCloud className="h-3.5 w-3.5" />
+            Publish
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Activity bar */}
-        <div className="flex flex-col items-center gap-2 w-10 py-2 border-r border-white/[0.05] bg-[#030304] shrink-0">
+        <div className="flex flex-col items-center gap-2 w-10 py-2 border-r border-white/[0.05] bg-[#16161b] shrink-0">
           {([
             { v: 'files' as SidebarView, I: Files, t: 'Archivos' },
             { v: 'projects' as SidebarView, I: FolderOpen, t: 'Proyectos' },
@@ -534,7 +562,7 @@ export default function Chat() {
             <StudioFileTree files={projectFiles} selectedFile={selectedFile} onSelect={setSelectedFile} onAddFile={handleAddFile} onDeleteFile={handleDeleteFile} />
           )}
           {sidebarView === 'projects' && (
-            <div className="flex flex-col h-full bg-[#030304]">
+            <div className="flex flex-col h-full bg-[#16161b]">
               <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.05]">
                 <span className="text-[10px] font-bold text-white/25 uppercase tracking-[0.3em] font-display">Proyectos</span>
                 <span className="text-[10px] text-white/15 font-bold">{projects.length}</span>
@@ -569,7 +597,7 @@ export default function Chat() {
             </div>
           )}
           {sidebarView === 'github' && (
-            <div className="flex flex-col h-full bg-[#030304] overflow-y-auto">
+            <div className="flex flex-col h-full bg-[#16161b] overflow-y-auto">
               <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05]">
                 <Github className="h-3.5 w-3.5 text-white/30" />
                 <span className="text-[10px] font-bold text-white/25 uppercase tracking-[0.3em] font-display">GitHub Push</span>
@@ -628,7 +656,7 @@ export default function Chat() {
                 <MessageSquare className="h-5 w-5" />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:w-[360px] p-0 bg-[#030304] border-white/[0.05]">
+            <SheetContent side="right" className="w-full sm:w-[360px] p-0 bg-[#16161b] border-white/[0.05]">
               <StudioChat
                 projectId={activeProject.id}
                 projectFiles={projectFiles}

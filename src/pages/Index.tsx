@@ -405,7 +405,7 @@ export default function Index() {
                     }`}
                   >
                     {plan.popular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-aether-purple text-black text-[10px] font-black uppercase tracking-widest">
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-aether-purple text-white text-[10px] font-black uppercase tracking-widest">
                         Más popular
                       </div>
                     )}

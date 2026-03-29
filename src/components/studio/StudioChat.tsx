@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Sparkles, Bot, User, Plus, Loader2, Code, Zap, FileCode, ChevronDown } from 'lucide-react';
+import { Send, Sparkles, Bot, User, Plus, Loader2, Code, Zap, FileCode, ChevronDown, ThumbsUp, ThumbsDown, Copy, RotateCcw, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -201,71 +201,98 @@ export function StudioChat({ projectId, projectFiles, onCodeGenerated, onNewConv
   };
 
   const showSuggestions = messages.length === 1 && messages[0].id === 'welcome';
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const copyMessage = (content: string, id: string) => {
+    navigator.clipboard.writeText(content);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   return (
-    <div className="flex h-full flex-col bg-[#030304]">
-      {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.05] bg-[#030304]">
-        <div className="relative">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-aether-purple/30 to-aether-blue/30 border border-white/10">
-            <Sparkles className="h-4 w-4 text-aether-purple" />
-          </div>
-          <div className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-green-500 border-2 border-[#030304]" />
+    <div className="flex h-full flex-col" style={{ background: '#141417' }}>
+      {/* Header — Lovable-style */}
+      <div className="flex items-center gap-2.5 px-4 py-3 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="relative flex h-7 w-7 items-center justify-center rounded-lg shrink-0" style={{ background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)' }}>
+          <Sparkles className="h-3.5 w-3.5 text-aether-purple" />
+          <div className="absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full bg-emerald-400 border border-[#141417]" />
         </div>
-        <div>
-          <span className="text-[13px] font-bold text-white block leading-tight font-display">BuilderAI</span>
-          <span className="text-[10px] text-white/30">Claude Sonnet 4.6</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-[12px] font-semibold text-white leading-none">Genesis AI</p>
+          <p className="text-[10px] text-white/30 mt-0.5">Claude Sonnet 4.6</p>
         </div>
         <button
           onClick={() => { setMessages([WELCOME]); onNewConversation?.(); }}
-          className="ml-auto p-2 rounded-xl text-white/20 hover:text-white hover:bg-white/5 transition-all"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] text-white/35 hover:text-white hover:bg-white/[0.05] transition-all"
           title="Nueva conversación"
         >
-          <Plus className="h-4 w-4" />
+          <Plus className="h-3.5 w-3.5" />
+          <span className="hidden sm:block">Nuevo</span>
         </button>
       </div>
 
       {/* Messages */}
-      <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div ref={containerRef} onScroll={handleScroll} className="flex-1 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar">
         {messages.map((msg) => (
-          <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-            <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-xl ${
-              msg.role === 'assistant' ? 'bg-gradient-to-br from-aether-purple/20 to-aether-blue/20 border border-white/10' : 'bg-white/10'
-            }`}>
-              {msg.role === 'assistant'
-                ? <Bot className="h-3.5 w-3.5 text-aether-purple" />
-                : <User className="h-3.5 w-3.5 text-white/50" />
-              }
-            </div>
-
-            <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-              msg.role === 'assistant'
-                ? `bg-white/[0.04] border text-white/80 ${msg.type === 'code' ? 'border-green-500/20 bg-green-500/5' : 'border-white/[0.06]'}`
-                : 'bg-aether-purple/20 border border-aether-purple/30 text-white'
-            }`}>
-              {msg.role === 'assistant' ? (
-                <div
-                  className="prose-custom"
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
-                />
-              ) : (
+          <div key={msg.id} className={`group ${msg.role === 'user' ? 'flex justify-end mb-3' : 'mb-4'}`}>
+            {msg.role === 'user' ? (
+              <div className="max-w-[88%] rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-[13px] leading-relaxed text-white"
+                style={{ background: 'rgba(139,92,246,0.18)', border: '1px solid rgba(139,92,246,0.25)' }}>
                 <span className="whitespace-pre-wrap">{msg.content}</span>
-              )}
-              <span className="block mt-2 text-[10px] opacity-30">
-                {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
+              </div>
+            ) : (
+              <div>
+                {/* Assistant message — no bubble, inline like Lovable */}
+                <div className="flex items-start gap-2 px-1">
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md mt-0.5"
+                    style={{ background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.2)' }}>
+                    <Bot className="h-3 w-3 text-aether-purple" />
+                  </div>
+                  <div className={`flex-1 text-[13px] leading-relaxed text-white/75 ${msg.type === 'code' ? 'text-white/90' : ''}`}>
+                    <div
+                      className="prose-custom"
+                      dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+                    />
+                  </div>
+                </div>
+                {/* Reactions bar — Lovable-style */}
+                <div className="flex items-center gap-0.5 ml-8 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => copyMessage(msg.content, msg.id)}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md text-white/25 hover:text-white hover:bg-white/[0.06] transition-all text-[10px]">
+                    {copiedId === msg.id ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                  </button>
+                  <button className="px-2 py-1 rounded-md text-white/25 hover:text-white hover:bg-white/[0.06] transition-all">
+                    <ThumbsUp className="h-3 w-3" />
+                  </button>
+                  <button className="px-2 py-1 rounded-md text-white/25 hover:text-white hover:bg-white/[0.06] transition-all">
+                    <ThumbsDown className="h-3 w-3" />
+                  </button>
+                  <button onClick={() => handleSend(messages[messages.indexOf(msg) - 1]?.content)}
+                    className="px-2 py-1 rounded-md text-white/25 hover:text-white hover:bg-white/[0.06] transition-all">
+                    <RotateCcw className="h-3 w-3" />
+                  </button>
+                  <span className="ml-1 text-[10px] text-white/15">
+                    {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         ))}
 
         {isGenerating && (
-          <div className="flex items-center gap-3">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-aether-purple/20 to-aether-blue/20 border border-white/10">
-              <Bot className="h-3.5 w-3.5 text-aether-purple" />
+          <div className="flex items-start gap-2 px-1 mb-4">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+              style={{ background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.2)' }}>
+              <Loader2 className="h-3 w-3 text-aether-purple animate-spin" />
             </div>
-            <div className="flex items-center gap-2 rounded-2xl bg-white/[0.04] border border-white/[0.06] px-4 py-3">
-              <Loader2 className="h-3.5 w-3.5 text-aether-purple animate-spin" />
-              <span className="text-[12px] text-white/50">{genProgress || 'Generando…'}</span>
+            <div className="flex items-center gap-2 py-1">
+              <div className="flex gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-aether-purple/60 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="h-1.5 w-1.5 rounded-full bg-aether-purple/60 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="h-1.5 w-1.5 rounded-full bg-aether-purple/60 animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+              <span className="text-[11px] text-white/35">{genProgress || 'Generando…'}</span>
             </div>
           </div>
         )}
@@ -277,50 +304,57 @@ export function StudioChat({ projectId, projectFiles, onCodeGenerated, onNewConv
       {showScrollBtn && (
         <button
           onClick={() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); setShowScrollBtn(false); }}
-          className="absolute bottom-28 right-4 z-10 h-8 w-8 flex items-center justify-center rounded-full bg-aether-purple/80 text-white shadow-lg hover:bg-aether-purple transition-colors"
+          className="absolute bottom-24 right-3 z-10 h-7 w-7 flex items-center justify-center rounded-full bg-aether-purple text-white shadow-lg hover:bg-aether-purple/80 transition-colors"
         >
-          <ChevronDown className="h-4 w-4" />
+          <ChevronDown className="h-3.5 w-3.5" />
         </button>
       )}
 
       {/* Suggestions */}
       {showSuggestions && (
-        <div className="px-4 pb-2 flex flex-wrap gap-2">
+        <div className="px-3 pb-2 flex flex-col gap-1.5">
           {SUGGESTIONS.map((s, i) => (
             <button
               key={i}
               onClick={() => handleSend(s.prompt)}
-              className="flex items-center gap-2 rounded-full border border-white/[0.06] bg-white/[0.03] px-3 py-1.5 text-[11px] text-white/40 hover:text-white hover:border-aether-purple/40 hover:bg-aether-purple/5 transition-all"
+              className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-[12px] text-white/50 hover:text-white transition-all text-left"
+              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(139,92,246,0.25)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'; }}
             >
-              <s.icon className="h-3 w-3" />
+              <s.icon className="h-3.5 w-3.5 text-aether-purple/60 shrink-0" />
               {s.text}
             </button>
           ))}
         </div>
       )}
 
-      {/* Input */}
-      <div className="border-t border-white/[0.05] p-4">
-        <div className="flex items-end gap-2 rounded-2xl bg-white/[0.03] border border-white/[0.06] px-4 py-3 focus-within:border-aether-purple/40 transition-colors">
+      {/* Input — Lovable-style */}
+      <div className="shrink-0 p-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="rounded-xl overflow-hidden transition-all"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <textarea
             ref={inputRef}
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Describe lo que quieres crear…"
-            className="flex-1 bg-transparent text-[13px] text-white placeholder:text-white/20 outline-none resize-none min-h-[22px] max-h-[140px]"
+            placeholder="Ask Genesis…"
+            className="w-full bg-transparent px-3.5 pt-3 pb-2 text-[13px] text-white placeholder:text-white/25 outline-none resize-none min-h-[20px] max-h-[120px] leading-relaxed"
             disabled={isGenerating}
             rows={1}
           />
-          <button
-            onClick={() => handleSend()}
-            disabled={!input.trim() || isGenerating}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-aether-purple text-white disabled:opacity-30 disabled:cursor-not-allowed hover:bg-aether-purple/80 transition-all active:scale-95"
-          >
-            {isGenerating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-          </button>
+          <div className="flex items-center justify-between px-3 pb-2.5">
+            <span className="text-[10px] text-white/20">↵ enviar · ⇧↵ nueva línea</span>
+            <button
+              onClick={() => handleSend()}
+              disabled={!input.trim() || isGenerating}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white disabled:opacity-30 transition-all active:scale-95"
+              style={{ background: input.trim() && !isGenerating ? '#8b5cf6' : 'rgba(139,92,246,0.3)' }}
+            >
+              {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+            </button>
+          </div>
         </div>
-        <p className="text-[9px] text-white/15 text-center mt-2 font-display tracking-widest uppercase">BuilderAI · Verifica el código generado</p>
       </div>
     </div>
   );

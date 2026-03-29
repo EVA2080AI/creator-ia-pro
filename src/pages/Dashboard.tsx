@@ -134,17 +134,17 @@ const Dashboard = () => {
 
   if (authLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-[#050506]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-aether-purple animate-spin" />
-          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Accediendo al Nexus...</p>
+      <div className="h-screen w-screen flex items-center justify-center" style={{ background: '#16161b' }}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 rounded-xl border-2 border-white/10 border-t-aether-purple animate-spin" />
+          <p className="text-[11px] text-white/30">Cargando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050506] text-white selection:bg-aether-purple/30 selection:text-white font-sans">
+    <div className="min-h-screen text-white font-sans" style={{ background: '#16161b' }}>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main className="pt-16">
@@ -153,7 +153,7 @@ const Dashboard = () => {
           {/* Post-checkout success banner */}
           {(checkoutSuccess || creditsSuccess) && (
             <div className="relative overflow-hidden rounded-2xl border border-aether-purple/30 bg-aether-purple/8 px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgba(74,222,128,0.06) 0%, transparent 70%)' }} />
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgba(139,92,246,0.06) 0%, transparent 70%)' }} />
               <div className="flex items-center gap-3 shrink-0">
                 <div className="w-10 h-10 rounded-xl bg-aether-purple/20 border border-aether-purple/30 flex items-center justify-center">
                   <Zap className="w-5 h-5 text-aether-purple" />
@@ -173,7 +173,7 @@ const Dashboard = () => {
               <div className="flex items-center gap-2 sm:ml-auto">
                 <button
                   onClick={() => navigate('/chat')}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-aether-purple text-black text-[12px] font-black uppercase tracking-widest hover:bg-aether-purple/90 transition-all active:scale-95"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-aether-purple text-white text-[12px] font-black uppercase tracking-widest hover:bg-aether-purple/90 transition-all active:scale-95"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   Ir a Genesis
@@ -192,8 +192,8 @@ const Dashboard = () => {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.8)]" />
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] font-display">System Active</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span className="text-[11px] text-white/35">Activo</span>
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-display">
                 Hola, <span className="bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">{profile?.display_name?.split(' ')[0] || 'Creator'}</span>
@@ -220,7 +220,7 @@ const Dashboard = () => {
               ) : (
                 <button
                   onClick={() => navigate("/pricing")}
-                  className="px-5 py-2 bg-aether-purple text-black rounded-xl flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest hover:bg-aether-purple/90 transition-all active:scale-95"
+                  className="px-5 py-2 bg-aether-purple text-white rounded-xl flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest hover:bg-aether-purple/90 transition-all active:scale-95"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   Upgrade
@@ -265,8 +265,8 @@ const Dashboard = () => {
                   <AreaChart data={usageData}>
                     <defs>
                       <linearGradient id="creditsGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#4ADE80" stopOpacity={0.2} />
-                        <stop offset="100%" stopColor="#4ADE80" stopOpacity={0} />
+                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.2} />
+                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 9, fontWeight: 600 }} dy={10} />
@@ -276,7 +276,7 @@ const Dashboard = () => {
                       labelStyle={{ color: 'rgba(255,255,255,0.4)', marginBottom: '2px' }}
                       itemStyle={{ color: '#fff' }}
                     />
-                    <Area type="monotone" dataKey="credits" stroke="#4ADE80" strokeWidth={2} fill="url(#creditsGrad)" dot={{ r: 3, fill: '#4ADE80', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
+                    <Area type="monotone" dataKey="credits" stroke="#8b5cf6" strokeWidth={2} fill="url(#creditsGrad)" dot={{ r: 3, fill: '#8b5cf6', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -326,7 +326,7 @@ const Dashboard = () => {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.9)]" />
-                  <span className="text-[10px] font-bold text-aether-purple/70 uppercase tracking-[0.2em] font-display">Genesis · BuilderAI</span>
+                  <span className="text-[11px] font-semibold text-aether-purple/80">Genesis · BuilderAI</span>
                 </div>
                 <h2 className="text-xl font-bold text-white font-display tracking-tight">¿Qué vas a crear hoy?</h2>
                 <p className="text-xs text-white/30 mt-1">Describe tu idea y Genesis la construye en segundos</p>
@@ -416,7 +416,7 @@ const Dashboard = () => {
 
       {/* Create Space Dialog */}
       <Dialog open={isCreatingSpace} onOpenChange={setIsCreatingSpace}>
-        <DialogContent className="bg-[#0a0a0b]/95 border border-white/10 rounded-3xl text-white max-w-md p-8 backdrop-blur-3xl">
+        <DialogContent className="border border-white/[0.08] rounded-2xl text-white max-w-md p-8" style={{ background: '#1c1c22' }}>
           <DialogHeader className="mb-6">
             <div className="w-12 h-12 rounded-2xl bg-aether-blue/20 text-aether-blue flex items-center justify-center mb-4 border border-aether-blue/20">
               <Rocket className="w-6 h-6" />

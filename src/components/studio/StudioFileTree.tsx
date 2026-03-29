@@ -39,7 +39,7 @@ export function StudioFileTree({ files, selectedFile, onSelect, onAddFile, onDel
   });
 
   return (
-    <div className="flex flex-col h-full bg-[#030304]">
+    <div className="flex flex-col h-full bg-[#16161b]">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.05]">
         <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Archivos</span>
         <button

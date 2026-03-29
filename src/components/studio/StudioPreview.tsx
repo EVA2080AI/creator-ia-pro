@@ -64,9 +64,9 @@ export function StudioPreview({ files, deviceMode = 'desktop', onDeviceModeChang
   }, [files, refreshKey]);
 
   return (
-    <div className="flex h-full flex-col bg-[#020203]">
+    <div className="flex h-full flex-col bg-[#1c1c22]">
       {/* Toolbar */}
-      <div className="flex items-center justify-between border-b border-white/[0.05] px-3 py-2 bg-[#030304]">
+      <div className="flex items-center justify-between border-b border-white/[0.05] px-3 py-2 bg-[#16161b]">
         <div className="flex items-center gap-1">
           {(['desktop', 'tablet', 'mobile'] as DeviceMode[]).map((mode) => {
             const Icon = mode === 'desktop' ? Monitor : mode === 'tablet' ? Tablet : Smartphone;
@@ -118,7 +118,7 @@ export function StudioPreview({ files, deviceMode = 'desktop', onDeviceModeChang
       </div>
 
       {/* Preview */}
-      <div className="flex flex-1 items-center justify-center bg-[#0a0a0b] p-3 overflow-hidden">
+      <div className="flex flex-1 items-center justify-center bg-[#16161b] p-3 overflow-hidden">
         <div
           key={refreshKey}
           className="h-full rounded-2xl border border-white/[0.06] bg-white shadow-2xl overflow-hidden transition-all duration-300"
