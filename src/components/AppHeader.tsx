@@ -6,7 +6,7 @@ import {
   Sparkles, Shield, LogOut,
   Home, Menu, X, User, Download,
   ChevronDown, Coins, Monitor,
-  Code2, Wand2, FolderOpen, CreditCard, Image, Zap
+  Code2, Wand2, FolderOpen, CreditCard, Image, Zap, LayoutTemplate
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,10 +16,11 @@ interface AppHeaderProps {
 }
 
 const NAV_ITEMS = [
-  { path: "/dashboard", label: "Home",    icon: Home  },
-  { path: "/chat",      label: "Genesis", icon: Code2 },
-  { path: "/studio",    label: "Studio",  icon: Wand2 },
-  { path: "/spaces",    label: "Spaces",  icon: FolderOpen },
+  { path: "/dashboard",   label: "Home",    icon: Home           },
+  { path: "/chat",        label: "Genesis", icon: Code2          },
+  { path: "/studio",      label: "Studio",  icon: Wand2          },
+  { path: "/formarketing", label: "Canvas", icon: LayoutTemplate },
+  { path: "/spaces",      label: "Spaces",  icon: FolderOpen     },
 ];
 
 export function AppHeader({ userId, onSignOut }: AppHeaderProps) {

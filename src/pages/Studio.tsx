@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import {
   Image, Video, Palette, FileText, Megaphone, Hash,
   Wand2, ZoomIn, ImagePlus, RotateCcw, Sparkles,
-  ArrowRight, Layers, PenTool, ShoppingBag, Zap,
+  PenTool, ShoppingBag, Zap,
   Upload, Loader2, Download, Copy, X, Check, BookmarkPlus,
   CheckCircle2, ChevronRight, Clock, Search,
 } from 'lucide-react';
@@ -141,28 +141,6 @@ function StudioWelcome({ onSelectTool, recentAssets, loadingAssets }: {
             </button>
           ))}
         </div>
-      </div>
-
-      {/* Canvas CTA */}
-      <div>
-        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mb-4">Producción avanzada</p>
-        <button
-          onClick={() => navigate('/formarketing')}
-          className="group relative w-full rounded-2xl overflow-hidden border border-white/[0.06] hover:border-aether-blue/30 transition-all text-left"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-aether-blue/10 via-transparent to-aether-purple/8 pointer-events-none" />
-          <div className="relative flex items-center justify-between p-6">
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4 text-aether-blue" />
-                <span className="text-[10px] font-bold text-aether-blue/70 uppercase tracking-[0.3em]">Canvas Editor</span>
-              </div>
-              <p className="text-sm font-bold text-white">Flujos de producción visual</p>
-              <p className="text-[12px] text-white/35">Editor node-based para campañas completas con imagen y video IA.</p>
-            </div>
-            <ArrowRight className="h-5 w-5 text-white/20 group-hover:text-aether-blue group-hover:translate-x-1 transition-all shrink-0" />
-          </div>
-        </button>
       </div>
 
       {/* Recent assets */}
@@ -628,20 +606,6 @@ export default function Studio() {
             ))}
           </div>
 
-          {/* Canvas CTA footer */}
-          <div className="shrink-0 p-3 border-t border-white/[0.05]">
-            <button
-              onClick={() => window.location.href = '/formarketing'}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-aether-blue/10 border border-aether-blue/20 text-aether-blue hover:bg-aether-blue/15 transition-all"
-            >
-              <Layers className="h-3.5 w-3.5 shrink-0" />
-              <div className="text-left">
-                <p className="text-[10px] font-bold uppercase tracking-widest">Canvas Editor</p>
-                <p className="text-[9px] text-aether-blue/60">Video + flujos visuales</p>
-              </div>
-              <ArrowRight className="h-3.5 w-3.5 ml-auto" />
-            </button>
-          </div>
         </div>
 
         {/* ── Main Area ─────────────────────────────────────────────────────── */}
