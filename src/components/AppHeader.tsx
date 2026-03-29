@@ -6,7 +6,7 @@ import {
   Sparkles, Shield, LogOut,
   Home, Menu, X, User, Download,
   ChevronDown, Coins, Monitor,
-  Code2, Wand2, FolderOpen, CreditCard, Image
+  Code2, Wand2, FolderOpen, CreditCard, Image, Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -104,10 +104,19 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
         {/* Right zone */}
         <div className="flex items-center gap-2 shrink-0">
 
+          {/* Pricing CTA — visible to all */}
+          <button
+            onClick={() => handleNav("/pricing")}
+            className="hidden sm:flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-white/30 hover:text-white hover:border-white/15 transition-all font-display"
+          >
+            <Zap className="w-3 h-3 text-aether-purple shrink-0" />
+            Precios
+          </button>
+
           {/* Credits counter */}
           <button
             onClick={() => handleNav("/pricing")}
-            className="hidden sm:flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2 text-[12px] font-semibold text-white/40 hover:text-white hover:bg-white/[0.06] transition-all group"
+            className="hidden lg:flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2 text-[12px] font-semibold text-white/40 hover:text-white hover:bg-white/[0.06] transition-all group"
           >
             <Coins className="w-3.5 h-3.5 text-aether-purple group-hover:text-aether-purple shrink-0" />
             <span className="tabular-nums">{profile?.credits_balance?.toLocaleString() ?? "0"}</span>

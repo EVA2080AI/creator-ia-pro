@@ -36,9 +36,9 @@ const PLANS = [
     features: [
       { label: "100,000 créditos/mes", highlight: true },
       { label: "Modelos ECO (Gemini Flash, Llama, Mistral)", highlight: false },
-      { label: "Studio Canvas", highlight: false },
-      { label: "AI Tools (imágenes, textos)", highlight: false },
-      { label: "Aether Chat con IA", highlight: false },
+      { label: "Genesis IDE — BuilderAI code generator", highlight: false },
+      { label: "Studio — herramientas creativas IA", highlight: false },
+      { label: "Canvas IA (ReactFlow node editor)", highlight: false },
       { label: "Soporte email", highlight: false },
     ],
     lockedFeatures: ["Modelos PRO y ULTRA", "Brand Voice"],
@@ -63,13 +63,13 @@ const PLANS = [
     features: [
       { label: "500,000 créditos/mes", highlight: true },
       { label: "Modelos ECO + PRO", highlight: true },
-      { label: "Claude 3.5 Sonnet · GPT-4o · Gemini Pro", highlight: false },
+      { label: "Claude Sonnet · GPT-4o · Gemini Pro", highlight: false },
+      { label: "Genesis IDE + GitHub push", highlight: true },
       { label: "Brand Voice personalizado", highlight: true },
-      { label: "Todo lo del plan Starter", highlight: false },
       { label: "Soporte prioritario", highlight: false },
     ],
     lockedFeatures: ["Modelos ULTRA (Claude Opus)"],
-    psychNote: "$29 = el café de un mes en Starbucks × 4 🚀",
+    psychNote: "$29 = el café de un mes en Starbucks × 4",
   },
   {
     key: "agency" as const,
@@ -90,9 +90,9 @@ const PLANS = [
     features: [
       { label: "2,000,000 créditos/mes", highlight: true },
       { label: "TODOS los modelos (ECO + PRO + ULTRA)", highlight: true },
-      { label: "Claude Opus · GPT-4o Ultra · Mistral Large", highlight: false },
+      { label: "Claude Opus · GPT-4o · Mistral Large", highlight: false },
+      { label: "Genesis IDE + proyectos ilimitados", highlight: true },
       { label: "Soporte prioritario 24/7", highlight: true },
-      { label: "Todo lo del plan Creator", highlight: false },
       { label: "API access (próximamente)", highlight: false },
     ],
     lockedFeatures: [],
@@ -102,14 +102,18 @@ const PLANS = [
 
 // ─── Comparison table rows ────────────────────────────────────────────────────
 const COMPARISON_ROWS = [
-  { label: "Créditos/mes",       starter: "100K",  creator: "500K",  agency: "2M" },
-  { label: "Modelos ECO",        starter: true,    creator: true,    agency: true },
-  { label: "Modelos PRO",        starter: false,   creator: true,    agency: true },
-  { label: "Modelos ULTRA",      starter: false,   creator: false,   agency: true },
-  { label: "Aether Chat IA",     starter: true,    creator: true,    agency: true },
-  { label: "Studio Canvas",      starter: true,    creator: true,    agency: true },
-  { label: "Brand Voice",        starter: false,   creator: true,    agency: true },
-  { label: "Soporte",            starter: "Email", creator: "Prior", agency: "24/7" },
+  { label: "Créditos/mes",             starter: "100K",  creator: "500K",  agency: "2M" },
+  { label: "Modelos ECO",              starter: true,    creator: true,    agency: true },
+  { label: "Modelos PRO",              starter: false,   creator: true,    agency: true },
+  { label: "Modelos ULTRA",            starter: false,   creator: false,   agency: true },
+  { label: "Genesis IDE (BuilderAI)",  starter: true,    creator: true,    agency: true },
+  { label: "GitHub push",              starter: true,    creator: true,    agency: true },
+  { label: "Studio — herramientas IA", starter: true,    creator: true,    agency: true },
+  { label: "Canvas IA (ReactFlow)",    starter: true,    creator: true,    agency: true },
+  { label: "Spaces (Drive IA)",        starter: true,    creator: true,    agency: true },
+  { label: "Brand Voice",              starter: false,   creator: true,    agency: true },
+  { label: "Proyectos en Genesis",     starter: "5",     creator: "∞",     agency: "∞" },
+  { label: "Soporte",                  starter: "Email", creator: "Prior", agency: "24/7" },
 ];
 
 // ─── Lightning bolts component ────────────────────────────────────────────────
@@ -391,11 +395,12 @@ export default function Pricing() {
             </h2>
             <div className="space-y-3">
               {[
-                { q: "¿Qué son los multiplicadores ECO/PRO/ULTRA?", a: "Son factores que determinan cuántos créditos consume cada modelo. Un modelo ECO (1×) usa 1 crédito por ~100 tokens. Un modelo PRO (5×) usa 5 créditos. ULTRA (20×) usa 20. Esto refleja el costo real de inferencia y protege la rentabilidad del servicio." },
-                { q: "¿Puedo cambiar de plan cuando quiera?", a: "Sí. Puedes subir o bajar de plan en cualquier momento. Los créditos del ciclo actual se mantienen." },
+                { q: "¿Qué es Genesis IDE?", a: "Genesis es nuestro generador de código IA estilo Lovable. Describes tu app en lenguaje natural y BuilderAI genera React + Tailwind listo para producción. Puedes hacer push directo a tu repositorio de GitHub." },
+                { q: "¿Qué son los multiplicadores ECO/PRO/ULTRA?", a: "Son factores que determinan cuántos créditos consume cada modelo. Un modelo ECO (1×) usa 1 crédito por ~100 tokens. Un modelo PRO (5×) usa 5 créditos. ULTRA (20×) usa 20. Esto refleja el costo real de inferencia." },
+                { q: "¿Puedo cambiar de plan cuando quiera?", a: "Sí. Puedes subir o bajar de plan en cualquier momento desde el Portal de cliente. Los créditos del ciclo actual se mantienen." },
                 { q: "¿Qué pasa si se me acaban los créditos?", a: "Puedes comprar un pack extra (top-up) sin cambiar de plan, o esperar tu renovación mensual." },
                 { q: "¿Los créditos expiran?", a: "Los créditos mensuales se renuevan cada ciclo de facturación. Los packs de top-up no expiran." },
-                { q: "¿Quién es dueño de lo que genero?", a: "Tú. El 100% de los activos generados en planes de pago son de tu propiedad." },
+                { q: "¿Quién es dueño de lo que genero?", a: "Tú. El 100% de los activos y el código generado en planes de pago son de tu propiedad absoluta." },
               ].map(faq => (
                 <div key={faq.q} className="rounded-2xl border border-white/[0.06] px-6 py-4">
                   <p className="text-[13px] font-bold text-white/70 mb-2">{faq.q}</p>
