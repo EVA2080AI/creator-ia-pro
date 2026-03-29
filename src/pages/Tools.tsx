@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { AppHeader } from "@/components/AppHeader";
@@ -164,6 +164,7 @@ const Tools = () => {
   const { profile, refreshProfile } = useProfile(user?.id);
   const navigate = useNavigate();
   const { appId } = useParams();
+  const [searchParams] = useSearchParams();
 
   const [activeTool, setActiveTool]           = useState<ToolId>("generate");
   const [category, setCategory]               = useState<"image" | "text">("image");
@@ -183,12 +184,15 @@ const Tools = () => {
   const fileRef    = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (appId && appIdToToolId[appId]) {
-      const tool = tools.find((t) => t.id === appIdToToolId[appId])!;
+    // Support both /apps/:appId and /tools?tool=xxx
+    const toolParam = searchParams.get('tool') as ToolId | null;
+    const resolvedId = (appId ? appIdToToolId[appId] : null) || (toolParam && tools.find(t => t.id === toolParam) ? toolParam : null);
+    if (resolvedId) {
+      const tool = tools.find((t) => t.id === resolvedId)!;
       setActiveTool(tool.id);
       setCategory(tool.category);
     }
-  }, [appId]);
+  }, [appId, searchParams]);
 
   // Auto-scroll result while streaming
   useEffect(() => {
