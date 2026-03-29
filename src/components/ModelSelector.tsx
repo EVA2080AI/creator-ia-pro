@@ -33,8 +33,8 @@ export const AVAILABLE_MODELS: AIModel[] = [
   { id: "gemini-3-flash",      name: "Gemini 2.0 Flash",     provider: "Google",      tokenCost: 1,  description: "Respuestas ultrarrápidas de Google.",                    type: "text" },
   { id: "gemini-3.1-pro-low",  name: "Gemini 2.5 Pro",       provider: "Google",      tokenCost: 1,  badge: "Nuevo",         description: "Inteligencia avanzada de Google.",                 type: "text" },
   { id: "gemini-3.1-pro-high", name: "Gemini 2.5 Pro Max",   provider: "Google",      tokenCost: 3,  badge: "Alta IQ",       description: "Razonamiento profundo y lógica compleja.",         type: "text" },
-  { id: "claude-3.5-sonnet",   name: "Claude Sonnet 4.5",    provider: "Anthropic",   tokenCost: 4,  badge: "Thinking",      description: "Código avanzado y análisis de Anthropic.",         type: "text" },
-  { id: "claude-3-opus",       name: "Claude Opus 4.5",      provider: "Anthropic",   tokenCost: 5,  badge: "Genius",        description: "El modelo más capaz de Anthropic.",                type: "text" },
+  { id: "claude-3.5-sonnet",   name: "Claude Sonnet 4.6",    provider: "Anthropic",   tokenCost: 4,  badge: "Thinking",      description: "Código avanzado y análisis de Anthropic.",         type: "text" },
+  { id: "claude-3-opus",       name: "Claude Opus 4.6",      provider: "Anthropic",   tokenCost: 5,  badge: "Genius",        description: "El modelo más capaz de Anthropic.",                type: "text" },
   { id: "gpt-oss-120b",        name: "Llama 4 Maverick",     provider: "OpenSource",  tokenCost: 2,  badge: "Open Source",   description: "Modelo open source de alto rendimiento.",          type: "text" },
   // ─── IMAGEN — FLUX y SDXL vía OpenRouter ─────────────────────────────────────
   { id: "flux-schnell",        name: "FLUX Schnell",         provider: "OpenRouter",  tokenCost: 2,  badge: "Recomendado",   description: "FLUX.1 Schnell — rápido, 4 pasos, 1024×1024.",    type: "image" },
@@ -179,7 +179,7 @@ function ModelItem({
         {/* Active dot */}
         <div className={cn(
           "w-1.5 h-1.5 rounded-full shrink-0 transition-all",
-          isSelected ? "bg-aether-purple shadow-[0_0_8px_rgba(168,85,247,0.8)]" : "bg-white/10"
+          isSelected ? "bg-aether-purple shadow-[0_0_8px_rgba(74,222,128,0.8)]" : "bg-white/10"
         )} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">

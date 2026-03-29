@@ -37,8 +37,8 @@ const CHAT_MODELS = [
   { id: 'mistral-small',       name: 'Mistral Small',     badge: 'Privacidad', cost: 1, color: '#FF6B6B', openrouter: 'mistralai/mistral-small-3.1-24b-instruct' },
   { id: 'gemini-3.1-pro-low',  name: 'Gemini 2.5 Pro',    badge: 'Análisis',   cost: 1, color: '#00E5A0', openrouter: 'google/gemini-2.5-pro-preview-03-25' },
   { id: 'mistral-large',       name: 'Mistral Large',     badge: 'EU',         cost: 2, color: '#FF9500', openrouter: 'mistralai/mistral-large' },
-  { id: 'claude-3.5-sonnet',   name: 'Claude Sonnet 4.5', badge: 'Creativo',   cost: 4, color: '#A855F7', openrouter: 'anthropic/claude-sonnet-4-5' },
-  { id: 'claude-3-opus',       name: 'Claude Opus 4.5',   badge: 'Máximo',     cost: 5, color: '#F59E0B', openrouter: 'anthropic/claude-opus-4-5' },
+  { id: 'claude-3.5-sonnet',   name: 'Claude Sonnet 4.6', badge: 'Creativo',   cost: 4, color: '#A855F7', openrouter: 'anthropic/claude-sonnet-4-6' },
+  { id: 'claude-3-opus',       name: 'Claude Opus 4.6',   badge: 'Máximo',     cost: 5, color: '#F59E0B', openrouter: 'anthropic/claude-opus-4-6' },
   { id: 'gpt-oss-120b',        name: 'Llama 4 Maverick',  badge: 'Open',       cost: 2, color: '#EC4899', openrouter: 'meta-llama/llama-4-maverick' },
 ];
 

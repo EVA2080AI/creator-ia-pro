@@ -214,7 +214,7 @@ export function StudioChat({ projectId, projectFiles, onCodeGenerated, onNewConv
         </div>
         <div>
           <span className="text-[13px] font-bold text-white block leading-tight font-display">BuilderAI</span>
-          <span className="text-[10px] text-white/30">Claude Sonnet 4.5</span>
+          <span className="text-[10px] text-white/30">Claude Sonnet 4.6</span>
         </div>
         <button
           onClick={() => { setMessages([WELCOME]); onNewConversation?.(); }}

@@ -11,27 +11,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CreditProgressBar } from "@/components/CreditProgressBar";
 
-// Global ambient glassmorphism background — excluded on Studio/Canvas
+// Subtle background ambient — Zephyr system (no heavy orbs)
 function GlobalAmbient() {
   const loc = useLocation();
-  const isCanvas = loc.pathname.startsWith("/formarketing") || loc.pathname === "/canvas" || loc.pathname === "/chat";
-  if (isCanvas) return null;
+  const isFullscreen = loc.pathname.startsWith("/formarketing") || loc.pathname === "/canvas" || loc.pathname === "/chat" || loc.pathname === "/studio";
+  if (isFullscreen) return null;
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden>
-      {/* Purple top-left orb */}
-      <div className="absolute -top-[20%] -left-[10%] h-[70vh] w-[70vh] rounded-full bg-aether-purple/[0.06] blur-[130px]" />
-      {/* Blue top-right orb */}
-      <div className="absolute top-[10%] right-[-5%] h-[50vh] w-[50vh] rounded-full bg-aether-blue/[0.04] blur-[110px]" />
-      {/* Rose bottom-center orb */}
-      <div className="absolute bottom-[5%] left-[30%] h-[40vh] w-[40vh] rounded-full bg-rose-500/[0.03] blur-[100px] animate-pulse" />
-      {/* Noise grain */}
-      <div
-        className="fixed inset-0 opacity-[0.025] mix-blend-overlay"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E")`,
-          backgroundSize: "200px 200px",
-        }}
-      />
+      {/* Single very subtle brand gradient at top */}
+      <div className="absolute -top-[30%] left-[20%] h-[60vh] w-[80vw] rounded-full"
+        style={{ background: 'radial-gradient(ellipse, rgba(74,222,128,0.025) 0%, transparent 70%)' }} />
     </div>
   );
 }
@@ -86,8 +75,8 @@ const Studio = lazy(() => import("./pages/Studio"));
 const LoadingScreen = () => (
   <div className="flex h-screen w-screen items-center justify-center bg-[#09090b]">
     <div className="relative">
-      <div className="absolute inset-0 bg-[#EC4699]/20 blur-2xl rounded-full animate-pulse" />
-      <Loader2 className="relative h-10 w-10 animate-spin-slow text-[#EC4699]" />
+      <div className="absolute inset-0 bg-aether-purple/20 blur-2xl rounded-full animate-pulse" />
+      <Loader2 className="relative h-10 w-10 animate-spin text-aether-purple" />
     </div>
   </div>
 );

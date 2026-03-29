@@ -38,15 +38,19 @@ interface WelcomeScreenProps {
   onPrompt: (prompt: string) => void;
   onCreateProject: () => void;
   creating: boolean;
+  projects: StudioProject[];
+  onSelectProject: (p: StudioProject) => void;
 }
 
-function WelcomeScreen({ onPrompt, onCreateProject, creating }: WelcomeScreenProps) {
+function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelectProject }: WelcomeScreenProps) {
   const [input, setInput] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) onPrompt(input.trim());
   };
+
+  const hasProjects = projects.length > 0;
 
   return (
     <div className="flex flex-col items-center justify-center h-full px-6 py-12 relative overflow-hidden">
@@ -58,7 +62,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating }: WelcomeScreenPro
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-aether-purple/30 to-aether-blue/20 border border-white/10 shadow-2xl">
           <Code2 className="h-7 w-7 text-aether-purple" />
         </div>
-        <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-aether-purple shadow-[0_0_12px_rgba(168,85,247,0.8)] flex items-center justify-center">
+        <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-aether-purple shadow-[0_0_12px_rgba(74,222,128,0.8)] flex items-center justify-center">
           <Sparkles className="h-2.5 w-2.5 text-white" />
         </div>
       </div>
@@ -69,6 +73,43 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating }: WelcomeScreenPro
       <p className="text-white/40 text-sm text-center mb-10 max-w-xs leading-relaxed">
         Describe lo que quieres construir. La IA genera el código completo.
       </p>
+
+      {/* Recent projects — returning users */}
+      {hasProjects && (
+        <div className="w-full max-w-xl mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Proyectos recientes</p>
+            <button
+              onClick={onCreateProject}
+              disabled={creating}
+              className="flex items-center gap-1 text-[10px] font-bold text-aether-purple/60 hover:text-aether-purple transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+              Nuevo
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            {projects.slice(0, 4).map((p) => (
+              <button
+                key={p.id}
+                onClick={() => onSelectProject(p)}
+                className="flex flex-col items-start gap-1.5 px-4 py-3.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-aether-purple/30 hover:bg-aether-purple/5 transition-all text-left group"
+              >
+                <div className="flex items-center gap-2 w-full min-w-0">
+                  <FolderOpen className="h-3.5 w-3.5 text-white/20 group-hover:text-aether-purple shrink-0 transition-colors" />
+                  <span className="text-[12px] font-semibold text-white/70 group-hover:text-white truncate transition-colors">{p.name}</span>
+                </div>
+                <span className="text-[10px] text-white/20 pl-5">
+                  {new Date(p.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                </span>
+              </button>
+            ))}
+          </div>
+          {projects.length > 4 && (
+            <p className="text-center text-[10px] text-white/20 mt-2">+{projects.length - 4} más en la barra lateral</p>
+          )}
+        </div>
+      )}
 
       {/* Main input */}
       <form onSubmit={handleSubmit} className="w-full max-w-xl mb-6">
@@ -97,7 +138,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating }: WelcomeScreenPro
 
       {/* Starter suggestions */}
       <div className="w-full max-w-xl">
-        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display mb-3 text-center">Empieza con</p>
+        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display mb-3 text-center">{hasProjects ? 'O empieza algo nuevo' : 'Empieza con'}</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {STARTER_PROMPTS.map((s) => (
             <button
@@ -113,14 +154,20 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating }: WelcomeScreenPro
       </div>
 
       <div className="mt-8 flex items-center gap-3">
-        <button
-          onClick={onCreateProject}
-          disabled={creating}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[12px] font-medium text-white/40 hover:text-white hover:border-white/20 transition-all"
-        >
-          {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-          Proyecto en blanco
-        </button>
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-aether-purple/8 border border-aether-purple/15">
+          <Zap className="h-3 w-3 text-aether-purple" />
+          <span className="text-[10px] font-bold text-aether-purple/70">~5 créditos por generación</span>
+        </div>
+        {!hasProjects && (
+          <button
+            onClick={onCreateProject}
+            disabled={creating}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[12px] font-medium text-white/40 hover:text-white hover:border-white/20 transition-all"
+          >
+            {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+            Proyecto en blanco
+          </button>
+        )}
       </div>
     </div>
   );
@@ -270,27 +317,10 @@ export default function Chat() {
             onPrompt={handleWelcomePrompt}
             onCreateProject={() => createProject()}
             creating={creatingWithPrompt}
+            projects={projects}
+            onSelectProject={setActiveProject}
           />
         </div>
-        {/* Floating project switcher for returning users */}
-        {projects.length > 0 && (
-          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-[#0d0d10] border border-white/[0.08] rounded-2xl px-4 py-2.5 shadow-2xl z-50">
-            <FolderOpen className="h-4 w-4 text-white/30 shrink-0" />
-            <span className="text-[11px] text-white/40 mr-2">{projects.length} proyectos</span>
-            {projects.slice(0, 3).map((p) => (
-              <button
-                key={p.id}
-                onClick={() => setActiveProject(p)}
-                className="text-[11px] font-medium text-white/60 hover:text-white px-2 py-1 rounded-lg hover:bg-white/5 transition-all truncate max-w-[120px]"
-              >
-                {p.name}
-              </button>
-            ))}
-            {projects.length > 3 && (
-              <span className="text-[11px] text-white/25">+{projects.length - 3}</span>
-            )}
-          </div>
-        )}
       </div>
     );
   }

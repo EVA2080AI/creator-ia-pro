@@ -54,9 +54,24 @@ serve(async (req) => {
     return new Response("Webhook Error", { status: 400 });
   }
 
-  console.log(`[WEBHOOK] Event: ${event.type}`);
+  console.log(`[WEBHOOK] Event: ${event.type} id: ${event.id}`);
 
   try {
+    // ── Idempotency check: skip if this event was already processed ────────────
+    const { data: existing } = await supabaseAdmin
+      .from("transactions")
+      .select("id")
+      .eq("stripe_event_id", event.id)
+      .maybeSingle();
+
+    if (existing) {
+      console.log(`[WEBHOOK] Event ${event.id} already processed — skipping.`);
+      return new Response(JSON.stringify({ received: true, duplicate: true }), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     // Handle subscription renewal / payment success
     if (event.type === "invoice.payment_succeeded") {
       const invoice = event.data.object as Stripe.Invoice;
@@ -97,6 +112,7 @@ serve(async (req) => {
             amount: tierInfo.credits,
             type: "subscription_reload",
             description: `Recarga mensual: plan ${tierInfo.name} (${tierInfo.credits} créditos)`,
+            stripe_event_id: event.id,
           });
 
           console.log(`[WEBHOOK] Reloaded ${tierInfo.credits} credits for ${customerEmail} (${tierInfo.name})`);
@@ -164,6 +180,7 @@ serve(async (req) => {
               amount: creditAmount,
               type: "credit_purchase",
               description: `Compra de ${creditAmount} créditos extra`,
+              stripe_event_id: event.id,
             });
 
             console.log(`[WEBHOOK] Added ${creditAmount} credits for ${customerEmail}`);

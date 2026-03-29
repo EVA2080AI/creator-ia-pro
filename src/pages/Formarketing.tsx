@@ -21,12 +21,14 @@ import { FormarketingSidebar } from '@/components/formarketing/FormarketingSideb
 import { TEMPLATES, CATEGORIES, type Template } from '@/components/formarketing/TemplateModal';
 import AntigravityBridgeNode from '@/components/formarketing/AntigravityBridgeNode';
 import { CommandPalette } from '@/components/formarketing/CommandPalette';
-import { ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, LayoutDashboard, Circle, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, LayoutDashboard, Circle, MessageSquare, Download, Smartphone, Layers, GitBranch, Play as PlayIcon, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { aiService } from '@/services/ai-service';
+import { aiService, classifyError } from '@/services/ai-service';
 import { supabase } from '@/integrations/supabase/client';
 import { GeniusAssistant } from '@/components/formarketing/GeniusAssistant';
+import { PropertyInspector } from '@/components/formarketing/PropertyInspector';
+import { ExportModal } from '@/components/formarketing/ExportModal';
 
 const nodeTypes = {
   characterBreakdown: CharacterBreakdownNode,
@@ -92,6 +94,33 @@ function FormarketingContent() {
 
   // AI panel (embedded GeniusAssistant)
   const [aiPanelOpen, setAiPanelOpen]         = useState(false);
+
+  // Property Inspector
+  const [selectedNodeId, setSelectedNodeId]   = useState<string | null>(null);
+
+  // Export modal
+  const [exportOpen, setExportOpen]           = useState(false);
+
+  // Mobile detection
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handler);
+    return () => window.removeEventListener('resize', handler);
+  }, []);
+
+  // Onboarding overlay (first visit)
+  const [onboardingStep, setOnboardingStep]   = useState(0);
+  const [showOnboarding, setShowOnboarding]   = useState(() => !localStorage.getItem('fm_onboarded'));
+  const ONBOARDING_STEPS = [
+    { icon: Layers,      title: 'Arrastra un nodo',          desc: 'Desde la barra lateral izquierda elige un módulo y arrástralo al canvas.' },
+    { icon: GitBranch,   title: 'Conecta los nodos',          desc: 'Haz clic en el punto de salida de un nodo y conéctalo al siguiente.' },
+    { icon: PlayIcon,    title: 'Ejecuta el flujo',           desc: 'Presiona ▶ dentro de cada nodo para que la IA genere el contenido.' },
+  ];
+  const dismissOnboarding = () => {
+    localStorage.setItem('fm_onboarded', '1');
+    setShowOnboarding(false);
+  };
 
   // HU33 — Execution status
   const [execStatus, setExecStatus]           = useState<'idle' | 'running' | 'success' | 'error'>('idle');
@@ -397,11 +426,11 @@ function FormarketingContent() {
         id: newNodeId,
         type,
         position,
-        data: { 
+        data: {
           title: label || 'Nuevo Elemento',
           status: 'idle',
           prompt: '',
-          model: type === 'modelView' ? 'nano-banana-pro' : type === 'videoModel' ? 'nano-banana-video' : type === 'layoutBuilder' ? 'claude-3.5-sonnet' : 'deepseek-chat',
+          model: type === 'modelView' ? 'flux-schnell' : type === 'videoModel' ? 'video' : type === 'layoutBuilder' ? 'claude-3.5-sonnet' : 'deepseek-chat',
           description: type === 'characterBreakdown' ? 'Describe tu personaje...' : ''
         },
       };
@@ -527,8 +556,10 @@ function FormarketingContent() {
             }).eq('id', nodeId);
 
             toast.success(`${node.data.title || 'Personaje'} analizado con ${selectedModel}`);
-          } catch (e) {
+          } catch (e: any) {
             rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' } } : n));
+            const { userMessage } = classifyError(e?.message ?? '');
+            toast.error(userMessage);
           }
         })();
       } else if (node.type === 'modelView') {
@@ -549,7 +580,7 @@ function FormarketingContent() {
             const result = await aiService.processAction({
               action: 'image',
               prompt: finalPrompt,
-              model: (node.data as any).model || 'nano-banana-pro',
+              model: (node.data as any).model || 'flux-schnell',
               node_id: (spaceId && isPersisted) ? node.id : undefined 
             });
             
@@ -567,7 +598,10 @@ function FormarketingContent() {
             toast.success("Imagen generada correctamente");
           } catch (error: any) {
             rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'error' } } : n));
-            toast.error(`Error: ${error.message}`);
+            const { userMessage, canRetry } = classifyError(error?.message ?? '');
+            toast.error(userMessage, {
+              action: canRetry ? { label: 'Reintentar', onClick: () => executeNode(node.id) } : undefined,
+            });
           }
         })();
       } else if (node.type === 'videoModel') {
@@ -576,7 +610,7 @@ function FormarketingContent() {
             rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'loading' } } : n));
             await new Promise(resolve => setTimeout(resolve, 3000));
             const videoUrl = 'https://cdn.pixabay.com/video/2023/10/20/185834-876356744_tiny.mp4';
-            const selectedModel = (node.data as any).model || 'nano-banana-video';
+            const selectedModel = (node.data as any).model || 'video';
             rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'ready', assetUrl: videoUrl } } : n));
             await supabase.from('canvas_nodes').update({ 
                asset_url: videoUrl, 
@@ -639,7 +673,7 @@ function FormarketingContent() {
             action: 'image',
             tool: 'variation',
             prompt: `variación de estilo de la imagen de referencia: ${(node.data as any).prompt || 'estética industrial'}`,
-            model: (node.data as any).model || 'nano-banana-pro',
+            model: (node.data as any).model || 'flux-schnell',
             image: node.data.assetUrl as string,
             node_id: (spaceId && isPersisted) ? node.id : undefined 
           });
@@ -915,6 +949,77 @@ function FormarketingContent() {
         <meta name="description" content="Crea campañas visuales con IA. Conecta personajes, imágenes y videos en un lienzo intuitivo." />
       </Helmet>
       <AppHeader userId={user?.id} onSignOut={signOut} />
+
+      {/* ── Mobile Warning Overlay ──────────────────────────────────────────── */}
+      {isMobile && (
+        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-8 bg-[#020203]/95 backdrop-blur-2xl px-8 text-center">
+          <div className="p-5 rounded-3xl bg-white/5 border border-white/10">
+            <Smartphone className="w-10 h-10 text-aether-purple/70" />
+          </div>
+          <div className="space-y-3 max-w-xs">
+            <h2 className="text-xl font-bold text-white font-display">Experiencia de escritorio</h2>
+            <p className="text-sm text-white/40 leading-relaxed">El Studio Canvas requiere un teclado y pantalla grande para la mejor experiencia creativa.</p>
+          </div>
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-aether-purple text-white text-sm font-bold transition-all hover:bg-aether-purple/90 active:scale-95"
+          >
+            Ir al Dashboard
+          </button>
+          <button
+            onClick={() => setIsMobile(false)}
+            className="text-xs text-white/20 hover:text-white/50 transition-colors"
+          >
+            Continuar de todas formas
+          </button>
+        </div>
+      )}
+
+      {/* ── Onboarding Overlay (primera visita) ─────────────────────────────── */}
+      {showOnboarding && !isMobile && (
+        <div className="fixed bottom-8 right-8 z-[150] w-80 aether-card rounded-3xl p-6 shadow-2xl border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="flex items-center justify-between mb-5">
+            <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Primeros pasos</span>
+            <button onClick={dismissOnboarding} className="text-white/20 hover:text-white/60 transition-colors text-xs">Saltar</button>
+          </div>
+          <div className="space-y-4">
+            {ONBOARDING_STEPS.map((step, i) => (
+              <div key={i} className={`flex items-start gap-3 transition-all duration-300 ${i === onboardingStep ? 'opacity-100' : 'opacity-30'}`}>
+                <div className={`p-2 rounded-xl shrink-0 ${i === onboardingStep ? 'bg-aether-purple/20 border border-aether-purple/30' : 'bg-white/5 border border-white/5'}`}>
+                  <step.icon className={`w-4 h-4 ${i === onboardingStep ? 'text-aether-purple' : 'text-white/20'}`} />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-white/80">{step.title}</p>
+                  {i === onboardingStep && <p className="text-[11px] text-white/40 mt-1 leading-relaxed">{step.desc}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-between mt-6">
+            <div className="flex gap-1">
+              {ONBOARDING_STEPS.map((_, i) => (
+                <div key={i} className={`h-1 rounded-full transition-all ${i === onboardingStep ? 'w-4 bg-aether-purple' : 'w-2 bg-white/10'}`} />
+              ))}
+            </div>
+            {onboardingStep < ONBOARDING_STEPS.length - 1 ? (
+              <button
+                onClick={() => setOnboardingStep(s => s + 1)}
+                className="flex items-center gap-1 text-xs font-bold text-white/60 hover:text-white transition-colors"
+              >
+                Siguiente <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            ) : (
+              <button
+                onClick={dismissOnboarding}
+                className="flex items-center gap-1 text-xs font-bold text-aether-purple hover:text-aether-purple/80 transition-colors"
+              >
+                Empezar <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="w-screen bg-[#020203] font-sans text-white/90 flex flex-col overflow-hidden relative selection:bg-aether-purple/20" style={{ height: 'calc(100vh - 64px)', marginTop: '64px' }}>
       {/* Canvas Toolbar */}
       <div className="flex h-14 w-full items-center justify-between border-b border-white/[0.06] bg-[#050506]/80 px-5 backdrop-blur-3xl shrink-0 z-[90]">
@@ -971,6 +1076,11 @@ function FormarketingContent() {
             <Monitor className="w-3.5 h-3.5" />
             <span className="hidden md:inline">Compartir</span>
           </Button>
+          {/* Export */}
+          <Button variant="ghost" onClick={() => setExportOpen(true)} disabled={nodes.length === 0} className="hidden sm:flex items-center gap-1.5 text-white/25 hover:text-white hover:bg-white/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all disabled:opacity-20">
+            <Download className="w-3.5 h-3.5" />
+            <span className="hidden md:inline">Exportar</span>
+          </Button>
           <Button variant="ghost" onClick={handleClear} disabled={nodes.length === 0 && edges.length === 0} className="text-white/25 hover:text-rose-400 hover:bg-rose-500/5 rounded-xl px-3 h-8 text-[10px] font-bold gap-1.5 transition-all disabled:opacity-20">
             <Trash2 className="w-3.5 h-3.5" />
             <span className="hidden md:inline">Limpiar</span>
@@ -979,7 +1089,7 @@ function FormarketingContent() {
           {/* AI Assistant panel toggle */}
           <Button
             variant="ghost"
-            onClick={() => setAiPanelOpen(v => !v)}
+            onClick={() => { setAiPanelOpen(v => !v); setSelectedNodeId(null); }}
             className={`h-8 px-3 rounded-xl gap-1.5 text-[10px] font-bold transition-all ${aiPanelOpen ? 'text-aether-purple bg-aether-purple/10 border border-aether-purple/20' : 'text-white/25 hover:text-white hover:bg-white/5'}`}
           >
             <MessageSquare className="w-3.5 h-3.5" />
@@ -997,8 +1107,11 @@ function FormarketingContent() {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
+      {/* ── Left Sidebar ────────────────────────────────────────────────── */}
+      <FormarketingSidebar onAddNode={handleManualAddNode} />
+
+      {/* ── Canvas ──────────────────────────────────────────────────────── */}
       <div className="relative flex-1" ref={reactFlowWrapper}>
-        <FormarketingSidebar onAddNode={handleManualAddNode} />
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -1007,6 +1120,11 @@ function FormarketingContent() {
           onConnect={onConnect}
           onDrop={onDrop}
           onDragOver={onDragOver}
+          onNodeClick={(_, node) => {
+            setSelectedNodeId(node.id);
+            if (aiPanelOpen) setAiPanelOpen(false);
+          }}
+          onPaneClick={() => setSelectedNodeId(null)}
           nodeTypes={nodeTypes}
           fitView
           className="aether-canvas"
@@ -1025,16 +1143,16 @@ function FormarketingContent() {
             },
           }}
         >
-          <Background 
-            color="#ffffff03" 
-            variant={BackgroundVariant.Dots} 
-            gap={40} 
-            size={1} 
+          <Background
+            color="#ffffff03"
+            variant={BackgroundVariant.Dots}
+            gap={40}
+            size={1}
           />
           <Controls className="!bg-[#0a0a0b]/90 !border-white/5 !fill-white/20 !bottom-16 !right-40 !left-auto rounded-2xl overflow-hidden scale-110 shadow-3xl backdrop-blur-xl transition-all hover:bg-[#0a0a0b]" />
-          <MiniMap 
-            className="!bg-[#0a0a0b]/90 border !border-white/5 !rounded-2xl overflow-hidden backdrop-blur-xl !bottom-12 !right-10 shadow-3xl opacity-30 hover:opacity-100 transition-opacity" 
-            maskColor="rgba(0,0,0,0.8)" 
+          <MiniMap
+            className="!bg-[#0a0a0b]/90 border !border-white/5 !rounded-2xl overflow-hidden backdrop-blur-xl !bottom-12 !right-10 shadow-3xl opacity-30 hover:opacity-100 transition-opacity"
+            maskColor="rgba(0,0,0,0.8)"
             nodeColor={(n) => {
                if (n.type === 'characterBreakdown') return '#ffffff10';
                if (n.type === 'modelView') return '#ffffff20';
@@ -1046,6 +1164,22 @@ function FormarketingContent() {
         </ReactFlow>
       </div>
 
+      {/* ── Property Inspector (selected node) ──────────────────────────── */}
+      {selectedNodeId && !aiPanelOpen && (
+        <PropertyInspector
+          node={nodes.find(n => n.id === selectedNodeId) ?? null}
+          onClose={() => setSelectedNodeId(null)}
+          onUpdate={(nodeId, data) => {
+            rfSetNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n));
+          }}
+          onExecute={(nodeId) => { executeNode(nodeId); }}
+          onDelete={(nodeId) => {
+            setNodes(nds => nds.filter(n => n.id !== nodeId));
+            toast.success('Nodo eliminado');
+          }}
+        />
+      )}
+
       {/* ── AI Panel (embedded GeniusAssistant) ────────────────────────── */}
       {aiPanelOpen && (
         <div className="w-[380px] shrink-0 border-l border-white/[0.06] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
@@ -1053,6 +1187,15 @@ function FormarketingContent() {
         </div>
       )}
       </div>
+
+      {/* ── Export Modal ─────────────────────────────────────────────────── */}
+      <ExportModal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        nodes={nodes}
+        edges={edges}
+        spaceName={spaceId ? `space-${spaceId.slice(0, 6)}` : 'canvas'}
+      />
 
       {/* HU28 — Command Palette */}
       <CommandPalette
@@ -1124,7 +1267,7 @@ function TemplateLanding({
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
             <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Studio · Plantillas</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display mb-4">

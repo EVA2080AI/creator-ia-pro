@@ -7,7 +7,7 @@ import {
   Wand2, ZoomIn, Eraser, ImagePlus, RotateCcw, Palette,
   Star, MessageSquare, PenTool,
   Hash, FileText, Type, Megaphone,
-  Layers, Shield, Users, CheckCircle2, Crown
+  Layers, Shield, Users, CheckCircle2, Crown, Code2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +27,7 @@ const GALLERY = [
 ];
 
 const aiTools = [
+  { icon: Code2,       name: "Genesis IDE",          desc: "Genera apps React completas desde texto.",   cat: "genesis",   color: "from-emerald-500/20 to-teal-500/10" },
   { icon: Wand2,       name: "Mejorar imagen",       desc: "Optimiza luz y detalles automáticamente.",   cat: "image",     color: "from-purple-500/20 to-violet-500/10" },
   { icon: ZoomIn,      name: "Aumentar resolución",  desc: "Escala imágenes hasta 4K sin perder calidad.", cat: "image",   color: "from-blue-500/20 to-cyan-500/10" },
   { icon: Eraser,      name: "Borrar objeto",        desc: "Elimina objetos de la imagen.",              cat: "image",     color: "from-rose-500/20 to-pink-500/10" },
@@ -87,7 +88,7 @@ const Index = () => {
                 height: `${1 + (i % 3)}px`,
                 left: `${(i * 5.5) % 100}%`,
                 top: `${(i * 7.3) % 100}%`,
-                background: i % 3 === 0 ? 'rgba(168,85,247,0.4)' : i % 3 === 1 ? 'rgba(0,194,255,0.3)' : 'rgba(255,255,255,0.15)',
+                background: i % 3 === 0 ? 'rgba(74,222,128,0.4)' : i % 3 === 1 ? 'rgba(0,194,255,0.3)' : 'rgba(255,255,255,0.15)',
                 animationDuration: `${2 + (i % 4)}s`,
                 animationDelay: `${i * 0.3}s`,
                 filter: `blur(${i % 2}px)`,
@@ -100,7 +101,7 @@ const Index = () => {
         <header className="relative z-50 flex items-center justify-between px-8 py-5 sm:px-14 sticky top-0 bg-[#050506]/50 backdrop-blur-2xl border-b border-white/[0.05]">
           <div className="flex items-center gap-4">
             <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-[0_0_16px_rgba(255,255,255,0.12)]">
-              <div className="absolute right-[-3px] top-[-3px] h-2.5 w-2.5 rounded-full bg-aether-purple shadow-[0_0_8px_rgba(168,85,247,0.8)] animate-pulse" />
+              <div className="absolute right-[-3px] top-[-3px] h-2.5 w-2.5 rounded-full bg-aether-purple shadow-[0_0_8px_rgba(74,222,128,0.8)] animate-pulse" />
               <Sparkles className="h-4 w-4 text-black" />
             </div>
             <div>
@@ -125,14 +126,14 @@ const Index = () => {
         {/* Vendor Banner */}
         <div className="relative z-50 bg-gradient-to-r from-aether-purple/15 via-aether-blue/10 to-aether-purple/15 border-b border-aether-purple/20 py-2.5 px-6 text-center">
           <p className="text-[11px] font-bold text-white/60 uppercase tracking-[0.25em]">
-            <span className="text-aether-purple">Plan Pro</span> — Imágenes, textos y videos ilimitados por{" "}
-            <span className="text-white font-black">$19/mes</span>
+            <span className="text-aether-purple">Genesis + Studio + Canvas</span> — Starter desde{" "}
+            <span className="text-white font-black">$12/mes</span>
             {" · "}
             <button
               onClick={() => navigate("/pricing")}
               className="text-aether-blue hover:text-white underline underline-offset-2 transition-colors"
             >
-              Ver oferta →
+              Ver planes →
             </button>
           </p>
         </div>
@@ -141,7 +142,7 @@ const Index = () => {
 
           {/* Hero */}
           <div className="mb-10 flex items-center gap-3 rounded-full border border-white/5 bg-white/[0.03] px-6 py-2.5 text-[10px] text-white/40 font-bold uppercase tracking-[0.4em] animate-in fade-in duration-700 font-display">
-            <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_10px_rgba(168,85,247,0.8)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.8)]" />
             Ecosistema Multimodal con IA
           </div>
 
@@ -151,8 +152,8 @@ const Index = () => {
           </h1>
 
           <p className="mt-10 max-w-xl text-center text-base text-white/35 font-medium animate-in fade-in duration-700 leading-relaxed">
-            Genera imágenes, mejora activos y orquesta campañas completas.
-            <strong className="text-white"> 12+ módulos profesionales</strong> en un hub de producción persistente.
+            Genera apps React con Genesis IDE, crea activos visuales con Studio y orquesta campañas completas.
+            <strong className="text-white"> Todo con IA, todo en un hub.</strong>
           </p>
 
           <div className="mt-10 flex flex-col sm:flex-row gap-4 animate-in fade-in duration-700">
@@ -166,7 +167,7 @@ const Index = () => {
 
           {/* ── Product preview mockup ─────────────────────────────── */}
           <div className="mt-20 w-full max-w-5xl animate-in fade-in duration-1000">
-            <div className="relative rounded-[1.5rem] overflow-hidden border border-white/10 bg-[#08080a] shadow-[0_0_80px_rgba(168,85,247,0.12),0_40px_100px_rgba(0,0,0,0.6)]">
+            <div className="relative rounded-[1.5rem] overflow-hidden border border-white/10 bg-[#08080a] shadow-[0_0_80px_rgba(74,222,128,0.12),0_40px_100px_rgba(0,0,0,0.6)]">
               {/* Browser chrome */}
               <div className="flex items-center gap-2 px-5 py-3 bg-white/[0.025] border-b border-white/[0.06]">
                 <div className="flex gap-1.5">

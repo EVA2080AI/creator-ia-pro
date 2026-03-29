@@ -71,7 +71,7 @@ ${filesContext || "(Proyecto vacío — crea desde cero)"}
         "X-Title": "Creator IA Pro - Studio",
       },
       body: JSON.stringify({
-        model: "anthropic/claude-sonnet-4-5",
+        model: "anthropic/claude-sonnet-4-6",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt },

@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Video, Trash2, Zap, ChevronDown, ChevronUp, Play, Download, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,9 +13,26 @@ interface VideoNodeData {
   dataPayload?: Record<string, any>;
 }
 
+const VIDEO_STEPS = [
+  'Iniciando generación…',
+  'Procesando frames…',
+  'Renderizando video…',
+  'Exportando…',
+];
+
 const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
   const { setNodes } = useReactFlow();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [stepIndex, setStepIndex] = useState(0);
+
+  useEffect(() => {
+    if (!isRendering) { setStepIndex(0); return; }
+    const interval = setInterval(() => {
+      setStepIndex((i) => Math.min(i + 1, VIDEO_STEPS.length - 1));
+    }, 12000); // video takes ~45s total, advance every 12s
+    return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.status]);
 
   // 🔧 BUG FIX: multi-source URL resolution for video
   const videoUrl =
@@ -109,11 +126,18 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
 
           {/* Rendering progress */}
           {isRendering && (
-            <div className="h-20 w-full bg-white/[0.02] rounded-2xl border border-white/[0.05] flex flex-col items-center justify-center gap-3">
-              <div className="w-3/4 h-1.5 bg-white/5 rounded-full overflow-hidden shadow-inner">
+            <div className="w-full bg-white/[0.02] rounded-2xl border border-white/[0.05] flex flex-col items-center justify-center gap-3 py-5 px-4">
+              <div className="w-3/4 h-1 bg-white/5 rounded-full overflow-hidden">
                 <div className="h-full bg-aether-blue animate-shimmer w-full" />
               </div>
-              <span className="text-[9px] text-white/30 font-bold uppercase tracking-[0.2em] animate-pulse">Calculating_Light_Paths</span>
+              <span className="text-[10px] text-white/70 font-bold tracking-wide animate-pulse text-center">
+                {VIDEO_STEPS[stepIndex]}
+              </span>
+              <div className="flex gap-1">
+                {VIDEO_STEPS.map((_, i) => (
+                  <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i <= stepIndex ? 'w-5 bg-aether-blue' : 'w-2 bg-white/10'}`} />
+                ))}
+              </div>
             </div>
           )}
 
@@ -174,15 +198,15 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
             <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-display">Engine Selector</span>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { id: 'nano-banana-video', name: 'Standard Flow' },
-                { id: 'nano-banana-cinema', name: 'Cinema 8K' }
+                { id: 'video', name: 'SVD Standard' },
+                { id: 'video-hq', name: 'SVD Cinema' }
               ].map((m) => (
                 <button
                   key={m.id}
                   onClick={() => updateModel(m.id)}
                   className={`px-3 py-2 rounded-xl border text-[10px] font-bold transition-all ${
-                    (data.model || 'nano-banana-video') === m.id 
-                    ? 'bg-white/10 border-white/20 text-white shadow-lg shadow-white/5' 
+                    (data.model || 'video') === m.id
+                    ? 'bg-white/10 border-white/20 text-white shadow-lg shadow-white/5'
                     : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'
                   }`}
                 >

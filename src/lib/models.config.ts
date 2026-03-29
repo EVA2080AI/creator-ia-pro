@@ -115,8 +115,8 @@ export const CHAT_MODELS: ModelDef[] = [
   // ── PRO (5x multiplier) ────────────────────────────────────────────────────
   {
     id: 'claude-sonnet',
-    name: 'Claude 3.5 Sonnet',
-    openrouter: 'anthropic/claude-sonnet-4-5',
+    name: 'Claude Sonnet 4.6',
+    openrouter: 'anthropic/claude-sonnet-4-6',
     category: 'PRO',
     context: '200K tokens',
     badge: 'Creativo',
@@ -187,8 +187,8 @@ export const LEGACY_OPENROUTER_MAP: Record<string, string> = {
   'gemini-3-flash':      'google/gemini-2.0-flash-001',
   'gemini-3.1-pro-low':  'google/gemini-pro-1.5',
   'gemini-3.1-pro-high': 'google/gemini-pro-1.5',
-  'claude-3.5-sonnet':   'anthropic/claude-sonnet-4-5',
-  'claude-3-opus':       'anthropic/claude-3-opus',
+  'claude-3.5-sonnet':   'anthropic/claude-sonnet-4-6',
+  'claude-3-opus':       'anthropic/claude-opus-4-6',
   'gpt-oss-120b':        'meta-llama/llama-4-maverick',
   'mistral-large':       'mistralai/mistral-large',
   'mistral-small':       'mistralai/mistral-small-3.1-24b-instruct',

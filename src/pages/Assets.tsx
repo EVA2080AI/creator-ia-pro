@@ -213,7 +213,7 @@ const Assets = () => {
               onClick={() => setFilterFav(!filterFav)}
               className={`h-14 px-6 rounded-2xl text-xs font-bold uppercase tracking-widest font-display transition-all duration-300 flex items-center gap-2 ${
                 filterFav
-                  ? "bg-aether-purple text-white shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+                  ? "bg-aether-purple text-white shadow-[0_0_20px_rgba(74,222,128,0.3)]"
                   : "bg-white/[0.03] border border-white/5 text-white/30 hover:text-white/60"
               }`}
             >

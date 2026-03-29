@@ -15,20 +15,19 @@ interface AppHeaderProps {
   onSignOut: () => void;
 }
 
-// Core 4-pillar navigation
 const NAV_ITEMS = [
-  { path: "/dashboard", label: "Home",    icon: Home,      color: "text-white/50" },
-  { path: "/chat",      label: "Genesis", icon: Code2,     color: "text-aether-purple" },
-  { path: "/studio",    label: "Studio",  icon: Wand2,     color: "text-aether-blue" },
-  { path: "/spaces",    label: "Spaces",  icon: FolderOpen, color: "text-emerald-400" },
+  { path: "/dashboard", label: "Home",    icon: Home  },
+  { path: "/chat",      label: "Genesis", icon: Code2 },
+  { path: "/studio",    label: "Studio",  icon: Wand2 },
+  { path: "/spaces",    label: "Spaces",  icon: FolderOpen },
 ];
 
 export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate   = useNavigate();
+  const location   = useLocation();
   const { profile } = useProfile(userId);
   const { isAdmin } = useAdmin(userId);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileOpen,  setMobileOpen]  = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const handleNav = (path: string) => {
@@ -44,28 +43,28 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
     (path !== "/dashboard" && location.pathname.startsWith(path));
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] h-16 flex items-center border-b border-white/[0.04] bg-[#040405]/80 backdrop-blur-2xl">
-      <div className="w-full max-w-[1440px] mx-auto px-6 flex items-center gap-6">
+    <header className="fixed top-0 left-0 right-0 z-[100] h-[56px] flex items-center"
+      style={{ background: 'rgba(8,8,8,0.92)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="w-full max-w-[1400px] mx-auto px-5 flex items-center gap-5">
 
         {/* Logo */}
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-2.5 shrink-0 group"
-        >
-          <div className="relative w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.1)] group-hover:scale-105 transition-all">
-            <Sparkles className="w-4 h-4 text-black" />
-            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-aether-purple shadow-[0_0_8px_rgba(168,85,247,1)] animate-pulse" />
+        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2.5 shrink-0 group">
+          <div className="relative w-7 h-7 rounded-lg flex items-center justify-center"
+            style={{ background: '#4ADE80' }}>
+            <Sparkles className="w-3.5 h-3.5 text-black" />
           </div>
           <div className="hidden sm:flex flex-col leading-none">
-            <span className="text-[13px] font-black text-white tracking-tight font-display uppercase">
-              Creator <span className="text-aether-purple">IA</span>
+            <span className="text-[12px] font-black text-white tracking-tight font-display uppercase">
+              Creator <span style={{ color: '#4ADE80' }}>IA</span>
             </span>
-            <span className="text-[8px] text-white/15 font-bold uppercase tracking-[0.3em] font-display mt-0.5">Pro · v9.0</span>
           </div>
         </button>
 
-        {/* Desktop Nav — pill style like Lovable */}
-        <nav className="hidden md:flex items-center gap-0.5 bg-white/[0.02] border border-white/[0.05] rounded-2xl p-1">
+        {/* Divider */}
+        <div className="hidden md:block w-px h-4" style={{ background: 'rgba(255,255,255,0.10)' }} />
+
+        {/* Desktop Nav */}
+        <nav className="hidden md:flex items-center gap-0.5">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.path);
             return (
@@ -73,16 +72,17 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                 key={item.path}
                 onClick={() => handleNav(item.path)}
                 className={cn(
-                  "relative flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all duration-200 font-display",
+                  "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all duration-150",
                   active
-                    ? "bg-white/[0.07] text-white shadow-inner border border-white/[0.08]"
-                    : "text-white/35 hover:text-white/70 hover:bg-white/[0.03]"
+                    ? "text-white"
+                    : "text-white/40 hover:text-white/70"
                 )}
+                style={active ? { background: 'rgba(255,255,255,0.08)' } : undefined}
               >
-                <item.icon className={cn("w-3.5 h-3.5 shrink-0 transition-colors", active ? item.color : "text-white/25")} />
+                <item.icon className="w-3.5 h-3.5 shrink-0" style={active && item.path === '/chat' ? { color: '#4ADE80' } : undefined} />
                 {item.label}
-                {item.label === "Genesis" && !active && (
-                  <span className="absolute -top-1 -right-1 h-1.5 w-1.5 rounded-full bg-aether-purple animate-pulse" />
+                {item.path === "/chat" && !active && (
+                  <span className="absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full" style={{ background: '#4ADE80' }} />
                 )}
               </button>
             );
@@ -90,7 +90,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           {isAdmin && (
             <button
               onClick={() => handleNav("/admin")}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest text-rose-500/40 hover:text-rose-400 hover:bg-rose-500/5 transition-all font-display"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold text-red-400/50 hover:text-red-400 transition-all"
             >
               <Shield className="w-3.5 h-3.5" />
               Admin
@@ -98,81 +98,94 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           )}
         </nav>
 
-        {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Right zone */}
+        {/* Right */}
         <div className="flex items-center gap-2 shrink-0">
 
-          {/* Pricing CTA — visible to all */}
+          {/* Pricing */}
           <button
             onClick={() => handleNav("/pricing")}
-            className="hidden sm:flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-white/30 hover:text-white hover:border-white/15 transition-all font-display"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-all"
+            style={{ color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.08)' }}
+            onMouseEnter={e => { (e.target as HTMLElement).closest('button')!.style.color = 'white'; (e.target as HTMLElement).closest('button')!.style.borderColor = 'rgba(255,255,255,0.16)'; }}
+            onMouseLeave={e => { (e.target as HTMLElement).closest('button')!.style.color = 'rgba(255,255,255,0.35)'; (e.target as HTMLElement).closest('button')!.style.borderColor = 'rgba(255,255,255,0.08)'; }}
           >
-            <Zap className="w-3 h-3 text-aether-purple shrink-0" />
+            <Zap className="w-3 h-3" style={{ color: '#4ADE80' }} />
             Precios
           </button>
 
-          {/* Credits counter */}
+          {/* Credits */}
           <button
             onClick={() => handleNav("/pricing")}
-            className="hidden lg:flex items-center gap-1.5 bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2 text-[12px] font-semibold text-white/40 hover:text-white hover:bg-white/[0.06] transition-all group"
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
+            style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.15)', color: 'rgba(255,255,255,0.60)' }}
           >
-            <Coins className="w-3.5 h-3.5 text-aether-purple group-hover:text-aether-purple shrink-0" />
-            <span className="tabular-nums">{profile?.credits_balance?.toLocaleString() ?? "0"}</span>
+            <Coins className="w-3.5 h-3.5 shrink-0" style={{ color: '#4ADE80' }} />
+            <span className="tabular-nums font-mono">{profile?.credits_balance?.toLocaleString() ?? "—"}</span>
           </button>
 
           {/* User menu */}
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:border-white/15 hover:bg-white/[0.05] transition-all"
+              className="flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all"
+              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
             >
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-aether-purple/30 to-aether-blue/30 flex items-center justify-center overflow-hidden border border-white/10 shrink-0">
+              <div className="w-6 h-6 rounded-md flex items-center justify-center overflow-hidden shrink-0"
+                style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.12)' }}>
                 {profile?.avatar_url
                   ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                  : <User className="w-3.5 h-3.5 text-white/50" />
+                  : <User className="w-3 h-3 text-white/40" />
                 }
               </div>
-              <span className="hidden lg:block text-[12px] font-semibold text-white/50 max-w-[100px] truncate">
+              <span className="hidden lg:block text-[12px] font-medium text-white/50 max-w-[90px] truncate">
                 {displayName ?? "Perfil"}
               </span>
-              <ChevronDown className={cn("w-3 h-3 text-white/20 transition-transform duration-200", userMenuOpen && "rotate-180")} />
+              <ChevronDown className={cn("w-3 h-3 text-white/25 transition-transform", userMenuOpen && "rotate-180")} />
             </button>
 
             {userMenuOpen && (
               <>
                 <div className="fixed inset-0 z-[150]" onClick={() => setUserMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-2 w-56 bg-[#0c0c0f] border border-white/[0.08] rounded-2xl shadow-2xl overflow-hidden z-[200] animate-in fade-in zoom-in-95 duration-150 p-1.5">
-                  <div className="px-3 py-2.5 mb-1">
+                <div className="absolute right-0 top-full mt-2 w-52 rounded-xl overflow-hidden z-[200]"
+                  style={{ background: '#111111', border: '1px solid rgba(255,255,255,0.12)', boxShadow: '0 16px 40px rgba(0,0,0,0.6)' }}>
+                  <div className="px-3 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                     <p className="text-[13px] font-semibold text-white truncate">{profile?.display_name ?? "Mi Perfil"}</p>
                     <p className="text-[11px] text-white/30 truncate mt-0.5">{profile?.email ?? ""}</p>
                   </div>
-                  <div className="h-px bg-white/[0.05] mb-1" />
-                  {[
-                    { label: "Mi Perfil",      icon: User,     path: "/profile" },
-                    { label: "Mis Activos",     icon: Image,    path: "/assets" },
-                    { label: "Precios",         icon: CreditCard, path: "/pricing" },
-                    { label: "Compartir Pantalla", icon: Monitor, path: "/sharescreen" },
-                    { label: "Descargar App",   icon: Download, path: "/descargar" },
-                  ].map(item => (
+                  <div className="p-1">
+                    {[
+                      { label: "Mi Perfil",          icon: User,       path: "/profile" },
+                      { label: "Mis Activos",         icon: Image,      path: "/assets" },
+                      { label: "Planes",              icon: CreditCard, path: "/pricing" },
+                      { label: "Compartir Pantalla",  icon: Monitor,    path: "/sharescreen" },
+                      { label: "Descargar App",       icon: Download,   path: "/descargar" },
+                    ].map(item => (
+                      <button
+                        key={item.path}
+                        onClick={() => handleNav(item.path)}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/45 hover:text-white transition-all"
+                        style={{ hover: { background: 'rgba(255,255,255,0.05)' } } as any}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.color = 'white'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = ''; }}
+                      >
+                        <item.icon className="w-3.5 h-3.5 text-white/25 shrink-0" />
+                        {item.label}
+                      </button>
+                    ))}
+                    <div className="my-1" style={{ height: '1px', background: 'rgba(255,255,255,0.06)' }} />
                     <button
-                      key={item.path}
-                      onClick={() => handleNav(item.path)}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.05] transition-all"
+                      onClick={() => { onSignOut(); setUserMenuOpen(false); }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-all"
+                      style={{ color: 'rgba(248,113,113,0.6)' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(248,113,113,0.06)'; (e.currentTarget as HTMLElement).style.color = 'rgb(248,113,113)'; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'rgba(248,113,113,0.6)'; }}
                     >
-                      <item.icon className="w-3.5 h-3.5 text-white/20 shrink-0" />
-                      {item.label}
+                      <LogOut className="w-3.5 h-3.5 shrink-0" />
+                      Cerrar sesión
                     </button>
-                  ))}
-                  <div className="h-px bg-white/[0.05] my-1" />
-                  <button
-                    onClick={() => { onSignOut(); setUserMenuOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-medium text-rose-400/50 hover:text-rose-400 hover:bg-rose-500/5 transition-all"
-                  >
-                    <LogOut className="w-3.5 h-3.5 shrink-0" />
-                    Cerrar sesión
-                  </button>
+                  </div>
                 </div>
               </>
             )}
@@ -181,7 +194,8 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           {/* Mobile toggle */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white transition-all"
+            className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-white/40 hover:text-white transition-all"
+            style={{ border: '1px solid rgba(255,255,255,0.08)' }}
           >
             {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
@@ -190,61 +204,68 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 top-16 z-40 md:hidden bg-[#040405]/98 backdrop-blur-3xl animate-in slide-in-from-top duration-200 px-5 py-6 overflow-y-auto">
-          {/* User card */}
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.05] mb-5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-aether-purple/30 to-aether-blue/30 flex items-center justify-center overflow-hidden border border-white/10 shrink-0">
+        <div className="fixed inset-0 top-[56px] z-40 md:hidden overflow-y-auto px-4 py-5"
+          style={{ background: 'rgba(8,8,8,0.98)', backdropFilter: 'blur(20px)' }}>
+
+          {/* User */}
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-4"
+            style={{ background: '#111', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden shrink-0"
+              style={{ background: '#1A1A1A', border: '1px solid rgba(255,255,255,0.10)' }}>
               {profile?.avatar_url
                 ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                : <User className="w-5 h-5 text-white/30" />
+                : <User className="w-4 h-4 text-white/30" />
               }
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-[13px] font-semibold text-white truncate">{profile?.display_name ?? "Mi Perfil"}</p>
               <p className="text-[11px] text-white/30 truncate">{profile?.email ?? ""}</p>
             </div>
-            <div className="flex items-center gap-1.5 bg-white/5 border border-white/[0.06] px-2.5 py-1.5 rounded-xl">
-              <Coins className="w-3 h-3 text-aether-purple" />
-              <span className="text-[11px] font-semibold text-white/40 tabular-nums">{profile?.credits_balance?.toLocaleString() ?? "0"}</span>
+            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
+              style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.15)' }}>
+              <Coins className="w-3 h-3" style={{ color: '#4ADE80' }} />
+              <span className="text-[11px] font-semibold text-white/50 tabular-nums">{profile?.credits_balance?.toLocaleString() ?? "—"}</span>
             </div>
           </div>
 
-          <nav className="flex flex-col gap-2">
+          <nav className="flex flex-col gap-1">
             {NAV_ITEMS.map((item) => {
               const active = isActive(item.path);
               return (
                 <button
                   key={item.path}
                   onClick={() => handleNav(item.path)}
-                  className={cn(
-                    "w-full flex items-center justify-between px-5 py-4 rounded-2xl text-[13px] font-bold transition-all font-display uppercase tracking-widest",
-                    active
-                      ? "bg-white text-black shadow-lg"
-                      : "text-white/50 bg-white/[0.03] border border-white/[0.05] hover:text-white hover:bg-white/[0.06]"
-                  )}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-semibold transition-all"
+                  style={active
+                    ? { background: 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid rgba(255,255,255,0.12)' }
+                    : { color: 'rgba(255,255,255,0.45)', border: '1px solid transparent' }
+                  }
                 >
-                  <div className="flex items-center gap-3">
-                    <item.icon className={cn("w-5 h-5", active ? "text-black" : item.color)} />
-                    {item.label}
-                  </div>
-                  <ChevronDown className="-rotate-90 w-4 h-4 opacity-20" />
+                  <item.icon className="w-5 h-5" />
+                  {item.label}
                 </button>
               );
             })}
 
             {isAdmin && (
-              <button
-                onClick={() => handleNav("/admin")}
-                className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-[13px] font-bold font-display uppercase tracking-widest text-rose-400/60 bg-rose-500/5 border border-rose-500/10 hover:text-rose-400 transition-all"
-              >
+              <button onClick={() => handleNav("/admin")}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-semibold text-red-400/60 transition-all"
+                style={{ border: '1px solid rgba(248,113,113,0.10)', background: 'rgba(248,113,113,0.04)' }}>
                 <Shield className="w-5 h-5" /> Admin
               </button>
             )}
 
-            <div className="mt-2 pt-2 border-t border-white/[0.05]">
+            <button onClick={() => handleNav("/pricing")}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-semibold mt-2 transition-all"
+              style={{ border: '1px solid rgba(74,222,128,0.20)', background: 'rgba(74,222,128,0.06)', color: '#4ADE80' }}>
+              <Zap className="w-5 h-5" /> Ver planes
+            </button>
+
+            <div className="mt-2 pt-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
               <button
                 onClick={() => { onSignOut(); setMobileOpen(false); }}
-                className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl text-[13px] font-semibold text-rose-400/60 bg-rose-500/5 border border-rose-500/10 hover:text-rose-400 transition-all"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-semibold transition-all"
+                style={{ color: 'rgba(248,113,113,0.6)', border: '1px solid transparent' }}
               >
                 <LogOut className="w-5 h-5" />
                 Cerrar sesión

@@ -70,26 +70,26 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
   ];
 
   return (
-    <div className="absolute left-6 top-28 z-10 flex gap-6 animate-fade-in items-start h-[calc(100vh-160px)] pointer-events-none">
+    <div className="flex h-full shrink-0 border-r border-white/[0.04] z-20">
 
       {/* Aether Vertical Toolbar */}
-      <div className="flex flex-col items-center gap-2 aether-card w-14 py-6 shadow-2xl backdrop-blur-3xl shrink-0 h-fit pointer-events-auto rounded-[2rem] border border-white/[0.08]">
+      <div className="flex flex-col items-center gap-2 w-14 py-4 bg-[#030304]/90 backdrop-blur-xl">
         {/* Menu Toggle */}
         <button
            onClick={() => setMenuOpen(!menuOpen)}
-           className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-500 scale-110 mb-2 ${menuOpen ? 'bg-white text-black shadow-xl shadow-white/20' : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white border border-white/5'}`}
+           className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-300 mb-1 ${menuOpen ? 'bg-white text-black shadow-xl shadow-white/20' : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white border border-white/5'}`}
         >
-          {menuOpen ? <X className="h-5 w-5" /> : <LayoutGrid className="h-5 w-5" />}
+          {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
         </button>
 
-        <div className="w-8 h-px bg-white/10 my-3" />
+        <div className="w-8 h-px bg-white/10 my-1" />
 
         {/* Action Button */}
         <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button className="flex h-10 w-10 items-center justify-center rounded-2xl bg-aether-purple/20 text-aether-purple shadow-xl hover:bg-aether-purple/30 transition-all group/play border border-aether-purple/20">
-              <Play className="h-5 w-5 fill-current ml-0.5 group-hover:scale-110 transition-transform" />
+            <button className="flex h-9 w-9 items-center justify-center rounded-2xl bg-aether-purple/20 text-aether-purple hover:bg-aether-purple/30 transition-all group/play border border-aether-purple/20">
+              <Play className="h-4 w-4 fill-current ml-0.5 group-hover:scale-110 transition-transform" />
             </button>
           </TooltipTrigger>
           <TooltipContent side="right">Ejecutar flujo</TooltipContent>
@@ -100,9 +100,9 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
           <Tooltip key={tool.id}>
             <TooltipTrigger asChild>
               <button
-                className={`flex h-10 w-10 items-center justify-center rounded-xl text-white/20 hover:bg-white/5 hover:text-white transition-all group ${tool.id === 'settings' ? 'mt-4 border-t border-white/5 pt-4 rounded-none w-8' : ''}`}
+                className={`flex h-9 w-9 items-center justify-center rounded-xl text-white/20 hover:bg-white/5 hover:text-white transition-all group ${tool.id === 'settings' ? 'mt-auto border-t border-white/5 pt-3 rounded-none w-8' : ''}`}
               >
-                <tool.icon className={`h-4.5 w-4.5 group-hover:scale-110 transition-transform ${tool.id === 'settings' ? 'mt-4' : ''}`} />
+                <tool.icon className="h-4 w-4 group-hover:scale-110 transition-transform" />
               </button>
             </TooltipTrigger>
             <TooltipContent side="right">{tool.label}</TooltipContent>
@@ -111,9 +111,9 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
         </TooltipProvider>
       </div>
 
-      {/* Aether Navigation Menu */}
+      {/* Aether Navigation Menu Panel */}
       {menuOpen && (
-        <div className="w-80 rounded-[2.5rem] aether-card p-7 shadow-4xl backdrop-blur-3xl flex flex-col gap-8 max-h-[85vh] overflow-y-auto no-scrollbar animate-in slide-in-from-left-6 duration-700 pointer-events-auto border border-white/[0.08]">
+        <div className="w-72 flex flex-col gap-6 p-5 bg-[#050506] border-l border-white/[0.04] overflow-y-auto no-scrollbar animate-in slide-in-from-left duration-200">
 
           {/* Search */}
           <div className="relative mb-0 font-display">
@@ -122,8 +122,16 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                value={search}
                onChange={(e) => setSearch(e.target.value)}
                placeholder="Buscar nodos..."
-               className="pl-12 bg-sidebar-accent/50 border-sidebar-border focus:border-sidebar-primary/40 rounded-2xl h-12 text-xs font-medium text-white placeholder:text-white/10 transition-all"
+               className="pl-12 pr-10 bg-sidebar-accent/50 border-sidebar-border focus:border-sidebar-primary/40 rounded-2xl h-12 text-xs font-medium text-white placeholder:text-white/10 transition-all"
             />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/60 transition-colors"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
 
           <div className="flex flex-col gap-6">
@@ -149,6 +157,13 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
 
           {/* Node Selector */}
           <div className="flex flex-col gap-3">
+             {menuItems.length === 0 && (
+               <div className="flex flex-col items-center gap-3 py-8 text-center">
+                 <Search className="h-6 w-6 text-white/10" />
+                 <span className="text-[11px] text-white/20 font-medium">Sin resultados para <span className="text-white/40">"{search}"</span></span>
+                 <button onClick={() => setSearch('')} className="text-[10px] text-aether-purple/60 hover:text-aether-purple transition-colors font-bold uppercase tracking-widest">Limpiar</button>
+               </div>
+             )}
              {menuItems.map((item, idx) => (
                 <button
                   key={idx}

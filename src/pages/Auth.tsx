@@ -7,13 +7,13 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   Sparkles, ArrowRight, Mail, Eye, EyeOff, User, Image,
-  FileText, Wand2, Loader2, Lock, Check
+  FileText, Wand2, Loader2, Lock, Check, Code2
 } from "lucide-react";
 
 const features = [
-  { icon: Image, text: "Crea imágenes con IA en segundos" },
-  { icon: Wand2, text: "Mejora, quita fondos y restaura fotos" },
-  { icon: FileText, text: "Genera textos, logos y anuncios" },
+  { icon: Code2, text: "Genesis IDE — genera apps React completas con IA" },
+  { icon: Image, text: "Studio — imágenes, logos, videos y más" },
+  { icon: Wand2, text: "Canvas creativo — flujos de producción visuales" },
 ];
 
 const Auth = () => {
@@ -99,7 +99,7 @@ const Auth = () => {
         <div className="relative z-10 space-y-10">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
               <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">
                 Plataforma de IA generativa
               </span>
@@ -132,8 +132,8 @@ const Auth = () => {
           <div className="grid grid-cols-3 gap-4 pt-4">
             {[
               { value: "12+", label: "Herramientas" },
-              { value: "4K", label: "Resolución" },
-              { value: "∞", label: "Posibilidades" },
+              { value: "$12", label: "Starter/mes" },
+              { value: "4.6", label: "Claude" },
             ].map((s) => (
               <div key={s.label} className="aether-card rounded-2xl border border-white/5 p-4 text-center">
                 <p className="text-2xl font-bold text-white font-display">{s.value}</p>

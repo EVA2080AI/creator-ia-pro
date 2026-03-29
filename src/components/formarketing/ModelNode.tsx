@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useState, useEffect } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Image as ImageIcon, Trash2, Wand2, Zap, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,9 +14,25 @@ interface ModelNodeData {
   onVariation?: () => void;
 }
 
+const IMAGE_STEPS = [
+  'Preparando prompt…',
+  'Enviando a modelo…',
+  'Sintetizando imagen…',
+  'Finalizando…',
+];
+
 const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
   const { setNodes } = useReactFlow();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
+
+  useEffect(() => {
+    if (data.status !== 'executing') { setStepIndex(0); return; }
+    const interval = setInterval(() => {
+      setStepIndex((i) => Math.min(i + 1, IMAGE_STEPS.length - 1));
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [data.status]);
 
   const updatePrompt = useCallback((val: string) => {
     setNodes((nds) => 
@@ -112,9 +128,16 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
         )}
         
         {data.status === 'executing' && (
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex flex-col items-center justify-center gap-4">
-             <div className="w-10 h-10 rounded-full border-t-2 border-aether-purple animate-spin" />
-             <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] animate-pulse">Computing_Aether</span>
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-md flex flex-col items-center justify-center gap-4 px-5">
+            <div className="w-10 h-10 rounded-full border-t-2 border-aether-purple animate-spin" />
+            <span className="text-[10px] font-bold text-white/80 tracking-wide animate-pulse text-center">
+              {IMAGE_STEPS[stepIndex]}
+            </span>
+            <div className="flex gap-1">
+              {IMAGE_STEPS.map((_, i) => (
+                <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i <= stepIndex ? 'w-6 bg-aether-purple' : 'w-2 bg-white/10'}`} />
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -158,16 +181,17 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                   <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-display">Engine Selector</span>
                   <div className="grid grid-cols-2 gap-2">
                      {[
-                       { id: 'nano-banana-pro', name: 'Flux Elite' },
-                       { id: 'nano-banana-2', name: 'Pro Vision' },
-                       { id: 'nano-banana-25', name: 'Economy' }
+                       { id: 'flux-schnell',  name: 'FLUX Schnell' },
+                       { id: 'flux-pro',      name: 'FLUX Pro' },
+                       { id: 'flux-pro-1.1',  name: 'FLUX Pro 1.1' },
+                       { id: 'sdxl',          name: 'SDXL' }
                      ].map((m) => (
                        <button
                          key={m.id}
                          onClick={() => updateModel(m.id)}
                          className={`px-3 py-2 rounded-xl border text-[10px] font-bold transition-all ${
-                           (data.model || 'nano-banana-pro') === m.id 
-                           ? 'bg-white/10 border-white/20 text-white shadow-lg shadow-white/5' 
+                           (data.model || 'flux-schnell') === m.id
+                           ? 'bg-white/10 border-white/20 text-white shadow-lg shadow-white/5'
                            : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'
                          }`}
                        >

@@ -101,6 +101,8 @@ const Dashboard = () => {
 
   const tierLabels: Record<string, string> = { free: "Free", starter: "Starter", creator: "Creator", agency: "Agency", educacion: "Educación", pro: "Pro", business: "Business" };
   const currentTier = profile?.subscription_tier || "free";
+  const checkoutSuccess = searchParams.get("checkout") === "success";
+  const creditsSuccess = searchParams.get("credits") === "success";
 
   const handleCreateSpace = async () => {
     if (!user || !newSpaceName.trim()) return;
@@ -148,11 +150,49 @@ const Dashboard = () => {
       <main className="pt-16">
         <div className="max-w-[1440px] mx-auto px-6 py-6 space-y-5">
 
+          {/* Post-checkout success banner */}
+          {(checkoutSuccess || creditsSuccess) && (
+            <div className="relative overflow-hidden rounded-2xl border border-aether-purple/30 bg-aether-purple/8 px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgba(74,222,128,0.06) 0%, transparent 70%)' }} />
+              <div className="flex items-center gap-3 shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-aether-purple/20 border border-aether-purple/30 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-aether-purple" />
+                </div>
+                <div>
+                  <p className="text-[13px] font-black text-white font-display">
+                    {checkoutSuccess ? '¡Suscripción activada!' : '¡Créditos añadidos!'}
+                  </p>
+                  <p className="text-[11px] text-white/40">
+                    {checkoutSuccess
+                      ? `Plan ${tierLabels[currentTier]} · ${profile?.credits_balance?.toLocaleString() ?? '—'} créditos cargados`
+                      : `${profile?.credits_balance?.toLocaleString() ?? '—'} créditos disponibles`
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 sm:ml-auto">
+                <button
+                  onClick={() => navigate('/chat')}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-aether-purple text-black text-[12px] font-black uppercase tracking-widest hover:bg-aether-purple/90 transition-all active:scale-95"
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  Ir a Genesis
+                </button>
+                <button
+                  onClick={() => navigate('/studio')}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 text-[12px] font-bold text-white/60 hover:text-white hover:border-white/25 transition-all"
+                >
+                  Studio →
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Welcome Row */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.8)]" />
                 <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] font-display">System Active</span>
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-display">
@@ -160,22 +200,32 @@ const Dashboard = () => {
               </h1>
             </div>
             <div className="flex gap-2 shrink-0">
-              {subscription?.subscribed && (
+              {subscription?.subscribed ? (
+                <>
+                  <button
+                    onClick={() => navigate("/pricing")}
+                    className="px-4 py-2 rounded-xl aether-card text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-all border border-white/5"
+                  >
+                    <Coins className="w-3.5 h-3.5 mr-1.5 inline" />
+                    + Créditos
+                  </button>
+                  <button
+                    onClick={async () => { try { await openCustomerPortal(); } catch { toast.error("Error abriendo portal"); } }}
+                    className="px-4 py-2 rounded-xl aether-card text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-all border border-white/5"
+                  >
+                    <Settings className="w-3.5 h-3.5 mr-1.5 inline" />
+                    Plan
+                  </button>
+                </>
+              ) : (
                 <button
-                  onClick={async () => { try { await openCustomerPortal(); } catch { toast.error("Error"); } }}
-                  className="px-4 py-2 rounded-xl aether-card text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-all border border-white/5"
+                  onClick={() => navigate("/pricing")}
+                  className="px-5 py-2 bg-aether-purple text-black rounded-xl flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest hover:bg-aether-purple/90 transition-all active:scale-95"
                 >
-                  <Settings className="w-3.5 h-3.5 mr-1.5 inline" />
-                  Portal
+                  <Zap className="w-3.5 h-3.5" />
+                  Upgrade
                 </button>
               )}
-              <button
-                onClick={() => navigate("/pricing")}
-                className="px-5 py-2 bg-white text-black rounded-xl flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest hover:bg-white/90 transition-all active:scale-95"
-              >
-                <Zap className="w-3.5 h-3.5" />
-                Upgrade
-              </button>
             </div>
           </div>
 
@@ -215,8 +265,8 @@ const Dashboard = () => {
                   <AreaChart data={usageData}>
                     <defs>
                       <linearGradient id="creditsGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#A855F7" stopOpacity={0.2} />
-                        <stop offset="100%" stopColor="#A855F7" stopOpacity={0} />
+                        <stop offset="0%" stopColor="#4ADE80" stopOpacity={0.2} />
+                        <stop offset="100%" stopColor="#4ADE80" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 9, fontWeight: 600 }} dy={10} />
@@ -226,7 +276,7 @@ const Dashboard = () => {
                       labelStyle={{ color: 'rgba(255,255,255,0.4)', marginBottom: '2px' }}
                       itemStyle={{ color: '#fff' }}
                     />
-                    <Area type="monotone" dataKey="credits" stroke="#A855F7" strokeWidth={2} fill="url(#creditsGrad)" dot={{ r: 3, fill: '#A855F7', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
+                    <Area type="monotone" dataKey="credits" stroke="#4ADE80" strokeWidth={2} fill="url(#creditsGrad)" dot={{ r: 3, fill: '#4ADE80', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -275,7 +325,7 @@ const Dashboard = () => {
             <div className="relative flex items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_6px_rgba(168,85,247,0.9)]" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.9)]" />
                   <span className="text-[10px] font-bold text-aether-purple/70 uppercase tracking-[0.2em] font-display">Genesis · BuilderAI</span>
                 </div>
                 <h2 className="text-xl font-bold text-white font-display tracking-tight">¿Qué vas a crear hoy?</h2>

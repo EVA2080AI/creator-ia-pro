@@ -64,39 +64,28 @@ export default {
         'node-glow': 'hsl(var(--node-glow))',
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
-        // Aether Evolution Brand Tokens (Ultra-Premium)
+        // Zephyr Design System Tokens
         aether: {
-          bg: '#020203',
-          canvas: '#010102',
-          card: 'rgba(10, 10, 12, 0.8)',
-          'card-hover': 'rgba(15, 15, 18, 0.9)',
-          purple: '#A855F7',
-          blue: '#00c2ff',
-          rose: '#ff0071',
-          glass: 'rgba(255, 255, 255, 0.03)',
-          border: 'rgba(255, 255, 255, 0.08)',
-          'border-hover': 'rgba(255,255,255,0.15)',
+          bg:           '#080808',
+          canvas:       '#060606',
+          card:         '#101010',
+          'card-hover': '#181818',
+          purple:       '#4ADE80',   // brand green (replaces purple across all components)
+          blue:         '#60A5FA',   // blue secondary
+          rose:         '#F87171',
+          glass:        'rgba(16, 16, 16, 0.90)',
+          border:       'rgba(255, 255, 255, 0.10)',
+          'border-hover': 'rgba(255, 255, 255, 0.18)',
         },
-        // Deep Space Palette
-        'deep-space': {
-          DEFAULT: '#050506',
-          surface: '#0a0a0d',
-          elevated: '#111116',
-          overlay: 'rgba(5, 5, 6, 0.85)',
-        },
-        // Ultra-Violet Brand
-        'ultra-violet': {
-          DEFAULT: '#7C3AED',
-          light: '#A855F7',
-          glow: 'rgba(124, 58, 237, 0.4)',
-          muted: 'rgba(124, 58, 237, 0.1)',
-        },
-        // Neon Accent
-        neon: {
-          cyan: '#00FFFF',
-          lime: '#ADFF2F',
-          magenta: '#FF00D4',
-          border: 'rgba(0, 255, 255, 0.15)',
+        // Zephyr surfaces
+        zephyr: {
+          base:    '#080808',
+          '1':     '#101010',
+          '2':     '#181818',
+          '3':     '#222222',
+          '4':     '#2C2C2C',
+          brand:   '#4ADE80',
+          blue:    '#60A5FA',
         },
         gold: {
           DEFAULT: 'hsl(var(--gold))',

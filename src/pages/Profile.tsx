@@ -27,7 +27,7 @@ const Profile = () => {
     const fetchAll = async () => {
       const [{ data: prof }, { data: history }] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-        supabase.from("credit_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
+        supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
       ]);
       if (prof) {
         setProfile(prof);

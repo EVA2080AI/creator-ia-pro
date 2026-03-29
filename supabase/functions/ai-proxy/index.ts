@@ -9,12 +9,50 @@ const OR_BASE   = 'https://openrouter.ai/api/v1';
 const OR_REFERER = 'https://creator-ia.com';
 const OR_TITLE   = 'Creator IA Pro - AI Infinite Canvas';
 
+// ── Per-user rate limiting (20 req/min for openrouter + openrouter-image) ─────
+const RATE_LIMIT = 20;
+const RATE_WINDOW_MS = 60_000;
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+  if (!entry || now >= entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT) return false;
+  entry.count++;
+  return true;
+}
+
+/** Extract user_id from Supabase JWT without full verification (proxy layer only) */
+function extractUserIdFromJwt(authHeader: string | null): string | null {
+  try {
+    if (!authHeader?.startsWith('Bearer ')) return null;
+    const token = authHeader.slice(7);
+    const [, payload] = token.split('.');
+    if (!payload) return null;
+    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    return decoded?.sub ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // Image model fallback chain (in order)
 const IMAGE_FALLBACK_MODELS = [
   'black-forest-labs/flux-1-schnell',
   'black-forest-labs/flux-1-pro',
   'stability-ai/sdxl',
 ];
+
+// Models that use chat/completions with modalities instead of /images/generations
+const MODALITIES_IMAGE_MODELS = new Set([
+  'google/gemini-2.0-flash-exp:free',
+  'google/gemini-2.0-flash-exp-image-generation',
+  'recraft-ai/recraft-v3',
+]);
 
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -65,6 +103,16 @@ serve(async (req: Request) => {
 
     if (!provider) return json({ error: 'Missing provider' }, 400);
 
+    // ── Rate limit check for costly providers ─────────────────────────────────
+    if (provider === 'openrouter' || provider === 'openrouter-image') {
+      const userId = extractUserIdFromJwt(req.headers.get('authorization'));
+      const key = userId ?? req.headers.get('x-forwarded-for') ?? 'anonymous';
+      if (!checkRateLimit(key)) {
+        console.warn(`[ai-proxy] Rate limit exceeded for key: ${key}`);
+        return json({ error: 'Demasiadas solicitudes. Espera un momento antes de continuar.' }, 429);
+      }
+    }
+
     // ── OpenRouter — Chat / Text ──────────────────────────────────────────────
     if (provider === 'openrouter') {
       if (!urlPath) return json({ error: 'Missing path for openrouter provider' }, 400);
@@ -107,6 +155,34 @@ serve(async (req: Request) => {
       for (const imageModel of tryModels) {
         try {
           console.log(`[Image] Trying: ${imageModel}`);
+
+          // Use chat/completions with modalities for supported models
+          if (MODALITIES_IMAGE_MODELS.has(imageModel)) {
+            const res = await openrouterFetch('chat/completions', {
+              model: imageModel,
+              messages: [{ role: 'user', content: prompt }],
+              modalities: ['image', 'text'],
+            });
+            const ct = res.headers.get('content-type') ?? '';
+            if (!ct.includes('text/html')) {
+              const data = await res.json().catch(() => ({})) as any;
+              if (res.ok) {
+                const content = data?.choices?.[0]?.message?.content;
+                if (Array.isArray(content)) {
+                  const imgItem = content.find((c: any) => c.type === 'image_url');
+                  if (imgItem?.image_url?.url) return json({ url: imgItem.image_url.url, model: imageModel });
+                }
+                // Inline base64
+                if (data?.choices?.[0]?.message?.content_parts) {
+                  const parts = data.choices[0].message.content_parts;
+                  const img = parts.find((p: any) => p.type === 'image');
+                  if (img?.image_url) return json({ url: img.image_url, model: imageModel });
+                }
+              }
+            }
+            errors.push(`${imageModel}: modalities response had no image`);
+            continue;
+          }
 
           const res = await fetch(`${OR_BASE}/images/generations`, {
             method: 'POST',

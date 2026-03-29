@@ -63,7 +63,7 @@ const PLANS = [
     features: [
       { label: "500,000 créditos/mes", highlight: true },
       { label: "Modelos ECO + PRO", highlight: true },
-      { label: "Claude Sonnet · GPT-4o · Gemini Pro", highlight: false },
+      { label: "Claude Sonnet 4.6 · GPT-4o · Gemini Pro", highlight: false },
       { label: "Genesis IDE + GitHub push", highlight: true },
       { label: "Brand Voice personalizado", highlight: true },
       { label: "Soporte prioritario", highlight: false },
@@ -90,7 +90,7 @@ const PLANS = [
     features: [
       { label: "2,000,000 créditos/mes", highlight: true },
       { label: "TODOS los modelos (ECO + PRO + ULTRA)", highlight: true },
-      { label: "Claude Opus · GPT-4o · Mistral Large", highlight: false },
+      { label: "Claude Opus 4.6 · GPT-4o · Mistral Large", highlight: false },
       { label: "Genesis IDE + proyectos ilimitados", highlight: true },
       { label: "Soporte prioritario 24/7", highlight: true },
       { label: "API access (próximamente)", highlight: false },
@@ -148,6 +148,8 @@ export default function Pricing() {
   const [userId, setUserId] = useState<string | undefined>();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [showComparison, setShowComparison] = useState(false);
+  const [loadingPack, setLoadingPack] = useState<string | null>(null);
+  const [annual, setAnnual] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -155,6 +157,24 @@ export default function Pricing() {
       setUserId(session?.user?.id);
     });
   }, []);
+
+  const handleBuyCredits = async (pack: typeof CREDIT_PACKS[number]) => {
+    if (!isLoggedIn) {
+      toast.info("Necesitas iniciar sesión para comprar créditos.");
+      navigate("/auth");
+      return;
+    }
+    setLoadingPack(pack.id);
+    try {
+      const data = await stripeService.buyCredits(pack.price_id);
+      if (data?.url) window.location.href = data.url;
+      else throw new Error("No se pudo generar el enlace de pago.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Error al procesar el pago.");
+    } finally {
+      setLoadingPack(null);
+    }
+  };
 
   const handleSubscribe = async (plan: typeof PLANS[number]) => {
     if (!isLoggedIn) {
@@ -209,6 +229,29 @@ export default function Pricing() {
             </p>
           </section>
 
+          {/* ── Billing period toggle ────────────────────────────────────── */}
+          <div className="flex items-center justify-center gap-4 mb-10">
+            <span className={cn("text-[12px] font-bold transition-colors", !annual ? "text-white" : "text-white/30")}>Mensual</span>
+            <button
+              onClick={() => setAnnual(v => !v)}
+              className={cn(
+                "relative w-12 h-6 rounded-full transition-all duration-300",
+                annual ? "bg-aether-purple" : "bg-white/10"
+              )}
+            >
+              <div className={cn(
+                "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-300",
+                annual ? "left-6" : "left-0.5"
+              )} />
+            </button>
+            <span className={cn("text-[12px] font-bold transition-colors flex items-center gap-2", annual ? "text-white" : "text-white/30")}>
+              Anual
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-aether-purple/20 text-aether-purple border border-aether-purple/30">
+                −20%
+              </span>
+            </span>
+          </div>
+
           {/* ── Model category explanation (bento row) ────────────────────── */}
           <section className="px-6 mb-12 max-w-5xl mx-auto">
             <div className="grid grid-cols-3 gap-3">
@@ -232,6 +275,8 @@ export default function Pricing() {
                 const Icon = plan.icon;
                 const isLoading = loadingPlan === plan.key;
                 const isPopular = plan.badge === "Más popular";
+                const displayPrice = annual ? Math.round(plan.price * 0.8) : plan.price;
+                const annualTotal = annual ? Math.round(plan.price * 0.8 * 12) : null;
                 return (
                   <div
                     key={plan.key}
@@ -266,8 +311,16 @@ export default function Pricing() {
 
                     {/* Price */}
                     <div className="mb-2">
-                      <span className="text-5xl font-black text-white font-display tracking-tight">{plan.priceLabel}</span>
-                      <span className="text-white/30 text-sm ml-1">{plan.period}</span>
+                      <span className="text-5xl font-black text-white font-display tracking-tight">${displayPrice}</span>
+                      <span className="text-white/30 text-sm ml-1">/mes</span>
+                      {annual && (
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="text-[11px] text-white/25 line-through">${plan.price}/mes</span>
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-aether-purple/20 text-aether-purple border border-aether-purple/25">
+                            ${annualTotal}/año
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Credits */}
@@ -370,20 +423,59 @@ export default function Pricing() {
           {/* ── Credit packs ─────────────────────────────────────────────── */}
           {CREDIT_PACKS && CREDIT_PACKS.length > 0 && (
             <section className="px-6 max-w-5xl mx-auto mb-12">
-              <h2 className="text-lg font-black text-white/60 uppercase tracking-widest mb-4 text-center">
-                Créditos extra · Top-up cuando los necesites
-              </h2>
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-black uppercase tracking-widest text-white/30 mb-3">
+                  <Coins className="h-3 w-3 text-aether-purple" />
+                  Top-up · Sin suscripción requerida
+                </div>
+                <h2 className="text-2xl font-black text-white font-display tracking-tight">Créditos extra</h2>
+                <p className="text-white/30 text-[13px] mt-1">Pago único · no expiran · compatible con todos los planes</p>
+              </div>
               <div className="grid sm:grid-cols-3 gap-4">
-                {CREDIT_PACKS.map((pack) => (
-                  <div key={pack.id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] px-5 py-4 flex items-center gap-4">
-                    <Coins className="h-5 w-5 text-aether-purple shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white/80">{pack.name ?? `${pack.credits?.toLocaleString()} créditos`}</p>
-                      <p className="text-[10px] text-white/30">Pago único · no expiran</p>
+                {CREDIT_PACKS.map((pack) => {
+                  const isLoadingThis = loadingPack === pack.id;
+                  return (
+                    <div
+                      key={pack.id}
+                      className={cn(
+                        "relative rounded-2xl border p-5 flex flex-col gap-4 transition-all",
+                        pack.popular
+                          ? "border-aether-purple/30 bg-aether-purple/5 shadow-[0_0_30px_rgba(74,222,128,0.08)]"
+                          : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
+                      )}
+                    >
+                      {pack.popular && (
+                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-aether-purple text-black">
+                          Más popular
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-aether-purple/10 border border-aether-purple/20 shrink-0">
+                          <Coins className="h-4 w-4 text-aether-purple" />
+                        </div>
+                        <div>
+                          <p className="text-[13px] font-black text-white font-display">{pack.credits?.toLocaleString()} créditos</p>
+                          <p className="text-[10px] text-white/30">Pago único · no expiran</p>
+                        </div>
+                        <span className="ml-auto text-xl font-black text-white font-display">{pack.price}</span>
+                      </div>
+                      <button
+                        onClick={() => handleBuyCredits(pack)}
+                        disabled={isLoadingThis}
+                        className={cn(
+                          "w-full py-2.5 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50",
+                          pack.popular
+                            ? "bg-aether-purple text-black hover:bg-aether-purple/90"
+                            : "border border-white/[0.10] text-white/60 hover:text-white hover:border-white/25 hover:bg-white/[0.04]"
+                        )}
+                      >
+                        {isLoadingThis
+                          ? <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                          : "Comprar ahora"}
+                      </button>
                     </div>
-                    <span className="text-sm font-black text-aether-purple shrink-0">{pack.price}</span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           )}

@@ -250,6 +250,9 @@ const TEMPLATES = [
   },
 ];
 
+// Last 5 templates in the array are marked "Nuevo"
+const NEW_TEMPLATE_IDS = new Set(TEMPLATES.slice(-5).map(t => t.id));
+
 // ─── Component ───────────────────────────────────────────────────────────────
 const Hub = () => {
   const { user, signOut } = useAuth("/auth");
@@ -303,7 +306,7 @@ const Hub = () => {
           <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
                 <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display">
@@ -368,9 +371,23 @@ const Hub = () => {
             {filtered.map((template, idx) => (
               <div
                 key={template.id}
-                className="aether-card rounded-[2rem] border border-white/5 group flex flex-col gap-5 p-6 hover:border-white/10 hover:scale-[1.02] transition-all duration-400"
-                style={{ animationDelay: `${idx * 30}ms` }}
+                className="aether-card rounded-[2rem] border border-white/5 group flex flex-col gap-5 p-6 transition-all duration-300 hover:scale-[1.02] overflow-hidden relative"
+                style={{
+                  animationDelay: `${idx * 30}ms`,
+                  ['--card-color' as string]: template.color,
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = `${template.color}30`;
+                  (e.currentTarget as HTMLElement).style.boxShadow = `0 0 32px ${template.color}12`;
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.05)';
+                  (e.currentTarget as HTMLElement).style.boxShadow = '';
+                }}
               >
+                {/* Color accent bar at top */}
+                <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-[2rem] opacity-60" style={{ background: `linear-gradient(90deg, ${template.color}80, transparent)` }} />
+
                 {/* Card header */}
                 <div className="flex items-start justify-between">
                   <div
@@ -379,12 +396,19 @@ const Hub = () => {
                   >
                     <template.icon className="w-5 h-5" style={{ color: template.color }} />
                   </div>
-                  <span
-                    className="text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest font-display"
-                    style={{ background: `${template.color}10`, color: template.color, border: `1px solid ${template.color}15` }}
-                  >
-                    {template.category}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {NEW_TEMPLATE_IDS.has(template.id) && (
+                      <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-aether-purple/20 text-aether-purple border border-aether-purple/30 uppercase tracking-widest font-display">
+                        Nuevo
+                      </span>
+                    )}
+                    <span
+                      className="text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest font-display"
+                      style={{ background: `${template.color}10`, color: template.color, border: `1px solid ${template.color}15` }}
+                    >
+                      {template.category}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Content */}

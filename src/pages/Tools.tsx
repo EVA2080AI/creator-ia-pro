@@ -353,7 +353,7 @@ const Tools = () => {
       return (
         <ProcessingCanvas
           modelName={activeModelObj.name}
-          modelColor={category === "image" ? "#A855F7" : "#00C2FF"}
+          modelColor={category === "image" ? "#4ADE80" : "#00C2FF"}
           category={category}
         />
       );
@@ -525,7 +525,7 @@ const Tools = () => {
                     {tool.disabled ? tool.disabledReason : `${tool.credits} crédito${tool.credits !== 1 ? "s" : ""}`}
                   </p>
                 </div>
-                {isActive && <div className="w-1 h-4 rounded-full bg-aether-purple shrink-0 shadow-[0_0_6px_rgba(168,85,247,0.7)]" />}
+                {isActive && <div className="w-1 h-4 rounded-full bg-aether-purple shrink-0 shadow-[0_0_6px_rgba(74,222,128,0.7)]" />}
               </button>
             );
           })}
@@ -557,7 +557,7 @@ const Tools = () => {
                   <p className="text-[12px] font-semibold truncate leading-none">{tool.name}</p>
                   <p className="text-[10px] text-white/20 mt-0.5">{tool.credits} crédito{tool.credits !== 1 ? "s" : ""}</p>
                 </div>
-                {isActive && <div className="w-1 h-4 rounded-full bg-aether-purple shrink-0 shadow-[0_0_6px_rgba(168,85,247,0.7)]" />}
+                {isActive && <div className="w-1 h-4 rounded-full bg-aether-purple shrink-0 shadow-[0_0_6px_rgba(74,222,128,0.7)]" />}
               </button>
             );
           })}
