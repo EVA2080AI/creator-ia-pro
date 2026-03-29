@@ -240,7 +240,7 @@ serve(async (req: Request) => {
 
     // ── Gemini (fallback for chat) ────────────────────────────────────────────
     if (provider === 'gemini') {
-      const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('VITE_GEMINI_API_KEY');
+      const apiKey = Deno.env.get('GEMINI_API_KEY');
       if (!apiKey) return json({ error: 'GEMINI_API_KEY not configured in Supabase secrets.' }, 503);
 
       const fetchUrl = `https://generativelanguage.googleapis.com/v1beta/${urlPath}?key=${apiKey}`;

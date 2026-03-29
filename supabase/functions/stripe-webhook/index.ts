@@ -38,17 +38,18 @@ serve(async (req) => {
     { auth: { persistSession: false } }
   );
 
+  // ── Webhook secret is REQUIRED — fail fast if not configured ──────────────
+  if (!webhookSecret) {
+    console.error("[WEBHOOK] STRIPE_WEBHOOK_SECRET is not set — refusing to process unsigned events.");
+    return new Response("Webhook secret not configured", { status: 500 });
+  }
+
   const body = await req.text();
   let event: Stripe.Event;
 
   try {
-    if (webhookSecret) {
-      const sig = req.headers.get("stripe-signature")!;
-      event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-    } else {
-      // Without webhook secret, parse directly (less secure but works for testing)
-      event = JSON.parse(body) as Stripe.Event;
-    }
+    const sig = req.headers.get("stripe-signature")!;
+    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (err) {
     console.error("Webhook signature verification failed:", err);
     return new Response("Webhook Error", { status: 400 });

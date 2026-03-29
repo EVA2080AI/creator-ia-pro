@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
-  Sparkles, ArrowRight, Mail, Eye, EyeOff, User, Image,
+  ArrowRight, Mail, Eye, EyeOff, User, Image,
   FileText, Wand2, Loader2, Lock, Check, Code2
 } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const features = [
   { icon: Code2, text: "Genesis IDE — genera apps React completas con IA" },
@@ -83,17 +84,9 @@ const Auth = () => {
         </div>
 
         {/* Top — Logo */}
-        <button
-          onClick={() => navigate("/")}
-          className="relative z-10 flex items-center gap-4 group w-fit"
-        >
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-[0_0_20px_rgba(255,255,255,0.15)] group-hover:scale-105 transition-transform">
-            <Sparkles className="h-5 w-5 text-black" />
-          </div>
-          <span className="text-sm font-bold text-white tracking-tight font-display uppercase">
-            Creator <span className="text-aether-purple">IA</span> Pro
-          </span>
-        </button>
+        <div className="relative z-10">
+          <Logo size="md" showText showPro onClick={() => navigate("/")} />
+        </div>
 
         {/* Center — Headline */}
         <div className="relative z-10 space-y-10">
@@ -164,16 +157,8 @@ const Auth = () => {
       {/* Right Panel — Form */}
       <div className="flex flex-1 items-center justify-center px-6 py-12 relative">
         {/* Mobile logo */}
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 lg:hidden flex items-center gap-3">
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white cursor-pointer"
-            onClick={() => navigate("/")}
-          >
-            <Sparkles className="h-4.5 w-4.5 text-black" />
-          </div>
-          <span className="text-sm font-bold text-white tracking-tight font-display uppercase">
-            Creator <span className="text-aether-purple">IA</span> Pro
-          </span>
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 lg:hidden">
+          <Logo size="sm" showText showPro onClick={() => navigate("/")} />
         </div>
 
         <div className="relative z-10 w-full max-w-[420px]">

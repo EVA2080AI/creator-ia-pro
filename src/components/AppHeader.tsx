@@ -3,12 +3,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useProfile } from "@/hooks/useProfile";
 import { useAdmin } from "@/hooks/useAdmin";
 import {
-  Sparkles, Shield, LogOut,
+  Shield, LogOut,
   Home, Menu, X, User, Download,
   ChevronDown, Coins, Monitor,
   Code2, Wand2, FolderOpen, CreditCard, Image, Zap, LayoutTemplate
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/Logo";
 
 interface AppHeaderProps {
   userId?: string;
@@ -49,17 +50,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
       <div className="w-full max-w-[1400px] mx-auto px-5 flex items-center gap-5">
 
         {/* Logo */}
-        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-2.5 shrink-0 group">
-          <div className="relative w-7 h-7 rounded-lg flex items-center justify-center"
-            style={{ background: '#4ADE80' }}>
-            <Sparkles className="w-3.5 h-3.5 text-black" />
-          </div>
-          <div className="hidden sm:flex flex-col leading-none">
-            <span className="text-[12px] font-black text-white tracking-tight font-display uppercase">
-              Creator <span style={{ color: '#4ADE80' }}>IA</span>
-            </span>
-          </div>
-        </button>
+        <Logo size="sm" showText onClick={() => navigate("/dashboard")} />
 
         {/* Divider */}
         <div className="hidden md:block w-px h-4" style={{ background: 'rgba(255,255,255,0.10)' }} />
@@ -109,7 +100,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
             onMouseEnter={e => { (e.target as HTMLElement).closest('button')!.style.color = 'white'; (e.target as HTMLElement).closest('button')!.style.borderColor = 'rgba(255,255,255,0.16)'; }}
             onMouseLeave={e => { (e.target as HTMLElement).closest('button')!.style.color = 'rgba(255,255,255,0.35)'; (e.target as HTMLElement).closest('button')!.style.borderColor = 'rgba(255,255,255,0.08)'; }}
           >
-            <Zap className="w-3 h-3" style={{ color: '#4ADE80' }} />
+            <Zap className="w-3 h-3" style={{ color: 'var(--brand)' }} />
             Precios
           </button>
 
@@ -119,7 +110,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
             className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all"
             style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.15)', color: 'rgba(255,255,255,0.60)' }}
           >
-            <Coins className="w-3.5 h-3.5 shrink-0" style={{ color: '#4ADE80' }} />
+            <Coins className="w-3.5 h-3.5 shrink-0" style={{ color: 'var(--brand)' }} />
             <span className="tabular-nums font-mono">{profile?.credits_balance?.toLocaleString() ?? "—"}</span>
           </button>
 
@@ -221,7 +212,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
             </div>
             <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg"
               style={{ background: 'rgba(74,222,128,0.08)', border: '1px solid rgba(74,222,128,0.15)' }}>
-              <Coins className="w-3 h-3" style={{ color: '#4ADE80' }} />
+              <Coins className="w-3 h-3" style={{ color: 'var(--brand)' }} />
               <span className="text-[11px] font-semibold text-white/50 tabular-nums">{profile?.credits_balance?.toLocaleString() ?? "—"}</span>
             </div>
           </div>
@@ -255,7 +246,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
             <button onClick={() => handleNav("/pricing")}
               className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-semibold mt-2 transition-all"
-              style={{ border: '1px solid rgba(74,222,128,0.20)', background: 'rgba(74,222,128,0.06)', color: '#4ADE80' }}>
+              style={{ border: '1px solid rgba(74,222,128,0.20)', background: 'rgba(74,222,128,0.06)', color: 'var(--brand)' }}>
               <Zap className="w-5 h-5" /> Ver planes
             </button>
 

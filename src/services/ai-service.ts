@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // ─── TEXT MODEL MAP (internal-id → OpenRouter model ID) ───────────────────────
 const TEXT_MODEL_MAP: Record<string, string> = {
@@ -110,6 +111,23 @@ export const aiService = {
         const { data: exists } = await supabase
           .from("canvas_nodes").select("id").eq("id", safeNodeId).maybeSingle();
         if (!exists) safeNodeId = null;
+      }
+
+      // 2b. Smart credit warning
+      const balance = profile?.credits_balance ?? 0;
+      if (balance < cost) {
+        toast.error("Créditos insuficientes. Recarga tu plan para continuar.", {
+          action: { label: "Ver planes", onClick: () => { window.location.href = '/pricing'; } },
+          duration: 6000,
+        });
+        throw new Error("Créditos insuficientes");
+      }
+      if (balance < 50) {
+        toast.warning(`Solo te quedan ${balance} créditos. ¡Recarga pronto!`, {
+          action: { label: "Actualizar", onClick: () => { window.location.href = '/pricing'; } },
+          duration: 5000,
+          id: 'low-credits-warning', // deduplicate toasts
+        });
       }
 
       // 3. Deduct credits

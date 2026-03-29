@@ -77,7 +77,7 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
   };
 
   return (
-    <div className="w-[280px] shrink-0 flex flex-col border-l border-white/[0.06] bg-[#030304] animate-in slide-in-from-right duration-200 overflow-y-auto no-scrollbar">
+    <div className="w-[280px] shrink-0 flex flex-col border-l border-white/[0.06] bg-[#222228] animate-in slide-in-from-right duration-200 overflow-y-auto no-scrollbar">
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">

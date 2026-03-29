@@ -127,12 +127,12 @@ const Spaces = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#030304] text-white">
+    <div className="min-h-screen bg-[#222228] text-white">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <div className="flex pt-16 h-screen overflow-hidden">
         {/* Drive-like Left Sidebar */}
-        <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-white/[0.05] bg-[#030304] py-4 px-3 gap-1 overflow-y-auto">
+        <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-white/[0.05] bg-[#222228] py-4 px-3 gap-1 overflow-y-auto">
           <button
             onClick={handleOpenCreate}
             className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-white text-black text-[12px] font-bold hover:bg-white/90 transition-all active:scale-95 shadow-lg mb-3"

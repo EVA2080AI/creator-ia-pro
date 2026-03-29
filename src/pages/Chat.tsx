@@ -9,7 +9,7 @@ import {
   Github, Loader2, FolderOpen, Files, MessageSquare,
   Pencil, UploadCloud, Zap, Sparkles, Search, Star,
   User, Home, Paperclip, Mic, Send, LayoutTemplate,
-  Clock, ChevronDown,
+  Clock, ChevronDown, Eye, ToggleLeft,
 } from 'lucide-react';
 import { AppHeader } from '@/components/AppHeader';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
@@ -25,7 +25,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 type PanelView = 'code' | 'preview' | 'split';
-type SidebarView = 'files' | 'projects' | 'github';
+type LeftTab = 'chat' | 'files' | 'projects' | 'github';
 
 // ─── Starter prompts / Templates ────────────────────────────────────────────
 const STARTER_PROMPTS = [
@@ -313,7 +313,8 @@ export default function Chat() {
   const [selectedFile, setSelectedFile] = useState('App.tsx');
   const [panelView, setPanelView] = useState<PanelView>('split');
   const [deviceMode, setDeviceMode] = useState<DeviceMode>('desktop');
-  const [sidebarView, setSidebarView] = useState<SidebarView>('files');
+  const [leftTab, setLeftTab] = useState<LeftTab>('chat');
+  const [visualEdits, setVisualEdits] = useState(false);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [githubToken, setGithubToken] = useState('');
@@ -454,16 +455,18 @@ export default function Chat() {
     );
   }
 
-  // Full IDE view
+  // Full IDE view — Lovable-style: chat LEFT | code/preview CENTER
+  const credits = profile?.credits_balance ?? 0;
+
   return (
     <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#16161b' }}>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      {/* Genesis Top Bar — Lovable-style */}
+      {/* Genesis Top Bar */}
       <div className="flex h-12 items-center gap-2 px-3 shrink-0 z-10 mt-14"
         style={{ background: '#1a1a20', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
 
-        {/* Left: back + project */}
+        {/* Left: back + project name + subtitle */}
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <button
             onClick={() => setActiveProject(null as any)}
@@ -472,9 +475,12 @@ export default function Chat() {
             ← <span className="hidden sm:block ml-0.5">Proyectos</span>
           </button>
           <div className="h-4 w-px shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
-          <div className="flex items-center gap-1.5 min-w-0">
-            <Code2 className="h-3.5 w-3.5 text-aether-purple shrink-0" />
-            <span className="text-[12px] font-medium text-white/60 truncate max-w-[150px]">{activeProject.name}</span>
+          <div className="flex flex-col justify-center min-w-0">
+            <div className="flex items-center gap-1.5">
+              <Code2 className="h-3 w-3 text-aether-purple shrink-0" />
+              <span className="text-[12px] font-semibold text-white/80 truncate max-w-[180px]">{activeProject.name}</span>
+            </div>
+            <span className="text-[10px] text-white/25 leading-none mt-0.5 hidden sm:block">Viendo la última versión guardada</span>
           </div>
         </div>
 
@@ -485,9 +491,7 @@ export default function Chat() {
             { v: 'split',   label: 'Split',   Icon: Tablet  },
             { v: 'code',    label: 'Code',     Icon: Code2   },
           ] as { v: PanelView; label: string; Icon: any }[]).map(({ v, label, Icon }) => (
-            <button
-              key={v}
-              onClick={() => setPanelView(v)}
+            <button key={v} onClick={() => setPanelView(v)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-medium transition-all"
               style={panelView === v ? { background: 'rgba(255,255,255,0.09)', color: 'white' } : { color: 'rgba(255,255,255,0.35)' }}
             >
@@ -511,7 +515,7 @@ export default function Chat() {
         {/* Right: GitHub + Share + Publish */}
         <div className="flex items-center gap-1.5 ml-1 shrink-0">
           <button
-            onClick={() => setSidebarView('github')}
+            onClick={() => setLeftTab('github')}
             className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-medium text-white/40 hover:text-white transition-all"
             style={{ border: '1px solid rgba(255,255,255,0.08)' }}
           >
@@ -536,94 +540,188 @@ export default function Chat() {
         </div>
       </div>
 
+      {/* Main body */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Activity bar */}
-        <div className="flex flex-col items-center gap-2 w-10 py-2 border-r border-white/[0.05] bg-[#16161b] shrink-0">
-          {([
-            { v: 'files' as SidebarView, I: Files, t: 'Archivos' },
-            { v: 'projects' as SidebarView, I: FolderOpen, t: 'Proyectos' },
-            { v: 'github' as SidebarView, I: Github, t: 'GitHub' },
-          ]).map(({ v, I, t }) => (
-            <button key={v} onClick={() => setSidebarView(sidebarView === v ? 'files' : v)} title={t}
-              className={`flex h-8 w-8 items-center justify-center rounded-xl transition-all ${sidebarView === v ? 'bg-aether-purple/20 text-aether-purple border border-aether-purple/30' : 'text-white/20 hover:bg-white/5 hover:text-white'}`}>
-              <I className="h-3.5 w-3.5" />
-            </button>
-          ))}
-          <div className="flex-1" />
-          <button onClick={() => createProject()} title="Nuevo proyecto"
-            className="flex h-8 w-8 items-center justify-center rounded-xl text-white/20 hover:bg-aether-purple/10 hover:text-aether-purple transition-all">
-            <Plus className="h-3.5 w-3.5" />
-          </button>
-        </div>
 
-        {/* Sidebar */}
-        <div className="w-52 shrink-0 border-r border-white/[0.05] overflow-hidden flex flex-col">
-          {sidebarView === 'files' && (
-            <StudioFileTree files={projectFiles} selectedFile={selectedFile} onSelect={setSelectedFile} onAddFile={handleAddFile} onDeleteFile={handleDeleteFile} />
-          )}
-          {sidebarView === 'projects' && (
-            <div className="flex flex-col h-full bg-[#16161b]">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.05]">
-                <span className="text-[10px] font-bold text-white/25 uppercase tracking-[0.3em] font-display">Proyectos</span>
-                <span className="text-[10px] text-white/15 font-bold">{projects.length}</span>
+        {/* ── LEFT: Chat / Files / Projects / GitHub panel ──────────────────── */}
+        <div className="hidden lg:flex w-[240px] shrink-0 flex-col border-r overflow-hidden"
+          style={{ background: '#131318', borderColor: 'rgba(255,255,255,0.07)' }}>
+
+          {/* Left panel tab bar */}
+          <div className="flex items-center shrink-0 px-2 pt-2 gap-0.5">
+            {([
+              { id: 'chat' as LeftTab,     I: MessageSquare, t: 'Chat' },
+              { id: 'files' as LeftTab,    I: Files,         t: 'Archivos' },
+              { id: 'projects' as LeftTab, I: FolderOpen,    t: 'Proyectos' },
+              { id: 'github' as LeftTab,   I: Github,        t: 'GitHub' },
+            ]).map(({ id, I, t }) => (
+              <button key={id} onClick={() => setLeftTab(id)} title={t}
+                className="flex-1 flex items-center justify-center py-2 rounded-lg transition-all"
+                style={leftTab === id
+                  ? { background: 'rgba(139,92,246,0.15)', color: '#a78bfa' }
+                  : { color: 'rgba(255,255,255,0.25)' }}
+              >
+                <I className="h-3.5 w-3.5" />
+              </button>
+            ))}
+          </div>
+
+          {/* Tab content — fills remaining height */}
+          <div className="flex flex-col flex-1 overflow-hidden">
+
+            {/* CHAT tab */}
+            {leftTab === 'chat' && (
+              <StudioChat
+                projectId={activeProject.id}
+                projectFiles={projectFiles}
+                onCodeGenerated={handleCodeGenerated}
+                initialPrompt={pendingPrompt}
+                onInitialPromptUsed={() => setPendingPrompt(null)}
+              />
+            )}
+
+            {/* FILES tab */}
+            {leftTab === 'files' && (
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-2.5 shrink-0"
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Archivos</span>
+                  <button onClick={() => handleAddFile(`file${Date.now()}.tsx`)}
+                    className="text-white/25 hover:text-white transition-all">
+                    <Plus className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <StudioFileTree files={projectFiles} selectedFile={selectedFile} onSelect={(f) => { setSelectedFile(f); setPanelView('code'); }} onAddFile={handleAddFile} onDeleteFile={handleDeleteFile} />
+                </div>
               </div>
-              <div className="flex flex-col gap-1 p-2 flex-1 overflow-y-auto">
-                {projects.map((p) => (
-                  <div key={p.id}
-                    className={`group flex items-center justify-between gap-1 px-3 py-2 rounded-xl cursor-pointer transition-all border ${activeProject.id === p.id ? 'bg-aether-purple/15 border-aether-purple/30 text-white' : 'text-white/35 hover:bg-white/[0.03] hover:text-white border-transparent'}`}
-                    onClick={() => { setActiveProject(p); setSidebarView('files'); }}
-                  >
-                    {renamingId === p.id ? (
-                      <input autoFocus value={renameValue} onChange={(e) => setRenameValue(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter') confirmRename(); if (e.key === 'Escape') setRenamingId(null); }}
-                        onBlur={confirmRename} onClick={(e) => e.stopPropagation()}
-                        className="flex-1 bg-transparent border-b border-aether-purple/40 text-[11px] text-white outline-none" />
-                    ) : (
-                      <span className="text-[11px] font-medium truncate flex-1">{p.name}</span>
-                    )}
-                    <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <button onClick={(e) => { e.stopPropagation(); setRenamingId(p.id); setRenameValue(p.name); }}
-                        className="p-1 rounded hover:bg-white/10 text-white/20 hover:text-white transition-all">
-                        <Pencil className="h-2.5 w-2.5" />
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }}
-                        className="p-1 rounded hover:bg-rose-500/20 text-white/20 hover:text-rose-400 transition-all">
-                        <Trash2 className="h-2.5 w-2.5" />
-                      </button>
+            )}
+
+            {/* PROJECTS tab */}
+            {leftTab === 'projects' && (
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-2.5 shrink-0"
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Proyectos</span>
+                  <button onClick={() => createProject()}
+                    className="text-white/25 hover:text-white transition-all">
+                    <Plus className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div className="flex flex-col gap-1 p-2 flex-1 overflow-y-auto">
+                  {projects.map((p) => (
+                    <div key={p.id}
+                      className={`group flex items-center justify-between gap-1 px-3 py-2 rounded-xl cursor-pointer transition-all border ${activeProject.id === p.id ? 'bg-aether-purple/15 border-aether-purple/30 text-white' : 'text-white/35 hover:bg-white/[0.03] hover:text-white border-transparent'}`}
+                      onClick={() => { setActiveProject(p); setLeftTab('chat'); }}
+                    >
+                      {renamingId === p.id ? (
+                        <input autoFocus value={renameValue} onChange={(e) => setRenameValue(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') confirmRename(); if (e.key === 'Escape') setRenamingId(null); }}
+                          onBlur={confirmRename} onClick={(e) => e.stopPropagation()}
+                          className="flex-1 bg-transparent border-b border-aether-purple/40 text-[11px] text-white outline-none" />
+                      ) : (
+                        <span className="text-[11px] font-medium truncate flex-1">{p.name}</span>
+                      )}
+                      <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                        <button onClick={(e) => { e.stopPropagation(); setRenamingId(p.id); setRenameValue(p.name); }}
+                          className="p-1 rounded hover:bg-white/10 text-white/20 hover:text-white transition-all">
+                          <Pencil className="h-2.5 w-2.5" />
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }}
+                          className="p-1 rounded hover:bg-rose-500/20 text-white/20 hover:text-rose-400 transition-all">
+                          <Trash2 className="h-2.5 w-2.5" />
+                        </button>
+                      </div>
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* GITHUB tab */}
+            {leftTab === 'github' && (
+              <div className="flex flex-col flex-1 overflow-y-auto">
+                <div className="flex items-center gap-2 px-4 py-2.5 shrink-0"
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  <Github className="h-3.5 w-3.5 text-white/30" />
+                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">GitHub Push</span>
+                </div>
+                <div className="p-4 flex flex-col gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Token PAT</label>
+                    <input type="password" value={githubToken} onChange={(e) => setGithubToken(e.target.value)} placeholder="ghp_xxx"
+                      className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-[11px] text-white placeholder:text-white/15 outline-none focus:border-aether-purple/40 font-mono" />
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
-          {sidebarView === 'github' && (
-            <div className="flex flex-col h-full bg-[#16161b] overflow-y-auto">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.05]">
-                <Github className="h-3.5 w-3.5 text-white/30" />
-                <span className="text-[10px] font-bold text-white/25 uppercase tracking-[0.3em] font-display">GitHub Push</span>
-              </div>
-              <div className="p-4 flex flex-col gap-4">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest font-display">Token PAT</label>
-                  <input type="password" value={githubToken} onChange={(e) => setGithubToken(e.target.value)} placeholder="ghp_xxx"
-                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-[11px] text-white placeholder:text-white/15 outline-none focus:border-aether-purple/40 font-mono" />
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Repositorio</label>
+                    <input value={githubRepo} onChange={(e) => setGithubRepo(e.target.value)} placeholder="usuario/repo"
+                      className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-[11px] text-white placeholder:text-white/15 outline-none focus:border-aether-purple/40 font-mono" />
+                  </div>
+                  <button onClick={handleGithubPush} disabled={pushingGithub || !githubToken || !githubRepo}
+                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white text-black text-[11px] font-bold disabled:opacity-25 hover:bg-white/90 transition-all active:scale-95">
+                    {pushingGithub ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando…</> : <><UploadCloud className="h-3.5 w-3.5" /> Push a GitHub</>}
+                  </button>
+                  <p className="text-[9px] text-white/20 leading-relaxed">Token necesita permisos <code className="text-white/35">repo</code>. Crea el repo automáticamente si no existe.</p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest font-display">Repositorio</label>
-                  <input value={githubRepo} onChange={(e) => setGithubRepo(e.target.value)} placeholder="usuario/repo"
-                    className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-[11px] text-white placeholder:text-white/15 outline-none focus:border-aether-purple/40 font-mono" />
-                </div>
-                <button onClick={handleGithubPush} disabled={pushingGithub || !githubToken || !githubRepo}
-                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white text-black text-[11px] font-bold disabled:opacity-25 hover:bg-white/90 transition-all active:scale-95">
-                  {pushingGithub ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando…</> : <><UploadCloud className="h-3.5 w-3.5" /> Push</>}
-                </button>
-                <p className="text-[9px] text-white/15 leading-relaxed">Token necesita permisos <span className="text-white/30 font-mono">repo</span>. Crea el repo automáticamente si no existe.</p>
               </div>
+            )}
+          </div>
+
+          {/* ── Bottom strip: Visual edits toggle + Back to Preview + Credits ── */}
+          <div className="shrink-0 flex flex-col gap-1 p-2"
+            style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+
+            {/* Visual edits toggle */}
+            <button
+              onClick={() => setVisualEdits(!visualEdits)}
+              className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[11px] font-medium transition-all"
+              style={visualEdits
+                ? { background: 'rgba(139,92,246,0.12)', color: '#a78bfa', border: '1px solid rgba(139,92,246,0.25)' }
+                : { color: 'rgba(255,255,255,0.30)', border: '1px solid rgba(255,255,255,0.06)' }}
+            >
+              <ToggleLeft className="h-3.5 w-3.5 shrink-0" />
+              Edición visual
+              <div className="ml-auto h-4 w-7 rounded-full transition-all flex items-center px-0.5"
+                style={{ background: visualEdits ? '#8b5cf6' : 'rgba(255,255,255,0.1)' }}>
+                <div className="h-3 w-3 rounded-full bg-white transition-all"
+                  style={{ transform: visualEdits ? 'translateX(12px)' : 'translateX(0)' }} />
+              </div>
+            </button>
+
+            {/* Back to Preview (only when in code view) */}
+            {panelView === 'code' && (
+              <button
+                onClick={() => setPanelView('preview')}
+                className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[11px] font-medium text-white/35 hover:text-white transition-all"
+                style={{ border: '1px solid rgba(255,255,255,0.06)' }}
+              >
+                <Eye className="h-3.5 w-3.5 shrink-0" />
+                Volver al Preview
+              </button>
+            )}
+
+            {/* Credits bar */}
+            <div className="px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[10px] text-white/30">{credits.toLocaleString()} créditos restantes</span>
+                <Zap className="h-3 w-3 text-white/20" />
+              </div>
+              <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+                <div className="h-full rounded-full transition-all"
+                  style={{ width: `${Math.min(100, (credits / 1000) * 100)}%`, background: credits > 200 ? '#8b5cf6' : credits > 50 ? '#f59e0b' : '#ef4444' }} />
+              </div>
+              <button
+                onClick={() => { window.location.href = '/pricing'; }}
+                className="mt-2 w-full text-center text-[10px] font-semibold py-1.5 rounded-lg transition-all"
+                style={{ background: 'rgba(139,92,246,0.12)', color: '#a78bfa', border: '1px solid rgba(139,92,246,0.2)' }}
+              >
+                Actualizar plan →
+              </button>
             </div>
-          )}
+          </div>
         </div>
 
-        {/* Code + Preview area */}
+        {/* ── CENTER: Code + Preview ─────────────────────────────────────────── */}
         <div className="flex flex-1 overflow-hidden">
           {(panelView === 'code' || panelView === 'split') && (
             <div className={`flex flex-col overflow-hidden ${panelView === 'split' ? 'w-1/2 border-r border-white/[0.05]' : 'flex-1'}`}>
@@ -637,26 +735,17 @@ export default function Chat() {
           )}
         </div>
 
-        {/* Right: Chat — desktop */}
-        <div className="hidden lg:flex w-72 shrink-0 border-l border-white/[0.05] flex-col overflow-hidden">
-          <StudioChat
-            projectId={activeProject.id}
-            projectFiles={projectFiles}
-            onCodeGenerated={handleCodeGenerated}
-            initialPrompt={pendingPrompt}
-            onInitialPromptUsed={() => setPendingPrompt(null)}
-          />
-        </div>
-
-        {/* Mobile chat */}
+        {/* Mobile chat FAB */}
         <div className="lg:hidden fixed bottom-4 right-4 z-50">
           <Sheet>
             <SheetTrigger asChild>
-              <button className="flex h-12 w-12 items-center justify-center rounded-full bg-aether-purple text-white shadow-lg shadow-aether-purple/30">
+              <button className="flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg"
+                style={{ background: '#8b5cf6', boxShadow: '0 8px 24px rgba(139,92,246,0.4)' }}>
                 <MessageSquare className="h-5 w-5" />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:w-[360px] p-0 bg-[#16161b] border-white/[0.05]">
+            <SheetContent side="left" className="w-full sm:w-[280px] p-0 border-white/[0.05]"
+              style={{ background: '#131318' }}>
               <StudioChat
                 projectId={activeProject.id}
                 projectFiles={projectFiles}

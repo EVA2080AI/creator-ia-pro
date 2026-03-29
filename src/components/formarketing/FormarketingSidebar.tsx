@@ -73,7 +73,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
     <div className="flex h-full shrink-0 border-r border-white/[0.04] z-20">
 
       {/* Aether Vertical Toolbar */}
-      <div className="flex flex-col items-center gap-2 w-14 py-4 bg-[#030304]/90 backdrop-blur-xl">
+      <div className="flex flex-col items-center gap-2 w-14 py-4 bg-[#222228]/90 backdrop-blur-xl">
         {/* Menu Toggle */}
         <button
            onClick={() => setMenuOpen(!menuOpen)}

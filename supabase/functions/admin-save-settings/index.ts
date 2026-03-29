@@ -33,12 +33,18 @@ Deno.serve(async (req) => {
     if (!isAdmin) throw new Error('Admin access required');
 
     const { key, value } = await req.json();
-    if (!key || !value) throw new Error('Missing key or value');
+    if (!key) throw new Error('Missing key');
 
     console.log(`Admin ${user.email} saved setting: ${key}`);
 
+    const { error: upsertError } = await adminClient
+      .from('app_settings')
+      .upsert({ key, value: JSON.stringify(value), updated_by: user.id, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+
+    if (upsertError) throw new Error(`Failed to save: ${upsertError.message}`);
+
     return new Response(
-      JSON.stringify({ success: true, message: `Setting ${key} saved` }),
+      JSON.stringify({ success: true, message: `Setting "${key}" guardado correctamente` }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {

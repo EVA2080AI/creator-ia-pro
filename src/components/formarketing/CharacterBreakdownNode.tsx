@@ -147,7 +147,7 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
         </div>
       </div>
 
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#020203] hover:scale-125 transition-transform" />
+      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#16161b] hover:scale-125 transition-transform" />
       <NodeNextAction nodeId={id} />
     </div>
   );

@@ -530,13 +530,13 @@ export default function Studio() {
   });
 
   return (
-    <div className="flex flex-col h-screen bg-[#030304] overflow-hidden">
+    <div className="flex flex-col h-screen bg-[#222228] overflow-hidden">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <div className="flex flex-1 overflow-hidden pt-16">
 
         {/* ── Left Sidebar ─────────────────────────────────────────────────── */}
-        <div className="w-64 shrink-0 border-r border-white/[0.05] flex flex-col overflow-hidden bg-[#030304]">
+        <div className="w-64 shrink-0 border-r border-white/[0.05] flex flex-col overflow-hidden bg-[#222228]">
 
           {/* Header */}
           <div className="px-4 py-4 border-b border-white/[0.05]">

@@ -8,10 +8,11 @@ import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  ArrowRight, Code2, Image, Sparkles, Zap,
+  ArrowRight, Code2, Image, Zap,
   CheckCircle2, Layers, MessageSquare, Video,
   Star, Shield, Users, ChevronRight,
 } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const PRODUCTS = [
@@ -82,15 +83,7 @@ export default function Index() {
 
         {/* ── Nav ─────────────────────────────────────────────────────────── */}
         <header className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-[#0a0a0b]/90 backdrop-blur-md border-b border-white/[0.06]">
-          <div className="flex items-center gap-3">
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-[0_0_16px_rgba(74,222,128,0.3)]">
-              <Sparkles className="h-4 w-4 text-black" />
-              <div className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-aether-purple animate-pulse" />
-            </div>
-            <span className="font-black text-white text-sm tracking-tight uppercase">
-              Creator <span className="text-aether-purple">IA</span> Pro
-            </span>
-          </div>
+          <Logo size="sm" showText showPro onClick={() => navigate("/")} />
 
           <div className="flex items-center gap-6">
             <button onClick={() => navigate("/pricing")} className="hidden sm:block text-[13px] text-white/40 hover:text-white transition-colors font-medium">
@@ -466,10 +459,7 @@ export default function Index() {
           {/* ── Footer ──────────────────────────────────────────────────── */}
           <footer className="border-t border-white/[0.04] px-6 md:px-12 py-8">
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-aether-purple" />
-                <span className="text-[12px] font-bold text-white/30">Creator IA Pro</span>
-              </div>
+              <Logo size="sm" showText showPro />
               <div className="flex items-center gap-6 text-[11px] text-white/20">
                 <button onClick={() => navigate("/pricing")} className="hover:text-white transition-colors">Precios</button>
                 <button onClick={() => navigate("/hub")} className="hover:text-white transition-colors">Templates</button>

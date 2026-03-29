@@ -5,8 +5,56 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+/** Extract user_id from Supabase JWT (proxy layer — no full crypto verification) */
+function extractUserIdFromJwt(authHeader: string | null): string | null {
+  try {
+    if (!authHeader?.startsWith('Bearer ')) return null;
+    const token = authHeader.slice(7);
+    const [, payload] = token.split('.');
+    if (!payload) return null;
+    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    return decoded?.sub ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ── Per-user rate limiting: 10 req/min ───────────────────────────────────────
+const RATE_LIMIT_MEDIA = 10;
+const RATE_WINDOW_MS = 60_000;
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+  if (!entry || now >= entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MEDIA) return false;
+  entry.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // ── Auth check — require valid JWT ─────────────────────────────────────────
+  const userId = extractUserIdFromJwt(req.headers.get("authorization"));
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // ── Rate limit ─────────────────────────────────────────────────────────────
+  if (!checkRateLimit(userId)) {
+    return new Response(JSON.stringify({ error: "Rate limit exceeded. Máximo 10 peticiones por minuto." }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   try {
     const replicateApiToken = Deno.env.get("REPLICATE_API_TOKEN");

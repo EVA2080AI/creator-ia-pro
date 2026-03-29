@@ -749,7 +749,7 @@ const ToolLanding = () => {
         </div>
 
         {/* CTA */}
-        <div className="mt-40 w-full max-w-4xl rounded-2xl border border-white/5 bg-[#09090b] p-16 md:p-24 text-center shadow-2xl animate-fade-in relative overflow-hidden">
+        <div className="mt-40 w-full max-w-4xl rounded-2xl border border-white/5 bg-[#1c1c22] p-16 md:p-24 text-center shadow-2xl animate-fade-in relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#EC4699]/10 via-transparent to-[#FA8214]/10 pointer-events-none" />
           <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-2xl shadow-[#EC4699]/20 relative z-10">
             <tool.icon className="h-10 w-10 text-white" />

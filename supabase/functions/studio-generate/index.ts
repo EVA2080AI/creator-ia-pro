@@ -5,8 +5,56 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+/** Extract user_id from Supabase JWT */
+function extractUserIdFromJwt(authHeader: string | null): string | null {
+  try {
+    if (!authHeader?.startsWith('Bearer ')) return null;
+    const token = authHeader.slice(7);
+    const [, payload] = token.split('.');
+    if (!payload) return null;
+    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+    return decoded?.sub ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// ── Per-user rate limiting: 5 req/min ────────────────────────────────────────
+const RATE_LIMIT_STUDIO = 5;
+const RATE_WINDOW_MS = 60_000;
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(userId);
+  if (!entry || now >= entry.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_STUDIO) return false;
+  entry.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  // ── Auth check — require valid JWT ─────────────────────────────────────────
+  const userId = extractUserIdFromJwt(req.headers.get("authorization"));
+  if (!userId) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  // ── Rate limit ─────────────────────────────────────────────────────────────
+  if (!checkRateLimit(userId)) {
+    return new Response(JSON.stringify({ error: "Rate limit: máximo 5 generaciones por minuto." }), {
+      status: 429,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   try {
     const { prompt, currentFiles } = await req.json();

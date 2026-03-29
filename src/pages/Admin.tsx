@@ -40,7 +40,7 @@ interface Transaction {
 
 const TIERS: Record<string, { label: string; color: string; icon: typeof Zap }> = {
   free:      { label: "Free",       color: "#6B7280", icon: Zap },
-  starter:   { label: "Starter",    color: "#4ADE80", icon: Package },
+  starter:   { label: "Starter",    color: "var(--brand)", icon: Package },
   creator:   { label: "Creator",    color: "#A855F7", icon: Star },
   agency:    { label: "Agency",     color: "#F59E0B", icon: Building2 },
   educacion: { label: "Educación",  color: "#60A5FA", icon: GraduationCap },
@@ -49,7 +49,7 @@ const TIERS: Record<string, { label: string; color: string; icon: typeof Zap }> 
 };
 
 const TX_TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  admin_grant:  { label: "Carga Admin",   color: "#4ADE80" },
+  admin_grant:  { label: "Carga Admin",   color: "var(--brand)" },
   admin_deduct: { label: "Deducción",     color: "#EF4444" },
   refund:       { label: "Reembolso",     color: "#60A5FA" },
   spend:        { label: "Uso",           color: "#F59E0B" },
@@ -121,7 +121,7 @@ function CreditModal({
   };
 
   const TABS = [
-    { key: "add",     label: "Agregar",   icon: Plus,      color: "#4ADE80" },
+    { key: "add",     label: "Agregar",   icon: Plus,      color: "var(--brand)" },
     { key: "deduct",  label: "Deducir",   icon: Minus,     color: "#EF4444" },
     { key: "refund",  label: "Reembolso", icon: RotateCcw, color: "#60A5FA" },
     { key: "history", label: "Historial", icon: History,   color: "#A855F7" },
@@ -198,9 +198,9 @@ function CreditModal({
                 disabled={loading || !amount}
                 className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all disabled:opacity-40"
                 style={{
-                  background: tab === "add" ? "#4ADE8015" : tab === "deduct" ? "#EF444415" : "#60A5FA15",
-                  border: `1px solid ${tab === "add" ? "#4ADE8030" : tab === "deduct" ? "#EF444430" : "#60A5FA30"}`,
-                  color: tab === "add" ? "#4ADE80" : tab === "deduct" ? "#EF4444" : "#60A5FA",
+                  background: tab === "add" ? "var(--brand)15" : tab === "deduct" ? "#EF444415" : "#60A5FA15",
+                  border: `1px solid ${tab === "add" ? "var(--brand)30" : tab === "deduct" ? "#EF444430" : "#60A5FA30"}`,
+                  color: tab === "add" ? "var(--brand)" : tab === "deduct" ? "#EF4444" : "#60A5FA",
                 }}
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -229,7 +229,7 @@ function CreditModal({
                         )}
                         <p className="text-[10px] text-white/25">{new Date(tx.created_at).toLocaleString()}</p>
                       </div>
-                      <span className="ml-3 font-mono text-sm font-bold" style={{ color: tx.amount >= 0 ? "#4ADE80" : "#EF4444" }}>
+                      <span className="ml-3 font-mono text-sm font-bold" style={{ color: tx.amount >= 0 ? "var(--brand)" : "#EF4444" }}>
                         {tx.amount >= 0 ? "+" : ""}{tx.amount.toLocaleString()}
                       </span>
                     </div>
@@ -490,7 +490,7 @@ const Admin = () => {
           { name: "Imagen IA",   count: image,  color: "#A855F7" },
           { name: "Texto / Copy",count: text,   color: "#60A5FA" },
           { name: "Video",       count: video,  color: "#F59E0B" },
-          { name: "BuilderAI",   count: studio, color: "#4ADE80" },
+          { name: "BuilderAI",   count: studio, color: "var(--brand)" },
           { name: "Canvas",      count: canvas, color: "#EC4899" },
         ],
         dailyCredits: Object.values(dayMap),
@@ -612,9 +612,9 @@ const Admin = () => {
     { name: "ai-proxy",          desc: "Texto e imagen IA (OpenRouter)",      icon: Zap,      color: "#A855F7" },
     { name: "media-proxy",       desc: "Edición de imagen (Replicate)",       icon: Image,    color: "#60A5FA" },
     { name: "video-gen",         desc: "Generación de video (Replicate)",     icon: Video,    color: "#F59E0B" },
-    { name: "studio-generate",   desc: "BuilderAI — generación de código",    icon: Code2,    color: "#4ADE80" },
+    { name: "studio-generate",   desc: "BuilderAI — generación de código",    icon: Code2,    color: "var(--brand)" },
     { name: "stripe-webhook",    desc: "Webhook de pagos Stripe",             icon: CreditCard, color: "#635BFF" },
-    { name: "create-checkout",   desc: "Crear sesión de pago Stripe",         icon: DollarSign, color: "#4ADE80" },
+    { name: "create-checkout",   desc: "Crear sesión de pago Stripe",         icon: DollarSign, color: "var(--brand)" },
     { name: "customer-portal",   desc: "Portal de cliente Stripe",            icon: Users2,   color: "#EC4899" },
     { name: "admin-settings",    desc: "Guardar configuración de plataforma", icon: Settings, color: "#6B7280" },
     { name: "deploy-hook",       desc: "Redeployment automático (Vercel)",    icon: Globe,    color: "#60A5FA" },
@@ -675,7 +675,7 @@ const Admin = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: "Usuarios", value: users.length, icon: Users, color: "#A855F7" },
-            { label: "Planes pagos", value: paidUsers, icon: TrendingUp, color: "#4ADE80" },
+            { label: "Planes pagos", value: paidUsers, icon: TrendingUp, color: "var(--brand)" },
             { label: "Créditos totales", value: totalCredits.toLocaleString(), icon: Coins, color: "#F59E0B" },
             { label: "Conversión", value: users.length ? `${Math.round((paidUsers/users.length)*100)}%` : "0%", icon: BarChart2, color: "#60A5FA" },
           ].map((s) => {
@@ -962,7 +962,7 @@ const Admin = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
                     { label: "Créditos consumidos (30d)", value: analyticsData.totalSpend.toLocaleString(), icon: Activity, color: "#A855F7" },
-                    { label: "Nuevos usuarios (7d)",     value: analyticsData.recentUsers, icon: Users, color: "#4ADE80" },
+                    { label: "Nuevos usuarios (7d)",     value: analyticsData.recentUsers, icon: Users, color: "var(--brand)" },
                     { label: "Revenue estimado",          value: `$${(paidUsers * 19).toLocaleString()}`, icon: DollarSign, color: "#F59E0B" },
                     { label: "Tasa conversión",           value: users.length ? `${Math.round((paidUsers/users.length)*100)}%` : "0%", icon: TrendingUp, color: "#60A5FA" },
                   ].map((s) => {
