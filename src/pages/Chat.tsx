@@ -7,7 +7,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   Code2, Monitor, Smartphone, Tablet, Plus, Trash2,
   Github, Loader2, FolderOpen, Files, MessageSquare,
-  Pencil, UploadCloud, Zap, ArrowRight, Sparkles
+  Pencil, UploadCloud, Zap, Sparkles, Search, Star,
+  User, Home, Paperclip, Mic, Send, LayoutTemplate,
+  Clock, ChevronDown,
 } from 'lucide-react';
 import { AppHeader } from '@/components/AppHeader';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
@@ -15,6 +17,7 @@ import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
 import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioChat } from '@/components/studio/StudioChat';
 import { useStudioProjects, type StudioFile, type StudioProject } from '@/hooks/useStudioProjects';
+import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -24,15 +27,17 @@ type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 type PanelView = 'code' | 'preview' | 'split';
 type SidebarView = 'files' | 'projects' | 'github';
 
-// ─── Lovable-like Welcome Screen ────────────────────────────────────────────
+// ─── Starter prompts / Templates ────────────────────────────────────────────
 const STARTER_PROMPTS = [
-  { label: 'Landing page', prompt: 'Crea una landing page moderna con hero section animado, sección de features con iconos, testimonios y footer. Diseño oscuro con gradientes morados.' },
-  { label: 'Dashboard', prompt: 'Crea un dashboard con tarjetas de métricas, una tabla de datos con filtros, y un gráfico de barras CSS. Diseño dark minimalista.' },
-  { label: 'Login / Auth', prompt: 'Crea un sistema de login y registro con formularios validados, estados de error, y diseño moderno con glassmorphism.' },
-  { label: 'E-commerce', prompt: 'Crea una página de producto de e-commerce con galería de imágenes, selector de variantes, precio, y botón de compra. Diseño premium.' },
-  { label: 'Portfolio', prompt: 'Crea un portfolio personal con sección hero, proyectos en grid, habilidades con barras de progreso, y formulario de contacto.' },
-  { label: 'Kanban Board', prompt: 'Crea un tablero Kanban con columnas (Por hacer, En progreso, Hecho), tarjetas con prioridad, y diseño drag-like.' },
+  { label: 'Landing page',  emoji: '🚀', prompt: 'Crea una landing page moderna con hero section animado, sección de features con iconos, testimonios y footer. Diseño oscuro con gradientes morados.' },
+  { label: 'Dashboard',     emoji: '📊', prompt: 'Crea un dashboard con tarjetas de métricas, una tabla de datos con filtros, y un gráfico de barras CSS. Diseño dark minimalista.' },
+  { label: 'Login / Auth',  emoji: '🔐', prompt: 'Crea un sistema de login y registro con formularios validados, estados de error, y diseño moderno con glassmorphism.' },
+  { label: 'E-commerce',    emoji: '🛍️', prompt: 'Crea una página de producto de e-commerce con galería de imágenes, selector de variantes, precio, y botón de compra. Diseño premium.' },
+  { label: 'Portfolio',     emoji: '🎨', prompt: 'Crea un portfolio personal con sección hero, proyectos en grid, habilidades con barras de progreso, y formulario de contacto.' },
+  { label: 'Kanban Board',  emoji: '📋', prompt: 'Crea un tablero Kanban con columnas (Por hacer, En progreso, Hecho), tarjetas con prioridad, y diseño drag-like.' },
 ];
+
+type WelcomeTab = 'projects' | 'recents' | 'templates';
 
 interface WelcomeScreenProps {
   onPrompt: (prompt: string) => void;
@@ -40,134 +45,256 @@ interface WelcomeScreenProps {
   creating: boolean;
   projects: StudioProject[];
   onSelectProject: (p: StudioProject) => void;
+  displayName?: string;
 }
 
-function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelectProject }: WelcomeScreenProps) {
+function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelectProject, displayName }: WelcomeScreenProps) {
+  const navigate = useNavigate();
   const [input, setInput] = useState('');
+  const [activeTab, setActiveTab] = useState<WelcomeTab>('projects');
+  const [search, setSearch] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input.trim()) onPrompt(input.trim());
+  const handleSubmit = (val?: string) => {
+    const text = (val ?? input).trim();
+    if (text) onPrompt(text);
   };
 
-  const hasProjects = projects.length > 0;
+  const filteredProjects = projects.filter(p =>
+    p.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const greeting = displayName ? `¿Qué tienes en mente, ${displayName.split(' ')[0]}?` : '¿Qué vas a construir hoy?';
 
   return (
-    <div className="flex flex-col items-center justify-center h-full px-6 py-12 relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-aether-purple/8 blur-[100px] rounded-full pointer-events-none" />
+    <div className="flex h-full overflow-hidden">
 
-      {/* Logo mark */}
-      <div className="relative mb-8">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-aether-purple/30 to-aether-blue/20 border border-white/10 shadow-2xl">
-          <Code2 className="h-7 w-7 text-aether-purple" />
-        </div>
-        <div className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-aether-purple shadow-[0_0_12px_rgba(74,222,128,0.8)] flex items-center justify-center">
-          <Sparkles className="h-2.5 w-2.5 text-white" />
-        </div>
-      </div>
+      {/* ── Left Sidebar ──────────────────────────────────────────────── */}
+      <div className="w-60 shrink-0 flex flex-col border-r border-white/[0.06]" style={{ background: '#0c0c10' }}>
 
-      <h1 className="text-3xl font-black text-white font-display tracking-tight mb-2 text-center">
-        Genesis
-      </h1>
-      <p className="text-white/40 text-sm text-center mb-10 max-w-xs leading-relaxed">
-        Describe lo que quieres construir. La IA genera el código completo.
-      </p>
-
-      {/* Recent projects — returning users */}
-      {hasProjects && (
-        <div className="w-full max-w-xl mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Proyectos recientes</p>
-            <button
-              onClick={onCreateProject}
-              disabled={creating}
-              className="flex items-center gap-1 text-[10px] font-bold text-aether-purple/60 hover:text-aether-purple transition-colors"
-            >
-              <Plus className="h-3 w-3" />
-              Nuevo
-            </button>
+        {/* Brand */}
+        <div className="flex items-center gap-2.5 px-4 py-4 border-b border-white/[0.05]">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg shrink-0" style={{ background: 'rgba(168,85,247,0.15)', border: '1px solid rgba(168,85,247,0.3)' }}>
+            <Code2 className="h-3.5 w-3.5 text-aether-purple" />
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            {projects.slice(0, 4).map((p) => (
-              <button
-                key={p.id}
-                onClick={() => onSelectProject(p)}
-                className="flex flex-col items-start gap-1.5 px-4 py-3.5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:border-aether-purple/30 hover:bg-aether-purple/5 transition-all text-left group"
-              >
-                <div className="flex items-center gap-2 w-full min-w-0">
-                  <FolderOpen className="h-3.5 w-3.5 text-white/20 group-hover:text-aether-purple shrink-0 transition-colors" />
-                  <span className="text-[12px] font-semibold text-white/70 group-hover:text-white truncate transition-colors">{p.name}</span>
-                </div>
-                <span className="text-[10px] text-white/20 pl-5">
-                  {new Date(p.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-                </span>
-              </button>
-            ))}
-          </div>
-          {projects.length > 4 && (
-            <p className="text-center text-[10px] text-white/20 mt-2">+{projects.length - 4} más en la barra lateral</p>
-          )}
+          <span className="text-[13px] font-black text-white tracking-tight">Genesis</span>
+          <ChevronDown className="h-3 w-3 text-white/20 ml-auto" />
         </div>
-      )}
 
-      {/* Main input */}
-      <form onSubmit={handleSubmit} className="w-full max-w-xl mb-6">
-        <div className="relative flex flex-col gap-0 rounded-2xl bg-white/[0.04] border border-white/[0.08] focus-within:border-aether-purple/50 focus-within:bg-white/[0.05] transition-all overflow-hidden shadow-2xl">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (input.trim()) onPrompt(input.trim()); } }}
-            placeholder="Crea una app de gestión de tareas con modo oscuro, drag & drop, y etiquetas de prioridad..."
-            className="w-full bg-transparent px-5 pt-5 pb-3 text-[14px] text-white placeholder:text-white/20 outline-none resize-none min-h-[100px] leading-relaxed"
-            rows={3}
-          />
-          <div className="flex items-center justify-between px-4 pb-3">
-            <span className="text-[11px] text-white/20">Enter para enviar · Shift+Enter nueva línea</span>
-            <button
-              type="submit"
-              disabled={!input.trim() || creating}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-aether-purple text-white text-[12px] font-bold disabled:opacity-30 hover:bg-aether-purple/80 transition-all active:scale-95"
-            >
-              {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Zap className="h-3.5 w-3.5 fill-current" />}
-              Generar
-            </button>
-          </div>
+        {/* Nav */}
+        <div className="px-2 py-2 border-b border-white/[0.05]">
+          <button onClick={() => navigate('/dashboard')}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all">
+            <Home className="h-3.5 w-3.5 shrink-0" />
+            Home
+          </button>
+          <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all">
+            <Search className="h-3.5 w-3.5 shrink-0" />
+            <span className="flex-1 text-left">Buscar</span>
+            <kbd className="text-[9px] text-white/20 font-mono px-1.5 py-0.5 rounded border border-white/[0.08]">⌘K</kbd>
+          </button>
         </div>
-      </form>
 
-      {/* Starter suggestions */}
-      <div className="w-full max-w-xl">
-        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display mb-3 text-center">{hasProjects ? 'O empieza algo nuevo' : 'Empieza con'}</p>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {STARTER_PROMPTS.map((s) => (
-            <button
-              key={s.label}
-              onClick={() => onPrompt(s.prompt)}
-              className="flex items-center gap-2 px-3 py-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] text-[11px] text-white/50 hover:text-white hover:border-aether-purple/30 hover:bg-aether-purple/5 transition-all text-left group"
-            >
-              <ArrowRight className="h-3 w-3 text-white/20 group-hover:text-aether-purple shrink-0 transition-colors" />
-              {s.label}
+        {/* Projects */}
+        <div className="px-4 pt-4 pb-2">
+          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mb-2">Proyectos</p>
+        </div>
+        <div className="px-2 flex flex-col gap-0.5">
+          {[
+            { label: 'Todos',      icon: FolderOpen, count: projects.length },
+            { label: 'Favoritos',  icon: Star,       count: 0 },
+            { label: 'Creados',    icon: User,       count: projects.length },
+          ].map(item => (
+            <button key={item.label}
+              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all">
+              <item.icon className="h-3.5 w-3.5 shrink-0" />
+              <span className="flex-1 text-left">{item.label}</span>
+              {item.count > 0 && <span className="text-[10px] text-white/20">{item.count}</span>}
             </button>
           ))}
         </div>
+
+        {/* Recents */}
+        {projects.length > 0 && (
+          <>
+            <div className="px-4 pt-4 pb-2">
+              <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em]">Recientes</p>
+            </div>
+            <div className="px-2 flex flex-col gap-0.5 flex-1 overflow-y-auto pb-2">
+              {projects.slice(0, 8).map(p => (
+                <button key={p.id} onClick={() => onSelectProject(p)}
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all text-left group">
+                  <div className="h-2 w-2 rounded-sm shrink-0" style={{ background: 'rgba(168,85,247,0.4)', border: '1px solid rgba(168,85,247,0.4)' }} />
+                  <span className="truncate flex-1">{p.name}</span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* Bottom CTA */}
+        <div className="p-3 border-t border-white/[0.05] shrink-0">
+          <button onClick={() => navigate('/pricing')}
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all"
+            style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.2)', color: 'rgba(168,85,247,0.8)' }}>
+            <Zap className="h-3.5 w-3.5 shrink-0" />
+            Actualizar plan
+          </button>
+        </div>
       </div>
 
-      <div className="mt-8 flex items-center gap-3">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-aether-purple/8 border border-aether-purple/15">
-          <Zap className="h-3 w-3 text-aether-purple" />
-          <span className="text-[10px] font-bold text-aether-purple/70">~5 créditos por generación</span>
+      {/* ── Main Area ─────────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+
+        {/* Gradient background */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(88,28,135,0.35) 0%, transparent 60%), radial-gradient(ellipse 60% 50% at 80% 100%, rgba(157,23,77,0.25) 0%, transparent 60%), #08080e'
+        }} />
+
+        {/* Centered content */}
+        <div className="flex-1 flex flex-col items-center justify-center px-8 py-10 relative z-10">
+
+          {/* Heading */}
+          <h1 className="text-[28px] font-black text-white tracking-tight mb-8 text-center leading-tight">
+            {greeting}
+          </h1>
+
+          {/* Input */}
+          <div className="w-full max-w-2xl">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl"
+              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(20px)' }}>
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
+                placeholder="Describe la app que quieres construir…"
+                className="w-full bg-transparent px-5 pt-5 pb-4 text-[14px] text-white placeholder:text-white/25 outline-none resize-none leading-relaxed"
+                rows={3}
+              />
+              <div className="flex items-center justify-between px-4 pb-4">
+                <div className="flex items-center gap-1">
+                  <button className="flex items-center justify-center h-8 w-8 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all">
+                    <Paperclip className="h-4 w-4" />
+                  </button>
+                  <button className="flex items-center justify-center h-8 w-8 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all">
+                    <Mic className="h-4 w-4" />
+                  </button>
+                </div>
+                <button
+                  onClick={() => handleSubmit()}
+                  disabled={!input.trim() || creating}
+                  className="flex items-center justify-center h-9 w-9 rounded-xl text-white disabled:opacity-30 transition-all active:scale-95"
+                  style={{ background: input.trim() && !creating ? '#a855f7' : 'rgba(168,85,247,0.3)' }}
+                >
+                  {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <p className="text-center text-[10px] text-white/20 mt-2.5">Enter para enviar · Shift+Enter nueva línea · ~5 créditos</p>
+          </div>
         </div>
-        {!hasProjects && (
-          <button
-            onClick={onCreateProject}
-            disabled={creating}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[12px] font-medium text-white/40 hover:text-white hover:border-white/20 transition-all"
-          >
-            {creating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
-            Proyecto en blanco
-          </button>
-        )}
+
+        {/* ── Bottom section ──────────────────────────────────────────── */}
+        <div className="relative z-10 border-t border-white/[0.06]" style={{ background: 'rgba(8,8,14,0.8)', backdropFilter: 'blur(20px)' }}>
+
+          {/* Tabs */}
+          <div className="flex items-center gap-1 px-6 pt-3">
+            {([
+              { id: 'projects',  label: 'Mis proyectos',    icon: FolderOpen },
+              { id: 'recents',   label: 'Recientes',        icon: Clock },
+              { id: 'templates', label: 'Templates',        icon: LayoutTemplate },
+            ] as { id: WelcomeTab; label: string; icon: any }[]).map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-semibold transition-all"
+                style={activeTab === tab.id
+                  ? { background: 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid rgba(255,255,255,0.12)' }
+                  : { color: 'rgba(255,255,255,0.35)', border: '1px solid transparent' }
+                }
+              >
+                <tab.icon className="h-3.5 w-3.5" />
+                {tab.label}
+              </button>
+            ))}
+            <div className="flex-1" />
+            <button
+              onClick={onCreateProject}
+              disabled={creating}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-[11px] font-bold transition-all"
+              style={{ background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.25)', color: 'rgba(168,85,247,0.9)' }}
+            >
+              {creating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+              Nuevo
+            </button>
+          </div>
+
+          {/* Tab content */}
+          <div className="px-6 py-4 min-h-[140px] max-h-[180px] overflow-y-auto">
+
+            {/* My projects */}
+            {activeTab === 'projects' && (
+              <>
+                {projects.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-24 gap-2">
+                    <FolderOpen className="h-6 w-6 text-white/10" />
+                    <p className="text-[12px] text-white/25">Aún no tienes proyectos. ¡Crea el primero!</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+                    {projects.map(p => (
+                      <button key={p.id} onClick={() => onSelectProject(p)}
+                        className="flex flex-col gap-1.5 p-3 rounded-xl text-left transition-all group"
+                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(168,85,247,0.3)'; (e.currentTarget as HTMLElement).style.background = 'rgba(168,85,247,0.06)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
+                      >
+                        <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: 'rgba(168,85,247,0.15)' }}>
+                          <Code2 className="h-3.5 w-3.5 text-aether-purple" />
+                        </div>
+                        <p className="text-[11px] font-semibold text-white/70 group-hover:text-white truncate transition-colors">{p.name}</p>
+                        <p className="text-[9px] text-white/20">{new Date(p.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</p>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Recents */}
+            {activeTab === 'recents' && (
+              <div className="flex flex-col gap-1">
+                {projects.slice(0, 5).map(p => (
+                  <button key={p.id} onClick={() => onSelectProject(p)}
+                    className="flex items-center gap-3 px-3 py-2 rounded-lg text-[12px] text-white/50 hover:text-white hover:bg-white/[0.04] transition-all text-left">
+                    <Clock className="h-3.5 w-3.5 shrink-0 text-white/20" />
+                    <span className="flex-1 truncate">{p.name}</span>
+                    <span className="text-[10px] text-white/20 shrink-0">{new Date(p.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
+                  </button>
+                ))}
+                {projects.length === 0 && (
+                  <p className="text-[12px] text-white/20 text-center py-6">Sin actividad reciente</p>
+                )}
+              </div>
+            )}
+
+            {/* Templates */}
+            {activeTab === 'templates' && (
+              <div className="grid grid-cols-3 lg:grid-cols-6 gap-2">
+                {STARTER_PROMPTS.map(s => (
+                  <button key={s.label} onClick={() => handleSubmit(s.prompt)}
+                    className="flex flex-col gap-2 p-3 rounded-xl text-left transition-all"
+                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(168,85,247,0.3)'; (e.currentTarget as HTMLElement).style.background = 'rgba(168,85,247,0.06)'; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
+                  >
+                    <span className="text-xl">{s.emoji}</span>
+                    <p className="text-[11px] font-semibold text-white/60">{s.label}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -176,6 +303,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
 // ─── Genesis IDE ─────────────────────────────────────────────────────────────
 export default function Chat() {
   const { user, signOut } = useAuth('/auth');
+  const { profile } = useProfile(user?.id);
   const {
     projects, activeProject, setActiveProject,
     loading, createProject, updateProjectFiles,
@@ -310,15 +438,16 @@ export default function Chat() {
   // Show Welcome screen when no project is active
   if (!activeProject) {
     return (
-      <div className="flex flex-col h-screen bg-[#030304]">
+      <div className="flex flex-col h-screen" style={{ background: '#08080e' }}>
         <AppHeader userId={user?.id} onSignOut={signOut} />
-        <div className="flex-1 overflow-hidden pt-16">
+        <div className="flex-1 overflow-hidden pt-14">
           <WelcomeScreen
             onPrompt={handleWelcomePrompt}
             onCreateProject={() => createProject()}
             creating={creatingWithPrompt}
             projects={projects}
             onSelectProject={setActiveProject}
+            displayName={profile?.display_name ?? undefined}
           />
         </div>
       </div>
