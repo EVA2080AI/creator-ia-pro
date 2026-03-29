@@ -43,9 +43,11 @@ interface StudioChatProps {
   projectFiles: Record<string, StudioFile>;
   onCodeGenerated: (files: Record<string, StudioFile>) => void;
   onNewConversation?: () => void;
+  initialPrompt?: string | null;
+  onInitialPromptUsed?: () => void;
 }
 
-export function StudioChat({ projectId, projectFiles, onCodeGenerated, onNewConversation }: StudioChatProps) {
+export function StudioChat({ projectId, projectFiles, onCodeGenerated, onNewConversation, initialPrompt, onInitialPromptUsed }: StudioChatProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([WELCOME]);
   const [input, setInput] = useState('');
@@ -59,6 +61,15 @@ export function StudioChat({ projectId, projectFiles, onCodeGenerated, onNewConv
   useEffect(() => {
     if (!showScrollBtn) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isGenerating]);
+
+  // Auto-trigger initial prompt (from Welcome screen)
+  useEffect(() => {
+    if (initialPrompt && !isGenerating && user) {
+      onInitialPromptUsed?.();
+      handleSend(initialPrompt);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialPrompt, user]);
 
   const handleScroll = () => {
     if (!containerRef.current) return;

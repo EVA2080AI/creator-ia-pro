@@ -142,6 +142,7 @@ const App = () => {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/hub" element={<Hub />} />
                 <Route path="/chat" element={<Chat />} />
+                <Route path="/genesis" element={<Chat />} />
                 <Route path="/studio" element={<Studio />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
