@@ -14,19 +14,19 @@ const NODE_TYPE_LABELS: Record<string, string> = {
 };
 
 const NODE_TYPE_COLORS: Record<string, string> = {
-  characterBreakdown: 'text-aether-purple bg-aether-purple/10 border-aether-purple/20',
+  characterBreakdown: 'text-[#8AB4F8] bg-[#8AB4F8]/10 border-[#8AB4F8]/20',
   modelView: 'text-white bg-white/10 border-white/10',
-  videoModel: 'text-aether-blue bg-aether-blue/10 border-aether-blue/20',
+  videoModel: 'text-[#8AB4F8] bg-[#8AB4F8]/10 border-[#8AB4F8]/20',
   layoutBuilder: 'text-white/50 bg-white/5 border-white/10',
   campaignManager: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
   antigravityBridge: 'text-white bg-white/15 border-white/10',
 };
 
 const IMAGE_MODELS = [
-  { id: 'flux-schnell',  label: 'FLUX Schnell (2cr)' },
-  { id: 'flux-pro',      label: 'FLUX Pro (4cr)' },
-  { id: 'flux-pro-1.1',  label: 'FLUX Pro 1.1 (4cr)' },
-  { id: 'sdxl',          label: 'SDXL (2cr)' },
+  { id: 'flux-schnell',  label: 'GPT-5 Mini (2cr)' },
+  { id: 'flux-pro',      label: 'GPT-5 Image (4cr)' },
+  { id: 'flux-pro-1.1',  label: 'Gemini Image (4cr)' },
+  { id: 'sdxl',          label: 'Gemini Preview (2cr)' },
 ];
 
 const TEXT_MODELS = [
@@ -77,7 +77,7 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
   };
 
   return (
-    <div className="w-[280px] shrink-0 flex flex-col border-l border-white/[0.06] bg-[#222228] animate-in slide-in-from-right duration-200 overflow-y-auto no-scrollbar">
+    <div className="w-[280px] shrink-0 flex flex-col border-l border-white/[0.06] bg-[#25272f] animate-in slide-in-from-right duration-200 overflow-y-auto no-scrollbar">
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
@@ -124,7 +124,7 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
             onChange={(e) => setLocalPrompt(e.target.value)}
             rows={4}
             placeholder="Describe lo que quieres generar..."
-            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2.5 text-xs text-white/80 placeholder:text-white/15 focus:outline-none focus:border-aether-purple/30 resize-none transition-all"
+            className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2.5 text-xs text-white/80 placeholder:text-white/15 focus:outline-none focus:border-[#8AB4F8]/30 resize-none transition-all"
           />
         </div>
 
@@ -135,7 +135,7 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
             <select
               value={localModel}
               onChange={(e) => setLocalModel(e.target.value)}
-              className="w-full appearance-none bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2.5 text-xs text-white/70 focus:outline-none focus:border-aether-purple/30 cursor-pointer pr-8 transition-all"
+              className="w-full appearance-none bg-white/[0.03] border border-white/[0.06] rounded-xl px-3 py-2.5 text-xs text-white/70 focus:outline-none focus:border-[#8AB4F8]/30 cursor-pointer pr-8 transition-all"
             >
               <option value="">Seleccionar modelo...</option>
               {models.map(m => (
@@ -182,7 +182,7 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
         <div className="flex gap-2">
           <Button
             onClick={() => onExecute(node.id)}
-            className="flex-1 h-9 bg-aether-purple/10 border border-aether-purple/20 text-aether-purple hover:bg-aether-purple/20 rounded-xl text-[10px] font-bold uppercase tracking-widest gap-1.5 transition-all"
+            className="flex-1 h-9 bg-[#8AB4F8]/10 border border-[#8AB4F8]/20 text-[#8AB4F8] hover:bg-[#8AB4F8]/20 rounded-xl text-[10px] font-bold uppercase tracking-widest gap-1.5 transition-all"
           >
             <Zap className="w-3 h-3 fill-current" /> Ejecutar
           </Button>

@@ -16,6 +16,12 @@ const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
 function checkRateLimit(userId: string): boolean {
   const now = Date.now();
+  // Probabilistic cleanup to prevent unbounded map growth (~1% of requests)
+  if (Math.random() < 0.01) {
+    for (const [key, entry] of rateLimitMap.entries()) {
+      if (now >= entry.resetAt) rateLimitMap.delete(key);
+    }
+  }
   const entry = rateLimitMap.get(userId);
   if (!entry || now >= entry.resetAt) {
     rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_WINDOW_MS });
@@ -40,18 +46,17 @@ function extractUserIdFromJwt(authHeader: string | null): string | null {
   }
 }
 
-// Image model fallback chain (in order)
+// Image model fallback chain — verified OpenRouter slugs, fastest first
 const IMAGE_FALLBACK_MODELS = [
-  'black-forest-labs/flux-1-schnell',
-  'black-forest-labs/flux-1-pro',
-  'stability-ai/sdxl',
+  'google/gemini-2.0-flash-exp:free',
+  'recraft-ai/recraft-v3',
+  'openai/dall-e-3',
 ];
 
-// Models that use chat/completions with modalities instead of /images/generations
+// Models that use chat/completions with modalities (NOT /images/generations)
 const MODALITIES_IMAGE_MODELS = new Set([
   'google/gemini-2.0-flash-exp:free',
   'google/gemini-2.0-flash-exp-image-generation',
-  'recraft-ai/recraft-v3',
 ]);
 
 function json(data: unknown, status = 200) {
@@ -109,13 +114,19 @@ serve(async (req: Request) => {
       const key = userId ?? req.headers.get('x-forwarded-for') ?? 'anonymous';
       if (!checkRateLimit(key)) {
         console.warn(`[ai-proxy] Rate limit exceeded for key: ${key}`);
-        return json({ error: 'Demasiadas solicitudes. Espera un momento antes de continuar.' }, 429);
+        return json({ error: 'Demasiadas solicitudes. Espera un momento antes de continuar.', code: 'rate_limit' }, 200);
       }
     }
 
     // ── OpenRouter — Chat / Text ──────────────────────────────────────────────
     if (provider === 'openrouter') {
       if (!urlPath) return json({ error: 'Missing path for openrouter provider' }, 400);
+
+      // Validate model ID format to prevent injection of arbitrary slugs
+      const model = reqBody?.model as string | undefined;
+      if (model && !/^[a-z0-9@._\-\/]{3,80}$/i.test(model)) {
+        return json({ error: `Invalid model ID: ${model}` }, 400);
+      }
 
       const streamMode = reqBody?.stream === true;
       const res = await openrouterFetch(urlPath, reqBody, streamMode);
@@ -133,13 +144,19 @@ serve(async (req: Request) => {
         });
       }
 
-      const data = await parseJsonOrThrow(res, 'OpenRouter');
-      return json(data);
+      try {
+        const data = await parseJsonOrThrow(res, 'OpenRouter');
+        return json(data);
+      } catch (orErr: unknown) {
+        const msg = orErr instanceof Error ? orErr.message : String(orErr);
+        console.error('[ai-proxy] OpenRouter text error:', msg);
+        return json({ error: msg }, 200);
+      }
     }
 
     // ── OpenRouter — Image Generation ─────────────────────────────────────────
     if (provider === 'openrouter-image') {
-      const { prompt, model, width = 1024, height = 1024 } = reqBody || {};
+      const { prompt, model, width = 1024, height = 1024, image_url } = reqBody || {};
       if (!prompt) return json({ error: 'prompt is required' }, 400);
 
       const apiKey = Deno.env.get('OPENROUTER_API_KEY');
@@ -158,23 +175,56 @@ serve(async (req: Request) => {
 
           // Use chat/completions with modalities for supported models
           if (MODALITIES_IMAGE_MODELS.has(imageModel)) {
-            const res = await openrouterFetch('chat/completions', {
-              model: imageModel,
-              messages: [{ role: 'user', content: prompt }],
-              modalities: ['image', 'text'],
-            });
+            // Support img2img: if image_url provided, include it in message content
+            const userContent = image_url
+              ? [
+                  { type: 'image_url', image_url: { url: image_url } },
+                  { type: 'text', text: prompt },
+                ]
+              : prompt;
+
+            // 90-second per-model timeout so we can try fallback before edge function times out
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 90_000);
+
+            const apiKey = Deno.env.get('OPENROUTER_API_KEY')!;
+            const resRaw = await fetch(`${OR_BASE}/chat/completions`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                'HTTP-Referer': OR_REFERER,
+                'X-Title': OR_TITLE,
+              },
+              body: JSON.stringify({
+                model: imageModel,
+                messages: [{ role: 'user', content: userContent }],
+                modalities: ['image', 'text'],
+              }),
+              signal: controller.signal,
+            }).finally(() => clearTimeout(timeoutId));
+            const res = resRaw;
             const ct = res.headers.get('content-type') ?? '';
             if (!ct.includes('text/html')) {
               const data = await res.json().catch(() => ({})) as any;
               if (res.ok) {
-                const content = data?.choices?.[0]?.message?.content;
+                const msg = data?.choices?.[0]?.message ?? {};
+                const content = msg.content;
+
+                // Format 1: content array with image_url items (Gemini, Recraft)
                 if (Array.isArray(content)) {
                   const imgItem = content.find((c: any) => c.type === 'image_url');
                   if (imgItem?.image_url?.url) return json({ url: imgItem.image_url.url, model: imageModel });
                 }
-                // Inline base64
-                if (data?.choices?.[0]?.message?.content_parts) {
-                  const parts = data.choices[0].message.content_parts;
+                // Format 2: message.images array (GPT-5 image models)
+                if (Array.isArray(msg.images) && msg.images.length > 0) {
+                  const img = msg.images[0];
+                  const url = img?.image_url?.url ?? img?.url ?? img;
+                  if (typeof url === 'string' && url.length > 10) return json({ url, model: imageModel });
+                }
+                // Format 3: content_parts (legacy)
+                if (msg.content_parts) {
+                  const parts = msg.content_parts;
                   const img = parts.find((p: any) => p.type === 'image');
                   if (img?.image_url) return json({ url: img.image_url, model: imageModel });
                 }
@@ -268,6 +318,6 @@ serve(async (req: Request) => {
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Unknown error';
     console.error('[ai-proxy] Unhandled error:', msg);
-    return json({ error: msg }, 500);
+    return json({ error: msg }, 200);
   }
 });

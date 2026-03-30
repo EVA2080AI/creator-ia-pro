@@ -5,11 +5,20 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { NodeNextAction } from './NodeNextAction';
 
+const RATIOS = [
+  { id: '1:1',  label: '1:1',  desc: 'Instagram' },
+  { id: '9:16', label: '9:16', desc: 'Story/Reel' },
+  { id: '16:9', label: '16:9', desc: 'YouTube' },
+  { id: '4:5',  label: '4:5',  desc: 'Feed' },
+];
+
 interface ModelNodeData {
   title?: string;
   prompt?: string;
   model?: string;
   assetUrl?: string;
+  ratio?: string;
+  imageHistory?: string[];
   status?: 'idle' | 'loading' | 'executing' | 'ready' | 'error';
   onVariation?: () => void;
 }
@@ -48,10 +57,10 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
     );
   }, [id, setNodes]);
 
-  const persistChange = async (val: string, field: 'prompt' | 'model' = 'prompt') => {
-    const updateData = field === 'prompt' 
+  const persistChange = async (val: string, field: 'prompt' | 'model' | 'ratio' = 'prompt') => {
+    const updateData = field === 'prompt'
       ? { prompt: val, data_payload: { ...data, prompt: val } as any }
-      : { data_payload: { ...data, model: val } as any };
+      : { data_payload: { ...data, [field]: val } as any };
 
     const { error } = await supabase
       .from('canvas_nodes')
@@ -62,7 +71,7 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
   };
 
   const updateModel = useCallback((val: string) => {
-    setNodes((nds) => 
+    setNodes((nds) =>
       nds.map((node) => {
         if (node.id === id) {
           return {
@@ -75,6 +84,23 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
     );
     persistChange(val, 'model');
   }, [id, data, setNodes]);
+
+  const updateRatio = useCallback((val: string) => {
+    setNodes((nds) =>
+      nds.map((node) => node.id === id ? { ...node, data: { ...node.data, ratio: val } } : node)
+    );
+    persistChange(val, 'ratio');
+  }, [id, setNodes]);
+
+  // Track image history when assetUrl changes
+  useEffect(() => {
+    if (!data.assetUrl) return;
+    const history = data.imageHistory || [];
+    if (history[0] === data.assetUrl) return; // already recorded
+    const next = [data.assetUrl, ...history].slice(0, 3);
+    setNodes(nds => nds.map(n => n.id === id ? { ...n, data: { ...n.data, imageHistory: next } } : n));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.assetUrl]);
 
   const deleteNode = async () => {
     const { error } = await supabase.from('canvas_nodes').delete().eq('id', id);
@@ -177,6 +203,27 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                  placeholder="Enter creative prompt..."
               />
               
+              {/* Aspect Ratio Selector */}
+              <div className="space-y-2">
+                <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-display">Ratio</span>
+                <div className="flex gap-1.5 flex-wrap">
+                  {RATIOS.map(r => (
+                    <button
+                      key={r.id}
+                      onClick={() => updateRatio(r.id)}
+                      title={r.desc}
+                      className={`px-2.5 py-1.5 rounded-xl border text-[9px] font-bold transition-all ${
+                        (data.ratio || '1:1') === r.id
+                        ? 'bg-white/10 border-white/20 text-white'
+                        : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'
+                      }`}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-3">
                   <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-display">Engine Selector</span>
                   <div className="grid grid-cols-2 gap-2">
@@ -200,6 +247,25 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                      ))}
                   </div>
                </div>
+
+               {/* Image History thumbnails */}
+               {data.imageHistory && data.imageHistory.length > 0 && (
+                 <div className="space-y-2 pt-2 border-t border-white/5">
+                   <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-display">Historial</span>
+                   <div className="flex gap-2">
+                     {data.imageHistory.map((url, i) => (
+                       <button
+                         key={i}
+                         onClick={() => setNodes(nds => nds.map(n => n.id === id ? { ...n, data: { ...n.data, assetUrl: url } } : n))}
+                         title="Restaurar imagen"
+                         className="w-10 h-10 rounded-lg overflow-hidden border border-white/10 hover:border-white/30 transition-all shrink-0"
+                       >
+                         <img src={url} alt={`Historial ${i + 1}`} className="w-full h-full object-cover" />
+                       </button>
+                     ))}
+                   </div>
+                 </div>
+               )}
            </div>
         </div>
       )}

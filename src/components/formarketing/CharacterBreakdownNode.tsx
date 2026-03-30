@@ -4,6 +4,7 @@ import { UserCircle, Trash2, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { NodeNextAction } from './NodeNextAction';
+import { NodeConnectionDropdown } from './NodeConnectionDropdown';
 
 interface CharacterNodeData {
   title?: string;
@@ -11,6 +12,7 @@ interface CharacterNodeData {
   description?: string;
   model?: string;
   status?: 'idle' | 'executing' | 'ready' | 'error';
+  onAddConnected?: (sourceId: string, targetType: string) => void;
 }
 
 const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeData }) => {
@@ -68,13 +70,13 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
       {/* Aether Character Header */}
       <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">
         <div className="flex items-center gap-2.5 overflow-hidden">
-            <UserCircle className="w-4 h-4 text-white/40 group-hover:text-aether-purple transition-colors shrink-0" />
+            <UserCircle className="w-4 h-4 text-white/40 group-hover:text-[#8AB4F8] transition-colors shrink-0" />
              <input 
               value={localTitle} 
               onChange={(e) => setLocalTitle(e.target.value)}
               onBlur={(e) => persistChange('title', e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
-              className="bg-transparent border-none p-0 m-0 text-xs font-bold tracking-tight text-white focus:outline-none w-full truncate transition-all font-display uppercase"
+              className="bg-transparent border-none p-0 m-0 text-xs font-bold tracking-tight text-white focus:outline-none w-full truncate transition-all font-sans uppercase"
               placeholder="Unnamed Entity"
             />
         </div>
@@ -91,7 +93,7 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
       <div className="p-4 space-y-4">
         <div className="space-y-2">
             <div className="flex items-center justify-between px-1">
-               <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-display">
+               <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-sans">
                   Persona flavor
                </span>
             </div>
@@ -100,20 +102,20 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
                  onChange={(e) => setLocalFlavor(e.target.value)}
                  onBlur={(e) => persistChange('flavor', e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-xs text-white/90 bg-white/[0.03] border border-white/[0.08] p-3 rounded-2xl focus:outline-none focus:border-aether-purple/50 transition-all font-bold placeholder:text-white/10"
+                 className="w-full text-xs text-white/90 bg-white/[0.03] border border-white/[0.08] p-3 rounded-2xl focus:outline-none focus:border-[#8AB4F8]/50 transition-all font-bold placeholder:text-white/10"
                  placeholder="e.g. Cyberpunk Architect..."
               />
         </div>
 
         {isExpanded && (
           <div className="space-y-2 animate-in slide-in-from-top-2 duration-300">
-             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest px-1 font-display">Narrative essence</span>
+             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest px-1 font-sans">Narrative essence</span>
               <textarea
                  value={localDescription}
                  onChange={(e) => setLocalDescription(e.target.value)}
                  onBlur={(e) => persistChange('description', e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-xs leading-relaxed text-white/60 bg-white/[0.02] p-4 rounded-3xl border border-white/[0.05] min-h-[90px] focus:outline-none focus:border-aether-purple/30 resize-none transition-all font-medium placeholder:text-white/5"
+                 className="w-full text-xs leading-relaxed text-white/60 bg-white/[0.02] p-4 rounded-3xl border border-white/[0.05] min-h-[90px] focus:outline-none focus:border-[#8AB4F8]/30 resize-none transition-all font-medium placeholder:text-white/5"
                  placeholder="Describe the core behavior and background..."
               />
           </div>
@@ -122,7 +124,7 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
         {/* Aether Logic Engine */}
         <div className="pt-2 border-t border-white/5 space-y-3">
           <div className="flex items-center justify-between px-1">
-             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-display">Neural Engine</span>
+             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest font-sans">Neural Engine</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             {[
@@ -147,7 +149,14 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
         </div>
       </div>
 
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#16161b] hover:scale-125 transition-transform" />
+      <NodeConnectionDropdown
+        nodeType="characterBreakdown"
+        nodeId={id}
+        onAddConnected={data.onAddConnected ?? (() => {})}
+      />
+
+      <Handle type="target" position={Position.Left} id="text-in" className="!w-2 !h-2 !-left-1 !bg-yellow-400 !border-2 !border-[#191a1f] hover:scale-125 transition-transform" />
+      <Handle type="source" position={Position.Right} id="context-out" className="!w-2 !h-2 !-right-1 !bg-[#fb923c] !border-2 !border-[#191a1f] hover:scale-125 transition-transform" />
       <NodeNextAction nodeId={id} />
     </div>
   );

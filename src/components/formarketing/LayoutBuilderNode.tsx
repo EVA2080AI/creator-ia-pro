@@ -3,6 +3,7 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Layout, Trash2, Globe, Smartphone, Monitor, Zap, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { NodeConnectionDropdown } from './NodeConnectionDropdown';
 
 interface LayoutNodeData {
   title?: string;
@@ -10,6 +11,7 @@ interface LayoutNodeData {
   structure?: string;
   model?: string;
   status?: 'idle' | 'executing' | 'ready' | 'error';
+  onAddConnected?: (sourceId: string, targetType: string) => void;
 }
 
 const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) => {
@@ -46,7 +48,7 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-white/5 bg-[#0a0a0b] backdrop-blur-xl w-[270px] shadow-2xl transition-all duration-300 hover:border-white/20
+    <div className={`group relative rounded-2xl border border-white/5 bg-[#191a1f] backdrop-blur-xl w-[270px] shadow-2xl transition-all duration-300 hover:border-white/20
       ${data.status === 'executing' ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.05)] animate-pulse' : ''}
     `}>
       {/* Nexus V3 Industrial Header */}
@@ -98,7 +100,7 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
           </div>
 
           {/* Preview: show structure if ready, otherwise show wireframe placeholder */}
-          <div className="bg-[#050506] rounded-2xl border border-white/5 aspect-[16/10] relative overflow-hidden shadow-inner">
+          <div className="bg-[#191a1f] rounded-2xl border border-white/5 aspect-[16/10] relative overflow-hidden shadow-inner">
             {data.structure && data.status === 'ready' ? (
               <div className="p-3 h-full overflow-hidden">
                 <div className="flex items-center gap-1 mb-2">
@@ -108,7 +110,7 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
                 {/* Render parsed structure sections */}
                 <div className="space-y-1.5">
                   {data.structure.split(/[>|\n,]/).filter(Boolean).slice(0, 5).map((section: string, i: number) => (
-                    <div key={i} className={`h-4 rounded-md flex items-center px-2 ${i === 0 ? 'bg-aether-purple/20 border border-aether-purple/20 w-full' : i % 2 === 0 ? 'bg-white/5 border border-white/5 w-3/4' : 'bg-white/[0.03] border border-white/5 w-full'}`}>
+                    <div key={i} className={`h-4 rounded-md flex items-center px-2 ${i === 0 ? 'bg-[#8AB4F8]/20 border border-[#8AB4F8]/20 w-full' : i % 2 === 0 ? 'bg-white/5 border border-white/5 w-3/4' : 'bg-white/[0.03] border border-white/5 w-full'}`}>
                       <span className="text-[7px] text-white/30 truncate capitalize">{section.trim()}</span>
                     </div>
                   ))}
@@ -162,8 +164,14 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
         </div>
       )}
 
-      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !-left-1 !bg-white/40 !border-2 !border-[#050506]" />
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#050506]" />
+      <NodeConnectionDropdown
+        nodeType="layoutBuilder"
+        nodeId={id}
+        onAddConnected={data.onAddConnected ?? (() => {})}
+      />
+
+      <Handle type="target" position={Position.Left} id="any-in" className="!w-2 !h-2 !-left-1 !bg-[#94a3b8] !border-2 !border-[#191a1f]" />
+      <Handle type="source" position={Position.Right} id="layout-out" className="!w-2 !h-2 !-right-1 !bg-[#60a5fa] !border-2 !border-[#191a1f]" />
     </div>
   );
 };

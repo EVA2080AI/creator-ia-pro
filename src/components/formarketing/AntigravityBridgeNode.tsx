@@ -3,6 +3,7 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Rocket, Shield, Globe, ExternalLink, Zap, Braces, RefreshCcw, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { NodeConnectionDropdown } from './NodeConnectionDropdown';
 
 interface AntigravityBridgeData {
   title?: string;
@@ -13,6 +14,7 @@ interface AntigravityBridgeData {
     extract_assets?: boolean;
     auto_deploy?: boolean;
   };
+  onAddConnected?: (sourceId: string, targetType: string) => void;
 }
 
 const AntigravityBridgeNode = ({ id, data }: { id: string, data: AntigravityBridgeData }) => {
@@ -59,7 +61,7 @@ const AntigravityBridgeNode = ({ id, data }: { id: string, data: AntigravityBrid
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-white/5 bg-[#0a0a0b] backdrop-blur-xl w-[270px] shadow-2xl transition-all duration-300 hover:border-white/20
+    <div className={`group relative rounded-2xl border border-white/5 bg-[#191a1f] backdrop-blur-xl w-[270px] shadow-2xl transition-all duration-300 hover:border-white/20
       ${status === 'scanning' || status === 'cloning' ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.05)] animate-pulse' : ''}
     `}>
       
@@ -132,8 +134,14 @@ const AntigravityBridgeNode = ({ id, data }: { id: string, data: AntigravityBrid
         )}
       </div>
 
-      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !-left-1 !bg-white/40 !border-2 !border-[#050506]" />
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#050506]" />
+      <NodeConnectionDropdown
+        nodeType="antigravityBridge"
+        nodeId={id}
+        onAddConnected={data.onAddConnected ?? (() => {})}
+      />
+
+      <Handle type="target" position={Position.Left} id="any-in" className="!w-2 !h-2 !-left-1 !bg-[#94a3b8] !border-2 !border-[#191a1f]" />
+      <Handle type="source" position={Position.Right} id="any-out" className="!w-2 !h-2 !-right-1 !bg-[#94a3b8] !border-2 !border-[#191a1f]" />
     </div>
   );
 };

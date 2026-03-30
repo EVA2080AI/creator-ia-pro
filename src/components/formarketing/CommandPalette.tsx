@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { UserCircle, Image, Video, Layout, Megaphone, Sparkles, Search } from 'lucide-react';
 
 const NODE_CATALOG = [
-  { type: 'characterBreakdown', label: 'Personaje / Brief',   desc: 'Define tono, voz y perfil de marca',    icon: UserCircle, color: 'text-aether-purple', bg: 'bg-aether-purple/10' },
+  { type: 'characterBreakdown', label: 'Personaje / Brief',   desc: 'Define tono, voz y perfil de marca',    icon: UserCircle, color: 'text-[#8AB4F8]', bg: 'bg-[#8AB4F8]/10' },
   { type: 'modelView',          label: 'Imagen IA',           desc: 'Genera imágenes con inteligencia artificial', icon: Image,       color: 'text-rose-400',     bg: 'bg-rose-500/10'      },
-  { type: 'videoModel',         label: 'Video IA',            desc: 'Genera videos y secuencias animadas',    icon: Video,       color: 'text-aether-blue',  bg: 'bg-aether-blue/10'   },
+  { type: 'videoModel',         label: 'Video IA',            desc: 'Genera videos y secuencias animadas',    icon: Video,       color: 'text-[#8AB4F8]',  bg: 'bg-[#8AB4F8]/10'   },
   { type: 'layoutBuilder',      label: 'Diseño UI',           desc: 'Construye interfaces y páginas web',     icon: Layout,      color: 'text-emerald-400',  bg: 'bg-emerald-500/10'   },
   { type: 'campaignManager',    label: 'Campaña',             desc: 'Gestiona distribución y paid media',     icon: Megaphone,   color: 'text-amber-400',    bg: 'bg-amber-500/10'     },
   { type: 'antigravityBridge',  label: 'Antigravity AI',      desc: 'Chat avanzado y razonamiento IA',        icon: Sparkles,    color: 'text-white',        bg: 'bg-white/5'          },
@@ -52,7 +52,7 @@ export function CommandPalette({ open, onClose, onSelect }: CommandPaletteProps)
   return (
     <div className="fixed inset-0 z-[300] flex items-start justify-center pt-[20vh]" onClick={onClose}>
       <div
-        className="w-full max-w-md mx-4 bg-[#0d0d10] border border-white/10 rounded-2xl shadow-[0_40px_80px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="w-full max-w-md mx-4 bg-[#191a1f] border border-white/10 rounded-2xl shadow-[0_40px_80px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         onClick={e => e.stopPropagation()}
       >
         {/* Search */}

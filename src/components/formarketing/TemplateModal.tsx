@@ -72,7 +72,7 @@ export const TEMPLATES: Template[] = [
     description: 'Anuncios optimizados para el feed y stories de Facebook con alta conversión.',
     category: 'Publicidad',
     icon: Megaphone,
-    color: 'text-aether-blue',
+    color: 'text-[#8AB4F8]',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Copy del anuncio', description: 'Redacta el texto persuasivo del anuncio', prompt: 'Escribe copy de alto impacto para anuncio de Facebook', status: 'idle' } },
       { type: 'modelView', data: { title: 'Imagen del anuncio', description: 'Visual principal para el feed de Facebook', prompt: 'Imagen publicitaria profesional para Facebook Ads', status: 'idle' } },
@@ -111,7 +111,7 @@ export const TEMPLATES: Template[] = [
     description: 'Diseña el logo y la identidad visual básica de tu marca desde cero.',
     category: 'Marca',
     icon: Palette,
-    color: 'text-aether-purple',
+    color: 'text-[#8AB4F8]',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Brief de marca', description: 'Define los valores y personalidad de la marca', prompt: 'Crea un brief creativo para el diseño de logo y marca: valores, colores, tipografía, estilo', status: 'idle' } },
       { type: 'modelView', data: { title: 'Diseño del logo', description: 'Genera opciones de logo para la marca', prompt: 'Logo minimalista y profesional, fondo transparente, vectorial', status: 'idle' } },
@@ -136,7 +136,7 @@ export const TEMPLATES: Template[] = [
     description: 'Anuncios de búsqueda y display para Google Ads con alto CTR y conversión.',
     category: 'Publicidad',
     icon: Search,
-    color: 'text-aether-blue',
+    color: 'text-[#8AB4F8]',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Copy de Google Ads', description: 'Escribe los títulos y descripciones del anuncio', prompt: 'Escribe 5 variaciones de títulos y descripciones para Google Search Ads con máximo CTR', status: 'idle' } },
       { type: 'campaignManager', data: { title: 'Campaña de Google Ads', description: 'Estructura la campaña y las palabras clave', prompt: 'Estructura de campaña de Google Ads con grupos de anuncios y palabras clave negativas', status: 'idle' } },
@@ -174,7 +174,7 @@ export const TEMPLATES: Template[] = [
     description: 'Publicación profesional para LinkedIn que genera engagement y autoridad.',
     category: 'Redes Sociales',
     icon: TrendingUp,
-    color: 'text-aether-blue',
+    color: 'text-[#8AB4F8]',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Texto del post', description: 'Redacta el contenido del post de LinkedIn', prompt: 'Escribe un post de LinkedIn de alto engagement con historia personal, aprendizaje clave y llamada a la acción', status: 'idle' } },
       { type: 'modelView', data: { title: 'Imagen del post', description: 'Visual que acompañe el post', prompt: 'Imagen profesional para LinkedIn, formato 1200x627, estilo corporativo moderno', status: 'idle' } },
@@ -186,7 +186,7 @@ export const TEMPLATES: Template[] = [
     description: 'Sistema de identidad visual completo: logo, colores, tipografía y guía de estilo.',
     category: 'Marca',
     icon: Palette,
-    color: 'text-aether-purple',
+    color: 'text-[#8AB4F8]',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Estrategia de marca', description: 'Define la misión, visión y valores', prompt: 'Desarrolla la estrategia de marca completa: propósito, valores, arquetipo, tono de voz y posicionamiento', status: 'idle' } },
       { type: 'modelView', data: { title: 'Logo principal', description: 'Diseño del logotipo principal', prompt: 'Logo profesional y versátil para la marca, múltiples variaciones: positivo, negativo e icono', status: 'idle' } },
@@ -226,7 +226,7 @@ export const TEMPLATES: Template[] = [
     description: 'UI/UX de aplicación móvil con pantallas principales y flujo de usuario.',
     category: 'Web',
     icon: Monitor,
-    color: 'text-aether-blue',
+    color: 'text-[#8AB4F8]',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Descripción de la app', description: 'Define el propósito y funcionalidades', prompt: 'Describe la arquitectura de información, flujo de usuario y pantallas principales de la app móvil', status: 'idle' } },
       { type: 'layoutBuilder', data: { title: 'UI de la app', description: 'Diseño de las pantallas principales', prompt: 'Diseño UI de app móvil: pantalla de inicio, lista, detalle y perfil con sistema de diseño consistente', status: 'idle' } },
@@ -251,7 +251,7 @@ export const TEMPLATES: Template[] = [
     description: 'Arte de podcast profesional para destacar en plataformas de audio.',
     category: 'Contenido',
     icon: Mic,
-    color: 'text-aether-purple',
+    color: 'text-[#8AB4F8]',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Concepto del podcast', description: 'Define el nombre, tagline y estilo', prompt: 'Desarrolla el concepto visual del podcast: nombre, tagline, colores, tipografía y personalidad', status: 'idle' } },
       { type: 'modelView', data: { title: 'Arte del podcast', description: 'Portada cuadrada 3000x3000px', prompt: 'Portada de podcast 3000x3000px, diseño llamativo para Spotify y Apple Podcasts, estilo profesional', status: 'idle' } },
@@ -277,7 +277,7 @@ export const TEMPLATES: Template[] = [
     description: 'Presentación corporativa de marca para clientes, inversores o socios.',
     category: 'Marca',
     icon: Layout,
-    color: 'text-aether-blue',
+    color: 'text-[#8AB4F8]',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Contenido de la presentación', description: 'Estructura y textos de la presentación', prompt: 'Escribe el contenido de una presentación de marca de 15 slides: historia, propuesta de valor, productos, equipo y próximos pasos', status: 'idle' } },
       { type: 'layoutBuilder', data: { title: 'Diseño de slides', description: 'Template y layout de la presentación', prompt: 'Template de presentación corporativa en PowerPoint/Keynote con portada, slides de contenido y cierre', status: 'idle' } },
@@ -338,7 +338,7 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-[#0a0a0b]/95 border border-white/10 rounded-[2rem] text-white max-w-3xl p-0 backdrop-blur-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        <DialogContent className="bg-[#191a1f]/95 border border-white/10 rounded-[2rem] text-white max-w-3xl p-0 backdrop-blur-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
           {/* Header */}
           <div className="p-8 pb-0 shrink-0">
             <DialogHeader className="mb-6">
@@ -347,8 +347,8 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
                   <Sparkles className="w-5 h-5 text-white/50" />
                 </div>
                 <div>
-                  <DialogTitle className="text-2xl font-bold tracking-tight font-display">Plantillas</DialogTitle>
-                  <DialogDescription className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mt-0.5 font-display">
+                  <DialogTitle className="text-2xl font-bold tracking-tight font-sans">Plantillas</DialogTitle>
+                  <DialogDescription className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mt-0.5 font-sans">
                     {TEMPLATES.length} plantillas listas para usar
                   </DialogDescription>
                 </div>
@@ -373,7 +373,7 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
                   className={cn(
-                    "px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all font-display",
+                    "px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all font-sans",
                     activeCategory === cat
                       ? "bg-white text-black"
                       : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white border border-white/5"
@@ -409,16 +409,16 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
 
                     {/* Content */}
                     <div className="flex flex-col gap-1.5 flex-1">
-                      <h3 className="text-sm font-bold text-white tracking-tight font-display leading-snug">{template.title}</h3>
+                      <h3 className="text-sm font-bold text-white tracking-tight font-sans leading-snug">{template.title}</h3>
                       <p className="text-[10px] text-white/30 font-medium leading-relaxed line-clamp-2">{template.description}</p>
                     </div>
 
                     {/* Footer */}
                     <div className="flex items-center justify-between pt-1">
-                      <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-[9px] font-bold text-white/30 uppercase tracking-widest font-display">
+                      <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-[9px] font-bold text-white/30 uppercase tracking-widest font-sans">
                         {template.category}
                       </span>
-                      <span className="text-[9px] text-white/20 font-bold font-display">
+                      <span className="text-[9px] text-white/20 font-bold font-sans">
                         {template.nodes.length} {template.nodes.length === 1 ? 'nodo' : 'nodos'}
                       </span>
                     </div>
@@ -430,7 +430,7 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
 
           {/* Footer */}
           <div className="px-8 py-4 border-t border-white/5 shrink-0">
-            <p className="text-[9px] font-bold text-white/10 uppercase tracking-[0.4em] font-display text-center">
+            <p className="text-[9px] font-bold text-white/10 uppercase tracking-[0.4em] font-sans text-center">
               Creator IA Pro · Studio
             </p>
           </div>

@@ -33,11 +33,11 @@ interface Conversation {
 // ─── Models ──────────────────────────────────────────────────────────────────
 const CHAT_MODELS = [
   { id: 'gemini-3-flash',      name: 'Gemini 2.0 Flash',  badge: 'Rápido',     cost: 1, color: '#00C2FF', openrouter: 'google/gemini-2.0-flash-001' },
-  { id: 'deepseek-chat',       name: 'DeepSeek V3',       badge: 'Código',     cost: 1, color: '#4ADE80', openrouter: 'deepseek/deepseek-chat-v3-0324' },
+  { id: 'deepseek-chat',       name: 'DeepSeek V3',       badge: 'Código',     cost: 1, color: '#8AB4F8', openrouter: 'deepseek/deepseek-chat-v3-0324' },
   { id: 'mistral-small',       name: 'Mistral Small',     badge: 'Privacidad', cost: 1, color: '#FF6B6B', openrouter: 'mistralai/mistral-small-3.1-24b-instruct' },
   { id: 'gemini-3.1-pro-low',  name: 'Gemini 2.5 Pro',    badge: 'Análisis',   cost: 1, color: '#00E5A0', openrouter: 'google/gemini-2.5-pro-preview-03-25' },
   { id: 'mistral-large',       name: 'Mistral Large',     badge: 'EU',         cost: 2, color: '#FF9500', openrouter: 'mistralai/mistral-large' },
-  { id: 'claude-3.5-sonnet',   name: 'Claude Sonnet 4.6', badge: 'Creativo',   cost: 4, color: '#A855F7', openrouter: 'anthropic/claude-sonnet-4-6' },
+  { id: 'claude-3.5-sonnet',   name: 'Claude Sonnet 4.6', badge: 'Creativo',   cost: 4, color: '#8AB4F8', openrouter: 'anthropic/claude-sonnet-4-6' },
   { id: 'claude-3-opus',       name: 'Claude Opus 4.6',   badge: 'Máximo',     cost: 5, color: '#F59E0B', openrouter: 'anthropic/claude-opus-4-6' },
   { id: 'gpt-oss-120b',        name: 'Llama 4 Maverick',  badge: 'Open',       cost: 2, color: '#EC4899', openrouter: 'meta-llama/llama-4-maverick' },
 ];
@@ -50,7 +50,7 @@ const PERSONALITIES = [
     prompt: 'Eres un desarrollador Full-Stack Senior experto. Generas código limpio, moderno con TypeScript, React y Tailwind CSS. SIEMPRE envuelves código en bloques con lenguaje especificado (```tsx, ```html, etc).' },
   { id: 'marketing',  name: 'Marketing Expert',     icon: Megaphone, color: 'text-rose-400',    bg: 'bg-rose-400/10',
     prompt: 'Eres un Especialista en Marketing Digital Senior con 10+ años de experiencia. Dominas Meta Ads, Google Ads, SEO y copywriting. Hablas en español.' },
-  { id: 'copywriter', name: 'Copywriter',           icon: PenTool,   color: 'text-violet-400',  bg: 'bg-violet-400/10',
+  { id: 'copywriter', name: 'Copywriter',           icon: PenTool,   color: 'text-[#8AB4F8]',  bg: 'bg-[#8AB4F8]/10',
     prompt: 'Eres un Copywriter creativo experto. Usas AIDA, PAS, FAB. Tu copy es persuasivo y orientado a conversión. Hablas en español.' },
   { id: 'seo',        name: 'SEO Strategist',       icon: Search,    color: 'text-emerald-400', bg: 'bg-emerald-400/10',
     prompt: 'Eres un Estratega SEO experto. Conoces el algoritmo de Google, E-E-A-T, keyword research y SEO técnico. Hablas en español.' },
@@ -99,13 +99,13 @@ function CodeBlock({ lang, code, onCanvas }: { lang: string; code: string; onCan
   const iframeSrc = lang === 'html'
     ? `data:text/html;charset=utf-8,${encodeURIComponent(code)}`
     : `data:text/html;charset=utf-8,${encodeURIComponent(
-        `<!DOCTYPE html><html><head><meta charset="utf-8"><script src="https://cdn.tailwindcss.com"><\/script><style>body{background:#0a0a0b;color:#e5e7eb;font-family:ui-sans-serif,system-ui,sans-serif;padding:1.5rem;margin:0}</style></head><body>${code}</body></html>`,
+        `<!DOCTYPE html><html><head><meta charset="utf-8"><script src="https://cdn.tailwindcss.com"><\/script><style>body{background:#191a1f;color:#e5e7eb;font-family:ui-sans-serif,system-ui,sans-serif;padding:1.5rem;margin:0}</style></head><body>${code}</body></html>`,
       )}`;
 
   const copy = async () => { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); };
 
   return (
-    <div className="my-4 rounded-xl overflow-hidden border border-white/[0.07] bg-[#0d0d10]">
+    <div className="my-4 rounded-xl overflow-hidden border border-white/[0.07] bg-[#191a1f]">
       {/* Window chrome */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.025] border-b border-white/[0.06]">
         <div className="flex items-center gap-3">
@@ -119,7 +119,7 @@ function CodeBlock({ lang, code, onCanvas }: { lang: string; code: string; onCan
         <div className="flex items-center gap-2">
           {isPrev && onCanvas && (
             <button onClick={() => onCanvas(code, lang)}
-              className="flex items-center gap-1.5 text-[11px] font-medium text-white/30 hover:text-aether-purple transition-colors px-2 py-1 rounded-lg hover:bg-aether-purple/10">
+              className="flex items-center gap-1.5 text-[11px] font-medium text-white/30 hover:text-[#8AB4F8] transition-colors px-2 py-1 rounded-lg hover:bg-[#8AB4F8]/10">
               <Monitor className="h-3.5 w-3.5" /> Canvas
             </button>
           )}
@@ -138,7 +138,7 @@ function CodeBlock({ lang, code, onCanvas }: { lang: string; code: string; onCan
         </div>
       </div>
       {showPreview ? (
-        <div className="h-72 bg-[#0a0a0b]">
+        <div className="h-72 bg-[#191a1f]">
           <iframe src={iframeSrc} className="w-full h-full border-0" sandbox="allow-scripts" title="code-preview" />
         </div>
       ) : (
@@ -170,13 +170,13 @@ function CanvasPanel({ code, lang, onClose }: { code: string; lang: string; onCl
   const src = lang === 'html'
     ? `data:text/html;charset=utf-8,${encodeURIComponent(code)}`
     : `data:text/html;charset=utf-8,${encodeURIComponent(
-        `<!DOCTYPE html><html><head><meta charset="utf-8"><script src="https://cdn.tailwindcss.com"><\/script><style>body{background:#0a0a0b;color:#e5e7eb;font-family:ui-sans-serif,system-ui,sans-serif;padding:2rem;margin:0}</style></head><body>${code}</body></html>`,
+        `<!DOCTYPE html><html><head><meta charset="utf-8"><script src="https://cdn.tailwindcss.com"><\/script><style>body{background:#191a1f;color:#e5e7eb;font-family:ui-sans-serif,system-ui,sans-serif;padding:2rem;margin:0}</style></head><body>${code}</body></html>`,
       )}`;
 
   const copy = async () => { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); };
 
   return (
-    <div className="w-[520px] shrink-0 flex flex-col border-l border-white/[0.06] bg-[#0a0a0b] animate-in slide-in-from-right duration-250">
+    <div className="w-[520px] shrink-0 flex flex-col border-l border-white/[0.06] bg-[#191a1f] animate-in slide-in-from-right duration-250">
       {/* Header */}
       <div className="flex items-center justify-between px-4 h-12 border-b border-white/[0.06] shrink-0">
         <div className="flex border border-white/[0.07] rounded-lg overflow-hidden bg-white/[0.03]">
@@ -384,13 +384,13 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
   // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className={embedded
-      ? "flex flex-col h-full bg-[#080809]"
-      : "fixed top-16 left-0 right-0 bottom-0 z-[9000] flex bg-[#0a0a0b]"
+      ? "flex flex-col h-full bg-[#1e2028]"
+      : "fixed top-16 left-0 right-0 bottom-0 z-[9000] flex bg-[#191a1f]"
     }>
 
       {/* ── Sidebar — only in fullscreen page mode ───────────────────────────── */}
       {!embedded && <aside className={cn(
-        'flex-col bg-[#0a0a0b] border-r border-white/[0.06] transition-all duration-200 overflow-hidden shrink-0',
+        'flex-col bg-[#191a1f] border-r border-white/[0.06] transition-all duration-200 overflow-hidden shrink-0',
         sidebarOpen ? 'flex w-[260px]' : 'hidden',
       )}>
         {/* Sidebar header */}
@@ -434,19 +434,19 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
         {/* Credits + profile */}
         <div className="px-3 pb-3 pt-2 border-t border-white/[0.06] space-y-1.5 shrink-0">
           <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/[0.03]">
-            <Zap className="h-3.5 w-3.5 text-aether-purple shrink-0" />
+            <Zap className="h-3.5 w-3.5 text-[#8AB4F8] shrink-0" />
             <span className="text-[12px] text-white/50">
               <span className="font-bold text-white/70">{(profile?.credits_balance ?? 0).toLocaleString()}</span> créditos
             </span>
           </div>
           {!isPro && (
             <button onClick={() => navigate('/pricing')}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-aether-purple/10 to-transparent border border-aether-purple/15 hover:border-aether-purple/30 transition-all group">
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-[#8AB4F8]/10 to-transparent border border-[#8AB4F8]/15 hover:border-[#8AB4F8]/30 transition-all group">
               <div className="flex items-center gap-2">
-                <CreditCard className="h-3.5 w-3.5 text-aether-purple" />
+                <CreditCard className="h-3.5 w-3.5 text-[#8AB4F8]" />
                 <span className="text-[12px] text-white/50 group-hover:text-white/80">Upgrade a Pro</span>
               </div>
-              <ArrowUpRight className="h-3.5 w-3.5 text-aether-purple/50" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-[#8AB4F8]/50" />
             </button>
           )}
           <button onClick={() => navigate('/profile')}
@@ -498,7 +498,7 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                           <p className="text-[13px] font-medium text-white/80">{m.name}</p>
                           <p className="text-[10px] text-white/30 mt-0.5">{m.badge} · {m.cost} cr/msg</p>
                         </div>
-                        {model === m.id && <Check className="h-3.5 w-3.5 text-aether-purple shrink-0" />}
+                        {model === m.id && <Check className="h-3.5 w-3.5 text-[#8AB4F8] shrink-0" />}
                       </button>
                     ))}
                   </div>
@@ -524,7 +524,7 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                           <p.icon className={cn('h-3.5 w-3.5', p.color)} />
                         </div>
                         <span className="text-[13px] font-medium text-white/75 flex-1">{p.name}</span>
-                        {personality === p.id && <Check className="h-3 w-3 text-aether-purple" />}
+                        {personality === p.id && <Check className="h-3 w-3 text-[#8AB4F8]" />}
                       </button>
                     ))}
                   </div>

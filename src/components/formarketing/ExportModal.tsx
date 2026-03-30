@@ -99,12 +99,12 @@ export function ExportModal({ open, onClose, nodes, edges, spaceName }: ExportMo
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md mx-4 bg-[#0a0a0b] border border-white/[0.08] rounded-[2rem] shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+      <div className="relative w-full max-w-md mx-4 bg-[#191a1f] border border-white/[0.08] rounded-[2rem] shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06]">
           <div>
-            <h2 className="text-sm font-bold text-white font-display">Exportar Canvas</h2>
+            <h2 className="text-sm font-bold text-white font-sans">Exportar Canvas</h2>
             <p className="text-[10px] text-white/30 mt-0.5">{nodes.length} nodo{nodes.length !== 1 ? 's' : ''} · {edges.length} conex.</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="w-8 h-8 rounded-xl text-white/20 hover:text-white hover:bg-white/5">
@@ -120,8 +120,8 @@ export function ExportModal({ open, onClose, nodes, edges, spaceName }: ExportMo
             onClick={downloadJSON}
             className="w-full flex items-center gap-4 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all group text-left"
           >
-            <div className="w-10 h-10 rounded-xl bg-aether-purple/10 border border-aether-purple/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <FileJson className="w-5 h-5 text-aether-purple" />
+            <div className="w-10 h-10 rounded-xl bg-[#8AB4F8]/10 border border-[#8AB4F8]/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <FileJson className="w-5 h-5 text-[#8AB4F8]" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-bold text-white group-hover:text-white">Creator IA JSON</p>
@@ -139,8 +139,8 @@ export function ExportModal({ open, onClose, nodes, edges, spaceName }: ExportMo
             onClick={downloadLovable}
             className="w-full flex items-center gap-4 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all group text-left"
           >
-            <div className="w-10 h-10 rounded-xl bg-aether-blue/10 border border-aether-blue/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <FileJson className="w-5 h-5 text-aether-blue" />
+            <div className="w-10 h-10 rounded-xl bg-[#8AB4F8]/10 border border-[#8AB4F8]/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <FileJson className="w-5 h-5 text-[#8AB4F8]" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-bold text-white">Lovable Format</p>

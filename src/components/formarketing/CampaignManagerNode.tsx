@@ -1,30 +1,113 @@
-import { memo, useState } from 'react';
+import { memo, useState, useCallback } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { Share2, Trash2, Instagram, Facebook, Twitter, CheckCircle2, Clock, ChevronDown, ChevronUp, Users, MousePointer2, Zap, Megaphone } from 'lucide-react';
+import { Share2, Trash2, Instagram, Facebook, Twitter, CheckCircle2, Clock, ChevronDown, ChevronUp, Users, MousePointer2, Zap, Megaphone, Loader2, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 interface CampaignNodeData {
   title?: string;
   model?: string;
   status?: 'pending' | 'processing' | 'ready' | 'error';
   platforms?: Record<string, 'pending' | 'ready' | 'error'>;
+  platformCopy?: Record<string, string>;
+  generatingCopy?: Record<string, boolean>;
 }
 
 const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData }) => {
   const { setNodes } = useReactFlow();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [copiedPlatform, setCopiedPlatform] = useState<string | null>(null);
   const platforms = data.platforms || {
     instagram: 'pending',
     facebook: 'pending',
     twitter: 'pending'
   };
 
+  const update = useCallback((patch: Partial<CampaignNodeData>) => {
+    setNodes(nds => nds.map(n => n.id === id ? { ...n, data: { ...n.data, ...patch } } : n));
+  }, [id, setNodes]);
+
   const deleteNode = async () => {
     const { error } = await supabase.from('canvas_nodes').delete().eq('id', id);
     if (!error) {
       setNodes((nds) => nds.filter((n) => n.id !== id));
       toast.success("Gestor de campaña eliminado");
+    }
+  };
+
+  const generateCopyForPlatform = async (platform: string) => {
+    update({ generatingCopy: { ...(data.generatingCopy || {}), [platform]: true } });
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token ?? '';
+      const prompt = `Genera un caption optimizado para ${platform} sobre: ${data.title || 'campaña de marketing'}. Máx 150 caracteres. Incluye emojis y hashtags relevantes.`;
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/ai-proxy`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'apikey': SUPABASE_ANON_KEY },
+        body: JSON.stringify({
+          provider: 'openrouter',
+          path: 'chat/completions',
+          body: {
+            model: data.model || 'deepseek/deepseek-chat',
+            messages: [{ role: 'user', content: prompt }],
+            stream: true,
+            max_tokens: 200,
+          },
+        }),
+      });
+
+      if (!res.ok) { toast.error(`Error generando copy para ${platform}`); return; }
+
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const payload = line.slice(6).trim();
+          if (payload === '[DONE]') break;
+          try {
+            const delta = JSON.parse(payload)?.choices?.[0]?.delta?.content;
+            if (typeof delta === 'string') accumulated += delta;
+          } catch { /* skip */ }
+        }
+      }
+
+      update({
+        platformCopy: { ...(data.platformCopy || {}), [platform]: accumulated },
+        generatingCopy: { ...(data.generatingCopy || {}), [platform]: false },
+      });
+    } catch {
+      update({ generatingCopy: { ...(data.generatingCopy || {}), [platform]: false } });
+      toast.error(`Error generando copy para ${platform}`);
+    }
+  };
+
+  const handleCopyToClipboard = (platform: string) => {
+    const text = (data.platformCopy || {})[platform];
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedPlatform(platform);
+    setTimeout(() => setCopiedPlatform(null), 2000);
+    toast.success('Copy copiado');
+  };
+
+  const handleDeploy = async () => {
+    (data as any).onExecute?.();
+    // Generate copy for all platforms
+    for (const platform of Object.keys(platforms)) {
+      generateCopyForPlatform(platform);
     }
   };
 
@@ -56,8 +139,8 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
         <div className="p-4 space-y-4 animate-in fade-in duration-500 bg-white/[0.01]">
           <div className="flex items-center justify-between">
              <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">Strategy Core</span>
-              <button 
-                onClick={() => (data as any).onExecute?.()}
+              <button
+                onClick={handleDeploy}
                 disabled={data.status === 'processing'}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-white/90 text-black transition-all shadow-xl disabled:opacity-50 active:scale-95 group/exec"
               >
@@ -65,6 +148,33 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
                 <span className="text-[8px] font-bold lowercase tracking-widest">Deploy</span>
               </button>
           </div>
+
+          {/* Platform copy display */}
+          {Object.keys(platforms).length > 0 && (
+            <div className="space-y-2">
+              {Object.keys(platforms).map(platform => {
+                const isGen = (data.generatingCopy || {})[platform];
+                const copy = (data.platformCopy || {})[platform];
+                return (
+                  <div key={platform} className="rounded-xl bg-white/[0.02] border border-white/5 p-2.5">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">{platform}</span>
+                      {isGen && <Loader2 className="w-2.5 h-2.5 text-white/30 animate-spin" />}
+                      {copy && !isGen && (
+                        <button onClick={() => handleCopyToClipboard(platform)} className="p-0.5 rounded text-white/20 hover:text-white transition-all">
+                          {copiedPlatform === platform ? <Check className="w-2.5 h-2.5 text-green-400" /> : <Copy className="w-2.5 h-2.5" />}
+                        </button>
+                      )}
+                    </div>
+                    {isGen && <p className="text-[8px] text-white/20 italic">Generando copy…</p>}
+                    {copy && !isGen && (
+                      <p className="text-[9px] text-white/50 leading-relaxed line-clamp-2">{copy}</p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="space-y-4">
             <div className="space-y-3">

@@ -4,13 +4,21 @@ import { Video, Trash2, Zap, ChevronDown, ChevronUp, Play, Download, Loader2 } f
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+const DURATIONS = [
+  { value: '5s',  label: '5s',  credits: 10 },
+  { value: '10s', label: '10s', credits: 20 },
+  { value: '15s', label: '15s', credits: 35 },
+];
+
 interface VideoNodeData {
   title?: string;
   status?: 'idle' | 'rendering' | 'executing' | 'ready' | 'error';
   duration?: string;
+  selectedDuration?: string;
   assetUrl?: string;
   model?: string;
   dataPayload?: Record<string, any>;
+  imageRef?: string;
 }
 
 const VIDEO_STEPS = [
@@ -60,6 +68,12 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
     a.download = `creator-ia-video-${Date.now()}.mp4`;
     a.target = '_blank';
     a.click();
+  };
+
+  const updateDuration = (val: string) => {
+    setNodes(nds =>
+      nds.map(node => node.id === id ? { ...node, data: { ...node.data, selectedDuration: val } } : node)
+    );
   };
 
   const updateModel = async (val: string) => {
@@ -193,6 +207,27 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
             </div>
           )}
 
+          {/* Duration Selector */}
+          <div className="space-y-2">
+            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-display">Duración</span>
+            <div className="flex gap-2">
+              {DURATIONS.map(d => (
+                <button
+                  key={d.value}
+                  onClick={() => updateDuration(d.value)}
+                  className={`flex flex-col items-center px-3 py-2 rounded-xl border text-[9px] font-bold transition-all flex-1 ${
+                    (data.selectedDuration || '5s') === d.value
+                    ? 'bg-white/10 border-white/20 text-white'
+                    : 'bg-white/5 border-transparent text-white/40 hover:bg-white/10'
+                  }`}
+                >
+                  <span>{d.label}</span>
+                  <span className="text-[8px] text-white/30 font-normal mt-0.5">{d.credits}cr</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Industrial Fallback Selector */}
           <div className="pt-2 border-t border-white/5 space-y-3">
             <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] font-display">Engine Selector</span>
@@ -233,7 +268,9 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
         </div>
       )}
 
-    <Handle type="target" position={Position.Left} className="!w-2 !h-2 !-left-1 !bg-white/40 !border-2 !border-[#16161b] hover:scale-125 transition-transform" />
+    <Handle type="target" position={Position.Left} id="any-in" style={{ top: '40%' }} className="!w-2 !h-2 !-left-1 !bg-white/40 !border-2 !border-[#16161b] hover:scale-125 transition-transform" />
+    <Handle type="target" position={Position.Left} id="image-in" style={{ top: '60%' }} className="!w-3 !h-3 !-left-1.5 !bg-[#a78bfa] !border-2 !border-[#16161b] hover:scale-125 transition-transform" />
+    <div className="absolute left-4 text-[8px] text-[#a78bfa]/60 font-bold" style={{ top: 'calc(60% - 6px)', transform: 'translateY(-50%)' }}>img→vid</div>
     <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#16161b] hover:scale-125 transition-transform" />
     </div>
   );

@@ -20,22 +20,31 @@ import CampaignManagerNode from '@/components/formarketing/CampaignManagerNode';
 import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
 import { TEMPLATES, CATEGORIES, type Template } from '@/components/formarketing/TemplateModal';
 import AntigravityBridgeNode from '@/components/formarketing/AntigravityBridgeNode';
+import CaptionNode from '@/components/formarketing/CaptionNode';
+import PromptBuilderNode from '@/components/formarketing/PromptBuilderNode';
+import LLMNode from '@/components/formarketing/LLMNode';
+import TextInputNode from '@/components/formarketing/TextInputNode';
+import ExportNode from '@/components/formarketing/ExportNode';
 import { CommandPalette } from '@/components/formarketing/CommandPalette';
-import { ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, LayoutDashboard, Circle, MessageSquare, Download, Smartphone, Layers, GitBranch, Play as PlayIcon, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, LayoutDashboard, Circle, MessageSquare, Download, Smartphone, Layers, GitBranch, Play as PlayIcon, ChevronRight, Terminal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { aiService, classifyError } from '@/services/ai-service';
 import { supabase } from '@/integrations/supabase/client';
-import { GeniusAssistant } from '@/components/formarketing/GeniusAssistant';
 import { PropertyInspector } from '@/components/formarketing/PropertyInspector';
 import { ExportModal } from '@/components/formarketing/ExportModal';
 
 const nodeTypes = {
   characterBreakdown: CharacterBreakdownNode,
+  textInput: TextInputNode,
+  llmNode: LLMNode,
   modelView: ModelNode,
   videoModel: VideoModelNode,
   layoutBuilder: LayoutBuilderNode,
   campaignManager: CampaignManagerNode,
+  captionNode: CaptionNode,
+  promptBuilder: PromptBuilderNode,
+  exportNode: ExportNode,
   antigravityBridge: AntigravityBridgeNode,
 };
 
@@ -92,8 +101,6 @@ function FormarketingContent() {
   // HU28 — Command palette
   const [cmdOpen, setCmdOpen]                 = useState(false);
 
-  // AI panel (embedded GeniusAssistant)
-  const [aiPanelOpen, setAiPanelOpen]         = useState(false);
 
   // Property Inspector
   const [selectedNodeId, setSelectedNodeId]   = useState<string | null>(null);
@@ -126,6 +133,10 @@ function FormarketingContent() {
   const [execStatus, setExecStatus]           = useState<'idle' | 'running' | 'success' | 'error'>('idle');
   const [execNodeCount, setExecNodeCount]     = useState(0);
   const [execDone, setExecDone]               = useState(0);
+
+  // Execution log
+  const [execLog, setExecLog] = useState<{ time: string; node: string; msg: string; type: 'info' | 'success' | 'error' }[]>([]);
+  const [logOpen, setLogOpen] = useState(false);
 
   // HU34 — Undo/Redo history
   const history   = useRef<{ nodes: Node[]; edges: Edge[] }[]>([]);
@@ -523,6 +534,11 @@ function FormarketingContent() {
     return true;
   };
 
+  const addLog = useCallback((node: string, msg: string, type: 'info' | 'success' | 'error' = 'info') => {
+    const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setExecLog(prev => [...prev.slice(-49), { time, node, msg, type }]);
+  }, []);
+
   const executeNode = async (nodeId: string) => {
     const isPersisted = await ensureNodePersisted(nodeId);
     
@@ -532,12 +548,14 @@ function FormarketingContent() {
 
       if (node.type === 'characterBreakdown') {
         (async () => {
+          const nodeName = (node.data as any).title || 'Personaje';
           try {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' } } : n));
-            
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Iniciando ejecución…', 'info');
+
             const selectedModel = (node.data as any).model || 'deepseek-chat';
             const profilePrompt = `Analiza este perfil de personaje y genera una descripción senior detallada: ${node.data.title}. Contexto: ${node.data.flavor}. Estilo: ${node.data.description}`;
-            
+
             const result = await aiService.processAction({
               action: 'chat',
               prompt: profilePrompt,
@@ -545,60 +563,84 @@ function FormarketingContent() {
               node_id: (spaceId && isPersisted) ? node.id : undefined
             });
 
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId 
-              ? { ...n, data: { ...n.data, status: 'ready', description: result.text } } 
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
+              ? { ...n, data: { ...n.data, status: 'ready', description: result.text }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
               : n
             ));
 
-            await supabase.from('canvas_nodes').update({ 
+            await supabase.from('canvas_nodes').update({
                status: 'ready',
                data_payload: { ...node.data, status: 'ready', description: result.text, model: selectedModel }
             }).eq('id', nodeId);
 
+            addLog(nodeName, 'Completado ✓', 'success');
             toast.success(`${node.data.title || 'Personaje'} analizado con ${selectedModel}`);
           } catch (e: any) {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' } } : n));
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
             const { userMessage } = classifyError(e?.message ?? '');
+            addLog(nodeName, 'Error: ' + (e?.message ?? 'desconocido'), 'error');
             toast.error(userMessage);
           }
         })();
       } else if (node.type === 'modelView') {
         (async () => {
+          const nodeName = (node.data as any).title || 'Imagen';
           try {
-            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'executing' } } : n));
-            
+            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Iniciando ejecución…', 'info');
+
             const latestEdges = rfGetEdges();
-            const contextEdges = latestEdges.filter(e => e.target === node.id);
-            const sourceNodes = currentNodes.filter(n => contextEdges.some(e => e.source === n.id && n.type === 'characterBreakdown'));
-            
-            let finalPrompt = (node.data as any).prompt || "High quality marketing visual";
-            if (sourceNodes.length > 0) {
-              const contexts = sourceNodes.map(s => (s?.data as any).description || "").join(". ");
-              finalPrompt = `${contexts}. ${finalPrompt}`;
+            const incomingEdges = latestEdges.filter(e => e.target === node.id);
+
+            // Auto-read context from connected nodes (characterBreakdown, promptBuilder, textInput, llmNode)
+            const upstreamContext: string[] = [];
+            for (const edge of incomingEdges) {
+              const srcNode = currentNodes.find(n => n.id === edge.source);
+              if (srcNode?.type === 'characterBreakdown') {
+                const flavor = (srcNode.data as any).flavor || '';
+                const desc = (srcNode.data as any).description || '';
+                if (flavor || desc) upstreamContext.push(`Personaje: ${flavor}. ${desc}`);
+              }
+              if (srcNode?.type === 'promptBuilder' && (srcNode.data as any).compiledPrompt) {
+                upstreamContext.push((srcNode.data as any).compiledPrompt);
+              }
+              if (srcNode?.type === 'textInput' && (srcNode.data as any).value) {
+                upstreamContext.push((srcNode.data as any).value);
+              }
+              if (srcNode?.type === 'llmNode' && (srcNode.data as any).output) {
+                upstreamContext.push((srcNode.data as any).output);
+              }
             }
+
+            const nodePrompt = (node.data as any).prompt || "High quality marketing visual";
+            const finalPrompt = upstreamContext.length > 0
+              ? `${upstreamContext.join('. ')}. ${nodePrompt}`
+              : nodePrompt;
 
             const result = await aiService.processAction({
               action: 'image',
               prompt: finalPrompt,
               model: (node.data as any).model || 'flux-schnell',
-              node_id: (spaceId && isPersisted) ? node.id : undefined 
+              node_id: (spaceId && isPersisted) ? node.id : undefined
             });
-            
-            rfSetNodes((nds) => nds.map((n) => 
-              n.id === node.id 
-                ? { ...n, data: { ...n.data, status: 'ready', assetUrl: result.url } } 
+
+            rfSetNodes((nds) => nds.map((n) =>
+              n.id === node.id
+                ? { ...n, data: { ...n.data, status: 'ready', assetUrl: result.url }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
                 : n
             ));
 
-            await supabase.from('canvas_nodes').update({ 
-              asset_url: result.url, 
-              status: 'ready' 
+            await supabase.from('canvas_nodes').update({
+              asset_url: result.url,
+              status: 'ready'
             }).eq('id', node.id);
 
+            addLog(nodeName, 'Completado ✓', 'success');
             toast.success("Imagen generada correctamente");
           } catch (error: any) {
-            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'error' } } : n));
+            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
             const { userMessage, canRetry } = classifyError(error?.message ?? '');
+            addLog(nodeName, 'Error: ' + (error?.message ?? 'desconocido'), 'error');
             toast.error(userMessage, {
               action: canRetry ? { label: 'Reintentar', onClick: () => executeNode(node.id) } : undefined,
             });
@@ -606,31 +648,38 @@ function FormarketingContent() {
         })();
       } else if (node.type === 'videoModel') {
         (async () => {
+          const nodeName = (node.data as any).title || 'Video';
           try {
-            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'loading' } } : n));
+            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'loading' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Iniciando ejecución…', 'info');
             await new Promise(resolve => setTimeout(resolve, 3000));
             const videoUrl = 'https://cdn.pixabay.com/video/2023/10/20/185834-876356744_tiny.mp4';
             const selectedModel = (node.data as any).model || 'video';
-            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'ready', assetUrl: videoUrl } } : n));
-            await supabase.from('canvas_nodes').update({ 
-               asset_url: videoUrl, 
-               status: 'ready', 
+            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'ready', assetUrl: videoUrl }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } } : n));
+            await supabase.from('canvas_nodes').update({
+               asset_url: videoUrl,
+               status: 'ready',
                prompt: node.data.title || 'video',
                data_payload: { ...node.data, assetUrl: videoUrl, status: 'ready', model: selectedModel }
             }).eq('id', node.id);
+            addLog(nodeName, 'Completado ✓', 'success');
             toast.success(`Video renderizado con ${selectedModel}`);
           } catch (error: any) {
+            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Error: ' + (error?.message ?? 'desconocido'), 'error');
             toast.error("Error al renderizar video");
           }
         })();
       } else if (node.type === 'layoutBuilder') {
         (async () => {
+          const nodeName = (node.data as any).title || 'Layout';
           try {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' } } : n));
-            
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Iniciando ejecución…', 'info');
+
             const selectedModel = (node.data as any).model || 'claude-3.5-sonnet';
             const layoutPrompt = `Genera un mapa de componentes React/Tailwind para una landing page de tipo ${node.data.title}. Plataforma: ${node.data.platform}. Estructura deseada: ${node.data.structure}`;
-            
+
             const result = await aiService.processAction({
               action: 'ui',
               prompt: layoutPrompt,
@@ -638,19 +687,21 @@ function FormarketingContent() {
               node_id: (spaceId && isPersisted) ? node.id : undefined
             });
 
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId 
-              ? { ...n, data: { ...n.data, status: 'ready', structure: JSON.stringify(result.ui || result, null, 2) } } 
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
+              ? { ...n, data: { ...n.data, status: 'ready', structure: JSON.stringify(result.ui || result, null, 2) }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
               : n
             ));
 
-            await supabase.from('canvas_nodes').update({ 
+            await supabase.from('canvas_nodes').update({
                status: 'ready',
                data_payload: { ...node.data, status: 'ready', structure: JSON.stringify(result.ui || result, null, 2), model: selectedModel }
             }).eq('id', nodeId);
 
+            addLog(nodeName, 'Completado ✓', 'success');
             toast.success(`Layout ${node.data.title} generado con ${selectedModel}`);
-          } catch (e) {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' } } : n));
+          } catch (e: any) {
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Error: ' + (e?.message ?? 'desconocido'), 'error');
             toast.error("Error al generar layout");
           }
         })();
@@ -1086,15 +1137,6 @@ function FormarketingContent() {
             <span className="hidden md:inline">Limpiar</span>
           </Button>
           <div className="h-5 w-px bg-white/[0.06] mx-1" />
-          {/* AI Assistant panel toggle */}
-          <Button
-            variant="ghost"
-            onClick={() => { setAiPanelOpen(v => !v); setSelectedNodeId(null); }}
-            className={`h-8 px-3 rounded-xl gap-1.5 text-[10px] font-bold transition-all ${aiPanelOpen ? 'text-aether-purple bg-aether-purple/10 border border-aether-purple/20' : 'text-white/25 hover:text-white hover:bg-white/5'}`}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">IA</span>
-          </Button>
           <Button
             onClick={handleExecute}
             disabled={nodes.length === 0 || execStatus === 'running'}
@@ -1111,7 +1153,7 @@ function FormarketingContent() {
       <FormarketingSidebar onAddNode={handleManualAddNode} />
 
       {/* ── Canvas ──────────────────────────────────────────────────────── */}
-      <div className="relative flex-1" ref={reactFlowWrapper}>
+      <div className="relative flex-1 flex flex-col" ref={reactFlowWrapper}>
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -1122,7 +1164,6 @@ function FormarketingContent() {
           onDragOver={onDragOver}
           onNodeClick={(_, node) => {
             setSelectedNodeId(node.id);
-            if (aiPanelOpen) setAiPanelOpen(false);
           }}
           onPaneClick={() => setSelectedNodeId(null)}
           nodeTypes={nodeTypes}
@@ -1162,10 +1203,39 @@ function FormarketingContent() {
             }}
           />
         </ReactFlow>
+
+        {/* Execution log panel */}
+        <div className={`absolute bottom-0 left-0 right-0 z-20 transition-all duration-300 ${logOpen ? 'h-48' : 'h-8'}`}
+          style={{ background: 'rgba(10,10,16,0.92)', backdropFilter: 'blur(8px)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <button
+            onClick={() => setLogOpen(!logOpen)}
+            className="flex items-center gap-2 px-4 h-8 w-full text-left"
+          >
+            <div className={`h-1.5 w-1.5 rounded-full ${execStatus === 'running' ? 'bg-yellow-400 animate-pulse' : execLog.some(l => l.type === 'error') ? 'bg-red-400' : 'bg-[#34d399]'}`} />
+            <Terminal className="w-3 h-3 text-white/20" />
+            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Execution Log</span>
+            <span className="text-[10px] text-white/20">{execLog.length} eventos</span>
+            <div className="flex-1" />
+            <span className="text-[10px] text-white/20">{logOpen ? '▼' : '▲'}</span>
+          </button>
+          {logOpen && (
+            <div className="overflow-y-auto h-40 px-4 py-2 space-y-0.5 font-mono">
+              {execLog.length === 0 ? (
+                <p className="text-[10px] text-white/20 py-4 text-center">Sin eventos. Ejecuta el flujo para ver logs.</p>
+              ) : [...execLog].reverse().map((log, i) => (
+                <div key={i} className="flex items-start gap-2 py-0.5">
+                  <span className="text-[9px] text-white/20 shrink-0 w-16">{log.time}</span>
+                  <span className="text-[9px] font-bold shrink-0 w-20 truncate" style={{ color: log.type === 'error' ? '#f87171' : log.type === 'success' ? '#34d399' : '#8AB4F8' }}>{log.node}</span>
+                  <span className="text-[9px] text-white/40">{log.msg}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Property Inspector (selected node) ──────────────────────────── */}
-      {selectedNodeId && !aiPanelOpen && (
+      {selectedNodeId && (
         <PropertyInspector
           node={nodes.find(n => n.id === selectedNodeId) ?? null}
           onClose={() => setSelectedNodeId(null)}
@@ -1180,12 +1250,6 @@ function FormarketingContent() {
         />
       )}
 
-      {/* ── AI Panel (embedded GeniusAssistant) ────────────────────────── */}
-      {aiPanelOpen && (
-        <div className="w-[380px] shrink-0 border-l border-white/[0.06] flex flex-col overflow-hidden animate-in slide-in-from-right duration-200">
-          <GeniusAssistant embedded onAction={handleAssistantAction} onClose={() => setAiPanelOpen(false)} />
-        </div>
-      )}
       </div>
 
       {/* ── Export Modal ─────────────────────────────────────────────────── */}

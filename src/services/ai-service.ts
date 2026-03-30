@@ -3,12 +3,12 @@ import { toast } from "sonner";
 
 // ─── TEXT MODEL MAP (internal-id → OpenRouter model ID) ───────────────────────
 const TEXT_MODEL_MAP: Record<string, string> = {
-  "deepseek-chat":       "deepseek/deepseek-chat-v3-0324",
+  "deepseek-chat":       "deepseek/deepseek-chat",
   "gemini-3-flash":      "google/gemini-2.0-flash-001",
   "gemini-3.1-pro-low":  "google/gemini-2.5-pro-preview-03-25",
   "gemini-3.1-pro-high": "google/gemini-2.5-pro-preview-03-25",
-  "claude-3.5-sonnet":   "anthropic/claude-sonnet-4-6",
-  "claude-3-opus":       "anthropic/claude-opus-4-6",
+  "claude-3.5-sonnet":   "anthropic/claude-3.5-sonnet",
+  "claude-3-opus":       "anthropic/claude-3-opus-20240229",
   "gpt-oss-120b":        "meta-llama/llama-4-maverick",
   "mistral-large":       "mistralai/mistral-large",
   "mistral-small":       "mistralai/mistral-small-3.1-24b-instruct",
@@ -16,10 +16,10 @@ const TEXT_MODEL_MAP: Record<string, string> = {
 
 // ─── IMAGE MODEL MAP (internal-id → OpenRouter model ID) ──────────────────────
 export const IMAGE_MODEL_MAP: Record<string, string> = {
-  "flux-schnell":  "black-forest-labs/flux-1-schnell",
-  "flux-pro":      "black-forest-labs/flux-1-pro",
-  "flux-pro-1.1":  "black-forest-labs/flux-1.1-pro",
-  "sdxl":          "stability-ai/sdxl",
+  "flux-schnell":  "google/gemini-2.5-flash-image",
+  "flux-pro":      "openai/gpt-5-image-mini",
+  "flux-pro-1.1":  "openai/gpt-5-image",
+  "sdxl":          "google/gemini-3.1-flash-image-preview",
 };
 
 // IDs that trigger image generation routing
@@ -141,7 +141,11 @@ export const aiService = {
 
       // 4. Route to correct handler
       let result: any;
-      if (tool && ["upscale", "background", "enhance", "restore", "eraser", "variation", "style", "product"].includes(tool)) {
+      if (tool && ["variation", "style", "product"].includes(tool)) {
+        // These use GPT-5 Image Mini with image input (img2img)
+        if (!image) throw new Error(`La herramienta "${tool}" requiere una imagen de origen.`);
+        result = await this.handleImageGen(prompt, model, tool, image);
+      } else if (tool && ["upscale", "background", "enhance", "restore", "eraser"].includes(tool)) {
         if (!image) throw new Error(`La herramienta "${tool}" requiere una imagen de origen.`);
         result = await this.handleMediaProxy(tool, image);
       } else if (action === "image" || IMAGE_MODEL_IDS.has(model) || tool === "generate" || tool === "logo") {
@@ -221,22 +225,31 @@ ${userCredits < 3 ? "⚠️ Créditos bajos — Plan Pro garantiza acceso contin
     return { text };
   },
 
-  // ─── IMAGE GENERATION — OpenRouter only (FLUX → SDXL fallback) ───────────────
-  async handleImageGen(prompt: string, model: string, tool?: string) {
+  // ─── IMAGE GENERATION — OpenRouter (supports img2img via image_url) ──────────
+  async handleImageGen(prompt: string, model: string, tool?: string, imageUrl?: string) {
     let finalPrompt = prompt;
     if (tool === "logo") {
       finalPrompt = `${prompt}, professional logo design, clean vector style, minimalist, white background, sharp edges, brand identity`;
+    } else if (tool === "variation") {
+      finalPrompt = prompt || "Create a creative variation of this image, keep the subject but change style or composition";
+    } else if (tool === "style") {
+      finalPrompt = prompt || "Apply an artistic painterly style to this image while keeping the original composition and subject";
+    } else if (tool === "product") {
+      finalPrompt = prompt || "Place this product in a clean professional studio setting with soft lighting and white background";
     }
 
     // Resolve OpenRouter model ID from internal ID
-    const orModel = IMAGE_MODEL_MAP[model] ?? "black-forest-labs/flux-1-schnell";
+    const orModel = IMAGE_MODEL_MAP[model] ?? "google/gemini-2.5-flash-image";
 
-    const data = await this.callProxy("openrouter-image", "", {
+    const body: Record<string, unknown> = {
       prompt: finalPrompt,
       model: orModel,
       width: 1024,
       height: 1024,
-    });
+    };
+    if (imageUrl) body.image_url = imageUrl;
+
+    const data = await this.callProxy("openrouter-image", "", body);
 
     if (data?.url) return { url: data.url, model: data.model ?? orModel };
     throw new Error("No se pudo generar la imagen. Intenta de nuevo.");

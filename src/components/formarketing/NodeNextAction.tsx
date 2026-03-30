@@ -9,8 +9,8 @@ interface NodeNextActionProps {
 }
 
 const NODE_SUGGESTIONS = [
-  { type: "modelView",          label: "Imagen",     icon: Image,     color: "text-aether-purple bg-aether-purple/10 border-aether-purple/20" },
-  { type: "videoModel",         label: "Video",      icon: Video,     color: "text-aether-blue   bg-aether-blue/10   border-aether-blue/20" },
+  { type: "modelView",          label: "Imagen",     icon: Image,     color: "text-[#8AB4F8] bg-[#8AB4F8]/10 border-[#8AB4F8]/20" },
+  { type: "videoModel",         label: "Video",      icon: Video,     color: "text-[#8AB4F8]   bg-[#8AB4F8]/10   border-[#8AB4F8]/20" },
   { type: "characterBreakdown", label: "Personaje",  icon: FileText,  color: "text-white         bg-white/5          border-white/10" },
   { type: "layoutBuilder",      label: "Layout",     icon: Layers,    color: "text-emerald-400   bg-emerald-400/10   border-emerald-400/20" },
   { type: "campaignManager",    label: "Campaña",    icon: Megaphone, color: "text-rose-400      bg-rose-400/10      border-rose-400/20" },
@@ -41,8 +41,8 @@ export function NodeNextAction({ nodeId, hidden }: NodeNextActionProps) {
         className={cn(
           "w-7 h-7 rounded-full flex items-center justify-center border transition-all duration-200 shadow-lg",
           open
-            ? "bg-aether-purple border-aether-purple/50 text-white rotate-45"
-            : "bg-[#0d0d10] border-white/10 text-white/30 hover:border-aether-purple/40 hover:text-white/70 hover:scale-110"
+            ? "bg-[#8AB4F8] border-[#8AB4F8]/50 text-white rotate-45"
+            : "bg-[#191a1f] border-white/10 text-white/30 hover:border-[#8AB4F8]/40 hover:text-white/70 hover:scale-110"
         )}
         title="Añadir nodo conectado"
       >
