@@ -15,11 +15,12 @@ const TEXT_MODEL_MAP: Record<string, string> = {
 };
 
 // ─── IMAGE MODEL MAP (internal-id → OpenRouter model ID) ──────────────────────
+// All slugs verified against OpenRouter's model catalog (Mar 2026)
 export const IMAGE_MODEL_MAP: Record<string, string> = {
-  "flux-schnell":  "google/gemini-2.5-flash-image",
-  "flux-pro":      "openai/gpt-5-image-mini",
-  "flux-pro-1.1":  "openai/gpt-5-image",
-  "sdxl":          "google/gemini-3.1-flash-image-preview",
+  "flux-schnell":  "black-forest-labs/flux-schnell",          // Free, fast FLUX
+  "flux-pro":      "black-forest-labs/flux-1.1-pro",          // FLUX 1.1 Pro
+  "flux-pro-1.1":  "black-forest-labs/flux-1.1-pro",          // alias
+  "sdxl":          "stability-ai/stable-diffusion-3-5-large", // SD 3.5
 };
 
 // IDs that trigger image generation routing
@@ -239,7 +240,7 @@ ${userCredits < 3 ? "⚠️ Créditos bajos — Plan Pro garantiza acceso contin
     }
 
     // Resolve OpenRouter model ID from internal ID
-    const orModel = IMAGE_MODEL_MAP[model] ?? "google/gemini-2.5-flash-image";
+    const orModel = IMAGE_MODEL_MAP[model] ?? "black-forest-labs/flux-schnell";
 
     const body: Record<string, unknown> = {
       prompt: finalPrompt,

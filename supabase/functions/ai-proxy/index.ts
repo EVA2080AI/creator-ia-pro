@@ -46,14 +46,27 @@ function extractUserIdFromJwt(authHeader: string | null): string | null {
   }
 }
 
-// Image model fallback chain — verified OpenRouter slugs, fastest first
+// Normalize legacy/broken model slugs → verified OpenRouter slugs
+// This runs BEFORE the fallback chain so old frontend code still works.
+const BROKEN_MODEL_FIX: Record<string, string> = {
+  'google/gemini-2.5-flash-image':            'google/gemini-2.0-flash-exp:free',
+  'google/gemini-3.1-flash-image-preview':    'google/gemini-2.0-flash-exp:free',
+  'openai/gpt-5-image-mini':                  'openai/dall-e-3',
+  'openai/gpt-5-image':                       'openai/dall-e-3',
+  'black-forest-labs/flux-schnell':           'google/gemini-2.0-flash-exp:free', // FLUX not on /images/generations
+  'black-forest-labs/flux-1.1-pro':           'openai/dall-e-3',
+};
+
+// Image model fallback chain — ONLY models verified on OpenRouter's /images/generations
+// OR modalities path. Ordered cheapest first.
 const IMAGE_FALLBACK_MODELS = [
-  'google/gemini-2.0-flash-exp:free',
-  'recraft-ai/recraft-v3',
-  'openai/dall-e-3',
+  'google/gemini-2.0-flash-exp:free',   // Free via modalities
+  'openai/dall-e-3',                    // Paid — very reliable
+  'openai/dall-e-2',                    // Paid — cheaper fallback
 ];
 
-// Models that use chat/completions with modalities (NOT /images/generations)
+// Models that use POST /chat/completions with modalities=['image','text']
+// (NOT the /images/generations endpoint)
 const MODALITIES_IMAGE_MODELS = new Set([
   'google/gemini-2.0-flash-exp:free',
   'google/gemini-2.0-flash-exp-image-generation',
@@ -162,9 +175,12 @@ serve(async (req: Request) => {
       const apiKey = Deno.env.get('OPENROUTER_API_KEY');
       if (!apiKey) return json({ error: 'OPENROUTER_API_KEY not configured.' }, 200);
 
-      // Build model fallback list: requested model first, then defaults
-      const tryModels = model
-        ? [model, ...IMAGE_FALLBACK_MODELS.filter(m => m !== model)]
+      // Normalize legacy/broken slugs before building the fallback list
+      const normalizedModel = model ? (BROKEN_MODEL_FIX[model] ?? model) : null;
+
+      // Build model fallback list: normalized requested model first, then defaults
+      const tryModels = normalizedModel
+        ? [normalizedModel, ...IMAGE_FALLBACK_MODELS.filter(m => m !== normalizedModel)]
         : IMAGE_FALLBACK_MODELS;
 
       const errors: string[] = [];
@@ -207,28 +223,51 @@ serve(async (req: Request) => {
             const ct = res.headers.get('content-type') ?? '';
             if (!ct.includes('text/html')) {
               const data = await res.json().catch(() => ({})) as any;
+              console.log(`[Image] ${imageModel} modalities response keys:`, Object.keys(data?.choices?.[0]?.message ?? {}));
               if (res.ok) {
                 const msg = data?.choices?.[0]?.message ?? {};
                 const content = msg.content;
 
-                // Format 1: content array with image_url items (Gemini, Recraft)
+                // Format 1: content array with image_url items (standard OpenRouter/Gemini)
                 if (Array.isArray(content)) {
                   const imgItem = content.find((c: any) => c.type === 'image_url');
                   if (imgItem?.image_url?.url) return json({ url: imgItem.image_url.url, model: imageModel });
+                  // Some models return inline_data (base64) instead of image_url
+                  const inlineItem = content.find((c: any) => c.type === 'image' || c.inline_data);
+                  if (inlineItem?.inline_data?.data) {
+                    const mime = inlineItem.inline_data.mime_type ?? 'image/png';
+                    return json({ url: `data:${mime};base64,${inlineItem.inline_data.data}`, model: imageModel });
+                  }
                 }
-                // Format 2: message.images array (GPT-5 image models)
+                // Format 2: content is a string with a data URI
+                if (typeof content === 'string' && content.startsWith('data:image')) {
+                  return json({ url: content, model: imageModel });
+                }
+                // Format 3: message.images array
                 if (Array.isArray(msg.images) && msg.images.length > 0) {
                   const img = msg.images[0];
                   const url = img?.image_url?.url ?? img?.url ?? img;
                   if (typeof url === 'string' && url.length > 10) return json({ url, model: imageModel });
                 }
-                // Format 3: content_parts (legacy)
+                // Format 4: content_parts (legacy)
                 if (msg.content_parts) {
-                  const parts = msg.content_parts;
-                  const img = parts.find((p: any) => p.type === 'image');
+                  const img = msg.content_parts.find((p: any) => p.type === 'image');
                   if (img?.image_url) return json({ url: img.image_url, model: imageModel });
+                  if (img?.inline_data?.data) {
+                    const mime = img.inline_data.mime_type ?? 'image/png';
+                    return json({ url: `data:${mime};base64,${img.inline_data.data}`, model: imageModel });
+                  }
                 }
+                console.warn(`[Image] ${imageModel} modalities — no image found in:`, JSON.stringify(data).slice(0, 400));
+              } else {
+                const errMsg = data?.error?.message ?? data?.error ?? `HTTP ${res.status}`;
+                console.warn(`[Image] ${imageModel} error:`, errMsg);
+                errors.push(`${imageModel}: ${errMsg}`);
+                continue;
               }
+            } else {
+              const preview = await res.text().catch(() => '');
+              console.warn(`[Image] ${imageModel} HTML response (${res.status}):`, preview.slice(0, 100));
             }
             errors.push(`${imageModel}: modalities response had no image`);
             continue;
