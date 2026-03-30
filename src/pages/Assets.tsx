@@ -151,7 +151,7 @@ const Assets = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#050506] text-white font-sans selection:bg-primary/30 selection:text-white">
+    <div className="min-h-screen bg-background bg-grid-white/[0.02] text-white font-sans selection:bg-primary/30 selection:text-white">
       {/* Ambient */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[150px]" />

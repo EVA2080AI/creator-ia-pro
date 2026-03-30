@@ -153,7 +153,7 @@ const Dashboard = () => {
           {/* Post-checkout success banner */}
           {(checkoutSuccess || creditsSuccess) && (
             <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-primary/8 px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgba(139,92,246,0.06) 0%, transparent 70%)' }} />
+              <div className="absolute inset-0 pointer-events-none bg-background/5" />
               <div className="flex items-center gap-3 shrink-0">
                 <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center">
                   <Zap className="w-5 h-5 text-primary" />
@@ -265,8 +265,8 @@ const Dashboard = () => {
                   <AreaChart data={usageData}>
                     <defs>
                       <linearGradient id="creditsGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.2} />
-                        <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
+                        <stop offset="0%" stopColor="#2563eb" stopOpacity={0.2} />
+                        <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 9, fontWeight: 600 }} dy={10} />
@@ -276,7 +276,7 @@ const Dashboard = () => {
                       labelStyle={{ color: 'rgba(255,255,255,0.4)', marginBottom: '2px' }}
                       itemStyle={{ color: '#fff' }}
                     />
-                    <Area type="monotone" dataKey="credits" stroke="#8b5cf6" strokeWidth={2} fill="url(#creditsGrad)" dot={{ r: 3, fill: '#8b5cf6', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
+                    <Area type="monotone" dataKey="credits" stroke="#2563eb" strokeWidth={2} fill="url(#creditsGrad)" dot={{ r: 3, fill: '#2563eb', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>

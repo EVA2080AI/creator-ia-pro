@@ -53,7 +53,7 @@ const ResetPassword = () => {
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/5 bg-[#121215] shadow-[0_0_25px_rgba(236,70,153,0.2)]">
             <Sparkles className="h-8 w-8 text-[#EC4699]" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-display text-white uppercase tracking-tight">Reiniciar <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">Acceso</span></h1>
+          <h1 className="text-4xl md:text-5xl font-display text-white uppercase tracking-tight">Reiniciar <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">Acceso</span></h1>
           <p className="mt-4 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Ingresa tu nueva clave de ingeniería creativa</p>
         </div>
 
@@ -72,7 +72,7 @@ const ResetPassword = () => {
                 className="bg-white/5 border-white/5 focus:bg-white/[0.08] focus:border-[#EC4699]/30 rounded-2xl h-13 text-xs font-bold text-white transition-all ring-0"
               />
             </div>
-            <Button type="submit" disabled={loading} className="w-full h-14 bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 rounded-2xl gap-3 font-bold uppercase text-[10px] tracking-[0.2em] shadow-xl transition-all active:scale-95 disabled:opacity-50 mt-4">
+            <Button type="submit" disabled={loading} className="w-full h-14 bg-gradient-to-r from-primary to-primary/80 text-white hover:opacity-90 rounded-2xl gap-3 font-bold uppercase text-[10px] tracking-[0.2em] shadow-xl transition-all active:scale-95 disabled:opacity-50 mt-4">
               {loading ? (
                 <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (

@@ -50,7 +50,6 @@ export function useStudioProjects() {
 
   const fetchProjects = useCallback(async () => {
     if (!user) { setLoading(false); return; }
-    setLoading(true);
     const { data, error } = await supabase
       .from('studio_projects')
       .select('*')

@@ -391,7 +391,7 @@ const SystemStatus = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background bg-grid-white/[0.02]">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main className="mx-auto max-w-5xl px-6 py-8">

@@ -284,6 +284,7 @@ const Hub = () => {
           position_y: 200,
           status: "idle",
           data_payload: node.data || {},
+          prompt: "",
         }));
         await supabase.from("canvas_nodes").insert(nodes);
       }
@@ -296,7 +297,7 @@ const Hub = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050506] text-white font-sans">
+    <div className="min-h-screen bg-background bg-grid-white/[0.02] text-white font-sans">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main className="pt-20">

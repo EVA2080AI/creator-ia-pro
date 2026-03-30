@@ -87,7 +87,7 @@ const Profile = () => {
   const joinDate = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" }) : "—";
 
   return (
-    <div className="min-h-screen bg-[#050506] text-white">
+    <div className="min-h-screen bg-background bg-grid-white/[0.02] text-white">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main className="max-w-5xl mx-auto px-6 pt-28 pb-20">

@@ -262,6 +262,7 @@ export function StudioPreview({
                 borderRadius: deviceMode === 'mobile' ? 36 : deviceMode === 'tablet' ? 12 : 0,
                 overflow: 'hidden',
               }}
+              className="flex-1 flex flex-col h-full"
             >
               <SandpackProvider
                 key={JSON.stringify(sandpackFiles)}
@@ -311,10 +312,12 @@ export function StudioPreview({
                 }}
                 theme="dark"
               >
+                <style>{`.sp-wrapper { height: 100% !important; flex: 1; }`}</style>
                 <SandpackLayout style={{ border: 'none', borderRadius: 0, height: deviceMode === 'desktop' ? '100%' : 620, minHeight: deviceMode !== 'desktop' ? 620 : undefined }}>
                   <SandpackPreview
                     showOpenInCodeSandbox={false}
                     showRefreshButton={false}
+                    style={{ height: '100%', minHeight: '100%', flex: 1 }}
                   />
                 </SandpackLayout>
               </SandpackProvider>

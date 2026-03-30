@@ -28,10 +28,9 @@ export function Logo({ size = "sm", showText = true, showPro = false, className,
     >
       {/* Icon badge */}
       <div
-        className={cn("relative rounded-lg flex items-center justify-center shrink-0", s.wrap)}
-        style={{ background: 'var(--brand, #4ADE80)' }}
+        className={cn("relative rounded-lg flex items-center justify-center shrink-0 bg-primary", s.wrap)}
       >
-        <Sparkles className={cn("text-black", s.icon)} />
+        <Sparkles className={cn("text-white", s.icon)} />
       </div>
 
       {/* Text */}
@@ -39,7 +38,7 @@ export function Logo({ size = "sm", showText = true, showPro = false, className,
         <div className="hidden sm:flex flex-col leading-none">
           <span className={cn("font-black text-white tracking-tight font-display uppercase", s.text)}>
             Creator{" "}
-            <span style={{ color: 'var(--brand, #4ADE80)' }}>IA</span>
+            <span className="text-primary">IA</span>
             {showPro && (
               <span className="ml-1 text-white/30 font-semibold normal-case tracking-normal" style={{ fontSize: "0.7em" }}>
                 Pro

@@ -18,7 +18,7 @@
     --card-foreground: 0 0% 98%;
     --popover:     240 5.9% 10%;
     --popover-foreground: 0 0% 98%;
-    --primary:     221 83% 53%;     /* blue-600 (Corporate blue, non-neon) */
+    --primary:     217 89% 61%;     /* Google True Blue (#4285F4) */
     --primary-foreground: 0 0% 100%;
     --secondary:   240 3.7% 15.9%;  /* zinc-800 */
     --secondary-foreground: 0 0% 98%;
@@ -30,18 +30,18 @@
     --destructive-foreground: 0 0% 98%;
     --border:      240 3.7% 15.9%;  /* zinc-800 */
     --input:       240 3.7% 15.9%;
-    --ring:        221 83% 53%;
+    --ring:        217 89% 61%;
     --radius:      0.75rem;
 
     /* Sidebar */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 5% 64.9%;
-    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary: 217 89% 61%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-ring: 217 89% 61%;
 
     /* Canvas / Node */
     --canvas: 240 8% 8%;
@@ -174,4 +174,18 @@
 .react-flow__edge.selected .react-flow__edge-path {
   stroke: #4ADE80 !important;
   filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.4));
+}
+
+/* ============================================
+   SANDPACK PREVIEW FULL HEIGHT FIX
+   ============================================ */
+.sp-wrapper,
+.sp-layout,
+.sp-preview,
+.sp-preview-container,
+.sp-preview-iframe {
+  height: 100% !important;
+  min-height: 100% !important;
+  width: 100% !important;
+  flex: 1 1 auto !important;
 }

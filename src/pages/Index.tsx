@@ -219,7 +219,7 @@ export default function Index() {
                 {/* Result panel */}
                 <div className="flex-1 bg-black/30 flex items-center justify-center relative">
                   <div className="w-44 h-44 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-                    <div className="w-full h-full bg-gradient-to-br from-orange-900/80 via-purple-900/60 to-blue-900/80 flex items-center justify-center">
+                    <div className="w-full h-full bg-background bg-grid-white/[0.02] flex items-center justify-center">
                       <div className="text-center">
                         <div className="text-3xl mb-1">🚀</div>
                         <div className="text-[8px] text-white/40">Resultado generado</div>
@@ -338,7 +338,7 @@ export default function Index() {
                             </div>
                           ))}
                         </div>
-                        <div className="mt-3 w-full h-24 rounded-xl bg-gradient-to-br from-purple-900/40 via-blue-900/20 to-emerald-900/20 border border-white/[0.05] flex items-center justify-center">
+                        <div className="mt-3 w-full h-24 rounded-xl bg-white/[0.03] border border-white/[0.05] flex items-center justify-center">
                           <span className="text-[10px] text-white/20">Preview en tiempo real</span>
                         </div>
                       </div>

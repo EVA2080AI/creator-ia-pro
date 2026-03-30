@@ -127,7 +127,7 @@ const Spaces = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#222228] text-white">
+    <div className="min-h-screen bg-background bg-grid-white/[0.02] text-white">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <div className="flex pt-16 h-screen overflow-hidden">

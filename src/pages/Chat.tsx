@@ -171,10 +171,10 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
       {/* ── Main Area ─────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
 
-        {/* Gradient background — Lovable-style with Creator IA colors */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: 'radial-gradient(ellipse 100% 70% at 50% -10%, rgba(138,180,248,0.45) 0%, rgba(88,28,135,0.38) 38%, transparent 65%), radial-gradient(ellipse 70% 55% at 85% 100%, rgba(157,23,77,0.28) 0%, transparent 55%), radial-gradient(ellipse 60% 40% at 15% 80%, rgba(138,180,248,0.12) 0%, transparent 50%), #07070d'
-        }} />
+        {/* Minimalist background — Lovable-style System Grid */}
+        <div className="absolute inset-0 bg-background bg-grid-white/[0.02]" />
+        {/* Subtle top glow just for visual depth, not neon */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-2xl h-64 bg-primary/10 rounded-full blur-[120px] pointer-events-none opacity-50" />
 
         {/* Centered content */}
         <div className="flex-1 flex flex-col items-center justify-center px-8 py-10 relative z-10">

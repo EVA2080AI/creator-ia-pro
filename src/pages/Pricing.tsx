@@ -206,7 +206,7 @@ export default function Pricing() {
         <meta name="description" content="Starter $12 · Creator $29 · Agency $79. Créditos mensuales para generar con los mejores modelos de IA." />
       </Helmet>
 
-      <div className="min-h-screen bg-[#050506] text-white selection:bg-primary/30">
+      <div className="min-h-screen bg-background bg-grid-white/[0.02] text-white selection:bg-primary/30">
         <AppHeader userId={userId} onSignOut={() => supabase.auth.signOut()} />
 
         <main className="pt-20 pb-40">

@@ -391,11 +391,11 @@ const ToolLanding = () => {
       <header className="relative z-50 flex items-center justify-between px-6 py-4 sm:px-8 border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate("/")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-[0_0_15px_rgba(236,70,153,0.3)]">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-display text-white tracking-wide hidden sm:inline uppercase">
-              Creator <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">IA Pro</span>
+              Creator <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">IA Pro</span>
             </span>
           </button>
 
@@ -485,7 +485,7 @@ const ToolLanding = () => {
               Iniciar Sesión
             </Button>
           )}
-          <Button onClick={handleCTA} className="bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 rounded-full px-6 shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] font-bold">
+          <Button onClick={handleCTA} className="bg-gradient-to-r from-primary to-primary/80 text-white hover:opacity-90 rounded-full px-6 shadow-[0_0_20px_-5px_rgba(37,99,235,0.4)] font-bold">
             {isLoggedIn ? "Ir a la App" : "Empezar Gratis"}
           </Button>
         </div>
@@ -507,7 +507,7 @@ const ToolLanding = () => {
         </p>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3 animate-fade-in">
-          <Button onClick={() => document.getElementById("try-demo")?.scrollIntoView({ behavior: "smooth" })} size="lg" className="bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 gap-2 text-base px-10 rounded-md h-14 shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)] font-bold active:scale-95 transition-all">
+          <Button onClick={() => document.getElementById("try-demo")?.scrollIntoView({ behavior: "smooth" })} size="lg" className="bg-gradient-to-r from-primary to-primary/80 text-white hover:opacity-90 gap-2 text-base px-10 rounded-md h-14 shadow-[0_0_20px_-5px_rgba(37,99,235,0.4)] font-bold active:scale-95 transition-all">
             <Play className="h-4 w-4" />
             Probar Ahora — Gratis
           </Button>
@@ -544,7 +544,7 @@ const ToolLanding = () => {
               Demo Interactiva
             </Badge>
             <h2 className="text-5xl font-display text-white md:text-7xl uppercase">
-              Prueba <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">{tool.name}</span> ahora mismo
+              Prueba <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">{tool.name}</span> ahora mismo
             </h2>
             <p className="mt-3 text-muted-foreground">
               Una prueba gratis sin necesidad de registrarte. Experimenta el poder de la IA.
@@ -611,7 +611,7 @@ const ToolLanding = () => {
               <Button
                 onClick={handleTryDemo}
                 disabled={demoing || (tool.tryItType === "image-upload" ? !tryItImage : !tryItInput.trim())}
-                className="w-full bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 gap-2 rounded-md h-12 font-bold uppercase text-xs tracking-widest shadow-[0_0_20px_-5px_rgba(236,70,153,0.4)]"
+                className="w-full bg-gradient-to-r from-primary to-primary/80 text-white hover:opacity-90 gap-2 rounded-md h-12 font-bold uppercase text-xs tracking-widest shadow-[0_0_20px_-5px_rgba(37,99,235,0.4)]"
               >
                 {demoing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -683,7 +683,7 @@ const ToolLanding = () => {
         {/* ========== FEATURES ========== */}
         <div className="mt-24 w-full max-w-4xl">
           <h2 className="text-center text-5xl font-display text-white mb-12 md:text-7xl uppercase">
-            Características <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">principales</span>
+            Características <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">principales</span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {tool.features.map((f) => (
@@ -698,7 +698,7 @@ const ToolLanding = () => {
         {/* Use Cases */}
         <div className="mt-20 w-full max-w-4xl">
           <h2 className="text-center text-5xl font-display text-white mb-12 md:text-7xl uppercase">
-            Casos de <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">uso</span>
+            Casos de <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">uso</span>
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {tool.useCases.map((uc) => (
@@ -713,7 +713,7 @@ const ToolLanding = () => {
         {/* How it works */}
         <div className="mt-20 w-full max-w-4xl">
           <h2 className="text-center text-5xl font-display text-white mb-12 md:text-7xl uppercase">
-            Cómo <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">funciona</span>
+            Cómo <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">funciona</span>
           </h2>
           <div className="grid gap-6 sm:grid-cols-3">
             {[
@@ -751,17 +751,17 @@ const ToolLanding = () => {
         {/* CTA */}
         <div className="mt-40 w-full max-w-4xl rounded-2xl border border-white/5 bg-[#1c1c22] p-16 md:p-24 text-center shadow-2xl animate-fade-in relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#EC4699]/10 via-transparent to-[#FA8214]/10 pointer-events-none" />
-          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#EC4699] to-[#FA8214] shadow-2xl shadow-[#EC4699]/20 relative z-10">
+          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-2xl shadow-[#EC4699]/20 relative z-10">
             <tool.icon className="h-10 w-10 text-white" />
           </div>
           <h2 className="text-6xl font-display text-white md:text-8xl relative z-10 leading-none uppercase">
-            Empieza a usar <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#EC4699] to-[#FA8214]">{tool.name}</span>
+            Empieza a usar <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">{tool.name}</span>
           </h2>
           <p className="mt-8 text-slate-500 max-w-md mx-auto relative z-10 uppercase text-xs font-bold tracking-[0.2em] leading-loose">
             Regístrate gratis y obtén 10 créditos para probar todas las herramientas. Sin tarjeta de crédito.
           </p>
           <div className="mt-12 flex flex-col sm:flex-row gap-5 justify-center relative z-10">
-            <Button onClick={handleCTA} size="lg" className="bg-gradient-to-r from-[#EC4699] to-[#FA8214] text-white hover:opacity-90 gap-3 px-12 rounded-md h-16 shadow-[0_0_30px_-5px_rgba(236,70,153,0.5)] font-bold uppercase text-xs tracking-widest active:scale-95 transition-all">
+            <Button onClick={handleCTA} size="lg" className="bg-gradient-to-r from-primary to-primary/80 text-white hover:opacity-90 gap-3 px-12 rounded-md h-16 shadow-[0_0_30px_-5px_rgba(37,99,235,0.5)] font-bold uppercase text-xs tracking-widest active:scale-95 transition-all">
               {isLoggedIn ? `Abrir ${tool.name}` : "Crear Cuenta Gratis"}
               <ArrowRight className="h-4 w-4" />
             </Button>

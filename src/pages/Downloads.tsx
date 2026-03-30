@@ -8,7 +8,7 @@ const Downloads = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#050506] text-white font-sans overflow-hidden selection:bg-primary/30 selection:text-white">
+    <div className="min-h-screen bg-background bg-grid-white/[0.02] text-white font-sans overflow-hidden selection:bg-primary/30 selection:text-white">
       {/* Ambient glows */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[180px]" />

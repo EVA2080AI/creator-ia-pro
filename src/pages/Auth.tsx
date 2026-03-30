@@ -73,7 +73,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#050506] font-sans selection:bg-primary/30 selection:text-white overflow-hidden">
+    <div className="flex min-h-screen bg-background bg-grid-white/[0.02] font-sans selection:bg-primary/30 selection:text-white overflow-hidden">
 
       {/* Left Panel — Value Prop */}
       <div className="hidden lg:flex lg:w-[45%] flex-col justify-between px-16 py-16 relative overflow-hidden bg-[#080809] border-r border-white/[0.04]">
