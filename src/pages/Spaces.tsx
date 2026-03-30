@@ -121,7 +121,7 @@ const Spaces = () => {
   if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#050506]">
-        <Loader2 className="h-8 w-8 animate-spin text-aether-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -153,7 +153,7 @@ const Spaces = () => {
                   item.active ? 'bg-white/[0.06] text-white border border-white/[0.08]' : 'text-white/35 hover:bg-white/[0.03] hover:text-white'
                 }`}
               >
-                <item.icon className={`h-4 w-4 shrink-0 ${item.active ? 'text-aether-purple' : 'text-white/25'}`} />
+                <item.icon className={`h-4 w-4 shrink-0 ${item.active ? 'text-primary' : 'text-white/25'}`} />
                 {item.label}
               </button>
             ))}
@@ -180,12 +180,12 @@ const Spaces = () => {
             {/* Top bar */}
             <div className="flex items-center gap-3 mb-6">
               <div className="relative flex-1 max-w-md group">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/20 group-focus-within:text-aether-purple/60 transition-colors pointer-events-none" />
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/20 group-focus-within:text-primary/60 transition-colors pointer-events-none" />
                 <Input
                   placeholder="Buscar en Spaces..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="bg-white/[0.03] border-white/[0.06] pl-11 h-10 rounded-xl text-[13px] text-white placeholder:text-white/15 focus:border-aether-purple/30 focus:ring-0 transition-all"
+                  className="bg-white/[0.03] border-white/[0.06] pl-11 h-10 rounded-xl text-[13px] text-white placeholder:text-white/15 focus:border-primary/30 focus:ring-0 transition-all"
                 />
               </div>
 
@@ -223,15 +223,15 @@ const Spaces = () => {
             {/* Content */}
             {loading ? (
               <div className="flex h-48 items-center justify-center">
-                <Loader2 className="h-7 w-7 animate-spin text-aether-purple/50" />
+                <Loader2 className="h-7 w-7 animate-spin text-primary/50" />
               </div>
             ) : filtered.length === 0 ? (
               <div
                 onClick={handleOpenCreate}
-                className="flex h-64 flex-col items-center justify-center border border-dashed border-white/[0.07] rounded-3xl bg-white/[0.01] cursor-pointer hover:border-aether-purple/20 hover:bg-aether-purple/5 transition-all group"
+                className="flex h-64 flex-col items-center justify-center border border-dashed border-white/[0.07] rounded-3xl bg-white/[0.01] cursor-pointer hover:border-primary/20 hover:bg-primary/5 transition-all group"
               >
-                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 group-hover:scale-105 group-hover:bg-aether-purple/10 group-hover:border-aether-purple/30 transition-all">
-                  <Plus className="h-6 w-6 text-white/30 group-hover:text-aether-purple transition-colors" />
+                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 group-hover:scale-105 group-hover:bg-primary/10 group-hover:border-primary/30 transition-all">
+                  <Plus className="h-6 w-6 text-white/30 group-hover:text-primary transition-colors" />
                 </div>
                 <p className="text-[14px] font-bold text-white/40 font-display mb-1">
                   {search ? "Sin resultados" : "Crea tu primer Space"}
@@ -257,7 +257,7 @@ const Spaces = () => {
                         <img src={space.thumbnail_url} alt={space.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
                       ) : (
                         <div className="flex flex-col items-center gap-2">
-                          <BookOpen className="h-7 w-7 text-white/8 group-hover:text-aether-purple/30 transition-colors" />
+                          <BookOpen className="h-7 w-7 text-white/8 group-hover:text-primary/30 transition-colors" />
                         </div>
                       )}
                     </div>
@@ -282,7 +282,7 @@ const Spaces = () => {
                               </span>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-[#0c0c0f]/95 backdrop-blur-xl border-white/[0.08] rounded-xl p-1.5 min-w-[140px] shadow-2xl">
-                              <DropdownMenuItem className="rounded-lg text-[11px] font-medium focus:bg-aether-purple/10 focus:text-aether-purple text-white/40 py-2 cursor-pointer"
+                              <DropdownMenuItem className="rounded-lg text-[11px] font-medium focus:bg-primary/10 focus:text-primary text-white/40 py-2 cursor-pointer"
                                 onClick={(e) => { e.stopPropagation(); handleOpenEdit(space); }}>
                                 <Pencil className="mr-2 h-3.5 w-3.5" /> Editar
                               </DropdownMenuItem>
@@ -296,7 +296,7 @@ const Spaces = () => {
                       </div>
                       <div className="mt-3 pt-3 border-t border-white/[0.04] flex items-center justify-between">
                         <span className="text-[9px] font-bold text-white/15 uppercase tracking-widest font-display">Abrir Canvas</span>
-                        <ChevronRight className="h-3.5 w-3.5 text-white/15 group-hover:text-aether-purple group-hover:translate-x-0.5 transition-all" />
+                        <ChevronRight className="h-3.5 w-3.5 text-white/15 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                       </div>
                     </div>
                   </div>
@@ -314,10 +314,10 @@ const Spaces = () => {
                     onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] group-hover:border-aether-purple/30 group-hover:bg-aether-purple/10 transition-colors">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.06] group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
                         {space.thumbnail_url
                           ? <img src={space.thumbnail_url} className="w-full h-full object-cover rounded-xl" />
-                          : <BookOpen className="h-3.5 w-3.5 text-white/20 group-hover:text-aether-purple transition-colors" />
+                          : <BookOpen className="h-3.5 w-3.5 text-white/20 group-hover:text-primary transition-colors" />
                         }
                       </div>
                       <span className="text-[13px] font-medium text-white/70 group-hover:text-white transition-colors truncate">{space.name}</span>
@@ -331,7 +331,7 @@ const Spaces = () => {
                         </button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="bg-[#0c0c0f]/95 backdrop-blur-xl border-white/[0.08] rounded-xl p-1.5 min-w-[140px] shadow-2xl">
-                        <DropdownMenuItem className="rounded-lg text-[11px] font-medium focus:bg-aether-purple/10 focus:text-aether-purple text-white/40 py-2 cursor-pointer"
+                        <DropdownMenuItem className="rounded-lg text-[11px] font-medium focus:bg-primary/10 focus:text-primary text-white/40 py-2 cursor-pointer"
                           onClick={(e) => { e.stopPropagation(); handleOpenEdit(space); }}>
                           <Pencil className="mr-2 h-3.5 w-3.5" /> Editar
                         </DropdownMenuItem>
@@ -380,8 +380,8 @@ const Spaces = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="bg-[#0a0a0b]/95 backdrop-blur-3xl border-white/10 sm:max-w-[480px] rounded-[3rem] p-12 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
           <DialogHeader>
-            <div className="h-14 w-14 rounded-2xl bg-aether-purple/10 border border-aether-purple/20 flex items-center justify-center mb-6">
-              <LayoutGrid className="h-7 w-7 text-aether-purple" />
+            <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
+              <LayoutGrid className="h-7 w-7 text-primary" />
             </div>
             <DialogTitle className="text-3xl font-bold text-white tracking-tight font-display">
               {editingSpace ? "Editar Space" : "Nuevo Nexus Space"}
@@ -401,7 +401,7 @@ const Spaces = () => {
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="ej: Nebula Marketing Campaign"
                 onKeyDown={(e) => e.key === "Enter" && handleSave()}
-                className="rounded-2xl border-white/5 bg-white/[0.03] h-14 text-white placeholder:text-white/10 focus:border-aether-purple/30 focus:ring-0 transition-all font-medium px-5"
+                className="rounded-2xl border-white/5 bg-white/[0.03] h-14 text-white placeholder:text-white/10 focus:border-primary/30 focus:ring-0 transition-all font-medium px-5"
               />
             </div>
             <div className="space-y-3">
@@ -413,7 +413,7 @@ const Spaces = () => {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="ej: Estética minimalista, tonos oscuros, tipografía geométrica..."
-                className="rounded-2xl border-white/5 bg-white/[0.03] min-h-[120px] focus:border-aether-purple/30 focus:ring-0 p-5 text-white placeholder:text-white/10 leading-relaxed font-medium resize-none"
+                className="rounded-2xl border-white/5 bg-white/[0.03] min-h-[120px] focus:border-primary/30 focus:ring-0 p-5 text-white placeholder:text-white/10 leading-relaxed font-medium resize-none"
               />
             </div>
           </div>

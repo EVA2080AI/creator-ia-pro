@@ -774,7 +774,7 @@ export function StudioChat({
                     <Bot className="h-3 w-3 text-[#8AB4F8]" />
                   </div>
                   <div className={`flex-1 text-[13px] leading-relaxed ${msg.type === 'code' ? 'text-white/90' : 'text-white/75'}`}>
-                    <div className="prose-custom"
+                    <div className="prose prose-invert max-w-none"
                       dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
 
                     {/* Tech stack badge */}
@@ -864,7 +864,7 @@ export function StudioChat({
               <Bot className="h-3 w-3 text-[#8AB4F8]" />
             </div>
             <div className="flex-1 text-[13px] leading-relaxed text-white/75">
-              <div className="prose-custom"
+              <div className="prose prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent || '​') }} />
               {/* Blinking cursor — only while actively streaming */}
               {genPhase === 'streaming' && (

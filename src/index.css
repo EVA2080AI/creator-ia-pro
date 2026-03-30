@@ -11,47 +11,6 @@
 
 @layer base {
   :root {
-    /* ── Base surfaces (Lovable-style dark charcoal) ── */
-    --bg-base:    #16161b;
-    --bg-1:       #1c1c22;
-    --bg-2:       #222228;
-    --bg-3:       #2a2a32;
-    --bg-4:       #32323c;
-
-    /* ── Borders — very subtle ── */
-    --border:     rgba(255, 255, 255, 0.08);
-    --border-2:   rgba(255, 255, 255, 0.12);
-    --border-3:   rgba(255, 255, 255, 0.20);
-
-    /* ── Text ── */
-    --text-1:     #FFFFFF;
-    --text-2:     #A0A0B0;
-    --text-3:     #606070;
-    --text-4:     #383848;
-
-    /* ── Brand (logo only — not used as UI accent) ── */
-    --brand:      #4ADE80;
-    --brand-dim:  rgba(74, 222, 128, 0.10);
-    --brand-glow: rgba(74, 222, 128, 0.18);
-
-    /* ── UI accent — purple (Lovable-style) ── */
-    --accent-ui:      #8b5cf6;
-    --accent-ui-dim:  rgba(139, 92, 246, 0.12);
-    --accent-ui-glow: rgba(139, 92, 246, 0.20);
-
-    /* ── Semantic ── */
-    --blue:       #60A5FA;
-    --blue-dim:   rgba(96, 165, 250, 0.12);
-    --rose:       #F87171;
-    --amber:      #FBBF24;
-
-    /* ── Radius scale ── */
-    --r-sm:  6px;
-    --r-md:  10px;
-    --r-lg:  14px;
-    --r-xl:  18px;
-    --r-2xl: 24px;
-
     /* ── Tailwind token bridge ── */
     --background:  240 7% 10%;
     --foreground:  0 0% 98%;
@@ -104,12 +63,12 @@
 
   * {
     box-sizing: border-box;
-    border-color: rgba(255, 255, 255, 0.08);
+    border-color: hsl(var(--border) / 0.7);
   }
 
   body {
-    background-color: var(--bg-base);
-    color: var(--text-1);
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -124,7 +83,7 @@
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: var(--text-1);
+    color: hsl(var(--foreground));
   }
 
   p { line-height: 1.65; }
@@ -135,142 +94,7 @@
   }
 }
 
-/* ============================================
-   ZEPHYR UTILITY CLASSES
-   ============================================ */
-@layer utilities {
-
-  /* ── Surfaces ── */
-  .z-bg       { background-color: var(--bg-base); }
-  .z-surface  { background-color: var(--bg-1); }
-  .z-surface-2{ background-color: var(--bg-2); }
-  .z-surface-3{ background-color: var(--bg-3); }
-
-  /* ── Card — clean solid, no glassmorphism ── */
-  .z-card {
-    background-color: var(--bg-1);
-    border: 1px solid var(--border);
-    transition: border-color 0.2s ease, background-color 0.2s ease;
-  }
-  .z-card:hover {
-    border-color: var(--border-2);
-    background-color: var(--bg-2);
-  }
-
-  /* ── Elevated card ── */
-  .z-card-elevated {
-    background-color: var(--bg-2);
-    border: 1px solid var(--border-2);
-  }
-
-  /* ── Legacy aether-card ── */
-  .aether-card {
-    background-color: var(--bg-1);
-    border: 1px solid var(--border);
-    transition: border-color 0.2s ease, background-color 0.15s ease;
-  }
-  .aether-card:hover {
-    border-color: var(--border-2);
-    background-color: var(--bg-2);
-  }
-
-  .aether-glass {
-    background-color: rgba(22, 22, 27, 0.88);
-    border: 1px solid var(--border);
-  }
-
-  /* ── UI accent color overrides — purple (Lovable-style) ── */
-  .text-aether-purple { color: var(--accent-ui); }
-  .text-aether-blue   { color: var(--blue); }
-  .bg-aether-purple   { background-color: var(--accent-ui); }
-  .bg-aether-blue     { background-color: var(--blue); }
-
-  .border-aether-purple     { border-color: var(--accent-ui); }
-  .border-aether-purple\/20 { border-color: rgba(139, 92, 246, 0.20); }
-  .border-aether-purple\/30 { border-color: rgba(139, 92, 246, 0.30); }
-  .border-aether-purple\/40 { border-color: rgba(139, 92, 246, 0.40); }
-
-  /* ── Text glows — subtle ── */
-  .text-glow-purple { text-shadow: 0 0 8px rgba(139, 92, 246, 0.35); }
-  .text-glow-blue   { text-shadow: 0 0 8px rgba(96, 165, 250, 0.35); }
-
-  /* ── Gradient text ── */
-  .aether-gradient-text {
-    background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.45) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .z-gradient-text {
-    background: linear-gradient(135deg, #fff 20%, rgba(74, 222, 128, 0.8) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  /* ── Divider ── */
-  .z-divider {
-    height: 1px;
-    background: var(--border);
-  }
-
-  /* ── Brand pill / badge ── */
-  .z-badge-brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 99px;
-    background: var(--brand-dim);
-    border: 1px solid rgba(74, 222, 128, 0.20);
-    color: var(--brand);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
-  /* ── Shimmer ── */
-  .shimmer {
-    position: relative;
-    overflow: hidden;
-  }
-  .shimmer::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
-    animation: shimmer 3s infinite;
-  }
-
-  /* ── Tool card ── */
-  .tool-card {
-    background-color: var(--bg-1);
-    border: 1px solid var(--border);
-    border-radius: var(--r-xl);
-    padding: 1.25rem;
-    transition: border-color 0.2s, background-color 0.2s;
-    cursor: pointer;
-  }
-  .tool-card:hover {
-    background-color: var(--bg-2);
-    border-color: var(--border-2);
-  }
-
-  /* ── Prose custom (chat/studio markdown) ── */
-  .prose-custom strong { font-weight: 700; color: #fff; }
-  .prose-custom code {
-    background: rgba(255,255,255,0.08);
-    color: #7DD3FC;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-  }
-}
+/* DELETED ZEPHYR UTILITIES */
 
 /* ============================================
    RESULT PROSE — markdown output

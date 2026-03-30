@@ -11,7 +11,7 @@ interface StudioFileTreeProps {
 }
 
 const getFileIcon = (name: string) => {
-  if (name.endsWith('.tsx') || name.endsWith('.ts')) return <FileCode className="h-3.5 w-3.5 text-aether-blue shrink-0" />;
+  if (name.endsWith('.tsx') || name.endsWith('.ts')) return <FileCode className="h-3.5 w-3.5 text-primary shrink-0" />;
   if (name.endsWith('.css')) return <FileText className="h-3.5 w-3.5 text-rose-400 shrink-0" />;
   if (name.endsWith('.json')) return <FileText className="h-3.5 w-3.5 text-yellow-400 shrink-0" />;
   return <FileText className="h-3.5 w-3.5 text-white/40 shrink-0" />;
@@ -59,13 +59,13 @@ export function StudioFileTree({ files, selectedFile, onSelect, onAddFile, onDel
             onMouseLeave={() => setHovered(null)}
             className={`group flex items-center justify-between gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all ${
               selectedFile === name
-                ? 'bg-aether-purple/20 border border-aether-purple/30 text-white'
+                ? 'bg-primary/20 border border-primary/30 text-white'
                 : 'text-white/50 hover:bg-white/5 hover:text-white border border-transparent'
             }`}
             onClick={() => onSelect(name)}
           >
             <div className="flex items-center gap-2 overflow-hidden min-w-0">
-              <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${selectedFile === name ? 'text-aether-purple rotate-90' : 'text-white/20'}`} />
+              <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${selectedFile === name ? 'text-primary rotate-90' : 'text-white/20'}`} />
               {getFileIcon(name)}
               <span className="text-[11px] font-mono truncate">{name}</span>
             </div>
@@ -92,7 +92,7 @@ export function StudioFileTree({ files, selectedFile, onSelect, onAddFile, onDel
               }}
               onBlur={handleAddFile}
               placeholder="nombre.tsx"
-              className="w-full bg-white/5 border border-aether-purple/30 rounded-lg px-2 py-1 text-xs text-white placeholder:text-white/20 outline-none focus:border-aether-purple/60"
+              className="w-full bg-white/5 border border-primary/30 rounded-lg px-2 py-1 text-xs text-white placeholder:text-white/20 outline-none focus:border-primary/60"
             />
           </div>
         )}

@@ -55,7 +55,7 @@ const PLANS = [
     description: "El sweet spot para creadores profesionales. Incluye Claude y GPT-4o.",
     color: "#A855F7",
     gradient: "from-aether-purple/15 to-aether-purple/5",
-    border: "border-aether-purple/30",
+    border: "border-primary/30",
     icon: Rocket,
     badge: "Más popular",
     category: "PRO",
@@ -206,7 +206,7 @@ export default function Pricing() {
         <meta name="description" content="Starter $12 · Creator $29 · Agency $79. Créditos mensuales para generar con los mejores modelos de IA." />
       </Helmet>
 
-      <div className="min-h-screen bg-[#050506] text-white selection:bg-aether-purple/30">
+      <div className="min-h-screen bg-[#050506] text-white selection:bg-primary/30">
         <AppHeader userId={userId} onSignOut={() => supabase.auth.signOut()} />
 
         <main className="pt-20 pb-40">
@@ -214,7 +214,7 @@ export default function Pricing() {
           {/* ── Hero ────────────────────────────────────────────────────────── */}
           <section className="text-center px-6 pt-12 pb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-black uppercase tracking-[0.4em] text-white/40 mb-8">
-              <Sparkles className="h-3 w-3 text-aether-purple" />
+              <Sparkles className="h-3 w-3 text-primary" />
               Precios claros · Cancela cuando quieras
             </div>
             <h1 className="text-5xl sm:text-7xl md:text-9xl font-black tracking-tighter uppercase font-display mb-6">
@@ -236,7 +236,7 @@ export default function Pricing() {
               onClick={() => setAnnual(v => !v)}
               className={cn(
                 "relative w-12 h-6 rounded-full transition-all duration-300",
-                annual ? "bg-aether-purple" : "bg-white/10"
+                annual ? "bg-primary" : "bg-white/10"
               )}
             >
               <div className={cn(
@@ -246,7 +246,7 @@ export default function Pricing() {
             </button>
             <span className={cn("text-[12px] font-bold transition-colors flex items-center gap-2", annual ? "text-white" : "text-white/30")}>
               Anual
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-aether-purple/20 text-aether-purple border border-aether-purple/30">
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-primary/20 text-primary border border-primary/30">
                 −20%
               </span>
             </span>
@@ -316,7 +316,7 @@ export default function Pricing() {
                       {annual && (
                         <div className="mt-1 flex items-center gap-2">
                           <span className="text-[11px] text-white/25 line-through">${plan.price}/mes</span>
-                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-aether-purple/20 text-aether-purple border border-aether-purple/25">
+                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/25">
                             ${annualTotal}/año
                           </span>
                         </div>
@@ -425,7 +425,7 @@ export default function Pricing() {
             <section className="px-6 max-w-5xl mx-auto mb-12">
               <div className="text-center mb-6">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-black uppercase tracking-widest text-white/30 mb-3">
-                  <Coins className="h-3 w-3 text-aether-purple" />
+                  <Coins className="h-3 w-3 text-primary" />
                   Top-up · Sin suscripción requerida
                 </div>
                 <h2 className="text-2xl font-black text-white font-display tracking-tight">Créditos extra</h2>
@@ -440,18 +440,18 @@ export default function Pricing() {
                       className={cn(
                         "relative rounded-2xl border p-5 flex flex-col gap-4 transition-all",
                         pack.popular
-                          ? "border-aether-purple/30 bg-aether-purple/5 shadow-[0_0_30px_rgba(74,222,128,0.08)]"
+                          ? "border-primary/30 bg-primary/5 shadow-[0_0_30px_rgba(74,222,128,0.08)]"
                           : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
                       )}
                     >
                       {pack.popular && (
-                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-aether-purple text-white">
+                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-primary text-white">
                           Más popular
                         </div>
                       )}
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-aether-purple/10 border border-aether-purple/20 shrink-0">
-                          <Coins className="h-4 w-4 text-aether-purple" />
+                        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 border border-primary/20 shrink-0">
+                          <Coins className="h-4 w-4 text-primary" />
                         </div>
                         <div>
                           <p className="text-[13px] font-black text-white font-display">{pack.credits?.toLocaleString()} créditos</p>
@@ -465,7 +465,7 @@ export default function Pricing() {
                         className={cn(
                           "w-full py-2.5 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50",
                           pack.popular
-                            ? "bg-aether-purple text-white hover:bg-aether-purple/90"
+                            ? "bg-primary text-white hover:bg-primary/90"
                             : "border border-white/[0.10] text-white/60 hover:text-white hover:border-white/25 hover:bg-white/[0.04]"
                         )}
                       >

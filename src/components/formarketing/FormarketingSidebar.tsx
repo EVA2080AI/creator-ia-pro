@@ -134,7 +134,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button className="flex h-9 w-9 items-center justify-center rounded-2xl bg-aether-purple/20 text-aether-purple hover:bg-aether-purple/30 transition-all group/play border border-aether-purple/20">
+              <button className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/20 text-primary hover:bg-primary/30 transition-all group/play border border-primary/20">
                 <Play className="h-4 w-4 fill-current ml-0.5 group-hover:scale-110 transition-transform" />
               </button>
             </TooltipTrigger>
@@ -189,9 +189,9 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
             <TemplateModal
               onSelect={handleSelectTemplate}
               trigger={
-                <button className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border border-white/[0.07] bg-white/[0.02] hover:border-aether-purple/30 hover:bg-aether-purple/[0.06] transition-all group/tpl">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.05] group-hover/tpl:bg-aether-purple/20 transition-colors shrink-0">
-                    <Sparkles className="h-3.5 w-3.5 text-aether-purple" />
+                <button className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border border-white/[0.07] bg-white/[0.02] hover:border-primary/30 hover:bg-primary/[0.06] transition-all group/tpl">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.05] group-hover/tpl:bg-primary/20 transition-colors shrink-0">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
                   </div>
                   <div className="text-left">
                     <p className="text-[11px] font-bold text-white/60 group-hover/tpl:text-white/90 transition-colors">Ver plantillas</p>
@@ -208,7 +208,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
               <div className="flex flex-col items-center gap-3 py-10 text-center">
                 <Search className="h-5 w-5 text-white/10" />
                 <span className="text-[11px] text-white/20">Sin resultados para <span className="text-white/40">"{search}"</span></span>
-                <button onClick={() => setSearch('')} className="text-[10px] text-aether-purple/60 hover:text-aether-purple font-bold uppercase tracking-widest">Limpiar</button>
+                <button onClick={() => setSearch('')} className="text-[10px] text-primary/60 hover:text-primary font-bold uppercase tracking-widest">Limpiar</button>
               </div>
             )}
 

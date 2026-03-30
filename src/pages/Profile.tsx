@@ -77,7 +77,7 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#050506]">
-        <Loader2 className="h-8 w-8 animate-spin text-aether-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -115,7 +115,7 @@ const Profile = () => {
                 >
                   {uploadingAvatar ? (
                     <div className="w-full h-full flex items-center justify-center">
-                      <Loader2 className="w-6 h-6 text-aether-purple animate-spin" />
+                      <Loader2 className="w-6 h-6 text-primary animate-spin" />
                     </div>
                   ) : avatarUrl ? (
                     <>
@@ -136,7 +136,7 @@ const Profile = () => {
                   <p className="text-sm text-white/40 mt-0.5">{user?.email}</p>
                   <button
                     onClick={() => avatarInputRef.current?.click()}
-                    className="text-xs text-aether-purple hover:text-white transition-colors mt-2 font-medium"
+                    className="text-xs text-primary hover:text-white transition-colors mt-2 font-medium"
                   >
                     Cambiar foto
                   </button>
@@ -150,7 +150,7 @@ const Profile = () => {
                   <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/5">
                     <Mail className="w-4 h-4 text-white/20 shrink-0" />
                     <span className="text-sm text-white/40">{user?.email}</span>
-                    <span className="ml-auto text-[10px] font-bold text-aether-purple bg-aether-purple/10 px-2 py-0.5 rounded-full">Verificado</span>
+                    <span className="ml-auto text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Verificado</span>
                   </div>
                 </div>
                 <div>
@@ -160,7 +160,7 @@ const Profile = () => {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="Tu nombre..."
-                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/5 focus:border-aether-purple/40 focus:outline-none text-sm text-white placeholder:text-white/20 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/5 focus:border-primary/40 focus:outline-none text-sm text-white placeholder:text-white/20 transition-colors"
                   />
                 </div>
                 <div className="flex justify-end">
@@ -227,8 +227,8 @@ const Profile = () => {
             <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-6 space-y-4">
               <h2 className="text-xs font-bold text-white/30 uppercase tracking-widest">Plan actual</h2>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-aether-purple/10 flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-aether-purple" />
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <p className="font-bold text-white">{tierLabel}</p>
@@ -238,7 +238,7 @@ const Profile = () => {
               {tierLabel === "Free" && (
                 <button
                   onClick={() => navigate("/pricing")}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-aether-purple/10 border border-aether-purple/20 text-aether-purple text-sm font-bold hover:bg-aether-purple/20 transition-all"
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-bold hover:bg-primary/20 transition-all"
                 >
                   Actualizar a Starter o superior
                   <ChevronRight className="w-4 h-4" />
@@ -280,7 +280,7 @@ const Profile = () => {
               className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-white/[0.03] border border-white/5 text-sm font-medium text-white/50 hover:text-white hover:bg-white/[0.06] transition-all"
             >
               <div className="flex items-center gap-3">
-                <Download className="w-4 h-4 text-aether-blue/60" />
+                <Download className="w-4 h-4 text-primary/60" />
                 Descargar App
               </div>
               <ChevronRight className="w-4 h-4 text-white/20" />

@@ -73,14 +73,14 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#050506] font-sans selection:bg-aether-purple/30 selection:text-white overflow-hidden">
+    <div className="flex min-h-screen bg-[#050506] font-sans selection:bg-primary/30 selection:text-white overflow-hidden">
 
       {/* Left Panel — Value Prop */}
       <div className="hidden lg:flex lg:w-[45%] flex-col justify-between px-16 py-16 relative overflow-hidden bg-[#080809] border-r border-white/[0.04]">
         {/* Glows */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-32 -left-32 h-[700px] w-[700px] rounded-full bg-aether-purple/6 blur-[160px]" />
-          <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-aether-blue/5 blur-[120px]" />
+          <div className="absolute -top-32 -left-32 h-[700px] w-[700px] rounded-full bg-primary/6 blur-[160px]" />
+          <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px]" />
         </div>
 
         {/* Top — Logo */}
@@ -92,7 +92,7 @@ const Auth = () => {
         <div className="relative z-10 space-y-10">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
               <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">
                 Plataforma de IA generativa
               </span>
@@ -116,7 +116,7 @@ const Auth = () => {
                   <f.icon className="h-4.5 w-4.5 text-white/30" />
                 </div>
                 <span className="text-sm font-medium text-white/40">{f.text}</span>
-                <Check className="h-4 w-4 text-aether-purple ml-auto shrink-0 opacity-50" />
+                <Check className="h-4 w-4 text-primary ml-auto shrink-0 opacity-50" />
               </div>
             ))}
           </div>
@@ -128,7 +128,7 @@ const Auth = () => {
               { value: "$12", label: "Starter/mes" },
               { value: "4.6", label: "Claude" },
             ].map((s) => (
-              <div key={s.label} className="aether-card rounded-2xl border border-white/5 p-4 text-center">
+              <div key={s.label} className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-2xl border border-white/5 p-4 text-center">
                 <p className="text-2xl font-bold text-white font-display">{s.value}</p>
                 <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-1">{s.label}</p>
               </div>
@@ -163,7 +163,7 @@ const Auth = () => {
 
         <div className="relative z-10 w-full max-w-[420px]">
           {/* Form Card */}
-          <div className="aether-card rounded-[2.5rem] border border-white/5 p-10 shadow-[0_40px_120px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-bottom-6 duration-700 relative overflow-hidden">
+          <div className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2.5rem] border border-white/5 p-10 shadow-[0_40px_120px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-bottom-6 duration-700 relative overflow-hidden">
 
             {/* Header */}
             <div className="mb-8">
@@ -199,7 +199,7 @@ const Auth = () => {
                       onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="¿Cómo te llamas?"
                       autoComplete="name"
-                      className="bg-white/[0.04] border-white/8 focus:border-aether-purple/40 rounded-2xl pl-11 h-12 text-sm text-white placeholder:text-white/15 transition-all focus:ring-0 focus:bg-white/[0.06]"
+                      className="bg-white/[0.04] border-white/8 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-white placeholder:text-white/15 transition-all focus:ring-0 focus:bg-white/[0.06]"
                     />
                   </div>
                 </div>
@@ -220,7 +220,7 @@ const Auth = () => {
                     placeholder="tu@correo.com"
                     required
                     autoComplete="email"
-                    className="bg-white/[0.04] border-white/8 focus:border-aether-purple/40 rounded-2xl pl-11 h-12 text-sm text-white placeholder:text-white/15 transition-all focus:ring-0 focus:bg-white/[0.06]"
+                    className="bg-white/[0.04] border-white/8 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-white placeholder:text-white/15 transition-all focus:ring-0 focus:bg-white/[0.06]"
                   />
                 </div>
               </div>
@@ -236,7 +236,7 @@ const Auth = () => {
                       <button
                         type="button"
                         onClick={() => setMode("forgot")}
-                        className="text-xs text-white/25 hover:text-aether-purple transition-colors font-medium"
+                        className="text-xs text-white/25 hover:text-primary transition-colors font-medium"
                       >
                         ¿Olvidaste tu contraseña?
                       </button>
@@ -253,7 +253,7 @@ const Auth = () => {
                       required
                       minLength={6}
                       autoComplete={mode === "login" ? "current-password" : "new-password"}
-                      className="bg-white/[0.04] border-white/8 focus:border-aether-purple/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-white placeholder:text-white/15 transition-all focus:ring-0 focus:bg-white/[0.06]"
+                      className="bg-white/[0.04] border-white/8 focus:border-primary/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-white placeholder:text-white/15 transition-all focus:ring-0 focus:bg-white/[0.06]"
                     />
                     <button
                       type="button"
@@ -370,7 +370,7 @@ const Auth = () => {
                   <button
                     type="button"
                     onClick={() => setMode(mode === "login" ? "signup" : "login")}
-                    className="font-semibold text-white/50 hover:text-aether-purple transition-colors underline underline-offset-2"
+                    className="font-semibold text-white/50 hover:text-primary transition-colors underline underline-offset-2"
                   >
                     {mode === "login" ? "Regístrate gratis" : "Inicia sesión"}
                   </button>
@@ -395,7 +395,7 @@ const Auth = () => {
 
         {/* Background glow */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-aether-purple/4 blur-[180px]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-primary/4 blur-[180px]" />
         </div>
       </div>
     </div>

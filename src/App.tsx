@@ -75,8 +75,8 @@ const Studio = lazy(() => import("./pages/Studio"));
 const LoadingScreen = () => (
   <div className="flex h-screen w-screen items-center justify-center bg-[#16161b]">
     <div className="relative">
-      <div className="absolute inset-0 bg-aether-purple/20 blur-2xl rounded-full animate-pulse" />
-      <Loader2 className="relative h-10 w-10 animate-spin text-aether-purple" />
+      <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
+      <Loader2 className="relative h-10 w-10 animate-spin text-primary" />
     </div>
   </div>
 );

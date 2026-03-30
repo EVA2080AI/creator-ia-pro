@@ -1005,7 +1005,7 @@ function FormarketingContent() {
       {isMobile && (
         <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-8 bg-[#020203]/95 backdrop-blur-2xl px-8 text-center">
           <div className="p-5 rounded-3xl bg-white/5 border border-white/10">
-            <Smartphone className="w-10 h-10 text-aether-purple/70" />
+            <Smartphone className="w-10 h-10 text-primary/70" />
           </div>
           <div className="space-y-3 max-w-xs">
             <h2 className="text-xl font-bold text-white font-display">Experiencia de escritorio</h2>
@@ -1013,7 +1013,7 @@ function FormarketingContent() {
           </div>
           <button
             onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-aether-purple text-white text-sm font-bold transition-all hover:bg-aether-purple/90 active:scale-95"
+            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-white text-sm font-bold transition-all hover:bg-primary/90 active:scale-95"
           >
             Ir al Dashboard
           </button>
@@ -1028,7 +1028,7 @@ function FormarketingContent() {
 
       {/* ── Onboarding Overlay (primera visita) ─────────────────────────────── */}
       {showOnboarding && !isMobile && (
-        <div className="fixed bottom-8 right-8 z-[150] w-80 aether-card rounded-3xl p-6 shadow-2xl border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="fixed bottom-8 right-8 z-[150] w-80 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-3xl p-6 shadow-2xl border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between mb-5">
             <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Primeros pasos</span>
             <button onClick={dismissOnboarding} className="text-white/20 hover:text-white/60 transition-colors text-xs">Saltar</button>
@@ -1036,8 +1036,8 @@ function FormarketingContent() {
           <div className="space-y-4">
             {ONBOARDING_STEPS.map((step, i) => (
               <div key={i} className={`flex items-start gap-3 transition-all duration-300 ${i === onboardingStep ? 'opacity-100' : 'opacity-30'}`}>
-                <div className={`p-2 rounded-xl shrink-0 ${i === onboardingStep ? 'bg-aether-purple/20 border border-aether-purple/30' : 'bg-white/5 border border-white/5'}`}>
-                  <step.icon className={`w-4 h-4 ${i === onboardingStep ? 'text-aether-purple' : 'text-white/20'}`} />
+                <div className={`p-2 rounded-xl shrink-0 ${i === onboardingStep ? 'bg-primary/20 border border-primary/30' : 'bg-white/5 border border-white/5'}`}>
+                  <step.icon className={`w-4 h-4 ${i === onboardingStep ? 'text-primary' : 'text-white/20'}`} />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-white/80">{step.title}</p>
@@ -1049,7 +1049,7 @@ function FormarketingContent() {
           <div className="flex items-center justify-between mt-6">
             <div className="flex gap-1">
               {ONBOARDING_STEPS.map((_, i) => (
-                <div key={i} className={`h-1 rounded-full transition-all ${i === onboardingStep ? 'w-4 bg-aether-purple' : 'w-2 bg-white/10'}`} />
+                <div key={i} className={`h-1 rounded-full transition-all ${i === onboardingStep ? 'w-4 bg-primary' : 'w-2 bg-white/10'}`} />
               ))}
             </div>
             {onboardingStep < ONBOARDING_STEPS.length - 1 ? (
@@ -1062,7 +1062,7 @@ function FormarketingContent() {
             ) : (
               <button
                 onClick={dismissOnboarding}
-                className="flex items-center gap-1 text-xs font-bold text-aether-purple hover:text-aether-purple/80 transition-colors"
+                className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
               >
                 Empezar <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -1071,7 +1071,7 @@ function FormarketingContent() {
         </div>
       )}
 
-      <div className="w-screen bg-[#020203] font-sans text-white/90 flex flex-col overflow-hidden relative selection:bg-aether-purple/20" style={{ height: 'calc(100vh - 64px)', marginTop: '64px' }}>
+      <div className="w-screen bg-[#020203] font-sans text-white/90 flex flex-col overflow-hidden relative selection:bg-primary/20" style={{ height: 'calc(100vh - 64px)', marginTop: '64px' }}>
       {/* Canvas Toolbar */}
       <div className="flex h-14 w-full items-center justify-between border-b border-white/[0.06] bg-[#050506]/80 px-5 backdrop-blur-3xl shrink-0 z-[90]">
         <div className="flex items-center gap-2">
@@ -1082,9 +1082,9 @@ function FormarketingContent() {
           {/* Templates */}
           <button
             onClick={() => setShowLanding(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.06] hover:border-aether-purple/30 hover:bg-aether-purple/5 transition-all"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.06] hover:border-primary/30 hover:bg-primary/5 transition-all"
           >
-            <div className="w-1.5 h-1.5 rounded-full bg-aether-blue/70 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-pulse" />
             <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Plantillas</span>
           </button>
           {/* Quick-add node (HU28) */}
@@ -1117,13 +1117,13 @@ function FormarketingContent() {
             variant="ghost"
             onClick={() => setSnapEnabled(s => !s)}
             title="Snap a rejilla"
-            className={`h-8 px-3 rounded-lg text-xs gap-1.5 transition-all ${snapEnabled ? 'text-aether-purple bg-aether-purple/10' : 'text-white/25 hover:text-white hover:bg-white/5'}`}
+            className={`h-8 px-3 rounded-lg text-xs gap-1.5 transition-all ${snapEnabled ? 'text-primary bg-primary/10' : 'text-white/25 hover:text-white hover:bg-white/5'}`}
           >
             <Grid3X3 className="w-3.5 h-3.5" />
           </Button>
           <div className="h-5 w-px bg-white/[0.06] mx-1" />
           {/* Share screen */}
-          <Button variant="ghost" onClick={() => navigate('/sharescreen')} className="hidden sm:flex items-center gap-1.5 text-aether-blue/50 hover:text-aether-blue hover:bg-aether-blue/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all">
+          <Button variant="ghost" onClick={() => navigate('/sharescreen')} className="hidden sm:flex items-center gap-1.5 text-primary/50 hover:text-primary hover:bg-primary/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all">
             <Monitor className="w-3.5 h-3.5" />
             <span className="hidden md:inline">Compartir</span>
           </Button>
@@ -1291,7 +1291,7 @@ function FormarketingContent() {
         <div className="ml-auto flex items-center gap-3">
           <span className="text-[10px] text-white/10">Espacio: añadir nodo</span>
           <span className="text-[10px] text-white/10">Ctrl+Z: deshacer</span>
-          {snapEnabled && <span className="text-[10px] text-aether-purple/50">Snap ON</span>}
+          {snapEnabled && <span className="text-[10px] text-primary/50">Snap ON</span>}
         </div>
       </div>
 
@@ -1331,7 +1331,7 @@ function TemplateLanding({
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
             <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Studio · Plantillas</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display mb-4">
@@ -1349,7 +1349,7 @@ function TemplateLanding({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar plantilla..."
-              className="w-full h-11 bg-white/[0.03] border border-white/5 rounded-2xl pl-4 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-aether-purple/30 transition-all"
+              className="w-full h-11 bg-white/[0.03] border border-white/5 rounded-2xl pl-4 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-primary/30 transition-all"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -1375,7 +1375,7 @@ function TemplateLanding({
             <button
               key={template.id}
               onClick={() => onSelect(template)}
-              className="group aether-card rounded-[2rem] border border-white/5 p-6 text-left hover:border-aether-purple/30 hover:scale-[1.02] transition-all duration-300 active:scale-[0.98]"
+              className="group bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2rem] border border-white/5 p-6 text-left hover:border-primary/30 hover:scale-[1.02] transition-all duration-300 active:scale-[0.98]"
             >
               <div className="flex items-start gap-4 mb-4">
                 <div className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${template.color}`}>
@@ -1391,7 +1391,7 @@ function TemplateLanding({
                 <span className="text-[10px] font-bold text-white/15 uppercase tracking-widest">
                   {template.nodes.length} nodo{template.nodes.length !== 1 ? 's' : ''}
                 </span>
-                <span className="text-[10px] font-bold text-aether-purple opacity-0 group-hover:opacity-100 transition-opacity">Usar →</span>
+                <span className="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Usar →</span>
               </div>
             </button>
           ))}

@@ -306,7 +306,7 @@ const Hub = () => {
           <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
                 <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display">
@@ -357,10 +357,10 @@ const Hub = () => {
                     else navigate("/formarketing");
                   });
               }}
-              className="aether-card rounded-[2rem] border border-dashed border-white/8 group flex flex-col items-center justify-center py-12 gap-4 hover:border-aether-purple/30 hover:bg-aether-purple/5 transition-all duration-500 active:scale-95"
+              className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2rem] border border-dashed border-white/8 group flex flex-col items-center justify-center py-12 gap-4 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500 active:scale-95"
             >
-              <div className="w-12 h-12 rounded-2xl bg-white/5 border border-dashed border-white/10 flex items-center justify-center group-hover:bg-aether-purple/10 group-hover:border-aether-purple/30 transition-all">
-                <Plus className="w-5 h-5 text-white/20 group-hover:text-aether-purple transition-colors" />
+              <div className="w-12 h-12 rounded-2xl bg-white/5 border border-dashed border-white/10 flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/30 transition-all">
+                <Plus className="w-5 h-5 text-white/20 group-hover:text-primary transition-colors" />
               </div>
               <div className="text-center space-y-1">
                 <p className="text-xs font-bold text-white/40 group-hover:text-white transition-colors uppercase tracking-widest font-display">Lienzo en Blanco</p>
@@ -371,7 +371,7 @@ const Hub = () => {
             {filtered.map((template, idx) => (
               <div
                 key={template.id}
-                className="aether-card rounded-[2rem] border border-white/5 group flex flex-col gap-5 p-6 transition-all duration-300 hover:scale-[1.02] overflow-hidden relative"
+                className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2rem] border border-white/5 group flex flex-col gap-5 p-6 transition-all duration-300 hover:scale-[1.02] overflow-hidden relative"
                 style={{
                   animationDelay: `${idx * 30}ms`,
                   ['--card-color' as string]: template.color,
@@ -398,7 +398,7 @@ const Hub = () => {
                   </div>
                   <div className="flex items-center gap-1.5">
                     {NEW_TEMPLATE_IDS.has(template.id) && (
-                      <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-aether-purple/20 text-aether-purple border border-aether-purple/30 uppercase tracking-widest font-display">
+                      <span className="text-[8px] font-bold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30 uppercase tracking-widest font-display">
                         Nuevo
                       </span>
                     )}

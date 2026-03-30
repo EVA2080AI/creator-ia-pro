@@ -112,13 +112,13 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
 
   return (
     <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
-      ${data.status === 'executing' ? 'aether-prism glow-purple' : 'aether-card'}
+      ${data.status === 'executing' ? 'aether-prism glow-purple' : 'bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors'}
       w-[260px] shadow-2xl
     `}>
       {/* Aether Node Header */}
       <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">
         <div className="flex items-center gap-2.5 overflow-hidden">
-            <div className="p-1.5 rounded-xl bg-white/5 border border-white/10 group-hover:bg-aether-purple/20 group-hover:border-aether-purple/30 transition-colors">
+            <div className="p-1.5 rounded-xl bg-white/5 border border-white/10 group-hover:bg-primary/20 group-hover:border-primary/30 transition-colors">
               <ImageIcon className="w-4 h-4 text-white/70 shrink-0" />
             </div>
             <h3 className="text-[11px] font-bold text-white/90 tracking-wide truncate font-display uppercase">
@@ -145,7 +145,7 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
         ) : (
           <div className="flex flex-col items-center gap-4 group-hover/img:scale-110 transition-transform duration-500">
              <div className="w-16 h-16 rounded-full bg-white/[0.02] border border-white/[0.05] flex items-center justify-center shadow-inner">
-                <Wand2 className={`w-6 h-6 text-white/20 ${data.status === 'executing' ? 'animate-pulse text-aether-purple' : ''}`} />
+                <Wand2 className={`w-6 h-6 text-white/20 ${data.status === 'executing' ? 'animate-pulse text-primary' : ''}`} />
              </div>
              <span className="text-[10px] font-medium text-white/20 uppercase tracking-[0.2em]">
                 {data.status === 'executing' ? 'Synthesizing...' : 'Awaiting Data'}
@@ -155,13 +155,13 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
         
         {data.status === 'executing' && (
           <div className="absolute inset-0 bg-black/70 backdrop-blur-md flex flex-col items-center justify-center gap-4 px-5">
-            <div className="w-10 h-10 rounded-full border-t-2 border-aether-purple animate-spin" />
+            <div className="w-10 h-10 rounded-full border-t-2 border-primary animate-spin" />
             <span className="text-[10px] font-bold text-white/80 tracking-wide animate-pulse text-center">
               {IMAGE_STEPS[stepIndex]}
             </span>
             <div className="flex gap-1">
               {IMAGE_STEPS.map((_, i) => (
-                <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i <= stepIndex ? 'w-6 bg-aether-purple' : 'w-2 bg-white/10'}`} />
+                <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i <= stepIndex ? 'w-6 bg-primary' : 'w-2 bg-white/10'}`} />
               ))}
             </div>
           </div>
@@ -188,7 +188,7 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                         disabled={data.status === 'executing'}
                         className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 transition-all active:scale-95 disabled:opacity-50 group/var"
                       >
-                        <Sparkles className="w-3.5 h-3.5 text-aether-blue group-hover/var:scale-110 transition-transform" />
+                        <Sparkles className="w-3.5 h-3.5 text-primary group-hover/var:scale-110 transition-transform" />
                         <span className="text-[10px] font-bold uppercase tracking-tight">Var</span>
                       </button>
                     )}
@@ -199,7 +199,7 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
                  onChange={(e) => updatePrompt(e.target.value)}
                  onBlur={(e) => persistChange(e.target.value)}
                  onKeyDown={(e) => e.stopPropagation()}
-                 className="w-full text-xs font-medium leading-relaxed text-white/80 bg-white/[0.03] border border-white/[0.08] p-3 rounded-2xl focus:outline-none focus:border-aether-purple/50 transition-all resize-none min-h-[80px] placeholder:text-white/10"
+                 className="w-full text-xs font-medium leading-relaxed text-white/80 bg-white/[0.03] border border-white/[0.08] p-3 rounded-2xl focus:outline-none focus:border-primary/50 transition-all resize-none min-h-[80px] placeholder:text-white/10"
                  placeholder="Enter creative prompt..."
               />
               

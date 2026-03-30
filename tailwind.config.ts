@@ -24,12 +24,7 @@ export default {
         '30': '7.5rem',
         '2.5xl': '1.375rem',
       },
-      borderRadius: {
-        '2.5xl': '1.25rem',
-        '3xl': '1.5rem',
-        '4xl': '2rem',
-        '5xl': '2.5rem',
-      },
+
       fontSize: {
         'xs':   ['12px', { lineHeight: '1.5' }],
         'sm':   ['13px', { lineHeight: '1.5' }],
@@ -64,29 +59,6 @@ export default {
         'node-glow': 'hsl(var(--node-glow))',
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
-        // Zephyr Design System Tokens
-        aether: {
-          bg:           '#16161b',
-          canvas:       '#131317',
-          card:         '#1c1c22',
-          'card-hover': '#222228',
-          purple:       '#8b5cf6',   // real purple — UI accent (Lovable-style)
-          blue:         '#60A5FA',   // blue secondary
-          rose:         '#F87171',
-          glass:        'rgba(22, 22, 27, 0.92)',
-          border:       'rgba(255, 255, 255, 0.08)',
-          'border-hover': 'rgba(255, 255, 255, 0.14)',
-        },
-        // Zephyr surfaces
-        zephyr: {
-          base:    '#16161b',
-          '1':     '#1c1c22',
-          '2':     '#222228',
-          '3':     '#2a2a32',
-          '4':     '#32323c',
-          brand:   '#4ADE80',   // brand green — logo only
-          blue:    '#60A5FA',
-        },
         gold: {
           DEFAULT: 'hsl(var(--gold))',
           foreground: 'hsl(var(--gold-foreground))',
@@ -137,6 +109,7 @@ export default {
         sm: "calc(var(--radius) - 4px)",
         xl: "0.75rem",
         "2xl": "1rem",
+        "2.5xl": "1.25rem",
         "3xl": "1.5rem",
         "4xl": "2rem",
         "5xl": "2.5rem",

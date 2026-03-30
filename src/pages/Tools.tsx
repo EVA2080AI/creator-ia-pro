@@ -40,15 +40,15 @@ interface Tool {
 // ─── Tool list ────────────────────────────────────────────────────────────────
 const tools: Tool[] = [
   { id: "generate",   name: "Crear imagen",        desc: "Genera imágenes desde texto con IA.",            icon: Image,       credits: 2, category: "image", needsUpload: false, placeholder: "Un gato astronauta en Marte al atardecer, estilo fotorrealista, luz dramática...", color: "text-white" },
-  { id: "logo",       name: "Diseñar logo",         desc: "Logos e identidades de marca con IA.",           icon: PenTool,     credits: 3, category: "image", needsUpload: false, placeholder: "Logo minimalista para una cafetería llamada Origen, tonos cálidos, fondo blanco...", color: "text-aether-blue" },
-  { id: "enhance",    name: "Mejorar imagen",       desc: "Mejora iluminación y detalles.",                 icon: Wand2,       credits: 2, category: "image", needsUpload: true,  color: "text-aether-purple" },
-  { id: "upscale",    name: "Aumentar resolución",  desc: "Escala hasta 4K sin perder calidad.",            icon: ZoomIn,      credits: 3, category: "image", needsUpload: true,  color: "text-aether-blue" },
+  { id: "logo",       name: "Diseñar logo",         desc: "Logos e identidades de marca con IA.",           icon: PenTool,     credits: 3, category: "image", needsUpload: false, placeholder: "Logo minimalista para una cafetería llamada Origen, tonos cálidos, fondo blanco...", color: "text-primary" },
+  { id: "enhance",    name: "Mejorar imagen",       desc: "Mejora iluminación y detalles.",                 icon: Wand2,       credits: 2, category: "image", needsUpload: true,  color: "text-primary" },
+  { id: "upscale",    name: "Aumentar resolución",  desc: "Escala hasta 4K sin perder calidad.",            icon: ZoomIn,      credits: 3, category: "image", needsUpload: true,  color: "text-primary" },
   { id: "background", name: "Quitar fondo",         desc: "Extrae el fondo con bordes perfectos.",          icon: ImagePlus,   credits: 1, category: "image", needsUpload: true,  color: "text-emerald-400" },
-  { id: "style",      name: "Transferir estilo",    desc: "Aplica el estilo de una imagen a otra.",         icon: Palette,     credits: 2, category: "image", needsUpload: true,  color: "text-aether-purple" },
+  { id: "style",      name: "Transferir estilo",    desc: "Aplica el estilo de una imagen a otra.",         icon: Palette,     credits: 2, category: "image", needsUpload: true,  color: "text-primary" },
   { id: "product",    name: "Mockup de producto",   desc: "Renders profesionales de producto.",             icon: ShoppingBag, credits: 3, category: "image", needsUpload: true,  color: "text-amber-400" },
   { id: "restore",    name: "Restaurar foto",       desc: "Restaura fotos antiguas o dañadas.",             icon: RotateCcw,   credits: 3, category: "image", needsUpload: true,  color: "text-amber-400" },
   { id: "eraser",     name: "Borrar objeto",        desc: "Elimina objetos de la imagen.",                  icon: X,           credits: 2, category: "image", needsUpload: true,  color: "text-rose-400/40", disabled: true, disabledReason: "Próximamente" },
-  { id: "copywriter", name: "Crear texto",          desc: "Copy persuasivo para marketing y ventas.",       icon: Megaphone,   credits: 1, category: "text",  needsUpload: false, placeholder: "Escribe un mensaje persuasivo para vender zapatos deportivos en Instagram...", color: "text-aether-purple" },
+  { id: "copywriter", name: "Crear texto",          desc: "Copy persuasivo para marketing y ventas.",       icon: Megaphone,   credits: 1, category: "text",  needsUpload: false, placeholder: "Escribe un mensaje persuasivo para vender zapatos deportivos en Instagram...", color: "text-primary" },
   { id: "social",     name: "Contenido para redes", desc: "Posts y estrategias para redes sociales.",       icon: Hash,        credits: 2, category: "text",  needsUpload: false, placeholder: "5 ideas de contenido para Instagram de una marca de ropa sostenible...", color: "text-rose-400" },
   { id: "blog",       name: "Escribir artículo",    desc: "Artículos optimizados para SEO.",                icon: FileText,    credits: 1, category: "text",  needsUpload: false, placeholder: "Artículo completo sobre los beneficios del café de especialidad en 2025...", color: "text-emerald-400" },
   { id: "ads",        name: "Crear anuncio",        desc: "Anuncios para Google, Meta y más.",              icon: Megaphone,   credits: 1, category: "text",  needsUpload: false, placeholder: "Anuncio de Google Ads para un servicio de consultoría de marketing digital...", color: "text-white" },
@@ -79,7 +79,7 @@ function parseMarkdown(text: string): string {
     .replace(/\*(.+?)\*/g,     '<em class="italic text-white/80">$1</em>')
     .replace(/`([^`\n]+)`/g,   '<code class="bg-white/[0.08] text-sky-300 px-1.5 py-0.5 rounded text-[12px] font-mono">$1</code>')
     .replace(/^---+$/gm,       '<hr class="border-white/10 my-4" />')
-    .replace(/^\s*[-*•] (.+)$/gm, '<li class="flex gap-2 my-1"><span class="text-aether-purple mt-1 shrink-0">›</span><span class="text-white/80">$1</span></li>')
+    .replace(/^\s*[-*•] (.+)$/gm, '<li class="flex gap-2 my-1"><span class="text-primary mt-1 shrink-0">›</span><span class="text-white/80">$1</span></li>')
     .replace(/(<li[\s\S]*?<\/li>\n?)+/g, m => `<ul class="my-3 space-y-0.5">${m}</ul>`)
     .replace(/\n\n/g, '</p><p class="mt-3 text-white/75 leading-relaxed">')
     .replace(/^(?!<[hublpei])(.+)$/gm, line =>
@@ -127,7 +127,7 @@ function ImageWithFallback({ src, onRetry }: { src: string; onRetry: () => void 
     <div className="relative w-full h-full min-h-[300px]">
       {status === "loading" && (
         <div className="absolute inset-0 flex items-center justify-center bg-white/[0.02] rounded-2xl">
-          <Loader2 className="h-8 w-8 text-aether-purple animate-spin" />
+          <Loader2 className="h-8 w-8 text-primary animate-spin" />
         </div>
       )}
       {status === "error" ? (
@@ -398,14 +398,14 @@ const Tools = () => {
           <div ref={resultRef} className="flex-1 overflow-y-auto rounded-2xl border border-white/[0.06] bg-white/[0.01] p-5 relative min-h-0">
             {streaming && !resultText && (
               <div className="flex items-center gap-3 text-white/30 text-sm">
-                <Loader2 className="h-4 w-4 animate-spin text-aether-purple" />
+                <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 <span>Escribiendo...</span>
               </div>
             )}
             <div className="result-prose text-sm leading-relaxed"
               dangerouslySetInnerHTML={{ __html: parseMarkdown(resultText) }} />
             {streaming && resultText && (
-              <span className="inline-block w-2 h-4 bg-aether-purple/70 animate-pulse ml-0.5 rounded-sm" />
+              <span className="inline-block w-2 h-4 bg-primary/70 animate-pulse ml-0.5 rounded-sm" />
             )}
           </div>
           {!streaming && resultText && (
@@ -436,7 +436,7 @@ const Tools = () => {
         </div>
       ) : (
         <button onClick={() => fileRef.current?.click()}
-          className="flex-1 m-4 flex flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed border-white/[0.07] bg-white/[0.01] hover:border-aether-purple/30 hover:bg-aether-purple/[0.03] transition-all group">
+          className="flex-1 m-4 flex flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed border-white/[0.07] bg-white/[0.01] hover:border-primary/30 hover:bg-primary/[0.03] transition-all group">
           <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center group-hover:scale-105 transition-transform">
             <Upload className="h-7 w-7 text-white/20 group-hover:text-white/40 transition-colors" />
           </div>
@@ -454,7 +454,7 @@ const Tools = () => {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-5 text-center p-10">
         <div className="relative">
-          <div className="absolute inset-0 blur-3xl rounded-full bg-aether-purple/10" />
+          <div className="absolute inset-0 blur-3xl rounded-full bg-primary/10" />
           <div className="relative w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
             <currentTool.icon className={cn("h-7 w-7", currentTool.color)} />
           </div>
@@ -515,7 +515,7 @@ const Tools = () => {
                 )}>
                 <div className={cn(
                   "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                  isActive ? "bg-aether-purple/20 text-aether-purple" : "bg-white/[0.04] text-white/20"
+                  isActive ? "bg-primary/20 text-primary" : "bg-white/[0.04] text-white/20"
                 )}>
                   {tool.disabled ? <Lock className="h-3.5 w-3.5" /> : <tool.icon className="h-3.5 w-3.5" />}
                 </div>
@@ -525,7 +525,7 @@ const Tools = () => {
                     {tool.disabled ? tool.disabledReason : `${tool.credits} crédito${tool.credits !== 1 ? "s" : ""}`}
                   </p>
                 </div>
-                {isActive && <div className="w-1 h-4 rounded-full bg-aether-purple shrink-0 shadow-[0_0_6px_rgba(74,222,128,0.7)]" />}
+                {isActive && <div className="w-1 h-4 rounded-full bg-primary shrink-0 shadow-[0_0_6px_rgba(74,222,128,0.7)]" />}
               </button>
             );
           })}
@@ -549,7 +549,7 @@ const Tools = () => {
                 )}>
                 <div className={cn(
                   "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                  isActive ? "bg-aether-purple/20 text-aether-purple" : "bg-white/[0.04] text-white/20"
+                  isActive ? "bg-primary/20 text-primary" : "bg-white/[0.04] text-white/20"
                 )}>
                   {tool.disabled ? <Lock className="h-3.5 w-3.5" /> : <tool.icon className="h-3.5 w-3.5" />}
                 </div>
@@ -557,7 +557,7 @@ const Tools = () => {
                   <p className="text-[12px] font-semibold truncate leading-none">{tool.name}</p>
                   <p className="text-[10px] text-white/20 mt-0.5">{tool.credits} crédito{tool.credits !== 1 ? "s" : ""}</p>
                 </div>
-                {isActive && <div className="w-1 h-4 rounded-full bg-aether-purple shrink-0 shadow-[0_0_6px_rgba(74,222,128,0.7)]" />}
+                {isActive && <div className="w-1 h-4 rounded-full bg-primary shrink-0 shadow-[0_0_6px_rgba(74,222,128,0.7)]" />}
               </button>
             );
           })}
@@ -577,7 +577,7 @@ const Tools = () => {
                 {profile?.display_name?.split(" ")[0] || "Mi perfil"}
               </p>
               <p className="text-[10px] text-white/25 mt-0.5 flex items-center gap-1">
-                <Coins className="h-2.5 w-2.5 text-aether-purple" />
+                <Coins className="h-2.5 w-2.5 text-primary" />
                 {(profile?.credits_balance ?? 0).toLocaleString()} créditos
               </p>
             </div>
@@ -607,7 +607,7 @@ const Tools = () => {
                   className={cn(
                     "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all",
                     showSettings
-                      ? "border-aether-purple/40 bg-aether-purple/10 text-aether-purple"
+                      ? "border-primary/40 bg-primary/10 text-primary"
                       : "border-white/[0.08] bg-white/[0.03] text-white/40 hover:text-white/70 hover:border-white/15"
                   )}>
                   <Sparkles className="h-3 w-3" />
@@ -620,7 +620,7 @@ const Tools = () => {
                 className={cn(
                   "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all",
                   showSettings
-                    ? "border-aether-purple/40 bg-aether-purple/10 text-aether-purple"
+                    ? "border-primary/40 bg-primary/10 text-primary"
                     : "border-white/[0.08] bg-white/[0.03] text-white/40 hover:text-white/70 hover:border-white/15"
                 )}>
                 <Sparkles className="h-3 w-3" />
@@ -648,7 +648,7 @@ const Tools = () => {
 
             {/* Credits cost badge */}
             <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-              <Zap className="h-3 w-3 text-aether-purple" />
+              <Zap className="h-3 w-3 text-primary" />
               <span className="text-[10px] font-bold text-white/30">{requiredCredits} cr</span>
             </div>
           </div>
@@ -693,7 +693,7 @@ const Tools = () => {
                 className={cn(
                   "h-12 px-3.5 rounded-2xl border transition-all flex items-center justify-center shrink-0",
                   imagePreview
-                    ? "border-aether-purple/40 bg-aether-purple/10 text-aether-purple"
+                    ? "border-primary/40 bg-primary/10 text-primary"
                     : "border-white/[0.08] bg-white/[0.04] text-white/30 hover:text-white hover:bg-white/[0.08]"
                 )}>
                 <Upload className="h-4 w-4" />
@@ -718,7 +718,7 @@ const Tools = () => {
                 }
                 rows={1}
                 maxLength={1000}
-                className="w-full resize-none rounded-2xl border border-white/[0.07] bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-aether-purple/30 focus:bg-white/[0.05] transition-all leading-relaxed"
+                className="w-full resize-none rounded-2xl border border-white/[0.07] bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-primary/30 focus:bg-white/[0.05] transition-all leading-relaxed"
                 style={{ minHeight: "48px", maxHeight: "140px", overflowY: "auto" }}
               />
             </div>

@@ -79,7 +79,7 @@ function StudioOnboarding({ onDismiss }: { onDismiss: () => void }) {
         <div className="flex items-center justify-between mb-4">
           <div className="flex gap-1.5">
             {STUDIO_ONBOARDING_STEPS.map((_, i) => (
-              <div key={i} className={`h-1 rounded-full transition-all ${i === step ? 'w-6 bg-aether-purple' : 'w-2 bg-white/10'}`} />
+              <div key={i} className={`h-1 rounded-full transition-all ${i === step ? 'w-6 bg-primary' : 'w-2 bg-white/10'}`} />
             ))}
           </div>
           <button onClick={onDismiss} className="text-[10px] text-white/20 hover:text-white/50 transition-colors font-bold uppercase tracking-widest">
@@ -87,13 +87,13 @@ function StudioOnboarding({ onDismiss }: { onDismiss: () => void }) {
           </button>
         </div>
         <div className="mb-5">
-          <p className="text-[10px] font-bold text-aether-purple/60 uppercase tracking-[0.3em] mb-1">Paso {step + 1} / {STUDIO_ONBOARDING_STEPS.length}</p>
+          <p className="text-[10px] font-bold text-primary/60 uppercase tracking-[0.3em] mb-1">Paso {step + 1} / {STUDIO_ONBOARDING_STEPS.length}</p>
           <h3 className="text-base font-black text-white mb-1">{STUDIO_ONBOARDING_STEPS[step].title}</h3>
           <p className="text-sm text-white/40 leading-relaxed">{STUDIO_ONBOARDING_STEPS[step].desc}</p>
         </div>
         <button
           onClick={() => isLast ? onDismiss() : setStep(s => s + 1)}
-          className="w-full py-2.5 rounded-xl bg-aether-purple text-white text-sm font-bold hover:bg-aether-purple/80 transition-all active:scale-95"
+          className="w-full py-2.5 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/80 transition-all active:scale-95"
         >
           {isLast ? 'Empezar a crear →' : 'Siguiente →'}
         </button>
@@ -116,7 +116,7 @@ function StudioWelcome({ onSelectTool, recentAssets, loadingAssets }: {
     <div className="flex-1 overflow-y-auto px-8 py-10 space-y-12">
       {/* Hero */}
       <div>
-        <p className="text-[10px] font-bold text-aether-purple/60 uppercase tracking-[0.3em] mb-3">AI Creative Hub</p>
+        <p className="text-[10px] font-bold text-primary/60 uppercase tracking-[0.3em] mb-3">AI Creative Hub</p>
         <h1 className="text-3xl font-black text-white tracking-tight mb-3">¿Qué vas a crear hoy?</h1>
         <p className="text-white/35 text-sm max-w-md leading-relaxed">Elige una herramienta de la barra lateral o comienza desde aquí.</p>
       </div>
@@ -338,7 +338,7 @@ function ToolWorkspace({
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
               <button
                 onClick={() => fileRef.current?.click()}
-                className="w-full aspect-video rounded-2xl border-2 border-dashed border-white/[0.08] hover:border-aether-purple/40 hover:bg-aether-purple/5 transition-all flex flex-col items-center justify-center gap-2 overflow-hidden relative"
+                className="w-full aspect-video rounded-2xl border-2 border-dashed border-white/[0.08] hover:border-primary/40 hover:bg-primary/5 transition-all flex flex-col items-center justify-center gap-2 overflow-hidden relative"
               >
                 {imagePreview ? (
                   <img src={imagePreview} alt="Input" className="absolute inset-0 w-full h-full object-cover" />
@@ -369,7 +369,7 @@ function ToolWorkspace({
                 onChange={(e) => setPrompt(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && e.metaKey) handleGenerate(); }}
                 placeholder={tool.placeholder || 'Describe lo que quieres…'}
-                className="flex-1 min-h-[140px] w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3 text-[13px] text-white placeholder:text-white/15 outline-none focus:border-aether-purple/40 resize-none transition-all leading-relaxed"
+                className="flex-1 min-h-[140px] w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3 text-[13px] text-white placeholder:text-white/15 outline-none focus:border-primary/40 resize-none transition-all leading-relaxed"
                 rows={6}
               />
               <p className="text-[9px] text-white/15">⌘ + Enter para generar</p>
@@ -381,7 +381,7 @@ function ToolWorkspace({
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
                 placeholder={tool.placeholder || 'Describe el resultado esperado…'}
-                className="flex-1 min-h-[100px] w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3 text-[13px] text-white placeholder:text-white/15 outline-none focus:border-aether-purple/40 resize-none transition-all leading-relaxed"
+                className="flex-1 min-h-[100px] w-full bg-white/[0.03] border border-white/[0.07] rounded-xl px-4 py-3 text-[13px] text-white placeholder:text-white/15 outline-none focus:border-primary/40 resize-none transition-all leading-relaxed"
                 rows={4}
               />
             </div>
@@ -389,7 +389,7 @@ function ToolWorkspace({
 
           {/* Credits badge */}
           <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-            <Zap className="h-3.5 w-3.5 text-aether-purple shrink-0" />
+            <Zap className="h-3.5 w-3.5 text-primary shrink-0" />
             <span className="text-[11px] text-white/40">Costo: <span className="text-white/70 font-bold">{tool.credits} créditos</span></span>
             <span className="ml-auto text-[10px] text-white/20">{profile?.credits_balance ?? 0} disponibles</span>
           </div>
@@ -448,7 +448,7 @@ function ToolWorkspace({
                 <div className="max-w-2xl mx-auto">
                   <div className="text-[13px] text-white/75 leading-[1.8] whitespace-pre-wrap font-sans">
                     {resultText}
-                    {streaming && <span className="inline-block w-2 h-4 bg-aether-purple/80 animate-pulse ml-0.5 rounded-sm" />}
+                    {streaming && <span className="inline-block w-2 h-4 bg-primary/80 animate-pulse ml-0.5 rounded-sm" />}
                   </div>
                   {!streaming && resultText && (
                     <div className="flex items-center gap-2 mt-6 pt-5 border-t border-white/[0.06]">
@@ -479,7 +479,7 @@ function ToolWorkspace({
                   onClick={handleSave}
                   disabled={saved}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[12px] font-bold transition-all active:scale-95 border ${
-                    saved ? 'bg-aether-purple/10 border-aether-purple/30 text-aether-purple' : 'bg-white/[0.04] border-white/[0.08] text-white/50 hover:text-white hover:border-white/15'
+                    saved ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-white/[0.04] border-white/[0.08] text-white/50 hover:text-white hover:border-white/15'
                   }`}
                 >
                   {saved ? <><CheckCircle2 className="h-3.5 w-3.5" /> Guardado</> : <><BookmarkPlus className="h-3.5 w-3.5" /> Guardar</>}
@@ -542,7 +542,7 @@ export default function Studio() {
           <div className="px-4 py-4 border-b border-white/[0.05]">
             <div className="flex items-center gap-2 mb-3">
               <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-aether-purple/30 to-aether-blue/20 border border-white/10">
-                <Sparkles className="h-3.5 w-3.5 text-aether-purple" />
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
               </div>
               <span className="text-[11px] font-black text-white/50 uppercase tracking-[0.2em]">Studio</span>
             </div>
@@ -554,7 +554,7 @@ export default function Studio() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar herramientas…"
-                className="w-full pl-9 pr-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[11px] text-white placeholder:text-white/15 outline-none focus:border-aether-purple/40 transition-all"
+                className="w-full pl-9 pr-3 py-2 rounded-xl bg-white/[0.03] border border-white/[0.06] text-[11px] text-white placeholder:text-white/15 outline-none focus:border-primary/40 transition-all"
               />
             </div>
           </div>
@@ -580,7 +580,7 @@ export default function Studio() {
               <div className="flex flex-col items-center gap-2 py-8 px-4 text-center">
                 <Search className="h-5 w-5 text-white/10" />
                 <p className="text-[11px] text-white/20">Sin resultados para "{search}"</p>
-                <button onClick={() => setSearch('')} className="text-[10px] text-aether-purple/60 hover:text-aether-purple transition-colors font-bold uppercase tracking-widest">Limpiar</button>
+                <button onClick={() => setSearch('')} className="text-[10px] text-primary/60 hover:text-primary transition-colors font-bold uppercase tracking-widest">Limpiar</button>
               </div>
             ) : visibleTools.map((t) => (
               <button
@@ -588,7 +588,7 @@ export default function Studio() {
                 onClick={() => setActiveTool(t)}
                 className={`w-full flex items-center gap-3 px-4 py-3 transition-all text-left group ${
                   activeTool?.id === t.id
-                    ? 'bg-white/[0.06] border-r-2 border-aether-purple'
+                    ? 'bg-white/[0.06] border-r-2 border-primary'
                     : 'hover:bg-white/[0.03] border-r-2 border-transparent'
                 }`}
               >
@@ -601,7 +601,7 @@ export default function Studio() {
                   <p className={`text-[12px] font-bold truncate transition-colors ${activeTool?.id === t.id ? 'text-white' : 'text-white/50 group-hover:text-white/80'}`}>{t.name}</p>
                   <p className="text-[9px] text-white/20">{t.credits} cr</p>
                 </div>
-                {activeTool?.id === t.id && <div className="w-1.5 h-1.5 rounded-full bg-aether-purple shrink-0" />}
+                {activeTool?.id === t.id && <div className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />}
               </button>
             ))}
           </div>

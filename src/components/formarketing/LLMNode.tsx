@@ -42,7 +42,7 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
   const isRunning = data.status === 'running';
 
   return (
-    <div className="group relative rounded-3xl overflow-hidden aether-card w-[280px] shadow-2xl">
+    <div className="group relative rounded-3xl overflow-hidden bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors w-[280px] shadow-2xl">
       {/* Header */}
       <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">
         <div className="flex items-center gap-2.5">

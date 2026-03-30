@@ -79,7 +79,7 @@ export default function Index() {
         <meta name="description" content="Genera apps React completas con Genesis IDE y crea imágenes, logos y textos con Studio. Todo con IA. Desde $12/mes." />
       </Helmet>
 
-      <div className="min-h-screen bg-[#0a0a0b] text-white selection:bg-aether-purple/30 font-sans">
+      <div className="min-h-screen bg-[#0a0a0b] text-white selection:bg-primary/30 font-sans">
 
         {/* ── Nav ─────────────────────────────────────────────────────────── */}
         <header className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-[#0a0a0b]/90 backdrop-blur-md border-b border-white/[0.06]">
@@ -102,13 +102,13 @@ export default function Index() {
         </header>
 
         {/* ── Announcement bar ─────────────────────────────────────────── */}
-        <div className="flex items-center justify-center gap-3 py-2.5 px-4 bg-aether-purple/10 border-b border-aether-purple/20">
-          <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse" />
+        <div className="flex items-center justify-center gap-3 py-2.5 px-4 bg-primary/10 border-b border-primary/20">
+          <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
           <p className="text-[12px] font-semibold text-white/70">
             Genesis IDE + Studio + Canvas — Starter desde{" "}
             <span className="text-white font-black">$12/mes</span>
           </p>
-          <button onClick={() => navigate("/pricing")} className="flex items-center gap-1 text-[12px] text-aether-purple hover:text-white transition-colors font-bold">
+          <button onClick={() => navigate("/pricing")} className="flex items-center gap-1 text-[12px] text-primary hover:text-white transition-colors font-bold">
             Ver planes <ChevronRight className="h-3 w-3" />
           </button>
         </div>
@@ -118,11 +118,11 @@ export default function Index() {
           {/* ── Hero ─────────────────────────────────────────────────────── */}
           <section className="relative flex flex-col items-center text-center px-6 pt-24 pb-20 overflow-hidden">
             {/* Subtle glow */}
-            <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-aether-purple/6 blur-[120px] rounded-full" />
+            <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/6 blur-[120px] rounded-full" />
 
             <div className="relative z-10">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-[11px] font-bold text-white/40 uppercase tracking-[0.3em] mb-8">
-                <Code2 className="h-3 w-3 text-aether-purple" />
+                <Code2 className="h-3 w-3 text-primary" />
                 Genesis IDE · Studio · Canvas IA
               </div>
 
@@ -157,7 +157,7 @@ export default function Index() {
               <div className="flex items-center justify-center gap-6 mt-10">
                 {TRUST.map((t) => (
                   <div key={t.text} className="hidden sm:flex items-center gap-1.5">
-                    <t.icon className="h-3.5 w-3.5 text-aether-purple/70" />
+                    <t.icon className="h-3.5 w-3.5 text-primary/70" />
                     <span className="text-[11px] text-white/30 font-medium">{t.text}</span>
                   </div>
                 ))}
@@ -176,7 +176,7 @@ export default function Index() {
                   <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
                 </div>
                 <div className="flex-1 mx-3 h-5 rounded bg-white/[0.04] flex items-center px-2.5 gap-1.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-aether-purple/50" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
                   <span className="text-[10px] text-white/15 font-mono">creator-ia.com/studio</span>
                 </div>
               </div>
@@ -194,7 +194,7 @@ export default function Index() {
                     { name: "Copywriting",   color: "#f43f5e" },
                     { name: "Artículo SEO",  color: "#34d399" },
                   ].map((t) => (
-                    <div key={t.name} className={`flex items-center gap-2 px-2 py-2 rounded-lg ${t.active ? 'bg-white/[0.06] border-r-2 border-aether-purple' : ''}`}>
+                    <div key={t.name} className={`flex items-center gap-2 px-2 py-2 rounded-lg ${t.active ? 'bg-white/[0.06] border-r-2 border-primary' : ''}`}>
                       <div className="w-5 h-5 rounded-md border border-white/[0.06] flex items-center justify-center" style={{ background: t.color + '15' }}>
                         <div className="w-2 h-2 rounded-full" style={{ background: t.color + '80' }} />
                       </div>
@@ -208,7 +208,7 @@ export default function Index() {
                   <div className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Prompt</div>
                   <div className="flex-1 rounded-lg bg-white/[0.03] border border-white/[0.06] p-2">
                     <div className="text-[9px] text-white/30 leading-relaxed">Un gato astronauta en Marte al atardecer, estilo fotorrealista, luz dorada…</div>
-                    <div className="w-1 h-3 bg-aether-purple/70 animate-pulse inline-block mt-1" />
+                    <div className="w-1 h-3 bg-primary/70 animate-pulse inline-block mt-1" />
                   </div>
                   <div className="flex items-center justify-between text-[8px]">
                     <span className="text-white/20">FLUX Schnell · 2cr</span>
@@ -311,12 +311,12 @@ export default function Index() {
                           {"  "}<span className="text-white">{")"}</span>
                           <br />
                           <span className="text-white">{"}"}</span>
-                          <span className="inline-block w-1 h-3 bg-aether-purple animate-pulse ml-0.5 align-middle" />
+                          <span className="inline-block w-1 h-3 bg-primary animate-pulse ml-0.5 align-middle" />
                         </div>
                         <div className="mt-3 flex items-center gap-2">
-                          <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-aether-purple/10 border border-aether-purple/20">
-                            <Sparkles className="h-3 w-3 text-aether-purple" />
-                            <span className="text-[9px] font-bold text-aether-purple">Claude 4.6</span>
+                          <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20">
+                            <Sparkles className="h-3 w-3 text-primary" />
+                            <span className="text-[9px] font-bold text-primary">Claude 4.6</span>
                           </div>
                           <span className="text-[9px] text-white/20">Generando App.tsx…</span>
                         </div>
@@ -352,7 +352,7 @@ export default function Index() {
           {/* ── Canvas section ──────────────────────────────────────────── */}
           <section className="px-6 md:px-12 py-20 border-t border-white/[0.04]">
             <div className="max-w-5xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-aether-blue/30 text-aether-blue bg-aether-blue/10 text-[10px] font-black uppercase tracking-[0.3em] mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-aether-blue/30 text-primary bg-primary/10 text-[10px] font-black uppercase tracking-[0.3em] mb-6">
                 <Layers className="h-3 w-3" />
                 Canvas Editor
               </div>
@@ -365,7 +365,7 @@ export default function Index() {
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => navigate("/formarketing")}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl border border-aether-blue/30 text-aether-blue hover:bg-aether-blue/10 transition-all font-bold text-[13px]"
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl border border-aether-blue/30 text-primary hover:bg-primary/10 transition-all font-bold text-[13px]"
                 >
                   <Layers className="h-4 w-4" />
                   Abrir Canvas
@@ -393,12 +393,12 @@ export default function Index() {
                     key={plan.name}
                     className={`relative rounded-2xl p-6 border transition-all ${
                       plan.popular
-                        ? 'border-aether-purple/40 bg-aether-purple/5'
+                        ? 'border-primary/40 bg-primary/5'
                         : 'border-white/[0.07] bg-white/[0.02]'
                     }`}
                   >
                     {plan.popular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-aether-purple text-white text-[10px] font-black uppercase tracking-widest">
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest">
                         Más popular
                       </div>
                     )}
@@ -437,7 +437,7 @@ export default function Index() {
           {/* ── Final CTA ───────────────────────────────────────────────── */}
           <section className="px-6 md:px-12 py-24 border-t border-white/[0.04]">
             <div className="max-w-2xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-aether-purple/10 border border-aether-purple/20 text-aether-purple text-[11px] font-bold mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-bold mb-6">
                 <Sparkles className="h-3 w-3" />
                 Sin tarjeta requerida
               </div>

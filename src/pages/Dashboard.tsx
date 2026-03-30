@@ -86,8 +86,8 @@ const Dashboard = () => {
         setUsageData(Object.values(dayMap));
         const total = visual + copy + system || 1;
         setToolData([
-          { name: 'Visual', value: Math.round((visual / total) * 100), color: 'bg-aether-purple' },
-          { name: 'Copy',   value: Math.round((copy   / total) * 100), color: 'bg-aether-blue' },
+          { name: 'Visual', value: Math.round((visual / total) * 100), color: 'bg-primary' },
+          { name: 'Copy',   value: Math.round((copy   / total) * 100), color: 'bg-primary' },
           { name: 'System', value: Math.round((system / total) * 100), color: 'bg-rose-400' },
         ]);
       } catch (e) {
@@ -117,8 +117,8 @@ const Dashboard = () => {
   };
 
   const stats = [
-    { label: "Créditos", value: profile?.credits_balance ?? 0, icon: Coins, color: "text-aether-purple" },
-    { label: "Plan", value: tierLabels[currentTier] || "Gratis", icon: CreditCard, color: "text-aether-blue" },
+    { label: "Créditos", value: profile?.credits_balance ?? 0, icon: Coins, color: "text-primary" },
+    { label: "Plan", value: tierLabels[currentTier] || "Gratis", icon: CreditCard, color: "text-primary" },
     { label: "Espacios", value: spacesCount, icon: LayoutGrid, color: "text-rose-400" },
     { label: "Activos", value: assetsCount, icon: Image, color: "text-emerald-400" },
   ];
@@ -152,11 +152,11 @@ const Dashboard = () => {
 
           {/* Post-checkout success banner */}
           {(checkoutSuccess || creditsSuccess) && (
-            <div className="relative overflow-hidden rounded-2xl border border-aether-purple/30 bg-aether-purple/8 px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="relative overflow-hidden rounded-2xl border border-primary/30 bg-primary/8 px-6 py-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 20% 50%, rgba(139,92,246,0.06) 0%, transparent 70%)' }} />
               <div className="flex items-center gap-3 shrink-0">
-                <div className="w-10 h-10 rounded-xl bg-aether-purple/20 border border-aether-purple/30 flex items-center justify-center">
-                  <Zap className="w-5 h-5 text-aether-purple" />
+                <div className="w-10 h-10 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-[13px] font-black text-white font-display">
@@ -173,7 +173,7 @@ const Dashboard = () => {
               <div className="flex items-center gap-2 sm:ml-auto">
                 <button
                   onClick={() => navigate('/chat')}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-aether-purple text-white text-[12px] font-black uppercase tracking-widest hover:bg-aether-purple/90 transition-all active:scale-95"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-[12px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   Ir a Genesis
@@ -204,14 +204,14 @@ const Dashboard = () => {
                 <>
                   <button
                     onClick={() => navigate("/pricing")}
-                    className="px-4 py-2 rounded-xl aether-card text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-all border border-white/5"
+                    className="px-4 py-2 rounded-xl bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-all border border-white/5"
                   >
                     <Coins className="w-3.5 h-3.5 mr-1.5 inline" />
                     + Créditos
                   </button>
                   <button
                     onClick={async () => { try { await openCustomerPortal(); } catch { toast.error("Error abriendo portal"); } }}
-                    className="px-4 py-2 rounded-xl aether-card text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-all border border-white/5"
+                    className="px-4 py-2 rounded-xl bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-all border border-white/5"
                   >
                     <Settings className="w-3.5 h-3.5 mr-1.5 inline" />
                     Plan
@@ -220,7 +220,7 @@ const Dashboard = () => {
               ) : (
                 <button
                   onClick={() => navigate("/pricing")}
-                  className="px-5 py-2 bg-aether-purple text-white rounded-xl flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest hover:bg-aether-purple/90 transition-all active:scale-95"
+                  className="px-5 py-2 bg-primary text-white rounded-xl flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   Upgrade
@@ -234,7 +234,7 @@ const Dashboard = () => {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="group flex items-center gap-3 p-4 aether-card rounded-xl border border-white/5 hover:border-white/10 transition-all duration-300"
+                className="group flex items-center gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-white/5 hover:border-white/10 transition-all duration-300"
               >
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/5 shrink-0 transition-all group-hover:scale-110 ${stat.color}`}>
                   <stat.icon className="w-4 h-4" />
@@ -250,14 +250,14 @@ const Dashboard = () => {
           {/* Analytics — 2/3 + 1/3 */}
           <div className="grid lg:grid-cols-3 gap-4">
             {/* Credit chart */}
-            <div className="lg:col-span-2 p-5 aether-card rounded-2xl border border-white/5">
+            <div className="lg:col-span-2 p-5 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-2xl border border-white/5">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] font-display">Uso de créditos</h3>
                   <p className="text-[9px] text-white/20 mt-0.5 uppercase tracking-widest font-display">Últimos 7 días</p>
                 </div>
                 <div className="p-2 rounded-xl bg-white/5">
-                  <TrendingUp className="w-4 h-4 text-aether-purple" />
+                  <TrendingUp className="w-4 h-4 text-primary" />
                 </div>
               </div>
               <div className="h-40">
@@ -283,14 +283,14 @@ const Dashboard = () => {
             </div>
 
             {/* Distribution */}
-            <div className="p-5 aether-card rounded-2xl border border-white/5">
+            <div className="p-5 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-2xl border border-white/5">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] font-display">Distribución</h3>
                   <p className="text-[9px] text-white/20 mt-0.5 uppercase tracking-widest font-display">Por tipo</p>
                 </div>
                 <div className="p-2 rounded-xl bg-white/5">
-                  <Box className="w-4 h-4 text-aether-blue" />
+                  <Box className="w-4 h-4 text-primary" />
                 </div>
               </div>
               {toolData.every(d => d.value === 0) ? (
@@ -319,19 +319,19 @@ const Dashboard = () => {
           {/* Genesis CTA */}
           <div
             onClick={() => navigate("/chat")}
-            className="group cursor-pointer relative overflow-hidden rounded-2xl border border-aether-purple/20 bg-gradient-to-r from-aether-purple/10 via-aether-blue/5 to-transparent p-5 hover:border-aether-purple/40 transition-all duration-300"
+            className="group cursor-pointer relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-aether-purple/10 via-aether-blue/5 to-transparent p-5 hover:border-primary/40 transition-all duration-300"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-aether-purple/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
             <div className="relative flex items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-aether-purple animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.9)]" />
-                  <span className="text-[11px] font-semibold text-aether-purple/80">Genesis · BuilderAI</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.9)]" />
+                  <span className="text-[11px] font-semibold text-primary/80">Genesis · BuilderAI</span>
                 </div>
                 <h2 className="text-xl font-bold text-white font-display tracking-tight">¿Qué vas a crear hoy?</h2>
                 <p className="text-xs text-white/30 mt-1">Describe tu idea y Genesis la construye en segundos</p>
               </div>
-              <div className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-aether-purple text-white rounded-xl text-xs font-bold uppercase tracking-widest group-hover:bg-aether-purple/80 transition-all active:scale-95 font-display">
+              <div className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest group-hover:bg-primary/80 transition-all active:scale-95 font-display">
                 <Rocket className="w-3.5 h-3.5" />
                 Crear
               </div>
@@ -351,10 +351,10 @@ const Dashboard = () => {
                 <button
                   key={app.label}
                   onClick={() => navigate(app.path)}
-                  className="group flex flex-col gap-3 p-4 aether-card rounded-xl border border-white/5 hover:border-aether-purple/25 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
+                  className="group flex flex-col gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-white/5 hover:border-primary/25 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
                 >
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/5 transition-all group-hover:bg-aether-purple/10 group-hover:border-aether-purple/20">
-                    <app.icon className="w-4 h-4 text-white/40 group-hover:text-aether-purple transition-colors" />
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/5 transition-all group-hover:bg-primary/10 group-hover:border-primary/20">
+                    <app.icon className="w-4 h-4 text-white/40 group-hover:text-primary transition-colors" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-white/80 group-hover:text-white tracking-tight font-display leading-tight">{app.label}</p>
@@ -395,16 +395,16 @@ const Dashboard = () => {
                   <button
                     key={space.id}
                     onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
-                    className="group flex items-center gap-3 p-4 aether-card rounded-xl border border-white/5 hover:border-aether-blue/30 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
+                    className="group flex items-center gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-white/5 hover:border-aether-blue/30 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
                   >
-                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0 group-hover:bg-aether-blue/10 group-hover:border-aether-blue/20 transition-all">
-                      <LayoutGrid className="w-4 h-4 text-white/30 group-hover:text-aether-blue transition-colors" />
+                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 group-hover:border-aether-blue/20 transition-all">
+                      <LayoutGrid className="w-4 h-4 text-white/30 group-hover:text-primary transition-colors" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-bold text-white truncate font-display">{space.name}</p>
                       <p className="text-[10px] text-white/25 truncate font-medium">{space.description || "Sin descripción"}</p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-white/15 shrink-0 group-hover:text-aether-blue group-hover:translate-x-0.5 transition-all" />
+                    <ChevronRight className="w-4 h-4 text-white/15 shrink-0 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                   </button>
                 ))}
               </div>
@@ -418,7 +418,7 @@ const Dashboard = () => {
       <Dialog open={isCreatingSpace} onOpenChange={setIsCreatingSpace}>
         <DialogContent className="border border-white/[0.08] rounded-2xl text-white max-w-md p-8" style={{ background: '#1c1c22' }}>
           <DialogHeader className="mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-aether-blue/20 text-aether-blue flex items-center justify-center mb-4 border border-aether-blue/20">
+            <div className="w-12 h-12 rounded-2xl bg-primary/20 text-primary flex items-center justify-center mb-4 border border-aether-blue/20">
               <Rocket className="w-6 h-6" />
             </div>
             <DialogTitle className="text-2xl font-bold text-white tracking-tight font-display">Nuevo espacio</DialogTitle>

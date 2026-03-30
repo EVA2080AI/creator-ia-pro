@@ -71,11 +71,11 @@ export function ModelSelector({ selectedModelId, onModelChange, filterType }: Mo
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between aether-card border-white/5 hover:border-white/10 h-14 rounded-xl px-4 transition-all duration-300 shadow-inner group"
+          className="w-full justify-between bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors border-white/5 hover:border-white/10 h-14 rounded-xl px-4 transition-all duration-300 shadow-inner group"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="p-1.5 rounded-lg bg-white/5 border border-white/5 group-hover:bg-aether-purple/10 group-hover:border-aether-purple/20 transition-all shrink-0">
-              <Sparkles className="h-3.5 w-3.5 text-aether-purple" />
+            <div className="p-1.5 rounded-lg bg-white/5 border border-white/5 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all shrink-0">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
             </div>
             <div className="flex flex-col items-start min-w-0">
               <span className="text-[13px] font-semibold text-white truncate">{selectedModel.name}</span>
@@ -179,7 +179,7 @@ function ModelItem({
         {/* Active dot */}
         <div className={cn(
           "w-1.5 h-1.5 rounded-full shrink-0 transition-all",
-          isSelected ? "bg-aether-purple shadow-[0_0_8px_rgba(74,222,128,0.8)]" : "bg-white/10"
+          isSelected ? "bg-primary shadow-[0_0_8px_rgba(74,222,128,0.8)]" : "bg-white/10"
         )} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -198,10 +198,10 @@ function ModelItem({
 
       <div className="flex items-center gap-2 shrink-0 ml-3">
         <div className="flex items-center gap-1 bg-white/[0.04] px-2 py-0.5 rounded-lg">
-          <Zap className="h-2.5 w-2.5 text-aether-purple" />
+          <Zap className="h-2.5 w-2.5 text-primary" />
           <span className="text-[10px] font-bold text-white/30 tabular-nums">{model.tokenCost}</span>
         </div>
-        {isSelected && <Check className="h-3.5 w-3.5 text-aether-purple" />}
+        {isSelected && <Check className="h-3.5 w-3.5 text-primary" />}
       </div>
     </CommandItem>
   );

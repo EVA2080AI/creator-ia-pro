@@ -99,15 +99,15 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
 
   return (
     <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
-      ${isRendering ? 'aether-prism glow-blue shadow-[0_0_40px_rgba(0,194,255,0.15)]' : 'aether-card'}
+      ${isRendering ? 'aether-prism glow-blue shadow-[0_0_40px_rgba(0,194,255,0.15)]' : 'bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors'}
       w-[260px] shadow-2xl
     `}>
 
       {/* Aether Node Header */}
       <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <div className="p-1.5 rounded-xl bg-white/5 border border-white/10 group-hover:bg-aether-blue/20 group-hover:border-aether-blue/30 transition-colors">
-            <Video className={`w-4 h-4 text-white/70 shrink-0 ${isRendering ? 'animate-pulse text-aether-blue' : ''}`} />
+          <div className="p-1.5 rounded-xl bg-white/5 border border-white/10 group-hover:bg-primary/20 group-hover:border-aether-blue/30 transition-colors">
+            <Video className={`w-4 h-4 text-white/70 shrink-0 ${isRendering ? 'animate-pulse text-primary' : ''}`} />
           </div>
           <h3 className="text-[11px] font-bold text-white/90 tracking-wide truncate font-display uppercase">{data.title || "Cinema Engine"}</h3>
         </div>
@@ -142,14 +142,14 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
           {isRendering && (
             <div className="w-full bg-white/[0.02] rounded-2xl border border-white/[0.05] flex flex-col items-center justify-center gap-3 py-5 px-4">
               <div className="w-3/4 h-1 bg-white/5 rounded-full overflow-hidden">
-                <div className="h-full bg-aether-blue animate-shimmer w-full" />
+                <div className="h-full bg-primary animate-shimmer w-full" />
               </div>
               <span className="text-[10px] text-white/70 font-bold tracking-wide animate-pulse text-center">
                 {VIDEO_STEPS[stepIndex]}
               </span>
               <div className="flex gap-1">
                 {VIDEO_STEPS.map((_, i) => (
-                  <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i <= stepIndex ? 'w-5 bg-aether-blue' : 'w-2 bg-white/10'}`} />
+                  <div key={i} className={`h-1 rounded-full transition-all duration-500 ${i <= stepIndex ? 'w-5 bg-primary' : 'w-2 bg-white/10'}`} />
                 ))}
               </div>
             </div>
@@ -194,7 +194,7 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
           {!isRendering && !isReady && !isError && (
             <div className="h-32 rounded-2xl border border-dashed border-white/10 bg-white/[0.01] flex flex-col items-center justify-center gap-4 group/idle hover:bg-white/[0.02] transition-colors">
               <div className="w-12 h-12 rounded-full border border-white/5 flex items-center justify-center group-hover/idle:border-white/10 transition-colors">
-                <Video className="w-5 h-5 text-white/10 group-hover/idle:text-aether-blue transition-colors" />
+                <Video className="w-5 h-5 text-white/10 group-hover/idle:text-primary transition-colors" />
               </div>
               <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">Awaiting Render</span>
             </div>

@@ -145,17 +145,17 @@ const Assets = () => {
   if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#050506]">
-        <Loader2 className="h-8 w-8 animate-spin text-aether-purple" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050506] text-white font-sans selection:bg-aether-purple/30 selection:text-white">
+    <div className="min-h-screen bg-[#050506] text-white font-sans selection:bg-primary/30 selection:text-white">
       {/* Ambient */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-aether-blue/5 blur-[150px]" />
-        <div className="absolute top-1/4 left-0 h-[400px] w-[400px] rounded-full bg-aether-purple/5 blur-[120px]" />
+        <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[150px]" />
+        <div className="absolute top-1/4 left-0 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[120px]" />
       </div>
 
       <AppHeader userId={user?.id} onSignOut={signOut} />
@@ -165,7 +165,7 @@ const Assets = () => {
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/5 pb-12">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-aether-blue animate-pulse shadow-[0_0_8px_rgba(0,194,255,0.8)]" />
+              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(0,194,255,0.8)]" />
               <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Asset Nexus v8.0</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight font-display leading-none">
@@ -187,12 +187,12 @@ const Assets = () => {
         {/* Filters */}
         <div className="mb-10 flex flex-col sm:flex-row items-center gap-4">
           <div className="relative flex-1 w-full group">
-            <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/20 group-focus-within:text-aether-purple transition-colors" />
+            <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/20 group-focus-within:text-primary transition-colors" />
             <Input
               placeholder="Buscar por prompt o tags..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-white/[0.03] border-white/5 pl-14 rounded-2xl h-14 text-white placeholder:text-white/10 focus:border-aether-purple/30 focus:ring-0 font-medium transition-all"
+              className="bg-white/[0.03] border-white/5 pl-14 rounded-2xl h-14 text-white placeholder:text-white/10 focus:border-primary/30 focus:ring-0 font-medium transition-all"
             />
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -213,7 +213,7 @@ const Assets = () => {
               onClick={() => setFilterFav(!filterFav)}
               className={`h-14 px-6 rounded-2xl text-xs font-bold uppercase tracking-widest font-display transition-all duration-300 flex items-center gap-2 ${
                 filterFav
-                  ? "bg-aether-purple text-white shadow-[0_0_20px_rgba(74,222,128,0.3)]"
+                  ? "bg-primary text-white shadow-[0_0_20px_rgba(74,222,128,0.3)]"
                   : "bg-white/[0.03] border border-white/5 text-white/30 hover:text-white/60"
               }`}
             >
@@ -226,7 +226,7 @@ const Assets = () => {
         {/* Grid */}
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <Loader2 className="h-10 w-10 animate-spin text-aether-purple" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex h-64 flex-col items-center justify-center gap-4">
@@ -243,7 +243,7 @@ const Assets = () => {
             {filtered.map((asset) => (
               <div
                 key={asset.id}
-                className="group relative overflow-hidden rounded-[2rem] border border-white/5 bg-[#080809]/60 backdrop-blur-3xl shadow-2xl transition-all hover:border-aether-purple/20 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] duration-500"
+                className="group relative overflow-hidden rounded-[2rem] border border-white/5 bg-[#080809]/60 backdrop-blur-3xl shadow-2xl transition-all hover:border-primary/20 hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] duration-500"
               >
                 {/* Image */}
                 <div className="aspect-square relative overflow-hidden">
@@ -282,7 +282,7 @@ const Assets = () => {
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-white/50 uppercase tracking-widest font-display">{asset.type}</span>
                       {asset.tags?.slice(0, 2).map((tag) => (
-                        <span key={tag} className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-aether-purple/20 text-aether-purple/80 uppercase tracking-widest font-display">{tag}</span>
+                        <span key={tag} className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-primary/20 text-primary/80 uppercase tracking-widest font-display">{tag}</span>
                       ))}
                     </div>
                   </div>
@@ -291,7 +291,7 @@ const Assets = () => {
                 {/* Favorite indicator */}
                 {asset.is_favorite && (
                   <div className="absolute top-3 left-3">
-                    <Star className="h-4 w-4 fill-aether-purple text-aether-purple drop-shadow-lg" />
+                    <Star className="h-4 w-4 fill-aether-purple text-primary drop-shadow-lg" />
                   </div>
                 )}
               </div>
@@ -339,8 +339,8 @@ const Assets = () => {
       <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
         <DialogContent className="bg-[#0a0a0b]/95 backdrop-blur-3xl border-white/10 sm:max-w-[440px] rounded-[3rem] p-12 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
           <DialogHeader>
-            <div className="h-14 w-14 rounded-2xl bg-aether-blue/10 border border-aether-blue/20 flex items-center justify-center mb-6">
-              <Link className="h-7 w-7 text-aether-blue" />
+            <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-aether-blue/20 flex items-center justify-center mb-6">
+              <Link className="h-7 w-7 text-primary" />
             </div>
             <DialogTitle className="text-3xl font-bold text-white tracking-tight font-display">
               Importar Recurso
