@@ -541,7 +541,7 @@ export default function Studio() {
           {/* Header */}
           <div className="px-4 py-4 border-b border-white/[0.05]">
             <div className="flex items-center gap-2 mb-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-aether-purple/30 to-aether-blue/20 border border-white/10">
+              <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-primary/30 to-primary/20 border border-white/10">
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
               </div>
               <span className="text-[11px] font-black text-white/50 uppercase tracking-[0.2em]">Studio</span>

@@ -54,7 +54,7 @@ const PLANS = [
     creditsLabel: "500K créditos",
     description: "El sweet spot para creadores profesionales. Incluye Claude y GPT-4o.",
     color: "#A855F7",
-    gradient: "from-aether-purple/15 to-aether-purple/5",
+    gradient: "from-primary/15 to-primary/5",
     border: "border-primary/30",
     icon: Rocket,
     badge: "Más popular",

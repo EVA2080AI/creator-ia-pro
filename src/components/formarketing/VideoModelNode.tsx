@@ -99,14 +99,14 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
 
   return (
     <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
-      ${isRendering ? 'aether-prism glow-blue shadow-[0_0_40px_rgba(0,194,255,0.15)]' : 'bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors'}
+      ${isRendering ? 'bg-card border-primary shadow-[0_0_20px_rgba(96,165,250,0.3)] shadow-[0_0_40px_rgba(0,194,255,0.15)]' : 'bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors'}
       w-[260px] shadow-2xl
     `}>
 
       {/* Aether Node Header */}
       <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">
         <div className="flex items-center gap-2.5 overflow-hidden">
-          <div className="p-1.5 rounded-xl bg-white/5 border border-white/10 group-hover:bg-primary/20 group-hover:border-aether-blue/30 transition-colors">
+          <div className="p-1.5 rounded-xl bg-white/5 border border-white/10 group-hover:bg-primary/20 group-hover:border-primary/30 transition-colors">
             <Video className={`w-4 h-4 text-white/70 shrink-0 ${isRendering ? 'animate-pulse text-primary' : ''}`} />
           </div>
           <h3 className="text-[11px] font-bold text-white/90 tracking-wide truncate font-display uppercase">{data.title || "Cinema Engine"}</h3>

@@ -112,7 +112,7 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
 
   return (
     <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
-      ${data.status === 'executing' ? 'aether-prism glow-purple' : 'bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors'}
+      ${data.status === 'executing' ? 'bg-card border-primary shadow-[0_0_20px_rgba(139,92,246,0.3)]' : 'bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors'}
       w-[260px] shadow-2xl
     `}>
       {/* Aether Node Header */}

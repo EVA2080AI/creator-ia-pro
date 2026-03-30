@@ -136,7 +136,7 @@ const Dashboard = () => {
     return (
       <div className="h-screen w-screen flex items-center justify-center" style={{ background: '#16161b' }}>
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-xl border-2 border-white/10 border-t-aether-purple animate-spin" />
+          <div className="w-8 h-8 rounded-xl border-2 border-white/10 border-t-primary animate-spin" />
           <p className="text-[11px] text-white/30">Cargando...</p>
         </div>
       </div>
@@ -319,9 +319,9 @@ const Dashboard = () => {
           {/* Genesis CTA */}
           <div
             onClick={() => navigate("/chat")}
-            className="group cursor-pointer relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-aether-purple/10 via-aether-blue/5 to-transparent p-5 hover:border-primary/40 transition-all duration-300"
+            className="group cursor-pointer relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-5 hover:border-primary/40 transition-all duration-300"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-aether-purple/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
             <div className="relative flex items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1">
@@ -395,9 +395,9 @@ const Dashboard = () => {
                   <button
                     key={space.id}
                     onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
-                    className="group flex items-center gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-white/5 hover:border-aether-blue/30 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
+                    className="group flex items-center gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-white/5 hover:border-primary/30 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
                   >
-                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 group-hover:border-aether-blue/20 transition-all">
+                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all">
                       <LayoutGrid className="w-4 h-4 text-white/30 group-hover:text-primary transition-colors" />
                     </div>
                     <div className="min-w-0 flex-1">
@@ -418,7 +418,7 @@ const Dashboard = () => {
       <Dialog open={isCreatingSpace} onOpenChange={setIsCreatingSpace}>
         <DialogContent className="border border-white/[0.08] rounded-2xl text-white max-w-md p-8" style={{ background: '#1c1c22' }}>
           <DialogHeader className="mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-primary/20 text-primary flex items-center justify-center mb-4 border border-aether-blue/20">
+            <div className="w-12 h-12 rounded-2xl bg-primary/20 text-primary flex items-center justify-center mb-4 border border-primary/20">
               <Rocket className="w-6 h-6" />
             </div>
             <DialogTitle className="text-2xl font-bold text-white tracking-tight font-display">Nuevo espacio</DialogTitle>
@@ -434,7 +434,7 @@ const Dashboard = () => {
                 value={newSpaceName}
                 onChange={(e) => setNewSpaceName(e.target.value)}
                 placeholder="ej. Campaña Verano 2025"
-                className="bg-white/[0.03] border-white/10 text-white placeholder:text-white/10 rounded-xl px-4 h-12 font-medium focus:border-aether-blue/40 focus:ring-0"
+                className="bg-white/[0.03] border-white/10 text-white placeholder:text-white/10 rounded-xl px-4 h-12 font-medium focus:border-primary/40 focus:ring-0"
                 onKeyDown={(e) => e.key === "Enter" && handleCreateSpace()}
               />
             </div>
@@ -445,7 +445,7 @@ const Dashboard = () => {
                 value={newSpaceDesc}
                 onChange={(e) => setNewSpaceDesc(e.target.value)}
                 placeholder="Contexto del proyecto..."
-                className="bg-white/[0.03] border-white/10 text-white placeholder:text-white/10 rounded-xl px-4 h-12 font-medium focus:border-aether-blue/40 focus:ring-0"
+                className="bg-white/[0.03] border-white/10 text-white placeholder:text-white/10 rounded-xl px-4 h-12 font-medium focus:border-primary/40 focus:ring-0"
               />
             </div>
           </div>

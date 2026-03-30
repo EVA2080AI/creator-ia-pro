@@ -99,7 +99,7 @@ const Auth = () => {
             </div>
             <h2 className="text-5xl xl:text-6xl font-bold text-white leading-[1.05] tracking-tight font-display">
               Crea con IA.<br />
-              <span className="bg-gradient-to-r from-aether-purple to-aether-blue bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">
                 Más rápido.
               </span>
             </h2>

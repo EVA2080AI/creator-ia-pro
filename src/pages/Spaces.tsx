@@ -249,7 +249,7 @@ const Spaces = () => {
                     onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
                   >
                     {/* Color accent bar */}
-                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-aether-purple/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                     {/* Thumbnail */}
                     <div className="flex h-32 items-center justify-center bg-white/[0.02] border-b border-white/[0.04] overflow-hidden">

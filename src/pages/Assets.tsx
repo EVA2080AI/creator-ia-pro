@@ -169,7 +169,7 @@ const Assets = () => {
               <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Asset Nexus v8.0</span>
             </div>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight font-display leading-none">
-              Mi <span className="bg-gradient-to-r from-aether-blue to-aether-purple bg-clip-text text-transparent">Biblioteca</span>
+              Mi <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">Biblioteca</span>
             </h1>
             <p className="text-sm text-white/30 font-medium max-w-md leading-relaxed">
               Generaciones guardadas, recursos curados y activos de marca persistentes.
@@ -291,7 +291,7 @@ const Assets = () => {
                 {/* Favorite indicator */}
                 {asset.is_favorite && (
                   <div className="absolute top-3 left-3">
-                    <Star className="h-4 w-4 fill-aether-purple text-primary drop-shadow-lg" />
+                    <Star className="h-4 w-4 fill-primary text-primary drop-shadow-lg" />
                   </div>
                 )}
               </div>
@@ -339,7 +339,7 @@ const Assets = () => {
       <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
         <DialogContent className="bg-[#0a0a0b]/95 backdrop-blur-3xl border-white/10 sm:max-w-[440px] rounded-[3rem] p-12 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
           <DialogHeader>
-            <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-aether-blue/20 flex items-center justify-center mb-6">
+            <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
               <Link className="h-7 w-7 text-primary" />
             </div>
             <DialogTitle className="text-3xl font-bold text-white tracking-tight font-display">
@@ -358,7 +358,7 @@ const Assets = () => {
                   value={importUrl}
                   onChange={(e) => setImportUrl(e.target.value)}
                   placeholder="https://example.com/image.png"
-                  className="pl-14 rounded-2xl border-white/5 bg-white/[0.03] h-14 text-white placeholder:text-white/10 focus:border-aether-blue/30 focus:ring-0 font-medium"
+                  className="pl-14 rounded-2xl border-white/5 bg-white/[0.03] h-14 text-white placeholder:text-white/10 focus:border-primary/30 focus:ring-0 font-medium"
                 />
               </div>
             </div>

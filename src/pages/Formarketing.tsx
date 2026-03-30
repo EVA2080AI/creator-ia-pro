@@ -1168,7 +1168,7 @@ function FormarketingContent() {
           onPaneClick={() => setSelectedNodeId(null)}
           nodeTypes={nodeTypes}
           fitView
-          className="aether-canvas"
+          className="bg-background"
           colorMode="dark"
           minZoom={0.1}
           maxZoom={4}
@@ -1335,7 +1335,7 @@ function TemplateLanding({
             <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Studio · Plantillas</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display mb-4">
-            Elige una <span className="bg-gradient-to-r from-aether-purple to-aether-blue bg-clip-text text-transparent">plantilla</span>
+            Elige una <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">plantilla</span>
           </h1>
           <p className="text-sm text-white/30 font-medium max-w-md mx-auto">
             Carga el flujo completo en segundos. Puedes editarlo como quieras.

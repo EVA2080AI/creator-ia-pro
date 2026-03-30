@@ -45,7 +45,7 @@ const Downloads = () => {
 
         <h1 className="max-w-3xl text-center text-5xl font-bold leading-none tracking-tight font-display md:text-7xl mb-6">
           Funciona en<br />
-          <span className="bg-gradient-to-r from-aether-purple to-aether-blue bg-clip-text text-transparent">cualquier dispositivo</span>
+          <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">cualquier dispositivo</span>
         </h1>
         <p className="text-center text-base text-white/30 font-medium max-w-lg leading-relaxed mb-16">
           Creator IA Pro es una aplicación web — no necesitas descargar nada.

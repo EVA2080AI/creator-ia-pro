@@ -473,7 +473,7 @@ const Tools = () => {
   if (authLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-[#050506]">
-        <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-aether-purple animate-spin" />
+        <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-primary animate-spin" />
       </div>
     );
   }

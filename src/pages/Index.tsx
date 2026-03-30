@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowRight, Code2, Image, Zap,
   CheckCircle2, Layers, MessageSquare, Video,
-  Star, Shield, Users, ChevronRight,
+  Star, Shield, Users, ChevronRight, Sparkles
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
@@ -128,7 +128,7 @@ export default function Index() {
 
               <h1 className="text-[clamp(2.5rem,8vw,5.5rem)] font-black leading-[0.9] tracking-tight text-white max-w-4xl mb-6">
                 Construye apps.<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-aether-purple to-aether-blue">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/80">
                   Crea contenido.
                 </span>
                 <br />Todo con IA.
@@ -352,7 +352,7 @@ export default function Index() {
           {/* ── Canvas section ──────────────────────────────────────────── */}
           <section className="px-6 md:px-12 py-20 border-t border-white/[0.04]">
             <div className="max-w-5xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-aether-blue/30 text-primary bg-primary/10 text-[10px] font-black uppercase tracking-[0.3em] mb-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 text-primary bg-primary/10 text-[10px] font-black uppercase tracking-[0.3em] mb-6">
                 <Layers className="h-3 w-3" />
                 Canvas Editor
               </div>
@@ -365,7 +365,7 @@ export default function Index() {
               <div className="flex items-center justify-center gap-4">
                 <button
                   onClick={() => navigate("/formarketing")}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl border border-aether-blue/30 text-primary hover:bg-primary/10 transition-all font-bold text-[13px]"
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 transition-all font-bold text-[13px]"
                 >
                   <Layers className="h-4 w-4" />
                   Abrir Canvas
