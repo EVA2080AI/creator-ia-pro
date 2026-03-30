@@ -22,21 +22,23 @@ const ICONS = [
   'Check','X','Menu','ChevronDown','ChevronUp','ChevronLeft','ChevronRight',
   'Star','Heart','Share2','Github','Twitter','Linkedin','Instagram','Facebook','Youtube',
   'Zap','Shield','Users','Globe','Code2','Sparkles','Rocket','Crown','Coins','Bolt',
-  'Image','Video','Type','Upload','Download','Copy','Trash2','Edit','Edit2','Plus','Minus',
+  'Video','Type','Upload','Download','Copy','Trash2','Edit','Edit2','Plus','Minus',
   'Search','Mail','Phone','MapPin','Clock','Calendar','Bell','Settings','User','LogOut',
   'Play','Pause','Loader2','AlertCircle','CheckCircle','Info','AlertTriangle',
-  'Home','Folder','FolderOpen','FileText','File','Database','Server','Cloud',
+  'Home','Folder','FolderOpen','FileText','Database','Server','Cloud',
   'Moon','Sun','Palette','LayoutTemplate','BarChart2','BarChart','Activity',
   'DollarSign','CreditCard','Briefcase','Building2','Store','ShoppingCart','ShoppingBag',
   'Lock','Unlock','Eye','EyeOff','Send','MessageSquare','MessageCircle','Mic','Camera',
   'Monitor','Smartphone','Tablet','Cpu','Package','Code','Layers','Workflow',
   'TrendingUp','TrendingDown','PieChart','LineChart','Target','Award','Badge',
   'Wifi','Battery','Bluetooth','Radio','Headphones','Volume2','VolumeX',
-  'Map','Navigation','Compass','Anchor','Flag','Tag','Bookmark','Paperclip',
+  'Navigation','Compass','Anchor','Flag','Tag','Bookmark','Paperclip',
   'Grid','List','Filter','SortAsc','SortDesc','RefreshCw','RotateCcw',
   'ExternalLink','Link','Hash','AtSign','Feather','Pen','PenTool',
   'Key','Fingerprint','ShieldCheck','ShieldAlert',
   'HardDrive','Terminal','GitBranch','GitCommit','GitMerge',
+  // NOTE: Map, Image, File intentionally excluded — they shadow JS/browser built-ins
+  // (Map constructor, Image constructor, File API). Accessed via _iconProxy instead.
 ].join(',\n  ');
 
 // ─── Strip imports / exports so code runs inline ─────────────────────────────
@@ -182,6 +184,13 @@ const LR = window.LucideReact || {};
 const {
   ${ICONS}
 } = LR;
+// Expose Lucide icons whose names clash with JS/browser built-ins (Map, Image, File).
+// We alias them so generated code using <MapIcon/> etc. still works,
+// AND the native Map/Image/File constructors remain intact.
+const MapIcon    = LR.Map    || null;
+const ImageIcon  = LR.Image  || null;
+const FileIcon   = LR.File   || null;
+
 // Icon proxy — unknown icons render a placeholder instead of crashing
 const _iconProxy = new Proxy(LR, {
   get(target, prop) {
