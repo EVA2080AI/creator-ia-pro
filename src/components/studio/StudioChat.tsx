@@ -223,8 +223,8 @@ function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
     } else if ((lang === 'tsx' || lang === 'jsx' || lang === 'react') && code.length > 100) {
       files['App.tsx'] = { language: 'tsx', content: code };
     } else if ((lang === 'ts' || lang === 'js' || lang === 'typescript' || lang === 'javascript') && code.length > 100 && !files['App.tsx']) {
-      // If it contains JSX patterns, treat as tsx
-      const isJsx = /<[A-Z][a-zA-Z]+|return\s*\([\s\S]{0,100}</.test(code);
+      // Treat as TSX if it contains JSX patterns or React hooks
+      const isJsx = /return\s*\(?\s*<|useState\s*[<(]|useEffect\s*\(|<[A-Z][A-Za-z]|React\.createElement/.test(code);
       files['App.tsx'] = { language: isJsx ? 'tsx' : lang, content: code };
     } else if (lang === 'css' && code.length > 20) {
       files['styles.css'] = { language: 'css', content: code };
@@ -476,7 +476,7 @@ export function StudioChat({
         }),
       });
 
-      if (!res.ok && res.status !== 200) {
+      if (!res.ok) {
         const errText = await res.text().catch(() => '');
         toast.error(`Error ${res.status}: ${errText.slice(0, 100)}`);
         return null;
@@ -563,7 +563,7 @@ export function StudioChat({
       }, 400);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectFiles, selectedModel, convHistory, pendingImage]);
+  }, [projectFiles, selectedModel, convHistory, pendingImage, supabaseConfig]);
 
   // ─── Process raw accumulated text into files ───────────────────────────────
   const processRaw = (rawText: string, prompt: string) => {

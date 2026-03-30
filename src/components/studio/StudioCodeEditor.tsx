@@ -7,6 +7,8 @@ interface StudioCodeEditorProps {
   selectedFile: string;
   projectFiles: Record<string, StudioFile>;
   onFilesChange: (files: Record<string, StudioFile>) => void;
+  isGenerating?: boolean;
+  streamPreview?: string;
 }
 
 const KEYWORDS = ['import','from','export','default','const','let','var','return','function',
@@ -17,10 +19,10 @@ function highlightLine(line: string): React.ReactNode[] {
   const tokens: React.ReactNode[] = [];
   const patterns: { re: RegExp; cls: string }[] = [
     { re: /(\/\/.*)/, cls: 'text-white/30' },
-    { re: new RegExp(`\\b(${KEYWORDS.join('|')})\\b`), cls: 'text-aether-purple' },
+    { re: new RegExp(`\\b(${KEYWORDS.join('|')})\\b`), cls: 'text-[#8AB4F8]' },
     { re: /('[^']*'|"[^"]*"|`[^`]*`)/, cls: 'text-green-400' },
     { re: /\b(\d+)\b/, cls: 'text-yellow-400' },
-    { re: new RegExp(`\\b(${TYPES.join('|')})\\b`), cls: 'text-aether-blue' },
+    { re: new RegExp(`\\b(${TYPES.join('|')})\\b`), cls: 'text-[#8AB4F8]' },
     { re: /(<\/?[A-Za-z]\w*)/, cls: 'text-rose-400' },
     { re: /(className|onClick|onChange|onSubmit|href|disabled|type|value|key|ref|style|placeholder)/, cls: 'text-yellow-300' },
   ];
@@ -50,17 +52,19 @@ function highlightLine(line: string): React.ReactNode[] {
   return tokens;
 }
 
-export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange }: StudioCodeEditorProps) {
+export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, isGenerating, streamPreview }: StudioCodeEditorProps) {
   const fileNames = Object.keys(projectFiles);
   const [openTabs, setOpenTabs] = useState<string[]>(() => fileNames.slice(0, 3));
-  const [activeTab, setActiveTab] = useState(selectedFile || fileNames[0] || 'App.tsx');
+  const [activeTab, setActiveTab] = useState(() => selectedFile || fileNames[0] || '');
   const [isEditing, setIsEditing] = useState(false);
   const [modified, setModified] = useState<Set<string>>(new Set());
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
 
-  const file = projectFiles[activeTab] || projectFiles[fileNames[0]] || { language: 'tsx', content: '' };
+  // Resolve active file safely — never read undefined
+  const resolvedTab = (activeTab && projectFiles[activeTab]) ? activeTab : (fileNames[0] ?? '');
+  const file = projectFiles[resolvedTab] ?? { language: 'tsx', content: '' };
   const lines = file.content.split('\n');
 
   useEffect(() => {
@@ -91,10 +95,11 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange }: 
   };
 
   const handleContentChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const updated = { ...projectFiles, [activeTab]: { ...file, content: e.target.value } };
+    if (!resolvedTab) return;
+    const updated = { ...projectFiles, [resolvedTab]: { ...file, content: e.target.value } };
     onFilesChange(updated);
-    setModified((prev) => new Set(prev).add(activeTab));
-  }, [activeTab, file, projectFiles, onFilesChange]);
+    setModified((prev) => new Set(prev).add(resolvedTab));
+  }, [resolvedTab, file, projectFiles, onFilesChange]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Tab') {
@@ -103,14 +108,14 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange }: 
       const start = ta.selectionStart;
       const end = ta.selectionEnd;
       const newContent = file.content.substring(0, start) + '  ' + file.content.substring(end);
-      onFilesChange({ ...projectFiles, [activeTab]: { ...file, content: newContent } });
-      setModified((prev) => new Set(prev).add(activeTab));
+      if (resolvedTab) onFilesChange({ ...projectFiles, [resolvedTab]: { ...file, content: newContent } });
+      setModified((prev) => new Set(prev).add(resolvedTab));
       requestAnimationFrame(() => { ta.selectionStart = ta.selectionEnd = start + 2; });
     }
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
-      setModified((prev) => { const n = new Set(prev); n.delete(activeTab); return n; });
-      toast.success(`${activeTab} guardado`);
+      setModified((prev) => { const n = new Set(prev); n.delete(resolvedTab); return n; });
+      toast.success(`${resolvedTab} guardado`);
     }
   };
 
@@ -119,20 +124,51 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange }: 
   };
 
   return (
-    <div className="flex h-full flex-col bg-[#1c1c22]">
+    <div className="flex h-full flex-col bg-[#1e2028] relative">
+      {isGenerating && (
+        <div className="absolute inset-0 z-20 flex flex-col overflow-hidden" style={{ background: '#1e2028' }}>
+          {/* fake tab bar */}
+          <div className="flex items-center border-b border-white/[0.05] bg-[#191a1f] px-3 py-2 gap-2 shrink-0">
+            <div className="h-2 w-16 rounded-full animate-pulse" style={{ background: 'rgba(138,180,248,0.15)' }} />
+            <div className="h-2 w-12 rounded-full animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+          </div>
+          {/* streaming code area */}
+          <div className="flex-1 overflow-hidden p-4 font-mono text-[11px] leading-6 relative">
+            <div className="absolute inset-0 p-4 overflow-hidden">
+              <pre className="text-emerald-400/70 whitespace-pre-wrap break-all text-[10px] leading-5 opacity-80">
+                {streamPreview || ''}
+                <span className="inline-block w-2 h-4 bg-[#8AB4F8] ml-0.5 animate-pulse align-middle" />
+              </pre>
+            </div>
+            {/* gradient fade at bottom */}
+            <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+              style={{ background: 'linear-gradient(to bottom, transparent, #1e2028)' }} />
+          </div>
+          {/* status bar */}
+          <div className="shrink-0 flex items-center gap-2 px-4 py-2 border-t border-white/[0.04]"
+            style={{ background: '#191a1f' }}>
+            <div className="flex gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#8AB4F8]/70 animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#8AB4F8]/70 animate-bounce" style={{ animationDelay: '120ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-[#8AB4F8]/70 animate-bounce" style={{ animationDelay: '240ms' }} />
+            </div>
+            <span className="text-[10px] text-white/30 font-mono">Genesis está generando código…</span>
+          </div>
+        </div>
+      )}
       {/* Tabs */}
-      <div className="flex items-center border-b border-white/[0.05] bg-[#16161b] overflow-x-auto no-scrollbar">
+      <div className="flex items-center border-b border-white/[0.05] bg-[#191a1f] overflow-x-auto no-scrollbar">
         {openTabs.filter((t) => projectFiles[t]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`group flex items-center gap-2 px-4 py-2.5 text-sm border-r border-white/[0.05] transition-colors shrink-0 ${
-              activeTab === tab
-                ? 'bg-[#1c1c22] text-white border-b-2 border-b-aether-purple'
+              resolvedTab === tab
+                ? 'bg-[#1e2028] text-white border-b-2 border-b-[#8AB4F8]'
                 : 'text-white/30 hover:text-white/70 hover:bg-white/[0.02]'
             }`}
           >
-            <Circle className={`h-1.5 w-1.5 shrink-0 ${modified.has(tab) ? 'fill-yellow-400 text-yellow-400' : 'fill-aether-blue/60 text-aether-blue/60'}`} />
+            <Circle className={`h-1.5 w-1.5 shrink-0 ${modified.has(tab) ? 'fill-yellow-400 text-yellow-400' : 'fill-[#8AB4F8]/60 text-[#8AB4F8]/60'}`} />
             <span className="font-mono text-[11px]">{tab}</span>
             <X
               className="h-3 w-3 opacity-0 group-hover:opacity-100 text-white/20 hover:text-white transition-opacity"
@@ -145,7 +181,7 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange }: 
       {/* Editor area */}
       <div className="relative flex flex-1 overflow-hidden">
         {/* Line numbers */}
-        <div ref={lineNumbersRef} className="w-12 shrink-0 overflow-hidden bg-[#1c1c22] py-4 text-right select-none border-r border-white/[0.03]">
+        <div ref={lineNumbersRef} className="w-12 shrink-0 overflow-hidden bg-[#1e2028] py-4 text-right select-none border-r border-white/[0.03]">
           {lines.map((_, i) => (
             <div key={i} className="pr-3 text-[11px] leading-6 text-white/15 font-mono">{i + 1}</div>
           ))}
@@ -180,7 +216,7 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange }: 
               const col = ta.selectionStart - text.lastIndexOf('\n');
               setCursorPos({ line: lineNum, col });
             }}
-            className="flex-1 resize-none bg-transparent p-4 font-mono text-[12px] leading-6 text-white/80 outline-none caret-aether-purple"
+            className="flex-1 resize-none bg-transparent p-4 font-mono text-[12px] leading-6 text-white/80 outline-none caret-[#8AB4F8]"
             spellCheck={false}
             autoFocus
           />
@@ -188,11 +224,11 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange }: 
       </div>
 
       {/* Status bar */}
-      <div className="flex items-center justify-between border-t border-white/[0.05] bg-[#16161b] px-4 py-1 text-[10px] text-white/20 font-mono">
+      <div className="flex items-center justify-between border-t border-white/[0.05] bg-[#191a1f] px-4 py-1 text-[10px] text-white/20 font-mono">
         <div className="flex items-center gap-4">
           <span>{file.language.toUpperCase()}</span>
           <span>UTF-8</span>
-          {modified.has(activeTab) && <span className="text-yellow-400">● Sin guardar</span>}
+          {modified.has(resolvedTab) && <span className="text-yellow-400">● Sin guardar</span>}
         </div>
         <span>Ln {cursorPos.line}, Col {cursorPos.col}</span>
       </div>

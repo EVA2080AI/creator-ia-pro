@@ -21,7 +21,17 @@ interface StudioPreviewProps {
   supabaseConfig?: SupabaseConfig | null;
 }
 
-// Map our file language → Sandpack-friendly extension
+// Known entry file names in priority order
+const ENTRY_NAMES = [
+  'App.tsx','app.tsx','App.jsx','app.jsx',
+  'index.tsx','index.jsx','main.tsx','main.jsx',
+  'src/App.tsx','src/app.tsx','src/index.tsx','src/main.tsx',
+];
+
+// Hint that a file contains JSX / React
+const JSX_HINT = /return\s*\(?\s*<|useState\s*\(|useEffect\s*\(|React\.|<[A-Z][A-Za-z]/;
+
+// Map our file records → Sandpack files, always placing entry at /App.tsx
 function toSandpackFiles(
   files: Record<string, StudioFile>,
   supabaseConfig?: SupabaseConfig | null,
@@ -30,56 +40,45 @@ function toSandpackFiles(
 
   const result: Record<string, { code: string; active?: boolean }> = {};
 
-  // Inject Supabase client singleton if config present
-  const supabaseSetup = supabaseConfig
-    ? `import { createClient } from '@supabase/supabase-js';
-export const supabase = createClient(
-  '${supabaseConfig.url}',
-  '${supabaseConfig.anonKey}'
-);\n`
-    : null;
-
-  if (supabaseSetup) {
-    result['/supabaseClient.ts'] = { code: supabaseSetup };
+  // Supabase client file when connected
+  if (supabaseConfig) {
+    result['/supabaseClient.ts'] = {
+      code: `import { createClient } from '@supabase/supabase-js';\nexport const supabase = createClient('${supabaseConfig.url}', '${supabaseConfig.anonKey}');\n`,
+    };
   }
 
-  let hasEntry = false;
+  // Find entry file
+  let entryContent: string | null = null;
+  let entryOrigName: string | null = null;
 
-  for (const [name, file] of Object.entries(files)) {
-    // Normalise path to absolute
-    const path = name.startsWith('/') ? name : `/${name}`;
-    result[path] = { code: file.content };
-
-    if (
-      name === 'App.tsx' || name === 'app.tsx' ||
-      name === 'App.jsx' || name === 'index.tsx' ||
-      name === 'index.jsx' || name === 'main.tsx'
-    ) {
-      hasEntry = true;
-    }
+  for (const name of ENTRY_NAMES) {
+    if (files[name]) { entryContent = files[name].content; entryOrigName = name; break; }
   }
-
-  // Sandpack needs /App.tsx as entry; if missing, use first TSX file
-  if (!hasEntry) {
-    const firstTsx = Object.entries(files).find(([, f]) =>
-      f.language === 'tsx' || f.language === 'jsx'
+  // Fallback: first TSX/JSX file that looks like a React component
+  if (!entryContent) {
+    const candidate = Object.entries(files).find(
+      ([, f]) => (f.language === 'tsx' || f.language === 'jsx') && JSX_HINT.test(f.content)
     );
-    if (firstTsx) {
-      const [origName, file] = firstTsx;
-      // Add a thin App.tsx wrapper that re-exports it
-      const compName = origName.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9]/g, '_') || 'Component';
-      result['/App.tsx'] = {
-        code: `export { default } from './${origName}';\n`,
-        active: true,
-      };
-      // Keep original too
-      if (!result[`/${origName}`]) {
-        result[`/${origName}`] = { code: file.content };
-      }
-    } else {
-      return null; // Nothing previewable
-    }
+    if (candidate) { entryContent = candidate[1].content; entryOrigName = candidate[0]; }
   }
+  // Last resort: any tsx/jsx file
+  if (!entryContent) {
+    const candidate = Object.entries(files).find(
+      ([, f]) => f.language === 'tsx' || f.language === 'jsx'
+    );
+    if (candidate) { entryContent = candidate[1].content; entryOrigName = candidate[0]; }
+  }
+  if (!entryContent) return null;
+
+  // Add supporting files (strip src/ prefix so paths resolve inside Sandpack)
+  for (const [name, file] of Object.entries(files)) {
+    if (name === entryOrigName) continue; // entry goes to /App.tsx below
+    const abs = (name.startsWith('/') ? name : `/${name}`).replace(/^\/src\//, '/');
+    result[abs] = { code: file.content };
+  }
+
+  // Always expose entry as /App.tsx
+  result['/App.tsx'] = { code: entryContent, active: true };
 
   return result;
 }
@@ -219,14 +218,10 @@ export function StudioPreview({
         {hasContent ? (
           /* ── Device frame wrapper ─────────────────────────────────── */
           <div
-            className="relative flex-shrink-0"
-            style={{
-              width: deviceMode === 'desktop' ? '100%' : undefined,
-              height: deviceMode === 'desktop' ? '100%' : undefined,
-              padding: deviceMode === 'desktop' ? 0
-                : deviceMode === 'tablet' ? '24px 20px'
-                : '28px 16px',
-            }}
+            className={deviceMode === 'desktop' ? 'w-full h-full' : 'relative flex-shrink-0'}
+            style={deviceMode !== 'desktop' ? {
+              padding: deviceMode === 'tablet' ? '24px 20px' : '28px 16px',
+            } : undefined}
           >
             {/* Phone / tablet bezel */}
             {deviceMode !== 'desktop' && (
@@ -259,9 +254,9 @@ export function StudioPreview({
             <div
               key={refreshKey}
               style={{
-                width: frameWidth[deviceMode],
+                width: deviceMode === 'desktop' ? '100%' : frameWidth[deviceMode],
                 height: deviceMode === 'desktop' ? '100%' : undefined,
-                minHeight: deviceMode === 'desktop' ? '100%' : 620,
+                minHeight: deviceMode !== 'desktop' ? 620 : undefined,
                 transformOrigin: 'top left',
                 transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
                 borderRadius: deviceMode === 'mobile' ? 36 : deviceMode === 'tablet' ? 12 : 0,
@@ -274,12 +269,37 @@ export function StudioPreview({
                 files={sandpackFiles!}
                 customSetup={{
                   dependencies: {
-                    'lucide-react': '^0.468.0',
+                    // Core React
                     'react': '^18.0.0',
                     'react-dom': '^18.0.0',
+                    // Icons
+                    'lucide-react': '^0.468.0',
+                    'react-icons': '^5.0.0',
+                    // Styling utilities
                     'clsx': '^2.0.0',
                     'class-variance-authority': '^0.7.0',
                     'tailwind-merge': '^2.0.0',
+                    // Routing
+                    'react-router-dom': '^6.0.0',
+                    // Animation
+                    'framer-motion': '^11.0.0',
+                    // Charts
+                    'recharts': '^2.0.0',
+                    // Forms
+                    'react-hook-form': '^7.0.0',
+                    'zod': '^3.0.0',
+                    '@hookform/resolvers': '^3.0.0',
+                    // HTTP
+                    'axios': '^1.0.0',
+                    // Dates
+                    'date-fns': '^3.0.0',
+                    // State
+                    'zustand': '^4.0.0',
+                    // Notifications
+                    'sonner': '^1.0.0',
+                    // Data fetching
+                    '@tanstack/react-query': '^5.0.0',
+                    // Supabase
                     ...(supabaseConfig ? { '@supabase/supabase-js': '^2.0.0' } : {}),
                   },
                 }}
@@ -291,11 +311,10 @@ export function StudioPreview({
                 }}
                 theme="dark"
               >
-                <SandpackLayout style={{ border: 'none', borderRadius: 0, height: deviceMode === 'desktop' ? '100%' : 620 }}>
+                <SandpackLayout style={{ border: 'none', borderRadius: 0, height: deviceMode === 'desktop' ? '100%' : 620, minHeight: deviceMode !== 'desktop' ? 620 : undefined }}>
                   <SandpackPreview
                     showOpenInCodeSandbox={false}
                     showRefreshButton={false}
-                    style={{ height: '100%', flex: 1 }}
                   />
                 </SandpackLayout>
               </SandpackProvider>
