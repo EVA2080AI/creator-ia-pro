@@ -104,6 +104,12 @@ export function StudioPreview({
     mobile:  '375px',
   };
 
+  const frameHeight: Record<DeviceMode, string | undefined> = {
+    desktop: undefined,
+    tablet:  '1024px',
+    mobile:  '812px',
+  };
+
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: '#13141a' }}>
 
@@ -255,14 +261,13 @@ export function StudioPreview({
               key={refreshKey}
               style={{
                 width: deviceMode === 'desktop' ? '100%' : frameWidth[deviceMode],
-                height: deviceMode === 'desktop' ? '100%' : undefined,
-                minHeight: deviceMode !== 'desktop' ? 620 : undefined,
-                transformOrigin: 'top left',
+                height: deviceMode === 'desktop' ? '100%' : frameHeight[deviceMode],
+                transformOrigin: 'top center',
                 transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
                 borderRadius: deviceMode === 'mobile' ? 36 : deviceMode === 'tablet' ? 12 : 0,
                 overflow: 'hidden',
               }}
-              className="flex-1 flex flex-col h-full"
+              className="flex-shrink-0 flex flex-col"
             >
               <SandpackProvider
                 key={JSON.stringify(sandpackFiles)}

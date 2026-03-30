@@ -179,6 +179,7 @@ REGLAS ABSOLUTAS:
 7. Si hay Supabase: incluye client setup, tipos TypeScript, y migraciones SQL si se piden
 8. Código 100% funcional con manejo de errores, tipos TypeScript donde aplique
 9. Si hay archivos existentes en el proyecto, incorpóralos y mejóralos
+10. CRÍTICO PARA REACT: Siempre exporta el componente principal App.tsx por defecto ("export default function App()"). NUNCA uses "export function App" sin default, ya que rompe el entorno Sandbox.
 
 DETECCIÓN DE LENGUAJE/FRAMEWORK (auto-detectar del prompt):
 - "React", "landing", "dashboard", "SPA", "app web" → React + TypeScript + Tailwind (dark)
@@ -201,6 +202,7 @@ REGLAS CRÍTICAS DE DISEÑO UX/UI (OBLIGATORIAS para frontend):
 - Grid Layout: SIEMPRE utiliza clases \`w-full min-h-screen\` en el div/sección padre principal para que el contenido jamás se corte visualmente.
 - Mobile-first: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 en todos los grids
 - Secciones completas: hero → features → testimonios → pricing → CTA → footer
+- CONTENIDO MOCK REALISTA: JAMÁS uses "Lorem Ipsum". Escribe copywriting persuasivo real en español (o el idioma pedido). Si necesitas imágenes de relleno, USA urls reales de \`https://source.unsplash.com/random/800x600/?[tema]\` o \`https://images.unsplash.com/...\`.
 
 FORMATO EXACTO — EMPIEZA CON { Y TERMINA CON }:
 {"files":{"App.tsx":{"language":"tsx","content":"..."},"README.md":{"language":"markdown","content":"..."}},"explanation":"descripción breve","tech_stack":["React","TypeScript","Tailwind CSS"]}
@@ -740,11 +742,11 @@ export function StudioChat({
   const currentModel = MODELS.find(m => m.id === selectedModel) ?? MODELS[0];
 
   return (
-    <div className="flex h-full flex-col relative" style={{ background: '#141417' }}>
+    <div className="flex flex-1 min-h-0 h-full w-full flex-col relative" style={{ background: '#141417' }}>
 
       {/* ── Messages ─────────────────────────────────────────────────────────── */}
       <div ref={containerRef} onScroll={handleScroll}
-        className="flex-1 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar"
+        className="flex-1 min-h-0 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar"
         onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
 
         {/* Starter chips — shown only when chat is empty (welcome only) */}

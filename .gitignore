@@ -25,3 +25,6 @@ dist-ssr
 .env.local
 node_modules/
 .vercel
+.env.vercel
+.claude/
+test-qa.mjs
