@@ -330,7 +330,7 @@ serve(async (req: Request) => {
         const encPrompt = encodeURIComponent(prompt || 'cool image');
         // Cache buster to ensure fresh generation
         const seed = Math.floor(Math.random() * 1000000);
-        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encPrompt}?width=${width}&height=${height}&nologo=true&seed=${seed}`;
+        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encPrompt}?width=${width}&height=${height}&nologo=true&enhance=false&model=flux&seed=${seed}`;
         
         return json({ url: pollinationsUrl, model: 'pollinations/flux' });
       } catch (fallbackErr) {
