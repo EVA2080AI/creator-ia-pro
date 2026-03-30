@@ -192,6 +192,7 @@ function ToolWorkspace({
   const [processing, setProcessing] = useState(false);
   const [streaming, setStreaming]   = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
+  const [imageLoading, setImageLoading] = useState(false);
   const [resultText, setResultText]   = useState('');
   const [saved, setSaved]             = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -263,7 +264,11 @@ function ToolWorkspace({
       const data = await aiService.processAction({
         action: 'image', tool: tool.id, prompt, model: activeModel, image: imagePreview || undefined,
       });
-      if (data?.url) { setResultImage(data.url); toast.success('¡Imagen generada!'); }
+      if (data?.url) { 
+        setResultImage(data.url); 
+        setImageLoading(true);
+        toast.success('¡Generación exitosa, insertando...'); 
+      }
       else throw new Error('Sin resultado');
     } catch (err: any) {
       toast.error(err?.message || 'Error al generar');
@@ -462,12 +467,20 @@ function ToolWorkspace({
             </div>
           ) : resultImage ? (
             /* Image result */
-            <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex-1 flex items-center justify-center p-8 overflow-hidden">
+            <div className="flex-1 flex flex-col overflow-hidden relative">
+              <div className="flex-1 flex items-center justify-center p-8 overflow-hidden relative">
+                {imageLoading && (
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-background/50 backdrop-blur-sm">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="mt-4 text-sm font-bold text-white/50 animate-pulse">Descargando recurso...</p>
+                  </div>
+                )}
                 <img
                   src={resultImage}
                   alt="Resultado"
-                  className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+                  onLoad={() => setImageLoading(false)}
+                  onError={() => { setImageLoading(false); toast.error('Error cargando la imagen redimencionada.'); }}
+                  className={`max-w-full max-h-full object-contain rounded-2xl shadow-2xl transition-opacity duration-300 ${imageLoading ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
                 />
               </div>
               {/* Image actions */}
