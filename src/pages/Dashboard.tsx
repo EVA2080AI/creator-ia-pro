@@ -144,7 +144,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen text-white font-sans" style={{ background: '#16161b' }}>
+    <div className="min-h-screen bg-background text-foreground font-sans bg-grid-white/[0.02]">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main className="pt-16">

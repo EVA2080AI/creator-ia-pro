@@ -79,10 +79,10 @@ export default function Index() {
         <meta name="description" content="Genera apps React completas con Genesis IDE y crea imágenes, logos y textos con Studio. Todo con IA. Desde $12/mes." />
       </Helmet>
 
-      <div className="min-h-screen bg-[#0a0a0b] text-white selection:bg-primary/30 font-sans">
+      <div className="min-h-screen bg-background text-foreground selection:bg-primary/30 font-sans bg-grid-white/[0.02]">
 
         {/* ── Nav ─────────────────────────────────────────────────────────── */}
-        <header className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-[#0a0a0b]/90 backdrop-blur-md border-b border-white/[0.06]">
+        <header className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-background/90 backdrop-blur-md border-b border-white/[0.06]">
           <Logo size="sm" showText showPro onClick={() => navigate("/")} />
 
           <div className="flex items-center gap-6">

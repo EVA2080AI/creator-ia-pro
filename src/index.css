@@ -11,37 +11,37 @@
 
 @layer base {
   :root {
-    /* ── Tailwind token bridge ── */
-    --background:  240 7% 10%;
-    --foreground:  0 0% 98%;
-    --card:        240 7% 12%;
+    /* ── Tailwind Catalyst / Stitch token bridge (Zinc base, True Blue primary) ── */
+    --background:  240 10% 3.9%;    /* zinc-950 (Dark mode Google Stitch base) */
+    --foreground:  0 0% 98%;        /* zinc-50 */
+    --card:        240 5.9% 10%;    /* zinc-900 */
     --card-foreground: 0 0% 98%;
-    --popover:     240 7% 13%;
+    --popover:     240 5.9% 10%;
     --popover-foreground: 0 0% 98%;
-    --primary:     214 82% 51%;     /* Stitch / Tailwind UI blue */
-    --primary-foreground: 0 0% 98%;
-    --secondary:   240 6% 15%;
+    --primary:     221 83% 53%;     /* blue-600 (Corporate blue, non-neon) */
+    --primary-foreground: 0 0% 100%;
+    --secondary:   240 3.7% 15.9%;  /* zinc-800 */
     --secondary-foreground: 0 0% 98%;
-    --muted:       240 6% 15%;
-    --muted-foreground: 240 5% 55%;
-    --accent:      240 6% 16%;
+    --muted:       240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%; /* zinc-400 */
+    --accent:      240 3.7% 15.9%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 72% 70%;
+    --destructive: 0 62.8% 30.6%;   /* red-900 */
     --destructive-foreground: 0 0% 98%;
-    --border:      240 6% 14%;
-    --input:       240 6% 14%;
-    --ring:        214 82% 51%;
+    --border:      240 3.7% 15.9%;  /* zinc-800 */
+    --input:       240 3.7% 15.9%;
+    --ring:        221 83% 53%;
     --radius:      0.75rem;
 
     /* Sidebar */
-    --sidebar-background: 240 8% 9%;
-    --sidebar-foreground: 240 5% 55%;
-    --sidebar-primary: 214 82% 51%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 6% 14%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 240 6% 14%;
-    --sidebar-ring: 214 82% 51%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 5% 64.9%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 221 83% 53%;
 
     /* Canvas / Node */
     --canvas: 240 8% 8%;
@@ -63,7 +63,7 @@
 
   * {
     box-sizing: border-box;
-    border-color: hsl(var(--border) / 0.7);
+    border-color: hsl(var(--border));
   }
 
   body {
@@ -95,6 +95,13 @@
 }
 
 /* DELETED ZEPHYR UTILITIES */
+
+@layer utilities {
+  /* System Grid Pattern for backgrounds */
+  .bg-grid-white {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.04)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+  }
+}
 
 /* ============================================
    RESULT PROSE — markdown output

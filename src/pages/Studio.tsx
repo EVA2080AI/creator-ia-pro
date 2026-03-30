@@ -75,7 +75,7 @@ function StudioOnboarding({ onDismiss }: { onDismiss: () => void }) {
   const isLast = step === STUDIO_ONBOARDING_STEPS.length - 1;
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center pb-8 pointer-events-none">
-      <div className="pointer-events-auto w-full max-w-sm mx-4 rounded-3xl bg-[#0d0d10] border border-white/[0.1] shadow-2xl p-6">
+      <div className="pointer-events-auto w-full max-w-sm mx-4 rounded-3xl bg-card border border-border shadow-2xl p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex gap-1.5">
             {STUDIO_ONBOARDING_STEPS.map((_, i) => (
@@ -103,7 +103,7 @@ function StudioOnboarding({ onDismiss }: { onDismiss: () => void }) {
 }
 
 // ─── Welcome (no tool selected) ───────────────────────────────────────────────
-interface RecentAsset { id: string; tool: string; prompt: string | null; image_url: string | null; created_at: string; }
+interface RecentAsset { id: string; type: string; prompt: string | null; asset_url: string | null; created_at: string; }
 
 function StudioWelcome({ onSelectTool, recentAssets, loadingAssets }: {
   onSelectTool: (t: StudioTool) => void;
@@ -158,12 +158,12 @@ function StudioWelcome({ onSelectTool, recentAssets, loadingAssets }: {
             <div className="grid grid-cols-4 gap-3">
               {recentAssets.map((a) => (
                 <div key={a.id} onClick={() => navigate('/assets')} className="group relative aspect-square rounded-xl overflow-hidden border border-white/[0.06] hover:border-white/15 transition-all cursor-pointer bg-white/[0.02]">
-                  {a.image_url
-                    ? <img src={a.image_url} alt={a.prompt || ''} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                  {a.asset_url
+                    ? <img src={a.asset_url} alt={a.prompt || ''} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     : <div className="w-full h-full flex items-center justify-center"><Sparkles className="h-5 w-5 text-white/10" /></div>
                   }
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2">
-                    <p className="text-[9px] font-bold text-white uppercase tracking-widest">{a.tool}</p>
+                    <p className="text-[9px] font-bold text-white uppercase tracking-widest">{a.type}</p>
                   </div>
                 </div>
               ))}
@@ -273,7 +273,7 @@ function ToolWorkspace({
   const handleSave = async () => {
     if (!user || !resultImage) return;
     const { error } = await supabase.from('saved_assets').insert({
-      user_id: user.id, tool: tool.id, prompt: prompt || null, image_url: resultImage,
+      user_id: user.id, type: tool.id, prompt: prompt || null, asset_url: resultImage,
     });
     if (!error) { setSaved(true); toast.success('Guardado en tu biblioteca'); }
   };
@@ -513,7 +513,7 @@ export default function Studio() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('saved_assets').select('id, tool, prompt, image_url, created_at')
+    supabase.from('saved_assets').select('id, type, prompt, asset_url, created_at')
       .eq('user_id', user.id).order('created_at', { ascending: false }).limit(4)
       .then(({ data }) => { setRecentAssets(data || []); setLoadingAssets(false); });
   }, [user]);
@@ -530,13 +530,13 @@ export default function Studio() {
   });
 
   return (
-    <div className="flex flex-col h-screen bg-[#222228] overflow-hidden">
+    <div className="flex flex-col h-screen bg-background bg-grid-white/[0.02] overflow-hidden">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <div className="flex flex-1 overflow-hidden pt-16">
 
         {/* ── Left Sidebar ─────────────────────────────────────────────────── */}
-        <div className="w-64 shrink-0 border-r border-white/[0.05] flex flex-col overflow-hidden bg-[#222228]">
+        <div className="w-64 shrink-0 border-r border-border flex flex-col overflow-hidden bg-background/50 backdrop-blur-md">
 
           {/* Header */}
           <div className="px-4 py-4 border-b border-white/[0.05]">
