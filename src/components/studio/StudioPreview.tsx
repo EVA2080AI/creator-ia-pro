@@ -154,6 +154,15 @@ function buildPreviewHtml(
   <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.468.0/dist/umd/lucide-react.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.0/babel.min.js"></script>
   ${supabaseBlock}
+  <script>
+    // Save native constructors BEFORE the Babel script can shadow them with Lucide icons.
+    // The Babel script creates dual-purpose Proxy wrappers that serve as both
+    // React icon component (when called as a function via JSX) AND native constructor
+    // (when called with new keyword).
+    window.__NativeMap   = window.Map;
+    window.__NativeImage = window.Image;
+    window.__NativeFile  = typeof File !== 'undefined' ? window.File : null;
+  </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; }
@@ -184,12 +193,18 @@ const LR = window.LucideReact || {};
 const {
   ${ICONS}
 } = LR;
-// Expose Lucide icons whose names clash with JS/browser built-ins (Map, Image, File).
-// We alias them so generated code using <MapIcon/> etc. still works,
-// AND the native Map/Image/File constructors remain intact.
-const MapIcon    = LR.Map    || null;
-const ImageIcon  = LR.Image  || null;
-const FileIcon   = LR.File   || null;
+
+// Dual-purpose wrappers for icon names that collide with JS/DOM built-ins.
+// • Called as JSX (<Map />) → React.createElement calls it as a function → icon renders ✓
+// • Called with new (new Map()) → Proxy construct trap → native constructor ✓
+function _dual(iconFn, NativeCtor) {
+  const icon = iconFn || function(){return null;};
+  if (!NativeCtor) return icon;
+  return new Proxy(icon, { construct(_, args) { return new NativeCtor(...args); } });
+}
+const Map   = _dual(LR.Map,   window.__NativeMap);
+const Image = _dual(LR.Image, window.__NativeImage);
+const File  = _dual(LR.File,  window.__NativeFile);
 
 // Icon proxy — unknown icons render a placeholder instead of crashing
 const _iconProxy = new Proxy(LR, {
