@@ -272,16 +272,22 @@ export function StudioPreview({
                 key={JSON.stringify(sandpackFiles)}
                 template="react-ts"
                 files={sandpackFiles!}
+                customSetup={{
+                  dependencies: {
+                    'lucide-react': '^0.468.0',
+                    'react': '^18.0.0',
+                    'react-dom': '^18.0.0',
+                    'clsx': '^2.0.0',
+                    'class-variance-authority': '^0.7.0',
+                    'tailwind-merge': '^2.0.0',
+                    ...(supabaseConfig ? { '@supabase/supabase-js': '^2.0.0' } : {}),
+                  },
+                }}
                 options={{
                   externalResources: [
                     'https://cdn.tailwindcss.com',
                     'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap',
                   ],
-                  classes: {
-                    'sp-wrapper': 'sp-wrapper-genesis',
-                    'sp-layout':  'sp-layout-genesis',
-                    'sp-preview': 'sp-preview-genesis',
-                  },
                 }}
                 theme="dark"
               >
