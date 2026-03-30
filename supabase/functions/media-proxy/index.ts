@@ -43,15 +43,15 @@ serve(async (req) => {
   const userId = extractUserIdFromJwt(req.headers.get("authorization"));
   if (!userId) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 
   // ── Rate limit ─────────────────────────────────────────────────────────────
   if (!checkRateLimit(userId)) {
-    return new Response(JSON.stringify({ error: "Rate limit exceeded. Máximo 10 peticiones por minuto." }), {
-      status: 429,
+    return new Response(JSON.stringify({ error: "Rate limit exceeded. Máximo 10 peticiones por minuto.", code: "rate_limit" }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
@@ -105,8 +105,13 @@ serve(async (req) => {
         input = { motion_bucket_id: 127, frames_per_second: 6, sizing_strategy: "maintain_aspect_ratio" };
         if (image_url) input.input_image = image_url;
         break;
+      case "variation":
+      case "style":
+      case "product":
+        // These are handled client-side via ai-proxy (img2img with GPT-5 Image Mini)
+        throw new Error(`La herramienta "${tool}" debe llamarse a través de ai-proxy con imagen de entrada.`);
       case "eraser":
-        throw new Error("La herramienta borrar requiere una máscara de borrado que aún no está implementada en el canvas.");
+        throw new Error("La herramienta borrar requiere una máscara de borrado (próximamente).");
       default:
         throw new Error(`Tool "${tool}" no está soportada por el proxy de medios.`);
     }
@@ -169,7 +174,7 @@ serve(async (req) => {
     console.error("Media Proxy Failed:", error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
+      status: 200,
     });
   }
 });

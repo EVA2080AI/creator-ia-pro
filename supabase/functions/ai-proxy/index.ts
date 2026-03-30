@@ -323,8 +323,19 @@ serve(async (req: Request) => {
         }
       }
 
-      // Return 200 so the client receives the error message (not a thrown exception)
-      return json({ error: `Generación fallida: ${errors.slice(0, 2).join(' | ')}` }, 200);
+      // ULTIMATE FALLBACK: Pollinations.ai (100% Free, no API key required)
+      // If all OpenRouter endpoints fail (common issue with billing limits), guarantee an image.
+      try {
+        console.log('[Image] All OR models failed. Fast-failing to Pollinations.ai fallback.');
+        const encPrompt = encodeURIComponent(prompt || 'cool image');
+        // Cache buster to ensure fresh generation
+        const seed = Math.floor(Math.random() * 1000000);
+        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encPrompt}?width=${width}&height=${height}&nologo=true&seed=${seed}`;
+        
+        return json({ url: pollinationsUrl, model: 'pollinations/flux' });
+      } catch (fallbackErr) {
+        return json({ error: `Generación fallida: ${errors.slice(0, 2).join(' | ')}` }, 200);
+      }
     }
 
     // ── Gemini (fallback for chat) ────────────────────────────────────────────

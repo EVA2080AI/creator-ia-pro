@@ -57,17 +57,24 @@ export function useStudioProjects() {
       .eq('user_id', user.id)
       .order('updated_at', { ascending: false });
 
-    if (error) { console.error('Error fetching studio projects:', error); setLoading(false); return; }
+    if (error) {
+      console.error('Error fetching studio projects:', error);
+      toast.error('No se pudieron cargar los proyectos');
+      setLoading(false);
+      return;
+    }
 
     const parsed = (data || []).map((p: any) => ({
       ...p,
-      files: typeof p.files === 'string' ? JSON.parse(p.files) : (p.files || {}),
+      files: typeof p.files === 'string'
+        ? (() => { try { return JSON.parse(p.files); } catch { return {}; } })()
+        : (p.files || {}),
     })) as StudioProject[];
 
     setProjects(parsed);
     setActiveProject((curr) => {
       if (!curr && parsed.length > 0) return parsed[0];
-      if (curr) return parsed.find((p) => p.id === curr.id) || curr;
+      if (curr) return parsed.find((p) => p.id === curr.id) ?? null;
       return null;
     });
     setLoading(false);
@@ -93,6 +100,10 @@ export function useStudioProjects() {
   }, [user]);
 
   const updateProjectFiles = useCallback(async (projectId: string, files: Record<string, StudioFile>) => {
+    if (Object.keys(files).length > 100) {
+      toast.error('Límite de 100 archivos por proyecto');
+      return;
+    }
     const { error } = await supabase
       .from('studio_projects')
       .update({ files: files as any, updated_at: new Date().toISOString() })
@@ -118,7 +129,7 @@ export function useStudioProjects() {
 
   const deleteProject = useCallback(async (projectId: string) => {
     const { error } = await supabase.from('studio_projects').delete().eq('id', projectId);
-    if (error) { toast.error('Error al eliminar proyecto'); return; }
+    if (error) { toast.error('Error al eliminar proyecto'); return; } // Only remove from UI if DB delete succeeded
     setProjects((prev) => prev.filter((p) => p.id !== projectId));
     setActiveProject((prev) => prev?.id === projectId ? null : prev);
     toast.success('Proyecto eliminado');
