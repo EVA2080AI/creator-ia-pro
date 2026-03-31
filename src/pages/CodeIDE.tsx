@@ -7,8 +7,10 @@ import { StudioTopbar } from '@/components/studio/StudioTopbar';
 import { StudioChat } from '@/components/studio/StudioChat';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
-import { Loader2, PanelLeftClose, PanelLeft, PanelRightClose, PanelRight } from 'lucide-react';
+import { PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { AppHeader } from '@/components/AppHeader';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   ResizableHandle, 
   ResizablePanel, 
@@ -108,27 +110,37 @@ export default function CodeIDE() {
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden text-foreground selection:bg-primary/30">
-      {/* --- Topbar --- */}
-      <StudioTopbar 
-        projectName={activeProject.name}
-        viewMode="code"
-        onViewModeChange={() => navigate('/studio')} // Link back to Studio
-        deviceMode="desktop"
-        onDeviceModeChange={() => {}}
-        isSaving={isSaving}
-        onShare={() => {
-          navigator.clipboard.writeText(window.location.href);
-          toast.success('Enlace copiado');
-        }}
-        onBack={() => navigate('/dashboard')}
-        onGithubSync={() => toast.info('GitHub Sync próximamente')}
-        onPublish={() => toast.info('Publicación próximamente')}
-        credits={profile?.credits_balance ?? 0}
-        userProfile={profile}
+      <AppHeader 
+        userId={user?.id} 
+        onSignOut={async () => {
+          await supabase.auth.signOut();
+          navigate('/auth');
+        }} 
       />
+      
+      <div className="flex-1 flex flex-col pt-[56px] overflow-hidden">
+        {/* --- Topbar --- */}
+        <StudioTopbar 
+          projectName={activeProject.name}
+          viewMode="code"
+          onViewModeChange={() => navigate('/studio')} // Link back to Studio
+          deviceMode="desktop"
+          onDeviceModeChange={() => {}}
+          isSaving={isSaving}
+          onShare={() => {
+            navigator.clipboard.writeText(window.location.href);
+            toast.success('Enlace copiado');
+          }}
+          onBack={() => navigate('/dashboard')}
+          onGithubSync={() => toast.info('GitHub Sync próximamente')}
+          onPublish={() => toast.info('Publicación próximamente')}
+          credits={profile?.credits_balance ?? 0}
+          userProfile={profile}
+          hideGlobalNav={true}
+        />
 
-      {/* --- Triple-Column Layout --- */}
-      <main className="flex-1 overflow-hidden relative">
+        {/* --- Triple-Column Layout --- */}
+        <main className="flex-1 overflow-hidden relative">
         <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
           
           {/* 1. File Explorer (Left) */}
@@ -247,6 +259,7 @@ export default function CodeIDE() {
           )}
         </ResizablePanelGroup>
       </main>
+      </div>
     </div>
   );
 }

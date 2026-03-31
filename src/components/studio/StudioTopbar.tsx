@@ -47,6 +47,7 @@ interface StudioTopbarProps {
     full_name?: string; 
     avatar_url?: string; 
   } | null;
+  hideGlobalNav?: boolean;
 }
 
 export function StudioTopbar({
@@ -61,63 +62,66 @@ export function StudioTopbar({
   onGithubSync,
   onPublish,
   credits = 0,
-  userProfile
+  userProfile,
+  hideGlobalNav = false
 }: StudioTopbarProps) {
   return (
     <div className="flex flex-col w-full shrink-0 z-50 sticky top-0">
       {/* ── Level 1: Global Navigation ── */}
-      <nav className="h-14 border-b border-border bg-background flex items-center justify-between px-6 shrink-0 relative">
-        <div className="flex items-center gap-8">
-          {/* Logo Section */}
-          <div className="flex items-center gap-2.5 group cursor-pointer">
-            <div className="h-8 w-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <div className="w-4 h-4 bg-emerald-500 rounded-sm rotate-45" />
+      {!hideGlobalNav && (
+        <nav className="h-14 border-b border-border bg-background flex items-center justify-between px-6 shrink-0 relative">
+          <div className="flex items-center gap-8">
+            {/* Logo Section */}
+            <div className="flex items-center gap-2.5 group cursor-pointer">
+              <div className="h-8 w-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <div className="w-4 h-4 bg-emerald-500 rounded-sm rotate-45" />
+              </div>
+              <span className="text-sm font-black text-white tracking-widest uppercase">CREATOR <span className="text-emerald-500">IA</span></span>
             </div>
-            <span className="text-sm font-black text-white tracking-widest uppercase">CREATOR <span className="text-emerald-500">IA</span></span>
-          </div>
 
-          <div className="h-4 w-px bg-border/40" />
+            <div className="h-4 w-px bg-border/40" />
 
-          {/* Nav Links */}
-          <div className="flex items-center gap-1">
-            <NavLink icon={<Home className="w-3.5 h-3.5" />} label="Home" active={false} />
-            <NavLink icon={<Sparkles className="w-3.5 h-3.5" />} label="Genesis" active={true} />
-            <NavLink icon={<LayoutGrid className="w-3.5 h-3.5" />} label="Studio" active={false} />
-            <NavLink icon={<Layout className="w-3.5 h-3.5" />} label="Canvas" active={false} />
-            <NavLink icon={<FolderOpen className="w-3.5 h-3.5" />} label="Spaces" active={false} />
-            <NavLink icon={<Shield className="w-3.5 h-3.5" />} label="Admin" active={false} />
-          </div>
-        </div>
-
-        {/* Global Toolbar */}
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-all">
-            <CreditCard className="w-3.5 h-3.5" />
-            Precios
-          </button>
-          
-          <div className="h-4 w-px bg-border/40 mx-1" />
-          
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-            <Coins className="w-3.5 h-3.5 text-emerald-500" />
-            <span className="text-[11px] font-black text-emerald-500 tracking-wider">
-              {credits.toLocaleString()}
-            </span>
-          </div>
-
-          <button className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-xl bg-secondary/30 border border-border/40 hover:bg-secondary/50 transition-all select-none">
-            <div className="w-7 h-7 rounded-lg overflow-hidden bg-primary/20 border border-primary/20 flex items-center justify-center">
-              {userProfile?.avatar_url ? (
-                <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-              ) : (
-                <User className="w-4 h-4 text-primary" />
-              )}
+            {/* Nav Links */}
+            <div className="flex items-center gap-1">
+              <NavLink icon={<Home className="w-3.5 h-3.5" />} label="Home" active={false} />
+              <NavLink icon={<Sparkles className="w-3.5 h-3.5" />} label="Genesis" active={true} />
+              <NavLink icon={<LayoutGrid className="w-3.5 h-3.5" />} label="Studio" active={false} />
+              <NavLink icon={<Layout className="w-3.5 h-3.5" />} label="Canvas" active={false} />
+              <NavLink icon={<FolderOpen className="w-3.5 h-3.5" />} label="Spaces" active={false} />
+              <NavLink icon={<Shield className="w-3.5 h-3.5" />} label="Admin" active={false} />
             </div>
-            <span className="text-[11px] font-bold text-foreground">Perfil</span>
-            <ChevronDown className="w-3 h-3 text-muted-foreground" />
-          </button>
-        </div>
-      </nav>
+          </div>
+
+          {/* Global Toolbar */}
+          <div className="flex items-center gap-2">
+            <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-all">
+              <CreditCard className="w-3.5 h-3.5" />
+              Precios
+            </button>
+            
+            <div className="h-4 w-px bg-border/40 mx-1" />
+            
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <Coins className="w-3.5 h-3.5 text-emerald-500" />
+              <span className="text-[11px] font-black text-emerald-500 tracking-wider">
+                {credits.toLocaleString()}
+              </span>
+            </div>
+
+            <button className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-xl bg-secondary/30 border border-border/40 hover:bg-secondary/50 transition-all select-none">
+              <div className="w-7 h-7 rounded-lg overflow-hidden bg-primary/20 border border-primary/20 flex items-center justify-center">
+                {userProfile?.avatar_url ? (
+                  <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-4 h-4 text-primary" />
+                )}
+              </div>
+              <span className="text-[11px] font-bold text-foreground">Perfil</span>
+              <ChevronDown className="w-3 h-3 text-muted-foreground" />
+            </button>
+          </div>
+        </nav>
+      )}
 
       {/* ── Level 2: Project Bar ── */}
       <header className="h-[52px] border-b border-border bg-background/95 backdrop-blur-md flex items-center justify-between px-4 shrink-0">
