@@ -370,6 +370,8 @@ export default function Chat() {
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   // Supabase Cloud config — persisted per project
   const [supabaseConfig, setSupabaseConfig] = useState<SupabaseConfig | null>(null);
+  // Topbar overflow menu
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const projectFiles = activeProject?.files || {};
 
@@ -562,7 +564,6 @@ export default function Chat() {
 
   // Full IDE view — Lovable-style: chat LEFT | code/preview CENTER
   const credits = profile?.credits_balance ?? 0;
-  const [moreOpen, setMoreOpen] = useState(false);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden pt-[56px]" style={{ background: '#191a1f' }}>
