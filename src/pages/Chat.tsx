@@ -332,15 +332,8 @@ export default function Chat() {
     if (activeProject) localStorage.setItem('genesis-last-project', activeProject.id);
   }, [activeProject?.id]);
 
-  useEffect(() => {
-    if (!loading && projects.length > 0 && !activeProject) {
-      const saved = localStorage.getItem('genesis-last-project');
-      if (saved) {
-        const found = projects.find(p => p.id === saved);
-        if (found) setActiveProject(found);
-      }
-    }
-  }, [loading, projects, activeProject, setActiveProject]);
+  // Auto-loading logic removed to ensure users land on the main Genesis page
+
 
   useEffect(() => {
     if (!activeProject) { setSupabaseConfig(null); return; }
