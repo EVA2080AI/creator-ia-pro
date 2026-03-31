@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Send, Sparkles, Bot, Loader2,
   ChevronDown, Copy, RotateCcw, Check,
-  X, Image as ImageIcon, AlertCircle, Wrench,
+  X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink,
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
@@ -143,6 +143,29 @@ ESTILO:
 - Responde en español. Términos técnicos en inglés.
 
 Tienes acceso al proyecto activo del usuario. Úsalo para dar respuestas contextualizadas.`;
+
+// ─── Clone system prompt ──────────────────────────────────────────────────────
+const CLONE_SYSTEM_PROMPT = `Eres un experto en Reverse-Engineering de Frontend de nivel mundial.
+
+El usuario quiere clonar el sitio web proporcionado. A continuación tienes la estructura semántica extraída y el contenido real de la página objetivo.
+
+Tu misión es:
+1. ANALIZAR meticulosamente la jerarquía visual, secciones y copywriting real extraído.
+2. DEDUCIR colores, paddings, flex/grid, tipografía y espaciados a partir del markup y clases inferidas.
+3. RECREAR el diseño como componentes React + Tailwind CSS multi-archivo, respetando al 100% el copywriting original.
+4. Separar el resultado en archivos limpio: App.tsx, components/Hero.tsx, components/Navbar.tsx, components/Footer.tsx, etc.
+5. Mantener el tema de colores del sitio original. Usa clases Tailwind custom si necesitas colores exactos (e.g., text-[#hexcolor]).
+6. Hacer el resultado COMPLETAMENTE funcional y responsivo (Mobile First).
+
+REGLAS ABSOLUTAS:
+- Tu respuesta COMPLETA debe ser SOLO el JSON sin texto antes ni después.
+- NO uses markdown fences.
+- OBLIGATORIO export default en App.tsx.
+- NUNCA inventes contenido — usa el texto real extraído del sitio.
+- Si el sitio tiene imágenes, usa la URL real si está disponible o un placeholder de Unsplash temático.
+
+[ESTRUCTURA Y CONTENIDO EXTRAÍDO DEL SITIO OBJETIVO]:
+`;
 
 // ─── System prompt ─────────────────────────────────────────────────────────────
 const CODE_GEN_SYSTEM = `🧠 MASTER SYSTEM PROMPT: Creator IA Pro Core
@@ -325,6 +348,10 @@ export function StudioChat({
   const [currentGenIntent, setCurrentGenIntent] = useState<'codegen' | 'chat' | null>(null);
   const [convHistory,      setConvHistory]      = useState<ConvMsg[]>([]);
   const [pendingImage,     setPendingImage]     = useState<string | null>(null);
+  const [pendingUrl,       setPendingUrl]       = useState<string | null>(null);
+  const [urlInput,         setUrlInput]         = useState('');
+  const [showUrlInput,     setShowUrlInput]     = useState(false);
+  const [isScraping,       setIsScraping]       = useState(false);
 
   const messagesEndRef    = useRef<HTMLDivElement>(null);
   const containerRef      = useRef<HTMLDivElement>(null);
@@ -333,7 +360,7 @@ export function StudioChat({
   const isFirstGen        = useRef(true);
   const streamBufferRef   = useRef('');   // raw accumulator (network side)
   const genPhaseRef       = useRef<'idle' | 'thinking' | 'streaming' | 'done'>('idle');
-
+  const abortControllerRef = useRef<AbortController | null>(null);
   // ─── Persist chat per project ────────────────────────────────────────────────
   useEffect(() => {
     if (!projectId) return;
@@ -404,6 +431,41 @@ export function StudioChat({
     reader.readAsDataURL(file);
   };
 
+  // ─── URL Scraper ───────────────────────────────────────────────────────────
+  const handleAttachUrl = async () => {
+    const raw = urlInput.trim();
+    if (!raw) return;
+    let url = raw;
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+    try { new URL(url); } catch { toast.error('URL inválida'); return; }
+
+    setIsScraping(true);
+    setShowUrlInput(false);
+    setUrlInput('');
+    try {
+      // Jina AI Reader — converts any URL to clean Markdown for free
+      const jinaUrl = `https://r.jina.ai/${url}`;
+      const res = await fetch(jinaUrl, {
+        headers: { 'Accept': 'text/plain' },
+        signal: AbortSignal.timeout(30_000),
+      });
+      if (!res.ok) throw new Error(`Jina returned ${res.status}`);
+      const md = await res.text();
+      if (!md || md.length < 50) throw new Error('El sitio no pudo ser leído.');
+      // Store trimmed version (max 12k chars to stay within token budget)
+      setPendingUrl(JSON.stringify({ url, content: md.slice(0, 12_000) }));
+      toast.success('Sitio analizado. Describe cómo quieres clonarlo.');
+    } catch (e: any) {
+      if (e.name === 'TimeoutError') {
+        toast.error('Tiempo agotado leyendo el sitio.');
+      } else {
+        toast.error(`No se pudo leer el sitio: ${e.message ?? e}`);
+      }
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
   // ─── Streaming generation ─────────────────────────────────────────────────
   const generateCode = useCallback(async (
     prompt: string,
@@ -415,6 +477,12 @@ export function StudioChat({
     genPhaseRef.current = 'thinking';
     streamBufferRef.current = '';
     setStreamingContent(null);
+    
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     const isChatModeActive = detectIntent(prompt) === 'chat';
     setCurrentGenIntent(isChatModeActive ? 'chat' : 'codegen');
@@ -442,21 +510,32 @@ export function StudioChat({
           fileKeys.map(f => `--- ${f} ---\n${projectFiles[f].content.slice(0, 2000)}`).join('\n\n');
       }
 
+      // ── URL Clone injection ────────────────────────────────────────────────────
+      let cloneBlock = '';
+      let effectiveSystemPrompt = isChatModeActive ? GENESIS_CHAT_SYSTEM : CODE_GEN_SYSTEM;
+      if (pendingUrl) {
+        const { url: cloneUrl, content: cloneMd } = JSON.parse(pendingUrl);
+        // Always force codegen mode when a URL is attached
+        effectiveSystemPrompt = CLONE_SYSTEM_PROMPT + cloneMd;
+        cloneBlock = `\n\n[URL OBJETIVO A CLONAR]: ${cloneUrl}\n[INSTRUCCIÓN DEL USUARIO]: ${prompt}`;
+        setPendingUrl(null); // consume once
+      }
+
       // Build user content (multimodal if image present)
       const currentModel = MODELS.find(m => m.id === selectedModel) ?? MODELS[0];
       const userContent: any = (pendingImage && currentModel.vision && !isChatModeActive)
-        ? [{ type: 'image_url', image_url: { url: pendingImage } }, { type: 'text', text: prompt + contextBlock }]
-        : prompt + contextBlock;
+        ? [{ type: 'image_url', image_url: { url: pendingImage } }, { type: 'text', text: (cloneBlock || prompt) + contextBlock }]
+        : (cloneBlock || prompt) + contextBlock;
 
       // System prompt + model selection
       const supabaseContext = supabaseConfig
         ? `\n\nSUPABASE CONECTADO AL PROYECTO:\n- URL: ${supabaseConfig.url}\n- Anon Key: ${supabaseConfig.anonKey}\nUSA window.supabaseClient (ya inicializado) para todas las operaciones de base de datos. NO importes ni crees el cliente, ya está disponible globalmente.`
         : '';
-      const systemPrompt = isChatModeActive
-        ? GENESIS_CHAT_SYSTEM
-        : CODE_GEN_SYSTEM + supabaseContext;
-      // In chat mode: use Gemini Flash for speed. In code gen: use the user-selected model.
-      const modelToUse = isChatModeActive
+      const systemPrompt = cloneBlock
+        ? effectiveSystemPrompt  // clone mode: already built above
+        : (isChatModeActive ? effectiveSystemPrompt : effectiveSystemPrompt + supabaseContext);
+      // In chat mode: Gemini Flash for speed. Clone/codegen: user-selected model.
+      const modelToUse = (isChatModeActive && !cloneBlock)
         ? 'google/gemini-2.0-flash-001'
         : selectedModel;
 
@@ -475,6 +554,7 @@ export function StudioChat({
       // Streaming fetch
       const res = await fetch(`${SUPABASE_URL}/functions/v1/ai-proxy`, {
         method: 'POST',
+        signal,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -558,6 +638,10 @@ export function StudioChat({
       return processRaw(accumulated, prompt);
 
     } catch (e: any) {
+      if (e.name === 'AbortError') {
+        toast.info('Generación detenida');
+        return null;
+      }
       const msg = e?.message || String(e);
       console.error('[Genesis] error:', msg);
       toast.error(msg.length > 120 ? msg.slice(0, 120) + '…' : msg, { duration: 6000 });
@@ -637,6 +721,19 @@ export function StudioChat({
       if (name && name.length > 2 && name.length < 60) onAutoName(name);
     } catch { /* silent */ }
   }, [onAutoName]);
+
+  // ─── Stop generation ───────────────────────────────────────────────────────
+  const handleStop = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsGenerating(false);
+    onGeneratingChange?.(false);
+    setGenPhase('idle');
+    genPhaseRef.current = 'idle';
+    setStreamingContent(null);
+  };
 
   // ─── Send message ──────────────────────────────────────────────────────────
   const handleSend = useCallback(async (override?: string) => {
@@ -719,7 +816,7 @@ export function StudioChat({
     setInput(e.target.value);
     const ta = e.target;
     ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 140) + 'px';
+    ta.style.height = Math.min(ta.scrollHeight, 350) + 'px';
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -938,6 +1035,69 @@ export function StudioChat({
           </div>
         )}
 
+        {/* Pending URL chip */}
+        {pendingUrl && (
+          <div className="mb-2 flex items-center gap-2 px-3 py-2 rounded-xl animate-in fade-in duration-200"
+            style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.25)' }}>
+            <Globe className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+            <span className="text-[11px] text-emerald-300/80 flex-1 truncate">
+              {JSON.parse(pendingUrl).url}
+            </span>
+            <span className="text-[9px] text-emerald-400/50 shrink-0">Listo para clonar</span>
+            <button onClick={() => setPendingUrl(null)} className="text-white/30 hover:text-white transition-colors ml-1">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* URL Input row */}
+        {showUrlInput && (
+          <div className="mb-2 flex items-center gap-1.5 animate-in slide-in-from-bottom-2 duration-200">
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl"
+              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(138,180,248,0.3)' }}>
+              <Link2 className="h-3.5 w-3.5 text-[#8AB4F8]/60 shrink-0" />
+              <input
+                autoFocus
+                type="url"
+                value={urlInput}
+                onChange={e => setUrlInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') { e.preventDefault(); handleAttachUrl(); }
+                  if (e.key === 'Escape') { setShowUrlInput(false); setUrlInput(''); }
+                }}
+                placeholder="https://stripe.com"
+                className="flex-1 bg-transparent text-[12px] text-white placeholder:text-white/20 outline-none"
+              />
+              {urlInput && (
+                <ExternalLink className="h-3 w-3 text-white/20" />
+              )}
+            </div>
+            <button
+              onClick={handleAttachUrl}
+              disabled={!urlInput.trim() || isScraping}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-bold transition-all disabled:opacity-30"
+              style={{ background: 'rgba(52,211,153,0.15)', color: '#34d399', border: '1px solid rgba(52,211,153,0.3)' }}
+            >
+              {isScraping ? <Loader2 className="h-3 w-3 animate-spin" /> : <Globe className="h-3 w-3" />}
+              {isScraping ? 'Leyendo...' : 'Clonar'}
+            </button>
+            <button onClick={() => { setShowUrlInput(false); setUrlInput(''); }}
+              className="p-2 rounded-xl text-white/30 hover:text-white transition-colors"
+              style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* Scraping spinner */}
+        {isScraping && !showUrlInput && (
+          <div className="mb-2 flex items-center gap-2 px-3 py-2 rounded-xl"
+            style={{ background: 'rgba(52,211,153,0.05)', border: '1px solid rgba(52,211,153,0.15)' }}>
+            <Loader2 className="h-3.5 w-3.5 text-emerald-400 animate-spin shrink-0" />
+            <span className="text-[11px] text-emerald-300/60">Analizando sitio web objetivo...</span>
+          </div>
+        )}
+
         <div className="rounded-xl overflow-hidden transition-all"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <textarea
@@ -946,7 +1106,7 @@ export function StudioChat({
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             placeholder="Escribe o describe lo que necesitas… @archivo para citar código"
-            className="w-full bg-transparent px-3.5 pt-3 pb-2 text-[13px] text-white placeholder:text-white/25 outline-none resize-none min-h-[20px] max-h-[120px] leading-relaxed"
+            className="w-full bg-transparent px-3.5 pt-3 pb-2 text-[13px] text-white placeholder:text-white/25 outline-none resize-none min-h-[20px] max-h-[350px] leading-relaxed"
             disabled={isGenerating}
             rows={1}
           />
@@ -961,6 +1121,23 @@ export function StudioChat({
               >
                 <ImageIcon className="h-3.5 w-3.5" />
                 {!currentModel.vision && <span className="text-[9px]">—</span>}
+              </button>
+
+              {/* URL Clone button */}
+              <button
+                onClick={() => { setShowUrlInput(v => !v); setUrlInput(''); }}
+                disabled={isGenerating || isScraping}
+                title="Clonar sitio web desde URL"
+                className="flex items-center gap-1 px-2 py-1 rounded-lg transition-all disabled:opacity-30"
+                style={pendingUrl
+                  ? { background: 'rgba(52,211,153,0.15)', color: '#34d399' }
+                  : showUrlInput
+                    ? { background: 'rgba(138,180,248,0.12)', color: '#8AB4F8' }
+                    : { color: 'rgba(255,255,255,0.3)' }}
+                onMouseEnter={e => { if (!pendingUrl && !showUrlInput) (e.currentTarget as HTMLElement).style.color = 'white'; }}
+                onMouseLeave={e => { if (!pendingUrl && !showUrlInput) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)'; }}
+              >
+                <Globe className="h-3.5 w-3.5" />
               </button>
 
               {/* Model selector — compact chip */}
@@ -1000,14 +1177,23 @@ export function StudioChat({
                 )}
               </div>
             </div>
-            <button
-              onClick={() => handleSend()}
-              disabled={!input.trim() || isGenerating}
-              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-white disabled:opacity-30 transition-all active:scale-95"
-              style={{ background: input.trim() && !isGenerating ? '#8AB4F8' : 'rgba(138,180,248,0.3)' }}
-            >
-              {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-            </button>
+            {isGenerating ? (
+              <button
+                onClick={handleStop}
+                className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-rose-500 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all text-[11px] font-bold ml-2 shadow-sm"
+              >
+                <div className="h-2 w-2 rounded-sm bg-rose-500" /> Stop
+              </button>
+            ) : (
+              <button
+                onClick={() => handleSend()}
+                disabled={!input.trim()}
+                className="flex flex-col items-center justify-center p-2 rounded-xl text-white disabled:opacity-30 transition-all active:scale-95 bg-white/10 hover:bg-[#8AB4F8] hover:text-black hover:shadow-lg ml-2"
+                style={input.trim() ? { background: '#8AB4F8', color: '#141417' } : {}}
+              >
+                <Send className="h-3.5 w-3.5" />
+              </button>
+            )}
           </div>
         </div>
 

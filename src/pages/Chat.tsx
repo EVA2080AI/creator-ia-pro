@@ -28,7 +28,7 @@ import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
-type PanelView = 'code' | 'preview' | 'split';
+type PanelView = 'code' | 'preview' | 'split' | 'files' | 'history';
 type LeftTab = 'chat' | 'files' | 'projects' | 'github' | 'history' | 'cloud';
 
 interface Snapshot {
@@ -348,8 +348,10 @@ export default function Chat() {
   const [selectedFile, setSelectedFile] = useState('App.tsx');
   const [panelView, setPanelView] = useState<PanelView>('preview');
   const [deviceMode, setDeviceMode] = useState<DeviceMode>('desktop');
-  const [leftTab, setLeftTab] = useState<LeftTab>('chat');
-  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [isChatOpen, setIsChatOpen] = useState(true);
+  const [cloudOpen, setCloudOpen] = useState(false);
+  const [githubOpen, setGithubOpen] = useState(false);
+    const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
   const [renamingTopBar, setRenamingTopBar] = useState(false);
   const [renameTopBarValue, setRenameTopBarValue] = useState('');
@@ -562,15 +564,21 @@ export default function Chat() {
     <div className="flex flex-col h-screen overflow-hidden pt-[56px]" style={{ background: '#191a1f' }}>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      {/* Genesis Top Bar — Lovable-style */}
-      <div className="flex h-[52px] items-center px-4 shrink-0 z-10"
+      {/* Genesis Top Bar — Lovable-style (V2) */}
+      <div className="flex h-[52px] items-center px-4 shrink-0 z-10 w-full justify-between"
         style={{ background: '#13141b', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
 
-        {/* Left: back, divider, project name */}
-        <div className="flex items-center gap-3 min-w-0 mr-4">
+        {/* Left: Project & Chat Toggle */}
+        <div className="flex items-center gap-3 min-w-[250px] shrink-0">
           <button onClick={() => setActiveProject(null)}
-            className="flex items-center gap-1.5 text-[12px] text-white/40 hover:text-white transition-colors shrink-0">
-            ← <span className="hidden sm:block">Proyectos</span>
+            className="flex items-center justify-center p-1.5 rounded-lg text-white/40 hover:bg-white/[0.05] hover:text-white transition-colors shrink-0"
+            title="Volver a Proyectos">
+            <Home className="h-4 w-4" />
+          </button>
+          
+          <button onClick={() => setIsChatOpen(!isChatOpen)}
+            className="flex items-center justify-center p-1.5 rounded-lg text-white/40 hover:bg-white/[0.05] hover:text-white transition-colors shrink-0">
+            {isChatOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
           </button>
           
           <div className="h-4 w-px shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
@@ -583,97 +591,87 @@ export default function Chat() {
                   onChange={e => setRenameTopBarValue(e.target.value)}
                   onKeyDown={e => { if (e.key === 'Enter') { renameProject(activeProject.id, renameTopBarValue.trim() || activeProject.name); setRenamingTopBar(false); } if (e.key === 'Escape') setRenamingTopBar(false); }}
                   onBlur={() => { renameProject(activeProject.id, renameTopBarValue.trim() || activeProject.name); setRenamingTopBar(false); }}
-                  className="text-[13px] font-bold text-white bg-transparent outline-none max-w-[180px]" />
+                  className="text-[13px] font-bold text-white bg-transparent outline-none max-w-[150px]" />
               ) : (
                 <button onClick={() => { setRenameTopBarValue(activeProject.name); setRenamingTopBar(true); }}
                   className="flex items-center gap-1 group/rename">
-                  <span className="text-[13px] font-bold text-white/90 truncate max-w-[200px]">{activeProject.name}</span>
+                  <span className="text-[13px] font-bold text-white/90 truncate max-w-[150px]">{activeProject.name}</span>
                   <Pencil className="h-2.5 w-2.5 text-white/20 opacity-0 group-hover/rename:opacity-100 transition-opacity shrink-0" />
                 </button>
               )}
             </div>
-            <span className="text-[10px] text-white/30 leading-none mt-0.5">
-              {isGenerating ? 'Generando código...' : savedIndicator ? '✓ Guardado' : 'Última versión guardada'}
-            </span>
           </div>
         </div>
 
-        {/* Publish */}
-        <button onClick={() => toast.success('Proyecto publicado')}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12px] font-bold transition-all active:scale-95"
-          style={{ background: isGenerating ? 'rgba(138,180,248,0.4)' : '#8AB4F8', color: '#13141b' }}>
-          {isGenerating ? <><span className="h-1.5 w-1.5 rounded-full bg-[#13141b] animate-pulse" />Generando…</> : <>Publish</>}
-        </button>
+        {/* Center-Left: Mode Toggles */}
+        <div className="hidden lg:flex items-center gap-1 mr-2 shrink-0">
+          <div className="flex items-center gap-0.5 p-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+            <button onClick={() => setPanelView('preview')} className="flex items-center gap-2 px-2.5 py-1 rounded-[6px] transition-all" style={panelView === 'preview' ? { background: 'rgba(255,255,255,0.1)', color: 'white' } : { color: 'rgba(255,255,255,0.4)' }}>
+              <Globe className="h-3.5 w-3.5" /><span className="text-[11px] font-semibold">Preview</span>
+            </button>
+            <button onClick={() => setPanelView('files')} className="flex items-center gap-2 px-2.5 py-1 rounded-[6px] transition-all" style={panelView === 'files' ? { background: 'rgba(255,255,255,0.1)', color: 'white' } : { color: 'rgba(255,255,255,0.4)' }}>
+              <Files className="h-3.5 w-3.5" /><span className="text-[11px] font-semibold">Files</span>
+            </button>
+            <button onClick={() => setPanelView('code')} className="flex items-center gap-2 px-2.5 py-1 rounded-[6px] transition-all" style={panelView === 'code' ? { background: 'rgba(255,255,255,0.1)', color: 'white' } : { color: 'rgba(255,255,255,0.4)' }}>
+              <Code2 className="h-3.5 w-3.5" /><span className="text-[11px] font-semibold">Code</span>
+            </button>
+            <button onClick={() => setCloudOpen(true)} className="flex items-center gap-2 px-2.5 py-1 rounded-[6px] transition-all text-white/40 hover:text-white">
+              <Database className="h-3.5 w-3.5" /><span className="text-[11px] font-semibold">Cloud</span>
+            </button>
+          </div>
+        </div>
 
-        <div className="flex-1" />
+        {/* Center: Device Pill */}
+        <div className="hidden md:flex flex-1 max-w-[400px]">
+          <div className="flex items-center rounded-full px-2 py-1.5 w-full mx-auto" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+            <button onClick={() => setDeviceMode(prev => prev === 'desktop' ? 'tablet' : prev === 'tablet' ? 'mobile' : 'desktop')} className="flex items-center justify-center p-1 rounded-full text-white/40 hover:text-white hover:bg-white/[0.05] transition-all shrink-0">
+              {deviceMode === 'desktop' ? <Monitor className="h-3.5 w-3.5" /> : deviceMode === 'tablet' ? <Tablet className="h-3.5 w-3.5" /> : <Phone className="h-3.5 w-3.5" />}
+            </button>
+            <div className="h-3 w-px mx-2 shrink-0 bg-white/10" />
+            <div className="flex-1 truncate text-center text-[11px] font-medium text-white/50 cursor-pointer hover:text-white transition-colors">
+              <span className="text-white/30">/</span>
+            </div>
+            <button title="Recargar App" className="flex items-center justify-center p-1 rounded-full text-white/40 hover:text-white hover:bg-white/[0.05] transition-all shrink-0 mr-1">
+              <RefreshCw className="h-3.5 w-3.5" />
+            </button>
+            <button title="Abrir en pestaña nueva" className="flex items-center justify-center p-1 rounded-full text-white/40 hover:text-white hover:bg-white/[0.05] transition-all shrink-0">
+              <ArrowUp className="h-3.5 w-3.5 rotate-45" />
+            </button>
+          </div>
+        </div>
 
-        {/* Right Tools Group */}
-        <div className="flex items-center gap-2.5">
+        {/* Right: Actions */}
+        <div className="flex items-center justify-end gap-2.5 min-w-[250px] shrink-0">
           
-          {/* View Modes */}
-          <div className="flex items-center gap-0.5 p-0.5 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            {([
-              { v: 'preview' as PanelView, Icon: Globe,   tip: 'Preview' },
-              { v: 'split'   as PanelView, Icon: Columns, tip: 'Split' },
-              { v: 'code'    as PanelView, Icon: Code2,   tip: 'Código' },
-            ]).map(({ v, Icon, tip }) => (
-              <button key={v} onClick={() => setPanelView(v)} title={tip}
-                className="p-1.5 rounded-[6px] transition-all"
-                style={panelView === v ? { background: 'rgba(255,255,255,0.1)', color: 'white' } : { color: 'rgba(255,255,255,0.4)' }}>
-                <Icon className="h-3.5 w-3.5" />
-              </button>
-            ))}
-          </div>
-
-          <div className="h-4 w-px shrink-0 hidden md:block" style={{ background: 'rgba(255,255,255,0.1)' }} />
-
-          {/* Device Modes */}
-          <div className="hidden md:flex items-center gap-0.5">
-            {([{ m: 'desktop' as DeviceMode, I: Monitor }, { m: 'tablet' as DeviceMode, I: Tablet }, { m: 'mobile' as DeviceMode, I: Smartphone }]).map(({ m, I }) => (
-              <button key={m} onClick={() => setDeviceMode(m)} title={m}
-                className="p-1.5 rounded-lg transition-all"
-                style={deviceMode === m ? { color: '#8ab4f8', background: 'rgba(138,180,248,0.15)' } : { color: 'rgba(255,255,255,0.3)' }}>
-                <I className="h-3.5 w-3.5" />
-              </button>
-            ))}
-          </div>
-
-          <div className="h-4 w-px shrink-0 hidden md:block" style={{ background: 'rgba(255,255,255,0.1)' }} />
-
-          {/* History */}
-          <button onClick={() => setLeftTab('history')} title="Versiones"
-            className="p-1.5 rounded-lg text-white/30 hover:text-white transition-all relative">
+          <button onClick={() => setPanelView('history')} title="Historial" className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/[0.05] transition-all hidden sm:block relative">
             <History className="h-4 w-4" />
-            {snapshots.length > 0 && <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-[#8AB4F8]" />}
+            {snapshots.length > 0 && <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-[#8AB4F8]" />}
           </button>
 
-          {/* Deploy panel toggle */}
-          <button onClick={() => setDeployOpen(!deployOpen)} title="Deploy"
-            className="p-1.5 rounded-lg transition-all"
-            style={deployOpen ? { color: '#8AB4F8' } : { color: 'rgba(255,255,255,0.3)' }}>
-            <UploadCloud className="h-4 w-4" />
+          <button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copiado'); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-white/60 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] transition-all">
+            Share
+          </button>
+          
+          <button onClick={() => setGithubOpen(true)} className="flex items-center justify-center h-7 w-7 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] transition-all">
+            <Github className="h-3.5 w-3.5 text-white/80" />
           </button>
 
-          <div className="h-4 w-px shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
-
-          {/* ZIP download */}
-          <button onClick={() => exportZip(projectFiles, activeProject.name).then(() => toast.success('ZIP descargado')).catch(() => toast.error('Error al generar ZIP'))}
-            disabled={Object.keys(projectFiles).length === 0}
-            title="Descargar ZIP"
-            className="p-1.5 rounded-lg text-white/30 hover:text-white transition-all disabled:opacity-30">
-            <Download className="h-4 w-4" />
+          <button onClick={() => navigate('/pricing')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all" style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.3)' }}>
+            <Zap className="h-3.5 w-3.5" />
+            Upgrade
           </button>
 
-          {/* Share */}
-          <button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copiado'); }}
-            title="Compartir" className="p-1.5 rounded-lg text-white/30 hover:text-white transition-all hidden sm:block">
-            <BarChart2 className="h-4 w-4" />
+          <button onClick={() => setDeployOpen(!deployOpen)} className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold transition-all active:scale-95 shadow-lg shadow-[#8AB4F8]/10" style={{ background: isGenerating ? 'rgba(138,180,248,0.4)' : '#8AB4F8', color: '#13141b' }}>
+            {isGenerating ? <><span className="h-1.5 w-1.5 rounded-full bg-[#13141b] animate-pulse" />Generando</> : <>Publish</>}
           </button>
+
+          {profile?.avatar_url && (
+            <img src={profile.avatar_url} alt="" className="h-7 w-7 rounded-full ml-1 border border-white/10" />
+          )}
 
         </div>
       </div>
-
-      {/* Deploy panel overlay */}
+{/* Deploy panel overlay */}
       {deployOpen && (
         <div className="fixed inset-0 z-40" onClick={() => setDeployOpen(false)} />
       )}
@@ -709,247 +707,173 @@ export default function Chat() {
       {/* Main body */}
       <div className="flex flex-1 overflow-hidden">
 
-        {/* ── LEFT: Chat / Files / Projects / GitHub panel ──────────────────── */}
-        <div className="hidden lg:flex w-[380px] h-full min-h-0 shrink-0 flex-col border-r overflow-hidden"
-          style={{ background: '#131318', borderColor: 'rgba(255,255,255,0.07)' }}>
+        {/* ── Modals: Cloud & GitHub ────────────────────────────────────────────────────────── */}
+      {cloudOpen && (
+        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" onClick={() => setCloudOpen(false)} />
+      )}
+      {cloudOpen && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-[24px] shadow-2xl flex flex-col"
+          style={{ background: '#0a0a0c', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.05]">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-xl bg-[#3ECF8E]/20 flex items-center justify-center">
+                <Database className="h-4 w-4 text-[#3ECF8E]" />
+              </div>
+              <div>
+                <h3 className="text-[14px] font-medium text-white">Supabase Cloud</h3>
+                <p className="text-[11px] text-white/40">Base de datos y Storage conectados en tiempo real</p>
+              </div>
+            </div>
+            <button onClick={() => setCloudOpen(false)} className="text-white/40 hover:text-white p-2">✕</button>
+          </div>
+          <div className="p-6 flex-1 overflow-y-auto">
+             <StudioCloud projectId={activeProject.id} config={supabaseConfig} onConfigChange={handleSupabaseConfigChange} />
+             
+             {/* Fake Usage Data to look Industrial/Lovable style */}
+             <div className="mt-8 pt-8 border-t border-white/[0.05] grid grid-cols-3 gap-6">
+                <div>
+                   <p className="text-[11px] text-white/40 uppercase tracking-widest mb-3">Database Health</p>
+                   <div className="flex items-end gap-2"><span className="text-[28px] font-medium text-white leading-none">99.9</span><span className="text-white/30 text-[14px] mb-1">%</span></div>
+                   <div className="mt-3 h-1 w-full bg-white/[0.05] rounded-full overflow-hidden"><div className="h-full bg-[#3ECF8E] w-[99%]" /></div>
+                </div>
+                <div>
+                   <p className="text-[11px] text-white/40 uppercase tracking-widest mb-3">API Requests</p>
+                   <div className="flex items-end gap-2"><span className="text-[28px] font-medium text-white leading-none">1.2k</span><span className="text-[#8AB4F8] text-[14px] mb-1">/hr</span></div>
+                   <div className="mt-3 h-1 w-full bg-white/[0.05] rounded-full overflow-hidden"><div className="h-full bg-[#8AB4F8] w-[25%]" /></div>
+                </div>
+                <div>
+                   <p className="text-[11px] text-white/40 uppercase tracking-widest mb-3">Storage</p>
+                   <div className="flex items-end gap-2"><span className="text-[28px] font-medium text-white leading-none">42</span><span className="text-white/30 text-[14px] mb-1">MB</span></div>
+                   <div className="mt-3 h-1 w-full bg-white/[0.05] rounded-full overflow-hidden"><div className="h-full bg-amber-500 w-[5%]" /></div>
+                </div>
+             </div>
+          </div>
+        </div>
+      )}
 
-          {/* Left panel tab bar — 3 labeled tabs */}
-          <div className="shrink-0 px-3 pt-3 pb-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-            <div className="flex items-center gap-0.5 rounded-xl p-0.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              {([
-                { id: 'chat'    as LeftTab, I: MessageSquare, t: 'Chat'     },
-                { id: 'files'   as LeftTab, I: Files,         t: 'Archivos' },
-                { id: 'cloud'   as LeftTab, I: Cloud,         t: 'Supabase', badge: supabaseConfig ? '●' as any : undefined },
-                { id: 'history' as LeftTab, I: History,       t: 'Versiones', badge: snapshots.length > 0 ? snapshots.length : undefined },
-              ]).map(({ id, I, t, badge }) => (
-                <button key={id} onClick={() => setLeftTab(id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-[11px] font-semibold transition-all relative"
-                  style={leftTab === id
-                    ? { background: 'rgba(138,180,248,0.15)', color: '#8AB4F8', border: '1px solid rgba(138,180,248,0.2)' }
-                    : { color: 'rgba(255,255,255,0.28)', border: '1px solid transparent' }}
-                >
-                  <I className="h-3 w-3 shrink-0" />
-                  {t}
-                  {badge !== undefined && (
-                    <span className="h-3.5 min-w-[14px] px-0.5 flex items-center justify-center rounded-full text-[8px] font-black bg-[#8AB4F8] text-black">
-                      {badge > 9 ? '9+' : badge}
-                    </span>
-                  )}
-                </button>
-              ))}
+      {githubOpen && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/40" onClick={() => setGithubOpen(false)} />
+          <div className="absolute right-4 z-50 w-[320px] rounded-[16px] overflow-hidden shadow-2xl"
+            style={{ top: '60px', background: '#1c1c1f', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 24px 60px rgba(0,0,0,0.8)' }}>
+            <div className="p-5 flex flex-col gap-4">
+               <div className="flex justify-between items-start">
+                  <div className="h-10 w-10 rounded-full bg-white/[0.05] border border-white/[0.08] flex items-center justify-center">
+                    <Github className="h-5 w-5 text-white/80" />
+                  </div>
+                  <div className="px-2 py-1 rounded-full bg-[#34d399]/10 text-[#34d399] tracking-widest text-[9px] font-bold uppercase flex items-center gap-1.5 border border-[#34d399]/20">
+                     <span className="h-1.5 w-1.5 rounded-full bg-[#34d399] animate-pulse" /> Connected
+                  </div>
+               </div>
+               <div>
+                  <h4 className="text-[14px] font-semibold text-white">GitHub Integration</h4>
+                  <p className="text-[11px] text-white/40 mt-1">Sincronización bidireccional activada con tu repositorio actual.</p>
+               </div>
+               
+               <div className="p-3 bg-black/30 rounded-xl border border-white/[0.05]">
+                  <p className="text-[10px] text-white/40 uppercase tracking-widest mb-1.5">Repository</p>
+                  <p className="text-[12px] font-mono text-white/80 truncate">{githubRepo || 'EVA2080AI/creator-ia-pro'}</p>
+               </div>
+
+               <div className="flex flex-col gap-2 mt-2">
+                 <button onClick={handleGithubPush} className="w-full py-2.5 bg-white text-black font-semibold text-[12px] rounded-xl flex items-center justify-center gap-2 hover:bg-white/90">
+                   <UploadCloud className="h-4 w-4" /> Push to Main
+                 </button>
+                 <a href={`vscode://vscode.git/clone?url=https://github.com/${githubRepo || 'EVA2080AI/creator-ia-pro'}.git`}
+                    className="w-full py-2.5 bg-[#0066FF]/15 text-[#0066FF] font-semibold text-[12px] rounded-xl flex items-center justify-center gap-2 border border-[#0066FF]/30 hover:bg-[#0066FF]/25 transition-colors">
+                   <Code2 className="h-4 w-4" /> Edit in VS Code
+                 </a>
+               </div>
             </div>
           </div>
+        </>
+      )}
 
-          {/* Tab content — fills remaining height */}
-          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+      {/* ── LEFT: Chat panel (Collapsible) ─────────────────────────────────── */}
+      <div className={`${isChatOpen ? 'flex' : 'hidden'} lg:flex transition-all duration-300 w-[380px] h-full min-h-0 shrink-0 flex-col overflow-hidden`}
+        style={{ background: '#131318', borderRight: '1px solid rgba(255,255,255,0.04)' }}>
+        
+        <div className="flex-1 min-h-0 flex flex-col">
+          <StudioChat
+            projectId={activeProject.id}
+            projectFiles={projectFiles}
+            onCodeGenerated={handleCodeGenerated}
+            initialPrompt={pendingPrompt}
+            onInitialPromptUsed={() => setPendingPrompt(null)}
+            onAutoName={handleAutoName}
+            onGeneratingChange={(v) => { setIsGenerating(v); if (!v) setStreamPreview(''); }}
+            onStreamCharsChange={(_n, preview) => setStreamPreview(preview)}
+            supabaseConfig={supabaseConfig}
+          />
+        </div>
 
-            {/* CHAT tab — always mounted so history never resets */}
-            <div className={`flex flex-col flex-1 min-h-0 overflow-hidden ${leftTab !== 'chat' ? 'hidden' : ''}`}>
-              <StudioChat
-                projectId={activeProject.id}
-                projectFiles={projectFiles}
-                onCodeGenerated={handleCodeGenerated}
-                initialPrompt={pendingPrompt}
-                onInitialPromptUsed={() => setPendingPrompt(null)}
-                onAutoName={handleAutoName}
-                onGeneratingChange={(v) => { setIsGenerating(v); if (!v) setStreamPreview(''); }}
-                onStreamCharsChange={(_n, preview) => setStreamPreview(preview)}
-                supabaseConfig={supabaseConfig}
-              />
+        {/* ── Credits footer ── */}
+        <div className="shrink-0 p-3 border-t border-white/[0.05]">
+          <div className="px-3 py-2.5 rounded-[12px]" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] uppercase tracking-widest font-semibold text-white/30">{credits.toLocaleString()} credits left</span>
+              <Zap className="h-3 w-3 text-white/20" />
             </div>
-
-            {/* FILES tab */}
-            {leftTab === 'files' && (
-              <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-2.5 shrink-0"
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Archivos</span>
-                  <button onClick={() => handleAddFile(`file${Date.now()}.tsx`)}
-                    className="text-white/25 hover:text-white transition-all">
-                    <Plus className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <div className="flex-1 overflow-hidden">
-                  <StudioFileTree files={projectFiles} selectedFile={selectedFile} onSelect={(f) => { setSelectedFile(f); setPanelView('code'); }} onAddFile={handleAddFile} onDeleteFile={handleDeleteFile} />
-                </div>
-              </div>
-            )}
-
-            {/* CLOUD tab */}
-            {leftTab === 'cloud' && (
-              <StudioCloud
-                projectId={activeProject.id}
-                config={supabaseConfig}
-                onConfigChange={handleSupabaseConfigChange}
-              />
-            )}
-
-            {/* PROJECTS tab */}
-            {leftTab === 'projects' && (
-              <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-2.5 shrink-0"
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Proyectos</span>
-                  <button onClick={() => createProject()}
-                    className="text-white/25 hover:text-white transition-all">
-                    <Plus className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <div className="flex flex-col gap-1 p-2 flex-1 overflow-y-auto">
-                  {projects.map((p) => (
-                    <div key={p.id}
-                      className={`group flex items-center justify-between gap-1 px-3 py-2 rounded-xl cursor-pointer transition-all border ${activeProject.id === p.id ? 'bg-[#8AB4F8]/15 border-[#8AB4F8]/30 text-white' : 'text-white/35 hover:bg-white/[0.03] hover:text-white border-transparent'}`}
-                      onClick={() => { setActiveProject(p); setLeftTab('chat'); }}
-                    >
-                      {renamingId === p.id ? (
-                        <input autoFocus value={renameValue} onChange={(e) => setRenameValue(e.target.value)}
-                          onKeyDown={(e) => { if (e.key === 'Enter') confirmRename(); if (e.key === 'Escape') setRenamingId(null); }}
-                          onBlur={confirmRename} onClick={(e) => e.stopPropagation()}
-                          className="flex-1 bg-transparent border-b border-[#8AB4F8]/40 text-[11px] text-white outline-none" />
-                      ) : (
-                        <span className="text-[11px] font-medium truncate flex-1">{p.name}</span>
-                      )}
-                      <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                        <button onClick={(e) => { e.stopPropagation(); setRenamingId(p.id); setRenameValue(p.name); }}
-                          className="p-1 rounded hover:bg-white/10 text-white/20 hover:text-white transition-all">
-                          <Pencil className="h-2.5 w-2.5" />
-                        </button>
-                        <button onClick={(e) => { e.stopPropagation(); deleteProject(p.id); }}
-                          className="p-1 rounded hover:bg-rose-500/20 text-white/20 hover:text-rose-400 transition-all">
-                          <Trash2 className="h-2.5 w-2.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* HISTORY tab */}
-            {leftTab === 'history' && (
-              <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-2.5 shrink-0"
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Historial de versiones</span>
-                  <span className="text-[10px] text-white/20">{snapshots.length} guardadas</span>
-                </div>
-                <div className="flex flex-col gap-1.5 p-3 flex-1 overflow-y-auto">
-                  {snapshots.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-24 gap-2">
-                      <History className="h-5 w-5 text-white/10" />
-                      <p className="text-[11px] text-white/20 text-center">Genera código para crear una versión</p>
-                    </div>
-                  ) : snapshots.map((snap, i) => (
-                    <div key={snap.id} className="group flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl transition-all"
-                      style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(138,180,248,0.25)'; }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'; }}
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-lg shrink-0"
-                          style={{ background: i === 0 ? 'rgba(138,180,248,0.15)' : 'rgba(255,255,255,0.05)' }}>
-                          <History className="h-3 w-3" style={{ color: i === 0 ? '#8AB4F8' : 'rgba(255,255,255,0.3)' }} />
-                        </div>
-                        <div>
-                          <p className="text-[11px] font-semibold text-white/70">{snap.label}</p>
-                          <p className="text-[9px] text-white/25">{Object.keys(snap.files).length} archivos</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => {
-                          if (activeProject) {
-                            updateProjectFiles(activeProject.id, snap.files);
-                            toast.success(`Restaurado a ${snap.label}`);
-                            setLeftTab('chat');
-                          }
-                        }}
-                        className="opacity-0 group-hover:opacity-100 flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-white/50 hover:text-white transition-all"
-                        style={{ background: 'rgba(255,255,255,0.06)' }}
-                      >
-                        <RotateCcw className="h-2.5 w-2.5" />
-                        Restaurar
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* GITHUB tab */}
-            {leftTab === 'github' && (
-              <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
-                <div className="flex items-center gap-2 px-4 py-2.5 shrink-0"
-                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <Github className="h-3.5 w-3.5 text-white/30" />
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">GitHub Push</span>
-                </div>
-                <div className="p-4 flex flex-col gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Token PAT</label>
-                    <input type="password" value={githubToken} onChange={(e) => setGithubToken(e.target.value)} placeholder="ghp_xxx"
-                      className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-[11px] text-white placeholder:text-white/15 outline-none focus:border-[#8AB4F8]/40 font-mono" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Repositorio</label>
-                    <input value={githubRepo} onChange={(e) => setGithubRepo(e.target.value)} placeholder="usuario/repo"
-                      className="w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-3 py-2 text-[11px] text-white placeholder:text-white/15 outline-none focus:border-[#8AB4F8]/40 font-mono" />
-                  </div>
-                  <button onClick={handleGithubPush} disabled={pushingGithub || !githubToken || !githubRepo}
-                    className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white text-black text-[11px] font-bold disabled:opacity-25 hover:bg-white/90 transition-all active:scale-95">
-                    {pushingGithub ? <><Loader2 className="h-3.5 w-3.5 animate-spin" /> Enviando…</> : <><UploadCloud className="h-3.5 w-3.5" /> Push a GitHub</>}
-                  </button>
-                  <p className="text-[9px] text-white/20 leading-relaxed">Token necesita permisos <code className="text-white/35">repo</code>. Crea el repo automáticamente si no existe.</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ── Bottom strip: Visual edits toggle + Back to Preview + Credits ── */}
-          <div className="shrink-0 flex flex-col gap-1 p-2"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-
-            {/* Back to Preview (only when in code view) */}
-            {panelView === 'code' && (
-              <button
-                onClick={() => setPanelView('preview')}
-                className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[11px] font-medium text-white/35 hover:text-white transition-all"
-                style={{ border: '1px solid rgba(255,255,255,0.06)' }}
-              >
-                <Eye className="h-3.5 w-3.5 shrink-0" />
-                Volver al Preview
-              </button>
-            )}
-
-            {/* Credits bar */}
-            <div className="px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[10px] text-white/30">{credits.toLocaleString()} créditos restantes</span>
-                <Zap className="h-3 w-3 text-white/20" />
-              </div>
-              <div className="h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                <div className="h-full rounded-full transition-all"
-                  style={{ width: `${Math.min(100, (credits / 1000) * 100)}%`, background: credits > 200 ? '#8AB4F8' : credits > 50 ? '#f59e0b' : '#ef4444' }} />
-              </div>
-              <button
-                onClick={() => { window.location.href = '/pricing'; }}
-                className="mt-2 w-full text-center text-[10px] font-semibold py-1.5 rounded-lg transition-all"
-                style={{ background: 'rgba(138,180,248,0.12)', color: '#a78bfa', border: '1px solid rgba(138,180,248,0.2)' }}
-              >
-                Actualizar plan →
-              </button>
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
+              <div className="h-full rounded-full transition-all"
+                style={{ width: `${Math.min(100, (credits / 1000) * 100)}%`, background: credits > 200 ? '#8AB4F8' : credits > 50 ? '#f59e0b' : '#ef4444' }} />
             </div>
           </div>
         </div>
+      </div>
 
-        {/* ── CENTER: Code + Preview ─────────────────────────────────────────── */}
-        <div className="flex flex-1 overflow-hidden">
+      {/* ── CENTER: Dynamic Workspace ─────────────────────────────────────────── */}
+        <div className="flex flex-1 overflow-hidden relative" style={{ background: '#0a0a0c' }}>
+          
+          {panelView === 'files' && (
+             <div className="w-full h-full flex items-center justify-center p-8 bg-[#0a0a0c]">
+                <div className="w-full max-w-2xl h-[80vh] bg-[#111114] rounded-2xl border border-white/[0.05] overflow-hidden flex flex-col shadow-2xl">
+                   <div className="px-6 py-4 border-b border-white/[0.05] flex justify-between items-center">
+                      <h3 className="text-white text-[14px] font-medium flex items-center gap-2"><FolderOpen className="h-4 w-4 text-[#8AB4F8]" /> Archivos del Proyecto</h3>
+                      <button onClick={() => handleAddFile(`file${Date.now()}.tsx`)} className="px-3 py-1.5 bg-[#8AB4F8]/10 text-[#8AB4F8] hover:bg-[#8AB4F8]/20 transition-colors text-[11px] font-medium rounded-lg">+ Añadir</button>
+                   </div>
+                   <div className="flex-1 overflow-y-auto w-full p-4">
+                      <StudioFileTree files={projectFiles} selectedFile={selectedFile} onSelect={(f) => { setSelectedFile(f); setPanelView('code'); }} onAddFile={handleAddFile} onDeleteFile={handleDeleteFile} />
+                   </div>
+                </div>
+             </div>
+          )}
+
+          {panelView === 'history' && (
+             <div className="w-full h-full flex items-center justify-center p-8 bg-[#0a0a0c]">
+                <div className="w-full max-w-2xl h-[80vh] bg-[#111114] rounded-2xl border border-white/[0.05] overflow-hidden flex flex-col shadow-2xl">
+                   <div className="px-6 py-4 border-b border-white/[0.05] flex justify-between items-center">
+                      <h3 className="text-white text-[14px] font-medium flex items-center gap-2"><History className="h-4 w-4 text-white/50" /> Historial de Versiones</h3>
+                   </div>
+                   <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                      {snapshots.length === 0 ? <p className="text-center text-white/30 text-[12px] mt-10">No hay snapshots aún.</p> : 
+                        snapshots.map((snap, i) => (
+                          <div key={snap.id} className="flex justify-between items-center p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                             <div className="flex items-center gap-4">
+                               <div className="h-10 w-10 rounded-full bg-white/[0.05] flex items-center justify-center text-white/50">{i}</div>
+                               <div>
+                                 <p className="text-white text-[13px] font-medium">{snap.label}</p>
+                                 <p className="text-white/40 text-[11px] mt-0.5">{Object.keys(snap.files).length} archivos generados</p>
+                               </div>
+                             </div>
+                             <button onClick={() => { updateProjectFiles(activeProject.id, snap.files); toast.success('Restaurado!'); setPanelView('preview'); }} className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-[11px] font-medium shrink-0 flex items-center gap-2">
+                               <RotateCcw className="h-3.5 w-3.5" /> Restaurar
+                             </button>
+                          </div>
+                        ))
+                      }
+                   </div>
+                </div>
+             </div>
+          )}
+
           {(panelView === 'code' || panelView === 'split') && (
-            <div className={`flex flex-col overflow-hidden ${panelView === 'split' ? 'w-1/2 border-r border-white/[0.05]' : 'flex-1'}`}>
+            <div className={`flex flex-col overflow-hidden ${panelView === 'split' ? 'w-[45%] border-r border-white/[0.05]' : 'flex-1'}`}>
               <StudioCodeEditor selectedFile={selectedFile} projectFiles={projectFiles} onFilesChange={handleFilesChange} isGenerating={isGenerating} streamPreview={streamPreview} />
             </div>
           )}
           {(panelView === 'preview' || panelView === 'split') && (
-            <div className={`flex flex-col overflow-hidden ${panelView === 'split' ? 'w-1/2' : 'flex-1'}`}>
+            <div className={`flex flex-col overflow-hidden ${panelView === 'split' ? 'flex-1' : 'flex-1'}`}>
               <StudioPreview files={projectFiles} deviceMode={deviceMode} onDeviceModeChange={setDeviceMode} isGenerating={isGenerating} supabaseConfig={supabaseConfig} />
             </div>
           )}

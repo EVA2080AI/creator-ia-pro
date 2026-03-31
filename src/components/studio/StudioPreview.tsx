@@ -229,31 +229,17 @@ export function StudioPreview({
               padding: deviceMode === 'tablet' ? '24px 20px' : '28px 16px',
             } : undefined}
           >
-            {/* Phone / tablet bezel */}
+            {/* Edge highlights for floating frame */}
             {deviceMode !== 'desktop' && (
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  border: '8px solid #232430',
-                  borderRadius: deviceMode === 'mobile' ? 44 : 20,
-                  boxShadow: '0 0 0 1px rgba(255,255,255,0.05), 0 32px 80px rgba(0,0,0,0.7)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: deviceMode === 'mobile' ? 40 : 20,
+                  boxShadow: '0 32px 80px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.05)',
                   zIndex: 5,
                 }}
-              >
-                {deviceMode === 'mobile' && (
-                  <div style={{
-                    position: 'absolute', top: 10, left: '50%', transform: 'translateX(-50%)',
-                    height: 20, width: 90, background: '#232430',
-                    borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)',
-                  }} />
-                )}
-                {deviceMode === 'mobile' && (
-                  <div style={{
-                    position: 'absolute', bottom: 8, left: '50%', transform: 'translateX(-50%)',
-                    height: 4, width: 80, background: 'rgba(255,255,255,0.18)', borderRadius: 4,
-                  }} />
-                )}
-              </div>
+              />
             )}
 
             {/* Sandpack — no editor, just preview */}
@@ -264,7 +250,7 @@ export function StudioPreview({
                 height: deviceMode === 'desktop' ? '100%' : frameHeight[deviceMode],
                 transformOrigin: 'top center',
                 transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
-                borderRadius: deviceMode === 'mobile' ? 36 : deviceMode === 'tablet' ? 12 : 0,
+                borderRadius: deviceMode === 'mobile' ? 40 : deviceMode === 'tablet' ? 20 : 0,
                 overflow: 'hidden',
               }}
               className="flex-shrink-0 flex flex-col"
