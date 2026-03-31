@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { path: "/dashboard",   label: "Home",    icon: Home           },
   { path: "/chat",        label: "Genesis", icon: Code2          }, // Chat viejo
   { path: "/studio",      label: "Studio",  icon: Wand2          }, // Herramientas de IA
-  { path: "/ide",         label: "Code",    icon: Monitor        }, // El IDE / Web Builder
+  { path: "/code",         label: "Code",    icon: Monitor        }, // El IDE / Web Builder
   { path: "/formarketing", label: "Canvas", icon: LayoutTemplate },
   { path: "/spaces",      label: "Spaces",  icon: FolderOpen     },
 ];

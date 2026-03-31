@@ -135,6 +135,7 @@ const App = () => {
                 <Route path="/genesis" element={<Chat />} />
                 <Route path="/studio" element={<Tools />} />
                 <Route path="/ide" element={<CodeIDE />} />
+                <Route path="/code" element={<CodeIDE />} />
                 <Route path="/code-editor" element={<CodeIDE />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
