@@ -223,24 +223,9 @@ export function StudioPreview({
 
         {hasContent ? (
           /* ── Device frame wrapper ─────────────────────────────────── */
-          <div
-            className={deviceMode === 'desktop' ? 'w-full h-full' : 'relative flex-shrink-0'}
-            style={deviceMode !== 'desktop' ? {
-              padding: deviceMode === 'tablet' ? '24px 20px' : '28px 16px',
-            } : undefined}
+        <div
+            className={deviceMode === 'desktop' ? 'w-full h-full' : 'relative flex-shrink-0 flex items-start justify-center'}
           >
-            {/* Edge highlights for floating frame */}
-            {deviceMode !== 'desktop' && (
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: deviceMode === 'mobile' ? 40 : 20,
-                  boxShadow: '0 32px 80px rgba(0,0,0,0.7), inset 0 1px 1px rgba(255,255,255,0.05)',
-                  zIndex: 5,
-                }}
-              />
-            )}
 
             {/* Sandpack — no editor, just preview */}
             <div
@@ -250,7 +235,7 @@ export function StudioPreview({
                 height: deviceMode === 'desktop' ? '100%' : frameHeight[deviceMode],
                 transformOrigin: 'top center',
                 transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
-                borderRadius: deviceMode === 'mobile' ? 40 : deviceMode === 'tablet' ? 20 : 0,
+                borderRadius: 0,
                 overflow: 'hidden',
               }}
               className="flex-shrink-0 flex flex-col"
