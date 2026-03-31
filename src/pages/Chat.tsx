@@ -562,116 +562,207 @@ export default function Chat() {
 
   // Full IDE view — Lovable-style: chat LEFT | code/preview CENTER
   const credits = profile?.credits_balance ?? 0;
+  const [moreOpen, setMoreOpen] = useState(false);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden pt-[56px]" style={{ background: '#191a1f' }}>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      {/* Genesis Top Bar — Lovable-style (V2) */}
-      <div className="flex h-[52px] items-center px-4 shrink-0 z-10 w-full justify-between"
-        style={{ background: '#13141b', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+      {/* ── Genesis Topbar (Lovable V3 — icon-only compact) ─────────────────── */}
+      <div className="flex h-[44px] items-center px-3 shrink-0 z-10 w-full"
+        style={{ background: '#0f1014', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
 
-        {/* Left: Project & Chat Toggle */}
-        <div className="flex items-center gap-3 min-w-[250px] shrink-0">
-          <button onClick={() => setActiveProject(null)}
-            className="flex items-center justify-center p-1.5 rounded-lg text-white/40 hover:bg-white/[0.05] hover:text-white transition-colors shrink-0"
-            title="Volver a Proyectos">
-            <Home className="h-4 w-4" />
+        {/* ── LEFT: Nav + project name ─────────────────────────────────────── */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Back to projects */}
+          <button onClick={() => setActiveProject(null)} title="Proyectos"
+            className="flex items-center justify-center h-7 w-7 rounded-md text-white/35 hover:bg-white/[0.06] hover:text-white transition-all">
+            <Home className="h-3.5 w-3.5" />
           </button>
-          
-          <button onClick={() => setIsChatOpen(!isChatOpen)}
-            className="flex items-center justify-center p-1.5 rounded-lg text-white/40 hover:bg-white/[0.05] hover:text-white transition-colors shrink-0">
-            {isChatOpen ? <PanelLeftClose className="h-4 w-4" /> : <PanelLeft className="h-4 w-4" />}
+
+          {/* Toggle chat panel */}
+          <button onClick={() => setIsChatOpen(!isChatOpen)} title={isChatOpen ? 'Ocultar chat' : 'Mostrar chat'}
+            className="flex items-center justify-center h-7 w-7 rounded-md transition-all"
+            style={isChatOpen
+              ? { color: 'white', background: 'rgba(255,255,255,0.07)' }
+              : { color: 'rgba(255,255,255,0.35)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = isChatOpen ? 'rgba(255,255,255,0.07)' : ''; }}>
+            {isChatOpen ? <PanelLeftClose className="h-3.5 w-3.5" /> : <PanelLeft className="h-3.5 w-3.5" />}
           </button>
-          
-          <div className="h-4 w-px shrink-0" style={{ background: 'rgba(255,255,255,0.1)' }} />
-          
-          <div className="flex flex-col justify-center min-w-0">
-            <div className="flex items-center gap-1.5">
-              <div className="h-2 w-2 rounded-full shrink-0" style={{ background: isGenerating ? '#f59e0b' : '#34d399' }} />
-              {renamingTopBar ? (
-                <input autoFocus value={renameTopBarValue}
-                  onChange={e => setRenameTopBarValue(e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter') { renameProject(activeProject.id, renameTopBarValue.trim() || activeProject.name); setRenamingTopBar(false); } if (e.key === 'Escape') setRenamingTopBar(false); }}
-                  onBlur={() => { renameProject(activeProject.id, renameTopBarValue.trim() || activeProject.name); setRenamingTopBar(false); }}
-                  className="text-[13px] font-bold text-white bg-transparent outline-none max-w-[150px]" />
-              ) : (
-                <button onClick={() => { setRenameTopBarValue(activeProject.name); setRenamingTopBar(true); }}
-                  className="flex items-center gap-1 group/rename">
-                  <span className="text-[13px] font-bold text-white/90 truncate max-w-[150px]">{activeProject.name}</span>
-                  <Pencil className="h-2.5 w-2.5 text-white/20 opacity-0 group-hover/rename:opacity-100 transition-opacity shrink-0" />
-                </button>
-              )}
-            </div>
+
+          <div className="h-4 w-px mx-1 shrink-0" style={{ background: 'rgba(255,255,255,0.08)' }} />
+
+          {/* Project name + status dot */}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: isGenerating ? '#f59e0b' : '#34d399' }} />
+            {renamingTopBar ? (
+              <input autoFocus value={renameTopBarValue}
+                onChange={e => setRenameTopBarValue(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') { renameProject(activeProject.id, renameTopBarValue.trim() || activeProject.name); setRenamingTopBar(false); }
+                  if (e.key === 'Escape') setRenamingTopBar(false);
+                }}
+                onBlur={() => { renameProject(activeProject.id, renameTopBarValue.trim() || activeProject.name); setRenamingTopBar(false); }}
+                className="text-[13px] font-semibold text-white bg-transparent outline-none max-w-[140px] border-b border-white/20" />
+            ) : (
+              <button onClick={() => { setRenameTopBarValue(activeProject.name); setRenamingTopBar(true); }}
+                className="flex items-center gap-1 group/rename min-w-0">
+                <span className="text-[13px] font-semibold text-white/80 truncate max-w-[130px] group-hover/rename:text-white transition-colors">{activeProject.name}</span>
+                <Pencil className="h-2.5 w-2.5 text-white/20 opacity-0 group-hover/rename:opacity-100 transition-opacity shrink-0" />
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Center-Left: Mode Toggles */}
-        <div className="hidden lg:flex items-center gap-1 mr-2 shrink-0">
-          <div className="flex items-center gap-0.5 p-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
-            <button onClick={() => setPanelView('preview')} className="flex items-center gap-2 px-2.5 py-1 rounded-[6px] transition-all" style={panelView === 'preview' ? { background: 'rgba(255,255,255,0.1)', color: 'white' } : { color: 'rgba(255,255,255,0.4)' }}>
-              <Globe className="h-3.5 w-3.5" /><span className="text-[11px] font-semibold">Preview</span>
+        {/* ── CENTER-LEFT: Icon strip (Lovable style) ──────────────────────── */}
+        <div className="flex items-center gap-0.5 ml-3 shrink-0">
+          {/* Undo/Redo history buttons */}
+          <button onClick={() => setPanelView('history')} title="Historial de versiones"
+            className="relative flex items-center justify-center h-7 w-7 rounded-md transition-all"
+            style={panelView === 'history' ? { color: 'white', background: 'rgba(255,255,255,0.08)' } : { color: 'rgba(255,255,255,0.35)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'white'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = panelView === 'history' ? 'rgba(255,255,255,0.08)' : ''; (e.currentTarget as HTMLElement).style.color = panelView === 'history' ? 'white' : 'rgba(255,255,255,0.35)'; }}>
+            <History className="h-3.5 w-3.5" />
+            {snapshots.length > 0 && <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-[#8AB4F8]" />}
+          </button>
+
+          <div className="h-4 w-px mx-0.5 shrink-0" style={{ background: 'rgba(255,255,255,0.07)' }} />
+
+          {/* Preview */}
+          <button onClick={() => setPanelView('preview')} title="Preview"
+            className="flex items-center justify-center h-7 w-7 rounded-md transition-all"
+            style={panelView === 'preview' ? { color: 'white', background: 'rgba(255,255,255,0.08)' } : { color: 'rgba(255,255,255,0.35)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'white'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = panelView === 'preview' ? 'rgba(255,255,255,0.08)' : ''; (e.currentTarget as HTMLElement).style.color = panelView === 'preview' ? 'white' : 'rgba(255,255,255,0.35)'; }}>
+            <Globe className="h-3.5 w-3.5" />
+          </button>
+
+          {/* Files */}
+          <button onClick={() => setPanelView('files')} title="Archivos"
+            className="flex items-center justify-center h-7 w-7 rounded-md transition-all"
+            style={panelView === 'files' ? { color: 'white', background: 'rgba(255,255,255,0.08)' } : { color: 'rgba(255,255,255,0.35)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'white'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = panelView === 'files' ? 'rgba(255,255,255,0.08)' : ''; (e.currentTarget as HTMLElement).style.color = panelView === 'files' ? 'white' : 'rgba(255,255,255,0.35)'; }}>
+            <Files className="h-3.5 w-3.5" />
+          </button>
+
+          {/* Code */}
+          <button onClick={() => setPanelView('code')} title="Editor de código"
+            className="flex items-center justify-center h-7 w-7 rounded-md transition-all"
+            style={panelView === 'code' ? { color: 'white', background: 'rgba(255,255,255,0.08)' } : { color: 'rgba(255,255,255,0.35)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'white'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = panelView === 'code' ? 'rgba(255,255,255,0.08)' : ''; (e.currentTarget as HTMLElement).style.color = panelView === 'code' ? 'white' : 'rgba(255,255,255,0.35)'; }}>
+            <Code2 className="h-3.5 w-3.5" />
+          </button>
+
+          {/* Cloud */}
+          <button onClick={() => setCloudOpen(true)} title="Cloud / Supabase"
+            className="flex items-center justify-center h-7 w-7 rounded-md text-white/35 hover:bg-white/[0.06] hover:text-white transition-all">
+            <Database className="h-3.5 w-3.5" />
+          </button>
+
+          {/* BarChart / Analytics */}
+          <button title="Analytics (próximamente)"
+            className="flex items-center justify-center h-7 w-7 rounded-md text-white/20 hover:bg-white/[0.06] hover:text-white/50 transition-all cursor-not-allowed">
+            <BarChart2 className="h-3.5 w-3.5" />
+          </button>
+
+          {/* More menu (…) */}
+          <div className="relative">
+            <button onClick={() => setMoreOpen(v => !v)} title="Más opciones"
+              className="flex items-center justify-center h-7 w-7 rounded-md transition-all"
+              style={moreOpen ? { color: 'white', background: 'rgba(255,255,255,0.08)' } : { color: 'rgba(255,255,255,0.35)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'white'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = moreOpen ? 'rgba(255,255,255,0.08)' : ''; (e.currentTarget as HTMLElement).style.color = moreOpen ? 'white' : 'rgba(255,255,255,0.35)'; }}>
+              <MoreHorizontal className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => setPanelView('files')} className="flex items-center gap-2 px-2.5 py-1 rounded-[6px] transition-all" style={panelView === 'files' ? { background: 'rgba(255,255,255,0.1)', color: 'white' } : { color: 'rgba(255,255,255,0.4)' }}>
-              <Files className="h-3.5 w-3.5" /><span className="text-[11px] font-semibold">Files</span>
-            </button>
-            <button onClick={() => setPanelView('code')} className="flex items-center gap-2 px-2.5 py-1 rounded-[6px] transition-all" style={panelView === 'code' ? { background: 'rgba(255,255,255,0.1)', color: 'white' } : { color: 'rgba(255,255,255,0.4)' }}>
-              <Code2 className="h-3.5 w-3.5" /><span className="text-[11px] font-semibold">Code</span>
-            </button>
-            <button onClick={() => setCloudOpen(true)} className="flex items-center gap-2 px-2.5 py-1 rounded-[6px] transition-all text-white/40 hover:text-white">
-              <Database className="h-3.5 w-3.5" /><span className="text-[11px] font-semibold">Cloud</span>
-            </button>
+            {moreOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
+                <div className="absolute left-0 top-full mt-1.5 w-52 rounded-xl z-50 overflow-hidden"
+                  style={{ background: '#1a1b22', border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 12px 40px rgba(0,0,0,0.6)' }}>
+                  <p className="px-3 pt-2.5 pb-1 text-[9px] font-bold text-white/25 uppercase tracking-[0.3em]">Herramientas</p>
+                  {[
+                    { icon: History,    label: 'Historial de versiones', action: () => { setPanelView('history'); setMoreOpen(false); } },
+                    { icon: Github,     label: 'Push a GitHub',          action: () => { setGithubOpen(true); setMoreOpen(false); } },
+                    { icon: Download,   label: 'Descargar ZIP',          action: () => { exportZip(projectFiles, activeProject.name).then(() => toast.success('ZIP descargado')).catch(() => toast.error('Error al generar ZIP')); setMoreOpen(false); } },
+                    { icon: UploadCloud,label: 'Publicar en Vercel',     action: () => { toast.info('Conecta Vercel desde ajustes'); setMoreOpen(false); } },
+                  ].map(item => (
+                    <button key={item.label} onClick={item.action}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-all text-white/60 hover:text-white hover:bg-white/[0.05]">
+                      <item.icon className="h-3.5 w-3.5 shrink-0 text-white/40" />
+                      <span className="text-[12px] font-medium">{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Center: Device Pill */}
-        <div className="hidden md:flex flex-1 max-w-[400px]">
-          <div className="flex items-center rounded-full px-2 py-1.5 w-full mx-auto" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <button onClick={() => setDeviceMode(prev => prev === 'desktop' ? 'tablet' : prev === 'tablet' ? 'mobile' : 'desktop')} className="flex items-center justify-center p-1 rounded-full text-white/40 hover:text-white hover:bg-white/[0.05] transition-all shrink-0">
+        {/* ── CENTER: Device pill ──────────────────────────────────────────── */}
+        <div className="hidden md:flex flex-1 justify-center px-4">
+          <div className="flex items-center rounded-full px-2 py-1 gap-1 w-full max-w-[340px]"
+            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            {/* Device cycle button */}
+            <button
+              onClick={() => setDeviceMode(prev => prev === 'desktop' ? 'tablet' : prev === 'tablet' ? 'mobile' : 'desktop')}
+              title={`Modo: ${deviceMode}`}
+              className="flex items-center justify-center p-1 rounded-full text-white/40 hover:text-white hover:bg-white/[0.05] transition-all shrink-0">
               {deviceMode === 'desktop' ? <Monitor className="h-3.5 w-3.5" /> : deviceMode === 'tablet' ? <Tablet className="h-3.5 w-3.5" /> : <Phone className="h-3.5 w-3.5" />}
             </button>
-            <div className="h-3 w-px mx-2 shrink-0 bg-white/10" />
-            <div className="flex-1 truncate text-center text-[11px] font-medium text-white/50 cursor-pointer hover:text-white transition-colors">
-              <span className="text-white/30">/</span>
+            <div className="h-3 w-px shrink-0 mx-1 bg-white/10" />
+            <div className="flex-1 text-center text-[11px] text-white/30 select-none truncate">
+              {activeProject.name.toLowerCase().replace(/\s+/g, '-')}
             </div>
-            <button title="Recargar App" className="flex items-center justify-center p-1 rounded-full text-white/40 hover:text-white hover:bg-white/[0.05] transition-all shrink-0 mr-1">
-              <RefreshCw className="h-3.5 w-3.5" />
-            </button>
-            <button title="Abrir en pestaña nueva" className="flex items-center justify-center p-1 rounded-full text-white/40 hover:text-white hover:bg-white/[0.05] transition-all shrink-0">
+            <div className="h-3 w-px shrink-0 mx-1 bg-white/10" />
+            <button title="Abrir en nueva pestaña"
+              className="flex items-center justify-center p-1 rounded-full text-white/30 hover:text-white hover:bg-white/[0.05] transition-all shrink-0">
               <ArrowUp className="h-3.5 w-3.5 rotate-45" />
             </button>
           </div>
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center justify-end gap-2.5 min-w-[250px] shrink-0">
-          
-          <button onClick={() => setPanelView('history')} title="Historial" className="p-1.5 rounded-lg text-white/40 hover:text-white hover:bg-white/[0.05] transition-all hidden sm:block relative">
-            <History className="h-4 w-4" />
-            {snapshots.length > 0 && <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-[#8AB4F8]" />}
-          </button>
+        {/* ── RIGHT: Actions ───────────────────────────────────────────────── */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Saved indicator */}
+          {savedIndicator && (
+            <span className="text-[10px] text-emerald-400/70 font-medium animate-in fade-in duration-200">Guardado ✓</span>
+          )}
 
-          <button onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copiado'); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold text-white/60 bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] transition-all">
+          {/* Share */}
+          <button
+            onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copiado'); }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold text-white/50 hover:text-white border border-white/[0.07] hover:border-white/20 hover:bg-white/[0.04] transition-all">
             Share
           </button>
-          
-          <button onClick={() => setGithubOpen(true)} className="flex items-center justify-center h-7 w-7 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] transition-all">
-            <Github className="h-3.5 w-3.5 text-white/80" />
+
+          {/* GitHub */}
+          <button onClick={() => setGithubOpen(true)} title="GitHub"
+            className="flex items-center justify-center h-7 w-7 rounded-full border border-white/[0.08] bg-white/[0.04] hover:bg-white/[0.1] transition-all">
+            <Github className="h-3.5 w-3.5 text-white/70" />
           </button>
 
-          <button onClick={() => navigate('/pricing')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all" style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.3)' }}>
-            <Zap className="h-3.5 w-3.5" />
-            Upgrade
+          {/* Upgrade */}
+          <button onClick={() => navigate('/pricing')}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-bold transition-all"
+            style={{ background: 'rgba(167,139,250,0.12)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.2)' }}>
+            <Zap className="h-3 w-3" /> Upgrade
           </button>
 
-          <button onClick={() => setDeployOpen(!deployOpen)} className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[11px] font-bold transition-all active:scale-95 shadow-lg shadow-[#8AB4F8]/10" style={{ background: isGenerating ? 'rgba(138,180,248,0.4)' : '#8AB4F8', color: '#13141b' }}>
-            {isGenerating ? <><span className="h-1.5 w-1.5 rounded-full bg-[#13141b] animate-pulse" />Generando</> : <>Publish</>}
+          {/* Publish */}
+          <button onClick={() => setDeployOpen(!deployOpen)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all active:scale-95"
+            style={{ background: isGenerating ? 'rgba(138,180,248,0.5)' : '#8AB4F8', color: '#0f1014' }}>
+            {isGenerating
+              ? <><span className="h-1.5 w-1.5 rounded-full bg-[#0f1014] animate-pulse" />Generando</>
+              : 'Publish'}
           </button>
 
           {profile?.avatar_url && (
-            <img src={profile.avatar_url} alt="" className="h-7 w-7 rounded-full ml-1 border border-white/10" />
+            <img src={profile.avatar_url} alt="" className="h-7 w-7 rounded-full border border-white/10 ml-0.5" />
           )}
-
         </div>
       </div>
 {/* Deploy panel overlay */}
