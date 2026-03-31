@@ -13,6 +13,7 @@ import {
   Clock, ChevronDown, Eye, History, Download, RotateCcw,
   MoreHorizontal, Globe, BarChart2, Columns, Cloud,
   Map, ArrowUp, ArrowRight,
+  PanelLeft, PanelLeftClose, Phone, RefreshCw, Database,
 } from 'lucide-react';
 import { AppHeader } from '@/components/AppHeader';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
@@ -337,6 +338,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
 
 // ─── Genesis IDE ─────────────────────────────────────────────────────────────
 export default function Chat() {
+  const navigate = useNavigate();
   const { user, signOut } = useAuth('/auth');
   const { profile } = useProfile(user?.id);
   const {
@@ -516,7 +518,8 @@ export default function Chat() {
       if (failed > 0) toast.warning(`${pushed} enviados, ${failed} fallaron — revisa el token`);
       else toast.success(`${pushed} archivos enviados a github.com/${owner}/${repo}`);
       if (user) {
-        await supabase.from('github_connections').upsert({ user_id: user.id, github_username: owner, access_token: githubToken, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+        // Note: github_connections table not in schema yet — skip upsert
+        console.log('[GitHub] pushed by', user.id);
       }
     } catch {
       toast.error('Error al enviar a GitHub');
@@ -684,7 +687,7 @@ export default function Chat() {
           </div>
           <div className="p-2 flex flex-col gap-1">
             {[
-              { icon: Github, label: 'Push a GitHub', desc: 'Sube los archivos al repo', action: () => { setDeployOpen(false); setLeftTab('github'); } },
+              { icon: Github, label: 'Push a GitHub', desc: 'Sube los archivos al repo', action: () => { setDeployOpen(false); setGithubOpen(true); } },
               { icon: Download, label: 'Descargar ZIP', desc: 'Todos los archivos comprimidos', action: () => { exportZip(projectFiles, activeProject.name).then(() => toast.success('ZIP descargado')).catch(() => toast.error('Error al generar ZIP')); setDeployOpen(false); } },
               { icon: UploadCloud, label: 'Publicar con Vercel', desc: 'Deploy automático', action: () => { toast.success('Conecta Vercel desde ajustes'); setDeployOpen(false); } },
             ].map(item => (
