@@ -71,6 +71,7 @@ const Profile = lazy(() => import("./pages/Profile"));
 const Hub = lazy(() => import("./pages/Hub"));
 const Chat = lazy(() => import("./pages/Chat"));
 const Studio = lazy(() => import("./pages/Studio"));
+const CodeIDE = lazy(() => import("./pages/CodeIDE"));
 
 const LoadingScreen = () => (
   <div className="flex h-screen w-screen items-center justify-center bg-[#16161b]">
@@ -133,7 +134,8 @@ const App = () => {
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/genesis" element={<Chat />} />
                 <Route path="/studio" element={<Tools />} />
-                <Route path="/ide" element={<Studio />} />
+                <Route path="/ide" element={<CodeIDE />} />
+                <Route path="/code-editor" element={<CodeIDE />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

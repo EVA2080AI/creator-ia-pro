@@ -53,7 +53,7 @@ const TX_TYPE_LABELS: Record<string, { label: string; color: string }> = {
   admin_deduct: { label: "Deducción",     color: "#EF4444" },
   refund:       { label: "Reembolso",     color: "#60A5FA" },
   spend:        { label: "Uso",           color: "#F59E0B" },
-  purchase:     { label: "Compra",        color: "#A855F7" },
+  purchase:     { label: "Compra",        color: "var(--brand)" },
 };
 
 // ─── Credit Modal ─────────────────────────────────────────────────────────────
@@ -76,7 +76,7 @@ function CreditModal({
 
   const loadHistory = useCallback(async () => {
     setTxLoading(true);
-    const { data, error } = await supabase.rpc("admin_get_transactions", {
+    const { data, error } = await (supabase.rpc as any)("admin_get_transactions", {
       _target_user_id: user.user_id,
       _limit: 30,
     });
@@ -102,7 +102,7 @@ function CreditModal({
     if (!fn) return;
 
     setLoading(true);
-    const { data, error } = await supabase.rpc(fn, {
+    const { data, error } = await (supabase.rpc as any)(fn, {
       _target_user_id: user.user_id,
       _amount: n,
       _reason: reason || undefined,
@@ -128,8 +128,8 @@ function CreditModal({
   ] as const;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-[#0c0c0f] shadow-2xl">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-md p-4">
+      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-background/50 backdrop-blur-2xl shadow-2xl shadow-black/50">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/[0.06] p-5">
           <div>
@@ -270,8 +270,8 @@ function AdminLoginGate() {
     <div className="min-h-screen bg-[#050506] flex items-center justify-center p-6">
       <div className="w-full max-w-sm rounded-3xl border border-white/[0.06] bg-white/[0.02] p-10 space-y-6">
         <div className="text-center space-y-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#A855F7]/10 border border-[#A855F7]/20 mx-auto">
-            <Shield className="h-7 w-7 text-[#A855F7]" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/10 mx-auto">
+            <Shield className="h-7 w-7 text-white" />
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Acceso Admin</h1>
           <p className="text-xs text-white/30">Inicia sesión con tu cuenta de administrador</p>
@@ -284,7 +284,7 @@ function AdminLoginGate() {
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#A855F7]/40 transition-colors"
+            className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/40 transition-colors"
           />
           <input
             type="password"
@@ -300,7 +300,7 @@ function AdminLoginGate() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[#A855F7] text-white font-bold text-sm hover:bg-[#9333EA] transition-all active:scale-95 disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
             Entrar al panel
@@ -342,10 +342,10 @@ function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () => void 
   };
 
   return (
-    <div className="min-h-screen bg-[#050506] flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-3xl border border-white/[0.06] bg-white/[0.02] p-10 text-center space-y-6">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#A855F7]/10 border border-[#A855F7]/20 mx-auto">
-          <Shield className="h-8 w-8 text-[#A855F7]" />
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-background/50 backdrop-blur-2xl p-10 text-center space-y-6 shadow-2xl shadow-black/50">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10 mx-auto">
+          <Shield className="h-8 w-8 text-white" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Panel Admin</h1>
@@ -394,9 +394,9 @@ ON CONFLICT DO NOTHING;`}
             <button
               onClick={handleBootstrap}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#A855F7] text-white font-bold text-sm hover:bg-[#9333EA] transition-all active:scale-95 disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-all active:scale-95 disabled:opacity-50 shadow-lg shadow-primary/20"
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shield className="h-4 w-4" />}
               Activar mi cuenta como Admin
             </button>
           </div>
@@ -620,13 +620,11 @@ const Admin = () => {
     { name: "deploy-hook",       desc: "Redeployment automático (Vercel)",    icon: Globe,    color: "#60A5FA" },
   ];
 
-  if (authLoading || adminLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#050506]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#A855F7]" />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-white/20" />
       </div>
     );
-  }
 
   // ── Not logged in ──────────────────────────────────────────────────────────
   if (!user) {
@@ -639,7 +637,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#050506] text-white">
+    <div className="min-h-screen bg-background text-white selection:bg-primary/20">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       {creditModalUser && (
@@ -655,8 +653,8 @@ const Admin = () => {
         {/* ── Header ── */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#A855F7]/10 border border-[#A855F7]/20">
-              <Shield className="h-5 w-5 text-[#A855F7]" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 border border-white/10">
+              <Shield className="h-5 w-5 text-white" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-white tracking-tight">Panel Admin</h1>
@@ -674,7 +672,7 @@ const Admin = () => {
         {/* ── Stats ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: "Usuarios", value: users.length, icon: Users, color: "#A855F7" },
+            { label: "Usuarios", value: users.length, icon: Users, color: "#FFFFFF" },
             { label: "Planes pagos", value: paidUsers, icon: TrendingUp, color: "var(--brand)" },
             { label: "Créditos totales", value: totalCredits.toLocaleString(), icon: Coins, color: "#F59E0B" },
             { label: "Conversión", value: users.length ? `${Math.round((paidUsers/users.length)*100)}%` : "0%", icon: BarChart2, color: "#60A5FA" },
@@ -710,8 +708,8 @@ const Admin = () => {
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
                   active
-                    ? "bg-[#A855F7] text-white shadow-lg shadow-[#A855F7]/20"
-                    : "text-white/40 hover:text-white/70"
+                    ? "bg-white text-black shadow-lg shadow-white/5"
+                    : "text-white/40 hover:text-white/70 hover:bg-white/5"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -754,7 +752,7 @@ const Admin = () => {
                   placeholder="Buscar por email o nombre…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-xl border border-white/[0.07] bg-white/[0.03] py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/25 outline-none focus:border-[#A855F7]/40 transition-colors"
+                  className="w-full rounded-xl border border-white/5 bg-white/[0.03] py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/25 outline-none focus:border-white/20 transition-colors"
                 />
               </div>
               <button
@@ -769,7 +767,7 @@ const Admin = () => {
             {/* States */}
             {loadingUsers ? (
               <div className="flex flex-col items-center justify-center py-20 gap-3">
-                <Loader2 className="h-6 w-6 animate-spin text-[#A855F7]" />
+                <Loader2 className="h-6 w-6 animate-spin text-white/20" />
                 <p className="text-sm text-white/30">Cargando usuarios…</p>
               </div>
             ) : loadError ? (
