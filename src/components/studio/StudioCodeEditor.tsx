@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Circle, Save } from 'lucide-react';
+import { X, Circle, Save, Code, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 
@@ -18,13 +18,13 @@ const TYPES = ['string','number','boolean','void','any','never','null','undefine
 function highlightLine(line: string): React.ReactNode[] {
   const tokens: React.ReactNode[] = [];
   const patterns: { re: RegExp; cls: string }[] = [
-    { re: /(\/\/.*)/, cls: 'text-white/30' },
-    { re: new RegExp(`\\b(${KEYWORDS.join('|')})\\b`), cls: 'text-[#8AB4F8]' },
-    { re: /('[^']*'|"[^"]*"|`[^`]*`)/, cls: 'text-green-400' },
-    { re: /\b(\d+)\b/, cls: 'text-yellow-400' },
-    { re: new RegExp(`\\b(${TYPES.join('|')})\\b`), cls: 'text-[#8AB4F8]' },
+    { re: /(\/\/.*)/, cls: 'text-muted-foreground/60' },
+    { re: new RegExp(`\\b(${KEYWORDS.join('|')})\\b`), cls: 'text-primary' },
+    { re: /('[^']*'|"[^"]*"|`[^`]*`)/, cls: 'text-emerald-400' },
+    { re: /\b(\d+)\b/, cls: 'text-amber-400' },
+    { re: new RegExp(`\\b(${TYPES.join('|')})\\b`), cls: 'text-sky-400' },
     { re: /(<\/?[A-Za-z]\w*)/, cls: 'text-rose-400' },
-    { re: /(className|onClick|onChange|onSubmit|href|disabled|type|value|key|ref|style|placeholder)/, cls: 'text-yellow-300' },
+    { re: /(className|onClick|onChange|onSubmit|href|disabled|type|value|key|ref|style|placeholder)/, cls: 'text-yellow-400' },
   ];
 
   let remaining = line;
@@ -124,54 +124,58 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
   };
 
   return (
-    <div className="flex h-full flex-col bg-[#1e2028] relative">
+    <div className="flex h-full flex-col bg-background relative overflow-hidden">
       {isGenerating && (
-        <div className="absolute inset-0 z-20 flex flex-col overflow-hidden" style={{ background: '#1e2028' }}>
-          {/* fake tab bar */}
-          <div className="flex items-center border-b border-white/[0.05] bg-[#191a1f] px-3 py-2 gap-2 shrink-0">
-            <div className="h-2 w-16 rounded-full animate-pulse" style={{ background: 'rgba(138,180,248,0.15)' }} />
-            <div className="h-2 w-12 rounded-full animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+        <div className="absolute inset-0 z-20 flex flex-col overflow-hidden bg-background">
+          {/* animated header while generating */}
+          <div className="flex items-center border-b border-border bg-card/50 px-3 py-2 gap-2 shrink-0">
+            <div className="h-2 w-16 rounded-full animate-pulse bg-primary/20" />
+            <div className="h-2 w-12 rounded-full animate-pulse bg-muted/40" />
           </div>
           {/* streaming code area */}
           <div className="flex-1 overflow-hidden p-4 font-mono text-[11px] leading-6 relative">
             <div className="absolute inset-0 p-4 overflow-hidden">
-              <pre className="text-emerald-400/70 whitespace-pre-wrap break-all text-[10px] leading-5 opacity-80">
+              <pre className="text-primary/70 whitespace-pre-wrap break-all text-[10px] leading-5 opacity-80">
                 {streamPreview || ''}
-                <span className="inline-block w-2 h-4 bg-[#8AB4F8] ml-0.5 animate-pulse align-middle" />
+                <span className="inline-block w-2 h-4 bg-primary ml-0.5 animate-pulse align-middle" />
               </pre>
             </div>
             {/* gradient fade at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
-              style={{ background: 'linear-gradient(to bottom, transparent, #1e2028)' }} />
+            <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none bg-gradient-to-t from-background to-transparent" />
           </div>
           {/* status bar */}
-          <div className="shrink-0 flex items-center gap-2 px-4 py-2 border-t border-white/[0.04]"
-            style={{ background: '#191a1f' }}>
+          <div className="shrink-0 flex items-center gap-2 px-4 py-2 border-t border-border bg-card">
             <div className="flex gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#8AB4F8]/70 animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="h-1.5 w-1.5 rounded-full bg-[#8AB4F8]/70 animate-bounce" style={{ animationDelay: '120ms' }} />
-              <span className="h-1.5 w-1.5 rounded-full bg-[#8AB4F8]/70 animate-bounce" style={{ animationDelay: '240ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: '120ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: '240ms' }} />
             </div>
-            <span className="text-[10px] text-white/30 font-mono">Genesis está generando código…</span>
+            <span className="text-[10px] text-muted-foreground font-mono">Genesis generating code...</span>
           </div>
         </div>
       )}
-      {/* Tabs */}
-      <div className="flex items-center border-b border-white/[0.05] bg-[#191a1f] overflow-x-auto no-scrollbar">
+
+      {/* Tabs Layout (GitHub Style) */}
+      <div className="flex items-center border-b border-border bg-secondary/10 overflow-x-auto no-scrollbar h-11 shrink-0">
         {openTabs.filter((t) => projectFiles[t]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`group flex items-center gap-2 px-4 py-2.5 text-sm border-r border-white/[0.05] transition-colors shrink-0 ${
+            className={`group h-full flex items-center gap-2 px-4 text-xs transition-all relative shrink-0 ${
               resolvedTab === tab
-                ? 'bg-[#1e2028] text-white border-b-2 border-b-[#8AB4F8]'
-                : 'text-white/30 hover:text-white/70 hover:bg-white/[0.02]'
+                ? 'bg-background text-foreground'
+                : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
             }`}
           >
-            <Circle className={`h-1.5 w-1.5 shrink-0 ${modified.has(tab) ? 'fill-yellow-400 text-yellow-400' : 'fill-[#8AB4F8]/60 text-[#8AB4F8]/60'}`} />
-            <span className="font-mono text-[11px]">{tab}</span>
+            {/* Active Top Border - Like GitHub's tabs */}
+            {resolvedTab === tab && (
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-primary" />
+            )}
+            
+            <Circle className={`h-1.5 w-1.5 shrink-0 ${modified.has(tab) ? 'fill-amber-400 text-amber-400' : 'fill-primary/60 text-primary/60'}`} />
+            <span className="font-mono text-[11px] font-medium">{tab}</span>
             <X
-              className="h-3 w-3 opacity-0 group-hover:opacity-100 text-white/20 hover:text-white transition-opacity"
+              className="h-3 w-3 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
               onClick={(e) => closeTab(tab, e)}
             />
           </button>
@@ -181,20 +185,20 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
       {/* Editor area */}
       <div className="relative flex flex-1 overflow-hidden">
         {/* Line numbers */}
-        <div ref={lineNumbersRef} className="w-12 shrink-0 overflow-hidden bg-[#1e2028] py-4 text-right select-none border-r border-white/[0.03]">
+        <div ref={lineNumbersRef} className="w-12 shrink-0 overflow-hidden bg-background py-4 text-right select-none border-r border-border/40">
           {lines.map((_, i) => (
-            <div key={i} className="pr-3 text-[11px] leading-6 text-white/15 font-mono">{i + 1}</div>
+            <div key={i} className="pr-3 text-[11px] leading-6 text-muted-foreground/30 font-mono">{i + 1}</div>
           ))}
         </div>
 
         {/* Syntax-highlighted view */}
         {!isEditing && (
           <div
-            className="absolute inset-0 left-12 overflow-auto p-4 font-mono text-[12px] leading-6 cursor-text"
+            className="absolute inset-0 left-12 overflow-auto p-4 font-mono text-[12px] leading-6 cursor-text custom-scrollbar selection:bg-primary/20"
             onClick={() => { setIsEditing(true); requestAnimationFrame(() => textareaRef.current?.focus()); }}
           >
             {lines.map((line, i) => (
-              <div key={i} className="whitespace-pre hover:bg-white/[0.015] transition-colors">
+              <div key={i} className="whitespace-pre hover:bg-primary/[0.03] transition-colors rounded-sm px-1 -mx-1">
                 <code>{highlightLine(line)}</code>
               </div>
             ))}
@@ -216,22 +220,37 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
               const col = ta.selectionStart - text.lastIndexOf('\n');
               setCursorPos({ line: lineNum, col });
             }}
-            className="flex-1 resize-none bg-transparent p-4 font-mono text-[12px] leading-6 text-white/80 outline-none caret-[#8AB4F8]"
+            className="flex-1 resize-none bg-transparent p-4 font-mono text-[12px] leading-6 text-foreground/80 outline-none caret-primary custom-scrollbar selection:bg-primary/20"
             spellCheck={false}
             autoFocus
           />
         )}
       </div>
 
-      {/* Status bar */}
-      <div className="flex items-center justify-between border-t border-white/[0.05] bg-[#191a1f] px-4 py-1 text-[10px] text-white/20 font-mono">
+      {/* Status bar (GitHub Style) */}
+      <div className="flex items-center justify-between border-t border-border bg-card px-4 py-1 text-[10px] text-muted-foreground font-mono shrink-0">
         <div className="flex items-center gap-4">
-          <span>{file.language.toUpperCase()}</span>
+          <div className="flex items-center gap-1">
+            <Code className="w-3 h-3" />
+            <span>{file.language.toUpperCase()}</span>
+          </div>
           <span>UTF-8</span>
-          {modified.has(resolvedTab) && <span className="text-yellow-400">● Sin guardar</span>}
+          {modified.has(resolvedTab) && (
+            <div className="flex items-center gap-1 text-amber-400">
+              <Circle className="w-1.5 h-1.5 fill-current" />
+              <span>Unsaved changes</span>
+            </div>
+          )}
         </div>
-        <span>Ln {cursorPos.line}, Col {cursorPos.col}</span>
+        <div className="flex items-center gap-3">
+          <span>Ln {cursorPos.line}, Col {cursorPos.col}</span>
+          <div className="flex items-center gap-1 hover:text-foreground cursor-pointer">
+            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+            <span>Prettier</span>
+          </div>
+        </div>
       </div>
     </div>
+
   );
 }

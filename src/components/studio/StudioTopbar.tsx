@@ -43,51 +43,53 @@ export function StudioTopbar({
   onPublish,
 }: StudioTopbarProps) {
   return (
-    <header className="h-[60px] border-b border-white/[0.06] bg-[#0A0B10]/80 backdrop-blur-xl flex items-center justify-between px-4 shrink-0 z-50">
-      {/* --- Left: Project Info --- */}
-      <div className="flex items-center gap-4">
+    <header className="h-[60px] border-b border-border bg-background/95 backdrop-blur-md flex items-center justify-between px-4 shrink-0 z-50 sticky top-0">
+      {/* --- Left: Project Info (GitHub Breadcrumbs Style) --- */}
+      <div className="flex items-center gap-3">
         <button 
           onClick={onBack}
-          className="p-2 hover:bg-white/5 rounded-xl transition-all group"
+          className="p-1.5 hover:bg-secondary rounded-md transition-all group"
+          title="Volver"
         >
-          <ChevronLeft className="w-5 h-5 text-white/40 group-hover:text-white" />
+          <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
         </button>
         
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <Layout className="w-5 h-5 text-primary" />
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <Github className="w-4 h-4 text-muted-foreground" />
+          <div className="flex items-center gap-1">
+            <span className="text-muted-foreground hover:text-primary cursor-pointer transition-colors">creator-ia</span>
+            <span className="text-muted-foreground/40">/</span>
+            <span className="text-foreground font-bold hover:text-primary cursor-pointer transition-colors">{projectName}</span>
           </div>
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Proyecto</span>
-              <ChevronRight className="w-3 h-3 text-white/10" />
-              <span className="text-sm font-bold text-white truncate max-w-[150px]">{projectName}</span>
-            </div>
+          <div className="ml-2 px-2 py-0.5 rounded-full border border-border bg-secondary/50 text-[10px] text-muted-foreground font-bold uppercase tracking-tight">
+            Public
+          </div>
+        </div>
+
+        {/* Save Status - Subtly on the left */}
+        <div className="ml-4 flex items-center gap-2 opacity-60">
+          {isSaving ? (
             <div className="flex items-center gap-1.5">
-              {isSaving ? (
-                <>
-                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
-                  <span className="text-[10px] text-white/20 font-medium lowercase">Guardando...</span>
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="w-3 h-3 text-emerald-500/50" />
-                  <span className="text-[10px] text-white/20 font-medium lowercase">Todo guardado</span>
-                </>
-              )}
+              <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+              <span className="text-[10px] text-muted-foreground lowercase">Guardando...</span>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+              <span className="text-[10px] text-muted-foreground lowercase">Guardado</span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* --- Center: View Switcher --- */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 bg-white/[0.03] border border-white/[0.05] rounded-xl shadow-2xl">
+      {/* --- Center: Tabs Switcher (GitHub Style) --- */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-center h-full">
         <button
           onClick={() => onViewModeChange('preview')}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 h-full text-xs font-semibold transition-all border-b-2 ${
             viewMode === 'preview' 
-              ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-100' 
-              : 'text-white/40 hover:text-white/60 hover:bg-white/5'
+              ? 'border-primary text-foreground' 
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
           }`}
         >
           <Layout className="w-3.5 h-3.5" />
@@ -95,25 +97,25 @@ export function StudioTopbar({
         </button>
         <button
           onClick={() => onViewModeChange('code')}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 h-full text-xs font-semibold transition-all border-b-2 ${
             viewMode === 'code' 
-              ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-100' 
-              : 'text-white/40 hover:text-white/60 hover:bg-white/5'
+              ? 'border-primary text-foreground' 
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
           }`}
         >
           <Code className="w-3.5 h-3.5" />
-          Código
+          Code
         </button>
         <button
           onClick={() => onViewModeChange('tools')}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+          className={`flex items-center gap-2 px-4 h-full text-xs font-semibold transition-all border-b-2 ${
             viewMode === 'tools' 
-              ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-100' 
-              : 'text-white/40 hover:text-white/60 hover:bg-white/5'
+              ? 'border-primary text-foreground' 
+              : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40'
           }`}
         >
           <Sparkles className="h-3.5 w-3.5" />
-          Herramientas
+          Tools
         </button>
       </div>
 

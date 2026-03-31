@@ -32,43 +32,47 @@ export function StudioFileTree({ files, selectedFile, onSelect, onAddFile, onDel
   };
 
   const fileNames = Object.keys(files).sort((a, b) => {
-    // Put App.tsx first
     if (a === 'App.tsx') return -1;
     if (b === 'App.tsx') return 1;
     return a.localeCompare(b);
   });
 
   return (
-    <div className="flex flex-col h-full bg-[#16161b]">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.05]">
-        <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Archivos</span>
+    <div className="flex flex-col h-full bg-transparent">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-secondary/20">
+        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] font-display">Explorer</span>
         <button
           onClick={() => setAddingFile(true)}
-          className="p-1 rounded-lg hover:bg-white/5 text-white/20 hover:text-white transition-all"
-          title="Nuevo archivo"
+          className="p-1 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-all"
+          title="New file"
         >
           <Plus className="h-3.5 w-3.5" />
         </button>
       </div>
 
-      <div className="flex flex-col gap-0.5 p-2 flex-1 overflow-y-auto">
+      <div className="flex flex-col py-2 flex-1 overflow-y-auto custom-scrollbar">
         {fileNames.map((name) => (
           <div
             key={name}
             onMouseEnter={() => setHovered(name)}
             onMouseLeave={() => setHovered(null)}
-            className={`group flex items-center justify-between gap-2 px-3 py-2 rounded-xl cursor-pointer transition-all ${
+            className={`group flex items-center justify-between gap-2 px-4 py-1.5 cursor-pointer transition-all relative ${
               selectedFile === name
-                ? 'bg-primary/20 border border-primary/30 text-white'
-                : 'text-white/50 hover:bg-white/5 hover:text-white border border-transparent'
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'
             }`}
             onClick={() => onSelect(name)}
           >
+            {/* Active Indicator Line */}
+            {selectedFile === name && (
+              <div className="absolute left-0 w-0.5 h-full bg-primary" />
+            )}
+            
             <div className="flex items-center gap-2 overflow-hidden min-w-0">
-              <ChevronRight className={`h-3 w-3 shrink-0 transition-transform ${selectedFile === name ? 'text-primary rotate-90' : 'text-white/20'}`} />
               {getFileIcon(name)}
-              <span className="text-[11px] font-mono truncate">{name}</span>
+              <span className="text-xs font-mono truncate">{name}</span>
             </div>
+
             {hovered === name && onDeleteFile && name !== 'App.tsx' && (
               <button
                 onClick={(e) => { e.stopPropagation(); onDeleteFile(name); }}

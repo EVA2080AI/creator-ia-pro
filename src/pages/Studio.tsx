@@ -102,7 +102,7 @@ export default function Studio() {
 
   if (loadingProjects) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0A0B10] gap-4">
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-background gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
         <p className="text-white/40 text-sm font-medium animate-pulse">Iniciando Genesis Studio...</p>
       </div>
@@ -112,7 +112,7 @@ export default function Studio() {
   // --- Welcome Screen / Empty State ---
   if (!activeProject) {
     return (
-      <div className="h-screen w-full bg-[#0A0B10] overflow-hidden flex flex-col relative selection:bg-primary/30">
+      <div className="h-screen w-full bg-background overflow-hidden flex flex-col relative selection:bg-primary/30">
         {/* Animated background background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[-25%] left-[-15%] w-[70%] h-[80%] bg-primary/10 rounded-full blur-[160px] opacity-40" />
@@ -120,7 +120,7 @@ export default function Studio() {
         </div>
 
         {/* Minimal Navigation */}
-        <header className="h-[60px] px-6 flex items-center justify-between border-b border-white/[0.04] bg-black/20 backdrop-blur-md relative z-20">
+        <header className="h-[60px] px-6 flex items-center justify-between border-b border-border bg-card/20 backdrop-blur-md relative z-20">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
               <Code2 className="h-4 w-4 text-primary" />
@@ -198,7 +198,7 @@ export default function Studio() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-[#0A0B10] overflow-hidden text-white selection:bg-primary/30">
+    <div className="flex flex-col h-screen bg-background overflow-hidden text-foreground selection:bg-primary/30">
       {/* ── Topbar ────────────────────────────────────────────────────────── */}
       <StudioTopbar 
         projectName={activeProject.name}
@@ -214,8 +214,8 @@ export default function Studio() {
       />
 
       <main className="flex flex-1 overflow-hidden">
-        {/* ── Left Sidebar: Chat ─────────────────────────────────────────── */}
-        <div className="w-[400px] shrink-0 border-r border-white/[0.06] bg-[#0A0B10]/50 backdrop-blur-3xl overflow-hidden flex flex-col">
+        {/* ── Left Sidebar: Chat (Genesis) ── */}
+        <div className="w-[410px] shrink-0 border-r border-border bg-background flex flex-col relative z-20">
           <StudioChat 
             projectId={activeProject.id} 
             projectFiles={activeProject.files}
@@ -246,8 +246,8 @@ export default function Studio() {
             </div>
           ) : viewMode === 'code' ? (
             <div className="flex h-full w-full">
-              {/* File Tree */}
-              <div className="w-64 shrink-0 border-r border-white/[0.06] bg-black/20">
+              {/* File Tree - Glass Effect */}
+              <div className="w-64 shrink-0 border-r border-border bg-card/30 backdrop-blur-sm">
                 <StudioFileTree 
                   files={activeProject.files} 
                   selectedFile={activeFile || ''} 

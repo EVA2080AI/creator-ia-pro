@@ -318,7 +318,7 @@ function renderMarkdown(text: string): string {
   let raw = text
     // Code blocks (multiline) — process FIRST before inline code
     .replace(/```(\w*)\n?([\s\S]*?)```/g, (_m, lang, code) =>
-      `<pre class="my-2 rounded-xl overflow-x-auto p-3 text-[11px] font-mono leading-relaxed" style="background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.08)"><code class="text-[#a8d8a8]">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`)
+      `<pre class="my-2 rounded-xl overflow-x-auto p-3 text-[11px] font-mono leading-relaxed" style="background:hsl(var(--secondary)/0.5);border:1px solid hsl(var(--border))"><code class="text-primary/90">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`)
     // Headers
     .replace(/^### (.+)$/gm, '<h3 class="text-[12px] font-bold text-white/90 mt-3 mb-1">$1</h3>')
     .replace(/^## (.+)$/gm,  '<h2 class="text-[13px] font-bold text-white mt-3 mb-1.5">$1</h2>')
@@ -328,11 +328,11 @@ function renderMarkdown(text: string): string {
     .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white/95">$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     // Inline code
-    .replace(/`([^`]+)`/g, '<code class="bg-black/40 px-1.5 py-0.5 rounded-md text-[#8AB4F8] font-mono text-[10px] border border-white/[0.07]">$1</code>')
+    .replace(/`([^`]+)`/g, '<code class="bg-secondary/40 px-1.5 py-0.5 rounded-md text-primary font-mono text-[10px] border border-border">$1</code>')
     // Numbered lists
-    .replace(/^\d+\. (.+)$/gm, '<li class="flex items-start gap-2 text-white/70 mb-0.5"><span class="text-[#8AB4F8] shrink-0 font-bold text-[10px] mt-0.5">→</span><span>$1</span></li>')
+    .replace(/^\d+\. (.+)$/gm, '<li class="flex items-start gap-2 text-muted-foreground mb-0.5"><span class="text-primary shrink-0 font-bold text-[10px] mt-0.5">→</span><span>$1</span></li>')
     // Bullet lists
-    .replace(/^[-•] (.+)$/gm, '<li class="flex items-start gap-2 text-white/70 mb-0.5"><span class="text-[#8AB4F8] shrink-0 mt-1.5 h-1 w-1 rounded-full bg-current inline-block"></span><span>$1</span></li>')
+    .replace(/^[-•] (.+)$/gm, '<li class="flex items-start gap-2 text-muted-foreground mb-0.5"><span class="text-primary shrink-0 mt-1.5 h-1 w-1 rounded-full bg-current inline-block"></span><span>$1</span></li>')
     // Horizontal rule
     .replace(/^---$/gm, '<hr class="border-white/10 my-3"/>')
     // Line breaks
@@ -902,7 +902,7 @@ export function StudioChat({
   const currentModel = MODELS.find(m => m.id === selectedModel) ?? MODELS[0];
 
   return (
-    <div className="flex flex-1 min-h-0 h-full w-full flex-col relative" style={{ background: '#141417' }}>
+    <div className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-background">
 
       {/* ── Messages ─────────────────────────────────────────────────────────── */}
       <div ref={containerRef} onScroll={handleScroll}
@@ -912,17 +912,14 @@ export function StudioChat({
         {/* Starter chips — shown only when chat is empty (welcome only) */}
         {messages.length === 1 && messages[0].id === 'welcome' && !isGenerating && (
           <div className="px-1 pb-2">
-            <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em] mb-2 px-1">Empezar con</p>
+            <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.3em] mb-2 px-1">Quick start</p>
             <div className="grid grid-cols-2 gap-1.5">
               {STARTER_CHIPS.map(chip => (
                 <button key={chip.label} onClick={() => handleSend(chip.prompt)}
-                  className="flex items-center gap-2 p-2.5 rounded-xl text-left transition-all group/chip"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(138,180,248,0.25)'; (e.currentTarget as HTMLElement).style.background = 'rgba(138,180,248,0.05)'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
+                  className="flex items-center gap-2 p-2.5 rounded-xl text-left transition-all group/chip bg-card/40 border border-border hover:border-primary/40 hover:bg-primary/5"
                 >
                   <span className="text-base shrink-0">{chip.emoji}</span>
-                  <span className="text-[11px] font-semibold text-white/50 group-hover/chip:text-white/80 transition-colors leading-tight">{chip.label}</span>
+                  <span className="text-[11px] font-semibold text-muted-foreground group-hover/chip:text-foreground transition-colors leading-tight">{chip.label}</span>
                 </button>
               ))}
             </div>
@@ -934,21 +931,19 @@ export function StudioChat({
             {msg.role === 'user' ? (
               <div className="max-w-[88%] space-y-1.5">
                 {msg.imagePreview && (
-                  <div className="rounded-xl overflow-hidden border border-[#8AB4F8]/20">
+                  <div className="rounded-xl overflow-hidden border border-primary/20">
                     <img src={msg.imagePreview} alt="Referencia" className="max-h-32 w-auto object-contain" />
                   </div>
                 )}
-                <div className="rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-[13px] leading-relaxed text-white"
-                  style={{ background: 'rgba(138,180,248,0.18)', border: '1px solid rgba(138,180,248,0.25)' }}>
+                <div className="rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-[13px] leading-relaxed text-foreground bg-primary/10 border border-primary/20">
                   <span className="whitespace-pre-wrap">{msg.content}</span>
                 </div>
               </div>
             ) : (
               <div>
                 <div className="flex items-start gap-2 px-1">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md mt-0.5"
-                    style={{ background: 'rgba(138,180,248,0.12)', border: '1px solid rgba(138,180,248,0.2)' }}>
-                    <Bot className="h-3 w-3 text-[#8AB4F8]" />
+                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md mt-0.5 bg-primary/10 border border-primary/20">
+                    <Bot className="h-3 w-3 text-primary" />
                   </div>
                   <div className={`flex-1 text-[13px] leading-relaxed ${msg.type === 'code' ? 'text-white/90' : 'text-white/75'}`}>
                     <div className="prose prose-invert max-w-none"
@@ -958,8 +953,7 @@ export function StudioChat({
                     {msg.stack && msg.stack.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {msg.stack.map(s => (
-                          <span key={s} className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest"
-                            style={{ background: 'rgba(138,180,248,0.1)', color: '#8AB4F8', border: '1px solid rgba(138,180,248,0.2)' }}>
+                          <span key={s} className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
                             {s}
                           </span>
                         ))}
@@ -984,12 +978,11 @@ export function StudioChat({
                         <p className="text-[9px] text-white/25 uppercase tracking-widest font-bold px-1">Iteraciones rápidas</p>
                         {msg.suggestions.map((s, i) => (
                           <button key={i} onClick={() => handleSend(s)}
-                            className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[11px] text-white/50 hover:text-white transition-all text-left"
-                            style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                            className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground hover:text-foreground transition-all text-left bg-card/30 border border-border hover:border-primary/30"
                             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(138,180,248,0.25)'; }}
                             onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'; }}
                           >
-                            <Wrench className="h-3 w-3 text-[#8AB4F8]/50 shrink-0" />
+                            <Wrench className="h-3 w-3 text-primary/40 shrink-0" />
                             {s}
                           </button>
                         ))}
@@ -1020,13 +1013,12 @@ export function StudioChat({
         {/* ── Phase: THINKING ─────────── */}
         {genPhase === 'thinking' && (
           <div className="flex items-start gap-2 px-1 mb-4 animate-in fade-in duration-200">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
-              style={{ background: 'rgba(138,180,248,0.12)', border: '1px solid rgba(138,180,248,0.2)' }}>
-              <Bot className="h-3 w-3 text-[#8AB4F8]" />
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 border border-primary/20">
+              <Bot className="h-3 w-3 text-primary" />
             </div>
             <div className="flex items-center gap-2.5 py-1">
-              <Loader2 className="h-3 w-3 text-[#8AB4F8]/50 animate-spin" />
-              <span className="text-[11px] font-medium text-[#8AB4F8]/60">
+              <Loader2 className="h-3 w-3 text-primary/40 animate-spin" />
+              <span className="text-[11px] font-medium text-primary/60">
                 {currentGenIntent === 'codegen' ? 'Generando código…' : 'Genesis está pensando…'}
               </span>
             </div>
@@ -1036,17 +1028,15 @@ export function StudioChat({
         {/* ── Phase: STREAMING — live content with smooth rate-limited display ─ */}
         {(genPhase === 'streaming' || genPhase === 'done') && streamingContent !== null && (
           <div className="flex items-start gap-2 px-1 mb-4">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md mt-0.5"
-              style={{ background: 'rgba(138,180,248,0.12)', border: '1px solid rgba(138,180,248,0.2)' }}>
-              <Bot className="h-3 w-3 text-[#8AB4F8]" />
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md mt-0.5 bg-primary/10 border border-primary/20">
+              <Bot className="h-3 w-3 text-primary" />
             </div>
             <div className="flex-1 text-[13px] leading-relaxed text-white/75">
               <div className="prose prose-invert max-w-none"
                 dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent || '​') }} />
               {/* Blinking cursor — only while actively streaming */}
               {genPhase === 'streaming' && (
-                <span className="inline-block h-3.5 w-0.5 ml-0.5 align-text-bottom rounded-full animate-pulse"
-                  style={{ background: '#8AB4F8' }} />
+                <span className="inline-block h-3.5 w-0.5 ml-0.5 align-text-bottom rounded-full animate-pulse bg-primary" />
               )}
             </div>
           </div>
@@ -1064,8 +1054,8 @@ export function StudioChat({
                 {genPhase === 'thinking' ? 'Analizando prompt…' : 'Generando código…'}
               </span>
               {streamChars > 0 && (
-                <div className="h-0.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(138,180,248,0.1)' }}>
-                  <div className="h-full rounded-full animate-pulse" style={{ background: '#8AB4F8', width: `${Math.min((streamChars / 12000) * 100, 95)}%`, transition: 'width 0.3s ease' }} />
+                <div className="h-0.5 w-full rounded-full overflow-hidden bg-primary/10">
+                  <div className="h-full rounded-full animate-pulse bg-primary" style={{ width: `${Math.min((streamChars / 12000) * 100, 95)}%`, transition: 'width 0.3s ease' }} />
                 </div>
               )}
             </div>
@@ -1078,13 +1068,13 @@ export function StudioChat({
       {/* Scroll-to-bottom */}
       {showScrollBtn && (
         <button onClick={() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); setShowScrollBtn(false); }}
-          className="absolute bottom-24 right-3 z-10 h-7 w-7 flex items-center justify-center rounded-full bg-[#8AB4F8] text-white shadow-lg">
+          className="absolute bottom-24 right-3 z-10 h-7 w-7 flex items-center justify-center rounded-full bg-primary text-white shadow-lg">
           <ChevronDown className="h-3.5 w-3.5" />
         </button>
       )}
 
-      {/* ── Input ─────────────────────────────────────────────────────────────── */}
-      <div className="shrink-0 p-3" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      {/* ── Input Area ── */}
+      <div className="shrink-0 p-3 border-t border-border bg-background">
 
         {/* Pending image preview */}
         {pendingImage && (
@@ -1161,15 +1151,14 @@ export function StudioChat({
           </div>
         )}
 
-        <div className="rounded-xl transition-all relative focus-within:ring-1 focus-within:ring-white/20"
-          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="rounded-xl transition-all relative focus-within:ring-1 focus-within:ring-primary/40 bg-card/40 border border-border">
           <textarea
             ref={inputRef}
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder="Escribe o describe lo que necesitas… @archivo para citar código"
-            className="w-full bg-transparent px-3.5 pt-3 pb-2 text-[13px] text-white placeholder:text-white/25 outline-none resize-none min-h-[20px] max-h-[350px] leading-relaxed"
+            placeholder="Type or describe what you need... @file to cite code"
+            className="w-full bg-transparent px-3.5 pt-3 pb-2 text-[13px] text-foreground placeholder:text-muted-foreground/30 outline-none resize-none min-h-[20px] max-h-[350px] leading-relaxed"
             disabled={isGenerating}
             rows={1}
           />
@@ -1207,11 +1196,11 @@ export function StudioChat({
               <div className="relative">
                 <button
                   onClick={() => setModelOpen(!modelOpen)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-white/30 hover:text-white hover:bg-white/[0.06] transition-all"
+                  className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
                 >
-                  <Sparkles className="h-3 w-3 text-[#8AB4F8]/50" />
+                  <Sparkles className="h-3 w-3 text-primary/50" />
                   <span className="max-w-[80px] truncate">{currentModel.label}</span>
-                  <span className="text-[9px] text-white/15 ml-0.5">código</span>
+                  <span className="text-[9px] text-muted-foreground/40 ml-0.5">code</span>
                   <ChevronDown className={`h-2.5 w-2.5 transition-transform ${modelOpen ? 'rotate-180' : ''}`} />
                 </button>
 
@@ -1251,8 +1240,7 @@ export function StudioChat({
               <button
                 onClick={() => handleSend()}
                 disabled={!input.trim()}
-                className="flex flex-col items-center justify-center p-2 rounded-xl text-white disabled:opacity-30 transition-all active:scale-95 bg-white/10 hover:bg-[#8AB4F8] hover:text-black hover:shadow-lg ml-2"
-                style={input.trim() ? { background: '#8AB4F8', color: '#141417' } : {}}
+                className="flex flex-col items-center justify-center p-2 rounded-xl text-white disabled:opacity-30 transition-all active:scale-95 bg-primary hover:shadow-lg shadow-primary/20 ml-2"
               >
                 <Send className="h-3.5 w-3.5" />
               </button>
