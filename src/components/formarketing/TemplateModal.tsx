@@ -54,6 +54,15 @@ export const CATEGORIES = ['Todos', 'Redes Sociales', 'Publicidad', 'Marca', 'Co
 
 export const TEMPLATES: Template[] = [
   {
+    id: 'blank_canvas',
+    title: 'Lienzo en Blanco',
+    description: 'Empieza un proyecto desde cero. Todas las herramientas a tu disposición.',
+    category: 'Todos',
+    icon: Layout,
+    color: 'text-white/50',
+    nodes: [],
+  },
+  {
     id: 'instagram_ads',
     title: 'Anuncio de Instagram',
     description: 'Crea anuncios visuales de alto impacto para Instagram con copy persuasivo.',

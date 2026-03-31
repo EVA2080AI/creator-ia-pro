@@ -1039,6 +1039,7 @@ function FormarketingContent() {
         </div>
       )}
 
+      <AppHeader onSignOut={signOut} />
       <div className="w-screen bg-[#020203] font-sans text-white/90 flex flex-col overflow-hidden relative selection:bg-primary/20" style={{ height: 'calc(100vh - 64px)', marginTop: '64px' }}>
       {/* Canvas Toolbar */}
       <div className="flex h-14 w-full items-center justify-between border-b border-white/[0.06] bg-[#050506]/80 px-5 backdrop-blur-3xl shrink-0 z-[90]">
