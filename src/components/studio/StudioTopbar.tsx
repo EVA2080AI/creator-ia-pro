@@ -10,10 +10,11 @@ import {
   Cloud,
   CheckCircle2,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Sparkles
 } from 'lucide-react';
 
-export type ViewMode = 'preview' | 'code';
+export type ViewMode = 'preview' | 'code' | 'tools';
 export type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 
 interface StudioTopbarProps {
@@ -80,7 +81,7 @@ export function StudioTopbar({
       </div>
 
       {/* --- Center: View Switcher --- */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 bg-white/[0.03] border border-white/[0.05] rounded-xl">
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 bg-white/[0.03] border border-white/[0.05] rounded-xl shadow-2xl">
         <button
           onClick={() => onViewModeChange('preview')}
           className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
@@ -102,6 +103,17 @@ export function StudioTopbar({
         >
           <Code className="w-3.5 h-3.5" />
           Código
+        </button>
+        <button
+          onClick={() => onViewModeChange('tools')}
+          className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            viewMode === 'tools' 
+              ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-100' 
+              : 'text-white/40 hover:text-white/60 hover:bg-white/5'
+          }`}
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          Herramientas
         </button>
       </div>
 

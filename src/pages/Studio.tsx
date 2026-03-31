@@ -8,6 +8,7 @@ import { StudioChat } from '@/components/studio/StudioChat';
 import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
+import { StudioAITools } from '@/components/studio/StudioAITools';
 import { Loader2, FolderOpen, Code2, Plus, Sparkles, ChevronRight, Layout } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -15,7 +16,7 @@ import { toast } from 'sonner';
  * Studio — Integrated IDE Workspace (Lovable Architecture)
  * - Topbar: Project navigation & View toggles
  * - Sidebar: Genesis AI Chat
- * - Main: Content workspace (Preview or Code)
+ * - Main: Content workspace (Preview, Code or AI Tools)
  */
 export default function Studio() {
   const { user } = useAuth('/auth');
@@ -227,7 +228,7 @@ export default function Studio() {
           />
         </div>
 
-        {/* ── Main Workspace: Preview or Code ──────────────────────────────── */}
+        {/* ── Main Workspace: Preview, Code or Tools ──────────────────────────────── */}
         <div className="flex-1 overflow-hidden bg-background/20 relative">
           {viewMode === 'preview' ? (
             <div className="h-full w-full flex flex-col items-center justify-center p-4">
@@ -243,7 +244,7 @@ export default function Studio() {
                 />
               </div>
             </div>
-          ) : (
+          ) : viewMode === 'code' ? (
             <div className="flex h-full w-full">
               {/* File Tree */}
               <div className="w-64 shrink-0 border-r border-white/[0.06] bg-black/20">
@@ -264,6 +265,11 @@ export default function Studio() {
                   streamPreview={streamPreview}
                 />
               </div>
+            </div>
+          ) : (
+            /* Tools View Mode */
+            <div className="h-full w-full overflow-hidden">
+              <StudioAITools />
             </div>
           )}
         </div>

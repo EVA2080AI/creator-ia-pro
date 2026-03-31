@@ -71,8 +71,11 @@ export function useStudioProjects() {
     })) as StudioProject[];
 
     setProjects(parsed);
+    
+    // IMPORTANT: Fix to prevent skipping Genesis Home.
+    // Only update activeProject if it already exists (syncing).
+    // DO NOT auto-select the first one if null.
     setActiveProject((curr) => {
-      if (!curr && parsed.length > 0) return parsed[0];
       if (curr) return parsed.find((p) => p.id === curr.id) ?? null;
       return null;
     });
