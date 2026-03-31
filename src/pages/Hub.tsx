@@ -25,7 +25,7 @@ const TEMPLATES = [
     title: "Meta Ads — Imagen Única",
     desc: "Campaña de imagen única optimizada para Facebook e Instagram. Incluye nodo de copy principal, imagen IA y CTA.",
     icon: Megaphone,
-    color: "#bd00ff",
+    color: "#2563eb", // Royal Blue
     nodes: 4,
     tags: ["Facebook", "Instagram", "Imagen"],
     preset: [
@@ -51,7 +51,7 @@ const TEMPLATES = [
     title: "TikTok UGC Creator",
     desc: "Flujo completo para crear un video estilo UGC: guion, voiceover y dirección creativa para TikTok Ads.",
     icon: Video,
-    color: "#ff0071",
+    color: "#6366f1", // Indigo
     nodes: 5,
     tags: ["TikTok", "UGC", "Video"],
     preset: []
@@ -62,7 +62,7 @@ const TEMPLATES = [
     title: "Meta Ads — Carrusel",
     desc: "5 tarjetas de carrusel con imágenes generadas por IA y copy persuasivo para Meta Business Suite.",
     icon: LayoutGrid,
-    color: "#bd00ff",
+    color: "#3b82f6", // Blue-500
     nodes: 7,
     tags: ["Facebook", "Carrusel", "E-commerce"],
     preset: []
@@ -74,7 +74,7 @@ const TEMPLATES = [
     title: "Landing SaaS — Hero + Features",
     desc: "Landing page completa para producto SaaS: hero, propuesta de valor, features, testimonios y CTA final.",
     icon: Layout,
-    color: "#00e5a0",
+    color: "#0ea5e9", // Sky-500
     nodes: 6,
     tags: ["SaaS", "Web", "Conversión"],
     preset: []
@@ -85,7 +85,7 @@ const TEMPLATES = [
     title: "Product Launch — E-commerce",
     desc: "Página de lanzamiento de producto con contador regresivo, galería de imágenes generadas y pricing grid.",
     icon: ShoppingBag,
-    color: "#ffb800",
+    color: "#8b5cf6", // Violet-500
     nodes: 5,
     tags: ["E-commerce", "Lanzamiento", "Producto"],
     preset: []
@@ -96,7 +96,7 @@ const TEMPLATES = [
     title: "Webinar / Evento Landing",
     desc: "Registro de evento o webinar con sección de speakers, agenda y formulario de inscripción.",
     icon: Camera,
-    color: "#bd00ff",
+    color: "#6d28d9", // Violet-700
     nodes: 4,
     tags: ["Evento", "Webinar", "Registro"],
     preset: []
@@ -108,7 +108,7 @@ const TEMPLATES = [
     title: "Instagram Reel Pack",
     desc: "Pack de 3 Reels: guion, texto en pantalla y hashtags estratégicos para máximo alcance orgánico.",
     icon: Camera,
-    color: "#ff0071",
+    color: "#4f46e5", // Indigo-600
     nodes: 4,
     tags: ["Instagram", "Reels", "Orgánico"],
     preset: []
@@ -130,7 +130,7 @@ const TEMPLATES = [
     title: "X / Twitter Thread Viral",
     desc: "Hilo de 10 tweets con estructura viral: gancho, desarrollo y CTA final. Optimizado para engagement.",
     icon: Hash,
-    color: "#bd00ff",
+    color: "#1d4ed8", // Blue-700
     nodes: 3,
     tags: ["Twitter/X", "Thread", "Viral"],
     preset: []
@@ -141,7 +141,7 @@ const TEMPLATES = [
     title: "Social Media Kit Completo",
     desc: "Contenido unificado para 4 plataformas: Instagram, LinkedIn, X y TikTok desde un solo prompt.",
     icon: Sparkles,
-    color: "#ffb800",
+    color: "#7c3aed", // Violet-600
     nodes: 6,
     tags: ["Multi-platform", "Kit", "Eficiencia"],
     preset: []
@@ -153,7 +153,7 @@ const TEMPLATES = [
     title: "Blog Post SEO — 1500 palabras",
     desc: "Artículo de blog optimizado: keyword research, outline, redacción y meta-descripción en un flujo.",
     icon: FileText,
-    color: "#00e5a0",
+    color: "#475569", // Slate-600
     nodes: 4,
     tags: ["Blog", "Contenido", "Keywords"],
     preset: []
@@ -243,7 +243,7 @@ const TEMPLATES = [
     title: "Analytics Dashboard",
     desc: "UI de dashboard con gráficos, KPIs y sidebar de navegación. Código Tailwind + React compatible con Lovable.",
     icon: Globe,
-    color: "#bd00ff",
+    color: "#2563eb", // Royal Blue
     nodes: 5,
     tags: ["Dashboard", "Admin", "Lovable"],
     preset: []
@@ -307,8 +307,8 @@ const Hub = () => {
           <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display">
                 Proyectos & <span className="brand-gradient-text">Plantillas</span>

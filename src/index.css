@@ -11,48 +11,49 @@
 
 @layer base {
   :root {
-    /* ── Tailwind Catalyst / Stitch token bridge (Zinc base, True Blue primary) ── */
-    --background:  240 10% 3.9%;    /* zinc-950 (Dark mode Google Stitch base) */
+    /* ── Onyx Design System (Professional / High-End) ── */
+    --background:  240 10% 3.9%;    /* zinc-950 - Deep Space */
     --foreground:  0 0% 98%;        /* zinc-50 */
     --card:        240 5.9% 10%;    /* zinc-900 */
+    --card-hover:  240 5.9% 12%;
     --card-foreground: 0 0% 98%;
     --popover:     240 5.9% 10%;
     --popover-foreground: 0 0% 98%;
-    --primary:     217 89% 61%;     /* Google True Blue (#4285F4) */
+    --primary:     221 83% 53%;     /* Royal Blue (#2563eb) - Solid & Trustworthy */
     --primary-foreground: 0 0% 100%;
     --secondary:   240 3.7% 15.9%;  /* zinc-800 */
     --secondary-foreground: 0 0% 98%;
     --muted:       240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%; /* zinc-400 */
-    --accent:      240 3.7% 15.9%;
+    --muted-foreground: 240 5.2% 55%; /* zinc-500 - Refined muted */
+    --accent:      217 91% 60%;     /* Soft link blue */
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;   /* red-900 */
+    --destructive: 0 84% 60%;       /* Precise red */
     --destructive-foreground: 0 0% 98%;
     --border:      240 3.7% 15.9%;  /* zinc-800 */
     --input:       240 3.7% 15.9%;
-    --ring:        217 89% 61%;
-    --radius:      0.75rem;
+    --ring:        221 83% 53%;
+    --radius:      0.5rem;          /* More professional 8px/12px radius */
 
-    /* Sidebar */
+    /* Sidebar - Minimalist */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 5% 64.9%;
-    --sidebar-primary: 217 89% 61%;
+    --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent: 240 4.8% 95.9% / 0.05;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217 89% 61%;
+    --sidebar-ring: 221 83% 53%;
 
-    /* Canvas / Node */
-    --canvas: 240 8% 8%;
-    --node-bg: 240 7% 12%;
-    --node-border: 240 6% 18%;
-    --node-glow: 142 70% 60%;
-    --success: 142 70% 60%;
-    --warning: 43 90% 60%;
-    --gold: 45 90% 55%;
-    --gold-foreground: 0 0% 5%;
-    --gold-muted: 45 90% 55% / 0.15;
+    /* Canvas / Node - Industrial */
+    --canvas: 240 10% 3.9%;
+    --node-bg: 240 5.9% 10%;
+    --node-border: 240 3.7% 20%;
+    --node-glow: 221 83% 53% / 0.1; /* Subtle blue glow instead of neon */
+    --success: 142 70% 45%;         /* Sober green */
+    --warning: 43 90% 50%;          /* Sober amber */
+    --gold: 45 60% 50%;             /* Refined gold/brass */
+    --gold-foreground: 0 0% 100%;
+    --gold-muted: 45 60% 50% / 0.1;
   }
 }
 
@@ -97,9 +98,9 @@
 /* DELETED ZEPHYR UTILITIES */
 
 @layer utilities {
-  /* System Grid Pattern for backgrounds */
+  /* System Grid Pattern for backgrounds - Ultra Subtle Onyx */
   .bg-grid-white {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.04)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.02)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
   }
 }
 
@@ -156,24 +157,22 @@
    REACT FLOW OVERRIDES
    ============================================ */
 .react-flow {
-  background-color: #080808 !important;
-  background-image:
-    radial-gradient(circle at 1px 1px, rgba(255,255,255,0.04) 1px, transparent 0);
-  background-size: 32px 32px;
+  background-color: transparent !important;
 }
 .react-flow__handle {
-  width: 10px !important;
-  height: 10px !important;
-  background: #4ADE80 !important;
-  border: 3px solid #080808 !important;
+  width: 8px !important;
+  height: 8px !important;
+  background: hsl(var(--primary)) !important;
+  border: 2px solid hsl(var(--background)) !important;
+  border-radius: 4px !important;
 }
 .react-flow__edge-path {
-  stroke-width: 2px !important;
-  stroke: rgba(255,255,255,0.12) !important;
+  stroke-width: 1.5px !important;
+  stroke: hsl(var(--muted-foreground) / 0.2) !important;
 }
 .react-flow__edge.selected .react-flow__edge-path {
-  stroke: #4ADE80 !important;
-  filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.4));
+  stroke: hsl(var(--primary)) !important;
+  filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.3));
 }
 
 /* ============================================

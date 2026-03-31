@@ -26,14 +26,36 @@ export const IMAGE_MODEL_MAP: Record<string, string> = {
 // IDs that trigger image generation routing
 const IMAGE_MODEL_IDS = new Set(Object.keys(IMAGE_MODEL_MAP));
 
-// ─── CREDIT COSTS ─────────────────────────────────────────────────────────────
-const MODEL_COSTS: Record<string, number> = {
-  // Text
-  "deepseek-chat": 1, "gemini-3-flash": 1, "gemini-3.1-pro-low": 1,
-  "gemini-3.1-pro-high": 3, "claude-3.5-sonnet": 4, "claude-3-opus": 5,
-  "gpt-oss-120b": 2, "mistral-large": 2, "mistral-small": 1,
-  // Image
+// ─── CREDIT COSTS (Credits per request) ──────────────────────────────────────
+export const MODEL_COSTS: Record<string, number> = {
+  // Common Text/Chat Models (OpenRouter Slugs)
+  "anthropic/claude-3.5-sonnet":           5,
+  "anthropic/claude-3-5-sonnet-20241022":  5,
+  "openai/gpt-4o":                         5,
+  "deepseek/deepseek-r1":                  3,
+  "deepseek/deepseek-chat":                1,
+  "google/gemini-2.0-flash-001":           1,
+  "google/gemini-2.5-pro-preview-03-25":   2,
+  "mistralai/mistral-large":               2,
+  "mistralai/mistral-small-3.1-24b-instruct": 1,
+
+  // Legacy Internal IDs (for backward compatibility)
+  "deepseek-chat":       1, 
+  "gemini-3-flash":      1, 
+  "gemini-3.1-pro-low":  1,
+  "gemini-3.1-pro-high": 3, 
+  "claude-3.5-sonnet":   4, 
+  "claude-3-opus":       5,
+  "gpt-oss-120b":        2, 
+  "mistral-large":       2, 
+  "mistral-small":       1,
+
+  // Image Generation
+  "black-forest-labs/flux-schnell": 2,
+  "black-forest-labs/flux-1.1-pro": 4,
+  "stability-ai/stable-diffusion-3-5-large": 2,
   "flux-schnell": 2, "flux-pro": 4, "flux-pro-1.1": 4, "sdxl": 2,
+  
   // Image editing tools
   "upscale": 3, "background": 1, "enhance": 2, "restore": 3, "variation": 4, "video": 5,
 };
@@ -387,6 +409,37 @@ ${userCredits < 3 ? "⚠️ Créditos bajos — Plan Pro garantiza acceso contin
     } catch (err) {
       clearInterval(progressTimer);
       throw err;
+    }
+  },
+
+  // ─── CREDIT HELPERS ─────────────────────────────────────────────────────────
+  async spendCredits(amount: number, action: string, model: string, nodeId: string | null = null) {
+    const { error } = await (supabase.rpc as any)("spend_credits", {
+      _amount: amount,
+      _action: action,
+      _model: model,
+      _node_id: nodeId,
+    });
+    if (error) {
+       if (error.message?.toLowerCase().includes('insufficient')) {
+         toast.error("Créditos insuficientes.", {
+           description: "Recarga tu plan para continuar construyendo.",
+           action: { label: "Actualizar", onClick: () => window.location.href = '/pricing' },
+           duration: 6000
+         });
+       }
+       throw new Error(error.message || "Error al descontar créditos");
+    }
+    return true;
+  },
+
+  async refundCredits(amount: number) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    try {
+      await (supabase.rpc as any)("refund_credits", { _amount: amount, _user_id: user.id });
+    } catch (e) {
+      console.warn("[aiService] Refund failed:", e);
     }
   },
 };

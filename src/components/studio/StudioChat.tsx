@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 import { cloneWebsiteAdvanced } from '@/services/clone-service';
+import { aiService, MODEL_COSTS } from '@/services/ai-service';
 
 // ─── Env ───────────────────────────────────────────────────────────────────────
 const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL as string;
@@ -785,64 +786,87 @@ export function StudioChat({
     setPendingImage(null);
     if (inputRef.current) inputRef.current.style.height = 'auto';
 
-    const result = await generateCode(text);
+    // ── CREDIT DEDUCTION ─────────────────────────────────────────────────────
+    const intent = detectIntent(text);
+    const modelId = (intent === 'chat' && !pendingUrl) ? 'google/gemini-2.0-flash-001' : selectedModel;
+    const cost = MODEL_COSTS[modelId] ?? 1;
 
-    let assistantMsg: Message;
-    if (result?.isChatOnly) {
-      // Check if the chat response contains previewable code and auto-preview it
-      const chatFiles = extractChatCodeFiles(result.explanation);
-      if (chatFiles && Object.keys(chatFiles).length > 0) {
-        onCodeGenerated(chatFiles);
+    try {
+      // 1. Spend credits
+      await aiService.spendCredits(cost, intent, modelId, projectId);
+
+      // 2. Generate code/chat
+      const result = await generateCode(text);
+
+      if (!result) {
+        // Refund if result is empty
+        await aiService.refundCredits(cost);
+        return;
       }
 
-      assistantMsg = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: result.explanation,
-        timestamp: new Date(),
-        ...(chatFiles ? { files: Object.keys(chatFiles), type: 'code' } : {}),
-      };
-      setConvHistory(prev => [
-        ...prev,
-        { role: 'user' as const,      content: text },
-        { role: 'assistant' as const, content: result.explanation },
-      ].slice(-16));
-    } else if (result?.files && Object.keys(result.files).length > 0) {
-      onCodeGenerated(result.files);
-      const fileList = Object.keys(result.files).map((f) => `• \`${f}\``).join('\n');
-      assistantMsg = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: `✅ **¡Código generado!**\n\n${fileList}\n\n${result.explanation}`,
-        timestamp: new Date(),
-        type: 'code',
-        files: Object.keys(result.files),
-        stack: result.stack,
-        deps: result.deps,
-        suggestions: result.suggestions,
-      };
-      // Auto-name on first generation
-      if (isFirstGen.current) {
-        isFirstGen.current = false;
-        autoNameProject(text);
+      let assistantMsg: Message;
+      if (result.isChatOnly) {
+        const chatFiles = extractChatCodeFiles(result.explanation);
+        if (chatFiles && Object.keys(chatFiles).length > 0) {
+          onCodeGenerated(chatFiles);
+        }
+        assistantMsg = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: result.explanation,
+          timestamp: new Date(),
+          ...(chatFiles ? { files: Object.keys(chatFiles), type: 'code' } : {}),
+        };
+        setConvHistory(prev => [
+          ...prev,
+          { role: 'user' as const,      content: text },
+          { role: 'assistant' as const, content: result.explanation },
+        ].slice(-16));
+      } else if (result.files && Object.keys(result.files).length > 0) {
+        onCodeGenerated(result.files);
+        const fileList = Object.keys(result.files).map((f) => `• \`${f}\``).join('\n');
+        assistantMsg = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `✅ **¡Código generado!**\n\n${fileList}\n\n${result.explanation}`,
+          timestamp: new Date(),
+          type: 'code',
+          files: Object.keys(result.files),
+          stack: result.stack,
+          deps: result.deps,
+          suggestions: result.suggestions,
+        };
+        if (isFirstGen.current) {
+          isFirstGen.current = false;
+          autoNameProject(text);
+        }
+        setConvHistory(prev => [
+          ...prev,
+          { role: 'user' as const,      content: text },
+          { role: 'assistant' as const, content: result.explanation || 'Código generado.' },
+        ].slice(-16));
+      } else {
+        assistantMsg = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: '⚠️ Hubo un problema al procesar tu solicitud.',
+          timestamp: new Date(),
+        };
       }
-      // Update conversation memory
-      setConvHistory(prev => [
-        ...prev,
-        { role: 'user' as const,      content: text },
-        { role: 'assistant' as const, content: result.explanation || 'Código generado.' },
-      ].slice(-16)); // keep last 8 turns
-    } else {
-      assistantMsg = {
+
+      // 3. Add assistant message to UI
+      setMessages((prev) => [...prev, assistantMsg]);
+
+    } catch (err: any) {
+      console.error("[StudioChat] Error in handleSend:", err);
+      setMessages((prev) => [...prev, {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: '⚠️ Hubo un problema al procesar tu solicitud. Revisa el error que apareció o intenta de nuevo.',
+        content: `⚠️ **Error:** ${err.message || "Hubo un problema."}`,
         timestamp: new Date(),
-      };
+      }]);
     }
-
-    setMessages((prev) => [...prev, assistantMsg]);
-  }, [input, isGenerating, user, generateCode, onCodeGenerated, pendingImage, autoNameProject]);
+  }, [input, isGenerating, user, generateCode, onCodeGenerated, pendingImage, autoNameProject, selectedModel, projectId, pendingUrl]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
