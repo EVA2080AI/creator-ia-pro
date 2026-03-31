@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { SupabaseProvisioning } from './SupabaseProvisioning';
 import {
   Cloud, Database, Users, HardDrive, Zap, Activity,
   CheckCircle, AlertCircle, Loader2, ExternalLink,
@@ -33,6 +34,7 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
   const [section,   setSection]   = useState<CloudSection>('overview');
   const [tables,    setTables]    = useState<string[]>([]);
   const [errorMsg,  setErrorMsg]  = useState('');
+  const [isProvisioning, setIsProvisioning] = useState(false);
 
   const testConnection = useCallback(async (url: string, anonKey: string) => {
     setStatus('testing');
@@ -145,6 +147,16 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
         {section === 'overview' && (
           <div className="p-4 space-y-4">
             {!isConnected ? (
+              isProvisioning ? (
+                <SupabaseProvisioning 
+                  onCancel={() => setIsProvisioning(false)} 
+                  onProvisioned={(newConfig) => {
+                    setIsProvisioning(false);
+                    onConfigChange(newConfig);
+                    testConnection(newConfig.url, newConfig.anonKey);
+                  }} 
+                />
+              ) : (
               /* Connection form */
               <>
                 <div>
@@ -194,10 +206,24 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                     : <><Cloud className="h-3.5 w-3.5" />Conectar proyecto</>}
                 </button>
 
-                <p className="text-[10px] text-white/15 text-center leading-relaxed">
-                  Encuéntralos en tu proyecto Supabase → Settings → API
+                <div className="relative flex items-center py-2">
+                  <div className="flex-grow border-t border-white/[0.05]"></div>
+                  <span className="flex-shrink-0 mx-2 text-[10px] text-white/20 uppercase tracking-widest">o crear nuevo</span>
+                  <div className="flex-grow border-t border-white/[0.05]"></div>
+                </div>
+
+                <button
+                  onClick={() => setIsProvisioning(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-semibold text-[#8AB4F8] hover:text-white transition-all active:scale-[0.98]"
+                  style={{ background: 'rgba(138,180,248,0.08)', border: '1px solid rgba(138,180,248,0.2)' }}>
+                  <Zap className="h-3.5 w-3.5" /> Aprovisionar Base de Datos
+                </button>
+
+                <p className="text-[10px] text-white/15 text-center leading-relaxed mt-2">
+                  Genesis puede crear un proyecto gratuito automáticamente si configuras tu Personal Access Token.
                 </p>
               </>
+              )
             ) : (
               /* Connected overview */
               <>
@@ -239,9 +265,9 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
 
                 <button
                   onClick={() => testConnection(config!.url, config!.anonKey)}
-                  className="flex items-center gap-1.5 text-[10px] text-white/20 hover:text-white transition-colors mx-auto">
+                  className="flex items-center gap-1.5 text-[10px] text-white/20 hover:text-white transition-colors mx-auto mt-2">
                   <RefreshCw className="h-3 w-3" />
-                  Actualizar
+                  Actualizar Tablas
                 </button>
               </>
             )}

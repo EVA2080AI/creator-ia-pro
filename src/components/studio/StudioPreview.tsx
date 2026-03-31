@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   SandpackProvider,
   SandpackPreview,
@@ -31,7 +31,109 @@ const ENTRY_NAMES = [
 // Hint that a file contains JSX / React
 const JSX_HINT = /return\s*\(?\s*<|useState\s*\(|useEffect\s*\(|React\.|<[A-Z][A-Za-z]/;
 
-// Map our file records → Sandpack files, always placing entry at /App.tsx
+// Detect page files — files that look like individual pages/routes
+const PAGE_PATTERNS = [
+  /^pages\/(\w+)\.(tsx|jsx)$/,
+  /^src\/pages\/(\w+)\.(tsx|jsx)$/,
+  /^routes\/(\w+)\.(tsx|jsx)$/,
+  /^views\/(\w+)\.(tsx|jsx)$/,
+];
+
+function slugify(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function detectPages(files: Record<string, StudioFile>): { path: string; name: string; file: string }[] {
+  const pages: { path: string; name: string; file: string }[] = [];
+  for (const filename of Object.keys(files)) {
+    for (const pattern of PAGE_PATTERNS) {
+      const match = filename.match(pattern);
+      if (match) {
+        const name = match[1];
+        const isHome = name.toLowerCase() === 'home' || name.toLowerCase() === 'index';
+        pages.push({
+          path: isHome ? '/' : `/${slugify(name)}`,
+          name: name,
+          file: filename,
+        });
+        break;
+      }
+    }
+  }
+  // Sort: home first
+  pages.sort((a, b) => (a.path === '/' ? -1 : b.path === '/' ? 1 : a.name.localeCompare(b.name)));
+  return pages;
+}
+
+// Generate a wrapper main.tsx that sets up routing for multi-page projects
+function generateRouterWrapper(
+  pages: { path: string; name: string; file: string }[],
+  files: Record<string, StudioFile>,
+): string {
+  const imports = pages.map((p, i) => {
+    // Sandpack paths need to start with /
+    const importPath = './' + p.file.replace(/^(src\/)?/, '').replace(/\.(tsx|jsx)$/, '');
+    return `import Page${i} from '${importPath}';`;
+  }).join('\n');
+
+  const routes = pages.map((p, i) =>
+    `          <Route path="${p.path}" element={<Page${i} />} />`
+  ).join('\n');
+
+  const navLinks = pages.map(p =>
+    `            <NavLink to="${p.path}" className={({ isActive }) => \`nav-link \${isActive ? 'active' : ''}\`}>${p.name}</NavLink>`
+  ).join('\n');
+
+  // Check if there's a Layout component
+  const hasLayout = files['components/Layout.tsx'] || files['Layout.tsx'] || files['src/components/Layout.tsx'];
+
+  return `import React from 'react';
+import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
+${imports}
+
+function NavBar() {
+  return (
+    <nav style={{
+      position: 'sticky', top: 0, zIndex: 50,
+      display: 'flex', alignItems: 'center', gap: '4px',
+      padding: '0 16px', height: '48px',
+      background: 'rgba(15,16,20,0.95)', backdropFilter: 'blur(12px)',
+      borderBottom: '1px solid rgba(255,255,255,0.08)',
+      fontFamily: "'Inter', system-ui, sans-serif",
+    }}>
+      <style>{\`
+        .nav-link {
+          padding: 6px 12px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 500;
+          color: rgba(255,255,255,0.5);
+          text-decoration: none;
+          transition: all 0.15s;
+        }
+        .nav-link:hover { color: white; background: rgba(255,255,255,0.08); }
+        .nav-link.active { color: white; background: rgba(138,180,248,0.15); }
+      \`}</style>
+${navLinks}
+    </nav>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <NavBar />
+      <Routes>
+${routes}
+        <Route path="*" element={<Page0 />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+`;
+}
+
+// Map our file records → Sandpack files, with multi-page routing support
 function toSandpackFiles(
   files: Record<string, StudioFile>,
   supabaseConfig?: SupabaseConfig | null,
@@ -47,21 +149,35 @@ function toSandpackFiles(
     };
   }
 
-  // Find entry file
+  // Detect multi-page structure
+  const pages = detectPages(files);
+  const isMultiPage = pages.length >= 2;
+
+  if (isMultiPage) {
+    // Multi-page mode: generate router wrapper as App.tsx
+    // Add all files first
+    for (const [name, file] of Object.entries(files)) {
+      const abs = (name.startsWith('/') ? name : `/${name}`).replace(/^\/src\//, '/');
+      result[abs] = { code: file.content };
+    }
+    // Override App.tsx with router wrapper
+    result['/App.tsx'] = { code: generateRouterWrapper(pages, files), active: true };
+    return result;
+  }
+
+  // Single-page mode (existing behavior)
   let entryContent: string | null = null;
   let entryOrigName: string | null = null;
 
   for (const name of ENTRY_NAMES) {
     if (files[name]) { entryContent = files[name].content; entryOrigName = name; break; }
   }
-  // Fallback: first TSX/JSX file that looks like a React component
   if (!entryContent) {
     const candidate = Object.entries(files).find(
       ([, f]) => (f.language === 'tsx' || f.language === 'jsx') && JSX_HINT.test(f.content)
     );
     if (candidate) { entryContent = candidate[1].content; entryOrigName = candidate[0]; }
   }
-  // Last resort: any tsx/jsx file
   if (!entryContent) {
     const candidate = Object.entries(files).find(
       ([, f]) => f.language === 'tsx' || f.language === 'jsx'
@@ -70,14 +186,11 @@ function toSandpackFiles(
   }
   if (!entryContent) return null;
 
-  // Add supporting files (strip src/ prefix so paths resolve inside Sandpack)
   for (const [name, file] of Object.entries(files)) {
-    if (name === entryOrigName) continue; // entry goes to /App.tsx below
+    if (name === entryOrigName) continue;
     const abs = (name.startsWith('/') ? name : `/${name}`).replace(/^\/src\//, '/');
     result[abs] = { code: file.content };
   }
-
-  // Always expose entry as /App.tsx
   result['/App.tsx'] = { code: entryContent, active: true };
 
   return result;
@@ -94,8 +207,10 @@ export function StudioPreview({
   const [refreshKey, setRefreshKey] = useState(0);
   const [zoom, setZoom]             = useState(100);
 
-  const sandpackFiles = toSandpackFiles(files, supabaseConfig);
+  const sandpackFiles = useMemo(() => toSandpackFiles(files, supabaseConfig), [files, supabaseConfig]);
   const hasContent    = !!sandpackFiles;
+  const pages = useMemo(() => detectPages(files), [files]);
+  const isMultiPage = pages.length >= 2;
 
   // Device preview widths
   const frameWidth: Record<DeviceMode, string> = {
@@ -138,22 +253,31 @@ export function StudioPreview({
 
         <div className="w-px h-4 mx-1.5" style={{ background: 'rgba(255,255,255,0.07)' }} />
 
-        {/* Zoom */}
-        <button
-          onClick={() => setZoom(z => Math.max(25, z - 10))}
-          className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] transition-all"
-        >
-          <ZoomOut className="h-3 w-3" />
-        </button>
-        <span className="text-[10px] text-white/25 font-mono w-8 text-center select-none">{zoom}%</span>
-        <button
-          onClick={() => setZoom(z => Math.min(200, z + 10))}
-          className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] transition-all"
-        >
-          <ZoomIn className="h-3 w-3" />
-        </button>
+        {/* Multi-page indicator */}
+        {isMultiPage && (
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md" style={{ background: 'rgba(138,180,248,0.08)', border: '1px solid rgba(138,180,248,0.15)' }}>
+            <span className="text-[9px] font-bold text-[#8AB4F8] uppercase tracking-widest">{pages.length} páginas</span>
+          </div>
+        )}
 
-        <div className="flex-1" />
+        {/* Zoom */}
+        <div className="flex items-center gap-0.5 ml-auto">
+          <button
+            onClick={() => setZoom(z => Math.max(25, z - 10))}
+            className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] transition-all"
+          >
+            <ZoomOut className="h-3 w-3" />
+          </button>
+          <span className="text-[10px] text-white/25 font-mono w-8 text-center select-none">{zoom}%</span>
+          <button
+            onClick={() => setZoom(z => Math.min(200, z + 10))}
+            className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] transition-all"
+          >
+            <ZoomIn className="h-3 w-3" />
+          </button>
+        </div>
+
+        <div className="w-px h-4 mx-1.5" style={{ background: 'rgba(255,255,255,0.07)' }} />
 
         {/* Refresh */}
         <button
@@ -164,7 +288,7 @@ export function StudioPreview({
           <RotateCcw className="h-3 w-3" />
         </button>
 
-        {/* Open in new tab — Sandpack exposes a URL we can use */}
+        {/* Open in new tab */}
         <button
           onClick={() => {
             const frame = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
@@ -256,7 +380,7 @@ export function StudioPreview({
                     'clsx': '^2.0.0',
                     'class-variance-authority': '^0.7.0',
                     'tailwind-merge': '^2.0.0',
-                    // Routing
+                    // Routing — critical for multi-page
                     'react-router-dom': '^6.0.0',
                     // Animation
                     'framer-motion': '^11.0.0',

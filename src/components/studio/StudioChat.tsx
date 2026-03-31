@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import type { StudioFile } from '@/hooks/useStudioProjects';
+import { cloneWebsiteAdvanced } from '@/services/clone-service';
 
 // ─── Env ───────────────────────────────────────────────────────────────────────
 const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL as string;
@@ -99,11 +100,13 @@ const MODELS = [
 
 // ─── Intent detection — auto-route between code gen and chat ──────────────────
 const CODE_VERBS = ['crea','genera','construye','haz','diseña','implementa','desarrolla',
-  'build','create','make','generate','design','develop','write','code','programa'];
+  'build','create','make','generate','design','develop','write','code','programa',
+  'clona','replica','copia','clone','replicate'];
 const CODE_NOUNS = ['página','pagina','app','aplicación','aplicacion','dashboard','landing',
   'formulario','componente','component','api','backend','frontend','website','sitio',
   'portfolio','portafolio','calculator','calculadora','todo','ecommerce','blog','navbar',
-  'footer','hero','modal','sidebar','tabla','chart','gráfica','grafica'];
+  'footer','hero','modal','sidebar','tabla','chart','gráfica','grafica',
+  'multi-page','multipágina','multipagina','prototipo','prototype','sitemap','rutas','routes'];
 
 function detectIntent(prompt: string): 'codegen' | 'chat' {
   const p = prompt.toLowerCase().trim();
@@ -152,17 +155,37 @@ El usuario quiere clonar el sitio web proporcionado. A continuación tienes la e
 Tu misión es:
 1. ANALIZAR meticulosamente la jerarquía visual, secciones y copywriting real extraído.
 2. DEDUCIR colores, paddings, flex/grid, tipografía y espaciados a partir del markup y clases inferidas.
-3. RECREAR el diseño como componentes React + Tailwind CSS multi-archivo, respetando al 100% el copywriting original.
-4. Separar el resultado en archivos limpio: App.tsx, components/Hero.tsx, components/Navbar.tsx, components/Footer.tsx, etc.
-5. Mantener el tema de colores del sitio original. Usa clases Tailwind custom si necesitas colores exactos (e.g., text-[#hexcolor]).
-6. Hacer el resultado COMPLETAMENTE funcional y responsivo (Mobile First).
+3. RECREAR el diseño como un PROYECTO MULTI-PÁGINA con React Router + Tailwind CSS.
+4. Separar en UNA ESTRUCTURA MULTI-PÁGINA NAVEGABLE:
+   - App.tsx (layout principal con navbar + react-router)
+   - pages/Home.tsx, pages/About.tsx, pages/Pricing.tsx, etc. (una por sección del sitio)
+   - components/Navbar.tsx, components/Footer.tsx, components/Hero.tsx, etc.
+5. Mantener el tema de colores del sitio original. Usa clases Tailwind custom con hex exactos (e.g., text-[#hexcolor], bg-[#hexcolor]).
+6. EXTRAER Y REPLICAR:
+   - Paleta de colores completa (primario, secundario, backgrounds, text)
+   - Tipografía (font-family, weights) — usa Google Fonts si los detectas
+   - Espaciado y layouts (grid, flex, gaps)
+   - Bordes, sombras y radios
+7. Hacer el resultado COMPLETAMENTE funcional y responsivo (Mobile First).
+
+ESTRUCTURA DE ARCHIVOS OBLIGATORIA PARA CLON MULTI-PÁGINA:
+{"files":{
+  "App.tsx": contenido con React Router + Layout,
+  "pages/Home.tsx": página principal,
+  "pages/[SecciónN].tsx": siguientes páginas detectadas del sitio,
+  "components/Navbar.tsx": navegación con links funcionales,
+  "components/Footer.tsx": footer,
+  "styles.css": variables CSS con colores extraídos
+}}
 
 REGLAS ABSOLUTAS:
 - Tu respuesta COMPLETA debe ser SOLO el JSON sin texto antes ni después.
 - NO uses markdown fences.
-- OBLIGATORIO export default en App.tsx.
+- OBLIGATORIO export default en cada archivo de página.
 - NUNCA inventes contenido — usa el texto real extraído del sitio.
 - Si el sitio tiene imágenes, usa la URL real si está disponible o un placeholder de Unsplash temático.
+- USA react-router-dom para navegación entre páginas.
+- INCLUYE import de Google Fonts en styles.css si detectas la tipografía original.
 
 [ESTRUCTURA Y CONTENIDO EXTRAÍDO DEL SITIO OBJETIVO]:
 `;
@@ -204,6 +227,15 @@ REGLAS ABSOLUTAS:
 9. Si hay archivos existentes en el proyecto, incorpóralos y mejóralos
 10. CRÍTICO PARA REACT: Siempre exporta el componente principal App.tsx por defecto ("export default function App()"). NUNCA uses "export function App" sin default, ya que rompe el entorno Sandbox.
 
+⚡ ARQUITECTURA MULTI-PÁGINA NAVEGABLE (OBLIGATORIA cuando el prompt implica múltiples pages/rutas):
+- Si el prompt dice "multi-page", "varias páginas", "sitio web completo", "prototipo navegable", "web app", o si el contenido naturalmente requiere más de 1 vista:
+  → GENERA archivos en "pages/" directory: pages/Home.tsx, pages/About.tsx, pages/Dashboard.tsx, etc.
+  → App.tsx DEBE importar react-router-dom y configurar <BrowserRouter> con <Routes> y <Route> para cada página.
+  → Incluye un <Navbar> con <Link> o <NavLink> funcionales para navegar entre páginas.
+  → Cada página en pages/ DEBE tener "export default function PageName()".
+- Si el prompt pide solo UN componente o algo simple → single file App.tsx está bien.
+- Si el prompt dice "landing page" con múltiples secciones → puedes hacer single-page con scroll, PERO si dice "con varias páginas" → multi-page routing obligatorio.
+
 DETECCIÓN DE LENGUAJE/FRAMEWORK (auto-detectar del prompt):
 - "React", "landing", "dashboard", "SPA", "app web" → React + TypeScript + Tailwind (dark)
 - "Next.js", "nextjs", "SSR" → Next.js + TypeScript
@@ -225,10 +257,10 @@ REGLAS CRÍTICAS DE DISEÑO UX/UI (OBLIGATORIAS para frontend):
 - Grid Layout: SIEMPRE utiliza clases \`w-full min-h-screen\` en el div/sección padre principal para que el contenido jamás se corte visualmente.
 - Mobile-first: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 en todos los grids
 - Secciones completas: hero → features → testimonios → pricing → CTA → footer
-- CONTENIDO MOCK REALISTA: JAMÁS uses "Lorem Ipsum". Escribe copywriting persuasivo real en español (o el idioma pedido). Si necesitas imágenes de relleno, USA urls reales de \`https://source.unsplash.com/random/800x600/?[tema]\` o \`https://images.unsplash.com/...\`.
+- CONTENIDO MOCK REALISTA: JAMÁS uses "Lorem Ipsum". Escribe copywriting persuasivo real en español (o el idioma pedido). Si necesitas imágenes de relleno, USA urls reales de \`https://images.unsplash.com/...\`.
 
 FORMATO EXACTO — EMPIEZA CON { Y TERMINA CON }:
-{"files":{"App.tsx":{"language":"tsx","content":"..."},"README.md":{"language":"markdown","content":"..."}},"explanation":"descripción breve","tech_stack":["React","TypeScript","Tailwind CSS"]}
+{"files":{"App.tsx":{"language":"tsx","content":"..."},"pages/Home.tsx":{"language":"tsx","content":"..."},"README.md":{"language":"markdown","content":"..."}},"explanation":"descripción breve","tech_stack":["React","TypeScript","Tailwind CSS","React Router"]}
 
 Si el usuario pide modificar código existente, incluye los archivos modificados con contenido COMPLETO.`;
 
@@ -443,17 +475,10 @@ export function StudioChat({
     setShowUrlInput(false);
     setUrlInput('');
     try {
-      // Jina AI Reader — converts any URL to clean Markdown for free
-      const jinaUrl = `https://r.jina.ai/${url}`;
-      const res = await fetch(jinaUrl, {
-        headers: { 'Accept': 'text/plain' },
-        signal: AbortSignal.timeout(30_000),
-      });
-      if (!res.ok) throw new Error(`Jina returned ${res.status}`);
-      const md = await res.text();
-      if (!md || md.length < 50) throw new Error('El sitio no pudo ser leído.');
-      // Store trimmed version (max 12k chars to stay within token budget)
-      setPendingUrl(JSON.stringify({ url, content: md.slice(0, 12_000) }));
+      const cloneData = await cloneWebsiteAdvanced(url);
+      
+      // Store full clone data to be injected into prompt later
+      setPendingUrl(JSON.stringify(cloneData));
       toast.success('Sitio analizado. Describe cómo quieres clonarlo.');
     } catch (e: any) {
       if (e.name === 'TimeoutError') {
@@ -514,9 +539,16 @@ export function StudioChat({
       let cloneBlock = '';
       let effectiveSystemPrompt = isChatModeActive ? GENESIS_CHAT_SYSTEM : CODE_GEN_SYSTEM;
       if (pendingUrl) {
-        const { url: cloneUrl, content: cloneMd } = JSON.parse(pendingUrl);
+        const parsedClone = JSON.parse(pendingUrl);
+        // Supports legacy `{url, content}` or new `CloneResult` from cloneWebsiteAdvanced
+        const cloneUrl = parsedClone.url;
+        const cloneMd  = parsedClone.content || parsedClone.markdown || '';
+        const colors   = parsedClone.colors && parsedClone.colors.length > 0 ? `\n[COLORES EXTRAÍDOS]: ${parsedClone.colors.join(', ')}` : '';
+        const fonts    = parsedClone.fonts && parsedClone.fonts.length > 0 ? `\n[TIPOGRAFÍA EXTRAÍDA]: ${parsedClone.fonts.join(', ')}` : '';
+        const sitemap  = parsedClone.sitemap && parsedClone.sitemap.length > 0 ? `\n[RUTAS/SITEMAP RECOMENDADO]: ${parsedClone.sitemap.join(', ')}` : '';
+
         // Always force codegen mode when a URL is attached
-        effectiveSystemPrompt = CLONE_SYSTEM_PROMPT + cloneMd;
+        effectiveSystemPrompt = CLONE_SYSTEM_PROMPT + cloneMd + colors + fonts + sitemap;
         cloneBlock = `\n\n[URL OBJETIVO A CLONAR]: ${cloneUrl}\n[INSTRUCCIÓN DEL USUARIO]: ${prompt}`;
         setPendingUrl(null); // consume once
       }
@@ -1098,7 +1130,7 @@ export function StudioChat({
           </div>
         )}
 
-        <div className="rounded-xl overflow-hidden transition-all"
+        <div className="rounded-xl transition-all relative focus-within:ring-1 focus-within:ring-white/20"
           style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <textarea
             ref={inputRef}

@@ -1,0 +1,81 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+/**
+ * Bold API Checkout Link Generator
+ */
+serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  try {
+    const { amount, packId, userId, buyerEmail, description } = await req.json();
+
+    const BOLD_API_KEY = Deno.env.get("BOLD_API_KEY");
+    
+    if (!BOLD_API_KEY) {
+      throw new Error("Bold BOLD_API_KEY missing");
+    }
+
+    const payload = {
+      amount_type: "CLOSE",
+      total_amount: amount,
+      currency: "COP",
+      description: description || "Créditos en Creator IA Pro",
+      payer_email: buyerEmail, 
+      callback_url: `${Deno.env.get("SUPABASE_URL") || "https://creator-ia.com"}/pricing?status=payment_returned`
+    };
+
+    const boldApiUrl = "https://integrations.api.bold.co/online/link/v1";
+    const response = await fetch(boldApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": BOLD_API_KEY
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Error al en Bold");
+    }
+
+    const linkId = data.payload?.payment_link;
+    const url = data.payload?.url;
+
+    // Track pending transaction in Database
+    // This allows the Webhook to know who gets the credits when this link is approved.
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const { error: insertError } = await supabaseClient
+      .from("transactions")
+      .insert({
+        user_id: userId,
+        amount: 0, // 0 until confirmed
+        type: "bold_pending",
+        description: `${packId}|${linkId}`
+      });
+
+    if (insertError) {
+      console.error("Failed to insert pending tx:", insertError);
+    }
+
+    return new Response(JSON.stringify({ url, linkId }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error: any) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 400,
+    });
+  }
+});

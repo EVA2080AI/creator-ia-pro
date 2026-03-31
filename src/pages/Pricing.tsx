@@ -2,8 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import { stripeService } from "@/services/billing-service";
-import { STRIPE_TIERS } from "@/lib/stripe-tiers";
+import { boldService } from "@/services/bold-service";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
 import { CATEGORY_CONFIG } from "@/lib/models.config";
 import {
@@ -166,14 +165,11 @@ export default function Pricing() {
     }
     setLoadingPack(pack.id);
     try {
-      const data = await stripeService.buyCredits(pack.price_id);
-      if (data?.url) window.location.href = data.url;
-      else throw new Error("No se pudo generar el enlace de pago.");
+      await boldService.purchaseCredits(pack.id);
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Error al procesar el pago.");
-    } finally {
       setLoadingPack(null);
-    }
+    } 
   };
 
   const handleSubscribe = async (plan: typeof PLANS[number]) => {
@@ -182,21 +178,11 @@ export default function Pricing() {
       navigate("/auth");
       return;
     }
-    const tier = STRIPE_TIERS[plan.stripeTier];
-    if (tier.price_id.includes('REPLACE_ME')) {
-      toast.error("Este plan aún no está activado. Configura los Stripe price IDs.");
-      return;
-    }
-    setLoadingPlan(plan.key);
-    try {
-      const data = await stripeService.createCheckout(tier.price_id);
-      if (data?.url) window.location.href = data.url;
-      else throw new Error("No se pudo generar el enlace de pago.");
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Error al procesar el pago.");
-    } finally {
-      setLoadingPlan(null);
-    }
+    
+    // In the new credit-only model with Bold, we map subscriptions to large credit packs.
+    // For now, prompt the user to buy the explicit credit packs instead.
+    toast.info("En el nuevo modelo Bold, por favor adquiere un pack de créditos debajo.");
+    document.getElementById("credit-packs-section")?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -422,11 +408,11 @@ export default function Pricing() {
 
           {/* ── Credit packs ─────────────────────────────────────────────── */}
           {CREDIT_PACKS && CREDIT_PACKS.length > 0 && (
-            <section className="px-6 max-w-5xl mx-auto mb-12">
+            <section id="credit-packs-section" className="px-6 max-w-5xl mx-auto mb-12">
               <div className="text-center mb-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-black uppercase tracking-widest text-white/30 mb-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-black uppercase tracking-widest text-primary mb-3">
                   <Coins className="h-3 w-3 text-primary" />
-                  Top-up · Sin suscripción requerida
+                  Top-up · Pagos con Bold
                 </div>
                 <h2 className="text-2xl font-black text-white font-display tracking-tight">Créditos extra</h2>
                 <p className="text-white/30 text-[13px] mt-1">Pago único · no expiran · compatible con todos los planes</p>
@@ -453,9 +439,9 @@ export default function Pricing() {
                         <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 border border-primary/20 shrink-0">
                           <Coins className="h-4 w-4 text-primary" />
                         </div>
-                        <div>
-                          <p className="text-[13px] font-black text-white font-display">{pack.credits?.toLocaleString()} créditos</p>
-                          <p className="text-[10px] text-white/30">Pago único · no expiran</p>
+                        <div className="flex items-baseline gap-1 mt-1 justify-center">
+                          <span className="text-3xl font-black text-white">{pack.credits_amount.toLocaleString()}</span>
+                          <span className="text-sm font-medium text-white/50">créditos</span>
                         </div>
                         <span className="ml-auto text-xl font-black text-white font-display">{pack.price}</span>
                       </div>

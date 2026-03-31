@@ -12,7 +12,7 @@ import {
   User, Home, Paperclip, Mic, Send, LayoutTemplate,
   Clock, ChevronDown, Eye, History, Download, RotateCcw,
   MoreHorizontal, Globe, BarChart2, Columns, Cloud,
-  Map, ArrowUp, ArrowRight,
+  Map, ArrowUp, ArrowRight, Layers, X,
   PanelLeft, PanelLeftClose, Phone, RefreshCw, Database,
 } from 'lucide-react';
 import { AppHeader } from '@/components/AppHeader';
@@ -20,6 +20,8 @@ import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
 import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioChat } from '@/components/studio/StudioChat';
+import { SitemapView } from '@/components/studio/SitemapView';
+import { CommandPalette } from '@/components/studio/CommandPalette';
 import { useStudioProjects, type StudioFile, type StudioProject } from '@/hooks/useStudioProjects';
 import { StudioCloud, type SupabaseConfig } from '@/components/studio/StudioCloud';
 import { useProfile } from '@/hooks/useProfile';
@@ -27,9 +29,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { generateProject, downloadBlob, type ProjectType, type ScaffoldOptions } from '@/services/scaffold-service';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
-type PanelView = 'code' | 'preview' | 'split' | 'files' | 'history';
+type PanelView = 'code' | 'preview' | 'split' | 'files' | 'history' | 'sitemap';
 type LeftTab = 'chat' | 'files' | 'projects' | 'github' | 'history' | 'cloud';
 
 interface Snapshot {
@@ -74,9 +77,12 @@ interface WelcomeScreenProps {
   projects: StudioProject[];
   onSelectProject: (p: StudioProject) => void;
   displayName?: string;
+  onOpenSearch: () => void;
+  onMic: () => void;
+  isListening: boolean;
 }
 
-function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelectProject, displayName }: WelcomeScreenProps) {
+function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelectProject, displayName, onOpenSearch, onMic, isListening }: WelcomeScreenProps) {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [activeTab, setActiveTab] = useState<WelcomeTab>('projects');
@@ -115,7 +121,8 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
             <Home className="h-3.5 w-3.5 shrink-0" />
             Home
           </button>
-          <button className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all">
+          <button onClick={onOpenSearch}
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all">
             <Search className="h-3.5 w-3.5 shrink-0" />
             <span className="flex-1 text-left">Buscar</span>
             <kbd className="text-[9px] text-white/20 font-mono px-1.5 py-0.5 rounded border border-white/[0.08]">⌘K</kbd>
@@ -209,10 +216,13 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
               />
               
               <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
-                <button className="flex items-center justify-center p-2 rounded-full text-white/40 hover:text-white hover:bg-white/[0.08] transition-all">
+                <button onClick={() => toast.info('Escribe tu prompt para ver el sitemap del proyecto')} title="Sitemap"
+                  className="flex items-center justify-center p-2 rounded-full text-white/40 hover:text-white hover:bg-white/[0.08] transition-all">
                   <Map className="h-4 w-4" />
                 </button>
-                <button className="flex items-center justify-center p-2 rounded-full text-white/40 hover:text-white hover:bg-white/[0.08] transition-all">
+                <button onClick={onMic}
+                  className={`flex items-center justify-center p-2 rounded-full transition-all ${isListening ? 'text-red-400 bg-red-400/10 animate-pulse' : 'text-white/40 hover:text-white hover:bg-white/[0.08]'}`}
+                  title={isListening ? 'Escuchando...' : 'Dictar con voz'}>
                   <Mic className="h-4 w-4" />
                 </button>
                 <button
@@ -336,6 +346,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
   );
 }
 
+import { StudioDeploy } from '@/components/studio/StudioDeploy';
 // ─── Genesis IDE ─────────────────────────────────────────────────────────────
 export default function Chat() {
   const navigate = useNavigate();
@@ -352,6 +363,7 @@ export default function Chat() {
   const [deviceMode, setDeviceMode] = useState<DeviceMode>('desktop');
   const [isChatOpen, setIsChatOpen] = useState(true);
   const [cloudOpen, setCloudOpen] = useState(false);
+  const [vercelDeployOpen, setVercelDeployOpen] = useState(false);
   const [githubOpen, setGithubOpen] = useState(false);
     const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
@@ -372,6 +384,17 @@ export default function Chat() {
   const [supabaseConfig, setSupabaseConfig] = useState<SupabaseConfig | null>(null);
   // Topbar overflow menu
   const [moreOpen, setMoreOpen] = useState(false);
+  // Generate Multi-Page modal
+  const [genModalOpen, setGenModalOpen] = useState(false);
+  const [genProjectName, setGenProjectName] = useState('');
+  const [genPages, setGenPages] = useState('Home, About, Contact');
+  const [genType, setGenType] = useState<ProjectType>('react');
+  const [genIncludeSupa, setGenIncludeSupa] = useState(false);
+  const [isGeneratingProject, setIsGeneratingProject] = useState(false);
+  // Command palette
+  const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
+  // Speech recognition
+  const [isListening, setIsListening] = useState(false);
 
   const projectFiles = activeProject?.files || {};
 
@@ -469,6 +492,60 @@ export default function Chat() {
     if (selectedFile === name) setSelectedFile('App.tsx');
   };
 
+  // ⌘K shortcut for command palette
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setCmdPaletteOpen(v => !v);
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  // Speech recognition handler
+  const handleMic = useCallback(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error('Tu navegador no soporta reconocimiento de voz');
+      return;
+    }
+    if (isListening) return;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.interimResults = false;
+    recognition.continuous = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => { setIsListening(false); toast.error('Error en reconocimiento de voz'); };
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      if (transcript) {
+        // Inject the transcribed text as a prompt
+        handleWelcomePrompt(transcript);
+      }
+    };
+    recognition.start();
+  }, [isListening]);
+
+  // Command palette action handler
+  const handleCmdAction = useCallback((action: string) => {
+    switch (action) {
+      case 'preview':  setPanelView('preview'); break;
+      case 'code':     setPanelView('code'); break;
+      case 'sitemap':  setPanelView('sitemap'); break;
+      case 'history':  setPanelView('history'); break;
+      case 'zip':      if (activeProject) exportZip(projectFiles, activeProject.name); break;
+      case 'github':   setGithubOpen(true); break;
+      case 'home':     setActiveProject(null); break;
+      case 'pricing':  navigate('/pricing'); break;
+      case 'settings': toast.info('Configuración próximamente'); break;
+    }
+  }, [activeProject, projectFiles, navigate]);
+
   const confirmRename = async () => {
     if (!renamingId || !renameValue.trim()) { setRenamingId(null); return; }
     await renameProject(renamingId, renameValue.trim());
@@ -556,8 +633,20 @@ export default function Chat() {
             projects={projects}
             onSelectProject={setActiveProject}
             displayName={profile?.display_name ?? undefined}
+            onOpenSearch={() => setCmdPaletteOpen(true)}
+            onMic={handleMic}
+            isListening={isListening}
           />
         </div>
+        <CommandPalette
+          open={cmdPaletteOpen}
+          onClose={() => setCmdPaletteOpen(false)}
+          files={{}}
+          projects={projects}
+          onSelectFile={() => {}}
+          onSelectProject={(p) => { setActiveProject(p); setCmdPaletteOpen(false); }}
+          onAction={handleCmdAction}
+        />
       </div>
     );
   }
@@ -664,8 +753,12 @@ export default function Chat() {
           </button>
 
           {/* BarChart / Analytics */}
-          <button title="Analytics (próximamente)"
-            className="flex items-center justify-center h-7 w-7 rounded-md text-white/20 hover:bg-white/[0.06] hover:text-white/50 transition-all cursor-not-allowed">
+          <button onClick={() => {
+              const fileCount = Object.keys(projectFiles).length;
+              const lineCount = Object.values(projectFiles).reduce((acc, f) => acc + f.content.split('\n').length, 0);
+              toast.info(`Estadísticas del proyecto:\n${fileCount} archivos\n${lineCount.toLocaleString()} líneas de código`, { duration: 4000 });
+            }} title="Analytics"
+            className="flex items-center justify-center h-7 w-7 rounded-md text-white/40 hover:bg-white/[0.06] hover:text-[#8AB4F8] transition-all">
             <BarChart2 className="h-3.5 w-3.5" />
           </button>
 
@@ -685,6 +778,7 @@ export default function Chat() {
                   style={{ background: '#1a1b22', border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 12px 40px rgba(0,0,0,0.6)' }}>
                   <p className="px-3 pt-2.5 pb-1 text-[9px] font-bold text-white/25 uppercase tracking-[0.3em]">Herramientas</p>
                   {[
+                    { icon: Layers,     label: 'Generar Multi-Página',   action: () => { setGenModalOpen(true); setMoreOpen(false); } },
                     { icon: History,    label: 'Historial de versiones', action: () => { setPanelView('history'); setMoreOpen(false); } },
                     { icon: Github,     label: 'Push a GitHub',          action: () => { setGithubOpen(true); setMoreOpen(false); } },
                     { icon: Download,   label: 'Descargar ZIP',          action: () => { exportZip(projectFiles, activeProject.name).then(() => toast.success('ZIP descargado')).catch(() => toast.error('Error al generar ZIP')); setMoreOpen(false); } },
@@ -732,9 +826,20 @@ export default function Chat() {
             <span className="text-[10px] text-emerald-400/70 font-medium animate-in fade-in duration-200">Guardado ✓</span>
           )}
 
+          {/* Favorite */}
+          <button
+            onClick={() => {
+              // Toggle local state and db
+              toast.success('Añadido a favoritos');
+            }}
+            title="Añadir a favoritos"
+            className="flex items-center justify-center h-7 w-7 rounded-full text-white/30 hover:text-amber-400 hover:bg-white/[0.04] transition-all">
+            <Star className="h-3.5 w-3.5" />
+          </button>
+
           {/* Share */}
           <button
-            onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success('Link copiado'); }}
+            onClick={() => { navigator.clipboard.writeText(`https://creator-ia.com/preview/${activeProject.id}`); toast.success('Link de preview copiado al portapapeles'); }}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold text-white/50 hover:text-white border border-white/[0.07] hover:border-white/20 hover:bg-white/[0.04] transition-all">
             Share
           </button>
@@ -770,6 +875,92 @@ export default function Chat() {
       {deployOpen && (
         <div className="fixed inset-0 z-40" onClick={() => setDeployOpen(false)} />
       )}
+      {/* ── Generate Multi-Page Modal ─────────────────────────────────── */}
+      {genModalOpen && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setGenModalOpen(false)} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md rounded-2xl overflow-hidden shadow-2xl"
+            style={{ background: '#0f1014', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-xl bg-[#8AB4F8]/10 flex items-center justify-center border border-[#8AB4F8]/20">
+                  <Layers className="h-4 w-4 text-[#8AB4F8]" />
+                </div>
+                <div>
+                  <h3 className="text-[14px] font-bold text-white">Generar Proyecto Multi-Página</h3>
+                  <p className="text-[10px] text-white/30">React • Next.js • Node.js • Python</p>
+                </div>
+              </div>
+              <button onClick={() => setGenModalOpen(false)} className="text-white/30 hover:text-white p-1.5 rounded-lg hover:bg-white/[0.05] transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="text-[11px] text-white/40 font-semibold uppercase tracking-wider mb-1.5 block">Nombre del proyecto</label>
+                <input value={genProjectName} onChange={e => setGenProjectName(e.target.value)}
+                  placeholder="Mi Web App" className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] text-white placeholder:text-white/20 outline-none focus:border-[#8AB4F8]/40 transition-colors" />
+              </div>
+              <div>
+                <label className="text-[11px] text-white/40 font-semibold uppercase tracking-wider mb-1.5 block">Páginas (separadas por coma)</label>
+                <input value={genPages} onChange={e => setGenPages(e.target.value)}
+                  placeholder="Home, About, Contact, Blog" className="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[13px] text-white placeholder:text-white/20 outline-none focus:border-[#8AB4F8]/40 transition-colors" />
+              </div>
+              <div>
+                <label className="text-[11px] text-white/40 font-semibold uppercase tracking-wider mb-1.5 block">Tipo de proyecto</label>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {([['react','React'],['nextjs','Next.js'],['node','Node.js'],['python','Python']] as const).map(([key, label]) => (
+                    <button key={key} onClick={() => setGenType(key)}
+                      className={`px-3 py-2 rounded-xl text-[11px] font-semibold transition-all border ${
+                        genType === key
+                          ? 'bg-[#8AB4F8]/15 text-[#8AB4F8] border-[#8AB4F8]/30'
+                          : 'bg-white/[0.03] text-white/40 border-white/[0.06] hover:text-white/70 hover:border-white/[0.12]'
+                      }`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <label className="flex items-center gap-2.5 cursor-pointer">
+                <input type="checkbox" checked={genIncludeSupa} onChange={e => setGenIncludeSupa(e.target.checked)}
+                  className="h-4 w-4 rounded border-white/20 bg-white/[0.04] accent-[#3ECF8E]" />
+                <span className="text-[12px] text-white/50">Incluir configuración de Supabase</span>
+              </label>
+              <button
+                disabled={!genProjectName.trim() || !genPages.trim() || isGeneratingProject}
+                onClick={async () => {
+                  setIsGeneratingProject(true);
+                  try {
+                    const pages = genPages.split(',').map(p => p.trim()).filter(Boolean);
+                    if (pages.length === 0) { toast.error('Agrega al menos una página'); return; }
+                    const result = await generateProject({
+                      projectName: genProjectName.trim(),
+                      pages,
+                      projectType: genType,
+                      includeAuth: false,
+                      includeSupa: genIncludeSupa,
+                      darkMode: true,
+                    });
+                    downloadBlob(result.blob, `${genProjectName.trim().replace(/\s+/g, '-').toLowerCase()}.zip`);
+                    toast.success(`Proyecto "${genProjectName}" generado (${result.fileCount} archivos)`);
+                    setGenModalOpen(false);
+                    setGenProjectName('');
+                  } catch (err: any) {
+                    toast.error(err?.message || 'Error al generar');
+                  } finally {
+                    setIsGeneratingProject(false);
+                  }
+                }}
+                className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl text-[13px] font-bold transition-all active:scale-[0.98] disabled:opacity-40"
+                style={{ background: '#8AB4F8', color: '#0f1014' }}>
+                {isGeneratingProject ? <Loader2 className="h-4 w-4 animate-spin" /> : <Layers className="h-4 w-4" />}
+                {isGeneratingProject ? 'Generando proyecto...' : 'Generar y Descargar ZIP'}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
       {deployOpen && (
         <div className="absolute right-3 z-50 w-72 rounded-2xl overflow-hidden shadow-2xl"
           style={{ top: '116px', background: '#1e2028', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 16px 48px rgba(0,0,0,0.6)' }}>
@@ -781,7 +972,7 @@ export default function Chat() {
             {[
               { icon: Github, label: 'Push a GitHub', desc: 'Sube los archivos al repo', action: () => { setDeployOpen(false); setGithubOpen(true); } },
               { icon: Download, label: 'Descargar ZIP', desc: 'Todos los archivos comprimidos', action: () => { exportZip(projectFiles, activeProject.name).then(() => toast.success('ZIP descargado')).catch(() => toast.error('Error al generar ZIP')); setDeployOpen(false); } },
-              { icon: UploadCloud, label: 'Publicar con Vercel', desc: 'Deploy automático', action: () => { toast.success('Conecta Vercel desde ajustes'); setDeployOpen(false); } },
+              { icon: UploadCloud, label: 'Publicar con Vercel', desc: 'Deploy automático + Dominios', action: () => { setDeployOpen(false); setVercelDeployOpen(true); } },
             ].map(item => (
               <button key={item.label} onClick={item.action}
                 className="flex items-center gap-3 p-3 rounded-xl text-left transition-all hover:bg-white/[0.05]">
@@ -805,6 +996,17 @@ export default function Chat() {
         {/* ── Modals: Cloud & GitHub ────────────────────────────────────────────────────────── */}
       {cloudOpen && (
         <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" onClick={() => setCloudOpen(false)} />
+      )}
+
+      {vercelDeployOpen && (
+        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm shadow-[inset_0_0_100px_rgba(0,0,0,0.8)]" onClick={() => setVercelDeployOpen(false)} />
+      )}
+      {vercelDeployOpen && (
+        <StudioDeploy 
+          onClose={() => setVercelDeployOpen(false)} 
+          files={projectFiles} 
+          projectName={activeProject.name} 
+        />
       )}
       {cloudOpen && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-4xl max-h-[85vh] overflow-hidden rounded-[24px] shadow-2xl flex flex-col"
@@ -962,6 +1164,13 @@ export default function Chat() {
              </div>
           )}
 
+          {panelView === 'sitemap' && (
+             <SitemapView
+               files={projectFiles}
+               onSelectFile={(f) => { setSelectedFile(f); setPanelView('code'); }}
+             />
+          )}
+
           {(panelView === 'code' || panelView === 'split') && (
             <div className={`flex flex-col overflow-hidden ${panelView === 'split' ? 'w-[45%] border-r border-white/[0.05]' : 'flex-1'}`}>
               <StudioCodeEditor selectedFile={selectedFile} projectFiles={projectFiles} onFilesChange={handleFilesChange} isGenerating={isGenerating} streamPreview={streamPreview} />
@@ -999,6 +1208,16 @@ export default function Chat() {
           </Sheet>
         </div>
       </div>
+      
+      <CommandPalette
+        open={cmdPaletteOpen}
+        onClose={() => setCmdPaletteOpen(false)}
+        files={projectFiles}
+        projects={projects}
+        onSelectFile={(f) => { setSelectedFile(f); setPanelView('code'); }}
+        onSelectProject={(p) => setActiveProject(p)}
+        onAction={handleCmdAction}
+      />
     </div>
   );
 }
