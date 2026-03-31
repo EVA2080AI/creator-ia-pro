@@ -11,49 +11,49 @@
 
 @layer base {
   :root {
-    /* ── Onyx Design System (Professional / High-End) ── */
-    --background:  240 10% 3.9%;    /* zinc-950 - Deep Space */
-    --foreground:  0 0% 98%;        /* zinc-50 */
-    --card:        240 5.9% 10%;    /* zinc-900 */
-    --card-hover:  240 5.9% 12%;
-    --card-foreground: 0 0% 98%;
-    --popover:     240 5.9% 10%;
-    --popover-foreground: 0 0% 98%;
-    --primary:     221 83% 53%;     /* Royal Blue (#2563eb) - Solid & Trustworthy */
+    /* ── Twilight Design System (Suave, amigable, no agresivo) ── */
+    --background:  255 30% 6%;      /* Un morado/azul muy oscuro y profundo, no negro puro */
+    --foreground:  255 10% 95%;     /* Blanco muy suave con tinte violeta */
+    --card:        255 25% 9%;      /* Un tono un poco más claro para las tarjetas */
+    --card-hover:  255 25% 12%;
+    --card-foreground: 255 10% 95%;
+    --popover:     255 25% 9%;
+    --popover-foreground: 255 10% 95%;
+    --primary:     260 80% 65%;     /* Un violeta pastel/suave, no neón */
     --primary-foreground: 0 0% 100%;
-    --secondary:   240 3.7% 15.9%;  /* zinc-800 */
-    --secondary-foreground: 0 0% 98%;
-    --muted:       240 3.7% 15.9%;
-    --muted-foreground: 240 5.2% 55%; /* zinc-500 - Refined muted */
-    --accent:      217 91% 60%;     /* Soft link blue */
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 84% 60%;       /* Precise red */
+    --secondary:   255 20% 14%;     /* Tonos intermedios suaves */
+    --secondary-foreground: 255 10% 95%;
+    --muted:       255 20% 14%;
+    --muted-foreground: 255 10% 65%;
+    --accent:      280 70% 60%;     /* Magenta/rosa suave */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 350 70% 60%;     /* Rojo suave */
     --destructive-foreground: 0 0% 98%;
-    --border:      240 3.7% 15.9%;  /* zinc-800 */
-    --input:       240 3.7% 15.9%;
-    --ring:        221 83% 53%;
-    --radius:      0.5rem;          /* More professional 8px/12px radius */
+    --border:      255 20% 15%;     /* Bordes sutiles, no alto contraste */
+    --input:       255 20% 15%;
+    --ring:        260 80% 65%;
+    --radius:      1rem;            /* Radios mucho más redondos y amigables (16px) */
 
-    /* Sidebar - Minimalist */
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 5% 64.9%;
-    --sidebar-primary: 221 83% 53%;
+    /* Sidebar - Suave */
+    --sidebar-background: 255 25% 7%;
+    --sidebar-foreground: 255 10% 70%;
+    --sidebar-primary: 260 80% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4.8% 95.9% / 0.05;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 221 83% 53%;
+    --sidebar-accent: 255 20% 15%;
+    --sidebar-accent-foreground: 255 10% 95%;
+    --sidebar-border: 255 20% 12%;
+    --sidebar-ring: 260 80% 65%;
 
-    /* Canvas / Node - Industrial */
-    --canvas: 240 10% 3.9%;
-    --node-bg: 240 5.9% 10%;
-    --node-border: 240 3.7% 20%;
-    --node-glow: 221 83% 53% / 0.1; /* Subtle blue glow instead of neon */
-    --success: 142 70% 45%;         /* Sober green */
-    --warning: 43 90% 50%;          /* Sober amber */
-    --gold: 45 60% 50%;             /* Refined gold/brass */
-    --gold-foreground: 0 0% 100%;
-    --gold-muted: 45 60% 50% / 0.1;
+    /* Canvas / Node - Suave */
+    --canvas: 255 30% 6%;
+    --node-bg: 255 25% 10%;
+    --node-border: 255 20% 20%;
+    --node-glow: 260 80% 65% / 0.1; /* Resplandor extremadamente sutil y pastel */
+    --success: 150 60% 50%;         /* Verde menta suave */
+    --warning: 40 80% 60%;          /* Naranja pastel */
+    --gold: 45 80% 65%;             /* Oro suave */
+    --gold-foreground: 45 90% 10%;
+    --gold-muted: 45 80% 65% / 0.1;
   }
 }
 

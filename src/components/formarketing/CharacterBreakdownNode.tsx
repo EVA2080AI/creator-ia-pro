@@ -155,8 +155,8 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
         onAddConnected={data.onAddConnected ?? (() => {})}
       />
 
-      <Handle type="target" position={Position.Left} id="text-in" className="!w-2 !h-2 !-left-1 !bg-yellow-400 !border-2 !border-[#191a1f] hover:scale-125 transition-transform" />
-      <Handle type="source" position={Position.Right} id="context-out" className="!w-2 !h-2 !-right-1 !bg-[#fb923c] !border-2 !border-[#191a1f] hover:scale-125 transition-transform" />
+      <Handle type="target" position={Position.Left} id="text-in" className="!w-3 !h-3 !-left-1.5 !bg-yellow-400 !border-2 !border-[var(--node-bg)] hover:scale-125 transition-transform" />
+      <Handle type="source" position={Position.Right} id="context-out" className="!w-3 !h-3 !-right-1.5 !bg-[#fb923c] !border-2 !border-[var(--node-bg)] hover:scale-125 transition-transform" />
       <NodeNextAction nodeId={id} />
     </div>
   );

@@ -48,40 +48,8 @@ const nodeTypes = {
   antigravityBridge: AntigravityBridgeNode,
 };
 
-const initialNodes: Node[] = [
-  {
-    id: crypto.randomUUID(),
-    type: 'characterBreakdown',
-    position: { x: 50, y: 100 },
-    data: { 
-       title: 'The Slow Starter', 
-       flavor: 'Morning Brew Blend',
-       description: 'Starting point: Morning routine. Trying to wake up but loving the slow pace of the morning.'
-    },
-  },
-  {
-    id: crypto.randomUUID(),
-    type: 'modelView',
-    position: { x: 450, y: 50 },
-    data: { 
-       title: 'Escena 1: Cocina', 
-       prompt: 'Cinematic shot of a cozy kitchen at sunrise, soft warm morning light.',
-       imageUrl: ''
-    },
-  },
-  {
-    id: crypto.randomUUID(),
-    type: 'videoModel',
-    position: { x: 850, y: 100 },
-    data: { 
-       title: 'Secuencia de Desayuno', 
-       status: 'pending',
-       duration: '00:15'
-    },
-  }
-];
-
-const initialEdges: Edge[] = []; // Clear initial edges to avoid ID mismatches with randomUUID
+const initialNodes: Node[] = [];
+const initialEdges: Edge[] = [];
 
 function FormarketingContent() {
   const { user, signOut } = useAuth("/auth");

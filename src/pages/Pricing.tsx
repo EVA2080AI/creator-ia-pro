@@ -19,8 +19,8 @@ const PLANS = [
   {
     key: "starter" as const,
     name: "Starter",
-    price: 12,
-    priceLabel: "$12",
+    price: 49900,
+    priceLabel: "$49.900",
     period: "/mes",
     credits: 100_000,
     creditsLabel: "100K créditos",
@@ -46,8 +46,8 @@ const PLANS = [
   {
     key: "creator" as const,
     name: "Creator",
-    price: 29,
-    priceLabel: "$29",
+    price: 129900,
+    priceLabel: "$129.900",
     period: "/mes",
     credits: 500_000,
     creditsLabel: "500K créditos",
@@ -62,19 +62,19 @@ const PLANS = [
     features: [
       { label: "500,000 créditos/mes", highlight: true },
       { label: "Modelos ECO + PRO", highlight: true },
-      { label: "Claude Sonnet 4.6 · GPT-4o · Gemini Pro", highlight: false },
+      { label: "Claude Sonnet 3.5 · GPT-4o · Gemini Pro", highlight: false },
       { label: "Genesis IDE + GitHub push", highlight: true },
       { label: "Brand Voice personalizado", highlight: true },
       { label: "Soporte prioritario", highlight: false },
     ],
     lockedFeatures: ["Modelos ULTRA (Claude Opus)"],
-    psychNote: "$29 = el café de un mes en Starbucks × 4",
+    psychNote: "Inversión 100% deducible de impuestos",
   },
   {
     key: "agency" as const,
     name: "Agency",
-    price: 79,
-    priceLabel: "$79",
+    price: 299900,
+    priceLabel: "$299.900",
     period: "/mes",
     credits: 2_000_000,
     creditsLabel: "2M créditos",
@@ -89,13 +89,13 @@ const PLANS = [
     features: [
       { label: "2,000,000 créditos/mes", highlight: true },
       { label: "TODOS los modelos (ECO + PRO + ULTRA)", highlight: true },
-      { label: "Claude Opus 4.6 · GPT-4o · Mistral Large", highlight: false },
+      { label: "Claude Opus 3.5 · GPT-4o · Mistral Large", highlight: false },
       { label: "Genesis IDE + proyectos ilimitados", highlight: true },
       { label: "Soporte prioritario 24/7", highlight: true },
       { label: "API access (próximamente)", highlight: false },
     ],
     lockedFeatures: [],
-    psychNote: "Las agencias facturan $79 en 15 minutos de trabajo con IA.",
+    psychNote: "Las agencias facturan el cuádruple en 15 minutos de trabajo con IA.",
   },
 ];
 
@@ -297,13 +297,13 @@ export default function Pricing() {
 
                     {/* Price */}
                     <div className="mb-2">
-                      <span className="text-5xl font-black text-white font-display tracking-tight">${displayPrice}</span>
-                      <span className="text-white/30 text-sm ml-1">/mes</span>
+                      <span className="text-5xl md:text-6xl font-black text-white font-display tracking-tight">${displayPrice.toLocaleString('es-CO')}</span>
+                      <span className="text-white/30 text-sm ml-1">COP/mes</span>
                       {annual && (
                         <div className="mt-1 flex items-center gap-2">
-                          <span className="text-[11px] text-white/25 line-through">${plan.price}/mes</span>
+                          <span className="text-[11px] text-white/25 line-through">${plan.price.toLocaleString('es-CO')}</span>
                           <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/25">
-                            ${annualTotal}/año
+                            ${annualTotal?.toLocaleString('es-CO')} / año
                           </span>
                         </div>
                       )}

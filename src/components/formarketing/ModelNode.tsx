@@ -270,7 +270,8 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
         </div>
       )}
 
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#16161b] hover:scale-125 transition-transform" />
+      <Handle type="target" position={Position.Left} id="any-in" className="!w-3 !h-3 !-left-1.5 !bg-white !border-2 !border-[var(--node-bg)] hover:scale-125 transition-transform" />
+      <Handle type="source" position={Position.Right} id="any-out" className="!w-3 !h-3 !-right-1.5 !bg-white !border-2 !border-[var(--node-bg)] hover:scale-125 transition-transform" />
       <NodeNextAction nodeId={id} />
     </div>
   );

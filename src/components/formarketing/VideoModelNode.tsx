@@ -268,10 +268,10 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
         </div>
       )}
 
-    <Handle type="target" position={Position.Left} id="any-in" style={{ top: '40%' }} className="!w-2 !h-2 !-left-1 !bg-white/40 !border-2 !border-[#16161b] hover:scale-125 transition-transform" />
-    <Handle type="target" position={Position.Left} id="image-in" style={{ top: '60%' }} className="!w-3 !h-3 !-left-1.5 !bg-[#a78bfa] !border-2 !border-[#16161b] hover:scale-125 transition-transform" />
+    <Handle type="target" position={Position.Left} id="any-in" style={{ top: '40%' }} className="!w-3 !h-3 !-left-1.5 !bg-white/40 !border-2 !border-[var(--node-bg)] hover:scale-125 transition-transform" />
+    <Handle type="target" position={Position.Left} id="image-in" style={{ top: '60%' }} className="!w-3 !h-3 !-left-1.5 !bg-[#a78bfa] !border-2 !border-[var(--node-bg)] hover:scale-125 transition-transform" />
     <div className="absolute left-4 text-[8px] text-[#a78bfa]/60 font-bold" style={{ top: 'calc(60% - 6px)', transform: 'translateY(-50%)' }}>img→vid</div>
-    <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-white !border-2 !border-[#16161b] hover:scale-125 transition-transform" />
+    <Handle type="source" position={Position.Right} className="!w-3 !h-3 !-right-1.5 !bg-white !border-2 !border-[var(--node-bg)] hover:scale-125 transition-transform" />
     </div>
   );
 };

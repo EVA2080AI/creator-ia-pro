@@ -813,7 +813,8 @@ export function StudioChat({
       if (result.isChatOnly) {
         const chatFiles = extractChatCodeFiles(result.explanation);
         if (chatFiles && Object.keys(chatFiles).length > 0) {
-          onCodeGenerated(chatFiles);
+          const mergedFiles = { ...projectFiles, ...chatFiles };
+          onCodeGenerated(mergedFiles);
         }
         assistantMsg = {
           id: crypto.randomUUID(),
@@ -828,7 +829,8 @@ export function StudioChat({
           { role: 'assistant' as const, content: result.explanation },
         ].slice(-16));
       } else if (result.files && Object.keys(result.files).length > 0) {
-        onCodeGenerated(result.files);
+        const mergedFiles = { ...projectFiles, ...result.files };
+        onCodeGenerated(mergedFiles);
         const fileList = Object.keys(result.files).map((f) => `• \`${f}\``).join('\n');
         assistantMsg = {
           id: crypto.randomUUID(),
