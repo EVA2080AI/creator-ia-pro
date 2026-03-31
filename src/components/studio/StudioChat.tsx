@@ -798,7 +798,7 @@ export function StudioChat({
 
     try {
       // 1. Spend credits
-      await aiService.spendCredits(cost, intent, modelId, projectId);
+      await aiService.spendCredits(cost, intent, modelId, null);
 
       // 2. Generate code/chat
       const result = await generateCode(text);
