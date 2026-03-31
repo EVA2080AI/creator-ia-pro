@@ -120,7 +120,7 @@ const Spaces = () => {
 
   if (authLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#050506]">
+      <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -135,7 +135,7 @@ const Spaces = () => {
         <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-white/[0.05] bg-[#222228] py-4 px-3 gap-1 overflow-y-auto">
           <button
             onClick={handleOpenCreate}
-            className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-white text-black text-[12px] font-bold hover:bg-white/90 transition-all active:scale-95 shadow-lg mb-3"
+            className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-[12px] font-black hover:bg-primary/90 transition-all active:scale-95 shadow-xl shadow-white/10 mb-3 uppercase tracking-widest"
           >
             <Plus className="h-4 w-4 shrink-0" />
             Nuevo Space
@@ -351,7 +351,7 @@ const Spaces = () => {
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteTargetId} onOpenChange={(o) => !o && setDeleteTargetId(null)}>
-        <DialogContent className="bg-[#0a0a0b]/95 backdrop-blur-3xl border-white/10 sm:max-w-[380px] rounded-[3rem] p-10 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+        <DialogContent className="sm:max-w-[380px]">
           <DialogHeader>
             <div className="h-14 w-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6">
               <Trash2 className="h-7 w-7 text-rose-400" />
@@ -378,7 +378,7 @@ const Spaces = () => {
 
       {/* Space Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-[#0a0a0b]/95 backdrop-blur-3xl border-white/10 sm:max-w-[480px] rounded-[3rem] p-12 shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+        <DialogContent className="sm:max-w-[480px] p-12">
           <DialogHeader>
             <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
               <LayoutGrid className="h-7 w-7 text-primary" />
@@ -427,7 +427,7 @@ const Spaces = () => {
             <button
               onClick={handleSave}
               disabled={creating || !formData.name}
-              className="flex-[1.5] flex items-center justify-center gap-3 px-10 py-4 bg-white text-black rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-white/90 active:scale-95 transition-all shadow-[0_20px_40px_rgba(255,255,255,0.1)] disabled:opacity-50 disabled:cursor-not-allowed font-display"
+              className="flex-[1.5] flex items-center justify-center gap-3 px-10 py-4 bg-primary text-primary-foreground rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary/90 active:scale-95 transition-all shadow-xl shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed font-display"
             >
               {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               {editingSpace ? "Guardar Cambios" : "Crear Space"}

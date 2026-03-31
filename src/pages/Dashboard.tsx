@@ -134,7 +134,7 @@ const Dashboard = () => {
 
   if (authLoading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center" style={{ background: '#16161b' }}>
+      <div className="h-screen w-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 rounded-xl border-2 border-white/10 border-t-primary animate-spin" />
           <p className="text-[11px] text-white/30">Cargando...</p>
@@ -220,10 +220,10 @@ const Dashboard = () => {
               ) : (
                 <button
                   onClick={() => navigate("/pricing")}
-                  className="px-5 py-2 bg-primary text-white rounded-xl flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
+                  className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95 shadow-xl shadow-white/10"
                 >
                   <Zap className="w-3.5 h-3.5" />
-                  Upgrade
+                  Upgrade Pro
                 </button>
               )}
             </div>
@@ -234,7 +234,7 @@ const Dashboard = () => {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="group flex items-center gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-white/5 hover:border-white/10 transition-all duration-300"
+                className="group flex items-center gap-3 p-4 bg-card border border-white/5 hover:border-white/10 transition-all duration-300 rounded-2xl"
               >
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/5 shrink-0 transition-all group-hover:scale-110 ${stat.color}`}>
                   <stat.icon className="w-4 h-4" />
@@ -416,13 +416,13 @@ const Dashboard = () => {
 
       {/* Create Space Dialog */}
       <Dialog open={isCreatingSpace} onOpenChange={setIsCreatingSpace}>
-        <DialogContent className="border border-white/[0.08] rounded-2xl text-white max-w-md p-8" style={{ background: '#1c1c22' }}>
+        <DialogContent className="max-w-md p-8">
           <DialogHeader className="mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-primary/20 text-primary flex items-center justify-center mb-4 border border-primary/20">
+            <div className="w-12 h-12 rounded-2xl bg-white/5 text-primary flex items-center justify-center mb-4 border border-white/10">
               <Rocket className="w-6 h-6" />
             </div>
             <DialogTitle className="text-2xl font-bold text-white tracking-tight font-display">Nuevo espacio</DialogTitle>
-            <DialogDescription className="text-white/30 text-sm font-medium leading-relaxed mt-2">
+            <DialogDescription className="text-white/40 text-sm font-medium leading-relaxed mt-2">
               Organiza tus proyectos creativos y campañas en un espacio independiente.
             </DialogDescription>
           </DialogHeader>
@@ -450,12 +450,12 @@ const Dashboard = () => {
             </div>
           </div>
           <DialogFooter className="gap-3 mt-6">
-            <button onClick={() => setIsCreatingSpace(false)} className="px-5 py-2.5 rounded-xl border border-white/5 text-xs font-bold uppercase tracking-widest text-white/30 hover:text-white transition-all flex-1 font-display">
+            <button onClick={() => setIsCreatingSpace(false)} className="px-5 py-2.5 rounded-xl border border-white/5 text-xs font-bold uppercase tracking-widest text-white/30 hover:text-white transition-all flex-1">
               Cancelar
             </button>
-            <button onClick={handleCreateSpace} className="flex-[1.5] px-6 py-2.5 bg-white text-black rounded-xl flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest hover:bg-white/90 transition-all active:scale-95 font-display">
+            <button onClick={handleCreateSpace} className="flex-[1.5] px-6 py-2.5 bg-primary text-primary-foreground rounded-xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95 shadow-xl shadow-white/5">
               <Plus className="w-4 h-4" />
-              Crear
+              Crear Space
             </button>
           </DialogFooter>
         </DialogContent>

@@ -11,44 +11,44 @@
 
 @layer base {
   :root {
-    /* ── Lovable Design System (Gris elegante, Azul vibrante) ── */
-    --background:  240 6% 10%;      /* Gris profundo, bajo contraste, elegante */
-    --foreground:  0 0% 100%;       /* Blanco puro */
-    --card:        240 6% 12%;      /* Tarjetas ligeramente destacadas */
-    --card-hover:  240 6% 15%;
+    /* ── Onyx Design System (Premium IDE Aesthetic) ── */
+    --background:  240 10% 4%;      /* #0b0c10 - Deep Onyx */
+    --foreground:  0 0% 100%;       /* Pure White */
+    --card:        0 0% 100% / 0.03; /* Glassmorphism Base */
+    --card-hover:  0 0% 100% / 0.06;
     --card-foreground: 0 0% 100%;
-    --popover:     240 6% 12%;
+    --popover:     240 10% 5%;      /* Slightly lighter for elevation */
     --popover-foreground: 0 0% 100%;
-    --primary:     217 91% 60%;     /* Azul vibrante moderno */
-    --primary-foreground: 0 0% 100%;
-    --secondary:   240 6% 15%;     /* Tonos grises intermedios */
+    --primary:     0 0% 100%;       /* Primary buttons are now White */
+    --primary-foreground: 240 10% 4%; /* Black text on Primary */
+    --secondary:   0 0% 100% / 0.05;
     --secondary-foreground: 0 0% 100%;
-    --muted:       240 6% 15%;
-    --muted-foreground: 240 5% 65%;
-    --accent:      217 91% 60%;     /* Acentos en el mismo azul primario */
+    --muted:       0 0% 100% / 0.05;
+    --muted-foreground: 240 5% 50%;
+    --accent:      217 91% 60%;     /* Electric Blue for active states & focus */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border:      240 6% 18%;     /* Bordes integrados en el gris */
-    --input:       240 6% 18%;
+    --border:      0 0% 100% / 0.08; /* Glass Boundary */
+    --input:       0 0% 100% / 0.08;
     --ring:        217 91% 60%;
-    --radius:      0.85rem;         /* Radios redondeados premium */
+    --radius:      1rem;            /* Soft high-end corners */
 
-    /* Sidebar - Estilo Moderno */
-    --sidebar-background: 240 6% 8%;
-    --sidebar-foreground: 240 5% 70%;
+    /* Sidebar - Full Onyx */
+    --sidebar-background: 240 10% 2%;
+    --sidebar-foreground: 240 5% 60%;
     --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 6% 14%;
+    --sidebar-accent: 0 0% 100% / 0.05;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 240 6% 12%;
+    --sidebar-border: 0 0% 100% / 0.05;
     --sidebar-ring: 217 91% 60%;
 
-    /* Canvas / IDE - Precision */
-    --canvas: 240 6% 10%;
-    --node-bg: 240 6% 13%;
-    --node-border: 240 6% 22%;
-    --node-glow: 217 91% 60% / 0.15; 
+    /* IDE / Canvas - Precision */
+    --canvas: 240 10% 4%;
+    --node-bg: 0 0% 100% / 0.04;
+    --node-border: 0 0% 100% / 0.12;
+    --node-glow: 217 91% 60% / 0.2; 
     --success: 142 71% 45%;         
     --warning: 38 92% 50%;          
     --gold: 45 93% 47%;             

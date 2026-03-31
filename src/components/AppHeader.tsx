@@ -46,8 +46,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
     (path !== "/dashboard" && location.pathname.startsWith(path));
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[100] h-[56px] flex items-center"
-      style={{ background: 'rgba(18,18,22,0.96)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+    <header className="fixed top-0 left-0 right-0 z-[100] h-[56px] flex items-center border-b border-white/5 bg-background/80 backdrop-blur-xl">
       <div className="w-full max-w-[1400px] mx-auto px-5 flex items-center gap-5">
 
         {/* Logo */}
@@ -65,12 +64,11 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                 key={item.path}
                 onClick={() => handleNav(item.path)}
                 className={cn(
-                  "relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all duration-150",
+                  "relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all duration-150 active:scale-95",
                   active
-                    ? "text-white"
-                    : "text-white/40 hover:text-white/70"
+                    ? "text-white bg-white/10 border border-white/10 shadow-lg shadow-white/5"
+                    : "text-white/40 hover:text-white/70 hover:bg-white/5"
                 )}
-                style={active ? { background: 'rgba(139,92,246,0.12)', color: 'white' } : undefined}
               >
                 <item.icon className="w-3.5 h-3.5 shrink-0" />
                 {item.label}
@@ -138,8 +136,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
             {userMenuOpen && (
               <>
                 <div className="fixed inset-0 z-[150]" onClick={() => setUserMenuOpen(false)} />
-                <div className="absolute right-0 top-full mt-2 w-52 rounded-xl overflow-hidden z-[200]"
-                  style={{ background: '#1e1e26', border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 12px 32px rgba(0,0,0,0.5)' }}>
+                <div className="absolute right-0 top-full mt-2 w-52 rounded-2xl overflow-hidden z-[200] bg-popover/95 backdrop-blur-2xl border border-white/10 shadow-2xl shadow-black/80">
                   <div className="px-3 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                     <p className="text-[13px] font-semibold text-white truncate">{profile?.display_name ?? "Mi Perfil"}</p>
                     <p className="text-[11px] text-white/30 truncate mt-0.5">{profile?.email ?? ""}</p>
