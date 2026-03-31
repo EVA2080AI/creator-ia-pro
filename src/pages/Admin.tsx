@@ -620,11 +620,13 @@ const Admin = () => {
     { name: "deploy-hook",       desc: "Redeployment automático (Vercel)",    icon: Globe,    color: "#60A5FA" },
   ];
 
+  if (authLoading || adminLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-white/20" />
       </div>
     );
+  }
 
   // ── Not logged in ──────────────────────────────────────────────────────────
   if (!user) {

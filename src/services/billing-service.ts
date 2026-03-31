@@ -87,7 +87,7 @@ export const CREDIT_PLANS: CreditPlan[] = [
 export const stripeService = {
   async createCheckout() { throw new Error("Deprecated in favor of PayU"); },
   async buyCredits() { throw new Error("Deprecated in favor of PayU"); },
-  async checkSubscription() { throw new Error("Deprecated in favor of PayU"); },
+  async checkSubscription() { return null; },
   async openPortal() { throw new Error("Deprecated in favor of PayU"); },
   async purchasePlan() { throw new Error("Deprecated in favor of PayU"); }
 };
