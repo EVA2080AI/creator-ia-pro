@@ -211,6 +211,8 @@ export default function Studio() {
         onBack={() => navigate('/studio')}
         onGithubSync={() => toast.info('Sincronización con GitHub próximamente')}
         onPublish={() => toast.info('Publicación próximamente')}
+        credits={profile?.credits_balance ?? 0}
+        userProfile={profile}
       />
 
       <main className="flex flex-1 overflow-hidden">
