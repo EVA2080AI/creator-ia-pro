@@ -38,18 +38,18 @@ interface StudioTool {
 
 // ─── Tool definitions ─────────────────────────────────────────────────────────
 const TOOLS: StudioTool[] = [
-  { id: 'generate',   name: 'Crear imagen',       desc: 'Texto → imagen con IA',         icon: Image,       credits: 2, category: 'image', needsUpload: false, placeholder: 'Un gato astronauta en Marte al atardecer, estilo fotorrealista…', color: '#a855f7' },
-  { id: 'logo',       name: 'Diseñar logo',        desc: 'Identidades de marca',          icon: PenTool,     credits: 3, category: 'image', needsUpload: false, placeholder: 'Logo minimalista para una cafetería llamada Origen, tonos cálidos…', color: '#00c2ff' },
-  { id: 'enhance',    name: 'Mejorar imagen',      desc: 'Optimiza luz y detalle',        icon: Wand2,       credits: 2, category: 'image', needsUpload: true,  color: '#a855f7' },
-  { id: 'upscale',    name: 'Aumentar resolución', desc: 'Escala hasta 4K',               icon: ZoomIn,      credits: 3, category: 'image', needsUpload: true,  color: '#00c2ff' },
-  { id: 'background', name: 'Quitar fondo',        desc: 'Extracción perfecta',           icon: ImagePlus,   credits: 1, category: 'image', needsUpload: true,  color: '#34d399' },
-  { id: 'restore',    name: 'Restaurar foto',      desc: 'Fotos antiguas o dañadas',      icon: RotateCcw,   credits: 3, category: 'image', needsUpload: true,  color: '#f59e0b' },
-  { id: 'style',      name: 'Transferir estilo',   desc: 'Aplica estilo entre imágenes',  icon: Palette,     credits: 2, category: 'image', needsUpload: true,  color: '#a855f7' },
-  { id: 'product',    name: 'Mockup producto',     desc: 'Renders profesionales',         icon: ShoppingBag, credits: 3, category: 'image', needsUpload: true,  color: '#f59e0b' },
-  { id: 'copywriter', name: 'Copywriting',         desc: 'Textos persuasivos',            icon: Megaphone,   credits: 1, category: 'text',  needsUpload: false, placeholder: 'Escribe un mensaje para vender zapatos deportivos en Instagram…', color: '#a855f7' },
-  { id: 'social',     name: 'Redes sociales',      desc: 'Posts e ideas virales',         icon: Hash,        credits: 2, category: 'text',  needsUpload: false, placeholder: '5 ideas de contenido para Instagram de una marca de ropa sostenible…', color: '#f43f5e' },
-  { id: 'blog',       name: 'Artículo SEO',        desc: 'Contenido optimizado',          icon: FileText,    credits: 1, category: 'text',  needsUpload: false, placeholder: 'Artículo sobre los beneficios del café de especialidad…', color: '#34d399' },
-  { id: 'ads',        name: 'Anuncios',            desc: 'Google, Meta y más',            icon: Megaphone,   credits: 1, category: 'text',  needsUpload: false, placeholder: 'Anuncio de Google Ads para consultoría de marketing digital…', color: '#ffffff' },
+  { id: 'generate',   name: 'Crear imagen',       desc: 'Texto → imagen con IA',         icon: Image,       credits: 2, category: 'image', needsUpload: false, placeholder: 'Un gato astronauta en Marte al atardecer, estilo fotorrealista…', color: '#3b82f6' }, // Blue-500
+  { id: 'logo',       name: 'Diseñar logo',        desc: 'Identidades de marca',          icon: PenTool,     credits: 3, category: 'image', needsUpload: false, placeholder: 'Logo minimalista para una cafetería llamada Origen, tonos cálidos…', color: '#6366f1' }, // Indigo-500
+  { id: 'enhance',    name: 'Mejorar imagen',      desc: 'Optimiza luz y detalle',        icon: Wand2,       credits: 2, category: 'image', needsUpload: true,  color: '#2563eb' }, // Blue-600
+  { id: 'upscale',    name: 'Aumentar resolución', desc: 'Escala hasta 4K',               icon: ZoomIn,      credits: 3, category: 'image', needsUpload: true,  color: '#4f46e5' }, // Indigo-600
+  { id: 'background', name: 'Quitar fondo',        desc: 'Extracción perfecta',           icon: ImagePlus,   credits: 1, category: 'image', needsUpload: true,  color: '#475569' }, // Slate-600
+  { id: 'restore',    name: 'Restaurar foto',      desc: 'Fotos antiguas o dañadas',      icon: RotateCcw,   credits: 3, category: 'image', needsUpload: true,  color: '#64748b' }, // Slate-500
+  { id: 'style',      name: 'Transferir estilo',   desc: 'Aplica estilo entre imágenes',  icon: Palette,     credits: 2, category: 'image', needsUpload: true,  color: '#7c3aed' }, // Violet-600
+  { id: 'product',    name: 'Mockup producto',     desc: 'Renders profesionales',         icon: ShoppingBag, credits: 3, category: 'image', needsUpload: true,  color: '#8b5cf6' }, // Violet-500
+  { id: 'copywriter', name: 'Copywriting',         desc: 'Textos persuasivos',            icon: Megaphone,   credits: 1, category: 'text',  needsUpload: false, placeholder: 'Escribe un mensaje para vender zapatos deportivos en Instagram…', color: '#3b82f6' },
+  { id: 'social',     name: 'Redes sociales',      desc: 'Posts e ideas virales',         icon: Hash,        credits: 2, category: 'text',  needsUpload: false, placeholder: '5 ideas de contenido para Instagram de una marca de ropa sostenible…', color: '#6366f1' },
+  { id: 'blog',       name: 'Artículo SEO',        desc: 'Contenido optimizado',          icon: FileText,    credits: 1, category: 'text',  needsUpload: false, placeholder: 'Artículo sobre los beneficios del café de especialidad…', color: '#475569' },
+  { id: 'ads',        name: 'Anuncios',            desc: 'Google, Meta y más',            icon: Megaphone,   credits: 1, category: 'text',  needsUpload: false, placeholder: 'Anuncio de Google Ads para consultoría de marketing digital…', color: '#2563eb' },
 ];
 
 const IMAGE_MODELS = [
@@ -227,52 +227,60 @@ function ToolWorkspace({
     if (!user) return;
     if (tool.needsUpload && !imagePreview) { toast.error('Sube una imagen primero'); return; }
     if (!tool.needsUpload && !prompt.trim()) { toast.error('Escribe un prompt'); return; }
-    const credits = profile?.credits_balance ?? 0;
-    if (credits < tool.credits) {
-      toast.error(`Necesitas ${tool.credits} créditos. Tienes ${credits}.`);
-      navigate('/pricing');
-      return;
-    }
+
+    const cost = tool.credits;
+    const modelId = activeModel;
+    const intent = 'codegen'; // Default for studio actions
 
     setResultImage(null);
     setResultText('');
     setSaved(false);
 
-    if (tool.category === 'text') {
-      setStreaming(true);
-      try {
-        await (supabase.rpc as any)('spend_credits', { _amount: tool.credits, _action: tool.id, _model: activeModel, _node_id: null });
-      } catch {
-        setStreaming(false);
-        toast.error('Créditos insuficientes');
+    try {
+      // 1. Centralized credit deduction
+      await aiService.spendCredits(cost, intent, modelId);
+
+      if (tool.category === 'text') {
+        setStreaming(true);
+        let full = '';
+        try {
+          await aiService.streamTextGen(tool.id, prompt, activeModel, profile, (chunk: string) => {
+            full += chunk;
+            setResultText(full);
+          });
+        } catch (err: any) {
+          await aiService.refundCredits(cost);
+          toast.error(err.message || 'Error generando texto');
+        } finally {
+          setStreaming(false);
+        }
         return;
       }
-      let full = '';
-      try {
-        await aiService.streamTextGen(tool.id, prompt, activeModel, profile, (chunk: string) => {
-          full += chunk;
-          setResultText(full);
-        });
-      } catch {
-        if (!full) { toast.error('Error generando texto'); }
-      } finally { setStreaming(false); }
-      return;
-    }
 
-    setProcessing(true);
-    try {
-      const data = await aiService.processAction({
-        action: 'image', tool: tool.id, prompt, model: activeModel, image: imagePreview || undefined,
-      });
-      if (data?.url) { 
-        setResultImage(data.url); 
-        setImageLoading(true);
-        toast.success('¡Generación exitosa, insertando...'); 
+      // Image generation
+      setProcessing(true);
+      try {
+        const data = await aiService.processAction({
+          action: 'image', tool: tool.id, prompt, model: activeModel, image: imagePreview || undefined,
+        });
+        if (data?.url) { 
+          setResultImage(data.url); 
+          setImageLoading(true);
+          toast.success('¡Generación exitosa!'); 
+        } else {
+          throw new Error('Sin resultado');
+        }
+      } catch (err: any) {
+        await aiService.refundCredits(cost);
+        toast.error(err?.message || 'Error al generar imagen');
+      } finally {
+        setProcessing(false);
       }
-      else throw new Error('Sin resultado');
+
     } catch (err: any) {
-      toast.error(err?.message || 'Error al generar');
-    } finally { setProcessing(false); }
+      console.error("[Studio] Generation failed:", err);
+      // aiService.spendCredits already handles toast and navigation for balance issues
+    }
   }, [user, tool, imagePreview, prompt, profile, activeModel, navigate]);
 
   const handleSave = async () => {
