@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 
 // Credit caps per plan tier (for progress bar %)
 const TIER_CAPS: Record<string, number> = {
-  free:      10,
+  free:      5,
   starter:   100_000,
   creator:   500_000,
   agency:    2_000_000,

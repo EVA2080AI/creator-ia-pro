@@ -13,7 +13,7 @@ import {
   Plus, Minus, RotateCcw, History, ChevronDown, ChevronUp,
   TrendingUp, UserCheck, Star, Package, BarChart2, Activity,
   Code2, Image, Video, FileText, Terminal, CreditCard, Globe,
-  AlertTriangle, CheckCircle2, DollarSign, Users2, Layers,
+  AlertTriangle, CheckCircle2, DollarSign, Users2, Layers, Rocket,
 } from "lucide-react";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -38,11 +38,11 @@ interface Transaction {
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const TIERS: Record<string, { label: string; color: string; icon: typeof Zap }> = {
+const TIERS: Record<string, { label: string; color: string; icon: any }> = {
   free:      { label: "Free",       color: "#6B7280", icon: Zap },
-  starter:   { label: "Starter",    color: "var(--brand)", icon: Package },
-  creator:   { label: "Creator",    color: "#A855F7", icon: Star },
-  agency:    { label: "Agency",     color: "#F59E0B", icon: Building2 },
+  starter:   { label: "Starter",    color: "#4ADE80", icon: Zap },
+  creator:   { label: "Creator",    color: "#A855F7", icon: Rocket },
+  agency:    { label: "Agency",     color: "#F59E0B", icon: Crown },
   educacion: { label: "Educación",  color: "#60A5FA", icon: GraduationCap },
   pro:       { label: "Pro",        color: "#EC4899", icon: Crown },
   business:  { label: "Business",   color: "#F59E0B", icon: Building2 },
