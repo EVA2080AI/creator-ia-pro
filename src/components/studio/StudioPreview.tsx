@@ -204,7 +204,7 @@ function toSandpackFiles(
     }
   }
 
-  // High-fidelity Figma Extractor Bridge (Inlined for reliability)
+  // High-fidelity Figma Extractor Bridge (Pro Version)
   const figmaBridgeCode = `(function() {
     window.addEventListener('message', async (e) => {
       if (e.data.type === 'FIGMA_EXTRACT') {
@@ -220,9 +220,9 @@ function toSandpackFiles(
 
     function rgbToFigma(rgb) {
       if (!rgb || rgb === 'transparent' || rgb === 'rgba(0, 0, 0, 0)') return null;
-      const m = rgb.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+      const m = rgb.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)(?:,\\s*([\\d.]+))?\\)/);
       if(!m) return null;
-      return { r: m[1]/255, g: m[2]/255, b: m[3]/255 };
+      return { r: m[1]/255, g: m[2]/255, b: m[3]/255, a: m[4] ? parseFloat(m[4]) : 1 };
     }
 
     function extractNode(el) {
@@ -235,30 +235,68 @@ function toSandpackFiles(
         const rect = range.getBoundingClientRect();
         return {
           type: 'TEXT',
-          name: text.substring(0, 20),
+          name: text.substring(0, 30),
           characters: text,
           x: rect.x, y: rect.y, width: rect.width, height: rect.height,
           fontSize: parseInt(parentStyle.fontSize),
           fontFamily: parentStyle.fontFamily,
           fontWeight: parentStyle.fontWeight,
-          fills: [{ type: 'SOLID', color: rgbToFigma(parentStyle.color) || { r: 0, g: 0, b: 0 } }]
+          lineHeight: { value: parseInt(parentStyle.lineHeight) || 0, unit: 'PIXELS' },
+          letterSpacing: { value: parseFloat(parentStyle.letterSpacing) || 0, unit: 'PIXELS' },
+          fills: [{ type: 'SOLID', color: rgbToFigma(parentStyle.color) || { r: 0, g: 0, b: 0 }, opacity: rgbToFigma(parentStyle.color)?.a ?? 1 }]
         };
       }
+
       if (el.nodeType !== 1) return null;
       const style = window.getComputedStyle(el);
-      if (style.display === 'none') return null;
+      if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return null;
+      
       const rect = el.getBoundingClientRect();
       const node = {
         type: 'FRAME',
         name: el.id || el.className || el.tagName,
         x: rect.x, y: rect.y, width: rect.width, height: rect.height,
         fills: [],
+        strokes: [],
+        effects: [],
         cornerRadius: parseInt(style.borderRadius) || 0,
         children: []
       };
+
+      // Fills & Images
       const bgColor = rgbToFigma(style.backgroundColor);
-      if (bgColor) node.fills.push({ type: 'SOLID', color: bgColor });
-      if (style.display === 'flex') {
+      if (bgColor) node.fills.push({ type: 'SOLID', color: bgColor, opacity: bgColor.a });
+      
+      if (el.tagName === 'IMG' && el.src) {
+        node.fills.push({ type: 'IMAGE', scaleMode: 'FILL', imageHash: el.src });
+      }
+
+      // Borders
+      if (parseInt(style.borderWidth) > 0) {
+        const borderColor = rgbToFigma(style.borderColor);
+        if (borderColor) {
+          node.strokes.push({ type: 'SOLID', color: borderColor, opacity: borderColor.a });
+          node.strokeWeight = parseInt(style.borderWidth);
+        }
+      }
+
+      // Shadows
+      if (style.boxShadow && style.boxShadow !== 'none') {
+        const m = style.boxShadow.match(/rgba?\\([^)]+\\)\\s+(-?\\d+)px\\s+(-?\\d+)px\\s+(-?\\d+)px\\s+(-?\\d+)px/);
+        if (m) {
+          node.effects.push({
+            type: 'DROP_SHADOW',
+            color: rgbToFigma(m[0].match(/rgba?\\([^)]+\\)/)[0]),
+            offset: { x: parseInt(m[2]), y: parseInt(m[3]) },
+            radius: parseInt(m[4]),
+            spread: parseInt(m[5]) || 0,
+            visible: true
+          });
+        }
+      }
+
+      const layoutProps = ['flex', 'grid'].includes(style.display);
+      if (layoutProps) {
         node.layoutMode = style.flexDirection === 'column' ? 'VERTICAL' : 'HORIZONTAL';
         node.itemSpacing = parseInt(style.gap) || 0;
         node.paddingTop = parseInt(style.paddingTop) || 0;
@@ -269,6 +307,7 @@ function toSandpackFiles(
         node.primaryAxisAlignItems = alignMap[style.justifyContent] || 'MIN';
         node.counterAxisAlignItems = alignMap[style.alignItems] || 'MIN';
       }
+
       Array.from(el.childNodes).forEach(child => {
         try {
           const extracted = extractNode(child);
