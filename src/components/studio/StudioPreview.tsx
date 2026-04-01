@@ -373,7 +373,7 @@ export function StudioPreview({
   const [refreshKey, setRefreshKey] = useState(0);
   const [zoom, setZoom]             = useState(100);
   const [isBridgeReady, setIsBridgeReady] = useState(false);
-  const figmaTimeoutRef = useMemo(() => ({ current: null as any }), []);
+  const figmaTimeoutRef = useMemo(() => ({ current: null as ReturnType<typeof setTimeout> | null }), []);
 
   const sandpackFiles = useMemo(() => toSandpackFiles(files, supabaseConfig), [files, supabaseConfig]);
   

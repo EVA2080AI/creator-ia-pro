@@ -83,11 +83,21 @@ interface WelcomeScreenProps {
   isListening: boolean;
 }
 
+// Plan credit limits for bar calculation
+const PLAN_CREDITS: Record<string, number> = { free: 5, starter: 500, creator: 1200, pymes: 4000 };
+
 function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelectProject, displayName, onOpenSearch, onMic, isListening }: WelcomeScreenProps) {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [activeTab, setActiveTab] = useState<WelcomeTab>('projects');
   const [search, setSearch] = useState('');
+  const textareaRef = useState<HTMLTextAreaElement | null>(null);
+
+  const handleTextareaInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const t = e.currentTarget;
+    t.style.height = 'auto';
+    t.style.height = Math.min(t.scrollHeight, 200) + 'px';
+  };
 
   const handleSubmit = (val?: string) => {
     const text = (val ?? input).trim();
@@ -130,21 +140,40 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
           </button>
         </div>
 
+        {/* Search projects */}
+        <div className="px-3 py-2 border-b border-white/[0.05]">
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Filtrar proyectos..."
+            className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-1.5 text-[11px] text-white/60 placeholder:text-white/20 outline-none focus:border-white/[0.12] focus:bg-white/[0.06] transition-all"
+          />
+        </div>
+
         {/* Projects */}
         <div className="px-4 pt-4 pb-2">
           <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mb-2">Proyectos</p>
         </div>
         <div className="px-2 flex flex-col gap-0.5">
           {[
-            { label: 'Todos',      icon: FolderOpen, count: projects.length },
-            { label: 'Favoritos',  icon: Star,       count: 0 },
-            { label: 'Creados',    icon: User,       count: projects.length },
+            { label: 'Todos',     icon: FolderOpen, count: projects.length, disabled: false },
+            { label: 'Favoritos', icon: Star,       count: 0, disabled: true },
+            { label: 'Creados',   icon: User,       count: projects.length, disabled: false },
           ].map(item => (
             <button key={item.label}
-              className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all">
+              disabled={item.disabled}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-all ${
+                item.disabled
+                  ? 'text-white/20 cursor-not-allowed'
+                  : 'text-white/40 hover:text-white hover:bg-white/[0.04]'
+              }`}>
               <item.icon className="h-3.5 w-3.5 shrink-0" />
               <span className="flex-1 text-left">{item.label}</span>
-              {item.count > 0 && <span className="text-[10px] text-white/20">{item.count}</span>}
+              {item.disabled
+                ? <span className="text-[8px] text-white/15 font-bold uppercase tracking-wider">Pronto</span>
+                : item.count > 0 && <span className="text-[10px] text-white/20">{item.count}</span>
+              }
             </button>
           ))}
         </div>
@@ -206,10 +235,12 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onInput={handleTextareaInput}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
                 placeholder="Describe qué quieres construir..."
-                className="w-full bg-transparent pl-14 pr-32 pt-6 pb-6 text-[16px] font-medium text-white placeholder:text-white/20 outline-none resize-none leading-relaxed min-h-[72px]"
+                className="w-full bg-transparent pl-14 pr-32 pt-6 pb-6 text-[16px] font-medium text-white placeholder:text-white/20 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px]"
                 rows={1}
+                style={{ overflowY: 'hidden' }}
               />
               
               <div className="absolute bottom-4 right-4 flex items-center gap-2">
@@ -263,7 +294,38 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                       <p className="text-[13px] font-bold text-white/80 group-hover:text-white truncate mt-1">{p.name}</p>
                     </button>
                   ))}
-                  {filteredProjects.length === 0 && <p className="text-[12px] text-white/20">Sin proyectos aún</p>}
+                  {filteredProjects.length === 0 && (
+                    <div className="col-span-full flex flex-col items-center gap-3 py-6">
+                      <span className="text-4xl">✨</span>
+                      <p className="text-[13px] text-white/40 text-center">Escribe un prompt arriba para crear tu primer proyecto</p>
+                    </div>
+                  )}
+                </div>
+              )}
+              {activeTab === 'recents' && (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  {[...projects]
+                    .sort((a, b) => new Date(b.updated_at ?? b.created_at ?? 0).getTime() - new Date(a.updated_at ?? a.created_at ?? 0).getTime())
+                    .slice(0, 10)
+                    .map(p => (
+                      <button key={p.id} onClick={() => onSelectProject(p)}
+                        className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all group">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
+                          <Clock className="h-4 w-4 text-primary" />
+                        </div>
+                        <p className="text-[13px] font-bold text-white/80 group-hover:text-white truncate mt-1">{p.name}</p>
+                        <p className="text-[10px] text-white/25">
+                          {new Date(p.updated_at ?? p.created_at ?? Date.now()).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                        </p>
+                      </button>
+                    ))
+                  }
+                  {projects.length === 0 && (
+                    <div className="col-span-full flex flex-col items-center gap-3 py-6">
+                      <span className="text-4xl">🕐</span>
+                      <p className="text-[13px] text-white/40">Tus proyectos recientes aparecerán aquí</p>
+                    </div>
+                  )}
                 </div>
               )}
               {activeTab === 'templates' && (
@@ -505,15 +567,26 @@ export default function Chat() {
           </div>
         </div>
         <div className="flex items-center gap-0.5 ml-4">
-          {(['code', 'preview', 'split', 'files', 'history'] as PanelView[]).map(v => (
-            <button key={v} onClick={() => setPanelView(v)} className={`flex items-center justify-center h-7 px-2.5 rounded-md text-[11px] font-bold transition-all ${panelView === v ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-white/5'}`}>
-              <span className="capitalize">{v}</span>
+          {([
+            { id: 'code',    icon: Code2,    label: 'Código'   },
+            { id: 'preview', icon: Monitor,  label: 'Preview'  },
+            { id: 'split',   icon: Columns,  label: 'Split'    },
+            { id: 'files',   icon: Files,    label: 'Files'    },
+            { id: 'history', icon: History,  label: 'History'  },
+          ] as { id: PanelView; icon: any; label: string }[]).map(({ id, icon: Icon, label }) => (
+            <button key={id} onClick={() => setPanelView(id)}
+              title={label}
+              className={`flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-bold transition-all ${panelView === id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-white/5'}`}>
+              <Icon className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline">{label}</span>
             </button>
           ))}
         </div>
         <div className="flex-1" />
         <div className="flex items-center gap-2">
-          <button onClick={() => navigate('/pricing')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all"><Zap className="h-3 w-3" /> Upgrade</button>
+          {profile?.subscription_tier !== 'pymes' && (
+            <button onClick={() => navigate('/pricing')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all"><Zap className="h-3 w-3" /> Upgrade</button>
+          )}
           <button onClick={() => setDeployOpen(!deployOpen)} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-bold bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-all">Publish</button>
           {profile?.avatar_url && <img src={profile.avatar_url} alt="" className="h-7 w-7 rounded-full border border-border/40 ml-1" />}
         </div>
@@ -526,8 +599,24 @@ export default function Chat() {
           <div className="flex-1 min-h-0"><StudioChat projectId={activeProject.id} projectFiles={projectFiles} onCodeGenerated={handleCodeGenerated} initialPrompt={pendingPrompt} onGeneratingChange={setIsGenerating} supabaseConfig={supabaseConfig} /></div>
           <div className="p-4 border-t border-border/40 shrink-0">
             <div className="p-3 bg-white/[0.02] border border-border rounded-xl">
-              <div className="flex justify-between text-[10px] font-bold mb-2 text-muted-foreground uppercase tracking-widest"><span>{credits.toLocaleString()} créditos</span><Zap className="h-3 w-3" /></div>
-              <div className="h-1 bg-border rounded-full overflow-hidden"><div className="h-full bg-primary transition-all duration-1000" style={{ width: `${Math.min(100, (credits/1000)*100)}%` }} /></div>
+              <div className="flex justify-between text-[10px] font-bold mb-2 text-muted-foreground uppercase tracking-widest">
+                <span>{credits.toLocaleString()} créditos</span>
+                <Zap className="h-3 w-3" />
+              </div>
+              {(() => {
+                const tier = profile?.subscription_tier ?? 'free';
+                const limit = PLAN_CREDITS[tier] ?? 1000;
+                const pct = Math.min(100, (credits / limit) * 100);
+                const barColor = pct < 20 ? 'hsl(var(--destructive))' : pct < 50 ? 'hsl(var(--warning))' : 'hsl(var(--primary))';
+                return (
+                  <>
+                    <div className="h-1 bg-border rounded-full overflow-hidden">
+                      <div className="h-full transition-all duration-1000" style={{ width: `${pct}%`, background: barColor }} />
+                    </div>
+                    <p className="text-[9px] text-muted-foreground/50 mt-1 capitalize">{tier} plan · {limit.toLocaleString()} límite</p>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -543,7 +632,7 @@ export default function Chat() {
             </div>
           )}
           {(panelView === 'code' || panelView === 'split') && <div className={`flex flex-col overflow-hidden ${panelView === 'split' ? 'w-[45%] border-r border-border/40' : 'flex-1'}`}><StudioCodeEditor selectedFile={selectedFile} projectFiles={projectFiles} onFilesChange={handleFilesChange} isGenerating={isGenerating} streamPreview={streamPreview} /></div>}
-          {(panelView === 'preview' || panelView === 'split') && <div className="flex flex-col overflow-hidden flex-1"><StudioPreview files={projectFiles} deviceMode={deviceMode} onDeviceModeChange={setDeviceMode} isGenerating={isGenerating} supabaseConfig={supabaseConfig} /></div>}
+          {(panelView === 'preview' || panelView === 'split') && <div className="flex flex-col overflow-hidden flex-1"><StudioPreview files={projectFiles} deviceMode={deviceMode} onDeviceModeChange={setDeviceMode} isGenerating={isGenerating} supabaseConfig={supabaseConfig} viewMode={panelView === 'code' ? 'code' : 'preview'} onToggleViewMode={(mode) => setPanelView(mode)} isSidebarCollapsed={!isChatOpen} onToggleSidebar={() => setIsChatOpen(!isChatOpen)} isFullscreen={false} onToggleFullscreen={() => {}} /></div>}
           {panelView === 'history' && (
             <div className="w-full h-full flex items-center justify-center p-8 bg-background/50">
               <div className="w-full max-w-2xl h-[80vh] bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-2xl">
