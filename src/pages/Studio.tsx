@@ -42,6 +42,8 @@ export default function Studio() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [streamChars, setStreamChars] = useState(0);
   const [streamPreview, setStreamPreview] = useState('');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // --- Project Initialization ---
   useEffect(() => {
@@ -199,25 +201,32 @@ export default function Studio() {
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden text-foreground selection:bg-primary/30">
-      {/* ── Topbar ────────────────────────────────────────────────────────── */}
-      <StudioTopbar 
-        projectName={activeProject.name}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        deviceMode={deviceMode}
-        onDeviceModeChange={(m) => setDeviceMode(m as DeviceMode)}
-        isSaving={isSaving}
-        onShare={handleShare}
-        onBack={() => navigate('/studio')}
-        onGithubSync={() => toast.info('Sincronización con GitHub próximamente')}
-        onPublish={() => toast.info('Publicación próximamente')}
-        credits={profile?.credits_balance ?? 0}
-        userProfile={profile}
-      />
+      {/* ── Topbar (Hidden in Fullscreen) ─────────────────────────────────── */}
+      {!isFullscreen && (
+        <StudioTopbar 
+          projectName={activeProject.name}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          deviceMode={deviceMode}
+          onDeviceModeChange={(m) => setDeviceMode(m as DeviceMode)}
+          isSaving={isSaving}
+          onShare={handleShare}
+          onBack={() => navigate('/studio')}
+          onGithubSync={() => toast.info('Sincronización con GitHub próximamente')}
+          onPublish={() => toast.info('Publicación próximamente')}
+          credits={profile?.credits_balance ?? 0}
+          userProfile={profile}
+        />
+      )}
 
       <main className="flex flex-1 overflow-hidden">
         {/* ── Left Sidebar: Chat (Genesis) ── */}
-        <div className="w-[410px] shrink-0 border-r border-border bg-background flex flex-col relative z-20">
+        <div 
+          className={cn(
+            "shrink-0 border-r border-border bg-background flex flex-col relative z-20 transition-all duration-300",
+            isSidebarCollapsed ? "w-0 opacity-0 -translate-x-full" : "w-[410px] opacity-100 translate-x-0"
+          )}
+        >
           <StudioChat 
             projectId={activeProject.id} 
             projectFiles={activeProject.files}
@@ -233,7 +242,7 @@ export default function Studio() {
         {/* ── Main Workspace: Preview, Code or Tools ──────────────────────────────── */}
         <div className="flex-1 overflow-hidden bg-background/20 relative">
           {viewMode === 'preview' ? (
-            <div className="h-full w-full flex flex-col items-center justify-center p-4">
+            <div className="h-full w-full flex flex-col items-center justify-center">
               <div className={cn(
                 "h-full w-full transition-all duration-500 ease-in-out flex items-center justify-center",
                 deviceMode === 'mobile' ? "max-w-[375px]" : deviceMode === 'tablet' ? "max-w-[768px]" : "max-w-full"
@@ -243,6 +252,13 @@ export default function Studio() {
                   isGenerating={isGenerating}
                   deviceMode={deviceMode as any}
                   onDeviceModeChange={setDeviceMode as any}
+                  viewMode="preview"
+                  onToggleViewMode={(m) => setViewMode(m as any)}
+                  isSidebarCollapsed={isSidebarCollapsed}
+                  onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                  isFullscreen={isFullscreen}
+                  onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+                  onShare={handleShare}
                 />
               </div>
             </div>

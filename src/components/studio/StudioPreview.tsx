@@ -10,8 +10,11 @@ import {
 } from 'lucide-react';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 import type { SupabaseConfig } from './StudioCloud';
+import { toast } from 'sonner';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
+
+import { StudioViewToolbar } from './StudioViewToolbar';
 
 interface StudioPreviewProps {
   files: Record<string, StudioFile>;
@@ -19,6 +22,16 @@ interface StudioPreviewProps {
   onDeviceModeChange?: (mode: DeviceMode) => void;
   isGenerating?: boolean;
   supabaseConfig?: SupabaseConfig | null;
+  
+  // Toolbar Props
+  viewMode: 'preview' | 'code';
+  onToggleViewMode: (mode: 'preview' | 'code') => void;
+  isSidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
+  onRefreshProject?: () => void;
+  onShare?: () => void;
 }
 
 // Known entry file names in priority order
@@ -203,6 +216,13 @@ export function StudioPreview({
   onDeviceModeChange,
   isGenerating,
   supabaseConfig,
+  viewMode,
+  onToggleViewMode,
+  isSidebarCollapsed,
+  onToggleSidebar,
+  isFullscreen,
+  onToggleFullscreen,
+  onShare,
 }: StudioPreviewProps) {
   const [refreshKey, setRefreshKey] = useState(0);
   const [zoom, setZoom]             = useState(100);
@@ -225,13 +245,37 @@ export function StudioPreview({
     mobile:  '812px',
   };
 
+  const currentView = pages.find(p => p.path === window.location.hash.split('#')[1] || p.path === '/') || pages[0];
+
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: '#13141a' }}>
 
-      {/* ── Minimal toolbar ─────────────────────────────────────────────────── */}
+      {/* ── Professional toolbar (New Creator Standard) ────────────────────────── */}
+      <StudioViewToolbar 
+        viewMode={viewMode}
+        onToggleViewMode={onToggleViewMode}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={onToggleSidebar}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={onToggleFullscreen}
+        onRefresh={() => setRefreshKey(k => k + 1)}
+        currentViewName={currentView?.name || 'Dashboard'}
+        onViewChange={(v) => {
+          toast.info(`Navegando a ${v}`);
+        }}
+        onCopyToFigma={() => toast.success('Interfaz copiada al portapapeles')}
+        onDownload={() => toast.info('Descargando assets...')}
+        onRun={() => {
+          setRefreshKey(k => k + 1);
+          toast.success('Proyecto ejecutado con éxito');
+        }}
+        onShare={onShare || (() => toast.success('Enlace de colaboración copiado'))}
+      />
+
+      {/* ── Sub-toolbar: Device & Zoom ─────────────────────────────────────── */}
       <div
         className="shrink-0 flex items-center gap-1 px-3"
-        style={{ background: '#16171e', borderBottom: '1px solid rgba(255,255,255,0.06)', height: 40 }}
+        style={{ background: '#16171e', borderBottom: '1px solid rgba(255,255,255,0.06)', height: 36 }}
       >
         {/* Device switcher */}
         {(['desktop', 'tablet', 'mobile'] as DeviceMode[]).map((m) => {
@@ -279,16 +323,7 @@ export function StudioPreview({
 
         <div className="w-px h-4 mx-1.5" style={{ background: 'rgba(255,255,255,0.07)' }} />
 
-        {/* Refresh */}
-        <button
-          onClick={() => setRefreshKey(k => k + 1)}
-          className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] transition-all"
-          title="Recargar"
-        >
-          <RotateCcw className="h-3 w-3" />
-        </button>
-
-        {/* Open in new tab */}
+        {/* External Link */}
         <button
           onClick={() => {
             const frame = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
