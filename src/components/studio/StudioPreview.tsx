@@ -204,15 +204,19 @@ function toSandpackFiles(
     }
   }
 
-  // High-fidelity Figma Extractor Bridge (Pro Version)
+  // High-fidelity Figma Extractor Bridge (Resilient Version)
   const figmaBridgeCode = `(function() {
+    console.log('[FigmaBridge] Iniciando...');
+    
     window.addEventListener('message', async (e) => {
       if (e.data.type === 'FIGMA_EXTRACT') {
+        console.log('[FigmaBridge] FIGMA_EXTRACT recibido');
         try {
           const root = document.getElementById('root') || document.body;
           const data = extractNode(root);
           window.parent.postMessage({ type: 'FIGMA_EXTRACT_RESULT', data }, '*');
         } catch (err) {
+          console.error('[FigmaBridge] Error Crítico:', err);
           window.parent.postMessage({ type: 'FIGMA_EXTRACT_ERROR', error: err.message }, '*');
         }
       }
@@ -221,101 +225,117 @@ function toSandpackFiles(
     function rgbToFigma(rgb) {
       if (!rgb || rgb === 'transparent' || rgb === 'rgba(0, 0, 0, 0)') return null;
       const m = rgb.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)(?:,\\s*([\\d.]+))?\\)/);
-      if(!m) return null;
+      if(!m) {
+        // Fallback for HEX
+        if (rgb.startsWith('#')) {
+          const hex = rgb.slice(1);
+          if (hex.length === 3) return { r: parseInt(hex[0]+hex[0], 16)/255, g: parseInt(hex[1]+hex[1], 16)/255, b: parseInt(hex[2]+hex[2], 16)/255, a: 1 };
+          if (hex.length === 6) return { r: parseInt(hex.slice(0,2), 16)/255, g: parseInt(hex.slice(2,4), 16)/255, b: parseInt(hex.slice(4,6), 16)/255, a: 1 };
+        }
+        return null;
+      }
       return { r: m[1]/255, g: m[2]/255, b: m[3]/255, a: m[4] ? parseFloat(m[4]) : 1 };
     }
 
     function extractNode(el) {
-      if (el.nodeType === 3) {
-        const text = el.textContent.trim();
-        if (!text) return null;
-        const parentStyle = window.getComputedStyle(el.parentElement);
-        const range = document.createRange();
-        range.selectNode(el);
-        const rect = range.getBoundingClientRect();
-        return {
-          type: 'TEXT',
-          name: text.substring(0, 30),
-          characters: text,
-          x: rect.x, y: rect.y, width: rect.width, height: rect.height,
-          fontSize: parseInt(parentStyle.fontSize),
-          fontFamily: parentStyle.fontFamily,
-          fontWeight: parentStyle.fontWeight,
-          lineHeight: { value: parseInt(parentStyle.lineHeight) || 0, unit: 'PIXELS' },
-          letterSpacing: { value: parseFloat(parentStyle.letterSpacing) || 0, unit: 'PIXELS' },
-          fills: [{ type: 'SOLID', color: rgbToFigma(parentStyle.color) || { r: 0, g: 0, b: 0 }, opacity: rgbToFigma(parentStyle.color)?.a ?? 1 }]
-        };
-      }
-
-      if (el.nodeType !== 1) return null;
-      const style = window.getComputedStyle(el);
-      if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return null;
-      
-      const rect = el.getBoundingClientRect();
-      const node = {
-        type: 'FRAME',
-        name: el.id || el.className || el.tagName,
-        x: rect.x, y: rect.y, width: rect.width, height: rect.height,
-        fills: [],
-        strokes: [],
-        effects: [],
-        cornerRadius: parseInt(style.borderRadius) || 0,
-        children: []
-      };
-
-      // Fills & Images
-      const bgColor = rgbToFigma(style.backgroundColor);
-      if (bgColor) node.fills.push({ type: 'SOLID', color: bgColor, opacity: bgColor.a });
-      
-      if (el.tagName === 'IMG' && el.src) {
-        node.fills.push({ type: 'IMAGE', scaleMode: 'FILL', imageHash: el.src });
-      }
-
-      // Borders
-      if (parseInt(style.borderWidth) > 0) {
-        const borderColor = rgbToFigma(style.borderColor);
-        if (borderColor) {
-          node.strokes.push({ type: 'SOLID', color: borderColor, opacity: borderColor.a });
-          node.strokeWeight = parseInt(style.borderWidth);
+      try {
+        if (el.nodeType === 3) {
+          const text = el.textContent.trim();
+          if (!text) return null;
+          const parentStyle = window.getComputedStyle(el.parentElement);
+          const range = document.createRange();
+          range.selectNode(el);
+          const rect = range.getBoundingClientRect();
+          return {
+            type: 'TEXT',
+            name: text.substring(0, 30),
+            characters: text,
+            x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+            fontSize: parseInt(parentStyle.fontSize),
+            fontFamily: parentStyle.fontFamily,
+            fontWeight: parentStyle.fontWeight,
+            lineHeight: { value: parseInt(parentStyle.lineHeight) || 0, unit: 'PIXELS' },
+            letterSpacing: { value: parseFloat(parentStyle.letterSpacing) || 0, unit: 'PIXELS' },
+            fills: [{ type: 'SOLID', color: rgbToFigma(parentStyle.color) || { r: 0, g: 0, b: 0 }, opacity: rgbToFigma(parentStyle.color)?.a ?? 1 }]
+          };
         }
-      }
 
-      // Shadows
-      if (style.boxShadow && style.boxShadow !== 'none') {
-        const m = style.boxShadow.match(/rgba?\\([^)]+\\)\\s+(-?\\d+)px\\s+(-?\\d+)px\\s+(-?\\d+)px\\s+(-?\\d+)px/);
-        if (m) {
-          node.effects.push({
-            type: 'DROP_SHADOW',
-            color: rgbToFigma(m[0].match(/rgba?\\([^)]+\\)/)[0]),
-            offset: { x: parseInt(m[2]), y: parseInt(m[3]) },
-            radius: parseInt(m[4]),
-            spread: parseInt(m[5]) || 0,
-            visible: true
+        if (el.nodeType !== 1) return null;
+        const style = window.getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return null;
+        
+        const rect = el.getBoundingClientRect();
+        const node = {
+          type: 'FRAME',
+          name: el.id || el.className || el.tagName,
+          x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+          fills: [],
+          strokes: [],
+          effects: [],
+          cornerRadius: parseInt(style.borderRadius) || 0,
+          children: []
+        };
+
+        const bgColor = rgbToFigma(style.backgroundColor);
+        if (bgColor) node.fills.push({ type: 'SOLID', color: bgColor, opacity: bgColor.a });
+        
+        if (el.tagName === 'IMG' && el.src) {
+          node.fills.push({ type: 'IMAGE', scaleMode: 'FILL', imageHash: el.src });
+        }
+
+        if (parseInt(style.borderWidth) > 0) {
+          const borderColor = rgbToFigma(style.borderColor);
+          if (borderColor) {
+            node.strokes.push({ type: 'SOLID', color: borderColor, opacity: borderColor.a });
+            node.strokeWeight = parseInt(style.borderWidth);
+          }
+        }
+
+        if (style.boxShadow && style.boxShadow !== 'none') {
+          const shadowParts = style.boxShadow.split(/,(?![^(]*\\))/);
+          shadowParts.forEach(s => {
+            const coords = s.match(/(-?\\d+)px\\s+(-?\\d+)px\\s+(-?\\d+)px(?:\\s+(-?\\d+)px)?/);
+            const color = s.match(/rgba?\\([^)]+\\)|#[a-fA-F0-9]+/);
+            if (coords && color) {
+              node.effects.push({
+                type: 'DROP_SHADOW',
+                color: rgbToFigma(color[0]) || { r: 0, g: 0, b: 0 },
+                offset: { x: parseInt(coords[1]), y: parseInt(coords[2]) },
+                radius: parseInt(coords[3]),
+                spread: parseInt(coords[4]) || 0,
+                visible: true
+              });
+            }
           });
         }
-      }
 
-      const layoutProps = ['flex', 'grid'].includes(style.display);
-      if (layoutProps) {
-        node.layoutMode = style.flexDirection === 'column' ? 'VERTICAL' : 'HORIZONTAL';
-        node.itemSpacing = parseInt(style.gap) || 0;
-        node.paddingTop = parseInt(style.paddingTop) || 0;
-        node.paddingRight = parseInt(style.paddingRight) || 0;
-        node.paddingBottom = parseInt(style.paddingBottom) || 0;
-        node.paddingLeft = parseInt(style.paddingLeft) || 0;
-        const alignMap = { 'center': 'CENTER', 'flex-start': 'MIN', 'flex-end': 'MAX', 'space-between': 'SPACE_BETWEEN' };
-        node.primaryAxisAlignItems = alignMap[style.justifyContent] || 'MIN';
-        node.counterAxisAlignItems = alignMap[style.alignItems] || 'MIN';
-      }
+        const layoutProps = ['flex', 'grid'].includes(style.display);
+        if (layoutProps) {
+          node.layoutMode = style.flexDirection === 'column' ? 'VERTICAL' : 'HORIZONTAL';
+          node.itemSpacing = parseInt(style.gap) || 0;
+          node.paddingTop = parseInt(style.paddingTop) || 0;
+          node.paddingRight = parseInt(style.paddingRight) || 0;
+          node.paddingBottom = parseInt(style.paddingBottom) || 0;
+          node.paddingLeft = parseInt(style.paddingLeft) || 0;
+          const alignMap = { 'center': 'CENTER', 'flex-start': 'MIN', 'flex-end': 'MAX', 'space-between': 'SPACE_BETWEEN', 'stretch':'STRETCH' };
+          node.primaryAxisAlignItems = alignMap[style.justifyContent] || 'MIN';
+          node.counterAxisAlignItems = alignMap[style.alignItems] || 'MIN';
+        }
 
-      Array.from(el.childNodes).forEach(child => {
-        try {
+        Array.from(el.childNodes).forEach(child => {
           const extracted = extractNode(child);
           if (extracted) node.children.push(extracted);
-        } catch(e) {}
-      });
-      return node;
+        });
+        return node;
+      } catch (e) {
+        console.warn('[FigmaBridge] Fallo nodo individual:', el, e);
+        return null;
+      }
     }
+    
+    // Handshake
+    console.log('[FigmaBridge] Listo');
+    window.parent.postMessage({ type: 'FIGMA_BRIDGE_READY' }, '*');
   })()`;
 
   result['/public/index.html'] = {
@@ -352,13 +372,20 @@ export function StudioPreview({
 }: StudioPreviewProps) {
   const [refreshKey, setRefreshKey] = useState(0);
   const [zoom, setZoom]             = useState(100);
+  const [isBridgeReady, setIsBridgeReady] = useState(false);
   const figmaTimeoutRef = useMemo(() => ({ current: null as any }), []);
 
   const sandpackFiles = useMemo(() => toSandpackFiles(files, supabaseConfig), [files, supabaseConfig]);
   
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
-      if (e.data && (e.data.type === 'FIGMA_EXTRACT_RESULT' || e.data.type === 'FIGMA_EXTRACT_ERROR')) {
+      if (!e.data) return;
+
+      if (e.data.type === 'FIGMA_BRIDGE_READY') {
+        setIsBridgeReady(true);
+      }
+
+      if (e.data.type === 'FIGMA_EXTRACT_RESULT' || e.data.type === 'FIGMA_EXTRACT_ERROR') {
         if (figmaTimeoutRef.current) {
           clearTimeout(figmaTimeoutRef.current);
           figmaTimeoutRef.current = null;
@@ -380,7 +407,10 @@ export function StudioPreview({
       }
     };
     window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+      if (figmaTimeoutRef.current) clearTimeout(figmaTimeoutRef.current);
+    };
   }, [figmaTimeoutRef]);
 
   const hasContent    = !!sandpackFiles;
@@ -416,19 +446,28 @@ export function StudioPreview({
         onCopyToFigma={() => {
           const frame = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
           if (frame && frame.contentWindow) {
-            toast.loading('Preparando capas para Figma (Auto Layout)...', { id: 'figma-export' });
+            toast.loading('Preparando capas para Figma (Alta Resiliencia)...', { id: 'figma-export' });
             
-            // Timeout safety
+            // Timeout safety (15s)
             if (figmaTimeoutRef.current) clearTimeout(figmaTimeoutRef.current);
             figmaTimeoutRef.current = setTimeout(() => {
               toast.dismiss('figma-export');
-              toast.error('La extracción está tardando demasiado', {
-                description: 'Asegúrate de que el preview haya cargado completamente o intenta con un layout más simple.'
+              toast.error('Error de comunicación con el preview', {
+                description: 'Asegúrate de que el preview haya cargado completamente. Si el problema persiste, refresca el proyecto.'
               });
               figmaTimeoutRef.current = null;
-            }, 10000);
+            }, 15000);
 
-            frame.contentWindow.postMessage({ type: 'FIGMA_EXTRACT' }, '*');
+            // Send with retry loop (try every 500ms for 3s until pong or action)
+            let attempts = 0;
+            const sendPing = () => {
+              if (attempts < 6 && figmaTimeoutRef.current) {
+                frame.contentWindow!.postMessage({ type: 'FIGMA_EXTRACT' }, '*');
+                attempts++;
+                if (attempts < 6) setTimeout(sendPing, 500);
+              }
+            };
+            sendPing();
           } else {
             toast.error('No se pudo encontrar el preview para exportar');
           }
