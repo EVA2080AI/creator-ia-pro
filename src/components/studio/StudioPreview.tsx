@@ -204,84 +204,80 @@ function toSandpackFiles(
     }
   }
 
-  // Inject High-fidelity Figma Extractor Bridge
-  result['/_figma_bridge.js'] = {
-    code: `(function() {
-      window.addEventListener('message', async (e) => {
-        if (e.data.type === 'FIGMA_EXTRACT') {
-          try {
-            const root = document.getElementById('root') || document.body;
-            const data = extractNode(root);
-            window.parent.postMessage({ type: 'FIGMA_EXTRACT_RESULT', data }, '*');
-          } catch (err) {
-            window.parent.postMessage({ type: 'FIGMA_EXTRACT_ERROR', error: err.message }, '*');
-          }
+  // High-fidelity Figma Extractor Bridge (Inlined for reliability)
+  const figmaBridgeCode = `(function() {
+    window.addEventListener('message', async (e) => {
+      if (e.data.type === 'FIGMA_EXTRACT') {
+        try {
+          const root = document.getElementById('root') || document.body;
+          const data = extractNode(root);
+          window.parent.postMessage({ type: 'FIGMA_EXTRACT_RESULT', data }, '*');
+        } catch (err) {
+          window.parent.postMessage({ type: 'FIGMA_EXTRACT_ERROR', error: err.message }, '*');
         }
-      });
-
-      function rgbToFigma(rgb) {
-        if (!rgb) return { r: 0, g: 0, b: 0 };
-        const m = rgb.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
-        if(!m) return { r:0, g:0, b:0 };
-        return { r: m[1]/255, g: m[2]/255, b: m[3]/255 };
       }
+    });
 
-      function extractNode(el) {
-        if (el.nodeType === 3) {
-          const text = el.textContent.trim();
-          if (!text) return null;
-          const parentStyle = window.getComputedStyle(el.parentElement);
-          const range = document.createRange();
-          range.selectNode(el);
-          const rect = range.getBoundingClientRect();
-          return {
-            type: 'TEXT',
-            name: text.substring(0, 20),
-            characters: text,
-            x: rect.x, y: rect.y, width: rect.width, height: rect.height,
-            fontSize: parseInt(parentStyle.fontSize),
-            fontFamily: parentStyle.fontFamily,
-            fontWeight: parentStyle.fontWeight,
-            fills: [{ type: 'SOLID', color: rgbToFigma(parentStyle.color) }]
-          };
-        }
+    function rgbToFigma(rgb) {
+      if (!rgb || rgb === 'transparent' || rgb === 'rgba(0, 0, 0, 0)') return null;
+      const m = rgb.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+      if(!m) return null;
+      return { r: m[1]/255, g: m[2]/255, b: m[3]/255 };
+    }
 
-        if (el.nodeType !== 1) return null;
-        const style = window.getComputedStyle(el);
-        if (style.display === 'none') return null;
-        
-        const rect = el.getBoundingClientRect();
-        const node = {
-          type: 'FRAME',
-          name: el.id || el.className || el.tagName,
+    function extractNode(el) {
+      if (el.nodeType === 3) {
+        const text = el.textContent.trim();
+        if (!text) return null;
+        const parentStyle = window.getComputedStyle(el.parentElement);
+        const range = document.createRange();
+        range.selectNode(el);
+        const rect = range.getBoundingClientRect();
+        return {
+          type: 'TEXT',
+          name: text.substring(0, 20),
+          characters: text,
           x: rect.x, y: rect.y, width: rect.width, height: rect.height,
-          fills: (style.backgroundColor !== 'transparent' && style.backgroundColor !== 'rgba(0, 0, 0, 0)') 
-            ? [{ type: 'SOLID', color: rgbToFigma(style.backgroundColor) }] 
-            : [],
-          cornerRadius: parseInt(style.borderRadius) || 0,
-          children: []
+          fontSize: parseInt(parentStyle.fontSize),
+          fontFamily: parentStyle.fontFamily,
+          fontWeight: parentStyle.fontWeight,
+          fills: [{ type: 'SOLID', color: rgbToFigma(parentStyle.color) || { r: 0, g: 0, b: 0 } }]
         };
-
-        if (style.display === 'flex') {
-          node.layoutMode = style.flexDirection === 'column' ? 'VERTICAL' : 'HORIZONTAL';
-          node.itemSpacing = parseInt(style.gap) || 0;
-          node.paddingTop = parseInt(style.paddingTop) || 0;
-          node.paddingRight = parseInt(style.paddingRight) || 0;
-          node.paddingBottom = parseInt(style.paddingBottom) || 0;
-          node.paddingLeft = parseInt(style.paddingLeft) || 0;
-          const alignMap = { 'center': 'CENTER', 'flex-start': 'MIN', 'flex-end': 'MAX', 'space-between': 'SPACE_BETWEEN' };
-          node.primaryAxisAlignItems = alignMap[style.justifyContent] || 'MIN';
-          node.counterAxisAlignItems = alignMap[style.alignItems] || 'MIN';
-        }
-
-        Array.from(el.childNodes).forEach(child => {
+      }
+      if (el.nodeType !== 1) return null;
+      const style = window.getComputedStyle(el);
+      if (style.display === 'none') return null;
+      const rect = el.getBoundingClientRect();
+      const node = {
+        type: 'FRAME',
+        name: el.id || el.className || el.tagName,
+        x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+        fills: [],
+        cornerRadius: parseInt(style.borderRadius) || 0,
+        children: []
+      };
+      const bgColor = rgbToFigma(style.backgroundColor);
+      if (bgColor) node.fills.push({ type: 'SOLID', color: bgColor });
+      if (style.display === 'flex') {
+        node.layoutMode = style.flexDirection === 'column' ? 'VERTICAL' : 'HORIZONTAL';
+        node.itemSpacing = parseInt(style.gap) || 0;
+        node.paddingTop = parseInt(style.paddingTop) || 0;
+        node.paddingRight = parseInt(style.paddingRight) || 0;
+        node.paddingBottom = parseInt(style.paddingBottom) || 0;
+        node.paddingLeft = parseInt(style.paddingLeft) || 0;
+        const alignMap = { 'center': 'CENTER', 'flex-start': 'MIN', 'flex-end': 'MAX', 'space-between': 'SPACE_BETWEEN' };
+        node.primaryAxisAlignItems = alignMap[style.justifyContent] || 'MIN';
+        node.counterAxisAlignItems = alignMap[style.alignItems] || 'MIN';
+      }
+      Array.from(el.childNodes).forEach(child => {
+        try {
           const extracted = extractNode(child);
           if (extracted) node.children.push(extracted);
-        });
-        return node;
-      }
-    })()`
-  };
+        } catch(e) {}
+      });
+      return node;
+    }
+  })()`;
 
   result['/public/index.html'] = {
     code: `<!DOCTYPE html>
@@ -293,7 +289,7 @@ function toSandpackFiles(
   </head>
   <body>
     <div id="root"></div>
-    <script src="/_figma_bridge.js"></script>
+    <script>${figmaBridgeCode}</script>
   </body>
 </html>`
   };
@@ -317,29 +313,36 @@ export function StudioPreview({
 }: StudioPreviewProps) {
   const [refreshKey, setRefreshKey] = useState(0);
   const [zoom, setZoom]             = useState(100);
+  const figmaTimeoutRef = useMemo(() => ({ current: null as any }), []);
 
   const sandpackFiles = useMemo(() => toSandpackFiles(files, supabaseConfig), [files, supabaseConfig]);
   
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
-      if (e.data && e.data.type === 'FIGMA_EXTRACT_RESULT') {
-        const json = JSON.stringify(e.data.data, null, 2);
-        navigator.clipboard.writeText(json).then(() => {
-           toast.dismiss('figma-export');
-           toast.success('¡Copiado para Figma con éxito!', {
-             description: 'Pega los datos usando el plugin "html.to.design" o Builder.io en Figma.',
-             duration: 6000
-           });
-        });
-      }
-      if (e.data && e.data.type === 'FIGMA_EXTRACT_ERROR') {
+      if (e.data && (e.data.type === 'FIGMA_EXTRACT_RESULT' || e.data.type === 'FIGMA_EXTRACT_ERROR')) {
+        if (figmaTimeoutRef.current) {
+          clearTimeout(figmaTimeoutRef.current);
+          figmaTimeoutRef.current = null;
+        }
+        
         toast.dismiss('figma-export');
-        toast.error('Error al exportar capas: ' + e.data.error);
+
+        if (e.data.type === 'FIGMA_EXTRACT_RESULT') {
+          const json = JSON.stringify(e.data.data, null, 2);
+          navigator.clipboard.writeText(json).then(() => {
+             toast.success('¡Copiado para Figma con éxito!', {
+               description: 'Pega los datos usando el plugin "html.to.design" o Builder.io en Figma.',
+               duration: 6000
+             });
+          });
+        } else {
+          toast.error('Error al exportar capas: ' + e.data.error);
+        }
       }
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  }, [figmaTimeoutRef]);
 
   const hasContent    = !!sandpackFiles;
   const pages = useMemo(() => detectPages(files), [files]);
@@ -375,6 +378,17 @@ export function StudioPreview({
           const frame = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
           if (frame && frame.contentWindow) {
             toast.loading('Preparando capas para Figma (Auto Layout)...', { id: 'figma-export' });
+            
+            // Timeout safety
+            if (figmaTimeoutRef.current) clearTimeout(figmaTimeoutRef.current);
+            figmaTimeoutRef.current = setTimeout(() => {
+              toast.dismiss('figma-export');
+              toast.error('La extracción está tardando demasiado', {
+                description: 'Asegúrate de que el preview haya cargado completamente o intenta con un layout más simple.'
+              });
+              figmaTimeoutRef.current = null;
+            }, 10000);
+
             frame.contentWindow.postMessage({ type: 'FIGMA_EXTRACT' }, '*');
           } else {
             toast.error('No se pudo encontrar el preview para exportar');
