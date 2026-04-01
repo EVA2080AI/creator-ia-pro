@@ -63,8 +63,8 @@ serve(async (req) => {
     if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is not configured");
 
     const filesContext = Object.entries(currentFiles || {})
-      .map(([name, f]: [string, any]) => `--- ${name} ---\n${f.content}`)
-      .join("\n\n");
+      .map(([name, f]: [string, any]) => '--- ' + name + ' ---\n' + f.content)
+      .join('\n\n');
 
     const systemPrompt = `Eres BuilderAI, un agente de desarrollo web experto integrado en Creator IA Pro. Creas aplicaciones React completas y funcionales.
 
@@ -113,7 +113,7 @@ ${filesContext || "(Proyecto vacío — crea desde cero)"}
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        Authorization: 'Bearer ' + OPENROUTER_API_KEY,
         "Content-Type": "application/json",
         "HTTP-Referer": "https://creator-ia.com",
         "X-Title": "Creator IA Pro - Studio",

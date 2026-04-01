@@ -84,12 +84,12 @@ async function parseJsonOrThrow(res: Response, label: string): Promise<unknown> 
   const ct = res.headers.get('content-type') ?? '';
   if (ct.includes('text/html') || ct.includes('text/plain')) {
     const preview = await res.text();
-    console.error(`[${label}] Non-JSON response (${res.status}):`, preview.slice(0, 200));
-    throw new Error(`${label} returned non-JSON (HTTP ${res.status}). Endpoint may be unavailable.`);
+    console.error('[' + label + '] Non-JSON response (' + res.status + '):', preview.slice(0, 200));
+    throw new Error(label + ' returned non-JSON (HTTP ' + res.status + '). Endpoint may be unavailable.');
   }
   const data = await res.json();
   if (!res.ok) {
-    const msg = (data as any)?.error?.message || (data as any)?.error || `HTTP ${res.status}`;
+    const msg = (data as any)?.error?.message || (data as any)?.error || 'HTTP ' + res.status;
     console.error(`[${label}] API error:`, JSON.stringify(data).slice(0, 300));
     throw new Error(msg);
   }
@@ -100,7 +100,7 @@ async function openrouterFetch(path: string, body: unknown, stream = false): Pro
   const apiKey = Deno.env.get('OPENROUTER_API_KEY');
   if (!apiKey) throw new Error('OPENROUTER_API_KEY not configured in Supabase secrets.');
 
-  return fetch(`${OR_BASE}/${path}`, {
+  return fetch(OR_BASE + '/' + path, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -126,7 +126,7 @@ serve(async (req: Request) => {
       const userId = extractUserIdFromJwt(req.headers.get('authorization'));
       const key = userId ?? req.headers.get('x-forwarded-for') ?? 'anonymous';
       if (!checkRateLimit(key)) {
-        console.warn(`[ai-proxy] Rate limit exceeded for key: ${key}`);
+        console.warn('[ai-proxy] Rate limit exceeded for key: ' + key);
         return json({ error: 'Demasiadas solicitudes. Espera un momento antes de continuar.', code: 'rate_limit' }, 200);
       }
     }
@@ -187,7 +187,7 @@ serve(async (req: Request) => {
 
       for (const imageModel of tryModels) {
         try {
-          console.log(`[Image] Trying: ${imageModel}`);
+          console.log('[Image] Trying: ' + imageModel);
 
           // Use chat/completions with modalities for supported models
           if (MODALITIES_IMAGE_MODELS.has(imageModel)) {
@@ -208,7 +208,7 @@ serve(async (req: Request) => {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`,
+                'Authorization': 'Bearer ' + apiKey,
                 'HTTP-Referer': OR_REFERER,
                 'X-Title': OR_TITLE,
               },
@@ -223,7 +223,7 @@ serve(async (req: Request) => {
             const ct = res.headers.get('content-type') ?? '';
             if (!ct.includes('text/html')) {
               const data = await res.json().catch(() => ({})) as any;
-              console.log(`[Image] ${imageModel} modalities response keys:`, Object.keys(data?.choices?.[0]?.message ?? {}));
+              console.log('[Image] ' + imageModel + ' modalities response keys:', Object.keys(data?.choices?.[0]?.message ?? {}));
               if (res.ok) {
                 const msg = data?.choices?.[0]?.message ?? {};
                 const content = msg.content;
@@ -236,7 +236,7 @@ serve(async (req: Request) => {
                   const inlineItem = content.find((c: any) => c.type === 'image' || c.inline_data);
                   if (inlineItem?.inline_data?.data) {
                     const mime = inlineItem.inline_data.mime_type ?? 'image/png';
-                    return json({ url: `data:${mime};base64,${inlineItem.inline_data.data}`, model: imageModel });
+                    return json({ url: 'data:' + mime + ';base64,' + inlineItem.inline_data.data, model: imageModel });
                   }
                 }
                 // Format 2: content is a string with a data URI
@@ -255,19 +255,19 @@ serve(async (req: Request) => {
                   if (img?.image_url) return json({ url: img.image_url, model: imageModel });
                   if (img?.inline_data?.data) {
                     const mime = img.inline_data.mime_type ?? 'image/png';
-                    return json({ url: `data:${mime};base64,${img.inline_data.data}`, model: imageModel });
+                    return json({ url: 'data:' + mime + ';base64,' + img.inline_data.data, model: imageModel });
                   }
                 }
                 console.warn(`[Image] ${imageModel} modalities — no image found in:`, JSON.stringify(data).slice(0, 400));
               } else {
                 const errMsg = data?.error?.message ?? data?.error ?? `HTTP ${res.status}`;
                 console.warn(`[Image] ${imageModel} error:`, errMsg);
-                errors.push(`${imageModel}: ${errMsg}`);
+                errors.push(imageModel + ': ' + errMsg);
                 continue;
               }
             } else {
               const preview = await res.text().catch(() => '');
-              console.warn(`[Image] ${imageModel} HTML response (${res.status}):`, preview.slice(0, 100));
+              console.warn('[Image] ' + imageModel + ' HTML response (' + res.status + '):', preview.slice(0, 100));
             }
             errors.push(`${imageModel}: modalities response had no image`);
             continue;
@@ -285,7 +285,7 @@ serve(async (req: Request) => {
               model: imageModel,
               prompt,
               n: 1,
-              size: `${width}x${height}`,
+              size: width + 'x' + height,
               response_format: 'url',
             }),
           });
@@ -302,13 +302,13 @@ serve(async (req: Request) => {
           if (!res.ok) {
             const msg = data?.error?.message || data?.error || `HTTP ${res.status}`;
             console.warn(`[Image] ${imageModel} → ${res.status}: ${msg}`);
-            errors.push(`${imageModel}: ${msg}`);
+            errors.push(imageModel + ': ' + msg);
             continue;
           }
 
           // Standard OpenAI image response
           const item = data?.data?.[0];
-          if (item?.b64_json) return json({ url: `data:image/png;base64,${item.b64_json}`, model: imageModel });
+          if (item?.b64_json) return json({ url: 'data:image/png;base64,' + item.b64_json, model: imageModel });
           if (item?.url)      return json({ url: item.url, model: imageModel });
 
           // Some providers return url at top level
@@ -330,7 +330,7 @@ serve(async (req: Request) => {
         const encPrompt = encodeURIComponent(prompt || 'cool image');
         // Cache buster to ensure fresh generation
         const seed = Math.floor(Math.random() * 1000000);
-        const pollinationsUrl = `https://image.pollinations.ai/prompt/${encPrompt}?width=${width}&height=${height}&nologo=true&enhance=false&model=flux&seed=${seed}`;
+        const pollinationsUrl = 'https://image.pollinations.ai/prompt/' + encPrompt + '?width=' + width + '&height=' + height + '&nologo=true&enhance=false&model=flux&seed=' + seed;
         
         return json({ url: pollinationsUrl, model: 'pollinations/flux' });
       } catch (fallbackErr) {
@@ -343,7 +343,7 @@ serve(async (req: Request) => {
       const apiKey = Deno.env.get('GEMINI_API_KEY');
       if (!apiKey) return json({ error: 'GEMINI_API_KEY not configured in Supabase secrets.' }, 503);
 
-      const fetchUrl = `https://generativelanguage.googleapis.com/v1beta/${urlPath}?key=${apiKey}`;
+      const fetchUrl = 'https://generativelanguage.googleapis.com/v1beta/' + urlPath + '?key=' + apiKey;
       const res = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
