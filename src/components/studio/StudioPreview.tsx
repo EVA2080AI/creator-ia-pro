@@ -419,6 +419,10 @@ export function StudioPreview({
                     'react-router-dom': '^6.0.0',
                     // Animation
                     'framer-motion': '^11.0.0',
+                    // UI Libraries
+                    '@chakra-ui/react': '^2.0.0',
+                    '@emotion/react': '^11.0.0',
+                    '@emotion/styled': '^11.0.0',
                     // Charts
                     'recharts': '^2.0.0',
                     // Forms
