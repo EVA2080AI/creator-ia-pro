@@ -7,16 +7,16 @@ const TIERS: Record<string, { name: string; credits: number }> = {
   "prod_U6xj2kgXVmXSBX": { name: "educacion", credits: 500 },
   "prod_U6xjReaTzoFveY": { name: "pro",        credits: 1_000 },
   "prod_U6xkDNO9PA3C9C": { name: "business",   credits: 5_000 },
-  // v2 tiers
-  "prod_UE2MjSRJAsKDnj": { name: "starter",    credits: 100_000 },
-  "prod_UE2NGBRjcHbZPk": { name: "creator",    credits: 500_000 },
-  "prod_UE2NDJ9HS6wxBF": { name: "agency",     credits: 2_000_000 },
+  // v3 tiers
+  "prod_UE2MjSRJAsKDnj": { name: "starter",    credits: 500 },
+  "prod_UE2NGBRjcHbZPk": { name: "creator",    credits: 1200 },
+  "prod_UE2NDJ9HS6wxBF": { name: "pymes",      credits: 4000 },
 };
 
 const CREDIT_PACKS: Record<string, number> = {
-  "prod_U6y485FCart4fA": 100,
-  "prod_U6y5xIdgIEdJ3Q": 500,
-  "prod_U6yAWcXSzZjc8g": 2500,
+  "prod_U6y485FCart4fA": 200, // Pack 1
+  "prod_U6y5xIdgIEdJ3Q": 1000, // Pack 2
+  "prod_U6yAWcXSzZjc8g": 2000, // Pack 3
 };
 
 serve(async (req) => {

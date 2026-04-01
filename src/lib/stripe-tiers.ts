@@ -3,9 +3,9 @@
 // Run in terminal: supabase secrets set STRIPE_SECRET_KEY=sk_live_...
 //
 // New tier pricing (2026):
-//   Starter  $12/mo  →  100,000 credits  ECO models only
-//   Creator  $29/mo  →  500,000 credits  ECO + PRO (Claude, GPT-4o)
-//   Agency   $79/mo  → 2,000,000 credits All models (ECO+PRO+ULTRA)
+//   Starter  $69,000/mo  →  500 credits
+//   Creator  $138,000/mo →  1.200 credits
+//   Pymes    $345,000/mo →  4.000 credits All models (Premium)
 
 export const STRIPE_TIERS = {
   // ── Legacy tiers (kept for backwards compatibility) ────────────────────────
@@ -34,31 +34,31 @@ export const STRIPE_TIERS = {
     tier_key: 'business',
   },
 
-  // ── New tiers (v2 pricing) ─────────────────────────────────────────────────
+  // ── New tiers (v3 pricing) ─────────────────────────────────────────────────
   // TODO: Replace price_id with real Stripe IDs after creating products
   starter: {
     name: 'Starter',
-    price_id: 'price_1TFaHzHXiILe6LmrJ2KTUaGx',
-    product_id: 'prod_UE2MjSRJAsKDnj',
-    credits: 100_000,
-    price: '$12',
+    price_id: 'price_1TFaHzHXiILe6LmrJ2KTUaGx', // UPDATE THIS IN STRIPE
+    product_id: 'prod_UE2MjSRJAsKDnj', // UPDATE THIS IN STRIPE
+    credits: 500,
+    price: '$69.000 COP',
     tier_key: 'starter',
   },
   creator: {
     name: 'Creator',
-    price_id: 'price_1TFaIYHXiILe6LmrYe9kJoFT',
-    product_id: 'prod_UE2NGBRjcHbZPk',
-    credits: 500_000,
-    price: '$29',
+    price_id: 'price_1TFaIYHXiILe6LmrYe9kJoFT', // UPDATE THIS IN STRIPE
+    product_id: 'prod_UE2NGBRjcHbZPk', // UPDATE THIS IN STRIPE
+    credits: 1200,
+    price: '$138.000 COP',
     tier_key: 'creator',
   },
-  agency: {
-    name: 'Agency',
-    price_id: 'price_1TFaIaHXiILe6LmrYwfqWW3Z',
-    product_id: 'prod_UE2NDJ9HS6wxBF',
-    credits: 2_000_000,
-    price: '$79',
-    tier_key: 'agency',
+  pymes: {
+    name: 'Pymes',
+    price_id: 'price_1TFaIaHXiILe6LmrYwfqWW3Z', // UPDATE THIS IN STRIPE
+    product_id: 'prod_UE2NDJ9HS6wxBF', // UPDATE THIS IN STRIPE
+    credits: 4000,
+    price: '$345.000 COP',
+    tier_key: 'pymes',
   },
 } as const;
 
