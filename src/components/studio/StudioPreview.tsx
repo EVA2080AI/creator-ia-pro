@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   SandpackProvider,
   SandpackPreview,
@@ -168,48 +168,139 @@ function toSandpackFiles(
 
   if (isMultiPage) {
     // Multi-page mode: generate router wrapper as App.tsx
-    // Add all files first
     for (const [name, file] of Object.entries(files)) {
       const abs = (name.startsWith('/') ? name : `/${name}`).replace(/^\/src\//, '/');
       result[abs] = { code: file.content };
     }
-    // Override App.tsx with router wrapper
     result['/App.tsx'] = { code: generateRouterWrapper(pages, files), active: true };
-    return result;
+  } else {
+    // Single-page mode
+    let entryContent: string | null = null;
+    let entryOrigName: string | null = null;
+
+    for (const name of ENTRY_NAMES) {
+      if (files[name]) { entryContent = files[name].content; entryOrigName = name; break; }
+    }
+    if (!entryContent) {
+      const candidate = Object.entries(files).find(
+        ([, f]) => (f.language === 'tsx' || f.language === 'jsx') && JSX_HINT.test(f.content)
+      );
+      if (candidate) { entryContent = candidate[1].content; entryOrigName = candidate[0]; }
+    }
+    if (!entryContent) {
+      const candidate = Object.entries(files).find(
+        ([, f]) => f.language === 'tsx' || f.language === 'jsx'
+      );
+      if (candidate) { entryContent = candidate[1].content; entryOrigName = candidate[0]; }
+    }
+    
+    if (entryContent) {
+      for (const [name, file] of Object.entries(files)) {
+        if (name === entryOrigName) continue;
+        const abs = (name.startsWith('/') ? name : `/${name}`).replace(/^\/src\//, '/');
+        result[abs] = { code: file.content };
+      }
+      result['/App.tsx'] = { code: entryContent, active: true };
+    }
   }
 
-  // Single-page mode (existing behavior)
-  let entryContent: string | null = null;
-  let entryOrigName: string | null = null;
+  // Inject High-fidelity Figma Extractor Bridge
+  result['/_figma_bridge.js'] = {
+    code: `(function() {
+      window.addEventListener('message', async (e) => {
+        if (e.data.type === 'FIGMA_EXTRACT') {
+          try {
+            const root = document.getElementById('root') || document.body;
+            const data = extractNode(root);
+            window.parent.postMessage({ type: 'FIGMA_EXTRACT_RESULT', data }, '*');
+          } catch (err) {
+            window.parent.postMessage({ type: 'FIGMA_EXTRACT_ERROR', error: err.message }, '*');
+          }
+        }
+      });
 
-  for (const name of ENTRY_NAMES) {
-    if (files[name]) { entryContent = files[name].content; entryOrigName = name; break; }
-  }
-  if (!entryContent) {
-    const candidate = Object.entries(files).find(
-      ([, f]) => (f.language === 'tsx' || f.language === 'jsx') && JSX_HINT.test(f.content)
-    );
-    if (candidate) { entryContent = candidate[1].content; entryOrigName = candidate[0]; }
-  }
-  if (!entryContent) {
-    const candidate = Object.entries(files).find(
-      ([, f]) => f.language === 'tsx' || f.language === 'jsx'
-    );
-    if (candidate) { entryContent = candidate[1].content; entryOrigName = candidate[0]; }
-  }
-  if (!entryContent) return null;
+      function rgbToFigma(rgb) {
+        if (!rgb) return { r: 0, g: 0, b: 0 };
+        const m = rgb.match(/rgba?\\((\\d+),\\s*(\\d+),\\s*(\\d+)/);
+        if(!m) return { r:0, g:0, b:0 };
+        return { r: m[1]/255, g: m[2]/255, b: m[3]/255 };
+      }
 
-  for (const [name, file] of Object.entries(files)) {
-    if (name === entryOrigName) continue;
-    const abs = (name.startsWith('/') ? name : `/${name}`).replace(/^\/src\//, '/');
-    result[abs] = { code: file.content };
-  }
-  result['/App.tsx'] = { code: entryContent, active: true };
+      function extractNode(el) {
+        if (el.nodeType === 3) {
+          const text = el.textContent.trim();
+          if (!text) return null;
+          const parentStyle = window.getComputedStyle(el.parentElement);
+          const range = document.createRange();
+          range.selectNode(el);
+          const rect = range.getBoundingClientRect();
+          return {
+            type: 'TEXT',
+            name: text.substring(0, 20),
+            characters: text,
+            x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+            fontSize: parseInt(parentStyle.fontSize),
+            fontFamily: parentStyle.fontFamily,
+            fontWeight: parentStyle.fontWeight,
+            fills: [{ type: 'SOLID', color: rgbToFigma(parentStyle.color) }]
+          };
+        }
+
+        if (el.nodeType !== 1) return null;
+        const style = window.getComputedStyle(el);
+        if (style.display === 'none') return null;
+        
+        const rect = el.getBoundingClientRect();
+        const node = {
+          type: 'FRAME',
+          name: el.id || el.className || el.tagName,
+          x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+          fills: (style.backgroundColor !== 'transparent' && style.backgroundColor !== 'rgba(0, 0, 0, 0)') 
+            ? [{ type: 'SOLID', color: rgbToFigma(style.backgroundColor) }] 
+            : [],
+          cornerRadius: parseInt(style.borderRadius) || 0,
+          children: []
+        };
+
+        if (style.display === 'flex') {
+          node.layoutMode = style.flexDirection === 'column' ? 'VERTICAL' : 'HORIZONTAL';
+          node.itemSpacing = parseInt(style.gap) || 0;
+          node.paddingTop = parseInt(style.paddingTop) || 0;
+          node.paddingRight = parseInt(style.paddingRight) || 0;
+          node.paddingBottom = parseInt(style.paddingBottom) || 0;
+          node.paddingLeft = parseInt(style.paddingLeft) || 0;
+          const alignMap = { 'center': 'CENTER', 'flex-start': 'MIN', 'flex-end': 'MAX', 'space-between': 'SPACE_BETWEEN' };
+          node.primaryAxisAlignItems = alignMap[style.justifyContent] || 'MIN';
+          node.counterAxisAlignItems = alignMap[style.alignItems] || 'MIN';
+        }
+
+        Array.from(el.childNodes).forEach(child => {
+          const extracted = extractNode(child);
+          if (extracted) node.children.push(extracted);
+        });
+        return node;
+      }
+    })()`
+  };
+
+  result['/public/index.html'] = {
+    code: `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Genesis Preview</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="/_figma_bridge.js"></script>
+  </body>
+</html>`
+  };
 
   return result;
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export function StudioPreview({
   files,
   deviceMode = 'desktop',
@@ -228,11 +319,32 @@ export function StudioPreview({
   const [zoom, setZoom]             = useState(100);
 
   const sandpackFiles = useMemo(() => toSandpackFiles(files, supabaseConfig), [files, supabaseConfig]);
+  
+  useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      if (e.data && e.data.type === 'FIGMA_EXTRACT_RESULT') {
+        const json = JSON.stringify(e.data.data, null, 2);
+        navigator.clipboard.writeText(json).then(() => {
+           toast.dismiss('figma-export');
+           toast.success('¡Copiado para Figma con éxito!', {
+             description: 'Pega los datos usando el plugin "html.to.design" o Builder.io en Figma.',
+             duration: 6000
+           });
+        });
+      }
+      if (e.data && e.data.type === 'FIGMA_EXTRACT_ERROR') {
+        toast.dismiss('figma-export');
+        toast.error('Error al exportar capas: ' + e.data.error);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   const hasContent    = !!sandpackFiles;
   const pages = useMemo(() => detectPages(files), [files]);
   const isMultiPage = pages.length >= 2;
 
-  // Device preview widths
   const frameWidth: Record<DeviceMode, string> = {
     desktop: '100%',
     tablet:  '768px',
@@ -249,8 +361,6 @@ export function StudioPreview({
 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: '#13141a' }}>
-
-      {/* ── Professional toolbar (New Creator Standard) ────────────────────────── */}
       <StudioViewToolbar 
         viewMode={viewMode}
         onToggleViewMode={onToggleViewMode}
@@ -260,10 +370,16 @@ export function StudioPreview({
         onToggleFullscreen={onToggleFullscreen}
         onRefresh={() => setRefreshKey(k => k + 1)}
         currentViewName={currentView?.name || 'Dashboard'}
-        onViewChange={(v) => {
-          toast.info(`Navegando a ${v}`);
+        onViewChange={(v) => { toast.info(`Navegando a ${v}`); }}
+        onCopyToFigma={() => {
+          const frame = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
+          if (frame && frame.contentWindow) {
+            toast.loading('Preparando capas para Figma (Auto Layout)...', { id: 'figma-export' });
+            frame.contentWindow.postMessage({ type: 'FIGMA_EXTRACT' }, '*');
+          } else {
+            toast.error('No se pudo encontrar el preview para exportar');
+          }
         }}
-        onCopyToFigma={() => toast.success('Interfaz copiada al portapapeles')}
         onDownload={() => toast.info('Descargando assets...')}
         onRun={() => {
           setRefreshKey(k => k + 1);
@@ -272,19 +388,16 @@ export function StudioPreview({
         onShare={onShare || (() => toast.success('Enlace de colaboración copiado'))}
       />
 
-      {/* ── Sub-toolbar: Device & Zoom ─────────────────────────────────────── */}
       <div
         className="shrink-0 flex items-center gap-1 px-3"
         style={{ background: '#16171e', borderBottom: '1px solid rgba(255,255,255,0.06)', height: 36 }}
       >
-        {/* Device switcher */}
         {(['desktop', 'tablet', 'mobile'] as DeviceMode[]).map((m) => {
           const Icon = m === 'desktop' ? Monitor : m === 'tablet' ? Tablet : Smartphone;
           return (
             <button
               key={m}
               onClick={() => { onDeviceModeChange?.(m); setZoom(100); }}
-              title={m}
               className="h-7 w-7 flex items-center justify-center rounded-md transition-all"
               style={deviceMode === m
                 ? { background: 'rgba(138,180,248,0.15)', color: '#8AB4F8' }
@@ -294,80 +407,47 @@ export function StudioPreview({
             </button>
           );
         })}
-
         <div className="w-px h-4 mx-1.5" style={{ background: 'rgba(255,255,255,0.07)' }} />
-
-        {/* Multi-page indicator */}
         {isMultiPage && (
           <div className="flex items-center gap-1 px-2 py-0.5 rounded-md" style={{ background: 'rgba(138,180,248,0.08)', border: '1px solid rgba(138,180,248,0.15)' }}>
             <span className="text-[9px] font-bold text-[#8AB4F8] uppercase tracking-widest">{pages.length} páginas</span>
           </div>
         )}
-
-        {/* Zoom */}
         <div className="flex items-center gap-0.5 ml-auto">
-          <button
-            onClick={() => setZoom(z => Math.max(25, z - 10))}
-            className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] transition-all"
-          >
+          <button onClick={() => setZoom(z => Math.max(25, z - 10))} className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06]">
             <ZoomOut className="h-3 w-3" />
           </button>
-          <span className="text-[10px] text-white/25 font-mono w-8 text-center select-none">{zoom}%</span>
-          <button
-            onClick={() => setZoom(z => Math.min(200, z + 10))}
-            className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] transition-all"
-          >
+          <span className="text-[10px] text-white/25 font-mono w-8 text-center">{zoom}%</span>
+          <button onClick={() => setZoom(z => Math.min(200, z + 10))} className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06]">
             <ZoomIn className="h-3 w-3" />
           </button>
         </div>
-
         <div className="w-px h-4 mx-1.5" style={{ background: 'rgba(255,255,255,0.07)' }} />
-
-        {/* External Link */}
         <button
           onClick={() => {
             const frame = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
             if (frame?.src) window.open(frame.src, '_blank');
           }}
           disabled={!hasContent}
-          className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-20"
-          title="Abrir en nueva pestaña"
+          className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] disabled:opacity-20"
         >
           <ExternalLink className="h-3 w-3" />
         </button>
       </div>
 
-      {/* ── Canvas ─────────────────────────────────────────────────────────── */}
       <div
         className="flex flex-1 items-start justify-center overflow-auto relative"
         style={{
-          background: deviceMode === 'desktop'
-            ? '#13141a'
-            : 'radial-gradient(ellipse at center, #1c1d26 0%, #13141a 70%)',
+          background: deviceMode === 'desktop' ? '#13141a' : 'radial-gradient(ellipse at center, #1c1d26 0%, #13141a 70%)',
         }}
       >
-        {/* Dot grid for device modes */}
         {deviceMode !== 'desktop' && (
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              opacity: 0.04,
-              backgroundImage: 'radial-gradient(circle, #8AB4F8 1px, transparent 1px)',
-              backgroundSize: '22px 22px',
-            }}
-          />
+          <div className="absolute inset-0 pointer-events-none" style={{ opacity: 0.04, backgroundImage: 'radial-gradient(circle, #8AB4F8 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
         )}
 
-        {/* Generating overlay */}
         {isGenerating && (
-          <div
-            className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-5"
-            style={{ background: 'rgba(13,14,20,0.9)', backdropFilter: 'blur(6px)' }}
-          >
-            <div
-              className="h-14 w-14 rounded-2xl flex items-center justify-center"
-              style={{ background: 'rgba(138,180,248,0.1)', border: '1px solid rgba(138,180,248,0.2)' }}
-            >
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-5" style={{ background: 'rgba(13,14,20,0.9)', backdropFilter: 'blur(6px)' }}>
+            <div className="h-14 w-14 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(138,180,248,0.1)', border: '1px solid rgba(138,180,248,0.2)' }}>
               <svg className="h-7 w-7 text-[#8AB4F8] animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5"/>
                 <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
@@ -381,12 +461,7 @@ export function StudioPreview({
         )}
 
         {hasContent ? (
-          /* ── Device frame wrapper ─────────────────────────────────── */
-        <div
-            className={deviceMode === 'desktop' ? 'w-full h-full' : 'relative flex-shrink-0 flex items-start justify-center'}
-          >
-
-            {/* Sandpack — no editor, just preview */}
+          <div className={deviceMode === 'desktop' ? 'w-full h-full' : 'relative flex-shrink-0 flex items-start justify-center'}>
             <div
               key={refreshKey}
               style={{
@@ -394,7 +469,6 @@ export function StudioPreview({
                 height: deviceMode === 'desktop' ? '100%' : frameHeight[deviceMode],
                 transformOrigin: 'top center',
                 transform: zoom !== 100 ? `scale(${zoom / 100})` : undefined,
-                borderRadius: 0,
                 overflow: 'hidden',
               }}
               className="flex-shrink-0 flex flex-col"
@@ -405,42 +479,15 @@ export function StudioPreview({
                 files={sandpackFiles!}
                 customSetup={{
                   dependencies: {
-                    // Core React
-                    'react': '^18.0.0',
-                    'react-dom': '^18.0.0',
-                    // Icons
-                    'lucide-react': '^0.468.0',
-                    'react-icons': '^5.0.0',
-                    // Styling utilities
-                    'clsx': '^2.0.0',
-                    'class-variance-authority': '^0.7.0',
-                    'tailwind-merge': '^2.0.0',
-                    // Routing — critical for multi-page
-                    'react-router-dom': '^6.0.0',
-                    // Animation
-                    'framer-motion': '^11.0.0',
-                    // UI Libraries
-                    '@chakra-ui/react': '^2.0.0',
-                    '@chakra-ui/icons': '^2.0.0',
-                    '@emotion/react': '^11.0.0',
-                    '@emotion/styled': '^11.0.0',
-                    // Charts
-                    'recharts': '^2.0.0',
-                    // Forms
-                    'react-hook-form': '^7.0.0',
-                    'zod': '^3.0.0',
-                    '@hookform/resolvers': '^3.0.0',
-                    // HTTP
-                    'axios': '^1.0.0',
-                    // Dates
-                    'date-fns': '^3.0.0',
-                    // State
-                    'zustand': '^4.0.0',
-                    // Notifications
-                    'sonner': '^1.0.0',
-                    // Data fetching
-                    '@tanstack/react-query': '^5.0.0',
-                    // Supabase
+                    'react': '^18.0.0', 'react-dom': '^18.0.0',
+                    'lucide-react': '^0.468.0', 'react-icons': '^5.0.0',
+                    'clsx': '^2.0.0', 'class-variance-authority': '^0.7.0', 'tailwind-merge': '^2.0.0',
+                    'react-router-dom': '^6.0.0', 'framer-motion': '^11.0.0',
+                    '@chakra-ui/react': '^2.0.0', '@chakra-ui/icons': '^2.0.0',
+                    '@emotion/react': '^11.0.0', '@emotion/styled': '^11.0.0',
+                    'recharts': '^2.0.0', 'react-hook-form': '^7.0.0', 'zod': '^3.0.0',
+                    '@hookform/resolvers': '^3.0.0', 'axios': '^1.0.0', 'date-fns': '^3.0.0',
+                    'zustand': '^4.0.0', 'sonner': '^1.0.0', '@tanstack/react-query': '^5.0.0',
                     ...(supabaseConfig ? { '@supabase/supabase-js': '^2.0.0' } : {}),
                   },
                 }}
@@ -453,38 +500,23 @@ export function StudioPreview({
                 theme="dark"
               >
                 <style>{`.sp-wrapper { height: 100% !important; flex: 1; }`}</style>
-                <SandpackLayout style={{ border: 'none', borderRadius: 0, height: deviceMode === 'desktop' ? '100%' : 620, minHeight: deviceMode !== 'desktop' ? 620 : undefined }}>
-                  <SandpackPreview
-                    showOpenInCodeSandbox={false}
-                    showRefreshButton={false}
-                    style={{ height: '100%', minHeight: '100%', flex: 1 }}
-                  />
+                <SandpackLayout style={{ border: 'none', borderRadius: 0, height: '100%' }}>
+                  <SandpackPreview showOpenInCodeSandbox={false} showRefreshButton={false} style={{ height: '100%', minHeight: '100%', flex: 1 }} />
                 </SandpackLayout>
               </SandpackProvider>
             </div>
           </div>
         ) : (
-          /* Empty state */
           <div className="flex flex-1 flex-col items-center justify-center text-center p-10 gap-5">
             <div className="relative">
-              <div
-                className="h-16 w-16 rounded-2xl flex items-center justify-center mx-auto"
-                style={{ background: 'rgba(138,180,248,0.07)', border: '1px solid rgba(138,180,248,0.13)' }}
-              >
+              <div className="h-16 w-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background: 'rgba(138,180,248,0.07)', border: '1px solid rgba(138,180,248,0.13)' }}>
                 <Monitor className="h-7 w-7 text-[#8AB4F8]/30" />
               </div>
-              <div
-                className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full flex items-center justify-center text-[10px]"
-                style={{ background: '#13141a', border: '1px solid rgba(138,180,248,0.2)' }}
-              >
-                ⚡
-              </div>
+              <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full flex items-center justify-center text-[10px]" style={{ background: '#13141a', border: '1px solid rgba(138,180,248,0.2)' }}>⚡</div>
             </div>
             <div>
               <h3 className="text-[15px] font-bold text-white/40 mb-1.5">Preview en vivo</h3>
-              <p className="text-[12px] text-white/20 max-w-[200px] leading-relaxed">
-                Genera código con Genesis y aparecerá aquí automáticamente
-              </p>
+              <p className="text-[12px] text-white/20 max-w-[200px] leading-relaxed">Genera código con Genesis y aparecerá aquí automáticamente</p>
             </div>
           </div>
         )}
