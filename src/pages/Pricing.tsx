@@ -105,7 +105,7 @@ const PLANS = [
     icon: Crown,
     badge: "Acceso Total",
     category: "ULTRA",
-    stripeTier: "agency" as const,
+    stripeTier: "pymes" as const,
     features: [
       { label: "4.000 créditos/mes", highlight: true },
       { label: "Modelos Premium (Claude 3.5 Sonnet, GPT-4o, Opus)", highlight: true },

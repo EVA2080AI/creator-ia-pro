@@ -77,6 +77,7 @@ interface WelcomeScreenProps {
   creating: boolean;
   projects: StudioProject[];
   onSelectProject: (p: StudioProject) => void;
+  onDeleteProject: (projectId: string, e: React.MouseEvent) => void;
   displayName?: string;
   onOpenSearch: () => void;
   onMic: () => void;
@@ -86,7 +87,7 @@ interface WelcomeScreenProps {
 // Plan credit limits for bar calculation
 const PLAN_CREDITS: Record<string, number> = { free: 5, starter: 500, creator: 1200, pymes: 4000 };
 
-function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelectProject, displayName, onOpenSearch, onMic, isListening }: WelcomeScreenProps) {
+function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelectProject, onDeleteProject, displayName, onOpenSearch, onMic, isListening }: WelcomeScreenProps) {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [activeTab, setActiveTab] = useState<WelcomeTab>('projects');
@@ -190,6 +191,10 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                   className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all text-left group">
                   <div className="h-2 w-2 rounded-sm shrink-0" style={{ background: 'rgba(138,180,248,0.3)', border: '1px solid rgba(138,180,248,0.3)' }} />
                   <span className="truncate flex-1">{p.name}</span>
+                  <Trash2 
+                    className="h-3 w-3 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all pointer-events-auto" 
+                    onClick={(e) => onDeleteProject(p.id, e)}
+                  />
                 </button>
               ))}
             </div>
@@ -287,11 +292,15 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {filteredProjects.map(p => (
                     <button key={p.id} onClick={() => onSelectProject(p)}
-                      className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all group">
+                      className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all group relative">
                       <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
                         <Code2 className="h-4 w-4 text-primary" />
                       </div>
                       <p className="text-[13px] font-bold text-white/80 group-hover:text-white truncate mt-1">{p.name}</p>
+                      <Trash2 
+                        className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all" 
+                        onClick={(e) => onDeleteProject(p.id, e)}
+                      />
                     </button>
                   ))}
                   {filteredProjects.length === 0 && (
@@ -309,7 +318,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                     .slice(0, 10)
                     .map(p => (
                       <button key={p.id} onClick={() => onSelectProject(p)}
-                        className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all group">
+                        className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all group relative">
                         <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
                           <Clock className="h-4 w-4 text-primary" />
                         </div>
@@ -317,6 +326,10 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                         <p className="text-[10px] text-white/25">
                           {new Date(p.updated_at ?? p.created_at ?? Date.now()).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
                         </p>
+                        <Trash2 
+                          className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all" 
+                          onClick={(e) => onDeleteProject(p.id, e)}
+                        />
                       </button>
                     ))
                   }
@@ -393,9 +406,6 @@ export default function Chat() {
   useEffect(() => {
     if (activeProject) localStorage.setItem('genesis-last-project', activeProject.id);
   }, [activeProject?.id]);
-
-  // Auto-loading logic removed to ensure users land on the main Genesis page
-
 
   useEffect(() => {
     if (!activeProject) { setSupabaseConfig(null); return; }
@@ -493,7 +503,7 @@ export default function Chat() {
       if (transcript) handleWelcomePrompt(transcript);
     };
     recognition.start();
-  }, [isListening]);
+  }, [handleWelcomePrompt, isListening]);
 
   const handleCmdAction = useCallback((action: string) => {
     switch (action) {
@@ -512,6 +522,12 @@ export default function Chat() {
     toast.success('Pushed to GitHub (simulado)');
     setPushingGithub(false);
   };
+
+  const handleDeleteProject = useCallback(async (projectId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este proyecto? Esta acción no se puede deshacer.')) return;
+    await deleteProject(projectId);
+  }, [deleteProject]);
 
   if (loading) {
     return (
@@ -537,6 +553,7 @@ export default function Chat() {
             creating={creatingWithPrompt}
             projects={projects}
             onSelectProject={setActiveProject}
+            onDeleteProject={handleDeleteProject}
             displayName={profile?.display_name ?? undefined}
             onOpenSearch={() => setCmdPaletteOpen(true)}
             onMic={handleMic}

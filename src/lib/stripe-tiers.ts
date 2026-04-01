@@ -8,32 +8,6 @@
 //   Pymes    $345,000/mo →  4.000 credits All models (Premium)
 
 export const STRIPE_TIERS = {
-  // ── Legacy tiers (kept for backwards compatibility) ────────────────────────
-  educacion: {
-    name: 'Educación',
-    price_id: 'price_1T8jnYHXiILe6LmroPsg0l33',
-    product_id: 'prod_U6xj2kgXVmXSBX',
-    credits: 500,
-    price: '$4.99',
-    tier_key: 'educacion',
-  },
-  pro: {
-    name: 'Pro',
-    price_id: 'price_1T8joOHXiILe6LmrLhyVJyPB',
-    product_id: 'prod_U6xjReaTzoFveY',
-    credits: 1000,
-    price: '$9.99',
-    tier_key: 'pro',
-  },
-  business: {
-    name: 'Business',
-    price_id: 'price_1T8jomHXiILe6Lmr5Aupx4nD',
-    product_id: 'prod_U6xkDNO9PA3C9C',
-    credits: 5000,
-    price: '$49.99',
-    tier_key: 'business',
-  },
-
   // ── New tiers (v3 pricing) ─────────────────────────────────────────────────
   // TODO: Replace price_id with real Stripe IDs after creating products
   starter: {

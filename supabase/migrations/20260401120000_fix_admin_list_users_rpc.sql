@@ -32,5 +32,5 @@ AS $$
     au.last_sign_in_at AS last_sign_in
   FROM public.profiles p
   JOIN auth.users au ON au.id = p.user_id
-  WHERE public.has_role(auth.uid(), 'admin'::app_role);
+  WHERE public.has_role(auth.uid(), 'admin'::TEXT);
 $$;

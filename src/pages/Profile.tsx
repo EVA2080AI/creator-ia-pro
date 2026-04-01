@@ -82,7 +82,7 @@ const Profile = () => {
     );
   }
 
-  const TIER_LABELS: Record<string, string> = { free: "Free", starter: "Starter", creator: "Creator", agency: "Agency", educacion: "Educación", pro: "Pro", business: "Business" };
+  const TIER_LABELS: Record<string, string> = { free: "Free", starter: "Starter", creator: "Creator", pymes: "Pymes" };
   const tierLabel = TIER_LABELS[profile?.subscription_tier ?? "free"] ?? "Free";
   const joinDate = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" }) : "—";
 

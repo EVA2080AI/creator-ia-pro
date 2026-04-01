@@ -43,10 +43,6 @@ const TIERS: Record<string, { label: string; color: string; icon: any }> = {
   starter:   { label: "Starter",    color: "#4ADE80", icon: Zap },
   creator:   { label: "Creator",    color: "#A855F7", icon: Rocket },
   pymes:     { label: "Pymes",      color: "#F59E0B", icon: Crown },
-  agency:    { label: "Agency",     color: "#F59E0B", icon: Crown },
-  educacion: { label: "Educación",  color: "#60A5FA", icon: GraduationCap },
-  pro:       { label: "Pro",        color: "#EC4899", icon: Crown },
-  business:  { label: "Business",   color: "#F59E0B", icon: Building2 },
 };
 
 const TX_TYPE_LABELS: Record<string, { label: string; color: string }> = {
