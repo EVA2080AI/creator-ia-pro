@@ -5,9 +5,10 @@ import { useAdmin } from "@/hooks/useAdmin";
 import {
   Shield, LogOut,
   Home, Menu, X, User, Download,
-  ChevronDown, Coins, Monitor,
+  ChevronDown, Coins, Monitor, Lock,
   Code2, Wand2, FolderOpen, CreditCard, Image, Zap, LayoutTemplate
 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/Logo";
 
@@ -20,8 +21,8 @@ const NAV_ITEMS = [
   { path: "/dashboard",   label: "Home",    icon: Home           },
   { path: "/chat",        label: "Genesis", icon: Code2          }, // Chat viejo
   { path: "/studio",      label: "Studio",  icon: Wand2          }, // Herramientas de IA
-  { path: "/code",         label: "Code",    icon: Monitor        }, // El IDE / Web Builder
-  { path: "/formarketing", label: "Canvas", icon: LayoutTemplate },
+  { path: "/code",        label: "Code",    icon: Monitor,        requiresPymes: true }, // El IDE / Web Builder
+  { path: "/formarketing",label: "Canvas",  icon: LayoutTemplate, requiresPymes: true },
   { path: "/spaces",      label: "Spaces",  icon: FolderOpen     },
 ];
 
@@ -33,7 +34,21 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
   const [mobileOpen,  setMobileOpen]  = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
-  const handleNav = (path: string) => {
+  const isPymes = ["pymes", "agency", "admin"].includes(profile?.subscription_tier?.toLowerCase() || "free");
+
+  const handleNav = (item: typeof NAV_ITEMS[0] | string) => {
+    const path = typeof item === 'string' ? item : item.path;
+    
+    // Check if the route is premium and user is not Pymes
+    if (typeof item !== 'string' && (item as any).requiresPymes && !isPymes) {
+      toast.error("Funcionalidad exclusiva", {
+        description: `La herramienta "${item.label}" es exclusiva del plan Pymes.`,
+        action: { label: "Actualizar Plan", onClick: () => navigate("/pricing") },
+        duration: 8000
+      });
+      return;
+    }
+
     navigate(path);
     setMobileOpen(false);
     setUserMenuOpen(false);
@@ -59,18 +74,24 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
         <nav className="hidden md:flex items-center gap-0.5">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item.path);
+            const isLocked = item.requiresPymes && !isPymes;
             return (
               <button
                 key={item.path}
-                onClick={() => handleNav(item.path)}
+                onClick={() => handleNav(item)}
                 className={cn(
                   "relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-bold transition-all duration-150 active:scale-95",
                   active
                     ? "text-white bg-white/10 border border-white/10 shadow-lg shadow-white/5"
-                    : "text-white/40 hover:text-white/70 hover:bg-white/5"
+                    : "text-white/40 hover:text-white/70 hover:bg-white/5",
+                  isLocked && "opacity-75"
                 )}
               >
-                <item.icon className="w-3.5 h-3.5 shrink-0" />
+                {isLocked ? (
+                  <Lock className="w-3.5 h-3.5 shrink-0 text-amber-500/80" />
+                ) : (
+                  <item.icon className="w-3.5 h-3.5 shrink-0" />
+                )}
                 {item.label}
               </button>
             );
@@ -218,18 +239,22 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           <nav className="flex flex-col gap-1">
             {NAV_ITEMS.map((item) => {
               const active = isActive(item.path);
+              const isLocked = item.requiresPymes && !isPymes;
               return (
                 <button
                   key={item.path}
-                  onClick={() => handleNav(item.path)}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[13px] font-semibold transition-all"
+                  onClick={() => handleNav(item)}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-[13px] font-semibold transition-all"
                   style={active
                     ? { background: 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid rgba(255,255,255,0.12)' }
                     : { color: 'rgba(255,255,255,0.45)', border: '1px solid transparent' }
                   }
                 >
-                  <item.icon className="w-5 h-5" />
-                  {item.label}
+                  <div className="flex items-center gap-3">
+                    <item.icon className="w-5 h-5" />
+                    {item.label}
+                  </div>
+                  {isLocked && <Lock className="w-4 h-4 text-amber-500/80" />}
                 </button>
               );
             })}

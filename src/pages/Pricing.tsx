@@ -17,41 +17,63 @@ import { cn } from "@/lib/utils";
 // ─── Plan definitions ─────────────────────────────────────────────────────────
 const PLANS = [
   {
+    key: "free" as const,
+    name: "Free",
+    price: 0,
+    priceLabel: "$0",
+    period: "/mes",
+    credits: 5,
+    creditsLabel: "5 créditos",
+    description: "Para explorar la plataforma y ver la magia en acción.",
+    color: "#9CA3AF",
+    gradient: "from-gray-500/10 to-gray-500/5",
+    border: "border-gray-500/20",
+    icon: Sparkles,
+    badge: null,
+    category: "ECO",
+    stripeTier: "free" as const,
+    features: [
+      { label: "5 créditos/mes", highlight: true },
+      { label: "Modelos ECO (Gemini, Llama)", highlight: false },
+      { label: "Studio (básico)", highlight: false },
+    ],
+    lockedFeatures: ["Modelos Premium", "Code y Canvas"],
+    psychNote: "Comienza sin tarjeta",
+  },
+  {
     key: "starter" as const,
     name: "Starter",
-    price: 49900,
-    priceLabel: "$49.900",
+    price: 69000,
+    priceLabel: "$69.000",
     period: "/mes",
-    credits: 100_000,
-    creditsLabel: "100K créditos",
-    description: "Para creadores que están comenzando su viaje con IA.",
+    credits: 500,
+    creditsLabel: "500 créditos",
+    description: "Para creadores que están construyendo su viaje.",
     color: "#4ADE80",
     gradient: "from-emerald-500/10 to-emerald-500/5",
     border: "border-emerald-500/20",
     icon: Zap,
     badge: null,
-    category: "ECO",
+    category: "PRO",
     stripeTier: "starter" as const,
     features: [
-      { label: "100,000 créditos/mes", highlight: true },
-      { label: "Modelos ECO (Gemini Flash, Llama, Mistral)", highlight: false },
-      { label: "Genesis IDE — BuilderAI code generator", highlight: false },
-      { label: "Studio — herramientas creativas IA", highlight: false },
-      { label: "Canvas IA (ReactFlow node editor)", highlight: false },
+      { label: "500 créditos/mes", highlight: true },
+      { label: "Modelos rápidos y estándar", highlight: false },
+      { label: "Genesis (Chat IA)", highlight: false },
       { label: "Soporte email", highlight: false },
     ],
-    lockedFeatures: ["Modelos PRO y ULTRA", "Brand Voice"],
+    lockedFeatures: ["Modelos Premium (Sonnet, Opus)", "Code y Canvas"],
     psychNote: "Prueba sin compromiso · cancela cuando quieras",
   },
   {
     key: "creator" as const,
     name: "Creator",
-    price: 129900,
-    priceLabel: "$129.900",
+    price: 138000,
+    priceLabel: "$138.000",
     period: "/mes",
-    credits: 500_000,
-    creditsLabel: "500K créditos",
-    description: "El sweet spot para creadores profesionales. Incluye Claude y GPT-4o.",
+    credits: 1200,
+    creditsLabel: "1.200 créditos",
+    description: "El nivel ideal para creadores e independientes.",
     color: "#A855F7",
     gradient: "from-primary/15 to-primary/5",
     border: "border-primary/30",
@@ -60,59 +82,52 @@ const PLANS = [
     category: "PRO",
     stripeTier: "creator" as const,
     features: [
-      { label: "500,000 créditos/mes", highlight: true },
-      { label: "Modelos ECO + PRO", highlight: true },
-      { label: "Claude Sonnet 3.5 · GPT-4o · Gemini Pro", highlight: false },
-      { label: "Genesis IDE + GitHub push", highlight: true },
-      { label: "Brand Voice personalizado", highlight: true },
+      { label: "1.200 créditos/mes", highlight: true },
+      { label: "Modelos rápidos y estándar", highlight: true },
+      { label: "Mayor límite de uso", highlight: false },
       { label: "Soporte prioritario", highlight: false },
     ],
-    lockedFeatures: ["Modelos ULTRA (Claude Opus)"],
+    lockedFeatures: ["Modelos Premium", "Code y Canvas"],
     psychNote: "Inversión 100% deducible de impuestos",
   },
   {
-    key: "agency" as const,
-    name: "Agency",
-    price: 299900,
-    priceLabel: "$299.900",
+    key: "pymes" as const,
+    name: "Pymes",
+    price: 345000,
+    priceLabel: "$345.000",
     period: "/mes",
-    credits: 2_000_000,
-    creditsLabel: "2M créditos",
-    description: "Para agencias y equipos. Acceso total. Modelos ULTRA incluidos.",
+    credits: 4000,
+    creditsLabel: "4.000 créditos",
+    description: "Acceso total. Modelos Premium y todas las herramientas.",
     color: "#F59E0B",
     gradient: "from-amber-500/15 to-amber-500/5",
     border: "border-amber-500/30",
     icon: Crown,
-    badge: "Máximo volumen",
+    badge: "Acceso Total",
     category: "ULTRA",
     stripeTier: "agency" as const,
     features: [
-      { label: "2,000,000 créditos/mes", highlight: true },
-      { label: "TODOS los modelos (ECO + PRO + ULTRA)", highlight: true },
-      { label: "Claude Opus 3.5 · GPT-4o · Mistral Large", highlight: false },
-      { label: "Genesis IDE + proyectos ilimitados", highlight: true },
+      { label: "4.000 créditos/mes", highlight: true },
+      { label: "Modelos Premium (Claude 3.5 Sonnet, GPT-4o, Opus)", highlight: true },
+      { label: "Desbloquea Code (BuilderAI IDE)", highlight: true },
+      { label: "Desbloquea Canvas (ReactFlow)", highlight: true },
       { label: "Soporte prioritario 24/7", highlight: true },
-      { label: "API access (próximamente)", highlight: false },
     ],
     lockedFeatures: [],
-    psychNote: "Las agencias facturan el cuádruple en 15 minutos de trabajo con IA.",
+    psychNote: "Máximo retorno para negocios de contenido.",
   },
 ];
 
 // ─── Comparison table rows ────────────────────────────────────────────────────
 const COMPARISON_ROWS = [
-  { label: "Créditos/mes",             starter: "100K",  creator: "500K",  agency: "2M" },
-  { label: "Modelos ECO",              starter: true,    creator: true,    agency: true },
-  { label: "Modelos PRO",              starter: false,   creator: true,    agency: true },
-  { label: "Modelos ULTRA",            starter: false,   creator: false,   agency: true },
-  { label: "Genesis IDE (BuilderAI)",  starter: true,    creator: true,    agency: true },
-  { label: "GitHub push",              starter: true,    creator: true,    agency: true },
-  { label: "Studio — herramientas IA", starter: true,    creator: true,    agency: true },
-  { label: "Canvas IA (ReactFlow)",    starter: true,    creator: true,    agency: true },
-  { label: "Spaces (Drive IA)",        starter: true,    creator: true,    agency: true },
-  { label: "Brand Voice",              starter: false,   creator: true,    agency: true },
-  { label: "Proyectos en Genesis",     starter: "5",     creator: "∞",     agency: "∞" },
-  { label: "Soporte",                  starter: "Email", creator: "Prior", agency: "24/7" },
+  { label: "Créditos/mes",             free: "5",       starter: "500",  creator: "1.200", pymes: "4.000" },
+  { label: "Modelos Estándar",         free: true,      starter: true,   creator: true,    pymes: true },
+  { label: "Modelos Premium",          free: false,     starter: false,  creator: false,   pymes: true },
+  { label: "Genesis (Chat IA)",        free: true,      starter: true,   creator: true,    pymes: true },
+  { label: "Studio",                   free: true,      starter: true,   creator: true,    pymes: true },
+  { label: "Code (BuilderAI)",         free: false,     starter: false,  creator: false,   pymes: true },
+  { label: "Canvas (ReactFlow)",       free: false,     starter: false,  creator: false,   pymes: true },
+  { label: "Soporte",                  free: "Foro",    starter: "Email",creator: "Prior", pymes: "24/7" },
 ];
 
 // ─── Lightning bolts component ────────────────────────────────────────────────
@@ -255,8 +270,8 @@ export default function Pricing() {
           </section>
 
           {/* ── Pricing cards (bento grid) ───────────────────────────────── */}
-          <section className="px-6 mb-8">
-            <div className="max-w-5xl mx-auto grid md:grid-cols-3 gap-6 items-start">
+          <section className="px-6 mb-8 w-full">
+            <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
               {PLANS.map((plan) => {
                 const Icon = plan.icon;
                 const isLoading = loadingPlan === plan.key;
@@ -384,8 +399,8 @@ export default function Pricing() {
                     {COMPARISON_ROWS.map((row, i) => (
                       <tr key={row.label} className={cn("border-b border-white/[0.04]", i % 2 === 0 && "bg-white/[0.01]")}>
                         <td className="px-5 py-3 text-[12px] text-white/50">{row.label}</td>
-                        {(['starter', 'creator', 'agency'] as const).map(tier => {
-                          const val = row[tier];
+                        {(['free', 'starter', 'creator', 'pymes'] as const).map(tier => {
+                          const val = (row as any)[tier];
                           return (
                             <td key={tier} className="px-4 py-3 text-center">
                               {typeof val === 'boolean' ? (

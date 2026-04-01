@@ -28,37 +28,48 @@ const IMAGE_MODEL_IDS = new Set(Object.keys(IMAGE_MODEL_MAP));
 
 // ─── CREDIT COSTS (Credits per request) ──────────────────────────────────────
 export const MODEL_COSTS: Record<string, number> = {
-  // Common Text/Chat Models (OpenRouter Slugs)
-  "anthropic/claude-3.5-sonnet":           5,
-  "anthropic/claude-3-5-sonnet-20241022":  5,
-  "openai/gpt-4o":                         5,
-  "deepseek/deepseek-r1":                  3,
+  // Standard Models (1 crédito) - Disponibles para todos los planes
+  "anthropic/claude-3-5-haiku-20241022":   1,
+  "openai/gpt-4o-mini":                    1,
+  "meta-llama/llama-3-8b-instruct":        1,
+  "meta-llama/llama-3-70b-instruct":       1,
   "deepseek/deepseek-chat":                1,
   "google/gemini-2.0-flash-001":           1,
-  "google/gemini-2.5-pro-preview-03-25":   2,
-  "mistralai/mistral-large":               2,
   "mistralai/mistral-small-3.1-24b-instruct": 1,
 
-  // Legacy Internal IDs (for backward compatibility)
-  "deepseek-chat":       1, 
-  "gemini-3-flash":      1, 
-  "gemini-3.1-pro-low":  1,
-  "gemini-3.1-pro-high": 3, 
-  "claude-3.5-sonnet":   4, 
-  "claude-3-opus":       5,
-  "gpt-oss-120b":        2, 
-  "mistral-large":       2, 
-  "mistral-small":       1,
+  // Premium Models (3 - 5 créditos) - EXCLUSIVO PYMES
+  "anthropic/claude-3.5-sonnet":           5,
+  "anthropic/claude-3-5-sonnet-20241022":  5,
+  "anthropic/claude-3-opus-20240229":      5,
+  "openai/gpt-4o":                         5,
+  "deepseek/deepseek-r1":                  3,
+  "google/gemini-2.5-pro-preview-03-25":   3,
+  "mistralai/mistral-large":               3,
 
-  // Image Generation
+  // Image Generation (Premium)
   "black-forest-labs/flux-schnell": 2,
-  "black-forest-labs/flux-1.1-pro": 4,
-  "stability-ai/stable-diffusion-3-5-large": 2,
-  "flux-schnell": 2, "flux-pro": 4, "flux-pro-1.1": 4, "sdxl": 2,
+  "black-forest-labs/flux-1.1-pro": 5,
+  "stability-ai/stable-diffusion-3-5-large": 3,
+  "flux-schnell": 2, "flux-pro": 5, "flux-pro-1.1": 5, "sdxl": 3,
   
   // Image editing tools
   "upscale": 3, "background": 1, "enhance": 2, "restore": 3, "variation": 4, "video": 5,
 };
+
+// Modelos que requieren el plan Pymes
+const PREMIUM_MODELS = new Set([
+  "anthropic/claude-3.5-sonnet",
+  "anthropic/claude-3-5-sonnet-20241022",
+  "anthropic/claude-3-opus-20240229",
+  "openai/gpt-4o",
+  "deepseek/deepseek-r1",
+  "google/gemini-2.5-pro-preview-03-25",
+  "mistralai/mistral-large",
+  "claude-3.5-sonnet",
+  "claude-3-opus",
+  "gpt-oss-120b",
+  "gemini-3.1-pro-high",
+]);
 
 export interface AIActionParams {
   action: "ui" | "image" | "video" | "chat";
@@ -102,6 +113,13 @@ export const aiService = {
 
   // ─── SINGLE PROXY CALL — all AI traffic goes through here ────────────────────
   async callProxy(provider: string, path: string, body: unknown) {
+    // Proactively fetch/refresh the token before invoking the edge function 
+    // to prevent 401 (Invalid JWT)
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session) {
+      throw new Error("No hay sesión activa. Por favor, recarga la página o vuelve a ingresar.");
+    }
+
     const { data, error } = await supabase.functions.invoke("ai-proxy", {
       body: { provider, path, body },
     });
@@ -136,14 +154,28 @@ export const aiService = {
         if (!exists) safeNodeId = null;
       }
 
-      // 2b. Smart credit warning
+      // 2b. Smart credit warning and zero balance guard
       const balance = profile?.credits_balance ?? 0;
-      if (balance < cost) {
-        toast.error("Créditos insuficientes. Recarga tu plan para continuar.", {
-          action: { label: "Ver planes", onClick: () => { window.location.href = '/pricing'; } },
+      if (balance <= 0 || balance < cost) {
+        toast.error("Créditos insuficientes. Actualiza tu plan o compra créditos extra para continuar.", {
+          action: { label: "Planes", onClick: () => { window.location.href = '/pricing'; } },
           duration: 6000,
         });
-        throw new Error("Créditos insuficientes");
+        throw new Error("Créditos exhaustos");
+      }
+
+      // 2c. Validar permisos de modelos premium (Solo plan Pymes)
+      const userTier = profile?.subscription_tier?.toLowerCase() || 'free';
+      const orModel = TEXT_MODEL_MAP[model] || model;
+      if (PREMIUM_MODELS.has(orModel) || PREMIUM_MODELS.has(model)) {
+        if (userTier !== 'pymes' && userTier !== 'agency' && userTier !== 'admin') {
+          toast.error("Modelo bloqueado", {
+            description: "Los modelos de IA Premium y Thinking (ej. Claude 3.5 Sonnet, GPT-4o) son exclusivos del plan Pymes.",
+            action: { label: "Actualizar Plan", onClick: () => { window.location.href = '/pricing'; } },
+            duration: 8000,
+          });
+          throw new Error("Este modelo premium requiere el plan Pymes.");
+        }
       }
       if (balance < 50) {
         toast.warning(`Solo te quedan ${balance} créditos. ¡Recarga pronto!`, {
@@ -330,14 +362,18 @@ ${userCredits < 3 ? "⚠️ Créditos bajos — Plan Pro garantiza acceso contin
       chat:       `Eres Antigravity, IA de nivel Senior. Responde con precisión y valor. PLAN: ${userTier}. CRÉDITOS: ${userCredits}.`,
     };
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session?.access_token) {
+      throw new Error("Sesión caducada. Por favor, refresca la página.");
+    }
+
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 
     const res = await fetch(`${supabaseUrl}/functions/v1/ai-proxy`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...(session?.access_token ? { "Authorization": `Bearer ${session.access_token}` } : {}),
+        "Authorization": `Bearer ${session.access_token}`,
         "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
       },
       body: JSON.stringify({
@@ -356,7 +392,13 @@ ${userCredits < 3 ? "⚠️ Créditos bajos — Plan Pro garantiza acceso contin
       }),
     });
 
-    if (!res.ok || !res.body) throw new Error("Streaming no disponible. Intenta de nuevo.");
+    if (!res.ok) {
+      if (res.status === 401) {
+        throw new Error("Token de sesión inválido (401). Verifica tu inicio de sesión.");
+      }
+      throw new Error("Streaming no disponible. Intenta de nuevo.");
+    }
+    if (!res.body) throw new Error("Cuerpo de respuesta vacío");
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();

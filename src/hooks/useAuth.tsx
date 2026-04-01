@@ -27,7 +27,20 @@ export function useAuth(redirectTo?: string) {
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Proactive refresh every 10 minutes to prevent edge-function 401s
+    const refreshInterval = setInterval(async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (!error && session) {
+        // Just calling getSession() can refresh the token if autoRefreshToken is true 
+        // We can also force refresh with refreshSession() if needed:
+        // await supabase.auth.refreshSession();
+      }
+    }, 10 * 60 * 1000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(refreshInterval);
+    };
   }, [navigate, redirectTo]);
 
   const signOut = async () => {
