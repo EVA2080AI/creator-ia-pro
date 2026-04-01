@@ -111,8 +111,10 @@ const CODE_NOUNS = ['página','pagina','app','aplicación','aplicacion','dashboa
 
 function detectIntent(prompt: string): 'codegen' | 'chat' {
   const p = prompt.toLowerCase().trim();
-  // Pasting an error/code block → always chat
-  if (/```[\s\S]*```/.test(prompt) || p.includes('error:') || p.includes('exception')) return 'chat';
+  // If prompt is just an error report with no instruction to fix/build, use chat
+  const isOnlyError = (p.includes('error:') || p.includes('exception')) && !CODE_VERBS.some(v => p.includes(v));
+  if (/```[\s\S]*```/.test(prompt) && isOnlyError) return 'chat';
+  
   // Starts with imperative build verb → codegen
   if (CODE_VERBS.some(v => p.startsWith(v + ' ') || p.startsWith(v + '\n'))) return 'codegen';
   // Contains code noun → codegen (weighted)
@@ -123,7 +125,7 @@ function detectIntent(prompt: string): 'codegen' | 'chat' {
 }
 
 // ─── Genesis unified system prompt (v3 — Elite Architect & Full-Stack Lead) ──────
-const GENESIS_CHAT_SYSTEM = `Eres Genesis AI — el asistente de desarrollo más avanzado del mundo, experto en arquitectura de software y entrega de productos de nivel empresarial (Elite Architect). Eres:
+const GENESIS_CHAT_SYSTEM_BASE_RULES = `Eres un experto en arquitectura de software y entrega de productos de nivel empresarial (Elite Architect). Eres:
 
 🧠 ARQUITECTO DE SISTEMAS & AITMPL EXPERT:
   - Diseñas arquitecturas escalables (Microservicios, Serverless, Event-Driven).
@@ -152,6 +154,19 @@ ESTILO Y REGLAS DE ORO:
 - Si detectas debilidades de seguridad o performance, corrígelas inmediatamente.
 
 Tienes acceso total al contexto de este proyecto. Estás aquí para liderar la implementación desde el primer archivo hasta el despliegue final en producción.`;
+
+const GENESIS_CHAT_SYSTEM = `Eres Genesis AI — el asistente de desarrollo más avanzado del mundo. Estás en modo CHAT/DEBUG.
+
+REGLAS DE RESPUESTA:
+1. Si propones código, SIEMPRE incluye la ruta del archivo en la primera línea del bloque de código. Ej:
+   \`\`\`tsx
+   // components/MyComponent.tsx
+   import ...
+   \`\`\`
+2. Intenta mantener los archivos existentes lo más posible, solo propón los cambios necesarios.
+3. Si el usuario te pide arreglar un error, analiza la causa raíz y propón la solución completa.
+
+${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
 
 // ─── Clone system prompt ──────────────────────────────────────────────────────
 const CLONE_SYSTEM_PROMPT = `Eres un experto en Reverse-Engineering de Frontend de nivel mundial.
@@ -285,30 +300,43 @@ Solo dime qué necesitas — detecto automáticamente si quieres código o una r
 // ─── Extract previewable code files from a Genesis chat response ───────────────
 function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
   const regex = /```(\w*)\n?([\s\S]*?)```/g;
-  const blocks: Array<{ lang: string; code: string }> = [];
+  const files: Record<string, StudioFile> = {};
   let m;
   while ((m = regex.exec(text)) !== null) {
     const lang = m[1].trim().toLowerCase();
     const code = m[2].trim();
-    if (code.length > 80) blocks.push({ lang, code });
-  }
-  if (blocks.length === 0) return null;
+    if (code.length < 50) continue; // skip trivial snippets
 
-  const files: Record<string, StudioFile> = {};
-  for (const { lang, code } of blocks) {
-    if (lang === 'html' || code.startsWith('<!DOCTYPE') || code.startsWith('<html')) {
-      files['index.html'] = { language: 'html', content: code };
-    } else if ((lang === 'tsx' || lang === 'jsx' || lang === 'react') && code.length > 100) {
-      files['App.tsx'] = { language: 'tsx', content: code };
-    } else if ((lang === 'ts' || lang === 'js' || lang === 'typescript' || lang === 'javascript') && code.length > 100 && !files['App.tsx']) {
-      // Treat as TSX if it contains JSX patterns or React hooks
-      const isJsx = /return\s*\(?\s*<|useState\s*[<(]|useEffect\s*\(|<[A-Z][A-Za-z]|React\.createElement/.test(code);
-      files['App.tsx'] = { language: isJsx ? 'tsx' : lang, content: code };
-    } else if (lang === 'css' && code.length > 20) {
-      files['styles.css'] = { language: 'css', content: code };
-    } else if (lang === 'python') {
-      files['main.py'] = { language: 'python', content: code };
+    // Try to detect filename from the first line or a specific comment
+    let filename = '';
+    const lines = code.split('\n');
+    const firstLine = lines[0].trim();
+    
+    // Look for "// path/to/file.tsx" or "/* path/to/file.tsx */" or "// Filename: file.tsx"
+    const fileMatch = 
+      firstLine.match(/\/\/\s*([\w./\-]+\.\w+)/) || 
+      firstLine.match(/\/\*\s*([\w./\-]+\.\w+)\s*\*\//) ||
+      code.match(/\/\/\s*Filename:\s*([\w./\-]+\.\w+)/i);
+
+    if (fileMatch) {
+      filename = fileMatch[1].replace(/^src\//, ''); // strip leading src/ if present
+    } else {
+      // Intelligent fallback
+      if (lang === 'html' || code.includes('<!DOCTYPE')) filename = 'index.html';
+      else if (lang === 'css') filename = 'styles.css';
+      else if (lang === 'python') filename = 'main.py';
+      else if (code.includes('import React') || code.includes('export default')) filename = 'App.tsx';
+      else continue; // ignore random snippets without file context
     }
+    
+    // Determine language based on extension or detected lang
+    let finalLang = lang;
+    if (filename.endsWith('.tsx')) finalLang = 'tsx';
+    else if (filename.endsWith('.ts')) finalLang = 'ts';
+    else if (filename.endsWith('.js')) finalLang = 'javascript';
+    else if (filename.endsWith('.json')) finalLang = 'json';
+
+    files[filename] = { language: finalLang, content: code };
   }
   return Object.keys(files).length > 0 ? files : null;
 }
