@@ -1,16 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
   <defs>
-    <linearGradient id="aether-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#D2FF00" />
-      <stop offset="100%" stop-color="#80A800" />
-    </linearGradient>
-    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1A1A1A" />
-      <stop offset="100%" stop-color="#050505" />
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc" />
+      <stop offset="100%" stop-color="#9333ea" />
     </linearGradient>
   </defs>
-  <rect width="256" height="256" rx="60" fill="url(#bg-grad)" />
-  <path d="M128 52 L204 100 L204 156 L128 204 L52 156 L52 100 Z" fill="none" stroke="url(#aether-grad)" stroke-width="18" stroke-linejoin="round"/>
-  <circle cx="128" cy="128" r="28" fill="url(#aether-grad)" />
-  <path d="M128 52 L128 204 M52 100 L204 156 M52 156 L204 100" stroke="url(#aether-grad)" stroke-width="6" stroke-opacity="0.3" />
+  <!-- Rounded square background -->
+  <rect width="256" height="256" rx="54" fill="url(#bg)" />
+  <!-- Lucide Sparkles icon scaled from 24→192, centered with 32px margin -->
+  <g transform="translate(32, 32) scale(8)">
+    <!-- Main star -->
+    <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"
+          fill="white" />
+    <!-- Small sparkle top-right -->
+    <line x1="20" y1="3" x2="20" y2="7" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="22" y1="5" x2="18" y2="5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <!-- Small sparkle bottom-left -->
+    <line x1="4" y1="17" x2="4" y2="19" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <line x1="5" y1="18" x2="3" y2="18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  </g>
 </svg>
