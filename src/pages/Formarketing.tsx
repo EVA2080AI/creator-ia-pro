@@ -1124,8 +1124,8 @@ function FormarketingContent() {
   return (
     <>
       <Helmet>
-        <title>Studio · Canvas | Creator IA Pro</title>
-        <meta name="description" content="Crea campañas visuales con IA. Conecta personajes, imágenes y videos en un lienzo intuitivo." />
+        <title>Canvas IA | Creator IA Pro</title>
+        <meta name="description" content="Canvas IA — flujos visuales de contenido con nodos inteligentes. Conecta, genera y publica campañas completas con IA." />
       </Helmet>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
@@ -1137,7 +1137,7 @@ function FormarketingContent() {
           </div>
           <div className="space-y-3 max-w-xs">
             <h2 className="text-xl font-bold text-white font-display">Experiencia de escritorio</h2>
-            <p className="text-sm text-white/40 leading-relaxed">El Studio Canvas requiere un teclado y pantalla grande para la mejor experiencia creativa.</p>
+            <p className="text-sm text-white/40 leading-relaxed">Canvas IA requiere pantalla grande y teclado para la mejor experiencia creativa.</p>
           </div>
           <button
             onClick={() => navigate('/dashboard')}
@@ -1208,6 +1208,11 @@ function FormarketingContent() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="h-5 w-px bg-white/[0.06]" />
+          <span className="hidden md:flex items-center gap-1.5 text-[11px] font-black text-white/50 uppercase tracking-widest">
+            <LayoutDashboard className="w-3.5 h-3.5 text-primary/60" />
+            Canvas IA
+          </span>
+          <div className="hidden md:block h-5 w-px bg-white/[0.06]" />
           {/* Templates */}
           <button
             onClick={() => setShowLanding(true)}

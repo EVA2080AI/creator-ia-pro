@@ -24,14 +24,14 @@ import {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const PRODUCTS = [
   {
-    badge: "Genesis IDE",
-    headline: "De la idea al código en segundos.",
-    sub: "Describe tu app y Genesis la construye completa con React, TypeScript y Tailwind. Previsualización en tiempo real, push a GitHub integrado.",
+    badge: "Genesis IA",
+    headline: "Crea apps y sitios web en segundos.",
+    sub: "Describe tu app o sitio web y Genesis lo construye completo: React, TypeScript, Tailwind, APIs y más. Previsualización en tiempo real, push a GitHub integrado.",
     icon: Code2,
     color: "#4ADE80",
-    cta: "Probar Genesis →",
+    cta: "Probar Genesis IA →",
     path: "/chat",
-    features: ["React 18 + TypeScript", "Preview instantáneo", "GitHub push", "Claude 4.6"],
+    features: ["Apps React + TypeScript", "Sitios web completos", "Preview instantáneo", "Claude 4.6 Sonnet"],
     preview: [
       { label: "App.tsx", lines: 42, active: true },
       { label: "components/Hero.tsx", lines: 28, active: false },
@@ -339,7 +339,7 @@ export default function Index() {
             className="w-1.5 h-1.5 rounded-full bg-primary"
           />
           <p className="text-[12px] font-semibold text-zinc-600">
-            Genesis IDE + Studio + Canvas — Starter desde{" "}
+            Genesis IA · Generar IA · Canvas IA — Starter desde{" "}
             <span className="text-zinc-900 font-black">$12/mes</span>
           </p>
           <button onClick={() => navigate("/pricing")} className="flex items-center gap-1 text-[12px] text-primary hover:text-zinc-900 transition-colors font-bold">
@@ -351,34 +351,72 @@ export default function Index() {
 
           {/* ── Hero ─────────────────────────────────────────────────────── */}
           <section ref={heroRef} className="relative flex flex-col items-center text-center px-6 pt-24 pb-20 overflow-hidden">
-            {/* Animated aurora blobs */}
+
+            {/* ── Creative background ──────────────────────────────────── */}
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              {/* Dot grid */}
+              <svg className="absolute inset-0 w-full h-full opacity-[0.055]" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <pattern id="hero-dots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
+                    <circle cx="1" cy="1" r="1" fill="#a855f7" />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#hero-dots)" />
+              </svg>
+
+              {/* Floating node graph — decorative AI canvas */}
+              <svg className="absolute inset-0 w-full h-full opacity-[0.06]" xmlns="http://www.w3.org/2000/svg">
+                {/* Connection lines */}
+                <line x1="18%" y1="30%" x2="38%" y2="50%" stroke="#a855f7" strokeWidth="1.5" strokeDasharray="6 4" />
+                <line x1="38%" y1="50%" x2="62%" y2="35%" stroke="#a855f7" strokeWidth="1.5" strokeDasharray="6 4" />
+                <line x1="62%" y1="35%" x2="82%" y2="55%" stroke="#a855f7" strokeWidth="1.5" strokeDasharray="6 4" />
+                <line x1="38%" y1="50%" x2="50%" y2="70%" stroke="#6366f1" strokeWidth="1"   strokeDasharray="4 4" />
+                <line x1="62%" y1="35%" x2="50%" y2="70%" stroke="#6366f1" strokeWidth="1"   strokeDasharray="4 4" />
+                {/* Node circles */}
+                <circle cx="18%" cy="30%" r="12" fill="none" stroke="#a855f7" strokeWidth="1.5" />
+                <circle cx="18%" cy="30%" r="5"  fill="#a855f7" />
+                <circle cx="38%" cy="50%" r="14" fill="none" stroke="#a855f7" strokeWidth="1.5" />
+                <circle cx="38%" cy="50%" r="6"  fill="#a855f7" />
+                <circle cx="62%" cy="35%" r="12" fill="none" stroke="#6366f1" strokeWidth="1.5" />
+                <circle cx="62%" cy="35%" r="5"  fill="#6366f1" />
+                <circle cx="82%" cy="55%" r="10" fill="none" stroke="#a855f7" strokeWidth="1.5" />
+                <circle cx="82%" cy="55%" r="4"  fill="#a855f7" />
+                <circle cx="50%" cy="70%" r="10" fill="none" stroke="#6366f1" strokeWidth="1.5" />
+                <circle cx="50%" cy="70%" r="4"  fill="#6366f1" />
+              </svg>
+
+              {/* Aurora blobs */}
               <motion.div
-                animate={{
-                  x: [0, 40, -20, 0],
-                  y: [0, -30, 20, 0],
-                  scale: [1, 1.1, 0.95, 1],
-                }}
+                animate={{ x: [0, 40, -20, 0], y: [0, -30, 20, 0], scale: [1, 1.1, 0.95, 1] }}
                 transition={{ repeat: Infinity, duration: 14, ease: "easeInOut" }}
                 className="absolute top-[-10%] left-[30%] w-[600px] h-[400px] bg-primary/8 blur-[130px] rounded-full"
               />
               <motion.div
-                animate={{
-                  x: [0, -50, 30, 0],
-                  y: [0, 40, -20, 0],
-                  scale: [1, 0.9, 1.05, 1],
-                }}
+                animate={{ x: [0, -50, 30, 0], y: [0, 40, -20, 0], scale: [1, 0.9, 1.05, 1] }}
                 transition={{ repeat: Infinity, duration: 18, ease: "easeInOut", delay: 2 }}
                 className="absolute bottom-[10%] right-[20%] w-[400px] h-[300px] bg-violet-400/6 blur-[110px] rounded-full"
               />
               <motion.div
-                animate={{
-                  x: [0, 30, -40, 0],
-                  scale: [1, 1.15, 0.9, 1],
-                }}
+                animate={{ x: [0, 30, -40, 0], scale: [1, 1.15, 0.9, 1] }}
                 transition={{ repeat: Infinity, duration: 22, ease: "easeInOut", delay: 4 }}
                 className="absolute top-[40%] left-[10%] w-[300px] h-[200px] bg-emerald-400/5 blur-[100px] rounded-full"
               />
+
+              {/* Floating animated particles */}
+              {[
+                { x: "12%", y: "20%", dur: 8,  delay: 0,   size: 3, color: "#a855f7" },
+                { x: "88%", y: "15%", dur: 10, delay: 1.5, size: 2, color: "#6366f1" },
+                { x: "75%", y: "65%", dur: 12, delay: 3,   size: 4, color: "#a855f7" },
+                { x: "5%",  y: "55%", dur: 9,  delay: 2,   size: 2, color: "#34d399" },
+                { x: "92%", y: "40%", dur: 11, delay: 4,   size: 3, color: "#f59e0b" },
+              ].map((p, i) => (
+                <motion.div
+                  key={i}
+                  style={{ left: p.x, top: p.y, width: p.size, height: p.size, background: p.color, position: "absolute", borderRadius: "50%" }}
+                  animate={{ y: [0, -16, 0], opacity: [0.3, 0.8, 0.3] }}
+                  transition={{ repeat: Infinity, duration: p.dur, delay: p.delay, ease: "easeInOut" }}
+                />
+              ))}
             </div>
 
             <div className="relative z-10">
