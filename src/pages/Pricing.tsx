@@ -1,14 +1,17 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { boldService } from "@/services/billing-service";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
 import { CATEGORY_CONFIG } from "@/lib/models.config";
+import { motion, AnimatePresence } from "framer-motion";
+import confetti from "canvas-confetti";
+import React from "react";
 import {
   Sparkles, Check, Zap, Crown, Rocket, Loader2,
-  Coins, Shield, Code2, Megaphone, MessageSquare,
-  ChevronDown, ChevronUp, Bolt,
+  Coins, Shield, Code2, Bolt, ArrowRight,
+  TrendingUp, Globe, Lock, Cpu, Star, MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
 import { AppHeader } from "@/components/AppHeader";
@@ -21,148 +24,157 @@ const PLANS = [
     name: "Free",
     price: 0,
     priceLabel: "$0",
-    period: "/mes",
     credits: 5,
     creditsLabel: "5 créditos",
-    description: "Para explorar la plataforma y ver la magia en acción.",
+    description: "Explora la magia de la IA sin compromisos.",
     color: "#9CA3AF",
     gradient: "from-gray-500/10 to-gray-500/5",
     border: "border-gray-500/20",
     icon: Sparkles,
     badge: null,
     category: "ECO",
-    stripeTier: "free" as const,
     features: [
-      { label: "5 créditos/mes", highlight: true },
-      { label: "Modelos ECO (Gemini, Llama)", highlight: false },
-      { label: "Studio (básico)", highlight: false },
+      { label: "5 créditos mensuales", highlight: true },
+      { label: "Modelos ECO (Llama 3, Gemini Flash)", highlight: false },
+      { label: "Genesis Studio básico", highlight: false },
+      { label: "Soporte vía comunidad", highlight: false },
     ],
-    lockedFeatures: ["Modelos Premium", "Code y Canvas"],
-    psychNote: "Comienza sin tarjeta",
   },
   {
     key: "starter" as const,
     name: "Starter",
     price: 69000,
     priceLabel: "$69.000",
-    period: "/mes",
     credits: 500,
     creditsLabel: "500 créditos",
-    description: "Para creadores que están construyendo su viaje.",
+    description: "Ideal para creadores que inician sus proyectos.",
     color: "#4ADE80",
-    gradient: "from-emerald-500/10 to-emerald-500/5",
+    gradient: "from-emerald-500/15 to-emerald-500/5",
     border: "border-emerald-500/20",
+    glow: "rgba(74, 222, 128, 0.15)",
     icon: Zap,
     badge: null,
     category: "PRO",
-    stripeTier: "starter" as const,
     features: [
-      { label: "500 créditos/mes", highlight: true },
-      { label: "Modelos rápidos y estándar", highlight: false },
-      { label: "Genesis (Chat IA)", highlight: false },
-      { label: "Soporte email", highlight: false },
+      { label: "500 créditos mensuales", highlight: true },
+      { label: "Acceso a modelos PRO", highlight: false },
+      { label: "Soporte por Email prioritario", highlight: false },
+      { label: "Genesis Studio completo", highlight: false },
     ],
-    lockedFeatures: ["Modelos Premium (Sonnet, Opus)", "Code y Canvas"],
-    psychNote: "Prueba sin compromiso · cancela cuando quieras",
   },
   {
     key: "creator" as const,
     name: "Creator",
     price: 138000,
     priceLabel: "$138.000",
-    period: "/mes",
     credits: 1200,
     creditsLabel: "1.200 créditos",
-    description: "El nivel ideal para creadores e independientes.",
+    description: "Nuestra opción más popular para profesionales.",
     color: "#A855F7",
-    gradient: "from-primary/15 to-primary/5",
+    gradient: "from-primary/20 to-primary/5",
     border: "border-primary/30",
+    glow: "rgba(168, 85, 247, 0.2)",
     icon: Rocket,
     badge: "Más popular",
     category: "PRO",
-    stripeTier: "creator" as const,
     features: [
-      { label: "1.200 créditos/mes", highlight: true },
-      { label: "Modelos rápidos y estándar", highlight: true },
-      { label: "Mayor límite de uso", highlight: false },
-      { label: "Soporte prioritario", highlight: false },
+      { label: "1.200 créditos mensuales", highlight: true },
+      { label: "Modelos estándar y rápidos", highlight: true },
+      { label: "Mayores límites de concurrencia", highlight: false },
+      { label: "Acceso temprano a betas", highlight: false },
     ],
-    lockedFeatures: ["Modelos Premium", "Code y Canvas"],
-    psychNote: "Inversión 100% deducible de impuestos",
   },
   {
     key: "pymes" as const,
     name: "Pymes",
     price: 345000,
     priceLabel: "$345.000",
-    period: "/mes",
     credits: 4000,
     creditsLabel: "4.000 créditos",
-    description: "Acceso total. Modelos Premium y todas las herramientas.",
+    description: "Poder total sin límites para tu negocio.",
     color: "#F59E0B",
-    gradient: "from-amber-500/15 to-amber-500/5",
+    gradient: "from-amber-500/20 to-amber-500/5",
     border: "border-amber-500/30",
+    glow: "rgba(245, 158, 11, 0.25)",
     icon: Crown,
     badge: "Acceso Total",
     category: "ULTRA",
     features: [
-      { label: "4.000 créditos/mes", highlight: true },
-      { label: "Modelos Premium (Claude 3.5 Sonnet, GPT-4o, Opus)", highlight: true },
-      { label: "Desbloquea Code (BuilderAI IDE)", highlight: true },
-      { label: "Desbloquea Canvas (ReactFlow)", highlight: true },
-      { label: "Soporte prioritario 24/7", highlight: true },
+      { label: "4.000 créditos mensuales", highlight: true },
+      { label: "Modelos ULTRA (Sonnet 3.5, GPT-4o)", highlight: true },
+      { label: "BuilderAI (IDE Integrado)", highlight: true },
+      { label: "Canvas (Visual Builder)", highlight: true },
+      { label: "Soporte 24/7 dedicado", highlight: true },
     ],
-    lockedFeatures: [],
-    psychNote: "Máximo retorno para negocios de contenido.",
   },
 ];
 
-// ─── Comparison table rows ────────────────────────────────────────────────────
-const COMPARISON_ROWS = [
-  { label: "Créditos/mes",             free: "5",       starter: "500",  creator: "1.200", pymes: "4.000" },
-  { label: "Modelos Estándar",         free: true,      starter: true,   creator: true,    pymes: true },
-  { label: "Modelos Premium",          free: false,     starter: false,  creator: false,   pymes: true },
-  { label: "Genesis (Chat IA)",        free: true,      starter: true,   creator: true,    pymes: true },
-  { label: "Studio",                   free: true,      starter: true,   creator: true,    pymes: true },
-  { label: "Code (BuilderAI)",         free: false,     starter: false,  creator: false,   pymes: true },
-  { label: "Canvas (ReactFlow)",       free: false,     starter: false,  creator: false,   pymes: true },
-  { label: "Soporte",                  free: "Foro",    starter: "Email",creator: "Prior", pymes: "24/7" },
+const COMPARISON_DATA = [
+  { feature: "Costo por Token", creator: "Optimización Dinámica", others: "Tarifas Fijas Altas" },
+  { feature: "Model Switching", creator: "Instantáneo (Any-Model)", others: "Bloqueo de Proveedor" },
+  { feature: "IDE Studio", creator: "Incluido en Planes", others: "Costo Extra ($20+)" },
+  { feature: "Soporte Latam", creator: "Bold Local / COP", others: "Tarjetas Int. / USD" },
 ];
 
-// ─── Lightning bolts component ────────────────────────────────────────────────
-function Bolts({ count, color }: { count: number; color: string }) {
+const TESTIMONIALS = [
+  {
+    name: "Carlos Rivera",
+    role: "Nómada Digital",
+    content: "La facilidad de pagar en COP con Bold y tener acceso a Claude 3.5 Sonnet cambió mi flujo de trabajo por completo.",
+    avatar: "https://i.pravatar.cc/150?u=carlos",
+  },
+  {
+    name: "Elena Gómez",
+    role: "Founder @ TechNova",
+    content: "El modo ULTRA es una bestia. BuilderAI genera interfaces complejas en segundos. Es como tener 10 seniors en uno.",
+    avatar: "https://i.pravatar.cc/150?u=elena",
+  },
+  {
+    name: "Mario Duarte",
+    role: "Creador de Contenido",
+    content: "Los créditos top-up que no expiran son clave. Compro lo que necesito y sé que siempre estarán ahí.",
+    avatar: "https://i.pravatar.cc/150?u=mario",
+  },
+];
+
+function MeshGradient() {
   return (
-    <div className="flex items-center gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Zap key={i} className="h-3 w-3" style={{ color: i < count ? color : 'rgba(255,255,255,0.1)' }} />
-      ))}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 opacity-40">
+      <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-primary/20 blur-[120px] rounded-full animate-pulse" />
+      <div className="absolute top-[10%] -right-[10%] w-[60%] h-[60%] bg-emerald-500/10 blur-[120px] rounded-full animate-pulse [animation-delay:2s]" />
+      <div className="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse [animation-delay:4s]" />
     </div>
   );
 }
 
-// ─── Model category pill ──────────────────────────────────────────────────────
-function CategoryPill({ category }: { category: keyof typeof CATEGORY_CONFIG }) {
-  const cfg = CATEGORY_CONFIG[category];
+function SectionHeader({ badge, title, subtitle }: { badge: string; title: string | React.ReactNode; subtitle: string }) {
   return (
-    <span
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
-      style={{ background: cfg.bgColor, color: cfg.color, border: `1px solid ${cfg.color}30` }}
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="text-center px-6 mb-16"
     >
-      <Bolts count={cfg.bolts} color={cfg.color} />
-      {cfg.label}
-    </span>
+      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-black uppercase tracking-widest text-primary mb-4">
+        {badge}
+      </span>
+      <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase font-display mb-4">
+        {title}
+      </h2>
+      <p className="max-w-xl mx-auto text-white/40 text-[15px] leading-relaxed">
+        {subtitle}
+      </p>
+    </motion.div>
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
 export default function Pricing() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState<string | undefined>();
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [showComparison, setShowComparison] = useState(false);
-  const [loadingPack, setLoadingPack] = useState<string | null>(null);
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [annual, setAnnual] = useState(false);
+  const [estimateSlider, setEstimateSlider] = useState(500);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -171,335 +183,348 @@ export default function Pricing() {
     });
   }, []);
 
-  const handleBuyCredits = async (pack: typeof CREDIT_PACKS[number]) => {
+  const handleBoldAction = async (id: string) => {
     if (!isLoggedIn) {
-      toast.info("Necesitas iniciar sesión para comprar créditos.");
+      toast.info("Identidad requerida. Por favor inicia sesión.");
       navigate("/auth");
       return;
     }
-    setLoadingPack(pack.id);
+    setLoadingAction(id);
     try {
-      await boldService.purchaseCredits(pack.id);
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Error al procesar el pago.");
-      setLoadingPack(null);
-    } 
-  };
-
-  const handleSubscribe = async (plan: typeof PLANS[number]) => {
-    if (!isLoggedIn) {
-      toast.info("Necesitas iniciar sesión para suscribirte.");
-      navigate("/auth");
-      return;
+      await boldService.purchaseCredits(id);
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#ffffff', '#4ade80', '#a855f7']
+      });
+    } catch (err: any) {
+      toast.error(err.message || "Error al conectar con Bold");
+      setLoadingAction(null);
     }
-    
-    // **Pagos:** Implementación única de **Bold.co** (webhooks, checkouts dinámicos, orquestación, firma HMAC-SHA256).
-    // For now, prompt the user to buy the explicit credit packs instead.
-    toast.info("En el nuevo modelo Bold, por favor adquiere un pack de créditos debajo.");
-    document.getElementById("credit-packs-section")?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <>
       <Helmet>
-        <title>Planes y Precios | Creator IA Pro</title>
-        <meta name="description" content="Starter $12 · Creator $29 · Agency $79. Créditos mensuales para generar con los mejores modelos de IA." />
+        <title>Precios | Creator IA Pro</title>
+        <meta name="description" content="Esquema de créditos industriales. Paga por lo que usas con la seguridad de Bold.co." />
       </Helmet>
 
-      <div className="min-h-screen bg-background bg-grid-white/[0.02] text-white selection:bg-primary/30">
+      <div className="min-h-screen bg-background bg-grid-white/[0.02] text-white selection:bg-primary/30 relative overflow-x-hidden">
         <AppHeader userId={userId} onSignOut={() => supabase.auth.signOut()} />
+        <MeshGradient />
 
-        <main className="pt-20 pb-40">
-
+        <main className="pt-32 pb-40 relative z-10">
+          
           {/* ── Hero ────────────────────────────────────────────────────────── */}
-          <section className="text-center px-6 pt-12 pb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-black uppercase tracking-[0.4em] text-white/40 mb-8">
-              <Sparkles className="h-3 w-3 text-primary" />
-              Precios claros · Cancela cuando quieras
-            </div>
-            <h1 className="text-5xl sm:text-7xl md:text-9xl font-black tracking-tighter uppercase font-display mb-6">
-              Elige tu{" "}
-              <span className="bg-gradient-to-br from-white via-white to-white/20 bg-clip-text text-transparent">
-                plan.
-              </span>
-            </h1>
-            <p className="max-w-lg mx-auto text-[15px] text-white/35 leading-relaxed">
-              Créditos basados en tokens. ECO · PRO · ULTRA.{" "}
-              <span className="text-white/60 font-semibold">Los multiplicadores protegen tu margen.</span>
-            </p>
+          <section className="relative px-6 mb-24 overflow-visible">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="max-w-5xl mx-auto text-center"
+            >
+              <h1 className="text-6xl sm:text-8xl md:text-[8rem] font-black tracking-[-0.05em] uppercase font-display leading-[0.85] mb-8">
+                Escala tu<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20">Impacto.</span>
+              </h1>
+              <p className="max-w-lg mx-auto text-lg text-white/40 leading-relaxed font-medium">
+                Sin suscripciones forzadas. <span className="text-white/80">Créditos industriales</span> para creadores que exigen la mejor latencia y los modelos más potentes.
+              </p>
+            </motion.div>
           </section>
 
-          {/* ── Billing period toggle ────────────────────────────────────── */}
-          <div className="flex items-center justify-center gap-4 mb-10">
-            <span className={cn("text-[12px] font-bold transition-colors", !annual ? "text-white" : "text-white/30")}>Mensual</span>
+          {/* ── Annual Toggle ──────────────────────────────────────────────── */}
+          <div className="flex items-center justify-center gap-6 mb-16">
+            <span className={cn("text-xs font-black uppercase tracking-widest transition-opacity", !annual ? "opacity-100" : "opacity-30")}>Mensual</span>
             <button
-              onClick={() => setAnnual(v => !v)}
-              className={cn(
-                "relative w-12 h-6 rounded-full transition-all duration-300",
-                annual ? "bg-primary" : "bg-white/10"
-              )}
+              onClick={() => setAnnual(!annual)}
+              className="relative w-14 h-7 rounded-full bg-white/5 border border-white/10 p-1 flex items-center transition-all"
             >
-              <div className={cn(
-                "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-300",
-                annual ? "left-6" : "left-0.5"
-              )} />
+              <motion.div 
+                animate={{ x: annual ? 28 : 0 }}
+                className="w-5 h-5 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]" 
+              />
             </button>
-            <span className={cn("text-[12px] font-bold transition-colors flex items-center gap-2", annual ? "text-white" : "text-white/30")}>
-              Anual
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-primary/20 text-primary border border-primary/30">
-                −20%
+            <span className={cn("text-xs font-black uppercase tracking-widest transition-opacity flex items-center gap-2", annual ? "opacity-100" : "opacity-30")}>
+              Anual 
+              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] border border-emerald-500/30">
+                -20% OFF
               </span>
             </span>
           </div>
 
-          {/* ── Model category explanation (bento row) ────────────────────── */}
-          <section className="px-6 mb-12 max-w-5xl mx-auto">
-            <div className="grid grid-cols-3 gap-3">
-              {(Object.entries(CATEGORY_CONFIG) as [keyof typeof CATEGORY_CONFIG, typeof CATEGORY_CONFIG[keyof typeof CATEGORY_CONFIG]][]).map(([key, cfg]) => (
-                <div key={key} className="rounded-2xl border p-5" style={{ borderColor: cfg.color + '20', background: cfg.bgColor }}>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-black uppercase tracking-widest" style={{ color: cfg.color }}>{cfg.label}</span>
-                    <Bolts count={cfg.bolts} color={cfg.color} />
-                  </div>
-                  <p className="text-[11px] text-white/40 leading-relaxed">{cfg.description}</p>
-                  <p className="text-xs font-bold text-white/60 mt-2">{cfg.multiplier}× multiplicador</p>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* ── Pricing cards (bento grid) ───────────────────────────────── */}
-          <section className="px-6 mb-8 w-full">
-            <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
-              {PLANS.map((plan) => {
-                const Icon = plan.icon;
-                const isLoading = loadingPlan === plan.key;
+          {/* ── Plans Grid ─────────────────────────────────────────────────── */}
+          <section className="px-6 mb-32">
+            <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {PLANS.map((plan, idx) => {
                 const isPopular = plan.badge === "Más popular";
                 const displayPrice = annual ? Math.round(plan.price * 0.8) : plan.price;
-                const annualTotal = annual ? Math.round(plan.price * 0.8 * 12) : null;
+                const Icon = plan.icon;
+                
                 return (
-                  <div
+                  <motion.div
                     key={plan.key}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    whileHover={{ y: -8 }}
                     className={cn(
-                      "relative rounded-[2rem] border p-8 flex flex-col transition-all duration-300 hover:-translate-y-1",
-                      isPopular
-                        ? "bg-gradient-to-b " + plan.gradient + " " + plan.border + " shadow-[0_0_60px_rgba(168,85,247,0.15)]"
-                        : "bg-white/[0.02] " + plan.border
+                      "relative group rounded-[2.5rem] border p-8 flex flex-col transition-all duration-500 overflow-hidden",
+                      isPopular 
+                        ? "bg-white/[0.03] border-primary/40 shadow-[0_30px_100px_-20px_rgba(168,85,247,0.15)]" 
+                        : "bg-white/[0.01] border-white/10"
                     )}
                   >
-                    {/* Popular badge */}
+                    <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                      style={{ background: `radial-gradient(circle at top right, ${plan.glow || 'rgba(255,255,255,0.05)'}, transparent 70%)` }} />
+
                     {plan.badge && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
-                        style={{ background: plan.color, color: '#000' }}>
+                      <div className="absolute top-4 right-6 px-3 py-1 rounded-full bg-primary text-black text-[10px] font-black uppercase tracking-widest">
                         {plan.badge}
                       </div>
                     )}
 
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-6">
-                      <div>
-                        <div className="flex items-center gap-2.5 mb-2">
-                          <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                            style={{ background: plan.color + '20' }}>
-                            <Icon className="h-4.5 w-4.5" style={{ color: plan.color }} />
-                          </div>
-                          <span className="text-base font-black text-white font-display">{plan.name}</span>
-                        </div>
-                        <CategoryPill category={plan.category as keyof typeof CATEGORY_CONFIG} />
+                    <div className="mb-8">
+                      <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-6 border border-white/10 group-hover:border-white/20 transition-colors">
+                        <Icon className="h-6 w-6" style={{ color: plan.color }} />
+                      </div>
+                      <h3 className="text-2xl font-black uppercase font-display mb-1">{plan.name}</h3>
+                      <p className="text-white/30 text-xs leading-relaxed">{plan.description}</p>
+                    </div>
+
+                    <div className="mb-8 overflow-hidden">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-black font-display tracking-tighter">
+                          ${displayPrice.toLocaleString('es-CO')}
+                        </span>
+                        <span className="text-white/20 text-xs font-bold uppercase tracking-widest">COP</span>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2 py-1.5 px-3 rounded-xl bg-white/5 border border-white/5 w-fit">
+                        <Coins className="h-3.5 w-3.5 text-primary" />
+                        <span className="text-xs font-black" style={{ color: plan.color }}>{plan.creditsLabel}</span>
                       </div>
                     </div>
 
-                    {/* Price */}
-                    <div className="mb-2">
-                      <span className="text-5xl md:text-6xl font-black text-white font-display tracking-tight">${displayPrice.toLocaleString('es-CO')}</span>
-                      <span className="text-white/30 text-sm ml-1">COP/mes</span>
-                      {annual && (
-                        <div className="mt-1 flex items-center gap-2">
-                          <span className="text-[11px] text-white/25 line-through">${plan.price.toLocaleString('es-CO')}</span>
-                          <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/25">
-                            ${annualTotal?.toLocaleString('es-CO')} / año
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Credits */}
-                    <div className="flex items-center gap-2 mb-5 px-3 py-2 rounded-xl" style={{ background: plan.color + '10' }}>
-                      <Coins className="h-4 w-4 shrink-0" style={{ color: plan.color }} />
-                      <span className="text-sm font-black" style={{ color: plan.color }}>{plan.creditsLabel}/mes</span>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-[12px] text-white/40 mb-5 leading-relaxed">{plan.description}</p>
-
-                    {/* Features */}
-                    <ul className="space-y-2.5 mb-6 flex-1">
+                    <ul className="space-y-4 mb-10 flex-1">
                       {plan.features.map(f => (
-                        <li key={f.label} className="flex items-start gap-2.5">
-                          <Check className="h-4 w-4 shrink-0 mt-0.5" style={{ color: f.highlight ? plan.color : 'rgba(255,255,255,0.25)' }} />
-                          <span className={cn("text-[12px] leading-relaxed", f.highlight ? "text-white/85 font-semibold" : "text-white/45")}>
+                        <li key={f.label} className="flex gap-3 items-start">
+                          <Check className={cn("h-4 w-4 shrink-0 mt-0.5", f.highlight ? "text-primary" : "text-white/20")} />
+                          <span className={cn("text-xs leading-relaxed", f.highlight ? "text-white/80 font-bold" : "text-white/40")}>
                             {f.label}
                           </span>
                         </li>
                       ))}
                     </ul>
 
-                    {/* CTA */}
                     <button
-                      onClick={() => handleSubscribe(plan)}
-                      disabled={isLoading}
+                      onClick={() => handleBoldAction(plan.key)}
+                      disabled={loadingAction === plan.key}
                       className={cn(
-                        "w-full py-3.5 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50",
-                        isPopular
-                          ? "bg-white text-black hover:bg-white/90 shadow-lg"
-                          : "border text-white hover:bg-white/5"
+                        "w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden group/btn",
+                        isPopular ? "bg-white text-black" : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
                       )}
-                      style={!isPopular ? { borderColor: plan.color + '40', color: plan.color } : undefined}
                     >
-                      {isLoading
-                        ? <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                        : `Activar ${plan.name}`}
+                      {loadingAction === plan.key ? (
+                        <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                      ) : (
+                        <span className="flex items-center justify-center gap-2">
+                          Empezar Ahora <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                        </span>
+                      )}
                     </button>
-
-                    {/* Psych note */}
-                    {plan.psychNote && (
-                      <p className="text-center text-[9px] text-white/20 mt-3 font-medium">{plan.psychNote}</p>
-                    )}
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
           </section>
 
-          {/* ── Comparison table toggle ──────────────────────────────────── */}
-          <section className="px-6 max-w-5xl mx-auto mb-12">
-            <button
-              onClick={() => setShowComparison(v => !v)}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] text-[11px] font-bold uppercase tracking-widest text-white/40 hover:text-white/70 hover:bg-white/[0.05] transition-all"
-            >
-              {showComparison ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-              {showComparison ? "Ocultar comparación" : "Ver tabla comparativa completa"}
-            </button>
+          {/* ── Comparación con la Industria ───────────────────────────────── */}
+          <section className="px-6 mb-40">
+            <SectionHeader 
+              badge="Eficiencia Industrial" 
+              title={<>Ahorro <span className="text-primary">Real.</span></>}
+              subtitle="Nuestro modelo distribuido elimina los costos fijos de servidores, pasando el ahorro directamente a tu saldo."
+            />
+            
+            <div className="max-w-4xl mx-auto rounded-[3rem] bg-white/[0.02] border border-white/5 p-4 sm:p-12 overflow-hidden relative">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
+                <div className="hidden sm:block text-xs font-black uppercase text-white/20 tracking-widest mt-4">Característica</div>
+                <div className="text-center">
+                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black text-primary uppercase">
+                    Creator IA Pro
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-white/40 uppercase">
+                    Modelos Tradicionales
+                  </div>
+                </div>
 
-            {showComparison && (
-              <div className="mt-4 rounded-2xl border border-white/[0.06] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-300">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-white/[0.06]">
-                      <th className="text-left px-5 py-3.5 text-[10px] font-bold text-white/25 uppercase tracking-widest w-2/5">Feature</th>
-                      {PLANS.map(p => (
-                        <th key={p.key} className="px-4 py-3.5 text-center">
-                          <span className="text-[11px] font-black" style={{ color: p.color }}>{p.name}</span>
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {COMPARISON_ROWS.map((row, i) => (
-                      <tr key={row.label} className={cn("border-b border-white/[0.04]", i % 2 === 0 && "bg-white/[0.01]")}>
-                        <td className="px-5 py-3 text-[12px] text-white/50">{row.label}</td>
-                        {(['free', 'starter', 'creator', 'pymes'] as const).map(tier => {
-                          const val = (row as any)[tier];
-                          return (
-                            <td key={tier} className="px-4 py-3 text-center">
-                              {typeof val === 'boolean' ? (
-                                val
-                                  ? <Check className="h-4 w-4 text-emerald-400 mx-auto" />
-                                  : <span className="text-white/15 text-lg">—</span>
-                              ) : (
-                                <span className="text-[11px] font-bold text-white/70">{val}</span>
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                {COMPARISON_DATA.map((row, idx) => (
+                  <React.Fragment key={row.feature}>
+                    <div className="hidden sm:block py-4 border-t border-white/5 text-xs font-bold text-white/60">{row.feature}</div>
+                    <div className="py-4 border-t border-white/5 text-center text-xs font-black text-white">{row.creator}</div>
+                    <div className="py-4 border-t border-white/5 text-center text-xs font-medium text-white/30">{row.others}</div>
+                  </React.Fragment>
+                ))}
               </div>
-            )}
+            </div>
           </section>
 
-          {/* ── Credit packs ─────────────────────────────────────────────── */}
-          {CREDIT_PACKS && CREDIT_PACKS.length > 0 && (
-            <section id="credit-packs-section" className="px-6 max-w-5xl mx-auto mb-12">
-              <div className="text-center mb-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-black uppercase tracking-widest text-primary mb-3">
-                  <Coins className="h-3 w-3 text-primary" />
-                  Top-up · Pagos con Bold
+          {/* ── Calculadora de Consumo ─────────────────────────────────────── */}
+          <section className="px-6 mb-40">
+            <div className="max-w-3xl mx-auto rounded-[3.5rem] bg-gradient-to-br from-primary/10 via-background to-background border border-primary/20 p-10 md:p-16 text-center overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+              
+              <Zap className="h-10 w-10 text-primary mx-auto mb-6" />
+              <h2 className="text-3xl font-black uppercase font-display mb-8">Calculadora de Consumo</h2>
+              
+              <div className="mb-12">
+                <div className="flex justify-between items-center mb-6">
+                  <span className="text-xs font-black uppercase text-white/40 tracking-widest">Uso estimado</span>
+                  <span className="text-2xl font-black text-primary font-display">{estimateSlider} créditos</span>
                 </div>
-                <h2 className="text-2xl font-black text-white font-display tracking-tight">Créditos extra</h2>
-                <p className="text-white/30 text-[13px] mt-1">Pago único · no expiran · compatible con todos los planes</p>
+                <input 
+                  type="range" 
+                  min="100" 
+                  max="10000" 
+                  step="100"
+                  value={estimateSlider}
+                  onChange={(e) => setEstimateSlider(parseInt(e.target.value))}
+                  className="w-full h-1.5 bg-white/5 rounded-full appearance-none cursor-pointer accent-primary"
+                />
+                <div className="flex justify-between mt-4 text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                  <span>Light (Básico)</span>
+                  <span>Industrial (Alto)</span>
+                </div>
               </div>
-              <div className="grid sm:grid-cols-3 gap-4">
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
+                <div className="p-4 rounded-3xl bg-white/5 border border-white/5">
+                  <Globe className="h-4 w-4 text-white/40 mx-auto mb-2" />
+                  <div className="text-lg font-black text-white/80">{(estimateSlider / 10).toFixed(0)}</div>
+                  <div className="text-[9px] font-black uppercase text-white/30">Tokens ECO</div>
+                </div>
+                <div className="p-4 rounded-3xl bg-white/5 border border-white/5">
+                  <Cpu className="h-4 w-4 text-white/40 mx-auto mb-2" />
+                  <div className="text-lg font-black text-white/80">{(estimateSlider / 100).toFixed(0)}</div>
+                  <div className="text-[9px] font-black uppercase text-white/30">Prompts ULTRA</div>
+                </div>
+                <div className="p-4 rounded-3xl bg-white/5 border border-white/5 col-span-2 md:col-span-1">
+                  <Code2 className="h-4 w-4 text-white/40 mx-auto mb-2" />
+                  <div className="text-lg font-black text-white/80">{(estimateSlider / 50).toFixed(0)}</div>
+                  <div className="text-[9px] font-black uppercase text-white/30">UI Screens</div>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => document.getElementById('credit-packs-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform font-bold"
+              >
+                Recargar Créditos Ahora <Bolt className="h-4 w-4 fill-current" />
+              </button>
+            </div>
+          </section>
+
+          {/* ── Packs de Créditos ─────────────────────────────────────────── */}
+          {CREDIT_PACKS && CREDIT_PACKS.length > 0 && (
+            <section id="credit-packs-section" className="px-6 mb-40">
+              <SectionHeader 
+                badge="Recargas Top-up" 
+                title="Créditos Extra."
+                subtitle="Sin vencimiento. Úsalos cuando los necesites con la flexibilidad total de Bold.co."
+              />
+              <div className="max-w-5xl mx-auto grid sm:grid-cols-3 gap-6">
                 {CREDIT_PACKS.map((pack) => {
-                  const isLoadingThis = loadingPack === pack.id;
+                  const isLoadingThis = loadingAction === pack.id;
                   return (
-                    <div
+                    <motion.div
                       key={pack.id}
+                      whileHover={{ scale: 1.02 }}
                       className={cn(
-                        "relative rounded-2xl border p-5 flex flex-col gap-4 transition-all",
-                        pack.popular
-                          ? "border-primary/30 bg-primary/5 shadow-[0_0_30px_rgba(74,222,128,0.08)]"
-                          : "border-white/[0.06] bg-white/[0.02] hover:border-white/[0.12]"
+                        "relative rounded-3xl border p-8 flex flex-col gap-6 transition-all bg-white/[0.01]",
+                        pack.popular ? "border-primary/40 bg-primary/5 shadow-2xl" : "border-white/10"
                       )}
                     >
-                      {pack.popular && (
-                        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-primary text-white">
-                          Más popular
+                      <div className="flex items-center justify-between">
+                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                          <Coins className="h-5 w-5 text-primary" />
                         </div>
-                      )}
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/10 border border-primary/20 shrink-0">
-                          <Coins className="h-4 w-4 text-primary" />
-                        </div>
-                        <div className="flex items-baseline gap-1 mt-1 justify-center">
-                          <span className="text-3xl font-black text-white">{pack.credits_amount.toLocaleString()}</span>
-                          <span className="text-sm font-medium text-white/50">créditos</span>
-                        </div>
-                        <span className="ml-auto text-xl font-black text-white font-display">{pack.price}</span>
+                        {pack.popular && (
+                          <span className="px-2 py-0.5 rounded-full bg-primary text-black text-[9px] font-black uppercase tracking-widest">Popular</span>
+                        )}
                       </div>
+                      <div>
+                        <div className="text-4xl font-black font-display mb-1">{pack.credits_amount.toLocaleString()}</div>
+                        <div className="text-xs font-bold text-white/30 uppercase tracking-widest">Créditos</div>
+                      </div>
+                      <div className="text-2xl font-black text-white/90 font-display">${pack.price}</div>
                       <button
-                        onClick={() => handleBuyCredits(pack)}
+                        onClick={() => handleBoldAction(pack.id)}
                         disabled={isLoadingThis}
                         className={cn(
-                          "w-full py-2.5 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50",
-                          pack.popular
-                            ? "bg-primary text-white hover:bg-primary/90"
-                            : "border border-white/[0.10] text-white/60 hover:text-white hover:border-white/25 hover:bg-white/[0.04]"
+                          "w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all",
+                          pack.popular ? "bg-primary text-black" : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
                         )}
                       >
-                        {isLoadingThis
-                          ? <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                          : "Comprar ahora"}
+                        {isLoadingThis ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Comprar Pack"}
                       </button>
-                    </div>
+                    </motion.div>
                   );
                 })}
               </div>
             </section>
           )}
 
-          {/* ── FAQ ──────────────────────────────────────────────────────── */}
-          <section className="px-6 max-w-3xl mx-auto">
-            <h2 className="text-center text-lg font-black text-white/40 uppercase tracking-widest mb-6">
-              Preguntas frecuentes
-            </h2>
-            <div className="space-y-3">
-              {[
-                { q: "¿Qué es Genesis IDE?", a: "Genesis es nuestro generador de código IA estilo Lovable. Describes tu app en lenguaje natural y BuilderAI genera React + Tailwind listo para producción. Puedes hacer push directo a tu repositorio de GitHub." },
-                { q: "¿Qué son los multiplicadores ECO/PRO/ULTRA?", a: "Son factores que determinan cuántos créditos consume cada modelo. Un modelo ECO (1×) usa 1 crédito por ~100 tokens. Un modelo PRO (5×) usa 5 créditos. ULTRA (20×) usa 20. Esto refleja el costo real de inferencia." },
-                { q: "¿Puedo cambiar de plan cuando quiera?", a: "Sí. Puedes subir o bajar de plan en cualquier momento desde el Portal de cliente. Los créditos del ciclo actual se mantienen." },
-                { q: "¿Qué pasa si se me acaban los créditos?", a: "Puedes comprar un pack extra (top-up) sin cambiar de plan, o esperar tu renovación mensual." },
-                { q: "¿Los créditos expiran?", a: "Los créditos mensuales se renuevan cada ciclo de facturación. Los packs de top-up no expiran." },
-                { q: "¿Quién es dueño de lo que genero?", a: "Tú. El 100% de los activos y el código generado en planes de pago son de tu propiedad absoluta." },
-              ].map(faq => (
-                <div key={faq.q} className="rounded-2xl border border-white/[0.06] px-6 py-4">
-                  <p className="text-[13px] font-bold text-white/70 mb-2">{faq.q}</p>
-                  <p className="text-[12px] text-white/35 leading-relaxed">{faq.a}</p>
-                </div>
+          {/* ── Testimonios ────────────────────────────────────────────────── */}
+          <section className="px-6 mb-40">
+            <SectionHeader 
+              badge="Proof of Quality" 
+              title="Testimonios."
+              subtitle="Líderes de industria que han industrializado sus flujos creativos con Creator IA Pro."
+            />
+            <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
+              {TESTIMONIALS.map((t, i) => (
+                <motion.div 
+                  key={t.name}
+                  initial={{ opacity: 0, x: -20 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 relative"
+                >
+                  <div className="flex gap-1 mb-6">
+                    {Array.from({ length: 5 }).map((_, j) => <Star key={j} className="h-3 w-3 fill-primary text-primary" />)}
+                  </div>
+                  <p className="text-[14px] text-white/60 leading-relaxed italic mb-8">"{t.content}"</p>
+                  <div className="flex items-center gap-4">
+                    <img src={t.avatar} className="w-10 h-10 rounded-2xl border border-white/10" alt={t.name} />
+                    <div>
+                      <div className="text-xs font-black uppercase tracking-widest text-white">{t.name}</div>
+                      <div className="text-[10px] font-bold text-white/30 uppercase">{t.role}</div>
+                    </div>
+                  </div>
+                </motion.div>
               ))}
             </div>
+          </section>
+
+          {/* ── Trust Grid ─────────────────────────────────────────────────── */}
+          <section className="px-6 max-w-5xl mx-auto mb-20 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: Shield, label: "Seguridad Bold" },
+              { icon: Lock, label: "AES-256 Encryption" },
+              { icon: TrendingUp, label: "99.9% Uptime" },
+              { icon: MessageSquare, label: "Soporte Latam" },
+            ].map(t => (
+              <div key={t.label} className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 flex flex-col items-center gap-4 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all cursor-default group">
+                <t.icon className="h-6 w-6 group-hover:text-primary transition-colors" />
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-center">{t.label}</span>
+              </div>
+            ))}
           </section>
 
         </main>
