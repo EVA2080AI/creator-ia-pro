@@ -155,8 +155,9 @@ const Profile = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Nombre para mostrar</label>
+                  <label htmlFor="display-name" className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Nombre para mostrar</label>
                   <input
+                    id="display-name"
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}

@@ -168,8 +168,9 @@ function CreditModal({
           {tab !== "history" ? (
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs text-zinc-500">Créditos</label>
+                <label htmlFor="admin-credits" className="mb-1.5 block text-xs text-zinc-500">Créditos</label>
                 <input
+                  id="admin-credits"
                   type="number"
                   min="1"
                   value={amount}
@@ -179,10 +180,11 @@ function CreditModal({
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs text-zinc-500">
+                <label htmlFor="admin-reason" className="mb-1.5 block text-xs text-zinc-500">
                   Razón {tab !== "refund" && <span className="text-zinc-300">(opcional)</span>}
                 </label>
                 <input
+                  id="admin-reason"
                   type="text"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
@@ -278,6 +280,7 @@ function AdminLoginGate() {
           <input
             type="email"
             required
+            aria-label="Correo electrónico"
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
@@ -286,6 +289,7 @@ function AdminLoginGate() {
           <input
             type="password"
             required
+            aria-label="Contraseña"
             placeholder="Contraseña"
             value={password}
             onChange={e => setPassword(e.target.value)}
@@ -1169,9 +1173,10 @@ const Admin = () => {
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Bold API Key</label>
+                  <label htmlFor="bold-api-key" className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Bold API Key</label>
                   <div className="relative">
                     <input
+                      id="bold-api-key"
                       type={showBoldKeys ? "text" : "password"}
                       value={boldApiKey}
                       onChange={(e) => setBoldApiKey(e.target.value)}
@@ -1182,9 +1187,10 @@ const Admin = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Bold Webhook Secret</label>
+                  <label htmlFor="bold-webhook-secret" className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Bold Webhook Secret</label>
                   <div className="relative">
                     <input
+                      id="bold-webhook-secret"
                       type={showBoldKeys ? "text" : "password"}
                       value={boldWebhookSecret}
                       onChange={(e) => setBoldWebhookSecret(e.target.value)}
@@ -1194,9 +1200,10 @@ const Admin = () => {
                     <button
                       type="button"
                       onClick={() => setShowBoldKeys(!showBoldKeys)}
+                      aria-label={showBoldKeys ? "Ocultar llaves Bold" : "Mostrar llaves Bold"}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors"
                     >
-                      {showBoldKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showBoldKeys ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </button>
                   </div>
                 </div>

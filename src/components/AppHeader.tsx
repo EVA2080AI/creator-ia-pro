@@ -179,6 +179,14 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
 
   return (
     <>
+      {/* Skip to main content — WCAG 2.1 SC 2.4.1 */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded-xl focus:text-sm focus:font-bold focus:shadow-lg"
+      >
+        Saltar al contenido principal
+      </a>
+
       {openMenu && (
         <div className="fixed inset-0 z-[90]" onClick={() => setOpenMenu(null)} />
       )}
@@ -269,6 +277,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                               <button
                                 key={item.path}
                                 onClick={() => handleNav(item.path)}
+                                aria-current={active ? "page" : undefined}
                                 className={cn(
                                   "w-full flex items-start gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all",
                                   active ? "bg-primary/5 border border-primary/10" : "hover:bg-zinc-50"
@@ -345,6 +354,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                           <button
                             key={item.path}
                             onClick={() => handleNav(item.path)}
+                            aria-current={active ? "page" : undefined}
                             className={cn(
                               "w-full flex items-start gap-3 px-3 py-2.5 rounded-xl text-left transition-all",
                               active ? "bg-primary/5 border border-primary/10" : "hover:bg-zinc-50"
