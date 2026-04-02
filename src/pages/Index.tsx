@@ -1,18 +1,25 @@
 /**
  * Creator IA Pro — Landing Page
- * Redesigned with Stitch/Google-inspired aesthetic:
- * Clean dark background, focused typography, minimal chrome, conversion-first layout.
+ * Motion-enhanced with Framer Motion: staggered entrances, floating mockup,
+ * animated aurora, scroll-triggered reveals, marquee ticker, and hover lifts.
  */
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowRight, Code2, Image, Zap,
   CheckCircle2, Layers, MessageSquare, Video,
-  Star, Shield, Users, ChevronRight, Sparkles
+  Star, Shield, Users, ChevronRight, Sparkles, Wand2
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import {
+  motion,
+  useInView,
+  useScroll,
+  useTransform,
+  AnimatePresence,
+} from "framer-motion";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const PRODUCTS = [
@@ -62,9 +69,220 @@ const TRUST = [
   { icon: Star,    text: "Modelos top del mundo",    sub: "Claude · GPT-4o · FLUX" },
 ];
 
+const MARQUEE_ITEMS = [
+  { icon: Sparkles, label: "Claude 4.6 Opus" },
+  { icon: Wand2,    label: "FLUX Pro Ultra" },
+  { icon: Code2,    label: "Genesis IDE" },
+  { icon: Image,    label: "Upscale 4K" },
+  { icon: Layers,   label: "Canvas Editor" },
+  { icon: MessageSquare, label: "GPT-4o" },
+  { icon: Video,    label: "Video IA" },
+  { icon: Zap,      label: "Generación <30s" },
+  { icon: Star,     label: "SDXL Turbo" },
+  { icon: Shield,   label: "E2E Encrypted" },
+];
+
+// ─── Motion variants ───────────────────────────────────────────────────────────
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  show: (delay = 0) => ({
+    opacity: 1, y: 0,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay },
+  }),
+};
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  show: (delay = 0) => ({
+    opacity: 1,
+    transition: { duration: 0.6, ease: "easeOut", delay },
+  }),
+};
+
+const staggerContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.1 } },
+};
+
+const cardEntrance = {
+  hidden: { opacity: 0, y: 40, scale: 0.97 },
+  show: {
+    opacity: 1, y: 0, scale: 1,
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+// ─── Reusable animated section wrapper ────────────────────────────────────────
+function InViewSection({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+  return (
+    <motion.div
+      ref={ref}
+      variants={staggerContainer}
+      initial="hidden"
+      animate={inView ? "show" : "hidden"}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// ─── Product deep-dive section (needs its own hooks) ──────────────────────────
+function ProductSection({ p, i, navigate }: { p: typeof PRODUCTS[0]; i: number; navigate: (path: string) => void }) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const inView = useInView(sectionRef, { once: true, margin: "-100px" });
+  return (
+    <section
+      ref={sectionRef}
+      className={`px-6 md:px-12 py-20 border-t border-zinc-200 ${i % 2 === 1 ? 'bg-zinc-50' : ''}`}
+    >
+      <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12">
+        {/* Text */}
+        <motion.div
+          initial={{ opacity: 0, x: i % 2 === 1 ? 40 : -40 }}
+          animate={inView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+          className={`flex-1 ${i % 2 === 1 ? 'md:order-2' : ''}`}
+        >
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-[0.3em] mb-6"
+            style={{ borderColor: p.color + '40', color: p.color, background: p.color + '10' }}>
+            <p.icon className="h-3 w-3" />
+            {p.badge}
+          </div>
+          <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight mb-4 leading-tight">
+            {p.headline}
+          </h2>
+          <p className="text-[15px] text-zinc-400 leading-relaxed mb-6 max-w-md">
+            {p.sub}
+          </p>
+          <ul className="flex flex-col gap-2 mb-8">
+            {p.features.map((f, fi) => (
+              <motion.li
+                key={f}
+                initial={{ opacity: 0, x: -10 }}
+                animate={inView ? { opacity: 1, x: 0 } : {}}
+                transition={{ delay: 0.2 + fi * 0.08, duration: 0.4 }}
+                className="flex items-center gap-2.5 text-[13px] text-zinc-500"
+              >
+                <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: p.color }} />
+                {f}
+              </motion.li>
+            ))}
+          </ul>
+          <motion.button
+            onClick={() => navigate(p.path)}
+            whileHover={{ x: 4 }}
+            className="flex items-center gap-2 text-[13px] font-bold transition-colors group"
+            style={{ color: p.color }}
+          >
+            {p.cta}
+            <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+          </motion.button>
+        </motion.div>
+
+        {/* Visual */}
+        <motion.div
+          initial={{ opacity: 0, x: i % 2 === 1 ? -40 : 40, scale: 0.96 }}
+          animate={inView ? { opacity: 1, x: 0, scale: 1 } : {}}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
+          whileHover={{ y: -4 }}
+          className={`flex-1 ${i % 2 === 1 ? 'md:order-1' : ''}`}
+        >
+          <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-md shadow-zinc-100">
+            {i === 0 ? (
+              /* Genesis preview */
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex gap-1">
+                    {(p.preview as any[]).map((f: any) => (
+                      <div key={f.label} className={`px-2 py-1 rounded text-[8px] font-bold ${f.active ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-300'}`}>{f.label}</div>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded-xl bg-zinc-950 p-4 font-mono text-[10px] leading-relaxed">
+                  <span className="text-blue-400">import</span>{" "}
+                  <span className="text-zinc-300">{'{'} useState {'}'}</span>{" "}
+                  <span className="text-blue-400">from</span>{" "}
+                  <span className="text-orange-300">'react'</span>
+                  <br /><br />
+                  <span className="text-blue-400">export default function</span>{" "}
+                  <span className="text-yellow-300">App</span>
+                  <span className="text-zinc-400">() {"{"}</span>
+                  <br />
+                  {"  "}<span className="text-blue-400">return</span>{" "}
+                  <span className="text-zinc-400">{"("}</span>
+                  <br />
+                  {"    "}<span className="text-zinc-500">{"<div className="}</span>
+                  <span className="text-orange-300">"hero"</span>
+                  <span className="text-zinc-500">{">"}</span>
+                  <br />
+                  {"      "}<span className="text-zinc-500">{"<h1>"}</span>
+                  <span className="text-zinc-300">Mi App con IA</span>
+                  <span className="text-zinc-500">{"</h1>"}</span>
+                  <br />
+                  {"    "}<span className="text-zinc-500">{"</div>"}</span>
+                  <br />
+                  {"  "}<span className="text-zinc-400">{")"}</span>
+                  <br />
+                  <span className="text-zinc-400">{"}"}</span>
+                  <motion.span
+                    animate={{ opacity: [1, 0, 1] }}
+                    transition={{ repeat: Infinity, duration: 1.1 }}
+                    className="inline-block w-1 h-3 bg-primary ml-0.5 align-middle"
+                  />
+                </div>
+                <div className="mt-3 flex items-center gap-2">
+                  <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20">
+                    <Sparkles className="h-3 w-3 text-primary" />
+                    <span className="text-[9px] font-bold text-primary">Claude 4.6</span>
+                  </div>
+                  <span className="text-[9px] text-zinc-300">Generando App.tsx…</span>
+                </div>
+              </div>
+            ) : (
+              /* Studio preview */
+              <div className="p-5">
+                <div className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest mb-3">Herramientas disponibles</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {(p.preview as any[]).map((t: any, ti: number) => (
+                    <motion.div
+                      key={t.tool}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={inView ? { opacity: 1, scale: 1 } : {}}
+                      transition={{ delay: 0.3 + ti * 0.1, duration: 0.4 }}
+                      className="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 bg-zinc-50"
+                    >
+                      <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: t.color + '20' }}>
+                        <div className="w-2 h-2 rounded-full" style={{ background: t.color + '80' }} />
+                      </div>
+                      <div>
+                        <div className="text-[9px] font-bold text-zinc-600">{t.tool}</div>
+                        <div className="text-[8px] text-zinc-300">{t.cr} crédito{t.cr > 1 ? 's' : ''}</div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="mt-3 w-full h-24 rounded-xl bg-gradient-to-br from-violet-50 via-zinc-50 to-cyan-50 border border-zinc-200 flex items-center justify-center">
+                  <span className="text-[10px] text-zinc-300">Preview en tiempo real</span>
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function Index() {
   const navigate = useNavigate();
+  const heroRef = useRef<HTMLDivElement>(null);
+  const { scrollY } = useScroll();
+  const mockupY = useTransform(scrollY, [0, 400], [0, -40]);
+  const mockupScale = useTransform(scrollY, [0, 400], [1, 0.96]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -79,10 +297,15 @@ export default function Index() {
         <meta name="description" content="Genera apps React completas con Genesis IDE y crea imágenes, logos y textos con Studio. Todo con IA. Desde $12/mes." />
       </Helmet>
 
-      <div className="min-h-screen bg-background text-foreground selection:bg-primary/15 font-sans bg-grid-white/[0.02]">
+      <div className="min-h-screen bg-background text-foreground selection:bg-primary/15 font-sans overflow-x-hidden">
 
         {/* ── Nav ─────────────────────────────────────────────────────────── */}
-        <header className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-background/90 backdrop-blur-md border-b border-zinc-200">
+        <motion.header
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-background/90 backdrop-blur-md border-b border-zinc-200"
+        >
           <Logo size="sm" showText showPro onClick={() => navigate("/")} />
 
           <div className="flex items-center gap-6">
@@ -92,18 +315,29 @@ export default function Index() {
             <button onClick={() => navigate("/hub")} className="hidden sm:block text-[13px] text-zinc-400 hover:text-zinc-900 transition-colors font-medium">
               Templates
             </button>
-            <button
+            <motion.button
               onClick={() => navigate("/auth")}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-zinc-900 text-white text-[13px] font-bold hover:bg-zinc-800 active:scale-95 transition-all"
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-zinc-900 text-white text-[13px] font-bold hover:bg-zinc-800 transition-all"
             >
               Empezar gratis
-            </button>
+            </motion.button>
           </div>
-        </header>
+        </motion.header>
 
         {/* ── Announcement bar ─────────────────────────────────────────── */}
-        <div className="flex items-center justify-center gap-3 py-2.5 px-4 bg-primary/10 border-b border-primary/20">
-          <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="flex items-center justify-center gap-3 py-2.5 px-4 bg-primary/10 border-b border-primary/20"
+        >
+          <motion.div
+            animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+            className="w-1.5 h-1.5 rounded-full bg-primary"
+          />
           <p className="text-[12px] font-semibold text-zinc-600">
             Genesis IDE + Studio + Canvas — Starter desde{" "}
             <span className="text-zinc-900 font-black">$12/mes</span>
@@ -111,63 +345,193 @@ export default function Index() {
           <button onClick={() => navigate("/pricing")} className="flex items-center gap-1 text-[12px] text-primary hover:text-zinc-900 transition-colors font-bold">
             Ver planes <ChevronRight className="h-3 w-3" />
           </button>
-        </div>
+        </motion.div>
 
         <main>
 
           {/* ── Hero ─────────────────────────────────────────────────────── */}
-          <section className="relative flex flex-col items-center text-center px-6 pt-24 pb-20 overflow-hidden">
-            {/* Subtle glow */}
-            <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/6 blur-[120px] rounded-full" />
+          <section ref={heroRef} className="relative flex flex-col items-center text-center px-6 pt-24 pb-20 overflow-hidden">
+            {/* Animated aurora blobs */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <motion.div
+                animate={{
+                  x: [0, 40, -20, 0],
+                  y: [0, -30, 20, 0],
+                  scale: [1, 1.1, 0.95, 1],
+                }}
+                transition={{ repeat: Infinity, duration: 14, ease: "easeInOut" }}
+                className="absolute top-[-10%] left-[30%] w-[600px] h-[400px] bg-primary/8 blur-[130px] rounded-full"
+              />
+              <motion.div
+                animate={{
+                  x: [0, -50, 30, 0],
+                  y: [0, 40, -20, 0],
+                  scale: [1, 0.9, 1.05, 1],
+                }}
+                transition={{ repeat: Infinity, duration: 18, ease: "easeInOut", delay: 2 }}
+                className="absolute bottom-[10%] right-[20%] w-[400px] h-[300px] bg-violet-400/6 blur-[110px] rounded-full"
+              />
+              <motion.div
+                animate={{
+                  x: [0, 30, -40, 0],
+                  scale: [1, 1.15, 0.9, 1],
+                }}
+                transition={{ repeat: Infinity, duration: 22, ease: "easeInOut", delay: 4 }}
+                className="absolute top-[40%] left-[10%] w-[300px] h-[200px] bg-emerald-400/5 blur-[100px] rounded-full"
+              />
+            </div>
 
             <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-50 border border-zinc-200 text-[11px] font-bold text-zinc-400 uppercase tracking-[0.3em] mb-8">
-                <Code2 className="h-3 w-3 text-primary" />
+              {/* Badge */}
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                animate="show"
+                custom={0.1}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-50 border border-zinc-200 text-[11px] font-bold text-zinc-400 uppercase tracking-[0.3em] mb-8"
+              >
+                <motion.span
+                  animate={{ rotate: [0, 15, -10, 0] }}
+                  transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                >
+                  <Code2 className="h-3 w-3 text-primary" />
+                </motion.span>
                 Genesis IDE · Studio · Canvas IA
-              </div>
+              </motion.div>
 
-              <h1 className="text-[clamp(2.5rem,8vw,5.5rem)] font-black leading-[0.9] tracking-tight text-zinc-900 max-w-4xl mb-6">
-                Construye apps.<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/80">
-                  Crea contenido.
-                </span>
-                <br />Todo con IA.
-              </h1>
+              {/* Headline — word-by-word stagger */}
+              <motion.h1
+                className="text-[clamp(2.5rem,8vw,5.5rem)] font-black leading-[0.9] tracking-tight text-zinc-900 max-w-4xl mb-6"
+              >
+                <motion.span
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="show"
+                  custom={0.2}
+                  className="block"
+                >
+                  Construye apps.
+                </motion.span>
+                <motion.span
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="show"
+                  custom={0.35}
+                  className="block text-transparent bg-clip-text"
+                  style={{
+                    backgroundImage: "linear-gradient(135deg, #a855f7 0%, #7c3aed 40%, #a855f7 80%, #c084fc 100%)",
+                    backgroundSize: "200% 200%",
+                  }}
+                >
+                  <motion.span
+                    animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                    transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
+                    style={{ display: "inline-block" }}
+                  >
+                    Crea contenido.
+                  </motion.span>
+                </motion.span>
+                <motion.span
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="show"
+                  custom={0.5}
+                  className="block"
+                >
+                  Todo con IA.
+                </motion.span>
+              </motion.h1>
 
-              <p className="text-[clamp(0.95rem,2vw,1.15rem)] text-zinc-400 max-w-lg mx-auto leading-relaxed mb-10">
+              <motion.p
+                variants={fadeUp}
+                initial="hidden"
+                animate="show"
+                custom={0.6}
+                className="text-[clamp(0.95rem,2vw,1.15rem)] text-zinc-400 max-w-lg mx-auto leading-relaxed mb-10"
+              >
                 Genesis genera apps React completas desde tu descripción. Studio produce imágenes, logos y textos al instante. Sin fricción, sin código manual.
-              </p>
+              </motion.p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <button
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                animate="show"
+                custom={0.7}
+                className="flex flex-col sm:flex-row items-center justify-center gap-3"
+              >
+                <motion.button
                   onClick={() => navigate("/auth")}
-                  className="flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-zinc-900 text-white text-[14px] font-black hover:bg-zinc-800 active:scale-[0.98] transition-all shadow-sm"
+                  whileHover={{ scale: 1.04, boxShadow: "0 8px 30px rgba(0,0,0,0.15)" }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-zinc-900 text-white text-[14px] font-black hover:bg-zinc-800 transition-all shadow-sm"
                 >
                   Comenzar gratis <ArrowRight className="h-4 w-4" />
-                </button>
-                <button
+                </motion.button>
+                <motion.button
                   onClick={() => navigate("/pricing")}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
                   className="flex items-center gap-2 px-6 py-3.5 rounded-xl border border-zinc-200 text-zinc-500 text-[14px] font-bold hover:text-zinc-900 hover:border-zinc-300 transition-all"
                 >
                   Ver planes
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
 
               {/* Social proof mini */}
-              <div className="flex items-center justify-center gap-6 mt-10">
-                {TRUST.map((t) => (
-                  <div key={t.text} className="hidden sm:flex items-center gap-1.5">
+              <motion.div
+                variants={fadeIn}
+                initial="hidden"
+                animate="show"
+                custom={0.9}
+                className="flex items-center justify-center gap-6 mt-10"
+              >
+                {TRUST.map((t, idx) => (
+                  <motion.div
+                    key={t.text}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.9 + idx * 0.08, duration: 0.4 }}
+                    className="hidden sm:flex items-center gap-1.5"
+                  >
                     <t.icon className="h-3.5 w-3.5 text-primary/70" />
                     <span className="text-[11px] text-zinc-400 font-medium">{t.text}</span>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </div>
           </section>
 
+          {/* ── Marquee ticker ───────────────────────────────────────────── */}
+          <div className="relative overflow-hidden py-4 border-y border-zinc-100 bg-zinc-50/80">
+            <div className="flex gap-0">
+              {[0, 1].map((copy) => (
+                <motion.div
+                  key={copy}
+                  animate={{ x: ["0%", "-100%"] }}
+                  transition={{ repeat: Infinity, duration: 28, ease: "linear" }}
+                  className="flex shrink-0 gap-8 pr-8"
+                >
+                  {MARQUEE_ITEMS.map((item, i) => (
+                    <div key={`${copy}-${i}`} className="flex items-center gap-2 text-zinc-300 whitespace-nowrap">
+                      <item.icon className="h-3.5 w-3.5 text-primary/50" />
+                      <span className="text-[11px] font-bold uppercase tracking-[0.2em]">{item.label}</span>
+                      <span className="text-zinc-200 mx-2">·</span>
+                    </div>
+                  ))}
+                </motion.div>
+              ))}
+            </div>
+            {/* Fade edges */}
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-zinc-50 to-transparent" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-zinc-50 to-transparent" />
+          </div>
+
           {/* ── Product browser mockup ──────────────────────────────────── */}
-          <section className="px-6 md:px-12 pb-20">
-            <div className="max-w-5xl mx-auto rounded-2xl overflow-hidden border border-zinc-200 shadow-lg shadow-zinc-100 bg-white">
+          <section className="px-6 md:px-12 pb-20 pt-12">
+            <motion.div
+              style={{ y: mockupY, scale: mockupScale }}
+              className="max-w-5xl mx-auto rounded-2xl overflow-hidden border border-zinc-200 shadow-lg shadow-zinc-100 bg-white"
+            >
               {/* Browser chrome */}
               <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-200 bg-zinc-50">
                 <div className="flex gap-1.5">
@@ -193,13 +557,19 @@ export default function Index() {
                     { name: "Quitar fondo",  color: "#34d399" },
                     { name: "Copywriting",   color: "#f43f5e" },
                     { name: "Artículo SEO",  color: "#34d399" },
-                  ].map((t) => (
-                    <div key={t.name} className={`flex items-center gap-2 px-2 py-2 rounded-lg ${t.active ? 'bg-zinc-100 border-r-2 border-primary' : ''}`}>
+                  ].map((t, idx) => (
+                    <motion.div
+                      key={t.name}
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 + idx * 0.07, duration: 0.35 }}
+                      className={`flex items-center gap-2 px-2 py-2 rounded-lg ${t.active ? 'bg-zinc-100 border-r-2 border-primary' : ''}`}
+                    >
                       <div className="w-5 h-5 rounded-md border border-zinc-200 flex items-center justify-center" style={{ background: t.color + '15' }}>
                         <div className="w-2 h-2 rounded-full" style={{ background: t.color + '80' }} />
                       </div>
                       <span className={`text-[9px] font-medium ${t.active ? 'text-zinc-900' : 'text-zinc-400'}`}>{t.name}</span>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
 
@@ -208,7 +578,11 @@ export default function Index() {
                   <div className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest">Prompt</div>
                   <div className="flex-1 rounded-lg bg-zinc-50 border border-zinc-200 p-2">
                     <div className="text-[9px] text-zinc-400 leading-relaxed">Un gato astronauta en Marte al atardecer, estilo fotorrealista, luz dorada…</div>
-                    <div className="w-1 h-3 bg-primary/70 animate-pulse inline-block mt-1" />
+                    <motion.div
+                      animate={{ opacity: [1, 0, 1] }}
+                      transition={{ repeat: Infinity, duration: 1.1 }}
+                      className="w-1 h-3 bg-primary/70 inline-block mt-1"
+                    />
                   </div>
                   <div className="flex items-center justify-between text-[8px]">
                     <span className="text-zinc-300">FLUX Schnell · 2cr</span>
@@ -217,188 +591,144 @@ export default function Index() {
                 </div>
 
                 {/* Result panel */}
-                <div className="flex-1 bg-black/30 flex items-center justify-center relative">
-                  <div className="w-44 h-44 rounded-2xl overflow-hidden border border-zinc-200 shadow-2xl">
-                    <div className="w-full h-full bg-background bg-grid-white/[0.02] flex items-center justify-center">
+                <div className="flex-1 bg-zinc-100 flex items-center justify-center relative">
+                  <motion.div
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                    className="w-44 h-44 rounded-2xl overflow-hidden border border-zinc-200 shadow-xl shadow-zinc-200/80"
+                  >
+                    <div className="w-full h-full bg-gradient-to-br from-violet-100 via-zinc-50 to-cyan-100 flex items-center justify-center">
                       <div className="text-center">
                         <div className="text-3xl mb-1">🚀</div>
                         <div className="text-[8px] text-zinc-400">Resultado generado</div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
                     <div className="px-2 py-1 rounded bg-zinc-900 text-white text-[8px] font-bold">Descargar</div>
                     <div className="px-2 py-1 rounded border border-zinc-200 text-zinc-400 text-[8px] font-bold">Guardar</div>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </section>
 
           {/* ── Products deep dive ──────────────────────────────────────── */}
           {PRODUCTS.map((p, i) => (
-            <section key={p.badge} className={`px-6 md:px-12 py-20 border-t border-zinc-200 ${i % 2 === 1 ? 'bg-zinc-50' : ''}`}>
-              <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-12">
-                {/* Text */}
-                <div className={`flex-1 ${i % 2 === 1 ? 'md:order-2' : ''}`}>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-[0.3em] mb-6"
-                    style={{ borderColor: p.color + '40', color: p.color, background: p.color + '10' }}>
-                    <p.icon className="h-3 w-3" />
-                    {p.badge}
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight mb-4 leading-tight">
-                    {p.headline}
-                  </h2>
-                  <p className="text-[15px] text-zinc-400 leading-relaxed mb-6 max-w-md">
-                    {p.sub}
-                  </p>
-                  <ul className="flex flex-col gap-2 mb-8">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2.5 text-[13px] text-zinc-500">
-                        <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: p.color }} />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <button
-                    onClick={() => navigate(p.path)}
-                    className="flex items-center gap-2 text-[13px] font-bold transition-colors group"
-                    style={{ color: p.color }}
-                  >
-                    {p.cta}
-                    <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
-                </div>
-
-                {/* Visual */}
-                <div className={`flex-1 ${i % 2 === 1 ? 'md:order-1' : ''}`}>
-                  <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-md shadow-zinc-200"
-                    style={{ boxShadow: `0 4px 24px 15` }}>
-                    {i === 0 ? (
-                      /* Genesis preview */
-                      <div className="p-5">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="flex gap-1">
-                            {p.preview.map((f: any) => (
-                              <div key={f.label} className={`px-2 py-1 rounded text-[8px] font-bold ${f.active ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-300'}`}>{f.label}</div>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="rounded-xl bg-black/40 p-4 font-mono text-[10px] leading-relaxed">
-                          <span className="text-blue-400">import</span>{" "}
-                          <span className="text-zinc-900">{'{'} useState {'}'}</span>{" "}
-                          <span className="text-blue-400">from</span>{" "}
-                          <span className="text-orange-300">'react'</span>
-                          <br />
-                          <br />
-                          <span className="text-blue-400">export default function</span>{" "}
-                          <span className="text-yellow-300">App</span>
-                          <span className="text-zinc-900">() {"{"}</span>
-                          <br />
-                          {"  "}<span className="text-blue-400">return</span>{" "}
-                          <span className="text-zinc-900">{"("}</span>
-                          <br />
-                          {"    "}<span className="text-zinc-400">{"<div className="}</span>
-                          <span className="text-orange-300">"hero"</span>
-                          <span className="text-zinc-400">{">"}</span>
-                          <br />
-                          {"      "}<span className="text-zinc-400">{"<h1>"}</span>
-                          <span className="text-zinc-900">Mi App con IA</span>
-                          <span className="text-zinc-400">{"</h1>"}</span>
-                          <br />
-                          {"    "}<span className="text-zinc-400">{"</div>"}</span>
-                          <br />
-                          {"  "}<span className="text-zinc-900">{")"}</span>
-                          <br />
-                          <span className="text-zinc-900">{"}"}</span>
-                          <span className="inline-block w-1 h-3 bg-primary animate-pulse ml-0.5 align-middle" />
-                        </div>
-                        <div className="mt-3 flex items-center gap-2">
-                          <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20">
-                            <Sparkles className="h-3 w-3 text-primary" />
-                            <span className="text-[9px] font-bold text-primary">Claude 4.6</span>
-                          </div>
-                          <span className="text-[9px] text-zinc-300">Generando App.tsx…</span>
-                        </div>
-                      </div>
-                    ) : (
-                      /* Studio preview */
-                      <div className="p-5">
-                        <div className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest mb-3">Herramientas disponibles</div>
-                        <div className="grid grid-cols-2 gap-2">
-                          {(p.preview as any[]).map((t) => (
-                            <div key={t.tool} className="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 bg-zinc-50">
-                              <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: t.color + '20' }}>
-                                <div className="w-2 h-2 rounded-full" style={{ background: t.color + '80' }} />
-                              </div>
-                              <div>
-                                <div className="text-[9px] font-bold text-zinc-600">{t.tool}</div>
-                                <div className="text-[8px] text-zinc-300">{t.cr} crédito{t.cr > 1 ? 's' : ''}</div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="mt-3 w-full h-24 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-center">
-                          <span className="text-[10px] text-zinc-300">Preview en tiempo real</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </section>
+            <ProductSection key={p.badge} p={p} i={i} navigate={navigate} />
           ))}
 
           {/* ── Canvas section ──────────────────────────────────────────── */}
           <section className="px-6 md:px-12 py-20 border-t border-zinc-200">
-            <div className="max-w-5xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 text-primary bg-primary/10 text-[10px] font-black uppercase tracking-[0.3em] mb-6">
-                <Layers className="h-3 w-3" />
-                Canvas Editor
-              </div>
-              <h2 className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight mb-4">
+            <InViewSection className="max-w-5xl mx-auto text-center">
+              <motion.div variants={fadeUp} custom={0}>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 text-primary bg-primary/10 text-[10px] font-black uppercase tracking-[0.3em] mb-6">
+                  <Layers className="h-3 w-3" />
+                  Canvas Editor
+                </div>
+              </motion.div>
+              <motion.h2 variants={fadeUp} custom={0.1} className="text-3xl md:text-4xl font-black text-zinc-900 tracking-tight mb-4">
                 Flujos de producción visual.
-              </h2>
-              <p className="text-[15px] text-zinc-400 max-w-xl mx-auto mb-8 leading-relaxed">
+              </motion.h2>
+              <motion.p variants={fadeUp} custom={0.2} className="text-[15px] text-zinc-400 max-w-xl mx-auto mb-8 leading-relaxed">
                 Editor node-based estilo Figma para orquestar campañas completas: conecta nodos de imagen, video y texto con IA. Para agencias y productores de contenido.
-              </p>
-              <div className="flex items-center justify-center gap-4">
-                <button
+              </motion.p>
+              <motion.div variants={fadeUp} custom={0.3} className="flex items-center justify-center gap-4">
+                <motion.button
                   onClick={() => navigate("/formarketing")}
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.97 }}
                   className="flex items-center gap-2 px-6 py-3 rounded-xl border border-primary/30 text-primary hover:bg-primary/10 transition-all font-bold text-[13px]"
                 >
                   <Layers className="h-4 w-4" />
                   Abrir Canvas
-                </button>
+                </motion.button>
                 <button
                   onClick={() => navigate("/hub")}
                   className="flex items-center gap-2 text-[13px] text-zinc-400 hover:text-zinc-900 transition-colors font-medium"
                 >
                   Ver templates <ArrowRight className="h-4 w-4" />
                 </button>
-              </div>
-            </div>
+              </motion.div>
+
+              {/* Animated canvas preview dots */}
+              <motion.div variants={fadeUp} custom={0.4} className="mt-14 relative h-40 w-full max-w-2xl mx-auto">
+                <div className="absolute inset-0 rounded-2xl border border-zinc-200 bg-zinc-950 overflow-hidden">
+                  {/* Grid */}
+                  <div className="absolute inset-0 opacity-20"
+                    style={{
+                      backgroundImage: "radial-gradient(circle, #a855f7 1px, transparent 1px)",
+                      backgroundSize: "28px 28px",
+                    }}
+                  />
+                  {/* Animated nodes */}
+                  {[
+                    { x: "15%", y: "30%", color: "#a855f7", label: "Imagen" },
+                    { x: "42%", y: "55%", color: "#00c2ff", label: "Texto" },
+                    { x: "68%", y: "25%", color: "#4ade80", label: "Video" },
+                  ].map((node, ni) => (
+                    <motion.div
+                      key={ni}
+                      animate={{ y: [0, -5, 0] }}
+                      transition={{ repeat: Infinity, duration: 3 + ni, ease: "easeInOut", delay: ni * 0.7 }}
+                      className="absolute"
+                      style={{ left: node.x, top: node.y }}
+                    >
+                      <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-[9px] font-bold"
+                        style={{ borderColor: node.color + '50', color: node.color, background: node.color + '15' }}>
+                        <div className="w-1.5 h-1.5 rounded-full" style={{ background: node.color }} />
+                        {node.label}
+                      </div>
+                    </motion.div>
+                  ))}
+                  {/* Animated connection line */}
+                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 160" preserveAspectRatio="none">
+                    <motion.path
+                      d="M90,48 C200,48 200,88 252,88"
+                      stroke="#a855f750"
+                      strokeWidth="1.5"
+                      fill="none"
+                      strokeDasharray="4 4"
+                      animate={{ strokeDashoffset: [0, -20] }}
+                      transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                    />
+                    <motion.path
+                      d="M252,88 C350,88 350,40 408,40"
+                      stroke="#00c2ff50"
+                      strokeWidth="1.5"
+                      fill="none"
+                      strokeDasharray="4 4"
+                      animate={{ strokeDashoffset: [0, -20] }}
+                      transition={{ repeat: Infinity, duration: 2, ease: "linear", delay: 0.5 }}
+                    />
+                  </svg>
+                </div>
+              </motion.div>
+            </InViewSection>
           </section>
 
           {/* ── Pricing ─────────────────────────────────────────────────── */}
           <section className="px-6 md:px-12 py-20 border-t border-zinc-200 bg-zinc-50">
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-black text-zinc-900 mb-3">Precios simples.</h2>
-                <p className="text-zinc-400 text-[15px]">Sin sorpresas. Cancela cuando quieras.</p>
-              </div>
-              <div className="grid md:grid-cols-3 gap-4">
-                {PLANS.map((plan) => (
-                  <div
+              <InViewSection className="text-center mb-12">
+                <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-black text-zinc-900 mb-3">Precios simples.</motion.h2>
+                <motion.p variants={fadeUp} custom={0.1} className="text-zinc-400 text-[15px]">Sin sorpresas. Cancela cuando quieras.</motion.p>
+              </InViewSection>
+              <InViewSection className="grid md:grid-cols-3 gap-4">
+                {PLANS.map((plan, pi) => (
+                  <motion.div
                     key={plan.name}
-                    className={`relative rounded-2xl p-6 border transition-all ${
+                    variants={cardEntrance}
+                    custom={pi}
+                    whileHover={{ y: -6, boxShadow: plan.popular ? `0 16px 48px ${plan.color}20` : "0 8px 24px rgba(0,0,0,0.06)" }}
+                    className={`relative rounded-2xl p-6 border transition-all cursor-pointer ${
                       plan.popular
-                        ? 'border-primary/40 bg-primary/5'
-                        : 'border-zinc-200 bg-zinc-50'
+                        ? 'border-primary/40 bg-white'
+                        : 'border-zinc-200 bg-white'
                     }`}
                   >
                     {plan.popular && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-zinc-900 text-[10px] font-black uppercase tracking-widest">
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest">
                         Más popular
                       </div>
                     )}
@@ -418,42 +748,61 @@ export default function Index() {
                         </li>
                       ))}
                     </ul>
-                    <button
+                    <motion.button
                       onClick={() => navigate("/pricing")}
-                      className={`w-full py-2.5 rounded-xl text-[13px] font-bold transition-all active:scale-95 ${
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.97 }}
+                      className={`w-full py-2.5 rounded-xl text-[13px] font-bold transition-all ${
                         plan.popular
                           ? 'bg-primary text-white hover:bg-primary/90'
                           : 'border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:border-zinc-300'
                       }`}
                     >
                       Empezar con {plan.name}
-                    </button>
-                  </div>
+                    </motion.button>
+                  </motion.div>
                 ))}
-              </div>
+              </InViewSection>
             </div>
           </section>
 
           {/* ── Final CTA ───────────────────────────────────────────────── */}
-          <section className="px-6 md:px-12 py-24 border-t border-zinc-200">
-            <div className="max-w-2xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-bold mb-6">
-                <Sparkles className="h-3 w-3" />
-                Sin tarjeta requerida
-              </div>
-              <h2 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight mb-4 leading-tight">
+          <section className="relative px-6 md:px-12 py-24 border-t border-zinc-200 overflow-hidden">
+            {/* Animated background glow */}
+            <motion.div
+              animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.7, 0.4] }}
+              transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+              className="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-primary/8 blur-[120px] rounded-full"
+            />
+            <InViewSection className="max-w-2xl mx-auto text-center relative z-10">
+              <motion.div variants={fadeUp} custom={0}>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-bold mb-6">
+                  <motion.span
+                    animate={{ rotate: [0, 15, -10, 0] }}
+                    transition={{ repeat: Infinity, duration: 3 }}
+                  >
+                    <Sparkles className="h-3 w-3" />
+                  </motion.span>
+                  Sin tarjeta requerida
+                </div>
+              </motion.div>
+              <motion.h2 variants={fadeUp} custom={0.1} className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight mb-4 leading-tight">
                 Empieza a crear hoy.
-              </h2>
-              <p className="text-zinc-400 text-[15px] mb-8 leading-relaxed">
+              </motion.h2>
+              <motion.p variants={fadeUp} custom={0.2} className="text-zinc-400 text-[15px] mb-8 leading-relaxed">
                 Genesis IDE y Studio disponibles desde el primer día. Sin configuración, sin fricción.
-              </p>
-              <button
-                onClick={() => navigate("/auth")}
-                className="flex items-center gap-2.5 px-10 py-4 rounded-xl bg-zinc-900 text-white text-[15px] font-black hover:bg-zinc-800 active:scale-[0.98] transition-all shadow-sm mx-auto"
-              >
-                Crear cuenta gratis <ArrowRight className="h-5 w-5" />
-              </button>
-            </div>
+              </motion.p>
+              <motion.div variants={fadeUp} custom={0.3}>
+                <motion.button
+                  onClick={() => navigate("/auth")}
+                  whileHover={{ scale: 1.05, boxShadow: "0 12px 40px rgba(0,0,0,0.18)" }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-2.5 px-10 py-4 rounded-xl bg-zinc-900 text-white text-[15px] font-black hover:bg-zinc-800 transition-all shadow-sm mx-auto"
+                >
+                  Crear cuenta gratis <ArrowRight className="h-5 w-5" />
+                </motion.button>
+              </motion.div>
+            </InViewSection>
           </section>
 
           {/* ── Footer ──────────────────────────────────────────────────── */}
