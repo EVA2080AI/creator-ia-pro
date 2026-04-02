@@ -27,11 +27,11 @@ const TEMPLATES = [
     desc: "Campaña de imagen única optimizada para Facebook e Instagram. Incluye nodo de copy principal, imagen IA y CTA.",
     icon: Megaphone,
     color: "#2563eb", // Royal Blue
-    nodes: 4,
+    nodes: 3,
     tags: ["Facebook", "Instagram", "Imagen"],
     preset: [
-      { type: "model", data: { title: "AI Copywriter", model: "gemini-3-flash" } },
-      { type: "model", data: { title: "Imagen IA", type: "image" } },
+      { type: "textInput", data: { title: "Briefing del Anuncio", value: "Escribe aquí el producto, audiencia y propuesta de valor..." } },
+      { type: "modelView", data: { title: "Imagen IA", prompt: "Anuncio publicitario profesional para Meta Ads", model: "flux-pro", ratio: "1:1" } },
       { type: "campaignManager", data: { title: "Meta Ads Deploy", platforms: { instagram: "pending", facebook: "pending" } } },
     ]
   },
@@ -44,7 +44,11 @@ const TEMPLATES = [
     color: "#00c2ff",
     nodes: 3,
     tags: ["Google", "Search", "Copy"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Producto / Servicio", value: "" } },
+      { type: "llmNode", data: { title: "Copy Titulares", systemPrompt: "Genera 3 titulares y 2 descripciones para un anuncio Google Ads Responsive. Máximo 30 caracteres por titular y 90 por descripción. Solo devuelve el texto estructurado.", model: "anthropic/claude-sonnet-4-5" } },
+      { type: "captionNode", data: { title: "CTA Final", network: "instagram", tone: "Urgente ⚡" } },
+    ]
   },
   {
     id: "tiktok-ugc",
@@ -53,9 +57,13 @@ const TEMPLATES = [
     desc: "Flujo completo para crear un video estilo UGC: guion, voiceover y dirección creativa para TikTok Ads.",
     icon: Video,
     color: "#6366f1", // Indigo
-    nodes: 5,
+    nodes: 3,
     tags: ["TikTok", "UGC", "Video"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Producto TikTok", value: "" } },
+      { type: "llmNode", data: { title: "Guión UGC", systemPrompt: "Escribe un guión UGC viral para TikTok de 30 segundos. Hook potente en los primeros 3 segundos, desarrollo y CTA. Tono casual y auténtico.", model: "anthropic/claude-sonnet-4-5" } },
+      { type: "videoModel", data: { title: "Video TikTok", selectedDuration: "10s" } },
+    ]
   },
   {
     id: "carousel-meta",
@@ -64,9 +72,14 @@ const TEMPLATES = [
     desc: "5 tarjetas de carrusel con imágenes generadas por IA y copy persuasivo para Meta Business Suite.",
     icon: LayoutGrid,
     color: "#3b82f6", // Blue-500
-    nodes: 7,
+    nodes: 4,
     tags: ["Facebook", "Carrusel", "E-commerce"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Producto E-commerce", value: "" } },
+      { type: "llmNode", data: { title: "Copy Carrusel", systemPrompt: "Genera 5 cards de carrusel para Meta Ads. Para cada card: título (máx 40 chars), descripción (máx 125 chars) y CTA. Formato: Card 1: | Card 2: etc.", model: "anthropic/claude-sonnet-4-5" } },
+      { type: "modelView", data: { title: "Imagen Producto 1", model: "flux-pro", ratio: "1:1" } },
+      { type: "campaignManager", data: { title: "Meta Business Deploy", platforms: { facebook: "pending", instagram: "pending" } } },
+    ]
   },
   // --- LANDING ---
   {
@@ -76,9 +89,13 @@ const TEMPLATES = [
     desc: "Landing page completa para producto SaaS: hero, propuesta de valor, features, testimonios y CTA final.",
     icon: Layout,
     color: "#0ea5e9", // Sky-500
-    nodes: 6,
+    nodes: 3,
     tags: ["SaaS", "Web", "Conversión"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Producto SaaS", value: "Describe tu producto SaaS: nombre, qué hace, para quién es y cuál es la propuesta de valor principal..." } },
+      { type: "llmNode", data: { title: "Copy Landing", systemPrompt: "Genera el copy completo de una landing page SaaS con: H1 impactante, subtítulo, 3 features con descripción, sección de testimonios (inventados pero creíbles) y CTA final. Tono profesional y orientado a conversión.", model: "anthropic/claude-sonnet-4-5" } },
+      { type: "modelView", data: { title: "Hero Image", prompt: "Modern SaaS product dashboard screenshot, clean UI, purple gradient, professional", model: "flux-pro", ratio: "16:9" } },
+    ]
   },
   {
     id: "landing-product",
@@ -87,9 +104,13 @@ const TEMPLATES = [
     desc: "Página de lanzamiento de producto con contador regresivo, galería de imágenes generadas y pricing grid.",
     icon: ShoppingBag,
     color: "#8b5cf6", // Violet-500
-    nodes: 5,
+    nodes: 3,
     tags: ["E-commerce", "Lanzamiento", "Producto"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Datos del Producto", value: "Nombre del producto, precio, características principales, audiencia objetivo..." } },
+      { type: "llmNode", data: { title: "Copy Lanzamiento", systemPrompt: "Escribe copy para el lanzamiento de un producto: título poderoso, urgencia, beneficios top 3, garantía y CTA de compra. Formato optimizado para conversión.", model: "anthropic/claude-sonnet-4-5" } },
+      { type: "modelView", data: { title: "Foto Producto", model: "flux-pro-1.1", ratio: "4:5" } },
+    ]
   },
   {
     id: "landing-webinar",
@@ -98,9 +119,13 @@ const TEMPLATES = [
     desc: "Registro de evento o webinar con sección de speakers, agenda y formulario de inscripción.",
     icon: Camera,
     color: "#6d28d9", // Violet-700
-    nodes: 4,
+    nodes: 3,
     tags: ["Evento", "Webinar", "Registro"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Datos del Evento", value: "Nombre del webinar, fecha, tema, speakers y propuesta de valor para los asistentes..." } },
+      { type: "llmNode", data: { title: "Copy Evento", systemPrompt: "Genera el copy para una landing de webinar: título atractivo, subtítulo que genere urgencia, agenda del evento (5 puntos), bio del speaker y CTA de registro gratuito.", model: "anthropic/claude-sonnet-4-5" } },
+      { type: "modelView", data: { title: "Banner Evento", model: "flux-pro", ratio: "16:9" } },
+    ]
   },
   // --- SOCIAL ---
   {
@@ -110,9 +135,13 @@ const TEMPLATES = [
     desc: "Pack de 3 Reels: guion, texto en pantalla y hashtags estratégicos para máximo alcance orgánico.",
     icon: Camera,
     color: "#4f46e5", // Indigo-600
-    nodes: 4,
+    nodes: 3,
     tags: ["Instagram", "Reels", "Orgánico"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Tema del Reel", value: "" } },
+      { type: "llmNode", data: { title: "Guión Reel", systemPrompt: "Crea el guión de un Reel de Instagram de 30-60 segundos. Incluye: hook (primeros 3 seg), desarrollo en 3 puntos, texto en pantalla por escena y CTA final. Tono dinámico y viral.", model: "anthropic/claude-sonnet-4-5" } },
+      { type: "captionNode", data: { title: "Caption + Hashtags", network: "instagram", tone: "Viral 🔥" } },
+    ]
   },
   {
     id: "linkedin-post",
@@ -123,7 +152,11 @@ const TEMPLATES = [
     color: "#00c2ff",
     nodes: 3,
     tags: ["LinkedIn", "B2B", "Autoridad"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Tema LinkedIn", value: "" } },
+      { type: "captionNode", data: { title: "Post LinkedIn", network: "linkedin", tone: "Profesional 💼" } },
+      { type: "modelView", data: { title: "Imagen Profesional", model: "flux-pro", ratio: "1:1" } },
+    ]
   },
   {
     id: "twitter-thread",
@@ -132,9 +165,12 @@ const TEMPLATES = [
     desc: "Hilo de 10 tweets con estructura viral: gancho, desarrollo y CTA final. Optimizado para engagement.",
     icon: Hash,
     color: "#1d4ed8", // Blue-700
-    nodes: 3,
+    nodes: 2,
     tags: ["Twitter/X", "Thread", "Viral"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Tema del Thread", value: "" } },
+      { type: "captionNode", data: { title: "Thread X/Twitter", network: "twitter", tone: "Viral 🔥" } },
+    ]
   },
   {
     id: "social-kit-full",
@@ -143,9 +179,14 @@ const TEMPLATES = [
     desc: "Contenido unificado para 4 plataformas: Instagram, LinkedIn, X y TikTok desde un solo prompt.",
     icon: Sparkles,
     color: "#7c3aed", // Violet-600
-    nodes: 6,
+    nodes: 4,
     tags: ["Multi-platform", "Kit", "Eficiencia"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Brief de Marca", value: "Describe tu marca, tono de voz, producto o servicio y el mensaje clave de esta semana..." } },
+      { type: "captionNode", data: { title: "Post Instagram", network: "instagram", tone: "Viral 🔥" } },
+      { type: "captionNode", data: { title: "Post LinkedIn", network: "linkedin", tone: "Profesional 💼" } },
+      { type: "captionNode", data: { title: "Tweet X", network: "twitter", tone: "Casual 😊" } },
+    ]
   },
   // --- SEO ---
   {
@@ -155,9 +196,13 @@ const TEMPLATES = [
     desc: "Artículo de blog optimizado: keyword research, outline, redacción y meta-descripción en un flujo.",
     icon: FileText,
     color: "#475569", // Slate-600
-    nodes: 4,
+    nodes: 3,
     tags: ["Blog", "Contenido", "Keywords"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Keyword Principal", value: "" } },
+      { type: "llmNode", data: { title: "Artículo SEO", systemPrompt: "Escribe un artículo SEO de 1500 palabras con: H1 optimizado, introducción con gancho, 4-5 secciones H2, conclusión y meta-descripción de 160 caracteres. Incluye la keyword principal de forma natural en títulos y primer párrafo.", model: "anthropic/claude-sonnet-4-5" } },
+      { type: "modelView", data: { title: "Imagen Featured", model: "flux-schnell", ratio: "16:9" } },
+    ]
   },
   {
     id: "product-description",
@@ -166,9 +211,12 @@ const TEMPLATES = [
     desc: "Generación en batch de descripciones SEO para catálogos e-commerce usando variables dinámicas.",
     icon: ShoppingBag,
     color: "#ffb800",
-    nodes: 3,
+    nodes: 2,
     tags: ["E-commerce", "Producto", "Batch"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Datos del Producto", value: "Nombre, categoría, características técnicas, material, tallas/colores disponibles..." } },
+      { type: "llmNode", data: { title: "Descripción SEO", systemPrompt: "Escribe una descripción de producto para e-commerce: párrafo principal (150 palabras), bullets de características (5 puntos), ficha técnica y meta-description de 160 chars. Optimizado para SEO y conversión.", model: "anthropic/claude-sonnet-4-5" } },
+    ]
   },
   {
     id: "keyword-cluster",
@@ -177,9 +225,12 @@ const TEMPLATES = [
     desc: "Análisis de clusters de palabras clave y mapa de contenidos para una estrategia SEO de 3 meses.",
     icon: BarChart2,
     color: "#00c2ff",
-    nodes: 3,
+    nodes: 2,
     tags: ["Estrategia", "Keywords", "Mapa"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Nicho / Industria", value: "" } },
+      { type: "llmNode", data: { title: "Keyword Clusters", systemPrompt: "Genera un mapa de clusters de keywords para una estrategia SEO de 3 meses. Incluye: 5 clusters temáticos, 5 keywords por cluster (con intención de búsqueda), prioridad (alta/media/baja) y tipo de contenido recomendado. Formato de tabla.", model: "anthropic/claude-sonnet-4-5" } },
+    ]
   },
   // --- EMAIL ---
   {
@@ -189,9 +240,13 @@ const TEMPLATES = [
     desc: "Flujo de 5 emails de onboarding: bienvenida, propuesta de valor, caso de éxito, objeción y conversión.",
     icon: Mail,
     color: "#bd00ff",
-    nodes: 6,
+    nodes: 3,
     tags: ["Email", "Onboarding", "Nurturing"],
-    preset: []
+    preset: [
+      { type: "textInput", data: { title: "Datos del Negocio", value: "Nombre de la marca, producto/servicio, perfil del cliente ideal y objetivo de la secuencia..." } },
+      { type: "llmNode", data: { title: "Secuencia 5 Emails", systemPrompt: "Escribe una secuencia de bienvenida de 5 emails para nurturing: Email 1 (Bienvenida y promesa), Email 2 (El problema que resuelves), Email 3 (Caso de éxito/social proof), Email 4 (Objeción principal + respuesta), Email 5 (CTA de conversión con urgencia). Incluye subject line y preview text para cada uno.", model: "anthropic/claude-sonnet-4-5" } },
+      { type: "captionNode", data: { title: "Subject Lines Test A/B", network: "instagram", tone: "Urgente ⚡" } },
+    ]
   },
   {
     id: "email-flash-sale",
@@ -276,18 +331,51 @@ const Hub = () => {
 
       // Seed canvas nodes from preset
       if (template.preset.length > 0) {
-        const nodes = template.preset.map((node: any, i: number) => ({
+        const nodeRows = template.preset.map((node: any, i: number) => ({
           user_id: user.id,
           space_id: space.id,
-          type: node.type || "model",
+          type: node.type || "modelView",
           name: node.data?.title || `Nodo ${i + 1}`,
-          position_x: 120 + i * 300,
-          position_y: 200,
+          position_x: 100 + i * 340,
+          position_y: 220,
           status: "idle",
           data_payload: node.data || {},
           prompt: "",
         }));
-        await supabase.from("canvas_nodes").insert(nodes);
+
+        const { data: insertedNodes, error: nodesError } = await supabase
+          .from("canvas_nodes")
+          .insert(nodeRows)
+          .select("id");
+
+        if (nodesError) throw nodesError;
+
+        // Create sequential edges: node[0]→node[1]→node[2]→...
+        if (insertedNodes && insertedNodes.length > 1) {
+          const edges = insertedNodes.slice(0, -1).map((src, i) => ({
+            id: `e-${src.id}-${insertedNodes[i + 1].id}`,
+            source: src.id,
+            target: insertedNodes[i + 1].id,
+            sourceHandle: "text-out",
+            targetHandle: "text-in",
+            type: "smoothstep",
+            animated: true,
+            style: { stroke: "#a855f7", strokeWidth: 2 },
+          }));
+
+          // Save edges as flow_metadata row
+          await supabase.from("canvas_nodes").insert({
+            user_id: user.id,
+            space_id: space.id,
+            type: "flow_metadata",
+            name: "__flow_metadata__",
+            position_x: 0,
+            position_y: 0,
+            status: "idle",
+            data_payload: { edges } as any,
+            prompt: "",
+          });
+        }
       }
 
       toast.success(`Plantilla "${template.title}" cargada`);

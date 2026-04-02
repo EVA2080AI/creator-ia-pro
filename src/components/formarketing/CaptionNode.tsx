@@ -228,8 +228,8 @@ Devuelve SOLO el caption, sin explicaciones.`;
 
       <NodeConnectionDropdown nodeType="captionNode" nodeId={id} onAddConnected={data.onAddConnected ?? (() => {})} />
 
-      <Handle type="target" position={Position.Left} id="text-in" className="!w-3 !h-3 !-left-1.5 !bg-yellow-400 !border-2 !border-[#191a1f] hover:scale-125 transition-transform" />
-      <Handle type="source" position={Position.Right} id="text-out" className="!w-3 !h-3 !-right-1.5 !bg-[#34d399] !border-2 !border-[#191a1f] hover:scale-125 transition-transform" />
+      <Handle type="target" position={Position.Left} id="text-in" className="!w-4 !h-4 !-left-2 !bg-yellow-400 !border-2 !border-[#0f1011] hover:!scale-125 transition-transform cursor-crosshair" />
+      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-[#34d399] !border-2 !border-[#0f1011] hover:!scale-125 transition-transform cursor-crosshair" />
     </div>
   );
 };

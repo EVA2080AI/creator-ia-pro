@@ -72,7 +72,7 @@ const TextInputNode = ({ id, data }: { id: string; data: TextInputNodeData }) =>
         type="source"
         position={Position.Right}
         id="text-out"
-        className="!w-3 !h-3 !-right-1.5 !bg-yellow-400 !border-2 !border-[#191a1f] hover:scale-125 transition-transform"
+        className="!w-4 !h-4 !-right-2 !bg-yellow-400 !border-2 !border-[#0f1011] hover:!scale-125 transition-transform cursor-crosshair"
       />
     </div>
   );
