@@ -546,7 +546,7 @@ export default function Chat() {
     return (
       <div className="flex flex-col h-screen" style={{ background: '#0a0a0c' }}>
         <AppHeader userId={user?.id} onSignOut={signOut} />
-        <div className="flex-1 overflow-hidden pt-14">
+        <div className="flex-1 overflow-hidden pt-20">
           <WelcomeScreen
             onPrompt={handleWelcomePrompt}
             onCreateProject={() => createProject()}
@@ -568,7 +568,7 @@ export default function Chat() {
   const credits = profile?.credits_balance ?? 0;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden pt-[56px]" style={{ background: 'hsl(var(--background))' }}>
+    <div className="flex flex-col h-screen overflow-hidden pt-[72px]" style={{ background: 'hsl(var(--background))' }}>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       {/* ── Topbar ── */}

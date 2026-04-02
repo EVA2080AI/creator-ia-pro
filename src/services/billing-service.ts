@@ -1,16 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
+import { CREDIT_PACKS } from "@/lib/credit-packs";
 
 /**
  * Billing Service — Credit-Based Economy (Industrial V4.0)
  *
- * Mirrors the Lovable credit-purchase model:
- *   1. User selects a credit plan (defined in `plans` table).
- *   2. Stripe Checkout creates a session → redirects user.
- *   3. Webhook confirms payment → credits are added via RPC.
- *   4. All movements logged in `transactions`.
- *
- * Note: Stripe integration uses Supabase Edge Functions for
- * server-side operations (checkout session, webhook validation).
+ * Integrated with Bold.co for Colombian payments.
+ *   1. User selects a credit plan or pack.
+ *   2. Bold Checkout generates a link via Edge Function.
+ *   3. Webhook confirms payment → credits added via RPC.
+ *   4. All movements logged in `public.transactions`.
  */
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -18,9 +16,9 @@ import { supabase } from "@/integrations/supabase/client";
 export interface CreditPlan {
   id: string;
   name: string;
-  price_id: string;          // Stripe price ID
+  price_id: string;          // Maps to packId in backend
   credits_amount: number;
-  price_display: string;     // e.g. "$9.99"
+  price_display: string;     // e.g. "$69.000 COP"
   description: string | null;
   popular?: boolean;
 }
@@ -28,7 +26,7 @@ export interface CreditPlan {
 export interface Invoice {
   id: string;
   user_id: string;
-  stripe_invoice_id: string;
+  bold_payment_id?: string; // Replaces stripe_invoice_id
   amount: number;
   credits_awarded: number;
   status: 'paid' | 'pending' | 'failed';
@@ -38,58 +36,85 @@ export interface Invoice {
 export interface Transaction {
   id: string;
   user_id: string;
-  type: 'purchase' | 'spend' | 'admin_grant' | 'admin_deduct' | 'refund';
+  type: 'purchase' | 'spend' | 'admin_grant' | 'admin_deduct' | 'refund' | 'bold_pending' | 'bold_approved';
   amount: number;
   description: string;
   created_at: string;
 }
 
-// ─── Credit Plans (static until DB table is populated) ──────────────────────
-// These mirror Lovable's credit tiers
-
+// ─── Credit Plans (Synchronized with Pricing.tsx) ───────────────────────────
 export const CREDIT_PLANS: CreditPlan[] = [
   {
-    id: 'plan_starter',
+    id: 'starter',
     name: 'Starter',
-    price_id: 'price_starter_placeholder',
-    credits_amount: 100,
-    price_display: '$9',
-    description: 'Ideal para probar. 100 créditos para generación de código, imágenes y más.',
+    price_id: 'starter',
+    credits_amount: 500,
+    price_display: '$69.000',
+    description: 'Para creadores individuales. 500 créditos mensuales.',
   },
   {
-    id: 'plan_creator',
+    id: 'creator',
     name: 'Creator',
-    price_id: 'price_creator_placeholder',
-    credits_amount: 500,
-    price_display: '$29',
-    description: 'Para creadores activos. 500 créditos con los mejores modelos de IA.',
+    price_id: 'creator',
+    credits_amount: 1200,
+    price_display: '$138.000',
+    description: 'El nivel ideal para creadores e independientes. 1.200 créditos.',
     popular: true,
   },
   {
-    id: 'plan_pro',
-    name: 'Pro',
-    price_id: 'price_pro_placeholder',
-    credits_amount: 2000,
-    price_display: '$79',
-    description: 'Para equipos y agencias. 2,000 créditos, prioridad en generación.',
-  },
-  {
-    id: 'plan_business',
-    name: 'Business',
-    price_id: 'price_business_placeholder',
-    credits_amount: 10000,
-    price_display: '$249',
-    description: 'Para empresas. 10,000 créditos, soporte dedicado y SLA garantizado.',
+    id: 'pymes',
+    name: 'Pymes',
+    price_id: 'pymes',
+    credits_amount: 4000,
+    price_display: '$345.000',
+    description: 'Acceso total. Modelos Premium y 4.000 créditos mensuales.',
   },
 ];
 
-// ─── Stripe Service (DEPRECATED: Migrated to PayU Latam) ────────────────────
-export const stripeService = {
-  async createCheckout() { throw new Error("Deprecated in favor of PayU"); },
-  async buyCredits() { throw new Error("Deprecated in favor of PayU"); },
-  async checkSubscription() { return null; },
-  async openPortal() { throw new Error("Deprecated in favor of PayU"); },
-  async purchasePlan() { throw new Error("Deprecated in favor of PayU"); }
+// ─── Bold Service ──────────────────────────────────────────────────────────
+export const boldService = {
+  /**
+   * Initiate a Checkout flow to buy credits with Bold.co
+   */
+  async purchaseCredits(packOrPlanId: string) {
+    // Look in credit packs first, then plans
+    const item = CREDIT_PACKS.find(p => p.id === packOrPlanId) || 
+                 CREDIT_PLANS.find(p => p.id === packOrPlanId);
+    
+    if (!item) throw new Error("Producto no encontrado");
+
+    // Extract numerical COP integer from price string
+    // Handles both CreditPlan (price_display) and CREDIT_PACKS (price)
+    const rawPrice = (item as any).price_display || (item as any).price || "0";
+    const amountStr = rawPrice.replace(/[^0-9]/g, "");
+    const amount = parseInt(amountStr, 10);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Usuario no autenticado");
+
+    const { data, error } = await supabase.functions.invoke("bold-checkout", {
+      body: { 
+        amount, 
+        packId: item.id,
+        userId: user.id,
+        buyerEmail: user.email,
+        description: `Creator IA Pro: ${item.name}`
+      },
+    });
+
+    if (error || !data) {
+      console.error("[Bold Checkout Error]", error);
+      throw new Error(error?.message || "Error al conectar con Bold API");
+    }
+
+    if (data.error) throw new Error(data.error);
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error("Respuesta inválida de Bold API");
+    }
+  },
 };
 
 // ─── Credit Operations (via Supabase RPCs) ──────────────────────────────────
@@ -154,43 +179,11 @@ export const creditService = {
     }
     return (data || []) as Transaction[];
   },
-
-  /**
-   * Get invoices for the current user.
-   */
-  async getInvoices(limit = 20): Promise<Invoice[]> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
-
-    const { data, error } = await (supabase as any)
-      .from("invoices")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('[Billing] Error fetching invoices:', error);
-      return [];
-    }
-    return (data || []) as Invoice[];
-  },
 };
 
 // ─── Admin Service ──────────────────────────────────────────────────────────
 
 export const adminService = {
-  /**
-   * Save platform settings (e.g., Stripe keys).
-   */
-  async saveSettings(settings: Record<string, string>) {
-    const { data, error } = await supabase.functions.invoke("admin-save-settings", {
-      body: { settings },
-    });
-    if (error) throw error;
-    return data;
-  },
-
   /**
    * Admin: Add credits to a user.
    */
@@ -240,39 +233,8 @@ export const adminService = {
       .order("credits_amount", { ascending: true });
 
     if (error || !data || data.length === 0) {
-      // Fallback to static plans if DB table is empty or missing
       return CREDIT_PLANS;
     }
     return data as CreditPlan[];
-  },
-
-  /**
-   * Admin: Create a new credit plan.
-   */
-  async createPlan(plan: Omit<CreditPlan, 'id'>) {
-    const { data, error } = await (supabase as any)
-      .from("plans")
-      .insert(plan as any)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
-  },
-
-  /**
-   * Admin: Get all invoices (all users).
-   */
-  async getAllInvoices(limit = 50): Promise<Invoice[]> {
-    const { data, error } = await (supabase as any)
-      .from("invoices")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('[Admin] Error fetching invoices:', error);
-      return [];
-    }
-    return (data || []) as Invoice[];
   },
 };

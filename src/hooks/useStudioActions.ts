@@ -9,7 +9,7 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import JSZip from 'jszip';
-import { payuService } from '@/services/payu-service';
+import { boldService } from '@/services/billing-service';
 import { CREDIT_PLANS } from '@/services/billing-service';
 import { generateProject, downloadBlob, type ScaffoldOptions, type ScaffoldResult } from '@/services/scaffold-service';
 import type { StudioFile } from '@/hooks/useStudioProjects';
@@ -153,7 +153,7 @@ export function useStudioActions(): UseStudioActionsReturn {
   const purchasePlan = useCallback(async (planId: string) => {
     setPurchasingPlan(true);
     try {
-      await payuService.purchaseCredits(planId);
+      await boldService.purchaseCredits(planId);
     } catch (err: unknown) {
       console.error('[Billing] Error de pago:', err);
       toast.error('No se pudo procesar el pago o la compra está cancelada.');

@@ -1,12 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { stripeService } from "@/services/billing-service";
 
 interface SubscriptionInfo {
-  subscribed: boolean;
   tier: string;
   credits: number;
-  subscription_end: string | null;
 }
 
 export function useSubscription(userId: string | undefined) {
@@ -17,18 +14,23 @@ export function useSubscription(userId: string | undefined) {
     if (!userId) return;
     setLoading(true);
     try {
-      const data = await stripeService.checkSubscription();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("subscription_tier, credits_balance")
+        .eq("user_id", userId)
+        .single();
+
+      if (error) throw error;
+
       if (data) {
         setSubscription({
-          subscribed: data.subscribed ?? false,
-          tier: data.tier ?? "free",
-          credits: data.credits ?? 0,
-          subscription_end: data.subscription_end ?? null,
+          tier: data.subscription_tier ?? "free",
+          credits: data.credits_balance ?? 0,
         });
       }
     } catch (err) {
-      console.error("check-subscription error:", err);
-      setSubscription({ subscribed: false, tier: "free", credits: 0, subscription_end: null });
+      console.error("fetch-profile-subscription error:", err);
+      setSubscription({ tier: "free", credits: 0 });
     } finally {
       setLoading(false);
     }
@@ -39,15 +41,5 @@ export function useSubscription(userId: string | undefined) {
     checkSubscription();
   }, [userId, checkSubscription]);
 
-  const openCustomerPortal = async () => {
-    try {
-      const data = await stripeService.openPortal();
-      if (data?.url) window.open(data.url, "_blank");
-    } catch (err: any) {
-      console.error("customer-portal error:", err);
-      throw err;
-    }
-  };
-
-  return { subscription, loading, checkSubscription, openCustomerPortal };
+  return { subscription, loading, checkSubscription };
 }

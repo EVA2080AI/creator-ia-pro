@@ -99,7 +99,7 @@ const Dashboard = () => {
     fetchData();
   }, [user]);
 
-  const tierLabels: Record<string, string> = { free: "Free", starter: "Starter", creator: "Creator", agency: "Agency", educacion: "Educación", pro: "Pro", business: "Business" };
+  const tierLabels: Record<string, string> = { free: "Gratis", starter: "Starter", creator: "Creator", pymes: "Pymes" };
   const currentTier = profile?.subscription_tier || "free";
   const checkoutSuccess = searchParams.get("checkout") === "success";
   const creditsSuccess = searchParams.get("credits") === "success";

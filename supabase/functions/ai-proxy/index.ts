@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,18 +33,41 @@ function checkRateLimit(userId: string): boolean {
   return true;
 }
 
-/** Extract user_id from Supabase JWT without full verification (proxy layer only) */
-function extractUserIdFromJwt(authHeader: string | null): string | null {
-  try {
-    if (!authHeader?.startsWith('Bearer ')) return null;
-    const token = authHeader.slice(7);
-    const [, payload] = token.split('.');
-    if (!payload) return null;
-    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-    return decoded?.sub ?? null;
-  } catch {
-    return null;
+/** 
+ * Robust JWT verification and Credit Check
+ * Since verify_jwt is false at the platform level, we must verify manually.
+ */
+async function verifyUserAndCredits(req: Request, supabaseAdmin: any) {
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    throw new Error('No se encontró token de autorización. Por favor inicia sesión.');
   }
+
+  const token = authHeader.replace('Bearer ', '');
+  const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+
+  if (authError || !user) {
+    console.error('[ai-proxy] Auth error:', authError);
+    throw new Error('Sesión inválida o expirada. Por favor vuelve a ingresar.');
+  }
+
+  // Check credits
+  const { data: profile, error: profileError } = await supabaseAdmin
+    .from('profiles')
+    .select('credits_balance, subscription_tier')
+    .eq('user_id', user.id)
+    .single();
+
+  if (profileError || !profile) {
+    throw new Error('No se pudo verificar el perfil del usuario.');
+  }
+
+  const balance = profile.credits_balance ?? 0;
+  if (balance <= 0) {
+    throw new Error('Créditos agotados. Por favor recarga tu plan para continuar.');
+  }
+
+  return { user, profile };
 }
 
 // Normalize legacy/broken model slugs → verified OpenRouter slugs
@@ -115,18 +139,25 @@ async function openrouterFetch(path: string, body: unknown, stream = false): Pro
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
+  const supabaseAdmin = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+    { auth: { persistSession: false } }
+  );
+
   try {
+    // 1. Mandatory Identity & Credit Verification
+    const { user } = await verifyUserAndCredits(req, supabaseAdmin);
+
     const payload = await req.json();
     const { provider, path: urlPath, body: reqBody } = payload;
 
     if (!provider) return json({ error: 'Missing provider' }, 400);
 
-    // ── Rate limit check for costly providers ─────────────────────────────────
+    // 2. Rate limit check (now using verified user ID)
     if (provider === 'openrouter' || provider === 'openrouter-image') {
-      const userId = extractUserIdFromJwt(req.headers.get('authorization'));
-      const key = userId ?? req.headers.get('x-forwarded-for') ?? 'anonymous';
-      if (!checkRateLimit(key)) {
-        console.warn('[ai-proxy] Rate limit exceeded for key: ' + key);
+      if (!checkRateLimit(user.id)) {
+        console.warn('[ai-proxy] Rate limit exceeded for user: ' + user.id);
         return json({ error: 'Demasiadas solicitudes. Espera un momento antes de continuar.', code: 'rate_limit' }, 200);
       }
     }

@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import { boldService } from "@/services/bold-service";
+import { boldService } from "@/services/billing-service";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
 import { CATEGORY_CONFIG } from "@/lib/models.config";
 import {
@@ -105,7 +105,6 @@ const PLANS = [
     icon: Crown,
     badge: "Acceso Total",
     category: "ULTRA",
-    stripeTier: "pymes" as const,
     features: [
       { label: "4.000 créditos/mes", highlight: true },
       { label: "Modelos Premium (Claude 3.5 Sonnet, GPT-4o, Opus)", highlight: true },
@@ -194,7 +193,7 @@ export default function Pricing() {
       return;
     }
     
-    // In the new credit-only model with Bold, we map subscriptions to large credit packs.
+    // **Pagos:** Implementación única de **Bold.co** (webhooks, checkouts dinámicos, orquestación, firma HMAC-SHA256).
     // For now, prompt the user to buy the explicit credit packs instead.
     toast.info("En el nuevo modelo Bold, por favor adquiere un pack de créditos debajo.");
     document.getElementById("credit-packs-section")?.scrollIntoView({ behavior: 'smooth' });

@@ -43,7 +43,7 @@ Tu misión es liderar proyectos desde la concepción hasta el despliegue en prod
 
 ### 🚀 QA, Pagos & DevOps
 - **QA:** Pruebas robustas con Playwright (E2E) y Vitest (unitarias/integración). Debugging de alto nivel. Auto-corrección de vulnerabilidades.
-- **Pagos:** Implementación experta de **Stripe** y **Bold Latam** (webhooks, suscripciones, orquestación, idempotencia).
+- **Pagos:** Implementación única de **Bold.co** (webhooks, checkouts dinámicos, orquestación, firma HMAC-SHA256).
 - **DevOps:** CI/CD con GitHub Actions, Vercel, Docker y Supabase Edge Functions.
 
 ---
