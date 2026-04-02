@@ -419,8 +419,9 @@ const Admin = () => {
   const [creditModalUser, setCreditModalUser] = useState<AdminUser | null>(null);
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
 
-  const [stripeKey, setStripeKey] = useState("");
-  const [showStripeKey, setShowStripeKey] = useState(false);
+  const [boldApiKey, setBoldApiKey] = useState("");
+  const [boldWebhookSecret, setBoldWebhookSecret] = useState("");
+  const [showBoldKeys, setShowBoldKeys] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
 
   // Analytics state
@@ -543,13 +544,18 @@ const Admin = () => {
     setActionLoading(null);
   };
 
-  const handleSaveStripeKey = async () => {
-    if (!stripeKey.trim()) { toast.error("Clave inválida"); return; }
+  const handleSaveBoldSettings = async () => {
+    if (!boldApiKey.trim() && !boldWebhookSecret.trim()) { toast.error("Ingresa al menos una clave"); return; }
     setSavingSettings(true);
     try {
-      await adminService.saveSettings({ STRIPE_SECRET_KEY: stripeKey });
-      toast.success("Clave de Stripe guardada");
-      setStripeKey("");
+      const settings: any = {};
+      if (boldApiKey.trim()) settings.BOLD_API_KEY = boldApiKey;
+      if (boldWebhookSecret.trim()) settings.BOLD_WEBHOOK_SECRET = boldWebhookSecret;
+      
+      await adminService.saveSettings(settings);
+      toast.success("Configuración de Bold guardada");
+      setBoldApiKey("");
+      setBoldWebhookSecret("");
     } catch (err: any) {
       toast.error(err.message || "Error guardando");
     } finally {
@@ -610,9 +616,8 @@ const Admin = () => {
     { name: "media-proxy",       desc: "Edición de imagen (Replicate)",       icon: Image,    color: "#60A5FA" },
     { name: "video-gen",         desc: "Generación de video (Replicate)",     icon: Video,    color: "#F59E0B" },
     { name: "studio-generate",   desc: "BuilderAI — generación de código",    icon: Code2,    color: "var(--brand)" },
-    { name: "stripe-webhook",    desc: "Webhook de pagos Stripe",             icon: CreditCard, color: "#635BFF" },
-    { name: "create-checkout",   desc: "Crear sesión de pago Stripe",         icon: DollarSign, color: "var(--brand)" },
-    { name: "customer-portal",   desc: "Portal de cliente Stripe",            icon: Users2,   color: "#EC4899" },
+    { name: "bold-webhook",      desc: "Webhook de pagos Bold.co",            icon: Shield,     color: "#F59E0B" },
+    { name: "bold-checkout",     desc: "Generador de checkout Bold",          icon: DollarSign,   color: "var(--brand)" },
     { name: "admin-settings",    desc: "Guardar configuración de plataforma", icon: Settings, color: "#6B7280" },
     { name: "deploy-hook",       desc: "Redeployment automático (Vercel)",    icon: Globe,    color: "#60A5FA" },
   ];
@@ -1153,43 +1158,58 @@ const Admin = () => {
           <div className="max-w-lg space-y-4">
             <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 space-y-5">
               <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-[#635BFF]/15 border border-[#635BFF]/20 flex items-center justify-center">
-                  <Settings className="h-4 w-4 text-[#635BFF]" />
+                <div className="h-9 w-9 rounded-xl bg-[#F59E0B]/15 border border-[#F59E0B]/20 flex items-center justify-center">
+                  <Shield className="h-4 w-4 text-[#F59E0B]" />
                 </div>
                 <div>
-                  <p className="font-semibold text-white">Stripe</p>
-                  <p className="text-xs text-white/35">Pasarela de pagos</p>
+                  <p className="font-semibold text-white">Bold.co</p>
+                  <p className="text-xs text-white/35">Pasarela de pagos Industrial</p>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-xs font-medium text-white/50">Stripe Secret Key</label>
-                <div className="relative">
-                  <input
-                    type={showStripeKey ? "text" : "password"}
-                    value={stripeKey}
-                    onChange={(e) => setStripeKey(e.target.value)}
-                    placeholder="sk_live_…"
-                    className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] py-2.5 pl-4 pr-10 text-sm text-white placeholder-white/20 outline-none focus:border-[#635BFF]/50 transition-colors"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowStripeKey(!showStripeKey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
-                  >
-                    {showStripeKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-white/40">Bold API Key</label>
+                  <div className="relative">
+                    <input
+                      type={showBoldKeys ? "text" : "password"}
+                      value={boldApiKey}
+                      onChange={(e) => setBoldApiKey(e.target.value)}
+                      placeholder="Identidad de Bold..."
+                      className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] py-2.5 pl-4 pr-10 text-sm text-white placeholder-white/20 outline-none focus:border-[#F59E0B]/50 transition-colors"
+                    />
+                  </div>
                 </div>
-                <p className="text-[11px] text-white/25">Almacenada cifrada. Nunca expuesta en el cliente.</p>
+
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-white/40">Bold Webhook Secret</label>
+                  <div className="relative">
+                    <input
+                      type={showBoldKeys ? "text" : "password"}
+                      value={boldWebhookSecret}
+                      onChange={(e) => setBoldWebhookSecret(e.target.value)}
+                      placeholder="Llave secreta de Bold..."
+                      className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] py-2.5 pl-4 pr-10 text-sm text-white placeholder-white/20 outline-none focus:border-[#F59E0B]/50 transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowBoldKeys(!showBoldKeys)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                    >
+                      {showBoldKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+                <p className="text-[10px] text-white/25 leading-relaxed">Configura estas llaves desde tu panel de Bold.co para habilitar cobros e integración con webhooks.</p>
               </div>
 
               <button
-                onClick={handleSaveStripeKey}
-                disabled={savingSettings || !stripeKey.trim()}
-                className="flex items-center gap-2 rounded-xl bg-[#635BFF]/12 border border-[#635BFF]/30 px-4 py-2.5 text-sm font-semibold text-[#635BFF] hover:bg-[#635BFF]/18 transition-colors disabled:opacity-40"
+                onClick={handleSaveBoldSettings}
+                disabled={savingSettings || (!boldApiKey.trim() && !boldWebhookSecret.trim())}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-white text-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:opacity-90 transition-colors disabled:opacity-40"
               >
                 {savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                Guardar clave
+                Actualizar Configuración
               </button>
             </div>
 

@@ -57,10 +57,8 @@ const features: Feature[] = [
   { name: "Ad Generator", module: "AI Apps", status: "done", completion: 90, team: "Backend", priority: "P1", notes: "Google Ads + Meta Ads copy" },
 
   // PAYMENTS
-  { name: "Stripe Checkout suscripciones", module: "Pagos", status: "done", completion: 95, team: "Backend", priority: "P0", notes: "3 tiers: Educación, Pro, Business" },
-  { name: "Stripe Checkout créditos", module: "Pagos", status: "done", completion: 95, team: "Backend", priority: "P0", notes: "3 packs: 100, 500, 2500" },
-  { name: "Webhook Stripe", module: "Pagos", status: "done", completion: 90, team: "Backend", priority: "P0", notes: "Recarga créditos y actualiza tier. Necesita test E2E." },
-  { name: "Customer Portal", module: "Pagos", status: "done", completion: 85, team: "Backend", priority: "P1", notes: "Funcional para cancelar/cambiar plan" },
+  { name: "Bold.co Checkout (Industrial)", module: "Pagos", status: "done", completion: 100, team: "Backend", priority: "P0", notes: "Generación de links dinámicos vía Edge Function" },
+  { name: "Bold.co Webhook (Secure)", module: "Pagos", status: "done", completion: 100, team: "Backend", priority: "P0", notes: "Hardening con HMAC-SHA256 y carga atómica de créditos" },
   { name: "Deducción de créditos", module: "Pagos", status: "done", completion: 100, team: "Backend", priority: "P0", notes: "Todas las tools y canvas deducen correctamente" },
   { name: "Rollback créditos en error", module: "Pagos", status: "done", completion: 100, team: "Backend", priority: "P0", notes: "Si IA falla, créditos se devuelven" },
 
@@ -117,7 +115,7 @@ const backlog: BacklogItem[] = [
   { id: "BL-004", title: "Edición de perfil completa", description: "UI para cambiar avatar, nombre, email de notificación desde el dashboard.", priority: "P1", effort: "S", team: "Frontend", sprint: "Sprint 5", icon: Users },
   { id: "BL-005", title: "Generación de Video IA", description: "Integrar modelo de video (Google Veo o similar) para nodos de video en canvas.", priority: "P2", effort: "XL", team: "Full-Stack", sprint: "Sprint 7", icon: Sparkles },
   { id: "BL-006", title: "Canvas: Flujo entre nodos", description: "Lógica de conexión: output de un nodo como input del siguiente (pipelines).", priority: "P2", effort: "L", team: "Full-Stack", sprint: "Sprint 6", icon: Palette },
-  { id: "BL-007", title: "Webhooks Stripe E2E test", description: "Testeo end-to-end del flujo completo de pago → webhook → créditos recargados.", priority: "P0", effort: "S", team: "QA", sprint: "Sprint 5", icon: CreditCard },
+  { id: "BL-007", title: "Bold Webhooks E2E test", description: "Testeo end-to-end del flujo completo de pago → webhook → créditos recargados con producción real.", priority: "P0", effort: "S", team: "QA", sprint: "Sprint 5", icon: CreditCard },
   { id: "BL-008", title: "Demo real con IA para landing", description: "Reemplazar demos estáticos de herramientas de imagen con procesamiento real limitado (1 demo gratis).", priority: "P1", effort: "L", team: "Full-Stack", sprint: "Sprint 6", icon: Wand2 },
   { id: "BL-009", title: "Canvas responsive (mobile)", description: "Optimizar canvas para tablets/móviles con gestos táctiles.", priority: "P2", effort: "L", team: "Frontend", sprint: "Sprint 7", icon: Smartphone },
   { id: "BL-010", title: "Analytics dashboard admin", description: "Métricas de uso: generaciones/día, usuarios activos, revenue, churn rate.", priority: "P2", effort: "L", team: "Full-Stack", sprint: "Sprint 7", icon: BarChart3 },
@@ -307,7 +305,7 @@ const ProductBacklog = () => {
               { risk: "API Google gratuita tiene límite 60 req/min", impact: "Alto", mitigation: "Implementar rate limiter propio + cola de espera", color: "border-destructive/30 bg-destructive/5" },
               { risk: "Base64 en DB hace assets pesados", impact: "Medio", mitigation: "Migrar a Storage bucket (BL-001)", color: "border-amber-500/30 bg-amber-500/5" },
               { risk: "Demos de imagen no son reales", impact: "Medio", mitigation: "Implementar demo real limitado (BL-008). Ya marcados como 'ejemplo'.", color: "border-amber-500/30 bg-amber-500/5" },
-              { risk: "Webhook Stripe sin test E2E", impact: "Alto", mitigation: "Priorizar BL-007 en Sprint 5", color: "border-destructive/30 bg-destructive/5" },
+              { risk: "Webhook Bold sin llaves de producción", impact: "Alto", mitigation: "Solicitar BOLD_WEBHOOK_SECRET al cliente", color: "border-destructive/30 bg-destructive/5" },
               { risk: "Página de Descargas tiene links ficticios", impact: "Bajo", mitigation: "Agregar 'Próximamente' badges o remover página", color: "border-border bg-muted/20" },
               { risk: "No hay backup de datos de usuario", impact: "Alto", mitigation: "Configurar backup automático de DB", color: "border-destructive/30 bg-destructive/5" },
             ].map((r, i) => (

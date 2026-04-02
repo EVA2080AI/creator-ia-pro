@@ -237,4 +237,15 @@ export const adminService = {
     }
     return data as CreditPlan[];
   },
+
+  /**
+   * Admin: Save platform settings (e.g., Bold API keys).
+   */
+  async saveSettings(settings: Record<string, string>) {
+    const { data, error } = await supabase.functions.invoke("admin-settings", {
+      body: settings,
+    });
+    if (error) throw error;
+    return data;
+  },
 };

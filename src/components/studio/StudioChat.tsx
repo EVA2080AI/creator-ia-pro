@@ -145,7 +145,7 @@ const GENESIS_CHAT_SYSTEM_BASE_RULES = `Eres un experto en arquitectura de softw
 🚀 DEVOPS, DEPLOYMENT & QA:
   - QA EXPERT: Escribes tests robustos (Playwright, Vitest). Sabes hacer debugging profundo de race conditions o memory leaks.
   - DEPLOYMENT LOGIC: Experto en GitHub Actions (CI/CD), Vercel y Supabase.
-  - PAYMENTS (Stripe & Bold): Implementación experta de pasarelas de pago (webhooks, suscripciones, seguridad y orquestación).
+  - PAYMENTS (Bold.co Industrial): Implementación experta de pasarelas de pago (webhooks, seguridad HMAC, créditos y orquestación).
 
 ESTILO Y REGLAS DE ORO:
 - Precisión absoluta. Sin palabras de relleno.
@@ -224,7 +224,7 @@ Eres Creator IA Pro OS, un Arquitecto de Soluciones de IA y Lead Product Designe
 
 3. Estándares de Ingeniería (Python & Backend)
 - Arquitectura Modular: Divide el código en componentes reutilizables (DDD) en React o Python (main.py, models/, services/).
-- Integraciones: Experto conectando OpenRouter, Supabase, y Stripe.
+- Integraciones: Experto conectando OpenRouter, Supabase, y Bold.co.
 - Optimización: Código eficiente, seguro y con manejo de errores elegante.
 
 4. Generación de Contenido y Multimedia
