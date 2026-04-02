@@ -140,9 +140,9 @@ const TESTIMONIALS = [
 function MeshGradient() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 opacity-40">
-      <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-primary/20 blur-[120px] rounded-full animate-pulse" />
-      <div className="absolute top-[10%] -right-[10%] w-[60%] h-[60%] bg-emerald-500/10 blur-[120px] rounded-full animate-pulse [animation-delay:2s]" />
-      <div className="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse [animation-delay:4s]" />
+      <div className="absolute -top-[20%] -left-[10%] w-[70%] h-[70%] bg-primary/8 blur-[120px] rounded-full animate-pulse" />
+      <div className="absolute top-[10%] -right-[10%] w-[60%] h-[60%] bg-emerald-500/5 blur-[120px] rounded-full animate-pulse [animation-delay:2s]" />
+      <div className="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] bg-purple-500/5 blur-[120px] rounded-full animate-pulse [animation-delay:4s]" />
     </div>
   );
 }
@@ -225,9 +225,9 @@ export default function Pricing() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="max-w-5xl mx-auto text-center"
             >
-              <h1 className="text-6xl sm:text-8xl md:text-[8rem] font-black tracking-[-0.05em] uppercase font-display leading-[0.85] mb-8">
+              <h1 className="text-6xl sm:text-8xl md:text-[8rem] font-black tracking-[-0.05em] uppercase font-display leading-[0.85] mb-8 text-zinc-900">
                 Escala tu<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20">Impacto.</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-b from-primary to-purple-300">Impacto.</span>
               </h1>
               <p className="max-w-lg mx-auto text-lg text-zinc-400 leading-relaxed font-medium">
                 Sin suscripciones forzadas. <span className="text-zinc-700">Créditos industriales</span> para creadores que exigen la mejor latencia y los modelos más potentes.

@@ -94,7 +94,7 @@ export default function Index() {
             </button>
             <button
               onClick={() => navigate("/auth")}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-white text-black text-[13px] font-bold hover:bg-white/90 active:scale-95 transition-all"
+              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-zinc-900 text-white text-[13px] font-bold hover:bg-zinc-800 active:scale-95 transition-all"
             >
               Empezar gratis
             </button>
@@ -141,13 +141,13 @@ export default function Index() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <button
                   onClick={() => navigate("/auth")}
-                  className="flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-white text-black text-[14px] font-black hover:bg-white/90 active:scale-[0.98] transition-all shadow-[0_0_40px_rgba(255,255,255,0.12)]"
+                  className="flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-zinc-900 text-white text-[14px] font-black hover:bg-zinc-800 active:scale-[0.98] transition-all shadow-sm"
                 >
                   Comenzar gratis <ArrowRight className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => navigate("/pricing")}
-                  className="flex items-center gap-2 px-6 py-3.5 rounded-xl border border-zinc-200 text-zinc-500 text-[14px] font-bold hover:text-zinc-900 hover:border-white/25 transition-all"
+                  className="flex items-center gap-2 px-6 py-3.5 rounded-xl border border-zinc-200 text-zinc-500 text-[14px] font-bold hover:text-zinc-900 hover:border-zinc-300 transition-all"
                 >
                   Ver planes
                 </button>
@@ -272,8 +272,8 @@ export default function Index() {
 
                 {/* Visual */}
                 <div className={`flex-1 ${i % 2 === 1 ? 'md:order-1' : ''}`}>
-                  <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
-                    style={{ boxShadow: `0 0 40px ${p.color}10, 0 20px 60px rgba(0,0,0,0.4)` }}>
+                  <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-md shadow-zinc-200"
+                    style={{ boxShadow: `0 4px 24px 15` }}>
                     {i === 0 ? (
                       /* Genesis preview */
                       <div className="p-5">
@@ -423,7 +423,7 @@ export default function Index() {
                       className={`w-full py-2.5 rounded-xl text-[13px] font-bold transition-all active:scale-95 ${
                         plan.popular
                           ? 'bg-white text-black hover:bg-white/90'
-                          : 'border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:border-white/25'
+                          : 'border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:border-zinc-300'
                       }`}
                     >
                       Empezar con {plan.name}
@@ -449,7 +449,7 @@ export default function Index() {
               </p>
               <button
                 onClick={() => navigate("/auth")}
-                className="flex items-center gap-2.5 px-10 py-4 rounded-xl bg-white text-black text-[15px] font-black hover:bg-white/90 active:scale-[0.98] transition-all shadow-[0_0_60px_rgba(255,255,255,0.1)] mx-auto"
+                className="flex items-center gap-2.5 px-10 py-4 rounded-xl bg-zinc-900 text-white text-[15px] font-black hover:bg-zinc-800 active:scale-[0.98] transition-all shadow-sm mx-auto"
               >
                 Crear cuenta gratis <ArrowRight className="h-5 w-5" />
               </button>

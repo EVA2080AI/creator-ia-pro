@@ -175,7 +175,7 @@ function CreditModal({
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder={tab === "add" ? "Ej: 50000" : "Ej: 1000"}
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-900 placeholder-white/25 outline-none focus:border-zinc-300 transition-colors"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-300 transition-colors"
                 />
               </div>
               <div>
@@ -187,7 +187,7 @@ function CreditModal({
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder={tab === "refund" ? "Motivo del reembolso" : "Descripción (opcional)"}
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-900 placeholder-white/25 outline-none focus:border-zinc-300 transition-colors"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-300 transition-colors"
                 />
               </div>
               <button
@@ -756,7 +756,7 @@ const Admin = () => {
                   placeholder="Buscar por email o nombre…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 placeholder-white/25 outline-none focus:border-zinc-300 transition-colors"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-300 transition-colors"
                 />
               </div>
               <button
@@ -1176,7 +1176,7 @@ const Admin = () => {
                       value={boldApiKey}
                       onChange={(e) => setBoldApiKey(e.target.value)}
                       placeholder="Identidad de Bold..."
-                      className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-4 pr-10 text-sm text-zinc-900 placeholder-white/20 outline-none focus:border-[#F59E0B]/50 transition-colors"
+                      className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-4 pr-10 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-[#F59E0B]/50 transition-colors"
                     />
                   </div>
                 </div>
@@ -1189,7 +1189,7 @@ const Admin = () => {
                       value={boldWebhookSecret}
                       onChange={(e) => setBoldWebhookSecret(e.target.value)}
                       placeholder="Llave secreta de Bold..."
-                      className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-4 pr-10 text-sm text-zinc-900 placeholder-white/20 outline-none focus:border-[#F59E0B]/50 transition-colors"
+                      className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-4 pr-10 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-[#F59E0B]/50 transition-colors"
                     />
                     <button
                       type="button"

@@ -196,7 +196,7 @@ const Dashboard = () => {
                 <span className="text-[11px] text-zinc-400">Activo</span>
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-display">
-                Hola, <span className="bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">{profile?.display_name?.split(' ')[0] || 'Creator'}</span>
+                Hola, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">{profile?.display_name?.split(' ')[0] || 'Creator'}</span>
               </h1>
             </div>
             <div className="flex gap-2 shrink-0">

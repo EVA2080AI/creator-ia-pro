@@ -300,7 +300,7 @@ const Auth = () => {
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-zinc-200" />
                   </div>
-                  <span className="relative bg-[#0b0b0d] px-4 text-[11px] text-zinc-300 font-medium">
+                  <span className="relative bg-white px-4 text-[11px] text-zinc-400 font-medium">
                     o continúa con
                   </span>
                 </div>
