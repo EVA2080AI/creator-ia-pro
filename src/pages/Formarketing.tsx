@@ -1216,34 +1216,36 @@ function FormarketingContent() {
           {/* Templates */}
           <button
             onClick={() => setShowLanding(true)}
+            aria-label="Ver plantillas de flujo"
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.06] hover:border-primary/30 hover:bg-primary/5 transition-all"
           >
-            <div className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-pulse" />
+            <div className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-pulse" aria-hidden="true" />
             <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Plantillas</span>
           </button>
           {/* Quick-add node (HU28) */}
           <button
             onClick={() => setCmdOpen(true)}
             title="Añadir nodo (Espacio)"
+            aria-label="Añadir nodo al canvas"
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.06] hover:border-white/20 hover:bg-white/5 transition-all"
           >
             <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">+ Nodo</span>
-            <kbd className="text-[9px] font-mono text-white/15 border border-white/[0.06] px-1 rounded">Espacio</kbd>
+            <kbd className="text-[9px] font-mono text-white/15 border border-white/[0.06] px-1 rounded" aria-hidden="true">Espacio</kbd>
           </button>
         </div>
 
         <div className="flex items-center gap-1.5">
           {/* Undo/Redo (HU34) */}
-          <Button variant="ghost" size="icon" onClick={undo} title="Deshacer (Ctrl+Z)" className="w-8 h-8 rounded-lg text-white/25 hover:text-white hover:bg-white/5 transition-all">
-            <RotateCcw className="w-3.5 h-3.5" />
+          <Button variant="ghost" size="icon" onClick={undo} title="Deshacer (Ctrl+Z)" aria-label="Deshacer" className="w-8 h-8 rounded-lg text-white/25 hover:text-white hover:bg-white/5 transition-all">
+            <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={redo} title="Rehacer (Ctrl+Y)" className="w-8 h-8 rounded-lg text-white/25 hover:text-white hover:bg-white/5 transition-all">
-            <RotateCw className="w-3.5 h-3.5" />
+          <Button variant="ghost" size="icon" onClick={redo} title="Rehacer (Ctrl+Y)" aria-label="Rehacer" className="w-8 h-8 rounded-lg text-white/25 hover:text-white hover:bg-white/5 transition-all">
+            <RotateCw className="w-3.5 h-3.5" aria-hidden="true" />
           </Button>
           <div className="h-5 w-px bg-white/[0.06] mx-1" />
           {/* Auto-layout */}
-          <Button variant="ghost" onClick={autoLayout} title="Auto-organizar (Dagre)" className="h-8 px-3 rounded-lg text-white/25 hover:text-white hover:bg-white/5 text-xs gap-1.5 transition-all">
-            <LayoutDashboard className="w-3.5 h-3.5" />
+          <Button variant="ghost" onClick={autoLayout} title="Auto-organizar (Dagre)" aria-label="Auto-organizar nodos" className="h-8 px-3 rounded-lg text-white/25 hover:text-white hover:bg-white/5 text-xs gap-1.5 transition-all">
+            <LayoutDashboard className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden md:inline text-[10px] font-bold uppercase tracking-wider">Organizar</span>
           </Button>
           {/* Snap grid toggle (HU26) */}
@@ -1251,23 +1253,25 @@ function FormarketingContent() {
             variant="ghost"
             onClick={() => setSnapEnabled(s => !s)}
             title="Snap a rejilla"
+            aria-label={snapEnabled ? 'Desactivar snap a rejilla' : 'Activar snap a rejilla'}
+            aria-pressed={snapEnabled}
             className={`h-8 px-3 rounded-lg text-xs gap-1.5 transition-all ${snapEnabled ? 'text-primary bg-primary/10' : 'text-white/25 hover:text-white hover:bg-white/5'}`}
           >
-            <Grid3X3 className="w-3.5 h-3.5" />
+            <Grid3X3 className="w-3.5 h-3.5" aria-hidden="true" />
           </Button>
           <div className="h-5 w-px bg-white/[0.06] mx-1" />
           {/* Share screen */}
-          <Button variant="ghost" onClick={() => navigate('/sharescreen')} className="hidden sm:flex items-center gap-1.5 text-primary/50 hover:text-primary hover:bg-primary/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all">
-            <Monitor className="w-3.5 h-3.5" />
+          <Button variant="ghost" onClick={() => navigate('/sharescreen')} aria-label="Compartir pantalla" className="hidden sm:flex items-center gap-1.5 text-primary/50 hover:text-primary hover:bg-primary/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all">
+            <Monitor className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden md:inline">Compartir</span>
           </Button>
           {/* Export */}
-          <Button variant="ghost" onClick={() => setExportOpen(true)} disabled={nodes.length === 0} className="hidden sm:flex items-center gap-1.5 text-white/25 hover:text-white hover:bg-white/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all disabled:opacity-20">
-            <Download className="w-3.5 h-3.5" />
+          <Button variant="ghost" onClick={() => setExportOpen(true)} disabled={nodes.length === 0} aria-label="Exportar canvas" className="hidden sm:flex items-center gap-1.5 text-white/25 hover:text-white hover:bg-white/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all disabled:opacity-20">
+            <Download className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden md:inline">Exportar</span>
           </Button>
-          <Button variant="ghost" onClick={handleClear} disabled={nodes.length === 0 && edges.length === 0} className="text-white/25 hover:text-rose-400 hover:bg-rose-500/5 rounded-xl px-3 h-8 text-[10px] font-bold gap-1.5 transition-all disabled:opacity-20">
-            <Trash2 className="w-3.5 h-3.5" />
+          <Button variant="ghost" onClick={handleClear} disabled={nodes.length === 0 && edges.length === 0} aria-label="Limpiar canvas" className="text-white/25 hover:text-rose-400 hover:bg-rose-500/5 rounded-xl px-3 h-8 text-[10px] font-bold gap-1.5 transition-all disabled:opacity-20">
+            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden md:inline">Limpiar</span>
           </Button>
           <div className="h-5 w-px bg-white/[0.06] mx-1" />
@@ -1343,6 +1347,8 @@ function FormarketingContent() {
           style={{ background: 'rgba(10,10,16,0.92)', backdropFilter: 'blur(8px)', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
           <button
             onClick={() => setLogOpen(!logOpen)}
+            aria-label={logOpen ? 'Cerrar log de ejecución' : 'Abrir log de ejecución'}
+            aria-expanded={logOpen}
             className="flex items-center gap-2 px-4 h-8 w-full text-left"
           >
             <div className={`h-1.5 w-1.5 rounded-full ${execStatus === 'running' ? 'bg-yellow-400 animate-pulse' : execLog.some(l => l.type === 'error') ? 'bg-red-400' : 'bg-[#34d399]'}`} />
