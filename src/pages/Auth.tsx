@@ -167,7 +167,7 @@ const Auth = () => {
           <div className="grid grid-cols-3 gap-4 pt-4">
             {[
               { value: "12+", label: "Herramientas" },
-              { value: "$12", label: "Starter/mes" },
+              { value: "$69K", label: "COP/mes" },
               { value: "4.6", label: "Claude" },
             ].map((s, i) => (
               <motion.div

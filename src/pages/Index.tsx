@@ -294,7 +294,7 @@ export default function Index() {
     <>
       <Helmet>
         <title>Creator IA Pro — Genesis IDE + Studio de IA</title>
-        <meta name="description" content="Genera apps React completas con Genesis IDE y crea imágenes, logos y textos con Studio. Todo con IA. Desde $12/mes." />
+        <meta name="description" content="Genera apps React completas con Genesis IDE y crea imágenes, logos y textos con Studio. Todo con IA. Desde $69.000 COP/mes." />
       </Helmet>
 
       <div className="min-h-screen bg-background text-foreground selection:bg-primary/15 font-sans overflow-x-hidden">
@@ -340,7 +340,7 @@ export default function Index() {
           />
           <p className="text-[12px] font-semibold text-zinc-600">
             Genesis IA · Generar IA · Canvas IA — Starter desde{" "}
-            <span className="text-zinc-900 font-black">$12/mes</span>
+            <span className="text-zinc-900 font-black">$69.000 COP/mes</span>
           </p>
           <button onClick={() => navigate("/pricing")} className="flex items-center gap-1 text-[12px] text-primary hover:text-zinc-900 transition-colors font-bold">
             Ver planes <ChevronRight className="h-3 w-3" />
