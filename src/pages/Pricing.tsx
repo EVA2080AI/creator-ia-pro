@@ -282,7 +282,7 @@ export default function Pricing() {
                       style={{ background: `radial-gradient(circle at top right, ${plan.glow || 'rgba(255,255,255,0.05)'}, transparent 70%)` }} />
 
                     {plan.badge && (
-                      <div className="absolute top-4 right-6 px-3 py-1 rounded-full bg-primary text-black text-[10px] font-black uppercase tracking-widest">
+                      <div className="absolute top-4 right-6 px-3 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest">
                         {plan.badge}
                       </div>
                     )}
@@ -454,7 +454,7 @@ export default function Pricing() {
                           <Coins className="h-5 w-5 text-primary" />
                         </div>
                         {pack.popular && (
-                          <span className="px-2 py-0.5 rounded-full bg-primary text-black text-[9px] font-black uppercase tracking-widest">Popular</span>
+                          <span className="px-2 py-0.5 rounded-full bg-primary text-white text-[9px] font-black uppercase tracking-widest">Popular</span>
                         )}
                       </div>
                       <div>
@@ -467,7 +467,7 @@ export default function Pricing() {
                         disabled={isLoadingThis}
                         className={cn(
                           "w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all",
-                          pack.popular ? "bg-primary text-black" : "bg-zinc-100 text-zinc-900 border border-zinc-200 hover:bg-zinc-100"
+                          pack.popular ? "bg-primary text-white hover:bg-primary/90" : "bg-zinc-100 text-zinc-900 border border-zinc-200 hover:bg-zinc-200"
                         )}
                       >
                         {isLoadingThis ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Comprar Pack"}

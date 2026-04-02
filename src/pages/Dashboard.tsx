@@ -220,7 +220,7 @@ const Dashboard = () => {
               ) : (
                 <button
                   onClick={() => navigate("/pricing")}
-                  className="px-5 py-2.5 bg-primary text-black rounded-xl flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
+                  className="px-5 py-2.5 bg-primary text-white rounded-xl flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   Upgrade Pro

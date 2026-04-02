@@ -77,7 +77,7 @@ function parseMarkdown(text: string): string {
     .replace(/^# (.+)$/gm,  '<h1 class="text-lg font-bold text-zinc-900 mt-6 mb-2">$1</h1>')
     .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-zinc-900">$1</strong>')
     .replace(/\*(.+?)\*/g,     '<em class="italic text-zinc-700">$1</em>')
-    .replace(/`([^`\n]+)`/g,   '<code class="bg-zinc-100 text-sky-300 px-1.5 py-0.5 rounded text-[12px] font-mono">$1</code>')
+    .replace(/`([^`\n]+)`/g,   '<code class="bg-zinc-100 text-sky-700 px-1.5 py-0.5 rounded text-[12px] font-mono">$1</code>')
     .replace(/^---+$/gm,       '<hr class="border-zinc-200 my-4" />')
     .replace(/^\s*[-*•] (.+)$/gm, '<li class="flex gap-2 my-1"><span class="text-primary mt-1 shrink-0">›</span><span class="text-zinc-700">$1</span></li>')
     .replace(/(<li[\s\S]*?<\/li>\n?)+/g, m => `<ul class="my-3 space-y-0.5">${m}</ul>`)
