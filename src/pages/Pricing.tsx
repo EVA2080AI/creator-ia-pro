@@ -155,13 +155,13 @@ function SectionHeader({ badge, title, subtitle }: { badge: string; title: strin
       viewport={{ once: true }}
       className="text-center px-6 mb-16"
     >
-      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-[10px] font-black uppercase tracking-widest text-primary mb-4">
+      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-50 border border-zinc-200 text-[10px] font-black uppercase tracking-widest text-primary mb-4">
         {badge}
       </span>
       <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase font-display mb-4">
         {title}
       </h2>
-      <p className="max-w-xl mx-auto text-white/40 text-[15px] leading-relaxed">
+      <p className="max-w-xl mx-auto text-zinc-400 text-[15px] leading-relaxed">
         {subtitle}
       </p>
     </motion.div>
@@ -211,7 +211,7 @@ export default function Pricing() {
         <meta name="description" content="Esquema de créditos industriales. Paga por lo que usas con la seguridad de Bold.co." />
       </Helmet>
 
-      <div className="min-h-screen bg-background bg-grid-white/[0.02] text-white selection:bg-primary/30 relative overflow-x-hidden">
+      <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900 selection:bg-primary/15 relative overflow-x-hidden">
         <AppHeader userId={userId} onSignOut={() => supabase.auth.signOut()} />
         <MeshGradient />
 
@@ -229,8 +229,8 @@ export default function Pricing() {
                 Escala tu<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-white/20">Impacto.</span>
               </h1>
-              <p className="max-w-lg mx-auto text-lg text-white/40 leading-relaxed font-medium">
-                Sin suscripciones forzadas. <span className="text-white/80">Créditos industriales</span> para creadores que exigen la mejor latencia y los modelos más potentes.
+              <p className="max-w-lg mx-auto text-lg text-zinc-400 leading-relaxed font-medium">
+                Sin suscripciones forzadas. <span className="text-zinc-700">Créditos industriales</span> para creadores que exigen la mejor latencia y los modelos más potentes.
               </p>
             </motion.div>
           </section>
@@ -240,7 +240,7 @@ export default function Pricing() {
             <span className={cn("text-xs font-black uppercase tracking-widest transition-opacity", !annual ? "opacity-100" : "opacity-30")}>Mensual</span>
             <button
               onClick={() => setAnnual(!annual)}
-              className="relative w-14 h-7 rounded-full bg-white/5 border border-white/10 p-1 flex items-center transition-all"
+              className="relative w-14 h-7 rounded-full bg-zinc-100 border border-zinc-200 p-1 flex items-center transition-all"
             >
               <motion.div 
                 animate={{ x: annual ? 28 : 0 }}
@@ -274,8 +274,8 @@ export default function Pricing() {
                     className={cn(
                       "relative group rounded-[2.5rem] border p-8 flex flex-col transition-all duration-500 overflow-hidden",
                       isPopular 
-                        ? "bg-white/[0.03] border-primary/40 shadow-[0_30px_100px_-20px_rgba(168,85,247,0.15)]" 
-                        : "bg-white/[0.01] border-white/10"
+                        ? "bg-zinc-50 border-primary/40 shadow-[0_30px_100px_-20px_rgba(168,85,247,0.15)]" 
+                        : "bg-zinc-50 border-zinc-200"
                     )}
                   >
                     <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
@@ -288,11 +288,11 @@ export default function Pricing() {
                     )}
 
                     <div className="mb-8">
-                      <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-6 border border-white/10 group-hover:border-white/20 transition-colors">
+                      <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center mb-6 border border-zinc-200 group-hover:border-zinc-300 transition-colors">
                         <Icon className="h-6 w-6" style={{ color: plan.color }} />
                       </div>
                       <h3 className="text-2xl font-black uppercase font-display mb-1">{plan.name}</h3>
-                      <p className="text-white/30 text-xs leading-relaxed">{plan.description}</p>
+                      <p className="text-zinc-400 text-xs leading-relaxed">{plan.description}</p>
                     </div>
 
                     <div className="mb-8 overflow-hidden">
@@ -300,9 +300,9 @@ export default function Pricing() {
                         <span className="text-4xl font-black font-display tracking-tighter">
                           ${displayPrice.toLocaleString('es-CO')}
                         </span>
-                        <span className="text-white/20 text-xs font-bold uppercase tracking-widest">COP</span>
+                        <span className="text-zinc-300 text-xs font-bold uppercase tracking-widest">COP</span>
                       </div>
-                      <div className="mt-2 flex items-center gap-2 py-1.5 px-3 rounded-xl bg-white/5 border border-white/5 w-fit">
+                      <div className="mt-2 flex items-center gap-2 py-1.5 px-3 rounded-xl bg-zinc-100 border border-zinc-200 w-fit">
                         <Coins className="h-3.5 w-3.5 text-primary" />
                         <span className="text-xs font-black" style={{ color: plan.color }}>{plan.creditsLabel}</span>
                       </div>
@@ -311,8 +311,8 @@ export default function Pricing() {
                     <ul className="space-y-4 mb-10 flex-1">
                       {plan.features.map(f => (
                         <li key={f.label} className="flex gap-3 items-start">
-                          <Check className={cn("h-4 w-4 shrink-0 mt-0.5", f.highlight ? "text-primary" : "text-white/20")} />
-                          <span className={cn("text-xs leading-relaxed", f.highlight ? "text-white/80 font-bold" : "text-white/40")}>
+                          <Check className={cn("h-4 w-4 shrink-0 mt-0.5", f.highlight ? "text-primary" : "text-zinc-300")} />
+                          <span className={cn("text-xs leading-relaxed", f.highlight ? "text-zinc-700 font-bold" : "text-zinc-400")}>
                             {f.label}
                           </span>
                         </li>
@@ -324,7 +324,7 @@ export default function Pricing() {
                       disabled={loadingAction === plan.key}
                       className={cn(
                         "w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden group/btn",
-                        isPopular ? "bg-white text-black" : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
+                        isPopular ? "bg-primary text-white" : "bg-zinc-100 text-zinc-900 border border-zinc-200 hover:bg-zinc-100"
                       )}
                     >
                       {loadingAction === plan.key ? (
@@ -349,25 +349,25 @@ export default function Pricing() {
               subtitle="Nuestro modelo distribuido elimina los costos fijos de servidores, pasando el ahorro directamente a tu saldo."
             />
             
-            <div className="max-w-4xl mx-auto rounded-[3rem] bg-white/[0.02] border border-white/5 p-4 sm:p-12 overflow-hidden relative">
+            <div className="max-w-4xl mx-auto rounded-[3rem] bg-zinc-50 border border-zinc-200 p-4 sm:p-12 overflow-hidden relative">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
-                <div className="hidden sm:block text-xs font-black uppercase text-white/20 tracking-widest mt-4">Característica</div>
+                <div className="hidden sm:block text-xs font-black uppercase text-zinc-300 tracking-widest mt-4">Característica</div>
                 <div className="text-center">
                   <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black text-primary uppercase">
                     Creator IA Pro
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-black text-white/40 uppercase">
+                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-[10px] font-black text-zinc-400 uppercase">
                     Modelos Tradicionales
                   </div>
                 </div>
 
                 {COMPARISON_DATA.map((row, idx) => (
                   <React.Fragment key={row.feature}>
-                    <div className="hidden sm:block py-4 border-t border-white/5 text-xs font-bold text-white/60">{row.feature}</div>
-                    <div className="py-4 border-t border-white/5 text-center text-xs font-black text-white">{row.creator}</div>
-                    <div className="py-4 border-t border-white/5 text-center text-xs font-medium text-white/30">{row.others}</div>
+                    <div className="hidden sm:block py-4 border-t border-zinc-200 text-xs font-bold text-zinc-500">{row.feature}</div>
+                    <div className="py-4 border-t border-zinc-200 text-center text-xs font-black text-zinc-900">{row.creator}</div>
+                    <div className="py-4 border-t border-zinc-200 text-center text-xs font-medium text-zinc-400">{row.others}</div>
                   </React.Fragment>
                 ))}
               </div>
@@ -384,7 +384,7 @@ export default function Pricing() {
               
               <div className="mb-12">
                 <div className="flex justify-between items-center mb-6">
-                  <span className="text-xs font-black uppercase text-white/40 tracking-widest">Uso estimado</span>
+                  <span className="text-xs font-black uppercase text-zinc-400 tracking-widest">Uso estimado</span>
                   <span className="text-2xl font-black text-primary font-display">{estimateSlider} créditos</span>
                 </div>
                 <input 
@@ -394,29 +394,29 @@ export default function Pricing() {
                   step="100"
                   value={estimateSlider}
                   onChange={(e) => setEstimateSlider(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-white/5 rounded-full appearance-none cursor-pointer accent-primary"
+                  className="w-full h-1.5 bg-zinc-100 rounded-full appearance-none cursor-pointer accent-primary"
                 />
-                <div className="flex justify-between mt-4 text-[10px] font-bold text-white/20 uppercase tracking-widest">
+                <div className="flex justify-between mt-4 text-[10px] font-bold text-zinc-300 uppercase tracking-widest">
                   <span>Light (Básico)</span>
                   <span>Industrial (Alto)</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
-                <div className="p-4 rounded-3xl bg-white/5 border border-white/5">
-                  <Globe className="h-4 w-4 text-white/40 mx-auto mb-2" />
-                  <div className="text-lg font-black text-white/80">{(estimateSlider / 10).toFixed(0)}</div>
-                  <div className="text-[9px] font-black uppercase text-white/30">Tokens ECO</div>
+                <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200">
+                  <Globe className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
+                  <div className="text-lg font-black text-zinc-700">{(estimateSlider / 10).toFixed(0)}</div>
+                  <div className="text-[9px] font-black uppercase text-zinc-400">Tokens ECO</div>
                 </div>
-                <div className="p-4 rounded-3xl bg-white/5 border border-white/5">
-                  <Cpu className="h-4 w-4 text-white/40 mx-auto mb-2" />
-                  <div className="text-lg font-black text-white/80">{(estimateSlider / 100).toFixed(0)}</div>
-                  <div className="text-[9px] font-black uppercase text-white/30">Prompts ULTRA</div>
+                <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200">
+                  <Cpu className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
+                  <div className="text-lg font-black text-zinc-700">{(estimateSlider / 100).toFixed(0)}</div>
+                  <div className="text-[9px] font-black uppercase text-zinc-400">Prompts ULTRA</div>
                 </div>
-                <div className="p-4 rounded-3xl bg-white/5 border border-white/5 col-span-2 md:col-span-1">
-                  <Code2 className="h-4 w-4 text-white/40 mx-auto mb-2" />
-                  <div className="text-lg font-black text-white/80">{(estimateSlider / 50).toFixed(0)}</div>
-                  <div className="text-[9px] font-black uppercase text-white/30">UI Screens</div>
+                <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200 col-span-2 md:col-span-1">
+                  <Code2 className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
+                  <div className="text-lg font-black text-zinc-700">{(estimateSlider / 50).toFixed(0)}</div>
+                  <div className="text-[9px] font-black uppercase text-zinc-400">UI Screens</div>
                 </div>
               </div>
 
@@ -445,8 +445,8 @@ export default function Pricing() {
                       key={pack.id}
                       whileHover={{ scale: 1.02 }}
                       className={cn(
-                        "relative rounded-3xl border p-8 flex flex-col gap-6 transition-all bg-white/[0.01]",
-                        pack.popular ? "border-primary/40 bg-primary/5 shadow-2xl" : "border-white/10"
+                        "relative rounded-3xl border p-8 flex flex-col gap-6 transition-all bg-zinc-50",
+                        pack.popular ? "border-primary/40 bg-primary/5 shadow-2xl" : "border-zinc-200"
                       )}
                     >
                       <div className="flex items-center justify-between">
@@ -459,15 +459,15 @@ export default function Pricing() {
                       </div>
                       <div>
                         <div className="text-4xl font-black font-display mb-1">{pack.credits_amount.toLocaleString()}</div>
-                        <div className="text-xs font-bold text-white/30 uppercase tracking-widest">Créditos</div>
+                        <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Créditos</div>
                       </div>
-                      <div className="text-2xl font-black text-white/90 font-display">${pack.price}</div>
+                      <div className="text-2xl font-black text-zinc-800 font-display">${pack.price}</div>
                       <button
                         onClick={() => handleBoldAction(pack.id)}
                         disabled={isLoadingThis}
                         className={cn(
                           "w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all",
-                          pack.popular ? "bg-primary text-black" : "bg-white/5 text-white border border-white/10 hover:bg-white/10"
+                          pack.popular ? "bg-primary text-black" : "bg-zinc-100 text-zinc-900 border border-zinc-200 hover:bg-zinc-100"
                         )}
                       >
                         {isLoadingThis ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Comprar Pack"}
@@ -494,17 +494,17 @@ export default function Pricing() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 relative"
+                  className="p-8 rounded-[2.5rem] bg-zinc-50 border border-zinc-200 relative"
                 >
                   <div className="flex gap-1 mb-6">
                     {Array.from({ length: 5 }).map((_, j) => <Star key={j} className="h-3 w-3 fill-primary text-primary" />)}
                   </div>
-                  <p className="text-[14px] text-white/60 leading-relaxed italic mb-8">"{t.content}"</p>
+                  <p className="text-[14px] text-zinc-500 leading-relaxed italic mb-8">"{t.content}"</p>
                   <div className="flex items-center gap-4">
-                    <img src={t.avatar} className="w-10 h-10 rounded-2xl border border-white/10" alt={t.name} />
+                    <img src={t.avatar} className="w-10 h-10 rounded-2xl border border-zinc-200" alt={t.name} />
                     <div>
-                      <div className="text-xs font-black uppercase tracking-widest text-white">{t.name}</div>
-                      <div className="text-[10px] font-bold text-white/30 uppercase">{t.role}</div>
+                      <div className="text-xs font-black uppercase tracking-widest text-zinc-900">{t.name}</div>
+                      <div className="text-[10px] font-bold text-zinc-400 uppercase">{t.role}</div>
                     </div>
                   </div>
                 </motion.div>
@@ -520,7 +520,7 @@ export default function Pricing() {
               { icon: TrendingUp, label: "99.9% Uptime" },
               { icon: MessageSquare, label: "Soporte Latam" },
             ].map(t => (
-              <div key={t.label} className="p-6 rounded-[2rem] bg-white/[0.02] border border-white/5 flex flex-col items-center gap-4 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all cursor-default group">
+              <div key={t.label} className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-200 flex flex-col items-center gap-4 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all cursor-default group">
                 <t.icon className="h-6 w-6 group-hover:text-primary transition-colors" />
                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-center">{t.label}</span>
               </div>

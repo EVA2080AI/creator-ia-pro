@@ -126,26 +126,26 @@ function CreditModal({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-md p-4">
-      <div className="w-full max-w-md rounded-2xl border border-white/10 bg-background/50 backdrop-blur-2xl shadow-2xl shadow-black/50">
+      <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-background/50 backdrop-blur-2xl shadow-2xl shadow-black/50">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/[0.06] p-5">
+        <div className="flex items-center justify-between border-b border-zinc-200 p-5">
           <div>
-            <p className="font-semibold text-white">{user.display_name || user.email}</p>
-            <p className="text-xs text-white/40 font-mono">{user.email}</p>
+            <p className="font-semibold text-zinc-900">{user.display_name || user.email}</p>
+            <p className="text-xs text-zinc-400 font-mono">{user.email}</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-lg bg-white/[0.04] px-3 py-1.5">
+            <div className="flex items-center gap-1.5 rounded-lg bg-zinc-50 px-3 py-1.5">
               <Coins className="h-3.5 w-3.5 text-amber-400" />
-              <span className="text-sm font-bold text-white font-mono">{user.credits_balance.toLocaleString()}</span>
+              <span className="text-sm font-bold text-zinc-900 font-mono">{user.credits_balance.toLocaleString()}</span>
             </div>
-            <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/[0.06] transition-colors">
+            <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors">
               <X className="h-4 w-4" />
             </button>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-white/[0.06]">
+        <div className="flex border-b border-zinc-200">
           {TABS.map((t) => {
             const Icon = t.icon;
             const isActive = tab === t.key;
@@ -168,26 +168,26 @@ function CreditModal({
           {tab !== "history" ? (
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs text-white/50">Créditos</label>
+                <label className="mb-1.5 block text-xs text-zinc-500">Créditos</label>
                 <input
                   type="number"
                   min="1"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder={tab === "add" ? "Ej: 50000" : "Ej: 1000"}
-                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none focus:border-white/20 transition-colors"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-900 placeholder-white/25 outline-none focus:border-zinc-300 transition-colors"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-xs text-white/50">
-                  Razón {tab !== "refund" && <span className="text-white/25">(opcional)</span>}
+                <label className="mb-1.5 block text-xs text-zinc-500">
+                  Razón {tab !== "refund" && <span className="text-zinc-300">(opcional)</span>}
                 </label>
                 <input
                   type="text"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder={tab === "refund" ? "Motivo del reembolso" : "Descripción (opcional)"}
-                  className="w-full rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-2.5 text-sm text-white placeholder-white/25 outline-none focus:border-white/20 transition-colors"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-900 placeholder-white/25 outline-none focus:border-zinc-300 transition-colors"
                 />
               </div>
               <button
@@ -208,23 +208,23 @@ function CreditModal({
             <div className="space-y-2 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
               {txLoading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-5 w-5 animate-spin text-white/30" />
+                  <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
                 </div>
               ) : txs.length === 0 ? (
-                <p className="py-8 text-center text-sm text-white/30">Sin transacciones</p>
+                <p className="py-8 text-center text-sm text-zinc-400">Sin transacciones</p>
               ) : (
                 txs.map((tx) => {
                   const meta = TX_TYPE_LABELS[tx.type] || { label: tx.type, color: "#6B7280" };
                   return (
-                    <div key={tx.id} className="flex items-center justify-between rounded-xl bg-white/[0.03] p-3">
+                    <div key={tx.id} className="flex items-center justify-between rounded-xl bg-zinc-50 p-3">
                       <div className="min-w-0">
                         <span className="inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ background: meta.color + "15", color: meta.color }}>
                           {meta.label}
                         </span>
                         {tx.description && (
-                          <p className="mt-0.5 truncate text-xs text-white/40">{tx.description}</p>
+                          <p className="mt-0.5 truncate text-xs text-zinc-400">{tx.description}</p>
                         )}
-                        <p className="text-[10px] text-white/25">{new Date(tx.created_at).toLocaleString()}</p>
+                        <p className="text-[10px] text-zinc-300">{new Date(tx.created_at).toLocaleString()}</p>
                       </div>
                       <span className="ml-3 font-mono text-sm font-bold" style={{ color: tx.amount >= 0 ? "#A855F7" : "#EF4444" }}>
                         {tx.amount >= 0 ? "+" : ""}{tx.amount.toLocaleString()}
@@ -264,14 +264,14 @@ function AdminLoginGate() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050506] flex items-center justify-center p-6">
-      <div className="w-full max-w-sm rounded-3xl border border-white/[0.06] bg-white/[0.02] p-10 space-y-6">
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="w-full max-w-sm rounded-3xl border border-zinc-200 bg-zinc-50 p-10 space-y-6">
         <div className="text-center space-y-2">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/10 mx-auto">
-            <Shield className="h-7 w-7 text-white" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 border border-zinc-200 mx-auto">
+            <Shield className="h-7 w-7 text-zinc-900" />
           </div>
-          <h1 className="text-xl font-bold text-white tracking-tight">Acceso Admin</h1>
-          <p className="text-xs text-white/30">Inicia sesión con tu cuenta de administrador</p>
+          <h1 className="text-xl font-bold text-zinc-900 tracking-tight">Acceso Admin</h1>
+          <p className="text-xs text-zinc-400">Inicia sesión con tu cuenta de administrador</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -281,7 +281,7 @@ function AdminLoginGate() {
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-white/40 transition-colors"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-300 focus:outline-none focus:border-zinc-300 transition-colors"
           />
           <input
             type="password"
@@ -289,7 +289,7 @@ function AdminLoginGate() {
             placeholder="Contraseña"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#A855F7]/40 transition-colors"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-300 focus:outline-none focus:border-[#A855F7]/40 transition-colors"
           />
           {error && (
             <p className="text-xs text-rose-400 text-center">{error}</p>
@@ -306,7 +306,7 @@ function AdminLoginGate() {
 
         <button
           onClick={() => navigate("/")}
-          className="w-full text-xs text-white/20 hover:text-white/40 transition-colors text-center"
+          className="w-full text-xs text-zinc-300 hover:text-zinc-400 transition-colors text-center"
         >
           ← Volver al inicio
         </button>
@@ -340,21 +340,21 @@ function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () => void 
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-background/50 backdrop-blur-2xl p-10 text-center space-y-6 shadow-2xl shadow-black/50">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/5 border border-white/10 mx-auto">
-          <Shield className="h-8 w-8 text-white" />
+      <div className="w-full max-w-md rounded-3xl border border-zinc-200 bg-background/50 backdrop-blur-2xl p-10 text-center space-y-6 shadow-2xl shadow-black/50">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border border-zinc-200 mx-auto">
+          <Shield className="h-8 w-8 text-zinc-900" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Panel Admin</h1>
-          <p className="text-sm text-white/40 mt-2">
+          <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Panel Admin</h1>
+          <p className="text-sm text-zinc-400 mt-2">
             Tu cuenta aún no tiene el rol de administrador.
           </p>
-          <p className="text-xs text-white/25 mt-1 font-mono">{user?.email}</p>
+          <p className="text-xs text-zinc-300 mt-1 font-mono">{user?.email}</p>
         </div>
 
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/40 text-xs hover:text-white/60 hover:bg-white/[0.07] transition-all"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-400 text-xs hover:text-zinc-500 hover:bg-zinc-100 transition-all"
         >
           Cambiar cuenta
         </button>
@@ -369,11 +369,11 @@ function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () => void 
 VALUES ('${user?.id}', 'admin')
 ON CONFLICT DO NOTHING;`}
               </pre>
-              <p className="text-white/30">Tu ID: <span className="text-white/50 font-mono select-all">{user?.id}</span></p>
+              <p className="text-zinc-400">Tu ID: <span className="text-zinc-500 font-mono select-all">{user?.id}</span></p>
             </div>
             <button
               onClick={onSuccess}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/[0.06] border border-white/10 text-white/60 font-semibold text-sm hover:bg-white/[0.09] transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-zinc-100 border border-zinc-200 text-zinc-500 font-semibold text-sm hover:bg-zinc-100 transition-all"
             >
               <RotateCcw className="h-4 w-4" /> Ya lo hice — Recargar
             </button>
@@ -625,7 +625,7 @@ const Admin = () => {
   if (authLoading || adminLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-white/20" />
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-300" />
       </div>
     );
   }
@@ -641,7 +641,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-white selection:bg-primary/20">
+    <div className="min-h-screen bg-background text-zinc-900 selection:bg-primary/20">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       {creditModalUser && (
@@ -657,12 +657,12 @@ const Admin = () => {
         {/* ── Header ── */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 border border-white/10">
-              <Shield className="h-5 w-5 text-white" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-zinc-100 border border-zinc-200">
+              <Shield className="h-5 w-5 text-zinc-900" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">Panel Admin</h1>
-              <p className="text-xs text-white/30 mt-0.5">{user?.email}</p>
+              <h1 className="text-xl font-bold text-zinc-900 tracking-tight">Panel Admin</h1>
+              <p className="text-xs text-zinc-400 mt-0.5">{user?.email}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -683,13 +683,13 @@ const Admin = () => {
           ].map((s) => {
             const Icon = s.icon;
             return (
-              <div key={s.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 flex items-center gap-3">
+              <div key={s.label} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 flex items-center gap-3">
                 <div className="h-9 w-9 shrink-0 rounded-xl flex items-center justify-center" style={{ background: s.color + "18" }}>
                   <Icon className="h-4 w-4" style={{ color: s.color }} />
                 </div>
                 <div>
-                  <p className="font-mono text-xl font-bold text-white leading-none">{s.value}</p>
-                  <p className="text-[10px] text-white/35 mt-0.5 leading-none">{s.label}</p>
+                  <p className="font-mono text-xl font-bold text-zinc-900 leading-none">{s.value}</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5 leading-none">{s.label}</p>
                 </div>
               </div>
             );
@@ -697,7 +697,7 @@ const Admin = () => {
         </div>
 
         {/* ── Tabs ── */}
-        <div className="flex gap-1 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-1 w-fit overflow-x-auto">
+        <div className="flex gap-1 rounded-2xl border border-zinc-200 bg-zinc-50 p-1 w-fit overflow-x-auto">
           {([
             { key: "users" as const,     icon: Users,           label: "Usuarios" },
             { key: "analytics" as const, icon: BarChart2,       label: "Analytics" },
@@ -713,7 +713,7 @@ const Admin = () => {
                 className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
                   active
                     ? "bg-white text-black shadow-lg shadow-white/5"
-                    : "text-white/40 hover:text-white/70 hover:bg-white/5"
+                    : "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100"
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -751,17 +751,17 @@ const Admin = () => {
             {/* Search + refresh */}
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25 pointer-events-none" />
+                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300 pointer-events-none" />
                 <input
                   placeholder="Buscar por email o nombre…"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-xl border border-white/5 bg-white/[0.03] py-2.5 pl-10 pr-4 text-sm text-white placeholder-white/25 outline-none focus:border-white/20 transition-colors"
+                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 placeholder-white/25 outline-none focus:border-zinc-300 transition-colors"
                 />
               </div>
               <button
                 onClick={fetchUsers}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.07] bg-white/[0.03] text-white/40 hover:text-white hover:bg-white/[0.06] transition-all"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
                 title="Recargar"
               >
                 <RefreshCw className={`h-4 w-4 ${loadingUsers ? "animate-spin" : ""}`} />
@@ -771,14 +771,14 @@ const Admin = () => {
             {/* States */}
             {loadingUsers ? (
               <div className="flex flex-col items-center justify-center py-20 gap-3">
-                <Loader2 className="h-6 w-6 animate-spin text-white/20" />
-                <p className="text-sm text-white/30">Cargando usuarios…</p>
+                <Loader2 className="h-6 w-6 animate-spin text-zinc-300" />
+                <p className="text-sm text-zinc-400">Cargando usuarios…</p>
               </div>
             ) : loadError ? (
               <div className="rounded-2xl border border-rose-500/20 bg-rose-500/[0.06] p-6 text-center space-y-3">
                 <X className="h-6 w-6 text-rose-400 mx-auto" />
                 <p className="text-sm font-semibold text-rose-400">Error al cargar usuarios</p>
-                <p className="text-xs text-white/35 font-mono">{loadError}</p>
+                <p className="text-xs text-zinc-400 font-mono">{loadError}</p>
                 <button
                   onClick={fetchUsers}
                   className="inline-flex items-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/20 px-4 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/15 transition-colors"
@@ -787,7 +787,7 @@ const Admin = () => {
                 </button>
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="py-16 text-center text-sm text-white/30">
+              <div className="py-16 text-center text-sm text-zinc-400">
                 {search ? "Sin resultados para esta búsqueda" : "No hay usuarios registrados"}
               </div>
             ) : (
@@ -800,11 +800,11 @@ const Admin = () => {
                   const initials = (u.display_name || u.email || "?")[0].toUpperCase();
 
                   return (
-                    <div key={u.user_id} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] overflow-hidden transition-all">
+                    <div key={u.user_id} className="rounded-2xl border border-zinc-200 bg-zinc-50 overflow-hidden transition-all">
 
                       {/* Card row */}
                       <div
-                        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-white/[0.01] transition-colors"
+                        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-zinc-50 transition-colors"
                         onClick={() => setExpandedUser(isExpanded ? null : u.user_id)}
                       >
                         {/* Avatar */}
@@ -818,7 +818,7 @@ const Admin = () => {
                         {/* Identity */}
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-semibold text-white truncate">
+                            <span className="text-sm font-semibold text-zinc-900 truncate">
                               {u.display_name || u.email}
                             </span>
                             <span
@@ -830,7 +830,7 @@ const Admin = () => {
                             </span>
                           </div>
                           {u.display_name && (
-                            <p className="text-xs text-white/35 font-mono truncate mt-0.5">{u.email}</p>
+                            <p className="text-xs text-zinc-400 font-mono truncate mt-0.5">{u.email}</p>
                           )}
                         </div>
 
@@ -841,31 +841,31 @@ const Admin = () => {
                           title="Gestionar créditos"
                         >
                           <Coins className="h-3.5 w-3.5 text-amber-400" />
-                          <span className="font-mono text-sm font-bold text-white">{u.credits_balance.toLocaleString()}</span>
+                          <span className="font-mono text-sm font-bold text-zinc-900">{u.credits_balance.toLocaleString()}</span>
                         </div>
 
                         {/* Expand icon */}
-                        <div className="text-white/25">
+                        <div className="text-zinc-300">
                           {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                         </div>
                       </div>
 
                       {/* Expanded panel */}
                       {isExpanded && (
-                        <div className="border-t border-white/[0.05] bg-black/20 p-4 space-y-5">
+                        <div className="border-t border-zinc-200 bg-black/20 p-4 space-y-5">
 
                           {/* Meta info */}
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs">
                             <div>
-                              <p className="text-white/30 mb-0.5">Registro</p>
-                              <p className="text-white/70">{new Date(u.created_at).toLocaleDateString("es-CO")}</p>
+                              <p className="text-zinc-400 mb-0.5">Registro</p>
+                              <p className="text-zinc-600">{new Date(u.created_at).toLocaleDateString("es-CO")}</p>
                             </div>
                             <div>
-                              <p className="text-white/30 mb-0.5">Último acceso</p>
-                              <p className="text-white/70">{u.last_sign_in ? new Date(u.last_sign_in).toLocaleDateString("es-CO") : "—"}</p>
+                              <p className="text-zinc-400 mb-0.5">Último acceso</p>
+                              <p className="text-zinc-600">{u.last_sign_in ? new Date(u.last_sign_in).toLocaleDateString("es-CO") : "—"}</p>
                             </div>
                             <div className="col-span-2 sm:col-span-1">
-                              <p className="text-white/30 mb-0.5">Créditos</p>
+                              <p className="text-zinc-400 mb-0.5">Créditos</p>
                               <button
                                 onClick={() => setCreditModalUser(u)}
                                 className="flex items-center gap-1 text-amber-400 font-semibold hover:text-amber-300 transition-colors"
@@ -875,14 +875,14 @@ const Admin = () => {
                               </button>
                             </div>
                             <div className="col-span-2">
-                              <p className="text-white/30 mb-0.5">User ID</p>
-                              <p className="text-white/40 font-mono text-[10px] break-all select-all">{u.user_id}</p>
+                              <p className="text-zinc-400 mb-0.5">User ID</p>
+                              <p className="text-zinc-400 font-mono text-[10px] break-all select-all">{u.user_id}</p>
                             </div>
                           </div>
 
                           {/* Change plan */}
                           <div>
-                            <p className="text-xs text-white/35 mb-2 font-medium">Cambiar plan</p>
+                            <p className="text-xs text-zinc-400 mb-2 font-medium">Cambiar plan</p>
                             <div className="flex flex-wrap gap-1.5">
                               {Object.entries(TIERS).map(([key, cfg]) => {
                                 const Icon = cfg.icon;
@@ -910,11 +910,11 @@ const Admin = () => {
                           </div>
 
                           {/* Actions */}
-                          <div className="flex flex-wrap gap-2 pt-1 border-t border-white/[0.04]">
+                          <div className="flex flex-wrap gap-2 pt-1 border-t border-zinc-200">
                             <button
                               disabled={isBusy(u.email + "-reset")}
                               onClick={() => handleResetPassword(u.email)}
-                              className="flex items-center gap-1.5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs font-medium text-white/50 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-40"
+                              className="flex items-center gap-1.5 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all disabled:opacity-40"
                             >
                               {isBusy(u.email + "-reset") ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <KeyRound className="h-3.5 w-3.5" />}
                               Enviar reset password
@@ -942,7 +942,7 @@ const Admin = () => {
                   );
                 })}
 
-                <p className="text-xs text-white/20 px-1">
+                <p className="text-xs text-zinc-300 px-1">
                   {filteredUsers.length} usuario{filteredUsers.length !== 1 ? "s" : ""}
                   {search && ` · filtrado de ${users.length}`}
                 </p>
@@ -970,13 +970,13 @@ const Admin = () => {
                   ].map((s) => {
                     const Icon = s.icon;
                     return (
-                      <div key={s.label} className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 flex items-center gap-3">
+                      <div key={s.label} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4 flex items-center gap-3">
                         <div className="h-9 w-9 shrink-0 rounded-xl flex items-center justify-center" style={{ background: s.color + "18" }}>
                           <Icon className="h-4 w-4" style={{ color: s.color }} />
                         </div>
                         <div>
-                          <p className="font-mono text-xl font-bold text-white leading-none">{s.value}</p>
-                          <p className="text-[10px] text-white/35 mt-0.5 leading-none">{s.label}</p>
+                          <p className="font-mono text-xl font-bold text-zinc-900 leading-none">{s.value}</p>
+                          <p className="text-[10px] text-zinc-400 mt-0.5 leading-none">{s.label}</p>
                         </div>
                       </div>
                     );
@@ -984,11 +984,11 @@ const Admin = () => {
                 </div>
 
                 {/* Credit usage per day (sparkline) */}
-                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em]">Consumo de créditos</h3>
-                      <p className="text-[9px] text-white/20 mt-0.5 uppercase tracking-widest">Últimos 7 días · todas las cuentas</p>
+                      <h3 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.2em]">Consumo de créditos</h3>
+                      <p className="text-[9px] text-zinc-300 mt-0.5 uppercase tracking-widest">Últimos 7 días · todas las cuentas</p>
                     </div>
                     <Activity className="h-4 w-4 text-[#A855F7]" />
                   </div>
@@ -1003,7 +1003,7 @@ const Admin = () => {
                             style={{ height: `${Math.max(pct, 5)}%` }}
                             title={`${d.credits.toLocaleString()} créditos`}
                           />
-                          <span className="text-[9px] text-white/25 font-bold">{d.name}</span>
+                          <span className="text-[9px] text-zinc-300 font-bold">{d.name}</span>
                         </div>
                       );
                     })}
@@ -1011,16 +1011,16 @@ const Admin = () => {
                 </div>
 
                 {/* Tool usage breakdown */}
-                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em]">Uso por herramienta</h3>
-                      <p className="text-[9px] text-white/20 mt-0.5 uppercase tracking-widest">Últimos 30 días</p>
+                      <h3 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.2em]">Uso por herramienta</h3>
+                      <p className="text-[9px] text-zinc-300 mt-0.5 uppercase tracking-widest">Últimos 30 días</p>
                     </div>
-                    <Layers className="h-4 w-4 text-white/20" />
+                    <Layers className="h-4 w-4 text-zinc-300" />
                   </div>
                   {analyticsData.toolUsage.every(t => t.count === 0) ? (
-                    <p className="text-xs text-white/30 text-center py-6">Sin actividad en este período</p>
+                    <p className="text-xs text-zinc-400 text-center py-6">Sin actividad en este período</p>
                   ) : (
                     <div className="space-y-3">
                       {analyticsData.toolUsage.map((tool) => {
@@ -1029,10 +1029,10 @@ const Admin = () => {
                         return (
                           <div key={tool.name}>
                             <div className="flex justify-between text-xs mb-1.5">
-                              <span className="text-white/50 font-medium">{tool.name}</span>
-                              <span className="text-white/30 font-mono">{tool.count} · {pct}%</span>
+                              <span className="text-zinc-500 font-medium">{tool.name}</span>
+                              <span className="text-zinc-400 font-mono">{tool.count} · {pct}%</span>
                             </div>
-                            <div className="h-1.5 bg-white/[0.05] rounded-full overflow-hidden">
+                            <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
                               <div
                                 className="h-full rounded-full transition-all duration-700"
                                 style={{ width: `${pct}%`, background: tool.color }}
@@ -1046,8 +1046,8 @@ const Admin = () => {
                 </div>
 
                 {/* Tier distribution */}
-                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5">
-                  <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] mb-4">Distribución de planes</h3>
+                <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-5">
+                  <h3 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.2em] mb-4">Distribución de planes</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {Object.entries(TIERS).map(([key, cfg]) => {
                       const count = tierCounts[key] || 0;
@@ -1060,7 +1060,7 @@ const Admin = () => {
                         >
                           <Icon className="h-3.5 w-3.5 shrink-0" style={{ color: cfg.color }} />
                           <div>
-                            <p className="text-sm font-bold text-white tabular-nums">{count}</p>
+                            <p className="text-sm font-bold text-zinc-900 tabular-nums">{count}</p>
                             <p className="text-[10px]" style={{ color: cfg.color + "AA" }}>{cfg.label}</p>
                           </div>
                         </div>
@@ -1071,7 +1071,7 @@ const Admin = () => {
               </>
             ) : (
               <div className="py-16 text-center">
-                <p className="text-sm text-white/30 mb-4">No se pudieron cargar los analytics</p>
+                <p className="text-sm text-zinc-400 mb-4">No se pudieron cargar los analytics</p>
                 <button onClick={fetchAnalytics} className="inline-flex items-center gap-2 text-xs text-[#A855F7] hover:underline">
                   <RefreshCw className="h-3.5 w-3.5" /> Reintentar
                 </button>
@@ -1087,7 +1087,7 @@ const Admin = () => {
             {/* Edge Functions */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs font-bold text-white/40 uppercase tracking-widest">Edge Functions · Supabase</h2>
+                <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Edge Functions · Supabase</h2>
                 <span className="flex items-center gap-1.5 rounded-full bg-green-500/10 border border-green-500/20 px-3 py-1 text-[11px] font-semibold text-green-400">
                   <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
                   {edgeFunctions.length} activas
@@ -1097,13 +1097,13 @@ const Admin = () => {
                 {edgeFunctions.map((fn) => {
                   const Icon = fn.icon;
                   return (
-                    <div key={fn.name} className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3">
+                    <div key={fn.name} className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3">
                       <div className="h-8 w-8 shrink-0 rounded-lg flex items-center justify-center" style={{ background: fn.color + "15" }}>
                         <Icon className="h-3.5 w-3.5" style={{ color: fn.color }} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-mono text-xs font-semibold text-white truncate">{fn.name}</p>
-                        <p className="text-[10px] text-white/30 truncate">{fn.desc}</p>
+                        <p className="font-mono text-xs font-semibold text-zinc-900 truncate">{fn.name}</p>
+                        <p className="text-[10px] text-zinc-400 truncate">{fn.desc}</p>
                       </div>
                       <CheckCircle2 className="h-3.5 w-3.5 text-green-400 shrink-0" />
                     </div>
@@ -1114,18 +1114,18 @@ const Admin = () => {
 
             {/* DB Tables */}
             <div>
-              <h2 className="mb-3 text-xs font-bold text-white/40 uppercase tracking-widest">Tablas · PostgreSQL</h2>
+              <h2 className="mb-3 text-xs font-bold text-zinc-400 uppercase tracking-widest">Tablas · PostgreSQL</h2>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {tables.map((t) => (
-                  <div key={t.name} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
+                  <div key={t.name} className="rounded-xl border border-zinc-200 bg-zinc-50 p-4">
                     <div className="flex items-center gap-2 mb-1.5">
                       <Database className="h-3.5 w-3.5 text-[#A855F7]" />
-                      <span className="font-mono text-sm font-semibold text-white">{t.name}</span>
+                      <span className="font-mono text-sm font-semibold text-zinc-900">{t.name}</span>
                       {t.rows !== null && (
-                        <span className="ml-auto text-[10px] font-mono text-white/30">{t.rows}</span>
+                        <span className="ml-auto text-[10px] font-mono text-zinc-400">{t.rows}</span>
                       )}
                     </div>
-                    <p className="text-xs text-white/35">{t.desc}</p>
+                    <p className="text-xs text-zinc-400">{t.desc}</p>
                   </div>
                 ))}
               </div>
@@ -1133,13 +1133,13 @@ const Admin = () => {
 
             {/* Frontend routes */}
             <div>
-              <h2 className="mb-3 text-xs font-bold text-white/40 uppercase tracking-widest">Rutas del Frontend · {routes.length} páginas</h2>
+              <h2 className="mb-3 text-xs font-bold text-zinc-400 uppercase tracking-widest">Rutas del Frontend · {routes.length} páginas</h2>
               <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {routes.map((r) => (
-                  <div key={r.path} className="flex items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.02] px-4 py-3 gap-3">
+                  <div key={r.path} className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 gap-3">
                     <div className="min-w-0">
-                      <span className="font-mono text-xs text-white/70 block truncate">{r.path}</span>
-                      <span className="text-[10px] text-white/25 truncate">{r.desc}</span>
+                      <span className="font-mono text-xs text-zinc-600 block truncate">{r.path}</span>
+                      <span className="text-[10px] text-zinc-300 truncate">{r.desc}</span>
                     </div>
                     <span className="flex items-center gap-1.5 shrink-0 rounded-full bg-green-500/10 border border-green-500/15 px-2.5 py-0.5 text-[10px] font-bold text-green-400">
                       <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
@@ -1156,51 +1156,51 @@ const Admin = () => {
         {/* ── Settings tab ── */}
         {activeTab === "settings" && (
           <div className="max-w-lg space-y-4">
-            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 space-y-5">
+            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 space-y-5">
               <div className="flex items-center gap-3">
                 <div className="h-9 w-9 rounded-xl bg-[#F59E0B]/15 border border-[#F59E0B]/20 flex items-center justify-center">
                   <Shield className="h-4 w-4 text-[#F59E0B]" />
                 </div>
                 <div>
-                  <p className="font-semibold text-white">Bold.co</p>
-                  <p className="text-xs text-white/35">Pasarela de pagos Industrial</p>
+                  <p className="font-semibold text-zinc-900">Bold.co</p>
+                  <p className="text-xs text-zinc-400">Pasarela de pagos Industrial</p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-white/40">Bold API Key</label>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Bold API Key</label>
                   <div className="relative">
                     <input
                       type={showBoldKeys ? "text" : "password"}
                       value={boldApiKey}
                       onChange={(e) => setBoldApiKey(e.target.value)}
                       placeholder="Identidad de Bold..."
-                      className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] py-2.5 pl-4 pr-10 text-sm text-white placeholder-white/20 outline-none focus:border-[#F59E0B]/50 transition-colors"
+                      className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-4 pr-10 text-sm text-zinc-900 placeholder-white/20 outline-none focus:border-[#F59E0B]/50 transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="block text-[10px] font-black uppercase tracking-widest text-white/40">Bold Webhook Secret</label>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-zinc-400">Bold Webhook Secret</label>
                   <div className="relative">
                     <input
                       type={showBoldKeys ? "text" : "password"}
                       value={boldWebhookSecret}
                       onChange={(e) => setBoldWebhookSecret(e.target.value)}
                       placeholder="Llave secreta de Bold..."
-                      className="w-full rounded-xl border border-white/[0.07] bg-white/[0.04] py-2.5 pl-4 pr-10 text-sm text-white placeholder-white/20 outline-none focus:border-[#F59E0B]/50 transition-colors"
+                      className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-4 pr-10 text-sm text-zinc-900 placeholder-white/20 outline-none focus:border-[#F59E0B]/50 transition-colors"
                     />
                     <button
                       type="button"
                       onClick={() => setShowBoldKeys(!showBoldKeys)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-900 transition-colors"
                     >
                       {showBoldKeys ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
-                <p className="text-[10px] text-white/25 leading-relaxed">Configura estas llaves desde tu panel de Bold.co para habilitar cobros e integración con webhooks.</p>
+                <p className="text-[10px] text-zinc-300 leading-relaxed">Configura estas llaves desde tu panel de Bold.co para habilitar cobros e integración con webhooks.</p>
               </div>
 
               <button
@@ -1213,8 +1213,8 @@ const Admin = () => {
               </button>
             </div>
 
-            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 space-y-3">
-              <p className="font-semibold text-white">Plataforma</p>
+            <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-6 space-y-3">
+              <p className="font-semibold text-zinc-900">Plataforma</p>
               {[
                 ["Nombre", "Creator IA Pro"],
                 ["Rutas activas", routes.length],
@@ -1223,8 +1223,8 @@ const Admin = () => {
                 ["Planes pagos", paidUsers],
               ].map(([label, val]) => (
                 <div key={String(label)} className="flex items-center justify-between text-sm py-0.5">
-                  <span className="text-white/40">{label}</span>
-                  <span className="font-semibold text-white">{String(val)}</span>
+                  <span className="text-zinc-400">{label}</span>
+                  <span className="font-semibold text-zinc-900">{String(val)}</span>
                 </div>
               ))}
             </div>

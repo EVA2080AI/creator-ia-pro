@@ -45,7 +45,7 @@ export function CreditProgressBar() {
     >
       {/* Ultra-thin progress line - Only show when low */}
       {isLow && (
-        <div className="h-[2px] w-full bg-white/[0.04] relative overflow-hidden">
+        <div className="h-[2px] w-full bg-zinc-50 relative overflow-hidden">
           <div
             className="h-full transition-all duration-700 ease-out"
             style={{

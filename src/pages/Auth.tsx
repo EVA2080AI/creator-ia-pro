@@ -73,10 +73,10 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background bg-grid-white/[0.02] font-sans selection:bg-primary/30 selection:text-white overflow-hidden">
+    <div className="flex min-h-screen bg-background bg-grid-white/[0.02] font-sans selection:bg-primary/15 selection:text-zinc-900 overflow-hidden">
 
       {/* Left Panel — Value Prop */}
-      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between px-16 py-16 relative overflow-hidden bg-[#080809] border-r border-white/[0.04]">
+      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between px-16 py-16 relative overflow-hidden bg-zinc-50 border-r border-zinc-200">
         {/* Glows */}
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute -top-32 -left-32 h-[700px] w-[700px] rounded-full bg-primary/6 blur-[160px]" />
@@ -93,17 +93,17 @@ const Auth = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
-              <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">
+              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] font-display">
                 Plataforma de IA generativa
               </span>
             </div>
-            <h2 className="text-5xl xl:text-6xl font-bold text-white leading-[1.05] tracking-tight font-display">
+            <h2 className="text-5xl xl:text-6xl font-bold text-zinc-900 leading-[1.05] tracking-tight font-display">
               Crea con IA.<br />
               <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">
                 Más rápido.
               </span>
             </h2>
-            <p className="text-white/30 text-base max-w-xs leading-relaxed font-medium">
+            <p className="text-zinc-400 text-base max-w-xs leading-relaxed font-medium">
               Imágenes, textos, videos, logos y más — todo en un solo lugar, con la IA más avanzada.
             </p>
           </div>
@@ -112,10 +112,10 @@ const Auth = () => {
           <div className="space-y-5">
             {features.map((f) => (
               <div key={f.text} className="flex items-center gap-5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/5 shrink-0">
-                  <f.icon className="h-4.5 w-4.5 text-white/30" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 border border-zinc-200 shrink-0">
+                  <f.icon className="h-4.5 w-4.5 text-zinc-400" />
                 </div>
-                <span className="text-sm font-medium text-white/40">{f.text}</span>
+                <span className="text-sm font-medium text-zinc-400">{f.text}</span>
                 <Check className="h-4 w-4 text-primary ml-auto shrink-0 opacity-50" />
               </div>
             ))}
@@ -128,9 +128,9 @@ const Auth = () => {
               { value: "$12", label: "Starter/mes" },
               { value: "4.6", label: "Claude" },
             ].map((s) => (
-              <div key={s.label} className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-2xl border border-white/5 p-4 text-center">
-                <p className="text-2xl font-bold text-white font-display">{s.value}</p>
-                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-1">{s.label}</p>
+              <div key={s.label} className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-2xl border border-zinc-200 p-4 text-center">
+                <p className="text-2xl font-bold text-zinc-900 font-display">{s.value}</p>
+                <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest mt-1">{s.label}</p>
               </div>
             ))}
           </div>
@@ -138,13 +138,13 @@ const Auth = () => {
 
         {/* Bottom */}
         <div className="relative z-10">
-          <p className="text-[11px] font-medium text-white/15 leading-relaxed">
+          <p className="text-[11px] font-medium text-zinc-300 leading-relaxed">
             Al registrarte aceptas nuestros{" "}
-            <span className="underline underline-offset-2 cursor-pointer hover:text-white/40 transition-colors">
+            <span className="underline underline-offset-2 cursor-pointer hover:text-zinc-400 transition-colors">
               Términos de servicio
             </span>{" "}
             y{" "}
-            <span className="underline underline-offset-2 cursor-pointer hover:text-white/40 transition-colors">
+            <span className="underline underline-offset-2 cursor-pointer hover:text-zinc-400 transition-colors">
               Política de privacidad
             </span>.
           </p>
@@ -163,18 +163,18 @@ const Auth = () => {
 
         <div className="relative z-10 w-full max-w-[420px]">
           {/* Form Card */}
-          <div className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2.5rem] border border-white/5 p-10 shadow-[0_40px_120px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-bottom-6 duration-700 relative overflow-hidden">
+          <div className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2.5rem] border border-zinc-200 p-10 shadow-[0_40px_120px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-bottom-6 duration-700 relative overflow-hidden">
 
             {/* Header */}
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-white tracking-tight font-display">
+              <h2 className="text-2xl font-bold text-zinc-900 tracking-tight font-display">
                 {mode === "login"
                   ? "Iniciar sesión"
                   : mode === "signup"
                   ? "Crear cuenta gratis"
                   : "Recuperar contraseña"}
               </h2>
-              <p className="mt-1.5 text-sm text-white/30 font-medium">
+              <p className="mt-1.5 text-sm text-zinc-400 font-medium">
                 {mode === "login"
                   ? "Bienvenido de vuelta"
                   : mode === "signup"
@@ -187,11 +187,11 @@ const Auth = () => {
               {/* Name (signup only) */}
               {mode === "signup" && (
                 <div className="space-y-2">
-                  <Label htmlFor="displayName" className="text-white/40 text-xs font-semibold ml-1">
+                  <Label htmlFor="displayName" className="text-zinc-400 text-xs font-semibold ml-1">
                     Tu nombre
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/20 pointer-events-none" />
+                    <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300 pointer-events-none" />
                     <Input
                       id="displayName"
                       type="text"
@@ -199,7 +199,7 @@ const Auth = () => {
                       onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="¿Cómo te llamas?"
                       autoComplete="name"
-                      className="bg-white/[0.04] border-white/8 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-white placeholder:text-white/15 transition-all focus:ring-0 focus:bg-white/[0.06]"
+                      className="bg-zinc-50 border-white/8 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
                     />
                   </div>
                 </div>
@@ -207,11 +207,11 @@ const Auth = () => {
 
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-white/40 text-xs font-semibold ml-1">
+                <Label htmlFor="email" className="text-zinc-400 text-xs font-semibold ml-1">
                   Correo electrónico
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/20 pointer-events-none" />
+                  <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300 pointer-events-none" />
                   <Input
                     id="email"
                     type="email"
@@ -220,7 +220,7 @@ const Auth = () => {
                     placeholder="tu@correo.com"
                     required
                     autoComplete="email"
-                    className="bg-white/[0.04] border-white/8 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-white placeholder:text-white/15 transition-all focus:ring-0 focus:bg-white/[0.06]"
+                    className="bg-zinc-50 border-white/8 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
                   />
                 </div>
               </div>
@@ -229,21 +229,21 @@ const Auth = () => {
               {mode !== "forgot" && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between ml-1 pr-1">
-                    <Label htmlFor="password" className="text-white/40 text-xs font-semibold">
+                    <Label htmlFor="password" className="text-zinc-400 text-xs font-semibold">
                       Contraseña
                     </Label>
                     {mode === "login" && (
                       <button
                         type="button"
                         onClick={() => setMode("forgot")}
-                        className="text-xs text-white/25 hover:text-primary transition-colors font-medium"
+                        className="text-xs text-zinc-300 hover:text-primary transition-colors font-medium"
                       >
                         ¿Olvidaste tu contraseña?
                       </button>
                     )}
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/20 pointer-events-none" />
+                    <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300 pointer-events-none" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
@@ -253,19 +253,19 @@ const Auth = () => {
                       required
                       minLength={6}
                       autoComplete={mode === "login" ? "current-password" : "new-password"}
-                      className="bg-white/[0.04] border-white/8 focus:border-primary/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-white placeholder:text-white/15 transition-all focus:ring-0 focus:bg-white/[0.06]"
+                      className="bg-zinc-50 border-white/8 focus:border-primary/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/60 transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-zinc-500 transition-colors"
                       tabIndex={-1}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                   {mode === "signup" && (
-                    <p className="text-[11px] text-white/20 ml-1">
+                    <p className="text-[11px] text-zinc-300 ml-1">
                       Usa al menos 6 caracteres.
                     </p>
                   )}
@@ -298,9 +298,9 @@ const Auth = () => {
               <div className="mt-8 space-y-5 relative z-10">
                 <div className="relative flex items-center justify-center">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-white/[0.06]" />
+                    <div className="w-full border-t border-zinc-200" />
                   </div>
-                  <span className="relative bg-[#0b0b0d] px-4 text-[11px] text-white/20 font-medium">
+                  <span className="relative bg-[#0b0b0d] px-4 text-[11px] text-zinc-300 font-medium">
                     o continúa con
                   </span>
                 </div>
@@ -309,7 +309,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-11 gap-3 border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/15 rounded-xl text-sm font-semibold text-white/40 hover:text-white transition-all active:scale-[0.98]"
+                    className="h-11 gap-3 border-zinc-200 bg-zinc-50 hover:bg-zinc-100 hover:border-white/15 rounded-xl text-sm font-semibold text-zinc-400 hover:text-zinc-900 transition-all active:scale-[0.98]"
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
@@ -333,7 +333,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-11 gap-3 border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.07] hover:border-white/15 rounded-xl text-sm font-semibold text-white/40 hover:text-white transition-all active:scale-[0.98]"
+                    className="h-11 gap-3 border-zinc-200 bg-zinc-50 hover:bg-zinc-100 hover:border-white/15 rounded-xl text-sm font-semibold text-zinc-400 hover:text-zinc-900 transition-all active:scale-[0.98]"
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
@@ -360,17 +360,17 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => setMode("login")}
-                  className="text-sm font-medium text-white/25 hover:text-white transition-colors"
+                  className="text-sm font-medium text-zinc-300 hover:text-zinc-900 transition-colors"
                 >
                   ← Volver al inicio de sesión
                 </button>
               ) : (
-                <p className="text-sm text-white/25">
+                <p className="text-sm text-zinc-300">
                   {mode === "login" ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"}{" "}
                   <button
                     type="button"
                     onClick={() => setMode(mode === "login" ? "signup" : "login")}
-                    className="font-semibold text-white/50 hover:text-primary transition-colors underline underline-offset-2"
+                    className="font-semibold text-zinc-500 hover:text-primary transition-colors underline underline-offset-2"
                   >
                     {mode === "login" ? "Regístrate gratis" : "Inicia sesión"}
                   </button>
@@ -386,7 +386,7 @@ const Auth = () => {
           <div className="mt-6 text-center">
             <button
               onClick={() => navigate("/pricing")}
-              className="text-xs font-medium text-white/15 hover:text-white/40 transition-colors"
+              className="text-xs font-medium text-zinc-300 hover:text-zinc-400 transition-colors"
             >
               Ver planes y precios →
             </button>

@@ -76,7 +76,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#050506]">
+      <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -87,14 +87,14 @@ const Profile = () => {
   const joinDate = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" }) : "—";
 
   return (
-    <div className="min-h-screen bg-background bg-grid-white/[0.02] text-white">
+    <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main className="max-w-5xl mx-auto px-6 pt-28 pb-20">
         {/* Header */}
         <div className="mb-10">
-          <p className="text-xs text-white/30 uppercase tracking-widest font-bold mb-2">Mi cuenta</p>
-          <h1 className="text-4xl font-bold text-white tracking-tight">Perfil</h1>
+          <p className="text-xs text-zinc-400 uppercase tracking-widest font-bold mb-2">Mi cuenta</p>
+          <h1 className="text-4xl font-bold text-zinc-900 tracking-tight">Perfil</h1>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -102,15 +102,15 @@ const Profile = () => {
           <div className="lg:col-span-2 space-y-5">
 
             {/* Identity card */}
-            <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-8">
-              <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-6">Información personal</h2>
+            <div className="rounded-3xl bg-zinc-50 border border-zinc-200 p-8">
+              <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">Información personal</h2>
 
               {/* Avatar */}
               <div className="flex items-center gap-5 mb-8">
                 <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                 <button
                   onClick={() => avatarInputRef.current?.click()}
-                  className="relative w-20 h-20 rounded-2xl overflow-hidden bg-white/5 border border-white/10 shrink-0 group"
+                  className="relative w-20 h-20 rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200 shrink-0 group"
                   disabled={uploadingAvatar}
                 >
                   {uploadingAvatar ? (
@@ -121,22 +121,22 @@ const Profile = () => {
                     <>
                       <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Camera className="w-5 h-5 text-white" />
+                        <Camera className="w-5 h-5 text-zinc-900" />
                       </div>
                     </>
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                      <User className="w-7 h-7 text-white/20" />
-                      <span className="text-[9px] text-white/20 font-bold group-hover:text-white/40 transition-colors">Subir</span>
+                      <User className="w-7 h-7 text-zinc-300" />
+                      <span className="text-[9px] text-zinc-300 font-bold group-hover:text-zinc-400 transition-colors">Subir</span>
                     </div>
                   )}
                 </button>
                 <div>
-                  <p className="font-semibold text-white text-base">{profile?.display_name || "Sin nombre"}</p>
-                  <p className="text-sm text-white/40 mt-0.5">{user?.email}</p>
+                  <p className="font-semibold text-zinc-900 text-base">{profile?.display_name || "Sin nombre"}</p>
+                  <p className="text-sm text-zinc-400 mt-0.5">{user?.email}</p>
                   <button
                     onClick={() => avatarInputRef.current?.click()}
-                    className="text-xs text-primary hover:text-white transition-colors mt-2 font-medium"
+                    className="text-xs text-primary hover:text-zinc-900 transition-colors mt-2 font-medium"
                   >
                     Cambiar foto
                   </button>
@@ -146,21 +146,21 @@ const Profile = () => {
               {/* Fields */}
               <div className="space-y-5">
                 <div>
-                  <label className="block text-xs font-bold text-white/30 uppercase tracking-widest mb-2">Correo electrónico</label>
-                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <Mail className="w-4 h-4 text-white/20 shrink-0" />
-                    <span className="text-sm text-white/40">{user?.email}</span>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Correo electrónico</label>
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200">
+                    <Mail className="w-4 h-4 text-zinc-300 shrink-0" />
+                    <span className="text-sm text-zinc-400">{user?.email}</span>
                     <span className="ml-auto text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Verificado</span>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-white/30 uppercase tracking-widest mb-2">Nombre para mostrar</label>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Nombre para mostrar</label>
                   <input
                     type="text"
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="Tu nombre..."
-                    className="w-full px-4 py-3 rounded-xl bg-white/[0.03] border border-white/5 focus:border-primary/40 focus:outline-none text-sm text-white placeholder:text-white/20 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 focus:border-primary/40 focus:outline-none text-sm text-zinc-900 placeholder:text-zinc-300 transition-colors"
                   />
                 </div>
                 <div className="flex justify-end">
@@ -178,21 +178,21 @@ const Profile = () => {
 
             {/* Recent activity */}
             {creditHistory.length > 0 && (
-              <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-8">
-                <h2 className="text-sm font-bold text-white/40 uppercase tracking-widest mb-6">Últimas transacciones</h2>
+              <div className="rounded-3xl bg-zinc-50 border border-zinc-200 p-8">
+                <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">Últimas transacciones</h2>
                 <div className="space-y-3">
                   {creditHistory.map((tx: any) => (
-                    <div key={tx.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.02] transition-colors">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${tx.amount > 0 ? "bg-green-500/10" : "bg-white/5"}`}>
-                        {tx.action === "image" || tx.action === "generate" ? <Image className="w-3.5 h-3.5 text-white/40" /> :
-                         tx.action === "chat" ? <MessageSquare className="w-3.5 h-3.5 text-white/40" /> :
-                         <Zap className="w-3.5 h-3.5 text-white/40" />}
+                    <div key={tx.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-50 transition-colors">
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${tx.amount > 0 ? "bg-green-500/10" : "bg-zinc-100"}`}>
+                        {tx.action === "image" || tx.action === "generate" ? <Image className="w-3.5 h-3.5 text-zinc-400" /> :
+                         tx.action === "chat" ? <MessageSquare className="w-3.5 h-3.5 text-zinc-400" /> :
+                         <Zap className="w-3.5 h-3.5 text-zinc-400" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-white/70 truncate capitalize">{tx.action || "Acción"}</p>
-                        <p className="text-xs text-white/30">{new Date(tx.created_at).toLocaleDateString("es-ES")}</p>
+                        <p className="text-sm font-medium text-zinc-600 truncate capitalize">{tx.action || "Acción"}</p>
+                        <p className="text-xs text-zinc-400">{new Date(tx.created_at).toLocaleDateString("es-ES")}</p>
                       </div>
-                      <span className={`text-sm font-bold tabular-nums ${tx.amount > 0 ? "text-green-400" : "text-white/40"}`}>
+                      <span className={`text-sm font-bold tabular-nums ${tx.amount > 0 ? "text-green-400" : "text-zinc-400"}`}>
                         {tx.amount > 0 ? "+" : ""}{tx.amount}
                       </span>
                     </div>
@@ -217,7 +217,7 @@ const Profile = () => {
               </div>
               <button
                 onClick={() => navigate("/pricing")}
-                className="w-full py-3 bg-black/90 text-white rounded-2xl font-bold text-sm hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-black/90 text-zinc-900 rounded-2xl font-bold text-sm hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2"
               >
                 <Coins className="w-4 h-4" />
                 Recargar créditos
@@ -225,15 +225,15 @@ const Profile = () => {
             </div>
 
             {/* Plan card */}
-            <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-6 space-y-4">
-              <h2 className="text-xs font-bold text-white/30 uppercase tracking-widest">Plan actual</h2>
+            <div className="rounded-3xl bg-zinc-50 border border-zinc-200 p-6 space-y-4">
+              <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Plan actual</h2>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-bold text-white">{tierLabel}</p>
-                  <p className="text-xs text-white/30">Plan activo</p>
+                  <p className="font-bold text-zinc-900">{tierLabel}</p>
+                  <p className="text-xs text-zinc-400">Plan activo</p>
                 </div>
               </div>
               {tierLabel === "Free" && (
@@ -248,27 +248,27 @@ const Profile = () => {
             </div>
 
             {/* Account info */}
-            <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-6 space-y-4">
-              <h2 className="text-xs font-bold text-white/30 uppercase tracking-widest">Detalles de cuenta</h2>
+            <div className="rounded-3xl bg-zinc-50 border border-zinc-200 p-6 space-y-4">
+              <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Detalles de cuenta</h2>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <Calendar className="w-4 h-4 text-white/20 shrink-0" />
+                  <Calendar className="w-4 h-4 text-zinc-300 shrink-0" />
                   <div>
-                    <p className="text-xs text-white/30">Miembro desde</p>
-                    <p className="text-sm font-medium text-white/70">{joinDate}</p>
+                    <p className="text-xs text-zinc-400">Miembro desde</p>
+                    <p className="text-sm font-medium text-zinc-600">{joinDate}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Bell className="w-4 h-4 text-white/20 shrink-0" />
+                  <Bell className="w-4 h-4 text-zinc-300 shrink-0" />
                   <div>
-                    <p className="text-xs text-white/30">Notificaciones</p>
-                    <p className="text-sm font-medium text-white/70">Activas</p>
+                    <p className="text-xs text-zinc-400">Notificaciones</p>
+                    <p className="text-sm font-medium text-zinc-600">Activas</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Check className="w-4 h-4 text-green-400/50 shrink-0" />
                   <div>
-                    <p className="text-xs text-white/30">Email verificado</p>
+                    <p className="text-xs text-zinc-400">Email verificado</p>
                     <p className="text-sm font-medium text-green-400/70">Confirmado</p>
                   </div>
                 </div>
@@ -278,19 +278,19 @@ const Profile = () => {
             {/* Download app */}
             <button
               onClick={() => navigate("/descargar")}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-white/[0.03] border border-white/5 text-sm font-medium text-white/50 hover:text-white hover:bg-white/[0.06] transition-all"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-zinc-50 border border-zinc-200 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
             >
               <div className="flex items-center gap-3">
                 <Download className="w-4 h-4 text-primary/60" />
                 Descargar App
               </div>
-              <ChevronRight className="w-4 h-4 text-white/20" />
+              <ChevronRight className="w-4 h-4 text-zinc-300" />
             </button>
 
             {/* Sign out */}
             <button
               onClick={signOut}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-white/5 text-sm font-medium text-white/30 hover:text-rose-400 hover:border-rose-500/20 hover:bg-rose-500/5 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-zinc-200 text-sm font-medium text-zinc-400 hover:text-rose-400 hover:border-rose-500/20 hover:bg-rose-500/5 transition-all"
             >
               <LogOut className="w-4 h-4" />
               Cerrar sesión

@@ -39,7 +39,7 @@ interface Tool {
 
 // ─── Tool list ────────────────────────────────────────────────────────────────
 const tools: Tool[] = [
-  { id: "generate",   name: "Crear imagen",        desc: "Genera imágenes desde texto con IA.",            icon: Image,       credits: 2, category: "image", needsUpload: false, placeholder: "Un gato astronauta en Marte al atardecer, estilo fotorrealista, luz dramática...", color: "text-white" },
+  { id: "generate",   name: "Crear imagen",        desc: "Genera imágenes desde texto con IA.",            icon: Image,       credits: 2, category: "image", needsUpload: false, placeholder: "Un gato astronauta en Marte al atardecer, estilo fotorrealista, luz dramática...", color: "text-zinc-900" },
   { id: "logo",       name: "Diseñar logo",         desc: "Logos e identidades de marca con IA.",           icon: PenTool,     credits: 3, category: "image", needsUpload: false, placeholder: "Logo minimalista para una cafetería llamada Origen, tonos cálidos, fondo blanco...", color: "text-primary" },
   { id: "enhance",    name: "Mejorar imagen",       desc: "Mejora iluminación y detalles.",                 icon: Wand2,       credits: 2, category: "image", needsUpload: true,  color: "text-primary" },
   { id: "upscale",    name: "Aumentar resolución",  desc: "Escala hasta 4K sin perder calidad.",            icon: ZoomIn,      credits: 3, category: "image", needsUpload: true,  color: "text-primary" },
@@ -51,7 +51,7 @@ const tools: Tool[] = [
   { id: "copywriter", name: "Crear texto",          desc: "Copy persuasivo para marketing y ventas.",       icon: Megaphone,   credits: 1, category: "text",  needsUpload: false, placeholder: "Escribe un mensaje persuasivo para vender zapatos deportivos en Instagram...", color: "text-primary" },
   { id: "social",     name: "Contenido para redes", desc: "Posts y estrategias para redes sociales.",       icon: Hash,        credits: 2, category: "text",  needsUpload: false, placeholder: "5 ideas de contenido para Instagram de una marca de ropa sostenible...", color: "text-rose-400" },
   { id: "blog",       name: "Escribir artículo",    desc: "Artículos optimizados para SEO.",                icon: FileText,    credits: 1, category: "text",  needsUpload: false, placeholder: "Artículo completo sobre los beneficios del café de especialidad en 2025...", color: "text-emerald-400" },
-  { id: "ads",        name: "Crear anuncio",        desc: "Anuncios para Google, Meta y más.",              icon: Megaphone,   credits: 1, category: "text",  needsUpload: false, placeholder: "Anuncio de Google Ads para un servicio de consultoría de marketing digital...", color: "text-white" },
+  { id: "ads",        name: "Crear anuncio",        desc: "Anuncios para Google, Meta y más.",              icon: Megaphone,   credits: 1, category: "text",  needsUpload: false, placeholder: "Anuncio de Google Ads para un servicio de consultoría de marketing digital...", color: "text-zinc-900" },
 ];
 
 const IMAGE_STYLES  = ["Fotorrealista", "Minimalista", "Anime", "Acuarela", "Cyberpunk", "Bauhaus", "3D", "Vintage"];
@@ -72,18 +72,18 @@ const appIdToToolId: Record<string, ToolId> = {
 // ─── Markdown ─────────────────────────────────────────────────────────────────
 function parseMarkdown(text: string): string {
   return text
-    .replace(/^### (.+)$/gm, '<h3 class="text-sm font-bold text-white mt-4 mb-1.5">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 class="text-base font-bold text-white mt-5 mb-2">$1</h2>')
-    .replace(/^# (.+)$/gm,  '<h1 class="text-lg font-bold text-white mt-6 mb-2">$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-white">$1</strong>')
-    .replace(/\*(.+?)\*/g,     '<em class="italic text-white/80">$1</em>')
-    .replace(/`([^`\n]+)`/g,   '<code class="bg-white/[0.08] text-sky-300 px-1.5 py-0.5 rounded text-[12px] font-mono">$1</code>')
-    .replace(/^---+$/gm,       '<hr class="border-white/10 my-4" />')
-    .replace(/^\s*[-*•] (.+)$/gm, '<li class="flex gap-2 my-1"><span class="text-primary mt-1 shrink-0">›</span><span class="text-white/80">$1</span></li>')
+    .replace(/^### (.+)$/gm, '<h3 class="text-sm font-bold text-zinc-900 mt-4 mb-1.5">$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2 class="text-base font-bold text-zinc-900 mt-5 mb-2">$1</h2>')
+    .replace(/^# (.+)$/gm,  '<h1 class="text-lg font-bold text-zinc-900 mt-6 mb-2">$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-zinc-900">$1</strong>')
+    .replace(/\*(.+?)\*/g,     '<em class="italic text-zinc-700">$1</em>')
+    .replace(/`([^`\n]+)`/g,   '<code class="bg-zinc-100 text-sky-300 px-1.5 py-0.5 rounded text-[12px] font-mono">$1</code>')
+    .replace(/^---+$/gm,       '<hr class="border-zinc-200 my-4" />')
+    .replace(/^\s*[-*•] (.+)$/gm, '<li class="flex gap-2 my-1"><span class="text-primary mt-1 shrink-0">›</span><span class="text-zinc-700">$1</span></li>')
     .replace(/(<li[\s\S]*?<\/li>\n?)+/g, m => `<ul class="my-3 space-y-0.5">${m}</ul>`)
-    .replace(/\n\n/g, '</p><p class="mt-3 text-white/75 leading-relaxed">')
+    .replace(/\n\n/g, '</p><p class="mt-3 text-zinc-900/75 leading-relaxed">')
     .replace(/^(?!<[hublpei])(.+)$/gm, line =>
-      line.trim() ? `<p class="text-white/75 leading-relaxed">${line}</p>` : ''
+      line.trim() ? `<p class="text-zinc-900/75 leading-relaxed">${line}</p>` : ''
     );
 }
 
@@ -96,16 +96,16 @@ function ProcessingCanvas({ modelName, modelColor, category }: {
       <div className="relative">
         <div className="absolute inset-0 rounded-full blur-3xl opacity-30 animate-pulse"
           style={{ background: modelColor }} />
-        <div className="relative w-20 h-20 rounded-2xl border border-white/[0.08] bg-white/[0.03] flex items-center justify-center">
+        <div className="relative w-20 h-20 rounded-2xl border border-zinc-200 bg-zinc-50 flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin" style={{ color: modelColor }} />
         </div>
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-center gap-2">
           <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: modelColor }} />
-          <span className="text-[13px] font-bold uppercase tracking-widest text-white/60">{modelName}</span>
+          <span className="text-[13px] font-bold uppercase tracking-widest text-zinc-500">{modelName}</span>
         </div>
-        <p className="text-sm text-white/30">
+        <p className="text-sm text-zinc-400">
           {category === "image" ? "Generando imagen con IA..." : "Generando contenido..."}
         </p>
         <div className="flex items-center justify-center gap-1.5 mt-3">
@@ -126,7 +126,7 @@ function ImageWithFallback({ src, onRetry }: { src: string; onRetry: () => void 
   return (
     <div className="relative w-full h-full min-h-[300px]">
       {status === "loading" && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/[0.02] rounded-2xl">
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 rounded-2xl">
           <Loader2 className="h-8 w-8 text-primary animate-spin" />
         </div>
       )}
@@ -136,8 +136,8 @@ function ImageWithFallback({ src, onRetry }: { src: string; onRetry: () => void 
             <X className="h-7 w-7 text-rose-400" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-white/60">La imagen no se pudo cargar</p>
-            <p className="text-xs text-white/25 mt-1">El motor puede estar saturado</p>
+            <p className="text-sm font-semibold text-zinc-500">La imagen no se pudo cargar</p>
+            <p className="text-xs text-zinc-300 mt-1">El motor puede estar saturado</p>
           </div>
           <button onClick={onRetry}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-bold text-sm hover:bg-white/90 active:scale-95 transition-all">
@@ -368,23 +368,23 @@ const Tools = () => {
           {/* Action bar */}
           <div className="flex items-center gap-2 shrink-0">
             <a href={resultImage} download={`creator-ia-${activeTool}-${Date.now()}.png`} target="_blank" rel="noreferrer" className="flex-1">
-              <button className="w-full h-11 rounded-xl border border-white/[0.08] bg-white/[0.04] text-sm font-semibold text-white/70 hover:text-white hover:bg-white/[0.10] transition-all flex items-center justify-center gap-2">
+              <button className="w-full h-11 rounded-xl border border-zinc-200 bg-zinc-50 text-sm font-semibold text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all flex items-center justify-center gap-2">
                 <Download className="h-4 w-4" /> Descargar
               </button>
             </a>
             <button onClick={handleSaveToAssets} disabled={savingAsset || savedAsset}
               className={cn("h-11 px-4 rounded-xl border text-sm font-semibold flex items-center gap-2 transition-all",
                 savedAsset ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                           : "border-white/[0.08] bg-white/[0.04] text-white/40 hover:text-white hover:bg-white/[0.10]")}>
+                           : "border-zinc-200 bg-zinc-50 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100")}>
               {savingAsset ? <Loader2 className="h-4 w-4 animate-spin" /> : savedAsset ? <CheckCircle2 className="h-4 w-4" /> : <BookmarkPlus className="h-4 w-4" />}
               {savedAsset ? "Guardado" : "Guardar"}
             </button>
             <button onClick={() => handleCopyImage(resultImage)}
-              className="h-11 w-11 rounded-xl border border-white/[0.08] bg-white/[0.04] text-white/30 hover:text-white hover:bg-white/[0.10] transition-all flex items-center justify-center">
+              className="h-11 w-11 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all flex items-center justify-center">
               <Copy className="h-4 w-4" />
             </button>
             <button onClick={() => { setResultImage(null); setSavedAsset(false); }}
-              className="h-11 w-11 rounded-xl border border-white/[0.06] text-white/20 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
+              className="h-11 w-11 rounded-xl border border-zinc-200 text-zinc-300 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -395,9 +395,9 @@ const Tools = () => {
     if (resultText || streaming) {
       return (
         <div className="flex flex-col h-full gap-4 animate-in fade-in duration-300 p-4">
-          <div ref={resultRef} className="flex-1 overflow-y-auto rounded-2xl border border-white/[0.06] bg-white/[0.01] p-5 relative min-h-0">
+          <div ref={resultRef} className="flex-1 overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50 p-5 relative min-h-0">
             {streaming && !resultText && (
-              <div className="flex items-center gap-3 text-white/30 text-sm">
+              <div className="flex items-center gap-3 text-zinc-400 text-sm">
                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 <span>Escribiendo...</span>
               </div>
@@ -415,7 +415,7 @@ const Tools = () => {
                 <Copy className="h-4 w-4" /> Copiar texto
               </button>
               <button onClick={() => { setResultText(""); setSavedAsset(false); }}
-                className="h-11 w-11 rounded-xl border border-white/[0.06] text-white/20 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
+                className="h-11 w-11 rounded-xl border border-zinc-200 text-zinc-300 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -427,24 +427,24 @@ const Tools = () => {
     // Empty state — upload or visual cue
     if (currentTool.needsUpload) {
       return imagePreview ? (
-        <div className="relative flex-1 m-4 rounded-2xl overflow-hidden border border-white/[0.08] bg-black">
+        <div className="relative flex-1 m-4 rounded-2xl overflow-hidden border border-zinc-200 bg-black">
           <img src={imagePreview} alt="Imagen subida" className="w-full h-full object-contain" />
           <button onClick={() => { setImagePreview(null); if (fileRef.current) fileRef.current.value = ""; }}
-            className="absolute top-3 right-3 rounded-xl bg-black/70 p-2 border border-white/10 hover:bg-rose-500/20 hover:text-rose-400 text-white/40 transition-all">
+            className="absolute top-3 right-3 rounded-xl bg-black/70 p-2 border border-zinc-200 hover:bg-rose-500/20 hover:text-rose-400 text-zinc-400 transition-all">
             <X className="h-4 w-4" />
           </button>
         </div>
       ) : (
         <button onClick={() => fileRef.current?.click()}
-          className="flex-1 m-4 flex flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed border-white/[0.07] bg-white/[0.01] hover:border-primary/30 hover:bg-primary/[0.03] transition-all group">
-          <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center group-hover:scale-105 transition-transform">
-            <Upload className="h-7 w-7 text-white/20 group-hover:text-white/40 transition-colors" />
+          className="flex-1 m-4 flex flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50 hover:border-primary/30 hover:bg-primary/[0.03] transition-all group">
+          <div className="w-16 h-16 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-center group-hover:scale-105 transition-transform">
+            <Upload className="h-7 w-7 text-zinc-300 group-hover:text-zinc-400 transition-colors" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-semibold text-white/30 group-hover:text-white/50 transition-colors">
+            <p className="text-sm font-semibold text-zinc-400 group-hover:text-zinc-500 transition-colors">
               Arrastra o haz clic para subir
             </p>
-            <p className="text-xs text-white/15 mt-1">PNG, JPG, WEBP · Máx 10MB</p>
+            <p className="text-xs text-zinc-300 mt-1">PNG, JPG, WEBP · Máx 10MB</p>
           </div>
         </button>
       );
@@ -455,15 +455,15 @@ const Tools = () => {
       <div className="flex-1 flex flex-col items-center justify-center gap-5 text-center p-10">
         <div className="relative">
           <div className="absolute inset-0 blur-3xl rounded-full bg-primary/10" />
-          <div className="relative w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+          <div className="relative w-16 h-16 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-center">
             <currentTool.icon className={cn("h-7 w-7", currentTool.color)} />
           </div>
         </div>
         <div>
-          <h3 className="text-base font-bold text-white/40 font-display tracking-tight">{currentTool.name}</h3>
-          <p className="text-sm text-white/20 mt-1 max-w-xs leading-relaxed">{currentTool.desc}</p>
+          <h3 className="text-base font-bold text-zinc-400 font-display tracking-tight">{currentTool.name}</h3>
+          <p className="text-sm text-zinc-300 mt-1 max-w-xs leading-relaxed">{currentTool.desc}</p>
         </div>
-        <p className="text-[11px] text-white/12 uppercase tracking-widest">
+        <p className="text-[11px] text-zinc-900/12 uppercase tracking-widest">
           Escribe un prompt y presiona Generar
         </p>
       </div>
@@ -472,8 +472,8 @@ const Tools = () => {
 
   if (authLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[#050506]">
-        <div className="w-12 h-12 rounded-2xl border-2 border-white/5 border-t-primary animate-spin" />
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="w-12 h-12 rounded-2xl border-2 border-zinc-200 border-t-primary animate-spin" />
       </div>
     );
   }
@@ -482,15 +482,15 @@ const Tools = () => {
   const textTools  = tools.filter(t => t.category === "text");
 
   return (
-    <div className="fixed inset-0 flex bg-[#0a0a0b] text-white font-sans overflow-hidden" style={{ top: "64px" }}>
+    <div className="fixed inset-0 flex bg-[#0a0a0b] text-zinc-900 font-sans overflow-hidden" style={{ top: "64px" }}>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
-      <aside className="hidden md:flex w-[240px] shrink-0 flex-col border-r border-white/[0.06] bg-[#080809] overflow-hidden">
+      <aside className="hidden md:flex w-[240px] shrink-0 flex-col border-r border-zinc-200 bg-zinc-50 overflow-hidden">
 
         {/* Sidebar header */}
         <div className="px-4 pt-5 pb-3 shrink-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 font-display">Herramientas IA</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 font-display">Herramientas IA</p>
         </div>
 
         {/* Tool list */}
@@ -498,7 +498,7 @@ const Tools = () => {
 
           {/* Image section */}
           <div className="px-2 pt-3 pb-1.5">
-            <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-white/20">
+            <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-300">
               <Image className="h-3 w-3" /> Imagen
             </span>
           </div>
@@ -510,18 +510,18 @@ const Tools = () => {
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
                   tool.disabled ? "opacity-25 cursor-not-allowed" :
                   isActive
-                    ? "bg-white/[0.07] border border-white/[0.08] text-white"
-                    : "text-white/40 hover:text-white/75 hover:bg-white/[0.04]"
+                    ? "bg-zinc-100 border border-zinc-200 text-zinc-900"
+                    : "text-zinc-400 hover:text-zinc-900/75 hover:bg-zinc-50"
                 )}>
                 <div className={cn(
                   "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                  isActive ? "bg-primary/20 text-primary" : "bg-white/[0.04] text-white/20"
+                  isActive ? "bg-primary/20 text-primary" : "bg-zinc-50 text-zinc-300"
                 )}>
                   {tool.disabled ? <Lock className="h-3.5 w-3.5" /> : <tool.icon className="h-3.5 w-3.5" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-semibold truncate leading-none">{tool.name}</p>
-                  <p className="text-[10px] text-white/20 mt-0.5">
+                  <p className="text-[10px] text-zinc-300 mt-0.5">
                     {tool.disabled ? tool.disabledReason : `${tool.credits} crédito${tool.credits !== 1 ? "s" : ""}`}
                   </p>
                 </div>
@@ -532,7 +532,7 @@ const Tools = () => {
 
           {/* Text section */}
           <div className="px-2 pt-4 pb-1.5">
-            <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-white/20">
+            <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-300">
               <FileText className="h-3 w-3" /> Texto & Copy
             </span>
           </div>
@@ -544,18 +544,18 @@ const Tools = () => {
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200",
                   tool.disabled ? "opacity-25 cursor-not-allowed" :
                   isActive
-                    ? "bg-white/[0.07] border border-white/[0.08] text-white"
-                    : "text-white/40 hover:text-white/75 hover:bg-white/[0.04]"
+                    ? "bg-zinc-100 border border-zinc-200 text-zinc-900"
+                    : "text-zinc-400 hover:text-zinc-900/75 hover:bg-zinc-50"
                 )}>
                 <div className={cn(
                   "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                  isActive ? "bg-primary/20 text-primary" : "bg-white/[0.04] text-white/20"
+                  isActive ? "bg-primary/20 text-primary" : "bg-zinc-50 text-zinc-300"
                 )}>
                   {tool.disabled ? <Lock className="h-3.5 w-3.5" /> : <tool.icon className="h-3.5 w-3.5" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-semibold truncate leading-none">{tool.name}</p>
-                  <p className="text-[10px] text-white/20 mt-0.5">{tool.credits} crédito{tool.credits !== 1 ? "s" : ""}</p>
+                  <p className="text-[10px] text-zinc-300 mt-0.5">{tool.credits} crédito{tool.credits !== 1 ? "s" : ""}</p>
                 </div>
                 {isActive && <div className="w-1 h-4 rounded-full bg-primary shrink-0 shadow-[0_0_6px_rgba(74,222,128,0.7)]" />}
               </button>
@@ -564,19 +564,19 @@ const Tools = () => {
         </nav>
 
         {/* Credits footer */}
-        <div className="p-3 border-t border-white/[0.06] shrink-0">
+        <div className="p-3 border-t border-zinc-200 shrink-0">
           <button onClick={() => navigate("/profile")}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-all">
-            <div className="w-7 h-7 rounded-lg bg-white/[0.05] border border-white/[0.07] flex items-center justify-center overflow-hidden shrink-0">
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-zinc-50 transition-all">
+            <div className="w-7 h-7 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center overflow-hidden shrink-0">
               {profile?.avatar_url
                 ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                : <User className="w-3.5 h-3.5 text-white/30" />}
+                : <User className="w-3.5 h-3.5 text-zinc-400" />}
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-[11px] font-bold text-white/60 truncate leading-none">
+              <p className="text-[11px] font-bold text-zinc-500 truncate leading-none">
                 {profile?.display_name?.split(" ")[0] || "Mi perfil"}
               </p>
-              <p className="text-[10px] text-white/25 mt-0.5 flex items-center gap-1">
+              <p className="text-[10px] text-zinc-300 mt-0.5 flex items-center gap-1">
                 <Coins className="h-2.5 w-2.5 text-primary" />
                 {(profile?.credits_balance ?? 0).toLocaleString()} créditos
               </p>
@@ -595,7 +595,7 @@ const Tools = () => {
         </div>
 
         {/* ── Input bar (same pattern as Chat IA) ─────────────────────────── */}
-        <div className="shrink-0 border-t border-white/[0.06] bg-[#0a0a0b] px-5 py-4">
+        <div className="shrink-0 border-t border-zinc-200 bg-[#0a0a0b] px-5 py-4">
 
           {/* Contextual settings row — always visible, compact */}
           <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -608,7 +608,7 @@ const Tools = () => {
                     "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all",
                     showSettings
                       ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-white/[0.08] bg-white/[0.03] text-white/40 hover:text-white/70 hover:border-white/15"
+                      : "border-zinc-200 bg-zinc-50 text-zinc-400 hover:text-zinc-600 hover:border-white/15"
                   )}>
                   <Sparkles className="h-3 w-3" />
                   {imageModelObj.name}
@@ -621,7 +621,7 @@ const Tools = () => {
                   "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all",
                   showSettings
                     ? "border-primary/40 bg-primary/10 text-primary"
-                    : "border-white/[0.08] bg-white/[0.03] text-white/40 hover:text-white/70 hover:border-white/15"
+                    : "border-zinc-200 bg-zinc-50 text-zinc-400 hover:text-zinc-600 hover:border-white/15"
                 )}>
                 <Sparkles className="h-3 w-3" />
                 {textModelObj.name}
@@ -637,8 +637,8 @@ const Tools = () => {
                     className={cn(
                       "px-2.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all",
                       aspectRatio.label === ar.label
-                        ? "bg-white/10 border-white/20 text-white"
-                        : "bg-white/[0.02] border-white/[0.06] text-white/25 hover:text-white/50"
+                        ? "bg-zinc-100 border-zinc-300 text-zinc-900"
+                        : "bg-zinc-50 border-zinc-200 text-zinc-300 hover:text-zinc-500"
                     )}>
                     {ar.label}
                   </button>
@@ -647,35 +647,35 @@ const Tools = () => {
             )}
 
             {/* Credits cost badge */}
-            <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+            <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-50 border border-zinc-200">
               <Zap className="h-3 w-3 text-primary" />
-              <span className="text-[10px] font-bold text-white/30">{requiredCredits} cr</span>
+              <span className="text-[10px] font-bold text-zinc-400">{requiredCredits} cr</span>
             </div>
           </div>
 
           {/* Expandable model selector */}
           {showSettings && (
-            <div className="mb-3 p-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] space-y-3">
+            <div className="mb-3 p-3 rounded-2xl border border-zinc-200 bg-zinc-50 space-y-3">
               {category === "image" && !currentTool.needsUpload && (
                 <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest">Motor de imagen</p>
+                  <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Motor de imagen</p>
                   <ModelSelector selectedModelId={selectedImageModel} onModelChange={setSelectedImageModel} filterType="image" />
                 </div>
               )}
               {category === "text" && (
                 <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest">Modelo de IA</p>
+                  <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Modelo de IA</p>
                   <ModelSelector selectedModelId={selectedTextModel} onModelChange={setSelectedTextModel} filterType="text" />
                 </div>
               )}
               {(activeTool === "generate" || activeTool === "logo") && (
                 <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold text-white/25 uppercase tracking-widest">Estilo rápido</p>
+                  <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Estilo rápido</p>
                   <div className="flex flex-wrap gap-1.5">
                     {styleList.map((style) => (
                       <button key={style}
                         onClick={() => setTextPrompt(p => p ? `${p}, estilo ${style}` : `Estilo ${style}: `)}
-                        className="px-3 py-1.5 rounded-lg bg-white/[0.03] border border-white/[0.05] text-[11px] font-medium text-white/30 hover:text-white hover:bg-white/[0.07] transition-all">
+                        className="px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] font-medium text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
                         {style}
                       </button>
                     ))}
@@ -694,7 +694,7 @@ const Tools = () => {
                   "h-12 px-3.5 rounded-2xl border transition-all flex items-center justify-center shrink-0",
                   imagePreview
                     ? "border-primary/40 bg-primary/10 text-primary"
-                    : "border-white/[0.08] bg-white/[0.04] text-white/30 hover:text-white hover:bg-white/[0.08]"
+                    : "border-zinc-200 bg-zinc-50 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100"
                 )}>
                 <Upload className="h-4 w-4" />
               </button>
@@ -718,7 +718,7 @@ const Tools = () => {
                 }
                 rows={1}
                 maxLength={1000}
-                className="w-full resize-none rounded-2xl border border-white/[0.07] bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-primary/30 focus:bg-white/[0.05] transition-all leading-relaxed"
+                className="w-full resize-none rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-300 focus:outline-none focus:border-primary/30 focus:bg-zinc-100 transition-all leading-relaxed"
                 style={{ minHeight: "48px", maxHeight: "140px", overflowY: "auto" }}
               />
             </div>
@@ -736,14 +736,14 @@ const Tools = () => {
           </div>
 
           {/* Mobile tool scroll */}
-          <div className="md:hidden flex overflow-x-auto no-scrollbar gap-1.5 pt-3 mt-3 border-t border-white/[0.06]">
+          <div className="md:hidden flex overflow-x-auto no-scrollbar gap-1.5 pt-3 mt-3 border-t border-zinc-200">
             {tools.filter(t => !t.disabled).map(tool => (
               <button key={tool.id} onClick={() => switchTool(tool)}
                 className={cn(
                   "flex flex-col items-center gap-1 px-3 py-2 rounded-xl shrink-0 transition-all",
                   activeTool === tool.id
-                    ? "bg-white/[0.08] border border-white/[0.10] text-white"
-                    : "text-white/30 hover:text-white/60"
+                    ? "bg-zinc-100 border border-zinc-200 text-zinc-900"
+                    : "text-zinc-400 hover:text-zinc-500"
                 )}>
                 <tool.icon className="h-4 w-4" />
                 <span className="text-[9px] font-bold whitespace-nowrap">{tool.name}</span>

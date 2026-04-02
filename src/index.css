@@ -5,62 +5,73 @@
 @tailwind utilities;
 
 /* ============================================
-   ZEPHYR v1.0 — Clean Dark System
-   Inspired by Google Stitch / Linear / Vercel
+   LUMINA v1.0 — Clean Light System
+   Linear / Vercel / Stripe aesthetic
    ============================================ */
 
 @layer base {
   :root {
-    /* ── Onyx Design System (Premium IDE Aesthetic) ── */
-    --background:  240 10% 4%;      /* #0b0c10 - Deep Onyx */
-    --foreground:  0 0% 100%;       /* Pure White */
-    --card:        0 0% 100% / 0.03; /* Glassmorphism Base */
-    --card-hover:  0 0% 100% / 0.06;
-    --card-foreground: 0 0% 100%;
-    --popover:     240 10% 5%;      /* Slightly lighter for elevation */
-    --popover-foreground: 0 0% 100%;
-    --primary:     0 0% 100%;       /* Primary buttons are now White */
-    --primary-foreground: 240 10% 4%; /* Black text on Primary */
-    --secondary:   0 0% 100% / 0.05;
-    --secondary-foreground: 0 0% 100%;
-    --muted:       0 0% 100% / 0.05;
-    --muted-foreground: 240 5% 50%;
-    --accent:      217 91% 60%;     /* Electric Blue for active states & focus */
-    --accent-foreground: 0 0% 100%;
-    --destructive: 0 84% 60%;
+    /* ── Core ──────────────────────────────── */
+    --background:      0 0% 99%;          /* #FCFCFC */
+    --foreground:      240 10% 6%;        /* #0E0E12 */
+
+    --card:            0 0% 100%;
+    --card-hover:      240 5% 98%;
+    --card-foreground: 240 10% 6%;
+
+    --popover:         0 0% 100%;
+    --popover-foreground: 240 10% 6%;
+
+    /* ── Brand ─────────────────────────────── */
+    --primary:         271 91% 65%;       /* #A855F7 brand purple */
+    --primary-foreground: 0 0% 100%;
+
+    /* ── Surfaces ──────────────────────────── */
+    --secondary:       240 5% 96%;        /* #F3F3F5 */
+    --secondary-foreground: 240 10% 6%;
+
+    --muted:           240 5% 96%;
+    --muted-foreground: 240 4% 50%;       /* #7D7D85 */
+
+    --accent:          271 91% 97%;
+    --accent-foreground: 271 91% 45%;
+
+    /* ── Utility ───────────────────────────── */
+    --destructive:     0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border:      0 0% 100% / 0.08; /* Glass Boundary */
-    --input:       0 0% 100% / 0.08;
-    --ring:        217 91% 60%;
-    --radius:      1rem;            /* Soft high-end corners */
 
-    /* Sidebar - Full Onyx */
-    --sidebar-background: 240 10% 2%;
-    --sidebar-foreground: 240 5% 60%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 100% / 0.05;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 100% / 0.05;
-    --sidebar-ring: 217 91% 60%;
+    --border:          240 6% 90%;        /* #E3E3E8 */
+    --input:           240 6% 90%;
+    --ring:            271 91% 65%;
+    --radius:          0.875rem;
 
-    /* IDE / Canvas - Precision */
-    --canvas: 240 10% 4%;
-    --node-bg: 0 0% 100% / 0.04;
+    /* ── Sidebar ───────────────────────────── */
+    --sidebar-background:          240 5% 98%;
+    --sidebar-foreground:          240 5% 40%;
+    --sidebar-primary:             271 91% 65%;
+    --sidebar-primary-foreground:  0 0% 100%;
+    --sidebar-accent:              240 5% 94%;
+    --sidebar-accent-foreground:   240 10% 6%;
+    --sidebar-border:              240 6% 90%;
+    --sidebar-ring:                271 91% 65%;
+
+    /* ── Canvas stays dark ─────────────────── */
+    --canvas:      240 10% 6%;
+    --node-bg:     0 0% 100% / 0.04;
     --node-border: 0 0% 100% / 0.12;
-    --node-glow: 217 91% 60% / 0.2; 
-    --success: 142 71% 45%;         
-    --warning: 38 92% 50%;          
-    --gold: 45 93% 47%;             
-    --gold-foreground: 45 90% 10%;
-    --gold-muted: 45 93% 47% / 0.1;
+    --node-glow:   271 91% 65% / 0.2;
+
+    /* ── Status ────────────────────────────── */
+    --success:          142 71% 45%;
+    --warning:          38 92% 50%;
+    --gold:             45 93% 47%;
+    --gold-foreground:  45 90% 10%;
+    --gold-muted:       45 93% 47% / 0.1;
   }
 }
 
 @layer base {
-  html {
-    font-size: 14px;
-  }
+  html { font-size: 14px; }
 
   * {
     box-sizing: border-box;
@@ -90,39 +101,66 @@
   p { line-height: 1.65; }
 
   *::selection {
-    background: rgba(139, 92, 246, 0.25);
-    color: white;
+    background: rgba(168, 85, 247, 0.15);
+    color: hsl(var(--foreground));
   }
 }
 
-/* DELETED ZEPHYR UTILITIES */
-
 @layer utilities {
-  /* System Grid Pattern for backgrounds - Ultra Subtle Onyx */
+  /* Subtle grid — light mode */
   .bg-grid-white {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.02)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(0 0 0 / 0.04)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+  }
+  /* Grid for dark canvas areas */
+  .bg-grid-dark {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.04)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+  }
+
+  /* Lumina card utility */
+  .lumina-card {
+    background: rgba(255,255,255,0.85);
+    border: 1px solid rgba(0,0,0,0.06);
+    backdrop-filter: blur(12px);
+  }
+  /* Brand shadow */
+  .shadow-brand {
+    box-shadow: 0 0 0 1px rgba(168,85,247,0.15), 0 4px 24px rgba(168,85,247,0.12);
   }
 }
 
 /* ============================================
-   RESULT PROSE — markdown output
+   RESULT PROSE
    ============================================ */
 .result-prose {
-  color: rgba(255,255,255,0.80);
+  color: hsl(240 4% 35%);
   font-size: 13.5px;
   line-height: 1.7;
 }
-.result-prose h1 { font-size: 18px; font-weight: 700; color: #fff; margin-top: 24px; margin-bottom: 8px; letter-spacing: -0.02em; }
-.result-prose h2 { font-size: 15px; font-weight: 700; color: #fff; margin-top: 20px; margin-bottom: 6px; }
-.result-prose h3 { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.9); margin-top: 16px; margin-bottom: 4px; }
+.result-prose h1 { font-size: 18px; font-weight: 700; color: hsl(240 10% 6%); margin-top: 24px; margin-bottom: 8px; }
+.result-prose h2 { font-size: 15px; font-weight: 700; color: hsl(240 10% 6%); margin-top: 20px; margin-bottom: 6px; }
+.result-prose h3 { font-size: 13px; font-weight: 700; color: hsl(240 5% 20%); margin-top: 16px; margin-bottom: 4px; }
 .result-prose p  { margin-top: 0; margin-bottom: 10px; }
 .result-prose ul { margin: 10px 0; padding: 0; list-style: none; }
 .result-prose li { display: flex; gap: 8px; margin: 4px 0; }
-.result-prose strong { font-weight: 600; color: #fff; }
-.result-prose em { color: rgba(255,255,255,0.75); }
-.result-prose code { background: rgba(255,255,255,0.07); color: #7DD3FC; padding: 2px 7px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-.result-prose blockquote { border-left: 2px solid rgba(139, 92, 246, 0.4); padding-left: 16px; margin: 12px 0; color: rgba(255,255,255,0.55); font-style: italic; }
-.result-prose hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 16px 0; }
+.result-prose strong { font-weight: 600; color: hsl(240 10% 6%); }
+.result-prose em  { color: hsl(240 4% 40%); }
+.result-prose code {
+  background: hsl(240 5% 94%);
+  color: #7C3AED;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  border: 1px solid hsl(240 6% 88%);
+}
+.result-prose blockquote {
+  border-left: 2px solid rgba(168,85,247,0.4);
+  padding-left: 16px;
+  margin: 12px 0;
+  color: hsl(240 4% 50%);
+  font-style: italic;
+}
+.result-prose hr { border: none; border-top: 1px solid hsl(240 6% 90%); margin: 16px 0; }
 
 /* ============================================
    ANIMATIONS
@@ -146,15 +184,15 @@
 .custom-scrollbar::-webkit-scrollbar { width: 4px; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.10);
   border-radius: 99px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.18);
 }
 
 /* ============================================
-   REACT FLOW OVERRIDES
+   REACT FLOW (canvas — stays dark)
    ============================================ */
 .react-flow {
   background-color: transparent !important;
@@ -162,21 +200,21 @@
 .react-flow__handle {
   width: 8px !important;
   height: 8px !important;
-  background: hsl(var(--primary)) !important;
-  border: 2px solid hsl(var(--background)) !important;
+  background: #A855F7 !important;
+  border: 2px solid #1a1a2e !important;
   border-radius: 4px !important;
 }
 .react-flow__edge-path {
   stroke-width: 1.5px !important;
-  stroke: hsl(var(--muted-foreground) / 0.2) !important;
+  stroke: rgba(168,85,247,0.25) !important;
 }
 .react-flow__edge.selected .react-flow__edge-path {
-  stroke: hsl(var(--primary)) !important;
-  filter: drop-shadow(0 0 8px hsl(var(--primary) / 0.3));
+  stroke: #A855F7 !important;
+  filter: drop-shadow(0 0 8px rgba(168,85,247,0.4));
 }
 
 /* ============================================
-   SANDPACK PREVIEW FULL HEIGHT FIX
+   SANDPACK
    ============================================ */
 .sp-wrapper,
 .sp-layout,

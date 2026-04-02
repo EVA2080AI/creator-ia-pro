@@ -136,8 +136,8 @@ const Dashboard = () => {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-xl border-2 border-white/10 border-t-primary animate-spin" />
-          <p className="text-[11px] text-white/30">Cargando...</p>
+          <div className="w-8 h-8 rounded-xl border-2 border-zinc-200 border-t-primary animate-spin" />
+          <p className="text-[11px] text-zinc-400">Cargando...</p>
         </div>
       </div>
     );
@@ -159,10 +159,10 @@ const Dashboard = () => {
                   <Zap className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-[13px] font-black text-white font-display">
+                  <p className="text-[13px] font-black text-zinc-900 font-display">
                     {checkoutSuccess ? '¡Suscripción activada!' : '¡Créditos añadidos!'}
                   </p>
-                  <p className="text-[11px] text-white/40">
+                  <p className="text-[11px] text-zinc-400">
                     {checkoutSuccess
                       ? `Plan ${tierLabels[currentTier]} · ${profile?.credits_balance?.toLocaleString() ?? '—'} créditos cargados`
                       : `${profile?.credits_balance?.toLocaleString() ?? '—'} créditos disponibles`
@@ -173,14 +173,14 @@ const Dashboard = () => {
               <div className="flex items-center gap-2 sm:ml-auto">
                 <button
                   onClick={() => navigate('/chat')}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-[12px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-zinc-900 text-[12px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   Ir a Genesis
                 </button>
                 <button
                   onClick={() => navigate('/studio')}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 text-[12px] font-bold text-white/60 hover:text-white hover:border-white/25 transition-all"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 text-[12px] font-bold text-zinc-500 hover:text-zinc-900 hover:border-white/25 transition-all"
                 >
                   Studio →
                 </button>
@@ -193,7 +193,7 @@ const Dashboard = () => {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                <span className="text-[11px] text-white/35">Activo</span>
+                <span className="text-[11px] text-zinc-400">Activo</span>
               </div>
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight font-display">
                 Hola, <span className="bg-gradient-to-r from-white to-white/40 bg-clip-text text-transparent">{profile?.display_name?.split(' ')[0] || 'Creator'}</span>
@@ -204,14 +204,14 @@ const Dashboard = () => {
                 <>
                   <button
                     onClick={() => navigate("/pricing")}
-                    className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white"
+                    className="px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 transition-all text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900"
                   >
                     <Coins className="w-3.5 h-3.5 mr-1.5 inline" />
                     + Créditos
                   </button>
                   <button
                     onClick={() => navigate("/pricing")}
-                    className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white"
+                    className="px-4 py-2 rounded-xl bg-zinc-50 border border-zinc-200 hover:bg-zinc-100 transition-all text-[11px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900"
                   >
                     <Settings className="w-3.5 h-3.5 mr-1.5 inline" />
                     Plan
@@ -234,14 +234,14 @@ const Dashboard = () => {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="group flex items-center gap-3 p-4 bg-card border border-white/5 hover:border-white/10 transition-all duration-300 rounded-2xl"
+                className="group flex items-center gap-3 p-4 bg-card border border-zinc-200 hover:border-zinc-200 transition-all duration-300 rounded-2xl"
               >
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/5 shrink-0 transition-all group-hover:scale-110 ${stat.color}`}>
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center bg-zinc-100 border border-zinc-200 shrink-0 transition-all group-hover:scale-110 ${stat.color}`}>
                   <stat.icon className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold tracking-[0.15em] text-white/25 uppercase font-display truncate">{stat.label}</p>
-                  <p className="text-xl font-bold text-white tracking-tight font-display tabular-nums truncate">{stat.value}</p>
+                  <p className="text-[10px] font-bold tracking-[0.15em] text-zinc-300 uppercase font-display truncate">{stat.label}</p>
+                  <p className="text-xl font-bold text-zinc-900 tracking-tight font-display tabular-nums truncate">{stat.value}</p>
                 </div>
               </div>
             ))}
@@ -250,13 +250,13 @@ const Dashboard = () => {
           {/* Analytics — 2/3 + 1/3 */}
           <div className="grid lg:grid-cols-3 gap-4">
             {/* Credit chart */}
-            <div className="lg:col-span-2 p-5 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-2xl border border-white/5">
+            <div className="lg:col-span-2 p-5 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-2xl border border-zinc-200">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] font-display">Uso de créditos</h3>
-                  <p className="text-[9px] text-white/20 mt-0.5 uppercase tracking-widest font-display">Últimos 7 días</p>
+                  <h3 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.2em] font-display">Uso de créditos</h3>
+                  <p className="text-[9px] text-zinc-300 mt-0.5 uppercase tracking-widest font-display">Últimos 7 días</p>
                 </div>
-                <div className="p-2 rounded-xl bg-white/5">
+                <div className="p-2 rounded-xl bg-zinc-100">
                   <TrendingUp className="w-4 h-4 text-primary" />
                 </div>
               </div>
@@ -283,27 +283,27 @@ const Dashboard = () => {
             </div>
 
             {/* Distribution */}
-            <div className="p-5 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-2xl border border-white/5">
+            <div className="p-5 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-2xl border border-zinc-200">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] font-display">Distribución</h3>
-                  <p className="text-[9px] text-white/20 mt-0.5 uppercase tracking-widest font-display">Por tipo</p>
+                  <h3 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.2em] font-display">Distribución</h3>
+                  <p className="text-[9px] text-zinc-300 mt-0.5 uppercase tracking-widest font-display">Por tipo</p>
                 </div>
-                <div className="p-2 rounded-xl bg-white/5">
+                <div className="p-2 rounded-xl bg-zinc-100">
                   <Box className="w-4 h-4 text-primary" />
                 </div>
               </div>
               {toolData.every(d => d.value === 0) ? (
-                <p className="text-[10px] text-white/20 text-center font-bold uppercase tracking-widest mt-8">Sin actividad reciente</p>
+                <p className="text-[10px] text-zinc-300 text-center font-bold uppercase tracking-widest mt-8">Sin actividad reciente</p>
               ) : (
                 <div className="space-y-4">
                   {toolData.map((item) => (
                     <div key={item.name}>
                       <div className="flex justify-between text-[10px] font-bold uppercase tracking-[0.1em] mb-1.5">
-                        <span className="text-white/40">{item.name}</span>
-                        <span className="text-white/70 tabular-nums">{item.value}%</span>
+                        <span className="text-zinc-400">{item.name}</span>
+                        <span className="text-zinc-600 tabular-nums">{item.value}%</span>
                       </div>
-                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-1000 ${item.color}`}
                           style={{ width: `${item.value}%` }}
@@ -328,10 +328,10 @@ const Dashboard = () => {
                   <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.9)]" />
                   <span className="text-[11px] font-semibold text-primary/80">Genesis · BuilderAI</span>
                 </div>
-                <h2 className="text-xl font-bold text-white font-display tracking-tight">¿Qué vas a crear hoy?</h2>
-                <p className="text-xs text-white/30 mt-1">Describe tu idea y Genesis la construye en segundos</p>
+                <h2 className="text-xl font-bold text-zinc-900 font-display tracking-tight">¿Qué vas a crear hoy?</h2>
+                <p className="text-xs text-zinc-400 mt-1">Describe tu idea y Genesis la construye en segundos</p>
               </div>
-              <div className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest group-hover:bg-primary/80 transition-all active:scale-95 font-display">
+              <div className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary text-zinc-900 rounded-xl text-xs font-bold uppercase tracking-widest group-hover:bg-primary/80 transition-all active:scale-95 font-display">
                 <Rocket className="w-3.5 h-3.5" />
                 Crear
               </div>
@@ -341,8 +341,8 @@ const Dashboard = () => {
           {/* AI Tools */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.4em] font-display">Accesos rápidos</h2>
-              <button onClick={() => navigate("/hub")} className="flex items-center gap-1.5 text-[10px] font-bold text-white/30 hover:text-white transition-all tracking-widest uppercase font-display">
+              <h2 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.4em] font-display">Accesos rápidos</h2>
+              <button onClick={() => navigate("/hub")} className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-400 hover:text-zinc-900 transition-all tracking-widest uppercase font-display">
                 Hub <ArrowRight className="w-3 h-3" />
               </button>
             </div>
@@ -351,14 +351,14 @@ const Dashboard = () => {
                 <button
                   key={app.label}
                   onClick={() => navigate(app.path)}
-                  className="group flex flex-col gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-white/5 hover:border-primary/25 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
+                  className="group flex flex-col gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-zinc-200 hover:border-primary/25 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
                 >
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 border border-white/5 transition-all group-hover:bg-primary/10 group-hover:border-primary/20">
-                    <app.icon className="w-4 h-4 text-white/40 group-hover:text-primary transition-colors" />
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-zinc-100 border border-zinc-200 transition-all group-hover:bg-primary/10 group-hover:border-primary/20">
+                    <app.icon className="w-4 h-4 text-zinc-400 group-hover:text-primary transition-colors" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-white/80 group-hover:text-white tracking-tight font-display leading-tight">{app.label}</p>
-                    <p className="text-[9px] text-white/20 font-bold uppercase tracking-widest mt-0.5 font-display">{app.desc}</p>
+                    <p className="text-xs font-bold text-zinc-700 group-hover:text-zinc-900 tracking-tight font-display leading-tight">{app.label}</p>
+                    <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest mt-0.5 font-display">{app.desc}</p>
                   </div>
                 </button>
               ))}
@@ -368,7 +368,7 @@ const Dashboard = () => {
           {/* Spaces */}
           <div className="pb-6">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.4em] font-display">Mis Espacios</h2>
+              <h2 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.4em] font-display">Mis Espacios</h2>
               <button
                 onClick={() => setIsCreatingSpace(true)}
                 className="bg-white text-black hover:bg-white/90 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl transition-all active:scale-95 font-display"
@@ -380,14 +380,14 @@ const Dashboard = () => {
 
             {spaces.length === 0 ? (
               <div
-                className="rounded-2xl border border-dashed border-white/10 bg-white/[0.01] p-10 text-center cursor-pointer hover:border-white/20 hover:bg-white/[0.02] transition-all group"
+                className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-10 text-center cursor-pointer hover:border-zinc-300 hover:bg-zinc-50 transition-all group"
                 onClick={() => setIsCreatingSpace(true)}
               >
-                <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-4 group-hover:bg-white group-hover:scale-110 transition-all">
-                  <FolderPlus className="w-6 h-6 text-white/30 group-hover:text-black" />
+                <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center mx-auto mb-4 group-hover:bg-white group-hover:scale-110 transition-all">
+                  <FolderPlus className="w-6 h-6 text-zinc-400 group-hover:text-black" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-1 font-display">Crea tu primer espacio</h3>
-                <p className="text-xs text-white/30">Organiza proyectos, activos e ideas en un solo lugar</p>
+                <h3 className="text-base font-bold text-zinc-900 mb-1 font-display">Crea tu primer espacio</h3>
+                <p className="text-xs text-zinc-400">Organiza proyectos, activos e ideas en un solo lugar</p>
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -395,16 +395,16 @@ const Dashboard = () => {
                   <button
                     key={space.id}
                     onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
-                    className="group flex items-center gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-white/5 hover:border-primary/30 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
+                    className="group flex items-center gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-zinc-200 hover:border-primary/30 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
                   >
-                    <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all">
-                      <LayoutGrid className="w-4 h-4 text-white/30 group-hover:text-primary transition-colors" />
+                    <div className="w-9 h-9 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all">
+                      <LayoutGrid className="w-4 h-4 text-zinc-400 group-hover:text-primary transition-colors" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-white truncate font-display">{space.name}</p>
-                      <p className="text-[10px] text-white/25 truncate font-medium">{space.description || "Sin descripción"}</p>
+                      <p className="text-sm font-bold text-zinc-900 truncate font-display">{space.name}</p>
+                      <p className="text-[10px] text-zinc-300 truncate font-medium">{space.description || "Sin descripción"}</p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-white/15 shrink-0 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    <ChevronRight className="w-4 h-4 text-zinc-300 shrink-0 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                   </button>
                 ))}
               </div>
@@ -418,39 +418,39 @@ const Dashboard = () => {
       <Dialog open={isCreatingSpace} onOpenChange={setIsCreatingSpace}>
         <DialogContent className="max-w-md p-8">
           <DialogHeader className="mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-white/5 text-primary flex items-center justify-center mb-4 border border-white/10">
+            <div className="w-12 h-12 rounded-2xl bg-zinc-100 text-primary flex items-center justify-center mb-4 border border-zinc-200">
               <Rocket className="w-6 h-6" />
             </div>
-            <DialogTitle className="text-2xl font-bold text-white tracking-tight font-display">Nuevo espacio</DialogTitle>
-            <DialogDescription className="text-white/40 text-sm font-medium leading-relaxed mt-2">
+            <DialogTitle className="text-2xl font-bold text-zinc-900 tracking-tight font-display">Nuevo espacio</DialogTitle>
+            <DialogDescription className="text-zinc-400 text-sm font-medium leading-relaxed mt-2">
               Organiza tus proyectos creativos y campañas en un espacio independiente.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] font-display">Nombre</Label>
+              <Label htmlFor="name" className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] font-display">Nombre</Label>
               <Input
                 id="name"
                 value={newSpaceName}
                 onChange={(e) => setNewSpaceName(e.target.value)}
                 placeholder="ej. Campaña Verano 2025"
-                className="bg-white/[0.03] border-white/10 text-white placeholder:text-white/10 rounded-xl px-4 h-12 font-medium focus:border-primary/40 focus:ring-0"
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-200 rounded-xl px-4 h-12 font-medium focus:border-primary/40 focus:ring-0"
                 onKeyDown={(e) => e.key === "Enter" && handleCreateSpace()}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="desc" className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] font-display">Descripción (opcional)</Label>
+              <Label htmlFor="desc" className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] font-display">Descripción (opcional)</Label>
               <Input
                 id="desc"
                 value={newSpaceDesc}
                 onChange={(e) => setNewSpaceDesc(e.target.value)}
                 placeholder="Contexto del proyecto..."
-                className="bg-white/[0.03] border-white/10 text-white placeholder:text-white/10 rounded-xl px-4 h-12 font-medium focus:border-primary/40 focus:ring-0"
+                className="bg-zinc-50 border-zinc-200 text-zinc-900 placeholder:text-zinc-200 rounded-xl px-4 h-12 font-medium focus:border-primary/40 focus:ring-0"
               />
             </div>
           </div>
           <DialogFooter className="gap-3 mt-6">
-            <button onClick={() => setIsCreatingSpace(false)} className="px-5 py-2.5 rounded-xl border border-white/5 text-xs font-bold uppercase tracking-widest text-white/30 hover:text-white transition-all flex-1">
+            <button onClick={() => setIsCreatingSpace(false)} className="px-5 py-2.5 rounded-xl border border-zinc-200 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-all flex-1">
               Cancelar
             </button>
             <button onClick={handleCreateSpace} className="flex-[1.5] px-6 py-2.5 bg-primary text-primary-foreground rounded-xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95 shadow-xl shadow-white/5">
