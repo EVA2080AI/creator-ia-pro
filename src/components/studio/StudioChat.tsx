@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Send, Sparkles, Bot, Loader2,
   ChevronDown, Copy, RotateCcw, Check,
-  X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink,
+  X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink, Lock,
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
@@ -90,13 +90,13 @@ interface ConvMsg { role: 'user' | 'assistant'; content: any; }
 
 // ─── Model options (verified OpenRouter slugs) ────────────────────────────────
 const MODELS = [
-  { id: 'anthropic/claude-3.5-sonnet',           label: 'Claude 3.5 Sonnet',  badge: '⚡ Recomendado', vision: true  },
-  { id: 'anthropic/claude-3-5-sonnet-20241022',  label: 'Claude 3.5 Sonnet v2',badge: '🔥 Sólido',     vision: true  },
-  { id: 'openai/gpt-4o',                         label: 'GPT-4o',              badge: '🧠 OpenAI',     vision: true  },
-  { id: 'deepseek/deepseek-r1',                  label: 'DeepSeek R1',         badge: '💡 Razonador',  vision: false },
-  { id: 'deepseek/deepseek-chat',                label: 'DeepSeek V3',         badge: '💰 Económico',  vision: false },
-  { id: 'google/gemini-2.0-flash-001',           label: 'Gemini 2.0 Flash',   badge: '🚀 Veloz',      vision: true  },
-  { id: 'mistralai/mistral-large',               label: 'Mistral Large',       badge: '🇪🇺 EU',         vision: false },
+  { id: 'google/gemini-2.0-flash-001',           label: 'Gemini 2.0 Flash',    badge: '🚀 Todos los planes', vision: true,  premium: false },
+  { id: 'deepseek/deepseek-chat',                label: 'DeepSeek V3',          badge: '💰 Todos los planes', vision: false, premium: false },
+  { id: 'anthropic/claude-3.5-sonnet',           label: 'Claude 3.5 Sonnet',   badge: '⚡ Solo Pymes',       vision: true,  premium: true  },
+  { id: 'anthropic/claude-3-5-sonnet-20241022',  label: 'Claude 3.5 Sonnet v2', badge: '🔥 Solo Pymes',       vision: true,  premium: true  },
+  { id: 'openai/gpt-4o',                         label: 'GPT-4o',               badge: '🧠 Solo Pymes',       vision: true,  premium: true  },
+  { id: 'deepseek/deepseek-r1',                  label: 'DeepSeek R1',          badge: '💡 Solo Pymes',       vision: false, premium: true  },
+  { id: 'mistralai/mistral-large',               label: 'Mistral Large',        badge: '🇪🇺 Solo Pymes',       vision: false, premium: true  },
 ];
 
 // ─── Intent detection — auto-route between code gen and chat ──────────────────
@@ -407,7 +407,7 @@ export function StudioChat({
   const [streamChars,      setStreamChars]      = useState(0);
   const [showScrollBtn,    setShowScrollBtn]    = useState(false);
   const [copiedId,         setCopiedId]         = useState<string | null>(null);
-  const [selectedModel,    setSelectedModel]    = useState(MODELS[0].id);
+  const [selectedModel,    setSelectedModel]    = useState('google/gemini-2.0-flash-001');
   const [modelOpen,        setModelOpen]        = useState(false);
   const [streamingContent, setStreamingContent] = useState<string | null>(null);
   const [genPhase,         setGenPhase]         = useState<'idle' | 'thinking' | 'streaming' | 'done'>('idle');
@@ -1196,17 +1196,19 @@ export function StudioChat({
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isGenerating}
+                aria-label={currentModel.vision ? 'Adjuntar imagen' : 'Este modelo no soporta imágenes'}
                 className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-white/30 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-30"
                 title={currentModel.vision ? 'Adjuntar imagen (modelo con visión)' : 'Este modelo no soporta imágenes'}
               >
-                <ImageIcon className="h-3.5 w-3.5" />
-                {!currentModel.vision && <span className="text-[9px]">—</span>}
+                <ImageIcon className="h-3.5 w-3.5" aria-hidden="true" />
+                {!currentModel.vision && <span className="text-[9px]" aria-hidden="true">—</span>}
               </button>
 
               {/* URL Clone button */}
               <button
                 onClick={() => { setShowUrlInput(v => !v); setUrlInput(''); }}
                 disabled={isGenerating || isScraping}
+                aria-label="Clonar sitio web desde URL"
                 title="Clonar sitio web desde URL"
                 className="flex items-center gap-1 px-2 py-1 rounded-lg transition-all disabled:opacity-30"
                 style={pendingUrl
@@ -1237,18 +1239,22 @@ export function StudioChat({
                     <div className="fixed inset-0 z-40" onClick={() => setModelOpen(false)} />
                     <div className="absolute left-0 bottom-full mb-1.5 w-72 rounded-xl overflow-hidden z-50"
                       style={{ background: '#1e2028', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
-                      <p className="px-3 pt-2.5 pb-1.5 text-[10px] font-bold text-white/25 uppercase tracking-[0.3em]">Modelo de IA</p>
+                      <p className="px-3 pt-2.5 pb-1.5 text-[10px] font-bold text-white/25 uppercase tracking-[0.3em]">Modelo de IA para código</p>
                       {MODELS.map(m => (
                         <button key={m.id} onClick={() => { setSelectedModel(m.id); setModelOpen(false); }}
+                          aria-label={`Seleccionar modelo ${m.label}${m.premium ? ' (requiere plan Pymes)' : ''}`}
                           className="w-full flex items-center justify-between px-3 py-2.5 text-left transition-all"
                           style={selectedModel === m.id ? { background: 'rgba(138,180,248,0.12)', color: '#E3E3E3' } : { color: 'rgba(255,255,255,0.5)' }}
                           onMouseEnter={e => { if (selectedModel !== m.id) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
                           onMouseLeave={e => { if (selectedModel !== m.id) (e.currentTarget as HTMLElement).style.background = ''; }}
                         >
-                          <span className="text-[12px] font-medium">{m.label}</span>
+                          <div className="flex items-center gap-2">
+                            {m.premium && <Lock className="h-2.5 w-2.5 text-amber-400/60 shrink-0" aria-hidden="true" />}
+                            <span className="text-[12px] font-medium">{m.label}</span>
+                          </div>
                           <div className="flex items-center gap-1.5">
-                            {m.vision && <span className="text-[9px] text-emerald-400">👁</span>}
-                            <span className="text-[10px] text-white/30">{m.badge}</span>
+                            {m.vision && <span className="text-[9px] text-emerald-400" aria-label="Soporta visión">👁</span>}
+                            <span className={`text-[9px] ${m.premium ? 'text-amber-400/50' : 'text-emerald-400/60'}`}>{m.badge}</span>
                           </div>
                         </button>
                       ))}
@@ -1260,17 +1266,19 @@ export function StudioChat({
             {isGenerating ? (
               <button
                 onClick={handleStop}
+                aria-label="Detener generación"
                 className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-rose-500 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all text-[11px] font-bold ml-2 shadow-sm"
               >
-                <div className="h-2 w-2 rounded-sm bg-rose-500" /> Stop
+                <div className="h-2 w-2 rounded-sm bg-rose-500" aria-hidden="true" /> Stop
               </button>
             ) : (
               <button
                 onClick={() => handleSend()}
                 disabled={!input.trim()}
+                aria-label="Enviar mensaje"
                 className="flex flex-col items-center justify-center p-2 rounded-xl text-white disabled:opacity-30 transition-all active:scale-95 bg-primary hover:shadow-lg shadow-primary/20 ml-2"
               >
-                <Send className="h-3.5 w-3.5" />
+                <Send className="h-3.5 w-3.5" aria-hidden="true" />
               </button>
             )}
           </div>

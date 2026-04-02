@@ -250,16 +250,18 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
               
               <div className="absolute bottom-4 right-4 flex items-center gap-2">
                 <button onClick={onMic}
+                  aria-label={isListening ? 'Detener grabación de voz' : 'Activar dictado por voz'}
                   className={`flex items-center justify-center p-2 rounded-full transition-all ${isListening ? 'text-red-400 bg-red-400/10 animate-pulse' : 'text-white/20 hover:text-white hover:bg-white/[0.08]'}`}>
-                  <Mic className="h-4 w-4" />
+                  <Mic className="h-4 w-4" aria-hidden="true" />
                 </button>
                 <button
                   onClick={() => handleSubmit()}
                   disabled={!input.trim() || creating}
+                  aria-label="Enviar prompt y crear proyecto"
                   className="flex items-center justify-center h-10 w-10 rounded-full text-[#18181b] disabled:opacity-30 transition-all active:scale-95 shadow-lg"
                   style={{ background: input.trim() && !creating ? 'white' : 'rgba(255,255,255,0.2)' }}
                 >
-                  {creating ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowUp className="h-5 w-5" />}
+                  {creating ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <ArrowUp className="h-5 w-5" aria-hidden="true" />}
                 </button>
               </div>
             </div>
@@ -575,12 +577,12 @@ export default function Chat() {
       <div className="flex h-[44px] items-center px-3 shrink-0 z-[40] w-full relative"
         style={{ background: 'hsl(var(--card))', borderBottom: '1px solid hsl(var(--border) / 0.6)' }}>
         <div className="flex items-center gap-1.5 shrink-0">
-          <button onClick={() => setActiveProject(null)} className="flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground hover:bg-white/[0.05] hover:text-foreground transition-all"><Home className="h-3.5 w-3.5" /></button>
-          <button onClick={() => setIsChatOpen(!isChatOpen)} className={`flex items-center justify-center h-7 w-7 rounded-md transition-all ${isChatOpen ? 'text-foreground bg-accent/10' : 'text-muted-foreground hover:bg-white/5'}`}>{isChatOpen ? <PanelLeftClose className="h-3.5 w-3.5" /> : <PanelLeft className="h-3.5 w-3.5" />}</button>
+          <button onClick={() => setActiveProject(null)} aria-label="Ir al inicio de Genesis" className="flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground hover:bg-white/[0.05] hover:text-foreground transition-all"><Home className="h-3.5 w-3.5" aria-hidden="true" /></button>
+          <button onClick={() => setIsChatOpen(!isChatOpen)} aria-label={isChatOpen ? 'Cerrar panel de chat' : 'Abrir panel de chat'} className={`flex items-center justify-center h-7 w-7 rounded-md transition-all ${isChatOpen ? 'text-foreground bg-accent/10' : 'text-muted-foreground hover:bg-white/5'}`}>{isChatOpen ? <PanelLeftClose className="h-3.5 w-3.5" aria-hidden="true" /> : <PanelLeft className="h-3.5 w-3.5" aria-hidden="true" />}</button>
           <div className="h-4 w-px mx-1 shrink-0 bg-border/40" />
           <div className="flex items-center gap-1.5 min-w-0">
             <div className="h-1.5 w-1.5 rounded-full" style={{ background: isGenerating ? 'hsl(var(--warning))' : 'hsl(var(--success))' }} />
-            <button onClick={() => { setRenameTopBarValue(activeProject.name); setRenamingTopBar(true); }} className="text-[13px] font-bold text-foreground/90 truncate max-w-[150px]">{activeProject.name}</button>
+            <button onClick={() => { setRenameTopBarValue(activeProject.name); setRenamingTopBar(true); }} aria-label={`Renombrar proyecto: ${activeProject.name}`} className="text-[13px] font-bold text-foreground/90 truncate max-w-[150px]">{activeProject.name}</button>
           </div>
         </div>
         <div className="flex items-center gap-0.5 ml-4">
@@ -604,7 +606,7 @@ export default function Chat() {
           {profile?.subscription_tier !== 'pymes' && (
             <button onClick={() => navigate('/pricing')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all"><Zap className="h-3 w-3" /> Upgrade</button>
           )}
-          <button onClick={() => setDeployOpen(!deployOpen)} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-bold bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-all">Publish</button>
+          <button onClick={() => setDeployOpen(!deployOpen)} aria-label="Publicar proyecto" className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-bold bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-all">Publish</button>
           {profile?.avatar_url && <img src={profile.avatar_url} alt="" className="h-7 w-7 rounded-full border border-border/40 ml-1" />}
         </div>
       </div>
