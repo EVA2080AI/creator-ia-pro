@@ -213,7 +213,7 @@ export default function Index() {
                   <div className="flex items-center justify-between text-[8px]">
                     <span className="text-zinc-300">FLUX Schnell · 2cr</span>
                   </div>
-                  <div className="w-full py-1.5 rounded-lg bg-white text-black text-[8px] font-black text-center">Generar</div>
+                  <div className="w-full py-1.5 rounded-lg bg-primary text-white text-[8px] font-black text-center">Generar</div>
                 </div>
 
                 {/* Result panel */}
@@ -227,7 +227,7 @@ export default function Index() {
                     </div>
                   </div>
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-2">
-                    <div className="px-2 py-1 rounded bg-white text-black text-[8px] font-bold">Descargar</div>
+                    <div className="px-2 py-1 rounded bg-zinc-900 text-white text-[8px] font-bold">Descargar</div>
                     <div className="px-2 py-1 rounded border border-zinc-200 text-zinc-400 text-[8px] font-bold">Guardar</div>
                   </div>
                 </div>
@@ -422,7 +422,7 @@ export default function Index() {
                       onClick={() => navigate("/pricing")}
                       className={`w-full py-2.5 rounded-xl text-[13px] font-bold transition-all active:scale-95 ${
                         plan.popular
-                          ? 'bg-white text-black hover:bg-white/90'
+                          ? 'bg-primary text-white hover:bg-primary/90'
                           : 'border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:border-zinc-300'
                       }`}
                     >

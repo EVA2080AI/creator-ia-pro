@@ -122,14 +122,14 @@ export default function Studio() {
         </div>
 
         {/* Minimal Navigation */}
-        <header className="h-[60px] px-6 flex items-center justify-between border-b border-border bg-card/20 backdrop-blur-md relative z-20">
+        <header className="h-[60px] px-6 flex items-center justify-between border-b border-zinc-200 bg-white relative z-20">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
               <Code2 className="h-4 w-4 text-primary" />
             </div>
-            <span className="text-sm font-black text-white tracking-widest uppercase">Genesis AI</span>
+            <span className="text-sm font-black text-zinc-900 tracking-widest uppercase">Studio</span>
           </div>
-          <button onClick={() => navigate('/dashboard')} className="text-xs font-bold text-white/30 hover:text-white transition-all">Volver al Dashboard</button>
+          <button onClick={() => navigate('/dashboard')} className="text-xs font-bold text-zinc-400 hover:text-zinc-900 transition-all">Volver al Dashboard</button>
         </header>
 
         {/* Content Area */}
@@ -142,16 +142,16 @@ export default function Studio() {
                 <Sparkles className="w-3.5 h-3.5 text-primary" />
                 <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Entorno de Desarrollo Profesional</span>
               </div>
-              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4 max-w-2xl leading-tight">
-                Construye el futuro de la web <br/> <span className="text-white/40">con Genesis Studio.</span>
+              <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight mb-4 max-w-2xl leading-tight">
+                Construye el futuro de la web <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">con Studio.</span>
               </h1>
-              <p className="text-lg text-white/30 max-w-xl mb-10 leading-relaxed font-medium font-display">
+              <p className="text-lg text-zinc-500 max-w-xl mb-10 leading-relaxed font-medium font-display">
                 Crea, diseña y despliega aplicaciones completas en minutos. Todo desde una interfaz diseñada para la velocidad.
               </p>
-              
-              <button 
+
+              <button
                 onClick={handleCreateNew}
-                className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-black font-black hover:scale-105 active:scale-95 transition-all shadow-xl shadow-white/10"
+                className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-primary text-white font-black hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all shadow-sm"
               >
                 <Plus className="w-5 h-5" />
                 Empezar nuevo proyecto
@@ -160,34 +160,31 @@ export default function Studio() {
 
             {/* Recents Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              <div className="col-span-full border-b border-white/[0.05] pb-4 mb-4">
-                <h2 className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em]">Proyectos Recientes</h2>
+              <div className="col-span-full border-b border-zinc-200 pb-4 mb-4">
+                <h2 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em]">Proyectos Recientes</h2>
               </div>
-              
+
               {projects.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => navigate(`/studio?project=${p.id}`)}
-                  className="group relative flex flex-col gap-4 p-5 rounded-3xl bg-white/[0.02] border border-white/[0.05] hover:bg-primary/[0.03] hover:border-primary/20 transition-all text-left"
+                  className="group relative flex flex-col gap-4 p-5 rounded-3xl bg-zinc-50 border border-zinc-200 hover:bg-primary/5 hover:border-primary/30 transition-all text-left"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-2xl bg-white/[0.05] group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-                      <FolderOpen className="w-5 h-5 text-white/20 group-hover:text-primary transition-colors" />
+                    <div className="w-10 h-10 rounded-2xl bg-zinc-100 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
+                      <FolderOpen className="w-5 h-5 text-zinc-400 group-hover:text-primary transition-colors" />
                     </div>
-                    <ChevronRight className="w-4 h-4 text-white/10 group-hover:text-primary transition-all group-hover:translate-x-1" />
+                    <ChevronRight className="w-4 h-4 text-zinc-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white mb-1">{p.name}</h3>
-                    <p className="text-[10px] text-white/20 font-bold uppercase tracking-widest">{Object.keys(p.files).length} Archivos</p>
+                    <h3 className="text-sm font-bold text-zinc-900 mb-1">{p.name}</h3>
+                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{Object.keys(p.files).length} Archivos</p>
                   </div>
-                  
-                  {/* Subtle hover indicator */}
-                  <div className="absolute inset-0 border border-primary/40 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                 </button>
               ))}
 
               {projects.length === 0 && (
-                <div className="col-span-full py-20 flex flex-col items-center justify-center opacity-20 border-2 border-dashed border-white/10 rounded-3xl">
+                <div className="col-span-full py-20 flex flex-col items-center justify-center text-zinc-300 border-2 border-dashed border-zinc-200 rounded-3xl">
                   <Layout className="w-12 h-12 mb-4" />
                   <p className="text-sm font-bold uppercase tracking-widest">No hay proyectos activos</p>
                 </div>

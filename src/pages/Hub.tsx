@@ -297,7 +297,7 @@ const Hub = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900 font-sans">
+    <div className="min-h-screen bg-background text-zinc-900 font-sans">
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main className="pt-20">
@@ -308,7 +308,7 @@ const Hub = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
+                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display">
                 Proyectos & <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Plantillas</span>
@@ -332,8 +332,8 @@ const Hub = () => {
                 onClick={() => setCategory(cat)}
                 className={`px-5 py-2.5 rounded-2xl text-[10px] font-bold whitespace-nowrap transition-all duration-300 font-display uppercase tracking-widest ${
                   category === cat
-                    ? "bg-white text-black shadow-[0_8px_24px_rgba(255,255,255,0.1)]"
-                    : "bg-zinc-50 border border-zinc-200 text-zinc-400 hover:text-zinc-500 hover:bg-zinc-100"
+                    ? "bg-primary text-white shadow-sm"
+                    : "bg-zinc-50 border border-zinc-200 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100"
                 }`}
               >
                 {cat}
@@ -350,6 +350,7 @@ const Hub = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {/* Create from scratch card */}
             <button
+              aria-label="Crear lienzo en blanco — nuevo proyecto vacío"
               onClick={() => {
                 supabase.from("spaces").insert({ user_id: user?.id || "", name: "Nuevo Proyecto" })
                   .select().single()
@@ -358,7 +359,7 @@ const Hub = () => {
                     else navigate("/formarketing");
                   });
               }}
-              className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2rem] border border-dashed border-white/8 group flex flex-col items-center justify-center py-12 gap-4 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500 active:scale-95"
+              className="rounded-[2rem] border border-dashed border-zinc-200 group flex flex-col items-center justify-center py-12 gap-4 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500 active:scale-95"
             >
               <div className="w-12 h-12 rounded-2xl bg-zinc-100 border border-dashed border-zinc-200 flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/30 transition-all">
                 <Plus className="w-5 h-5 text-zinc-300 group-hover:text-primary transition-colors" />
@@ -372,7 +373,7 @@ const Hub = () => {
             {filtered.map((template, idx) => (
               <div
                 key={template.id}
-                className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2rem] border border-zinc-200 group flex flex-col gap-5 p-6 transition-all duration-300 hover:scale-[1.02] overflow-hidden relative"
+                className="rounded-[2rem] border border-zinc-200 group flex flex-col gap-5 p-6 transition-all duration-300 hover:scale-[1.02] overflow-hidden relative"
                 style={{
                   animationDelay: `${idx * 30}ms`,
                   ['--card-color' as string]: template.color,
@@ -382,7 +383,7 @@ const Hub = () => {
                   (e.currentTarget as HTMLElement).style.boxShadow = `0 0 32px ${template.color}12`;
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.05)';
+                  (e.currentTarget as HTMLElement).style.borderColor = 'rgb(228,228,231)';
                   (e.currentTarget as HTMLElement).style.boxShadow = '';
                 }}
               >
@@ -429,9 +430,10 @@ const Hub = () => {
 
                 {/* Footer — Tailwind UI divider + action pattern */}
                 <div className="flex items-center justify-between pt-3 border-t border-zinc-200">
-                  <span className="text-[10px] text-zinc-300 font-bold font-display uppercase tracking-widest">{template.nodes} nodos</span>
+                  <span className="text-[10px] text-zinc-400 font-bold font-display uppercase tracking-widest">{template.nodes} nodos</span>
                   <button
                     onClick={() => handleUseTemplate(template)}
+                    aria-label={`Usar plantilla: ${template.title}`}
                     className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[10px] font-bold transition-all duration-300 active:scale-95 uppercase tracking-widest font-display"
                     style={{
                       background: `${template.color}12`,
@@ -452,7 +454,7 @@ const Hub = () => {
             ))}
           </div>
 
-          <p className="text-center text-[10px] text-zinc-300 mt-12 font-bold uppercase tracking-[0.3em] font-display">
+          <p className="text-center text-[10px] text-zinc-400 mt-12 font-bold uppercase tracking-[0.3em] font-display">
             {TEMPLATES.length} plantillas disponibles · Más con cada actualización
           </p>
         </div>

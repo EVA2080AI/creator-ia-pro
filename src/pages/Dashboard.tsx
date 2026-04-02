@@ -173,14 +173,14 @@ const Dashboard = () => {
               <div className="flex items-center gap-2 sm:ml-auto">
                 <button
                   onClick={() => navigate('/chat')}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-zinc-900 text-[12px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-white text-[12px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   Ir a Genesis
                 </button>
                 <button
                   onClick={() => navigate('/studio')}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 text-[12px] font-bold text-zinc-500 hover:text-zinc-900 hover:border-white/25 transition-all"
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 text-[12px] font-bold text-zinc-500 hover:text-zinc-900 hover:border-zinc-300 transition-all"
                 >
                   Studio →
                 </button>
@@ -331,7 +331,7 @@ const Dashboard = () => {
                 <h2 className="text-xl font-bold text-zinc-900 font-display tracking-tight">¿Qué vas a crear hoy?</h2>
                 <p className="text-xs text-zinc-400 mt-1">Describe tu idea y Genesis la construye en segundos</p>
               </div>
-              <div className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary text-zinc-900 rounded-xl text-xs font-bold uppercase tracking-widest group-hover:bg-primary/80 transition-all active:scale-95 font-display">
+              <div className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest group-hover:bg-primary/80 transition-all active:scale-95 font-display">
                 <Rocket className="w-3.5 h-3.5" />
                 Crear
               </div>
@@ -371,7 +371,7 @@ const Dashboard = () => {
               <h2 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.4em] font-display">Mis Espacios</h2>
               <button
                 onClick={() => setIsCreatingSpace(true)}
-                className="bg-white text-black hover:bg-white/90 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl transition-all active:scale-95 font-display"
+                className="bg-zinc-100 text-zinc-700 hover:bg-zinc-200 border border-zinc-200 flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl transition-all active:scale-95 font-display"
               >
                 <Plus className="w-3.5 h-3.5" />
                 Nuevo
@@ -453,7 +453,7 @@ const Dashboard = () => {
             <button onClick={() => setIsCreatingSpace(false)} className="px-5 py-2.5 rounded-xl border border-zinc-200 text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-all flex-1">
               Cancelar
             </button>
-            <button onClick={handleCreateSpace} className="flex-[1.5] px-6 py-2.5 bg-primary text-primary-foreground rounded-xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95 shadow-xl shadow-white/5">
+            <button onClick={handleCreateSpace} className="flex-[1.5] px-6 py-2.5 bg-primary text-white rounded-xl flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95 shadow-sm">
               <Plus className="w-4 h-4" />
               Crear Space
             </button>

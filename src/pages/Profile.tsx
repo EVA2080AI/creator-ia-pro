@@ -110,6 +110,7 @@ const Profile = () => {
                 <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                 <button
                   onClick={() => avatarInputRef.current?.click()}
+                  aria-label="Cambiar foto de perfil"
                   className="relative w-20 h-20 rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200 shrink-0 group"
                   disabled={uploadingAvatar}
                 >
@@ -167,7 +168,7 @@ const Profile = () => {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-bold text-sm hover:bg-white/90 transition-all active:scale-95 disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50"
                   >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Guardar cambios
@@ -206,18 +207,18 @@ const Profile = () => {
           <div className="space-y-5">
 
             {/* Credits card */}
-            <div className="rounded-3xl bg-white text-black p-8">
+            <div className="rounded-3xl bg-primary text-white p-8">
               <div className="flex items-center justify-between mb-4">
-                <Coins className="w-7 h-7 text-black/30" />
-                <span className="text-xs font-bold text-black/30 uppercase tracking-widest">Créditos</span>
+                <Coins className="w-7 h-7 text-white/50" />
+                <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Créditos</span>
               </div>
               <div className="mb-6">
                 <span className="text-6xl font-bold tracking-tight tabular-nums">{profile?.credits_balance ?? 0}</span>
-                <span className="text-sm text-black/30 ml-2 font-medium">disponibles</span>
+                <span className="text-sm text-white/60 ml-2 font-medium">disponibles</span>
               </div>
               <button
                 onClick={() => navigate("/pricing")}
-                className="w-full py-3 bg-black/90 text-zinc-900 rounded-2xl font-bold text-sm hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-white/20 text-white rounded-2xl font-bold text-sm hover:bg-white/30 transition-all active:scale-95 flex items-center justify-center gap-2"
               >
                 <Coins className="w-4 h-4" />
                 Recargar créditos

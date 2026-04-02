@@ -140,7 +140,7 @@ function ImageWithFallback({ src, onRetry }: { src: string; onRetry: () => void 
             <p className="text-xs text-zinc-300 mt-1">El motor puede estar saturado</p>
           </div>
           <button onClick={onRetry}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black font-bold text-sm hover:bg-white/90 active:scale-95 transition-all">
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 active:scale-95 transition-all">
             <RotateCcw className="h-4 w-4" /> Intentar de nuevo
           </button>
         </div>
@@ -411,7 +411,7 @@ const Tools = () => {
           {!streaming && resultText && (
             <div className="flex gap-2 shrink-0">
               <button onClick={() => { navigator.clipboard.writeText(resultText); toast.success("Texto copiado"); }}
-                className="flex-1 h-11 rounded-xl bg-white text-black font-semibold text-sm flex items-center justify-center gap-2 hover:bg-white/90 active:scale-[0.98] transition-all">
+                className="flex-1 h-11 rounded-xl bg-primary text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-[0.98] transition-all">
                 <Copy className="h-4 w-4" /> Copiar texto
               </button>
               <button onClick={() => { setResultText(""); setSavedAsset(false); }}
@@ -727,7 +727,7 @@ const Tools = () => {
             <Button
               onClick={handleProcess}
               disabled={isRunning || currentTool.disabled || (currentTool.needsUpload ? !imagePreview : !textPrompt.trim())}
-              className="h-12 w-12 rounded-2xl bg-white text-black shadow-[0_4px_20px_rgba(255,255,255,0.08)] hover:bg-white/90 active:scale-[0.97] transition-all disabled:opacity-30 shrink-0 flex items-center justify-center p-0"
+              className="h-12 w-12 rounded-2xl bg-primary text-white hover:bg-primary/90 active:scale-[0.97] transition-all disabled:opacity-30 shrink-0 flex items-center justify-center p-0"
             >
               {isRunning
                 ? <Loader2 className="h-4 w-4 animate-spin" />

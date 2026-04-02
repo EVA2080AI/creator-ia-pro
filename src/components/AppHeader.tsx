@@ -77,6 +77,8 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
               <button
                 key={item.path}
                 onClick={() => handleNav(item)}
+                aria-current={active ? "page" : undefined}
+                aria-label={isLocked ? `${item.label} — requiere plan Pymes` : item.label}
                 className={cn(
                   "relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[12px] font-semibold transition-all duration-150 active:scale-95",
                   active
@@ -113,6 +115,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           {/* Pricing link */}
           <button
             onClick={() => handleNav("/pricing")}
+            aria-label="Ver precios y planes"
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-zinc-400 border border-zinc-200 hover:text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 transition-all"
           >
             <Zap className="w-3 h-3 text-primary" />
@@ -122,10 +125,11 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           {/* Credits */}
           <button
             onClick={() => handleNav("/pricing")}
+            aria-label={`Créditos disponibles: ${profile?.credits_balance?.toLocaleString() ?? "cargando"}`}
             className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold bg-primary/5 border border-primary/15 hover:bg-primary/10 hover:border-primary/25 transition-all"
           >
             <Coins className="w-3.5 h-3.5 shrink-0 text-primary" />
-            <span className="tabular-nums font-mono text-zinc-700">
+            <span className="tabular-nums font-mono text-zinc-700" aria-hidden="true">
               {profile?.credits_balance?.toLocaleString() ?? "—"}
             </span>
           </button>
@@ -134,6 +138,9 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
+              aria-expanded={userMenuOpen}
+              aria-haspopup="true"
+              aria-label="Menú de usuario"
               className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-all"
             >
               <div className="w-6 h-6 rounded-md flex items-center justify-center overflow-hidden shrink-0 bg-zinc-100 border border-zinc-200">
@@ -192,16 +199,19 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
           {/* Mobile toggle */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
+            aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
             className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 hover:text-zinc-900 border border-zinc-200 hover:bg-zinc-50 transition-all"
           >
-            {mobileOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            {mobileOpen ? <X className="w-4 h-4" aria-hidden="true" /> : <Menu className="w-4 h-4" aria-hidden="true" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="fixed inset-0 top-[56px] z-40 md:hidden overflow-y-auto bg-white border-t border-zinc-200 px-4 py-5">
+        <div id="mobile-menu" className="fixed inset-0 top-[56px] z-40 md:hidden overflow-y-auto bg-white border-t border-zinc-200 px-4 py-5">
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl mb-4 bg-zinc-50 border border-zinc-200">
             <div className="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-zinc-100 border border-zinc-200">
               {profile?.avatar_url
@@ -231,6 +241,7 @@ export function AppHeader({ userId, onSignOut }: AppHeaderProps) {
                 <button
                   key={item.path}
                   onClick={() => handleNav(item)}
+                  aria-current={active ? "page" : undefined}
                   className={cn(
                     "w-full flex items-center justify-between px-4 py-3 rounded-xl text-[13px] font-semibold transition-all",
                     active

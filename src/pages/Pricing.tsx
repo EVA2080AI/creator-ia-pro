@@ -422,7 +422,7 @@ export default function Pricing() {
 
               <button 
                 onClick={() => document.getElementById('credit-packs-section')?.scrollIntoView({ behavior: 'smooth' })}
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-105 transition-transform font-bold"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary/90 hover:scale-105 transition-transform font-bold"
               >
                 Recargar Créditos Ahora <Bolt className="h-4 w-4 fill-current" />
               </button>

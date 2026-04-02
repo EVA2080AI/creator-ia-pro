@@ -132,10 +132,10 @@ const Spaces = () => {
 
       <div className="flex pt-16 h-screen overflow-hidden">
         {/* Drive-like Left Sidebar */}
-        <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-zinc-200 bg-[#222228] py-4 px-3 gap-1 overflow-y-auto">
+        <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-zinc-200 bg-zinc-50 py-4 px-3 gap-1 overflow-y-auto">
           <button
             onClick={handleOpenCreate}
-            className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-primary text-primary-foreground text-[12px] font-black hover:bg-primary/90 transition-all active:scale-95 shadow-xl shadow-white/10 mb-3 uppercase tracking-widest"
+            className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-primary text-white text-[12px] font-black hover:bg-primary/90 transition-all active:scale-95 shadow-sm mb-3 uppercase tracking-widest"
           >
             <Plus className="h-4 w-4 shrink-0" />
             Nuevo Space
@@ -160,14 +160,14 @@ const Spaces = () => {
           </div>
 
           <div className="mt-4 pt-4 border-t border-zinc-200">
-            <p className="text-[9px] font-bold text-zinc-300 uppercase tracking-[0.3em] font-display px-3 mb-2">Herramientas</p>
+            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-[0.3em] font-display px-3 mb-2">Herramientas</p>
             {[
               { label: 'Studio',  icon: Wand2,    path: '/studio' },
               { label: 'Genesis', icon: FolderOpen, path: '/chat' },
             ].map((item) => (
               <button key={item.label} onClick={() => navigate(item.path)}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium text-zinc-300 hover:bg-zinc-50 hover:text-zinc-900 transition-all">
-                <item.icon className="h-4 w-4 shrink-0 text-zinc-300" />
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-all">
+                <item.icon className="h-4 w-4 shrink-0 text-zinc-400" />
                 {item.label}
               </button>
             ))}
@@ -193,7 +193,7 @@ const Spaces = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-[11px] text-zinc-400 outline-none hover:border-white/15 transition-all cursor-pointer"
+                className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-[11px] text-zinc-500 outline-none hover:border-zinc-300 transition-all cursor-pointer"
               >
                 <option value="updated">Modificado</option>
                 <option value="created">Creado</option>
@@ -427,7 +427,7 @@ const Spaces = () => {
             <button
               onClick={handleSave}
               disabled={creating || !formData.name}
-              className="flex-[1.5] flex items-center justify-center gap-3 px-10 py-4 bg-primary text-primary-foreground rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary/90 active:scale-95 transition-all shadow-xl shadow-white/10 disabled:opacity-50 disabled:cursor-not-allowed font-display"
+              className="flex-[1.5] flex items-center justify-center gap-3 px-10 py-4 bg-primary text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-primary/90 active:scale-95 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed font-display"
             >
               {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
               {editingSpace ? "Guardar Cambios" : "Crear Space"}

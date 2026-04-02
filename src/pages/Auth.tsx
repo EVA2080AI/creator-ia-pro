@@ -163,7 +163,7 @@ const Auth = () => {
 
         <div className="relative z-10 w-full max-w-[420px]">
           {/* Form Card */}
-          <div className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2.5rem] border border-zinc-200 p-10 shadow-[0_40px_120px_rgba(0,0,0,0.6)] animate-in fade-in slide-in-from-bottom-6 duration-700 relative overflow-hidden">
+          <div className="rounded-[2.5rem] border border-zinc-200 bg-white p-10 shadow-xl shadow-zinc-200 animate-in fade-in slide-in-from-bottom-6 duration-700 relative overflow-hidden">
 
             {/* Header */}
             <div className="mb-8">
@@ -199,7 +199,7 @@ const Auth = () => {
                       onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="¿Cómo te llamas?"
                       autoComplete="name"
-                      className="bg-zinc-50 border-white/8 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
+                      className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
                     />
                   </div>
                 </div>
@@ -220,7 +220,7 @@ const Auth = () => {
                     placeholder="tu@correo.com"
                     required
                     autoComplete="email"
-                    className="bg-zinc-50 border-white/8 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
+                    className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
                   />
                 </div>
               </div>
@@ -253,15 +253,15 @@ const Auth = () => {
                       required
                       minLength={6}
                       autoComplete={mode === "login" ? "current-password" : "new-password"}
-                      className="bg-zinc-50 border-white/8 focus:border-primary/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
+                      className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-zinc-500 transition-colors"
-                      tabIndex={-1}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </button>
                   </div>
                   {mode === "signup" && (
@@ -276,7 +276,7 @@ const Auth = () => {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-white text-black hover:bg-white/90 rounded-2xl gap-3 font-bold text-sm tracking-tight shadow-[0_8px_30px_rgba(255,255,255,0.15)] transition-all active:scale-[0.98] disabled:opacity-50 mt-2"
+                className="w-full h-12 bg-primary text-white hover:bg-primary/90 rounded-2xl gap-3 font-bold text-sm tracking-tight transition-all active:scale-[0.98] disabled:opacity-50 mt-2"
               >
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />

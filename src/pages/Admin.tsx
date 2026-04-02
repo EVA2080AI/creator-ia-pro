@@ -712,7 +712,7 @@ const Admin = () => {
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all ${
                   active
-                    ? "bg-white text-black shadow-lg shadow-white/5"
+                    ? "bg-zinc-900 text-white shadow-sm"
                     : "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100"
                 }`}
               >
@@ -1206,7 +1206,7 @@ const Admin = () => {
               <button
                 onClick={handleSaveBoldSettings}
                 disabled={savingSettings || (!boldApiKey.trim() && !boldWebhookSecret.trim())}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-white text-black px-4 py-3 text-xs font-black uppercase tracking-widest hover:opacity-90 transition-colors disabled:opacity-40"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary text-white px-4 py-3 text-xs font-black uppercase tracking-widest hover:bg-primary/90 transition-colors disabled:opacity-40"
               >
                 {savingSettings ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 Actualizar Configuración
