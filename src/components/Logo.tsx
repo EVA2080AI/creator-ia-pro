@@ -36,11 +36,11 @@ export function Logo({ size = "sm", showText = true, showPro = false, className,
       {/* Text */}
       {showText && (
         <div className="hidden sm:flex flex-col leading-none">
-          <span className={cn("font-black text-white tracking-tight font-display uppercase", s.text)}>
+          <span className={cn("font-black text-zinc-900 tracking-tight font-display uppercase", s.text)}>
             Creator{" "}
             <span className="text-primary">IA</span>
             {showPro && (
-              <span className="ml-1 text-white/30 font-semibold normal-case tracking-normal" style={{ fontSize: "0.7em" }}>
+              <span className="ml-1 text-zinc-400 font-semibold normal-case tracking-normal" style={{ fontSize: "0.7em" }}>
                 Pro
               </span>
             )}

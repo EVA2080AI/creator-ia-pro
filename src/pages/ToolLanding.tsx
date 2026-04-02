@@ -4,20 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Sparkles, ArrowRight, Check, Wand2, ZoomIn, Eraser,
   ImagePlus, RotateCcw, Image, MessageSquare, PenTool,
-  Hash, FileText, Megaphone, Palette, ArrowLeft, Zap,
-  Star, Play, Upload, Loader2, Lock, Copy, Download,
-  Menu, ChevronDown, Home, CreditCard, LayoutGrid,
-  MonitorDown, X,
+  Hash, FileText, Megaphone, Palette, Zap,
+  Play, Upload, Loader2, Lock, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { toast } from "sonner";
 import { aiService } from "@/services/ai-service";
+import { AppHeader } from "@/components/AppHeader";
 
 // Demo images
 import demoEnhance from "@/assets/demo-enhance.jpg";
@@ -179,96 +173,17 @@ const toolsData: Record<string, ToolInfo> = {
     tryItExamples: ["Anuncio de Google Ads para tienda de ropa online", "Facebook Ad para app de delivery de comida", "LinkedIn Ad para servicio de consultoría empresarial"],
   },
   "formaketing-studio": {
-    id: "formaketing", name: "Formaketing Studio",
+    id: "formaketing", name: "Canvas IA Studio",
     headline: "Marketing visual con lienzo infinito",
     description: "El estudio de marketing visual más potente. Crea flows, genera assets y construye funnels con IA.",
     icon: Palette,
     features: ["Lienzo infinito", "Generación de imágenes inline", "Flows de marketing visual", "Exporta campañas", "Colaboración"],
     useCases: ["Planificación de campañas", "Funnels de marketing", "Storyboarding", "Workflows"],
     credits: 1, category: "studio",
-    demoImage: demoGenerate, demoLabel: "Formaketing Studio — Lienzo infinito con nodos de IA",
+    demoImage: demoGenerate, demoLabel: "Canvas IA Studio — Lienzo infinito con nodos de IA",
     tryItType: "text-prompt", tryItPlaceholder: "Describe la campaña que quieres planificar...",
     tryItExamples: ["Funnel de lanzamiento para curso online", "Campaña de Black Friday para e-commerce", "Flow de email marketing para SaaS B2B"],
   },
-};
-
-// Simulated demo results for text tools (free preview)
-const demoTextResults: Record<string, string> = {
-  copywriter: `🎯 **Headline Principal:**
-"Camina con estilo. Corre con pasión."
-
-📝 **Copy para Facebook Ad:**
-¿Buscas las zapatillas perfectas? Nuestras nuevas Runner Pro combinan comodidad extrema con diseño premium. Suela con tecnología CloudStep™ para que cada paso se sienta como caminar sobre nubes.
-
-✅ Envío gratis en pedidos +$50
-✅ 30 días de devolución sin preguntas
-✅ 4.9⭐ de +10,000 reseñas
-
-👉 Compra ahora y obtén 20% OFF con el código RUNNER20
-
-📱 **Copy para Instagram:**
-Tu nuevo mejor amigo para el gym, la calle y la vida. 🏃‍♂️✨ Runner Pro — donde el estilo se encuentra con el rendimiento. Link en bio 👆`,
-
-  blog: `# 10 Tendencias de Marketing Digital para 2026
-
-## Introducción
-El marketing digital evoluciona a un ritmo vertiginoso. En 2026, las marcas que adopten estas tendencias liderarán sus mercados...
-
-## 1. IA Generativa como Estándar
-La inteligencia artificial ya no es opcional. Desde la creación de contenido hasta la personalización...
-
-## 2. Video Corto Dominante
-TikTok, Reels e YouTube Shorts siguen siendo los formatos con mayor engagement...
-
-## 3. Comercio Conversacional
-Los chatbots con IA permiten compras directas desde WhatsApp y Messenger...
-
-*[Artículo completo de 1,500 palabras generado con estructura SEO, meta description y keywords optimizadas]*`,
-
-  ads: `📊 **Google Ads — Headlines:**
-• Zapatillas Premium | Envío Gratis Hoy
-• Runner Pro™ — Comodidad que se Siente
-• -20% en Zapatillas Deportivas | Solo Hoy
-
-📝 **Google Ads — Descriptions:**
-• Descubre las nuevas Runner Pro con tecnología CloudStep™. Comodidad extrema para tu día a día. Envío gratis.
-• +10,000 clientes satisfechos. Zapatillas diseñadas para rendir al máximo. 30 días de garantía.
-
-📱 **Meta Ads — Copy Principal:**
-¿Listo para tu próxima aventura? Las Runner Pro son las zapatillas más cómodas que vas a usar. Tecnología CloudStep™ + diseño que enamora. 🏃‍♂️
-
-CTA: "Comprar Ahora" → Landing con 20% descuento`,
-
-  social: `📅 **Kit de Contenido — Skincare Orgánico**
-
-**Instagram Post (Feed):**
-🌿 Tu piel merece lo mejor de la naturaleza.
-Nuestra nueva línea de skincare orgánico usa solo ingredientes 100% naturales.
-
-Hashtags: #SkinCareNatural #BellezaOrgánica #CuidadoDeLaPiel #CleanBeauty #NaturalSkincare
-
-**Instagram Story (3 slides):**
-1. "¿Sabías que tu piel absorbe el 60% de lo que le aplicas?"
-2. "Por eso creamos [Marca] — 100% ingredientes orgánicos certificados"
-3. "Desliza para ver nuestra rutina de 3 pasos → Link"
-
-**TikTok Script:**
-"POV: Descubres que tu skincare tiene más químicos que un laboratorio 😱 
-*transición*
-Prueba [Marca] — skincare que es 100% naturaleza 🌿✨"`,
-
-  logo: `🎨 **Opciones de Logo Generadas:**
-
-**Opción 1 — Minimalista:**
-Tipografía sans-serif limpia con ícono abstracto integrado en la letra inicial.
-
-**Opción 2 — Emblema:**
-Escudo circular con elementos que representan la marca, estilo premium.
-
-**Opción 3 — Wordmark:**
-Logotipo tipográfico con ligadura personalizada, elegante y memorable.
-
-*Cada opción incluye: versión a color, monocromática, y variante para fondos oscuros.*`,
 };
 
 const ToolLanding = () => {
@@ -311,7 +226,7 @@ const ToolLanding = () => {
 
   const handleCTA = () => {
     if (isLoggedIn) {
-      if (tool.id === "formaketing") navigate("/canvas");
+      if (tool.id === "formaketing") navigate("/formarketing");
       else navigate(`/apps/${tool.id}`);
     } else {
       navigate("/auth");
@@ -343,7 +258,7 @@ const ToolLanding = () => {
         image: tryItImage || undefined,
         model: isTextTool ? "gemini-3-flash" : "nano-banana-25"
       });
-      
+
       if (data?.text) {
         setDemoResult(data.text);
         setDemoUsed(Boolean(data?.demo_limit_reached));
@@ -379,400 +294,317 @@ const ToolLanding = () => {
     reader.readAsDataURL(file);
   };
 
+  const categoryLabel = tool.category === "image" ? "Imagen IA" : tool.category === "marketing" ? "Texto IA" : "Studio";
+  const categoryPath = tool.category === "image" ? "/herramientas/imagen" : "/herramientas/texto";
+
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
-      {/* Ambient */}
-      <div className="pointer-events-none fixed inset-0">
-        <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full bg-primary/8 blur-[180px]" />
-        <div className="absolute -bottom-40 right-1/3 h-[400px] w-[400px] rounded-full bg-accent/6 blur-[150px]" />
-      </div>
+    <div className="min-h-screen bg-white">
+      <AppHeader />
 
-      {/* Nav */}
-      <header className="relative z-50 flex items-center justify-between px-6 py-4 sm:px-8 border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate("/")} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity group">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-[0_0_15px_rgba(37,99,235,0.3)]">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-lg font-display text-white tracking-wide hidden sm:inline uppercase">
-              Creator <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">IA Pro</span>
-            </span>
-          </button>
-
-          {/* Mega Menu */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <button className="flex items-center gap-1.5 rounded-full border border-border bg-card/60 px-3.5 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-card transition-colors">
-                <Menu className="h-4 w-4" />
-                <span className="hidden sm:inline">Herramientas</span>
-                <ChevronDown className="h-3 w-3" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-[560px] p-0 bg-card border-border shadow-2xl rounded-2xl overflow-hidden">
-              <div className="p-4 border-b border-border bg-muted/30">
-                <p className="text-sm font-semibold text-foreground">Todas las herramientas</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Navega entre nuestras soluciones de IA</p>
-              </div>
-              <div className="grid grid-cols-2 gap-0">
-                {/* Image tools */}
-                <div className="p-3 border-r border-border">
-                  <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground px-2 mb-2">Herramientas de Imagen</p>
-                  {Object.entries(toolsData).filter(([, t]) => t.category === "image").map(([slug, t]) => (
-                    <button
-                      key={slug}
-                      onClick={() => navigate(`/herramienta/${slug}`)}
-                      className={`flex items-center gap-2.5 w-full rounded-xl px-2.5 py-2 text-left transition-colors ${
-                        toolSlug === slug ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${toolSlug === slug ? "bg-primary/20" : "bg-muted"}`}>
-                        <t.icon className="h-3.5 w-3.5" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium leading-tight">{t.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{t.credits} cr</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                {/* Marketing + Studio tools */}
-                <div className="p-3">
-                  <p className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground px-2 mb-2">Apps de Marketing</p>
-                  {Object.entries(toolsData).filter(([, t]) => t.category === "marketing" || t.category === "studio").map(([slug, t]) => (
-                    <button
-                      key={slug}
-                      onClick={() => navigate(`/herramienta/${slug}`)}
-                      className={`flex items-center gap-2.5 w-full rounded-xl px-2.5 py-2 text-left transition-colors ${
-                        toolSlug === slug ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
-                      }`}
-                    >
-                      <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${toolSlug === slug ? "bg-primary/20" : "bg-muted"}`}>
-                        <t.icon className="h-3.5 w-3.5" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium leading-tight">{t.name}</p>
-                        <p className="text-[10px] text-muted-foreground">{t.credits} cr</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {/* Quick links footer */}
-              <div className="flex items-center gap-2 p-3 border-t border-border bg-muted/20">
-                <Button variant="ghost" size="sm" onClick={() => navigate("/")} className="text-xs text-muted-foreground h-7 gap-1.5">
-                  <Home className="h-3 w-3" /> Inicio
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/pricing")} className="text-xs text-muted-foreground h-7 gap-1.5">
-                  <CreditCard className="h-3 w-3" /> Planes
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => navigate("/descargar")} className="text-xs text-muted-foreground h-7 gap-1.5">
-                  <MonitorDown className="h-3 w-3" /> Descargar
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button onClick={() => navigate("/pricing")} variant="ghost" className="text-muted-foreground hover:text-foreground hidden sm:flex text-sm">
-            Precios
-          </Button>
-          <Button onClick={() => navigate("/descargar")} variant="ghost" className="text-muted-foreground hover:text-foreground hidden md:flex text-sm">
-            Descargar
-          </Button>
-          {!isLoggedIn && (
-            <Button onClick={() => navigate("/auth")} variant="outline" className="rounded-full px-5 text-sm border-border">
-              Iniciar Sesión
-            </Button>
-          )}
-          <Button onClick={handleCTA} className="bg-gradient-to-r from-primary to-primary/80 text-white hover:opacity-90 rounded-full px-6 shadow-[0_0_20px_-5px_rgba(37,99,235,0.4)] font-bold">
-            {isLoggedIn ? "Ir a la App" : "Empezar Gratis"}
-          </Button>
-        </div>
-      </header>
-
-      <main className="relative z-10 flex flex-col items-center px-6 pt-12 pb-32">
-        {/* Hero */}
-        <Badge className="mb-6 bg-[#EC4699]/10 text-[#EC4699] border-[#EC4699]/20 hover:bg-[#EC4699]/10 font-bold uppercase tracking-widest px-4 py-1">
-          <tool.icon className="mr-1.5 h-3.5 w-3.5" />
-          {tool.name}
-        </Badge>
-
-        <h1 className="max-w-4xl text-center text-6xl font-display leading-[0.9] tracking-tight animate-fade-in md:text-8xl lg:text-9xl uppercase text-white">
-          <span className="gradient-text">{tool.headline}</span>
-        </h1>
-
-        <p className="mt-8 max-w-2xl text-center text-xl text-slate-400 font-medium animate-fade-in leading-relaxed tracking-tight">
-          {tool.description}
-        </p>
-
-        <div className="mt-8 flex flex-col sm:flex-row gap-3 animate-fade-in">
-          <Button onClick={() => document.getElementById("try-demo")?.scrollIntoView({ behavior: "smooth" })} size="lg" className="bg-gradient-to-r from-primary to-primary/80 text-white hover:opacity-90 gap-2 text-base px-10 rounded-md h-14 shadow-[0_0_20px_-5px_rgba(37,99,235,0.4)] font-bold active:scale-95 transition-all">
-            <Play className="h-4 w-4" />
-            Probar Ahora — Gratis
-          </Button>
-          <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 gap-2 text-base px-8 rounded-md h-14 font-bold shadow-sm transition-all focus:ring-0">
-            Ver Planes
-          </Button>
-        </div>
-
-        <p className="mt-6 text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">
-          1 prueba gratis sin registro • Luego {tool.credits} crédito{tool.credits > 1 ? "s" : ""} por uso
-        </p>
-
-        {/* ========== VISUAL SHOWCASE ========== */}
-        <div className="mt-16 w-full max-w-4xl animate-fade-in">
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-card/60 backdrop-blur-sm node-shadow">
-            <img
-              src={tool.demoImage}
-              alt={tool.demoLabel}
-              className="w-full h-auto object-cover"
-              loading="lazy"
-            />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-6">
-              <p className="text-sm font-medium text-foreground">{tool.demoLabel}</p>
-              <p className="text-xs text-muted-foreground mt-1">Resultado generado con Creator IA Pro</p>
-            </div>
+      <main id="main-content">
+        {/* ── Breadcrumb ─────────────────────────────────── */}
+        <div className="border-b border-zinc-100 bg-zinc-50">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2.5">
+            <nav className="flex items-center gap-1.5 text-xs text-zinc-500" aria-label="Breadcrumb">
+              <button onClick={() => navigate("/")} className="hover:text-zinc-800 transition-colors">Inicio</button>
+              <ChevronRight className="h-3 w-3 text-zinc-300" />
+              <button onClick={() => navigate(categoryPath)} className="hover:text-zinc-800 transition-colors">Generar IA</button>
+              <ChevronRight className="h-3 w-3 text-zinc-300" />
+              <button onClick={() => navigate("/herramienta/mejorar-imagen")} className="hover:text-zinc-800 transition-colors">{categoryLabel}</button>
+              <ChevronRight className="h-3 w-3 text-zinc-300" />
+              <span className="text-zinc-900 font-medium">{tool.name}</span>
+            </nav>
           </div>
         </div>
 
-        {/* ========== TRY IT FREE SECTION ========== */}
-        <div id="try-demo" className="mt-24 w-full max-w-4xl scroll-mt-8">
-          <div className="text-center mb-10">
-            <Badge className="mb-4 bg-[#FA8214]/10 text-[#FA8214] border-[#FA8214]/20 hover:bg-[#FA8214]/10 font-bold uppercase tracking-widest px-4 py-1">
-              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
-              Demo Interactiva
+        {/* ── Hero section ───────────────────────────────── */}
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 lg:py-16">
+          {/* Title */}
+          <div className="mb-8 text-center">
+            <Badge className="mb-4 bg-primary/10 text-primary border-primary/20 hover:bg-primary/10 font-semibold px-3 py-1">
+              <tool.icon className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+              {categoryLabel}
             </Badge>
-            <h2 className="text-5xl font-display text-white md:text-7xl uppercase">
-              Prueba <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">{tool.name}</span> ahora mismo
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Una prueba gratis sin necesidad de registrarte. Experimenta el poder de la IA.
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-zinc-900 tracking-tight leading-tight max-w-3xl mx-auto">
+              {tool.headline}
+            </h1>
+            <p className="mt-3 text-base text-zinc-500 max-w-xl mx-auto">{tool.description}</p>
+            <p className="mt-2 text-xs text-zinc-400 font-medium">
+              1 prueba gratis sin registro · {tool.credits} crédito{tool.credits > 1 ? "s" : ""} por uso después
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Input side */}
+          {/* 2-column layout: Demo left + Upload/Prompt right */}
+          <div className="grid lg:grid-cols-[1fr_420px] gap-6 items-start">
+            {/* LEFT — Demo showcase */}
+            <div className="space-y-3">
+              <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50 shadow-sm">
+                <img
+                  src={tool.demoImage}
+                  alt={tool.demoLabel}
+                  className="w-full h-auto object-cover aspect-[16/9]"
+                  loading="lazy"
+                />
+                {/* Before/After overlay label */}
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-4 py-3">
+                  <p className="text-sm font-medium text-white">{tool.demoLabel}</p>
+                  <p className="text-xs text-white/70 mt-0.5">Generado con Creator IA Pro</p>
+                </div>
+                {/* Before/After badge */}
+                <div className="absolute top-3 left-3 flex gap-2">
+                  <span className="bg-white/90 text-zinc-700 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-sm border border-zinc-200">ANTES</span>
+                  <span className="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">DESPUÉS</span>
+                </div>
+              </div>
+
+              {/* Stats row */}
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { stat: "+50.000", label: "procesadas" },
+                  { stat: "4.9 ⭐", label: "valoración" },
+                  { stat: "<5s", label: "tiempo promedio" },
+                ].map((s) => (
+                  <div key={s.label} className="rounded-xl border border-zinc-100 bg-white p-3 text-center shadow-sm">
+                    <p className="text-lg font-bold text-zinc-900">{s.stat}</p>
+                    <p className="text-[11px] text-zinc-500">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Features grid */}
+              <div className="rounded-2xl border border-zinc-100 bg-white p-5 shadow-sm">
+                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">Características</p>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {tool.features.map((f) => (
+                    <div key={f} className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
+                      <span className="text-sm text-zinc-700">{f}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT — Upload / Prompt card */}
             <div className="space-y-4">
-              <h3 className="text-xs font-bold text-slate-500 flex items-center gap-2 uppercase tracking-widest">
-                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#EC4699]/10 text-[10px] font-bold text-[#EC4699]">1</span>
-                {tool.tryItType === "image-upload" ? "Sube tu imagen" : "Escribe tu prompt"}
-              </h3>
+              <div className="rounded-2xl border border-zinc-200 bg-white shadow-md p-6">
+                <h2 className="text-base font-bold text-zinc-900 mb-1">
+                  {tool.tryItType === "image-upload" ? "Sube tu imagen" : "Escribe tu prompt"}
+                </h2>
+                <p className="text-xs text-zinc-500 mb-4">Prueba gratis — sin necesidad de registrarte</p>
 
-              {tool.tryItType === "image-upload" ? (
-                <div className="space-y-3">
-                  <input type="file" accept="image/*" className="hidden" id="demo-upload" onChange={handleFileUpload} />
-                  {!tryItImage ? (
-                    <label
-                      htmlFor="demo-upload"
-                      className="flex h-48 w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border bg-card/50 hover:border-primary/30 hover:bg-card transition-all"
-                    >
-                      <Upload className="h-8 w-8 text-muted-foreground" />
-                      <span className="text-sm text-muted-foreground">Arrastra o haz clic para subir</span>
-                      <span className="text-xs text-muted-foreground/50">JPG, PNG, WEBP</span>
-                    </label>
-                  ) : (
-                    <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
-                      <img src={tryItImage} alt="Preview" className="h-48 w-full object-contain bg-muted/20" />
-                      <button
-                        onClick={() => { setTryItImage(null); setDemoResultImage(null); }}
-                        className="absolute right-3 top-3 rounded-lg border border-border bg-card/80 p-1.5 backdrop-blur-sm hover:bg-card text-xs text-muted-foreground"
+                {tool.tryItType === "image-upload" ? (
+                  <div className="space-y-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      id="demo-upload"
+                      onChange={handleFileUpload}
+                      aria-label="Subir imagen"
+                    />
+                    {!tryItImage ? (
+                      <label
+                        htmlFor="demo-upload"
+                        className="flex h-44 w-full cursor-pointer flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed border-zinc-200 bg-zinc-50 hover:border-primary/40 hover:bg-primary/5 transition-all"
                       >
-                        ✕
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <textarea
-                    value={tryItInput}
-                    onChange={(e) => setTryItInput(e.target.value)}
-                    placeholder={tool.tryItPlaceholder}
-                    rows={4}
-                    className="w-full resize-none rounded-2xl border border-border bg-card/60 p-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary backdrop-blur-sm"
-                  />
-                  {tool.tryItExamples.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {tool.tryItExamples.map((ex, i) => (
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100">
+                          <Upload className="h-5 w-5 text-zinc-400" aria-hidden="true" />
+                        </div>
+                        <div className="text-center">
+                          <span className="text-sm font-medium text-zinc-700">Arrastra o haz clic para subir</span>
+                          <p className="text-xs text-zinc-400 mt-0.5">JPG, PNG, WEBP · máx 10 MB</p>
+                        </div>
+                      </label>
+                    ) : (
+                      <div className="relative overflow-hidden rounded-xl border border-zinc-200 bg-zinc-50">
+                        <img src={tryItImage} alt="Preview" className="h-44 w-full object-contain" />
                         <button
-                          key={i}
-                          onClick={() => setTryItInput(ex)}
-                          className="rounded-full border border-border bg-card/60 px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors"
+                          onClick={() => { setTryItImage(null); setDemoResultImage(null); }}
+                          className="absolute right-2 top-2 rounded-lg border border-zinc-200 bg-white/90 px-2 py-1 text-xs text-zinc-600 hover:bg-white backdrop-blur-sm"
+                          aria-label="Quitar imagen"
                         >
-                          {ex.length > 40 ? ex.slice(0, 40) + "..." : ex}
+                          Quitar
                         </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <Button
-                onClick={handleTryDemo}
-                disabled={demoing || (tool.tryItType === "image-upload" ? !tryItImage : !tryItInput.trim())}
-                className="w-full bg-gradient-to-r from-primary to-primary/80 text-white hover:opacity-90 gap-2 rounded-md h-12 font-bold uppercase text-xs tracking-widest shadow-[0_0_20px_-5px_rgba(37,99,235,0.4)]"
-              >
-                {demoing ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : !isLoggedIn && demoUsed ? (
-                  <Lock className="h-4 w-4" />
+                      </div>
+                    )}
+                  </div>
                 ) : (
-                  <Sparkles className="h-4 w-4" />
+                  <div className="space-y-3">
+                    <textarea
+                      value={tryItInput}
+                      onChange={(e) => setTryItInput(e.target.value)}
+                      placeholder={tool.tryItPlaceholder}
+                      rows={4}
+                      aria-label="Prompt de texto"
+                      className="w-full resize-none rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                    />
+                    {tool.tryItExamples.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-[11px] text-zinc-400 font-medium">Ejemplos:</p>
+                        <div className="flex flex-col gap-1.5">
+                          {tool.tryItExamples.map((ex, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setTryItInput(ex)}
+                              className="text-left rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2 text-xs text-zinc-600 hover:border-primary/30 hover:text-primary hover:bg-primary/5 transition-all"
+                            >
+                              {ex}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
-                {demoing ? "Procesando..." : !isLoggedIn && demoUsed ? "Límite alcanzado" : `Probar ${tool.name}${isLoggedIn ? "" : " Gratis"}`}
+
+                <Button
+                  onClick={handleTryDemo}
+                  disabled={demoing || (tool.tryItType === "image-upload" ? !tryItImage : !tryItInput.trim())}
+                  className="w-full mt-4 bg-primary text-white hover:bg-primary/90 gap-2 h-11 font-semibold rounded-xl shadow-sm"
+                  aria-label={demoing ? "Procesando..." : `Probar ${tool.name} gratis`}
+                >
+                  {demoing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : !isLoggedIn && demoUsed ? (
+                    <Lock className="h-4 w-4" aria-hidden="true" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  {demoing ? "Procesando con IA..." : !isLoggedIn && demoUsed ? "Límite alcanzado" : `Probar ${tool.name}${isLoggedIn ? "" : " — Gratis"}`}
+                </Button>
+
+                {/* Result area */}
+                {(demoing || demoResult || demoResultImage) && (
+                  <div className="mt-4">
+                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Resultado</p>
+                    {demoing ? (
+                      <div className="flex h-32 items-center justify-center rounded-xl border border-primary/10 bg-primary/5">
+                        <div className="text-center">
+                          <Loader2 className="mx-auto mb-2 h-6 w-6 text-primary animate-spin" aria-label="Cargando resultado" />
+                          <p className="text-xs text-zinc-500">Nuestra IA está procesando...</p>
+                        </div>
+                      </div>
+                    ) : demoResultImage ? (
+                      <div className="space-y-2">
+                        <div className="overflow-hidden rounded-xl border border-zinc-200">
+                          <img src={demoResultImage} alt="Resultado generado" className="w-full object-cover" />
+                        </div>
+                        <div className="rounded-xl border border-primary/15 bg-primary/5 p-3 text-center">
+                          <p className="text-xs font-medium text-zinc-900">✨ ¡Resultado listo!</p>
+                          <p className="text-xs text-zinc-500 mt-0.5">Regístrate para descargar en alta calidad.</p>
+                          <Button onClick={() => navigate("/auth")} size="sm" className="mt-2 h-7 text-xs rounded-full bg-primary text-white gap-1">
+                            Crear Cuenta Gratis <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : demoResult ? (
+                      <div className="space-y-2">
+                        <div className="rounded-xl border border-zinc-200 bg-zinc-50 p-4 max-h-52 overflow-y-auto">
+                          <pre className="whitespace-pre-wrap text-xs text-zinc-700 font-sans leading-relaxed">{demoResult}</pre>
+                        </div>
+                        <div className="rounded-xl border border-primary/15 bg-primary/5 p-3 text-center">
+                          <p className="text-xs font-medium text-zinc-900">✨ ¡Texto generado!</p>
+                          <p className="text-xs text-zinc-500 mt-0.5">Regístrate para generar sin límites.</p>
+                          <Button onClick={() => navigate("/auth")} size="sm" className="mt-2 h-7 text-xs rounded-full bg-primary text-white gap-1">
+                            Registrarme Gratis <ArrowRight className="h-3 w-3" aria-hidden="true" />
+                          </Button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+              </div>
+
+              {/* CTA card */}
+              <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
+                    <tool.icon className="h-4.5 w-4.5 text-white" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-zinc-900">Acceso completo a {tool.name}</p>
+                    <p className="text-xs text-zinc-500">desde $69.000 COP/mes</p>
+                  </div>
+                </div>
+                <ul className="space-y-1.5 mb-4">
+                  {["Sin límite de generaciones", "Descarga en alta calidad", "Acceso a todas las herramientas"].map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-xs text-zinc-700">
+                      <Check className="h-3.5 w-3.5 text-primary shrink-0" aria-hidden="true" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Button onClick={handleCTA} className="w-full bg-primary text-white hover:bg-primary/90 gap-2 h-10 text-sm font-semibold rounded-xl">
+                  {isLoggedIn ? `Abrir ${tool.name}` : "Empezar Gratis"}
+                  <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Use cases ──────────────────────────────────── */}
+        <div className="border-t border-zinc-100 bg-zinc-50 py-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <h2 className="text-xl font-bold text-zinc-900 mb-6 text-center">Casos de uso</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {tool.useCases.map((uc) => (
+                <div key={uc} className="flex items-center gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+                  <Zap className="h-4 w-4 text-primary shrink-0" aria-hidden="true" />
+                  <span className="text-sm text-zinc-700">{uc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── How it works ───────────────────────────────── */}
+        <div className="py-12">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <h2 className="text-xl font-bold text-zinc-900 mb-8 text-center">Cómo funciona</h2>
+            <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+              {[
+                { step: "1", title: "Sube o escribe", desc: "Carga tu imagen o describe lo que necesitas." },
+                { step: "2", title: "La IA procesa", desc: "Nuestra IA analiza y genera el resultado en segundos." },
+                { step: "3", title: "Descarga", desc: "Descarga tu resultado en alta calidad sin marca de agua." },
+              ].map((s) => (
+                <div key={s.step} className="flex flex-col items-center text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary font-bold text-lg mb-3">
+                    {s.step}
+                  </div>
+                  <h3 className="font-semibold text-zinc-900 mb-1">{s.title}</h3>
+                  <p className="text-sm text-zinc-500">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Final CTA ──────────────────────────────────── */}
+        <div className="border-t border-zinc-100 bg-gradient-to-br from-primary/5 to-purple-50 py-16">
+          <div className="mx-auto max-w-2xl px-4 sm:px-6 text-center">
+            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-3">
+              Empieza a usar {tool.name}
+            </h2>
+            <p className="text-zinc-500 mb-6">
+              Regístrate gratis y obtén 5 créditos para probar todas las herramientas. Sin tarjeta de crédito.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={handleCTA} size="lg" className="bg-primary text-white hover:bg-primary/90 gap-2 px-8 h-12 font-semibold rounded-xl shadow-sm">
+                {isLoggedIn ? `Abrir ${tool.name}` : "Crear Cuenta Gratis"}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Button>
+              <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-zinc-200 text-zinc-700 hover:bg-zinc-50 gap-2 px-8 h-12 font-semibold rounded-xl">
+                Ver planes desde $69.000 COP
+                <Play className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
-
-            {/* Result side */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold text-slate-500 flex items-center gap-2 uppercase tracking-widest">
-                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-[#FA8214]/10 text-[10px] font-bold text-[#FA8214]">2</span>
-                Resultado
-              </h3>
-
-              {demoing ? (
-                <div className="flex h-48 w-full items-center justify-center rounded-2xl border border-primary/20 bg-card/30 backdrop-blur-sm">
-                  <div className="text-center">
-                    <Loader2 className="mx-auto mb-3 h-8 w-8 text-primary animate-spin" />
-                    <p className="text-sm text-muted-foreground">Nuestra IA está procesando...</p>
-                    <div className="mt-3 h-1.5 w-48 mx-auto rounded-full bg-muted overflow-hidden">
-                      <div className="h-full bg-primary rounded-full animate-pulse" style={{ width: "70%" }} />
-                    </div>
-                  </div>
-                </div>
-              ) : demoResultImage ? (
-                <div className="space-y-3">
-                  <div className="overflow-hidden rounded-2xl border border-border bg-card">
-                    <img src={demoResultImage} alt="Resultado" className="h-48 w-full object-cover bg-muted/20" />
-                  </div>
-                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center">
-                    <p className="text-sm font-medium text-foreground">✨ ¡Resultado listo!</p>
-                    <p className="text-xs text-muted-foreground mt-1">Regístrate gratis para descargar en alta calidad y acceder a todas las herramientas.</p>
-                    <Button onClick={() => navigate("/auth")} size="sm" className="mt-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full gap-1 text-xs">
-                      Crear Cuenta Gratis <ArrowRight className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              ) : demoResult ? (
-                <div className="space-y-3">
-                  <div className="rounded-2xl border border-border bg-card/60 p-5 max-h-64 overflow-y-auto backdrop-blur-sm">
-                    <pre className="whitespace-pre-wrap text-sm text-foreground font-sans leading-relaxed">{demoResult}</pre>
-                  </div>
-                  <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 text-center">
-                    <p className="text-sm font-medium text-foreground">✨ ¡Texto generado!</p>
-                    <p className="text-xs text-muted-foreground mt-1">Regístrate para copiar, editar y generar sin límites.</p>
-                    <Button onClick={() => navigate("/auth")} size="sm" className="mt-3 bg-primary text-primary-foreground hover:bg-primary/90 rounded-full gap-1 text-xs">
-                      Registrarme Gratis <ArrowRight className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex h-48 w-full items-center justify-center rounded-2xl border border-dashed border-border bg-card/30 backdrop-blur-sm">
-                  <div className="text-center">
-                    <Sparkles className="mx-auto mb-2 h-6 w-6 text-muted-foreground/30" />
-                    <p className="text-sm text-muted-foreground">El resultado aparecerá aquí</p>
-                    <p className="text-xs text-muted-foreground/50 mt-1">Prueba gratis — sin registro</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* ========== FEATURES ========== */}
-        <div className="mt-24 w-full max-w-4xl">
-          <h2 className="text-center text-5xl font-display text-white mb-12 md:text-7xl uppercase">
-            Características <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">principales</span>
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {tool.features.map((f) => (
-              <div key={f} className="flex items-start gap-3 rounded-2xl border border-border bg-card/60 p-5 backdrop-blur-sm">
-                <Check className="mt-0.5 h-5 w-5 text-[#EC4699] shrink-0" />
-                <span className="text-xs text-slate-400 font-bold uppercase tracking-wide">{f}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Use Cases */}
-        <div className="mt-20 w-full max-w-4xl">
-          <h2 className="text-center text-5xl font-display text-white mb-12 md:text-7xl uppercase">
-            Casos de <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">uso</span>
-          </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {tool.useCases.map((uc) => (
-              <div key={uc} className="flex items-center gap-3 rounded-2xl border border-border bg-card/60 p-5 backdrop-blur-sm">
-                <Zap className="h-5 w-5 text-[#FA8214] shrink-0" />
-                <span className="text-xs text-slate-400 font-bold uppercase tracking-wide">{uc}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* How it works */}
-        <div className="mt-20 w-full max-w-4xl">
-          <h2 className="text-center text-5xl font-display text-white mb-12 md:text-7xl uppercase">
-            Cómo <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">funciona</span>
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-3">
-            {[
-              { step: "1", title: "Sube o escribe", desc: "Carga tu imagen o describe lo que necesitas." },
-              { step: "2", title: "La IA procesa", desc: "Nuestra IA analiza y genera el resultado en segundos." },
-              { step: "3", title: "Descarga", desc: "Descarga tu resultado en alta calidad." },
-            ].map((s) => (
-              <div key={s.step} className="text-center">
-                <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 text-xl font-display text-white group-hover:bg-[#EC4699]/10 transition-colors">
-                  {s.step}
-                </div>
-                <h3 className="text-xl font-display text-white mb-2 uppercase">{s.title}</h3>
-                <p className="mt-2 text-xs text-slate-500 font-bold uppercase tracking-widest">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Social proof */}
-        <div className="mt-20 w-full max-w-4xl">
-          <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              { stat: "+50,000", label: "Imágenes procesadas" },
-              { stat: "4.9 ⭐", label: "Valoración media" },
-              { stat: "<5 seg", label: "Tiempo promedio" },
-            ].map((s) => (
-              <div key={s.label} className="text-center rounded-2xl border border-border bg-card/60 p-6 backdrop-blur-sm">
-                <p className="text-3xl font-bold gradient-text">{s.stat}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="mt-40 w-full max-w-4xl rounded-2xl border border-white/5 bg-[#1c1c22] p-16 md:p-24 text-center shadow-2xl animate-fade-in relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#EC4699]/10 via-transparent to-[#FA8214]/10 pointer-events-none" />
-          <div className="mx-auto mb-8 flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-2xl shadow-[#EC4699]/20 relative z-10">
-            <tool.icon className="h-10 w-10 text-white" />
-          </div>
-          <h2 className="text-6xl font-display text-white md:text-8xl relative z-10 leading-none uppercase">
-            Empieza a usar <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">{tool.name}</span>
-          </h2>
-          <p className="mt-8 text-slate-500 max-w-md mx-auto relative z-10 uppercase text-xs font-bold tracking-[0.2em] leading-loose">
-            Regístrate gratis y obtén 10 créditos para probar todas las herramientas. Sin tarjeta de crédito.
-          </p>
-          <div className="mt-12 flex flex-col sm:flex-row gap-5 justify-center relative z-10">
-            <Button onClick={handleCTA} size="lg" className="bg-gradient-to-r from-primary to-primary/80 text-white hover:opacity-90 gap-3 px-12 rounded-md h-16 shadow-[0_0_30px_-5px_rgba(37,99,235,0.5)] font-bold uppercase text-xs tracking-widest active:scale-95 transition-all">
-              {isLoggedIn ? `Abrir ${tool.name}` : "Crear Cuenta Gratis"}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button onClick={() => navigate("/pricing")} size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 gap-2 px-10 rounded-md h-16 font-bold shadow-sm transition-all focus:ring-0 uppercase text-xs tracking-widest">
-              Ver todos los planes
-            </Button>
           </div>
         </div>
 
         {/* Footer */}
-        <footer className="mt-24 w-full max-w-5xl border-t border-border pt-8 text-center text-xs text-muted-foreground">
+        <footer className="border-t border-zinc-100 py-6 text-center text-xs text-zinc-400">
           <p>© {new Date().getFullYear()} Creator IA Pro. Todos los derechos reservados.</p>
         </footer>
       </main>
