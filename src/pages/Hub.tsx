@@ -311,7 +311,7 @@ const Hub = () => {
                 <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display">
-                Proyectos & <span className="brand-gradient-text">Plantillas</span>
+                Proyectos & <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Plantillas</span>
               </h1>
               <p className="text-sm text-white/40 font-medium">
                 {TEMPLATES.length} plantillas profesionales — 1 clic para abrir en el Studio.

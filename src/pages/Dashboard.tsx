@@ -25,7 +25,7 @@ import {
 const Dashboard = () => {
   const { user, loading: authLoading, signOut } = useAuth("/auth");
   const { profile, refreshProfile } = useProfile(user?.id);
-  const { subscription, checkSubscription, openCustomerPortal } = useSubscription(user?.id);
+  const { subscription, checkSubscription } = useSubscription(user?.id);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [spaces, setSpaces] = useState<any[]>([]);
@@ -200,18 +200,18 @@ const Dashboard = () => {
               </h1>
             </div>
             <div className="flex gap-2 shrink-0">
-              {subscription?.subscribed ? (
+              {subscription?.tier && subscription.tier !== "free" ? (
                 <>
                   <button
                     onClick={() => navigate("/pricing")}
-                    className="px-4 py-2 rounded-xl bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-all border border-white/5"
+                    className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white"
                   >
                     <Coins className="w-3.5 h-3.5 mr-1.5 inline" />
                     + Créditos
                   </button>
                   <button
-                    onClick={async () => { try { await openCustomerPortal(); } catch { toast.error("Error abriendo portal"); } }}
-                    className="px-4 py-2 rounded-xl bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white transition-all border border-white/5"
+                    onClick={() => navigate("/pricing")}
+                    className="px-4 py-2 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] transition-all text-[11px] font-bold uppercase tracking-widest text-white/50 hover:text-white"
                   >
                     <Settings className="w-3.5 h-3.5 mr-1.5 inline" />
                     Plan
@@ -220,7 +220,7 @@ const Dashboard = () => {
               ) : (
                 <button
                   onClick={() => navigate("/pricing")}
-                  className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95 shadow-xl shadow-white/10"
+                  className="px-5 py-2.5 bg-primary text-black rounded-xl flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all active:scale-95"
                 >
                   <Zap className="w-3.5 h-3.5" />
                   Upgrade Pro

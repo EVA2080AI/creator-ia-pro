@@ -217,8 +217,9 @@ const Profile = () => {
               </div>
               <button
                 onClick={() => navigate("/pricing")}
-                className="w-full py-3 bg-black text-white rounded-2xl font-bold text-sm hover:bg-black/80 transition-all active:scale-95"
+                className="w-full py-3 bg-black/90 text-white rounded-2xl font-bold text-sm hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2"
               >
+                <Coins className="w-4 h-4" />
                 Recargar créditos
               </button>
             </div>

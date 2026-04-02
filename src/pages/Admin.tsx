@@ -46,11 +46,11 @@ const TIERS: Record<string, { label: string; color: string; icon: any }> = {
 };
 
 const TX_TYPE_LABELS: Record<string, { label: string; color: string }> = {
-  admin_grant:  { label: "Carga Admin",   color: "var(--brand)" },
+  admin_grant:  { label: "Carga Admin",   color: "#A855F7" },
   admin_deduct: { label: "Deducción",     color: "#EF4444" },
   refund:       { label: "Reembolso",     color: "#60A5FA" },
   spend:        { label: "Uso",           color: "#F59E0B" },
-  purchase:     { label: "Compra",        color: "var(--brand)" },
+  purchase:     { label: "Compra",        color: "#A855F7" },
 };
 
 // ─── Credit Modal ─────────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ function CreditModal({
   };
 
   const TABS = [
-    { key: "add",     label: "Agregar",   icon: Plus,      color: "var(--brand)" },
+    { key: "add",     label: "Agregar",   icon: Plus,      color: "#A855F7" },
     { key: "deduct",  label: "Deducir",   icon: Minus,     color: "#EF4444" },
     { key: "refund",  label: "Reembolso", icon: RotateCcw, color: "#60A5FA" },
     { key: "history", label: "Historial", icon: History,   color: "#A855F7" },
@@ -195,9 +195,9 @@ function CreditModal({
                 disabled={loading || !amount}
                 className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all disabled:opacity-40"
                 style={{
-                  background: tab === "add" ? "var(--brand)15" : tab === "deduct" ? "#EF444415" : "#60A5FA15",
-                  border: `1px solid ${tab === "add" ? "var(--brand)30" : tab === "deduct" ? "#EF444430" : "#60A5FA30"}`,
-                  color: tab === "add" ? "var(--brand)" : tab === "deduct" ? "#EF4444" : "#60A5FA",
+                  background: tab === "add" ? "#A855F715" : tab === "deduct" ? "#EF444415" : "#60A5FA15",
+                  border: `1px solid ${tab === "add" ? "#A855F730" : tab === "deduct" ? "#EF444430" : "#60A5FA30"}`,
+                  color: tab === "add" ? "#A855F7" : tab === "deduct" ? "#EF4444" : "#60A5FA",
                 }}
               >
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
@@ -226,7 +226,7 @@ function CreditModal({
                         )}
                         <p className="text-[10px] text-white/25">{new Date(tx.created_at).toLocaleString()}</p>
                       </div>
-                      <span className="ml-3 font-mono text-sm font-bold" style={{ color: tx.amount >= 0 ? "var(--brand)" : "#EF4444" }}>
+                      <span className="ml-3 font-mono text-sm font-bold" style={{ color: tx.amount >= 0 ? "#A855F7" : "#EF4444" }}>
                         {tx.amount >= 0 ? "+" : ""}{tx.amount.toLocaleString()}
                       </span>
                     </div>
@@ -488,7 +488,7 @@ const Admin = () => {
           { name: "Imagen IA",   count: image,  color: "#A855F7" },
           { name: "Texto / Copy",count: text,   color: "#60A5FA" },
           { name: "Video",       count: video,  color: "#F59E0B" },
-          { name: "BuilderAI",   count: studio, color: "var(--brand)" },
+          { name: "BuilderAI",   count: studio, color: "#A855F7" },
           { name: "Canvas",      count: canvas, color: "#EC4899" },
         ],
         dailyCredits: Object.values(dayMap),
@@ -615,9 +615,9 @@ const Admin = () => {
     { name: "ai-proxy",          desc: "Texto e imagen IA (OpenRouter)",      icon: Zap,      color: "#A855F7" },
     { name: "media-proxy",       desc: "Edición de imagen (Replicate)",       icon: Image,    color: "#60A5FA" },
     { name: "video-gen",         desc: "Generación de video (Replicate)",     icon: Video,    color: "#F59E0B" },
-    { name: "studio-generate",   desc: "BuilderAI — generación de código",    icon: Code2,    color: "var(--brand)" },
+    { name: "studio-generate",   desc: "BuilderAI — generación de código",    icon: Code2,    color: "#A855F7" },
     { name: "bold-webhook",      desc: "Webhook de pagos Bold.co",            icon: Shield,     color: "#F59E0B" },
-    { name: "bold-checkout",     desc: "Generador de checkout Bold",          icon: DollarSign,   color: "var(--brand)" },
+    { name: "bold-checkout",     desc: "Generador de checkout Bold",          icon: DollarSign,   color: "#A855F7" },
     { name: "admin-settings",    desc: "Guardar configuración de plataforma", icon: Settings, color: "#6B7280" },
     { name: "deploy-hook",       desc: "Redeployment automático (Vercel)",    icon: Globe,    color: "#60A5FA" },
   ];
@@ -677,7 +677,7 @@ const Admin = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
             { label: "Usuarios", value: users.length, icon: Users, color: "#FFFFFF" },
-            { label: "Planes pagos", value: paidUsers, icon: TrendingUp, color: "var(--brand)" },
+            { label: "Planes pagos", value: paidUsers, icon: TrendingUp, color: "#A855F7" },
             { label: "Créditos totales", value: totalCredits.toLocaleString(), icon: Coins, color: "#F59E0B" },
             { label: "Conversión", value: users.length ? `${Math.round((paidUsers/users.length)*100)}%` : "0%", icon: BarChart2, color: "#60A5FA" },
           ].map((s) => {
@@ -964,7 +964,7 @@ const Admin = () => {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
                     { label: "Créditos consumidos (30d)", value: analyticsData.totalSpend.toLocaleString(), icon: Activity, color: "#A855F7" },
-                    { label: "Nuevos usuarios (7d)",     value: analyticsData.recentUsers, icon: Users, color: "var(--brand)" },
+                    { label: "Nuevos usuarios (7d)",     value: analyticsData.recentUsers, icon: Users, color: "#A855F7" },
                     { label: "Revenue estimado",          value: `$${(paidUsers * 19).toLocaleString()}`, icon: DollarSign, color: "#F59E0B" },
                     { label: "Tasa conversión",           value: users.length ? `${Math.round((paidUsers/users.length)*100)}%` : "0%", icon: TrendingUp, color: "#60A5FA" },
                   ].map((s) => {

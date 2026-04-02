@@ -9,6 +9,7 @@ const TIER_CAPS: Record<string, number> = {
   free:      5,
   starter:   100_000,
   creator:   500_000,
+  pymes:     2_000_000,
   agency:    2_000_000,
   educacion: 500,
   pro:       1_000,

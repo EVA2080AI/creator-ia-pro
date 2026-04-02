@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
 import {
@@ -34,19 +34,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { PropertyInspector } from '@/components/formarketing/PropertyInspector';
 import { ExportModal } from '@/components/formarketing/ExportModal';
 
-const nodeTypes = {
-  characterBreakdown: CharacterBreakdownNode,
-  textInput: TextInputNode,
-  llmNode: LLMNode,
-  modelView: ModelNode,
-  videoModel: VideoModelNode,
-  layoutBuilder: LayoutBuilderNode,
-  campaignManager: CampaignManagerNode,
-  captionNode: CaptionNode,
-  promptBuilder: PromptBuilderNode,
-  exportNode: ExportNode,
-  antigravityBridge: AntigravityBridgeNode,
-};
+// Dynamic nodeTypes will be defined inside the component
+
 
 const initialNodes: Node[] = [];
 const initialEdges: Edge[] = [];
@@ -220,8 +209,6 @@ function FormarketingContent() {
         data: {
           ...nodeData.data,
           ...demoData,
-          onExecute: () => {},
-          onVariation: () => {},
         },
       } as Node;
     });
@@ -550,6 +537,70 @@ function FormarketingContent() {
             toast.error(userMessage);
           }
         })();
+      } else if (node.type === 'textInput') {
+        (async () => {
+          const nodeName = (node.data as any).title || 'Texto';
+          try {
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'ready' }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Listo ✓', 'success');
+            
+            await supabase.from('canvas_nodes').update({ 
+               status: 'ready', 
+               data_payload: { ...node.data, status: 'ready' }
+            }).eq('id', nodeId);
+          } catch (e: any) {
+            console.error("Error setting text input status:", e);
+          }
+        })();
+      } else if (node.type === 'llmNode') {
+        (async () => {
+          const nodeName = (node.data as any).title || 'LLM';
+          try {
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Iniciando razonamiento…', 'info');
+
+            const latestEdges = rfGetEdges();
+            const incomingEdges = latestEdges.filter(e => e.target === node.id);
+            const upstreamContext: string[] = [];
+            for (const edge of incomingEdges) {
+              const srcNode = currentNodes.find(n => n.id === edge.source);
+              if (srcNode?.type === 'characterBreakdown') upstreamContext.push(`Personaje: ${(srcNode.data as any).description || (srcNode.data as any).flavor}`);
+              if (srcNode?.type === 'promptBuilder') upstreamContext.push(`Prompt: ${(srcNode.data as any).compiledPrompt}`);
+              if (srcNode?.type === 'textInput') upstreamContext.push(`Entrada: ${(srcNode.data as any).value || (srcNode.data as any).prompt}`);
+              if (srcNode?.type === 'llmNode') upstreamContext.push(`Previo: ${(srcNode.data as any).output}`);
+            }
+
+            const prompt = (node.data as any).prompt || "Genera una respuesta profesional";
+            const finalPrompt = upstreamContext.length > 0 
+              ? `Contexto:\n${upstreamContext.join('\n---\n')}\n\nInstrucción: ${prompt}`
+              : prompt;
+
+            const selectedModel = (node.data as any).model || 'deepseek-chat';
+            const result = await aiService.processAction({
+              action: 'chat',
+              prompt: finalPrompt,
+              model: selectedModel,
+              node_id: (spaceId && isPersisted) ? node.id : undefined
+            });
+
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
+              ? { ...n, data: { ...n.data, status: 'ready', output: result.text }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
+              : n
+            ));
+
+            await supabase.from('canvas_nodes').update({
+               status: 'ready',
+               data_payload: { ...node.data, status: 'ready', output: result.text, model: selectedModel }
+            }).eq('id', nodeId);
+
+            addLog(nodeName, 'Completado ✓', 'success');
+            toast.success("Respuesta de IA generada");
+          } catch (e: any) {
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Error: ' + (e?.message ?? 'desconocido'), 'error');
+            toast.error("Error en LLM: " + (e?.message || 'IA ocupada'));
+          }
+        })();
       } else if (node.type === 'modelView') {
         (async () => {
           const nodeName = (node.data as any).title || 'Imagen';
@@ -559,31 +610,17 @@ function FormarketingContent() {
 
             const latestEdges = rfGetEdges();
             const incomingEdges = latestEdges.filter(e => e.target === node.id);
-
-            // Auto-read context from connected nodes (characterBreakdown, promptBuilder, textInput, llmNode)
             const upstreamContext: string[] = [];
             for (const edge of incomingEdges) {
               const srcNode = currentNodes.find(n => n.id === edge.source);
-              if (srcNode?.type === 'characterBreakdown') {
-                const flavor = (srcNode.data as any).flavor || '';
-                const desc = (srcNode.data as any).description || '';
-                if (flavor || desc) upstreamContext.push(`Personaje: ${flavor}. ${desc}`);
-              }
-              if (srcNode?.type === 'promptBuilder' && (srcNode.data as any).compiledPrompt) {
-                upstreamContext.push((srcNode.data as any).compiledPrompt);
-              }
-              if (srcNode?.type === 'textInput' && (srcNode.data as any).value) {
-                upstreamContext.push((srcNode.data as any).value);
-              }
-              if (srcNode?.type === 'llmNode' && (srcNode.data as any).output) {
-                upstreamContext.push((srcNode.data as any).output);
-              }
+              if (srcNode?.type === 'characterBreakdown') upstreamContext.push(`Personaje: ${(srcNode.data as any).description}`);
+              if (srcNode?.type === 'promptBuilder') upstreamContext.push((srcNode.data as any).compiledPrompt);
+              if (srcNode?.type === 'textInput') upstreamContext.push((srcNode.data as any).value || (srcNode.data as any).prompt);
+              if (srcNode?.type === 'llmNode') upstreamContext.push((srcNode.data as any).output);
             }
 
             const nodePrompt = (node.data as any).prompt || "High quality marketing visual";
-            const finalPrompt = upstreamContext.length > 0
-              ? `${upstreamContext.join('. ')}. ${nodePrompt}`
-              : nodePrompt;
+            const finalPrompt = upstreamContext.length > 0 ? `${upstreamContext.join('. ')}. ${nodePrompt}` : nodePrompt;
 
             const result = await aiService.processAction({
               action: 'image',
@@ -627,7 +664,6 @@ function FormarketingContent() {
             await supabase.from('canvas_nodes').update({
                asset_url: videoUrl,
                status: 'ready',
-               prompt: node.data.title || 'video',
                data_payload: { ...node.data, assetUrl: videoUrl, status: 'ready', model: selectedModel }
             }).eq('id', node.id);
             addLog(nodeName, 'Completado ✓', 'success');
@@ -638,6 +674,87 @@ function FormarketingContent() {
             toast.error("Error al renderizar video");
           }
         })();
+      } else if (node.type === 'captionNode') {
+        (async () => {
+          const nodeName = (node.data as any).title || 'Caption';
+          try {
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Generando caption…', 'info');
+
+            const latestEdges = rfGetEdges();
+            const incomingEdges = latestEdges.filter(e => e.target === node.id);
+            const upstreamContext: string[] = [];
+            for (const edge of incomingEdges) {
+              const srcNode = currentNodes.find(n => n.id === edge.source);
+              if (srcNode?.type === 'characterBreakdown') upstreamContext.push(`Identidad: ${(srcNode.data as any).description}`);
+              if (srcNode?.type === 'llmNode') upstreamContext.push(`Draft: ${(srcNode.data as any).output}`);
+              if (srcNode?.type === 'textInput') upstreamContext.push(`Notas: ${(srcNode.data as any).value}`);
+            }
+
+            const platform = (node.data as any).platform || 'Instagram';
+            const style = (node.data as any).style || 'Persuasivo';
+            const finalPrompt = `Genera un copy/caption de alto impacto para ${platform}. Estilo: ${style}. Contexto upstream:\n${upstreamContext.join('\n')}`;
+
+            const result = await aiService.processAction({
+              action: 'chat',
+              prompt: finalPrompt,
+              model: 'deepseek-chat',
+              node_id: (spaceId && isPersisted) ? node.id : undefined
+            });
+
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
+              ? { ...n, data: { ...n.data, status: 'ready', caption: result.text }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
+              : n
+            ));
+
+            await supabase.from('canvas_nodes').update({
+               status: 'ready',
+               data_payload: { ...node.data, status: 'ready', caption: result.text }
+            }).eq('id', nodeId);
+
+            addLog(nodeName, 'Listo ✓', 'success');
+            toast.success(`Caption para ${platform} listo`);
+          } catch (e: any) {
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
+            addLog(nodeName, 'Error: ' + (e?.message ?? 'desconocido'), 'error');
+          }
+        })();
+      } else if (node.type === 'promptBuilder') {
+        (async () => {
+          const nodeName = (node.data as any).title || 'Prompt Builder';
+          try {
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' } } : n));
+            addLog(nodeName, 'Compilando variables…', 'info');
+
+            const latestEdges = rfGetEdges();
+            const incomingEdges = latestEdges.filter(e => e.target === node.id);
+            const variables: Record<string, string> = {};
+            for (const edge of incomingEdges) {
+              const srcNode = currentNodes.find(n => n.id === edge.source);
+              if (!srcNode) continue;
+              if (srcNode.type === 'textInput') variables['input'] = (srcNode.data as any).value || '';
+              if (srcNode.type === 'llmNode') variables['context'] = (srcNode.data as any).output || '';
+            }
+
+            let compiled = (node.data as any).template || '';
+            const firstText = Object.values(variables)[0] || '';
+            compiled = compiled.replace(/{{input}}/gi, firstText);
+
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
+              ? { ...n, data: { ...n.data, status: 'ready', compiledPrompt: compiled }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
+              : n
+            ));
+
+            await supabase.from('canvas_nodes').update({
+               status: 'ready',
+               data_payload: { ...node.data, status: 'ready', compiledPrompt: compiled }
+            }).eq('id', nodeId);
+
+            addLog(nodeName, 'Compilado ✓', 'success');
+          } catch (e: any) {
+             rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' } } : n));
+          }
+        })();
       } else if (node.type === 'layoutBuilder') {
         (async () => {
           const nodeName = (node.data as any).title || 'Layout';
@@ -645,8 +762,18 @@ function FormarketingContent() {
             rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
             addLog(nodeName, 'Iniciando ejecución…', 'info');
 
+            const latestEdges = rfGetEdges();
+            const incomingEdges = latestEdges.filter(e => e.target === node.id);
+            const upstreamContext: string[] = [];
+            for (const edge of incomingEdges) {
+              const srcNode = currentNodes.find(n => n.id === edge.source);
+              if (srcNode?.type === 'characterBreakdown') upstreamContext.push(`Identidad: ${(srcNode.data as any).description}`);
+              if (srcNode?.type === 'llmNode') upstreamContext.push(`Contenido: ${(srcNode.data as any).output}`);
+              if (srcNode?.type === 'textInput') upstreamContext.push(`Instrucciones: ${(srcNode.data as any).value}`);
+            }
+
             const selectedModel = (node.data as any).model || 'claude-3.5-sonnet';
-            const layoutPrompt = `Genera un mapa de componentes React/Tailwind para una landing page de tipo ${node.data.title}. Plataforma: ${node.data.platform}. Estructura deseada: ${node.data.structure}`;
+            const layoutPrompt = `Genera un mapa de componentes React/Tailwind para una landing page de tipo ${node.data.title}. Plataforma: ${node.data.platform}. Estructura deseada: ${node.data.structure}. Contexto: ${upstreamContext.join(' ')}`;
 
             const result = await aiService.processAction({
               action: 'ui',
@@ -666,11 +793,46 @@ function FormarketingContent() {
             }).eq('id', nodeId);
 
             addLog(nodeName, 'Completado ✓', 'success');
-            toast.success(`Layout ${node.data.title} generado con ${selectedModel}`);
+            toast.success(`Layout ${node.data.title} generado`);
           } catch (e: any) {
             rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
             addLog(nodeName, 'Error: ' + (e?.message ?? 'desconocido'), 'error');
             toast.error("Error al generar layout");
+          }
+        })();
+      } else if (node.type === 'campaignManager') {
+        (async () => {
+          const nodeName = (node.data as any).title || 'Campaign Mgr';
+          try {
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' } } : n));
+            addLog(nodeName, 'Orquestando campaña…', 'info');
+            
+            const latestEdges = rfGetEdges();
+            const incomingEdges = latestEdges.filter(e => e.target === node.id);
+            const assets: any[] = [];
+            for (const edge of incomingEdges) {
+              const srcNode = currentNodes.find(n => n.id === edge.source);
+              if (!srcNode) continue;
+              if (srcNode.data.assetUrl) assets.push({ type: srcNode.type, url: srcNode.data.assetUrl });
+              if (srcNode.data.output || srcNode.data.caption) assets.push({ type: srcNode.type, text: srcNode.data.output || srcNode.data.caption });
+            }
+
+            await new Promise(r => setTimeout(r, 2000));
+            
+            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
+              ? { ...n, data: { ...n.data, status: 'ready', assets_found: assets.length }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
+              : n
+            ));
+
+            await supabase.from('canvas_nodes').update({
+               status: 'ready',
+               data_payload: { ...node.data, status: 'ready', assets_found: assets.length }
+            }).eq('id', nodeId);
+
+            addLog(nodeName, 'Campaña orquestada ✓', 'success');
+            toast.success("Campaña lista para distribución");
+          } catch (e: any) {
+             rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' } } : n));
           }
         })();
       }
@@ -718,10 +880,111 @@ function FormarketingContent() {
     });
   };
 
+
+  // --- NODE HANDLERS & FACTORY ---
+  const handleAddConnected = useCallback(async (sourceId: string, targetType: string) => {
+    const newNodeId = crypto.randomUUID();
+    const currentNodes = rfGetNodes();
+    const sourceNode = currentNodes.find(n => n.id === sourceId);
+    if (!sourceNode) return;
+    
+    const position = { x: sourceNode.position.x + 400, y: sourceNode.position.y };
+    const newNode: Node = {
+      id: newNodeId,
+      type: targetType,
+      position,
+      data: {
+        title: `Nuevo ${targetType}`,
+        status: 'idle',
+        prompt: '',
+      },
+    };
+
+    setNodes((nds) => nds.concat(newNode));
+
+    const newEdge: Edge = {
+      id: `e-${sourceId}-${newNodeId}`,
+      source: sourceId,
+      target: newNodeId,
+      type: 'smoothstep',
+      animated: true,
+      style: { stroke: 'rgba(168,85,247,0.35)', strokeWidth: 2 },
+    };
+    setEdges((eds) => addEdge(newEdge, eds));
+
+    if (spaceId && user) {
+      await supabase.from('canvas_nodes').insert({
+        id: newNodeId,
+        space_id: spaceId,
+        user_id: user.id,
+        type: targetType,
+        pos_x: position.x,
+        pos_y: position.y,
+        prompt: targetType,
+        status: 'idle',
+        data_payload: newNode.data as any
+      });
+    }
+
+    toast.success(`Nodo ${targetType} conectado`);
+  }, [rfGetNodes, setNodes, setEdges, spaceId, user]);
+
+  // Refs keep callbacks stable so nodeTypes never re-creates (prevents ReactFlow node remounts)
+  const executeNodeRef = useRef<typeof executeNode>(executeNode);
+  useEffect(() => { executeNodeRef.current = executeNode; });
+  const executeVariationRef = useRef<typeof executeVariation>(executeVariation);
+  useEffect(() => { executeVariationRef.current = executeVariation; });
+  const handleAddConnectedRef = useRef<typeof handleAddConnected>(handleAddConnected);
+  useEffect(() => { handleAddConnectedRef.current = handleAddConnected; });
+
+  const nodeTypes = useMemo(() => {
+    const inject = (Component: any) => memo((props: any) => (
+      <Component
+        {...props}
+        data={{
+          ...props.data,
+          onExecute: () => executeNodeRef.current(props.id),
+          onVariation: () => executeVariationRef.current(props.id),
+          onAddConnected: (sourceId: string, targetType: string) => handleAddConnectedRef.current(sourceId, targetType)
+        }}
+      />
+    ));
+
+    return {
+      characterBreakdown: inject(CharacterBreakdownNode),
+      textInput: inject(TextInputNode),
+      llmNode: inject(LLMNode),
+      modelView: inject(ModelNode),
+      videoModel: inject(VideoModelNode),
+      layoutBuilder: inject(LayoutBuilderNode),
+      campaignManager: inject(CampaignManagerNode),
+      captionNode: inject(CaptionNode),
+      promptBuilder: inject(PromptBuilderNode),
+      exportNode: inject(ExportNode),
+      antigravityBridge: inject(AntigravityBridgeNode),
+    };
+  }, []); // empty deps — nodeTypes never re-creates, no node remounts
+
+  const handleManualAddNode = useCallback((type: string, label: string) => {
+    const newNodeId = crypto.randomUUID();
+    const newNode: Node = {
+      id: newNodeId,
+      type,
+      position: screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 }),
+      data: {
+        title: label,
+        status: 'idle',
+        prompt: '',
+      },
+    };
+    setNodes((nds) => nds.concat(newNode));
+    toast.success(`${label} añadido`);
+  }, [screenToFlowPosition, setNodes]);
+
   const handleExecute = async () => {
     if (nodes.length === 0) { toast.error("No hay nodos que ejecutar"); return; }
 
-    const ORDER = ['characterBreakdown', 'modelView', 'videoModel', 'layoutBuilder', 'campaignManager', 'antigravityBridge'];
+    const ORDER = ['textInput', 'characterBreakdown', 'promptBuilder', 'llmNode', 'modelView', 'videoModel', 'layoutBuilder', 'captionNode', 'campaignManager', 'antigravityBridge'];
     const sorted = [...nodes].sort((a, b) => ORDER.indexOf(a.type as string) - ORDER.indexOf(b.type as string));
 
     setExecStatus('running');
@@ -757,8 +1020,7 @@ function FormarketingContent() {
           position: { x: basePos.x + (index * 350), y: basePos.y + (index * 50) },
           data: { 
             ...nodeData.data,
-            onExecute: () => executeNode(newNodeId),
-            onVariation: () => executeVariation(newNodeId)
+            // Handlers injected by nodeTypes factory
           }
         };
       });
@@ -788,104 +1050,16 @@ function FormarketingContent() {
     return () => window.removeEventListener('add-template', handleAddTemplate);
   }, [user, spaceId, setNodes, executeNode, executeVariation]);
 
-  // Handle "add next node" suggestion from NodeNextAction component
+  // Harmonized listener for event-based node generation (NodeNextAction)
   useEffect(() => {
-    const handleAddNextNode = async (e: any) => {
-      const { sourceId, nodeType, nodeLabel } = e.detail;
-      const newNodeId = crypto.randomUUID();
-
-      // Find source node to position relative to it
-      const currentNodes = rfGetNodes();
-      const sourceNode = currentNodes.find(n => n.id === sourceId);
-      const sourcePos = sourceNode?.position || { x: 200, y: 200 };
-
-      const newNode: Node = {
-        id: newNodeId,
-        type: nodeType,
-        position: { x: sourcePos.x + 380, y: sourcePos.y },
-        data: {
-          title: nodeLabel,
-          status: 'idle',
-          prompt: '',
-          onExecute: () => executeNode(newNodeId),
-          onVariation: () => executeVariation(newNodeId),
-        },
-      };
-
-      // Add new edge connecting source → new node
-      const newEdge: Edge = {
-        id: `e-${sourceId}-${newNodeId}`,
-        source: sourceId,
-        target: newNodeId,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: 'rgba(168,85,247,0.35)', strokeWidth: 2 },
-      };
-
-      setNodes((nds) => nds.concat(newNode));
-      setEdges((eds) => addEdge(newEdge, eds));
-
-      if (spaceId && user) {
-        await supabase.from('canvas_nodes').insert({
-          id: newNodeId,
-          space_id: spaceId,
-          user_id: user.id,
-          type: nodeType,
-          pos_x: newNode.position.x,
-          pos_y: newNode.position.y,
-          prompt: nodeLabel,
-          status: 'idle',
-          data_payload: newNode.data as any,
-        });
-      }
-
-      toast.success(`${nodeLabel} añadido`);
+    const onAddRequest = (e: any) => {
+      const { sourceId, nodeType } = e.detail;
+      handleAddConnected(sourceId, nodeType);
     };
+    window.addEventListener('add-next-node', onAddRequest);
+    return () => window.removeEventListener('add-next-node', onAddRequest);
+  }, [handleAddConnected]);
 
-    window.addEventListener('add-next-node', handleAddNextNode);
-    return () => window.removeEventListener('add-next-node', handleAddNextNode);
-  }, [user, spaceId, setNodes, setEdges, rfGetNodes, executeNode, executeVariation]);
-
-  const handleManualAddNode = useCallback((type: string, label: string, assetUrl?: string) => {
-    const newNodeId = crypto.randomUUID();
-    const position = { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 };
-    const flowPos = screenToFlowPosition(position);
-
-    const newNode: Node = {
-      id: newNodeId,
-      type,
-      position: flowPos,
-      data: { 
-        title: label || 'Nuevo Elemento',
-        status: assetUrl ? 'ready' : 'idle',
-        prompt: '',
-        assetUrl: assetUrl || null,
-        description: type === 'characterBreakdown' ? 'Describe tu personaje...' : '',
-        onExecute: () => executeNode(newNodeId),
-        onVariation: () => executeVariation(newNodeId)
-      },
-    };
-
-    setNodes((nds) => nds.concat(newNode));
-
-    if (spaceId && user) {
-      supabase.from('canvas_nodes').insert({
-        id: newNodeId,
-        space_id: spaceId,
-        user_id: user.id,
-        type: type,
-        pos_x: flowPos.x,
-        pos_y: flowPos.y,
-        prompt: label || 'Nuevo',
-        status: assetUrl ? 'ready' : 'idle',
-        asset_url: assetUrl || null,
-        data_payload: newNode.data as any
-      }).then(({ error }) => {
-        if (error) console.error("Error persisting manual node:", error);
-      });
-    }
-    toast.success(`${label} añadido`);
-  }, [screenToFlowPosition, setNodes, spaceId, user, executeNode]);
 
   const handleAssistantAction = useCallback(async (action: string, data: any) => {
     switch (action) {
@@ -898,8 +1072,7 @@ function FormarketingContent() {
           data: { 
             ...data.data,
             title: data.data?.title || 'Generado por IA',
-            onExecute: () => executeNode(newNodeId),
-            onVariation: () => executeVariation(newNodeId)
+            // Handlers injected by factory
           },
         };
 
@@ -947,19 +1120,6 @@ function FormarketingContent() {
     }
   }, [setNodes, setEdges, spaceId, user, executeNode]);
 
-  // Inject onExecute to initial/loaded nodes
-  useEffect(() => {
-     if (nodes.length > 0 && !nodes[0].data.onExecute) {
-        setNodes(nds => nds.map(n => ({
-          ...n,
-          data: { 
-            ...n.data, 
-            onExecute: () => executeNode(n.id),
-            onVariation: () => executeVariation(n.id)
-          }
-        })));
-     }
-  }, [nodes, setNodes, executeNode, executeVariation]);
 
   return (
     <>

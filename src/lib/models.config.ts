@@ -3,7 +3,7 @@
 // ECO: 1x  |  PRO: 5x  |  ULTRA: 20x
 
 export type ModelCategory = 'ECO' | 'PRO' | 'ULTRA';
-export type PlanTier = 'free' | 'starter' | 'creator' | 'agency';
+export type PlanTier = 'free' | 'starter' | 'creator' | 'pymes';
 
 export interface ModelDef {
   id: string;               // internal ID used in UI
@@ -50,12 +50,12 @@ export const CATEGORY_CONFIG: Record<ModelCategory, {
     color: '#F59E0B',
     bgColor: 'rgba(245,158,11,0.1)',
     bolts: 5,
-    minTier: 'agency',
-    description: 'Máximo poder · Requiere Agency',
+    minTier: 'pymes',
+    description: 'Máximo poder · Requiere Pymes',
   },
 };
 
-export const PLAN_TIER_ORDER: PlanTier[] = ['free', 'starter', 'creator', 'agency'];
+export const PLAN_TIER_ORDER: PlanTier[] = ['free', 'starter', 'creator', 'pymes'];
 
 export function canAccessModel(userTier: string, modelCategory: ModelCategory): boolean {
   const tierOrder = PLAN_TIER_ORDER;
