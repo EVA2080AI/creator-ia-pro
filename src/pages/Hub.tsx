@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, useInView } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { AppHeader } from "@/components/AppHeader";
@@ -306,22 +307,46 @@ const Hub = () => {
           {/* Header */}
           <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.45 }}
+                className="flex items-center gap-3"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                  className="w-1.5 h-1.5 rounded-full bg-primary"
+                />
                 <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
-              </div>
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display">
+              </motion.div>
+              <motion.h1
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className="text-4xl md:text-6xl font-bold tracking-tight font-display"
+              >
                 Proyectos & <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Plantillas</span>
-              </h1>
-              <p className="text-sm text-zinc-400 font-medium">
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.2 }}
+                className="text-sm text-zinc-400 font-medium"
+              >
                 {TEMPLATES.length} plantillas profesionales — 1 clic para abrir en el Studio.
-              </p>
+              </motion.p>
             </div>
-            <div className="flex items-center gap-3 shrink-0">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              className="flex items-center gap-3 shrink-0"
+            >
               <div className="px-4 py-2 rounded-xl bg-zinc-100 border border-zinc-200 text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-display">
                 {filtered.length} resultados
               </div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Category Filter — Tailwind UI style pill tabs */}
@@ -349,7 +374,12 @@ const Hub = () => {
           {/* Template Grid — Tailwind UI card grid pattern */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             {/* Create from scratch card */}
-            <button
+            <motion.button
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              whileHover={{ scale: 1.03, borderColor: "rgba(168,85,247,0.3)" }}
+              whileTap={{ scale: 0.97 }}
               aria-label="Crear lienzo en blanco — nuevo proyecto vacío"
               onClick={() => {
                 supabase.from("spaces").insert({ user_id: user?.id || "", name: "Nuevo Proyecto" })
@@ -359,25 +389,29 @@ const Hub = () => {
                     else navigate("/formarketing");
                   });
               }}
-              className="rounded-[2rem] border border-dashed border-zinc-200 group flex flex-col items-center justify-center py-12 gap-4 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500 active:scale-95"
+              className="rounded-[2rem] border border-dashed border-zinc-200 group flex flex-col items-center justify-center py-12 gap-4 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500"
             >
-              <div className="w-12 h-12 rounded-2xl bg-zinc-100 border border-dashed border-zinc-200 flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/30 transition-all">
+              <motion.div
+                animate={{ y: [0, -4, 0] }}
+                transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+                className="w-12 h-12 rounded-2xl bg-zinc-100 border border-dashed border-zinc-200 flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/30 transition-all"
+              >
                 <Plus className="w-5 h-5 text-zinc-300 group-hover:text-primary transition-colors" />
-              </div>
+              </motion.div>
               <div className="text-center space-y-1">
                 <p className="text-xs font-bold text-zinc-400 group-hover:text-zinc-900 transition-colors uppercase tracking-widest font-display">Lienzo en Blanco</p>
                 <p className="text-[10px] text-zinc-300 font-display uppercase tracking-[0.15em]">Empieza desde cero</p>
               </div>
-            </button>
+            </motion.button>
 
-            {filtered.map((template, idx) => (
-              <div
+            {filtered.map((template, idx) => {
+              return (<motion.div
                 key={template.id}
-                className="rounded-[2rem] border border-zinc-200 group flex flex-col gap-5 p-6 transition-all duration-300 hover:scale-[1.02] overflow-hidden relative"
-                style={{
-                  animationDelay: `${idx * 30}ms`,
-                  ['--card-color' as string]: template.color,
-                }}
+                initial={{ opacity: 0, y: 24, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.35 + idx * 0.04, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -5 }}
+                className="rounded-[2rem] border border-zinc-200 group flex flex-col gap-5 p-6 transition-all duration-300 overflow-hidden relative"
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.borderColor = `${template.color}30`;
                   (e.currentTarget as HTMLElement).style.boxShadow = `0 0 32px ${template.color}12`;
@@ -450,8 +484,8 @@ const Hub = () => {
                     Usar <ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
-              </div>
-            ))}
+              </motion.div>
+            );})}
           </div>
 
           <p className="text-center text-[10px] text-zinc-400 mt-12 font-bold uppercase tracking-[0.3em] font-display">

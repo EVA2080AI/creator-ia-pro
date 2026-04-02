@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -231,10 +232,14 @@ const Dashboard = () => {
 
           {/* Stats — horizontal row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {stats.map((stat) => (
-              <div
+            {stats.map((stat, i) => (
+              <motion.div
                 key={stat.label}
-                className="group flex items-center gap-3 p-4 bg-card border border-zinc-200 hover:border-zinc-200 transition-all duration-300 rounded-2xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -3, boxShadow: "0 8px 24px rgba(0,0,0,0.06)" }}
+                className="group flex items-center gap-3 p-4 bg-card border border-zinc-200 transition-all duration-300 rounded-2xl"
               >
                 <div className={`w-9 h-9 rounded-lg flex items-center justify-center bg-zinc-100 border border-zinc-200 shrink-0 transition-all group-hover:scale-110 ${stat.color}`}>
                   <stat.icon className="w-4 h-4" />
@@ -243,7 +248,7 @@ const Dashboard = () => {
                   <p className="text-[10px] font-bold tracking-[0.15em] text-zinc-300 uppercase font-display truncate">{stat.label}</p>
                   <p className="text-xl font-bold text-zinc-900 tracking-tight font-display tabular-nums truncate">{stat.value}</p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
@@ -317,12 +322,17 @@ const Dashboard = () => {
           </div>
 
           {/* Genesis CTA */}
-          <div
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+            whileHover={{ scale: 1.01 }}
             onClick={() => navigate("/chat")}
             className="group cursor-pointer relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-5 hover:border-primary/40 transition-all duration-300"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
             <div className="relative flex items-center justify-between gap-4">
+
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.9)]" />
@@ -336,7 +346,7 @@ const Dashboard = () => {
                 Crear
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* AI Tools */}
           <div>
@@ -347,11 +357,16 @@ const Dashboard = () => {
               </button>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {aiApps.map((app) => (
-                <button
+              {aiApps.map((app, i) => (
+                <motion.button
                   key={app.label}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.35, delay: 0.4 + i * 0.06 }}
+                  whileHover={{ y: -4, scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => navigate(app.path)}
-                  className="group flex flex-col gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-zinc-200 hover:border-primary/25 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
+                  className="group flex flex-col gap-3 p-4 bg-card border border-zinc-200 rounded-xl text-left"
                 >
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-zinc-100 border border-zinc-200 transition-all group-hover:bg-primary/10 group-hover:border-primary/20">
                     <app.icon className="w-4 h-4 text-zinc-400 group-hover:text-primary transition-colors" />
@@ -360,7 +375,7 @@ const Dashboard = () => {
                     <p className="text-xs font-bold text-zinc-700 group-hover:text-zinc-900 tracking-tight font-display leading-tight">{app.label}</p>
                     <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest mt-0.5 font-display">{app.desc}</p>
                   </div>
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>

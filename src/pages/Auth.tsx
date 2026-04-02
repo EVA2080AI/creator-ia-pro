@@ -10,6 +10,7 @@ import {
   FileText, Wand2, Loader2, Lock, Check, Code2
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { motion } from "framer-motion";
 
 const features = [
   { icon: Code2, text: "Genesis IDE — genera apps React completas con IA" },
@@ -77,47 +78,88 @@ const Auth = () => {
 
       {/* Left Panel — Value Prop */}
       <div className="hidden lg:flex lg:w-[45%] flex-col justify-between px-16 py-16 relative overflow-hidden bg-zinc-50 border-r border-zinc-200">
-        {/* Glows */}
+        {/* Animated glows */}
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -top-32 -left-32 h-[700px] w-[700px] rounded-full bg-primary/6 blur-[160px]" />
-          <div className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px]" />
+          <motion.div
+            animate={{ x: [0, 20, -10, 0], y: [0, -20, 10, 0], scale: [1, 1.1, 0.95, 1] }}
+            transition={{ repeat: Infinity, duration: 14, ease: "easeInOut" }}
+            className="absolute -top-32 -left-32 h-[700px] w-[700px] rounded-full bg-primary/6 blur-[160px]"
+          />
+          <motion.div
+            animate={{ x: [0, -15, 10, 0], y: [0, 15, -10, 0], scale: [1, 0.9, 1.05, 1] }}
+            transition={{ repeat: Infinity, duration: 18, ease: "easeInOut", delay: 3 }}
+            className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px]"
+          />
         </div>
 
         {/* Top — Logo */}
-        <div className="relative z-10">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="relative z-10"
+        >
           <Logo size="md" showText showPro onClick={() => navigate("/")} />
-        </div>
+        </motion.div>
 
         {/* Center — Headline */}
         <div className="relative z-10 space-y-10">
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              className="flex items-center gap-2"
+            >
+              <motion.div
+                animate={{ scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
+                transition={{ repeat: Infinity, duration: 2 }}
+                className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(74,222,128,0.8)]"
+              />
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] font-display">
                 Plataforma de IA generativa
               </span>
-            </div>
-            <h2 className="text-5xl xl:text-6xl font-bold text-zinc-900 leading-[1.05] tracking-tight font-display">
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="text-5xl xl:text-6xl font-bold text-zinc-900 leading-[1.05] tracking-tight font-display"
+            >
               Crea con IA.<br />
               <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">
                 Más rápido.
               </span>
-            </h2>
-            <p className="text-zinc-400 text-base max-w-xs leading-relaxed font-medium">
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35 }}
+              className="text-zinc-400 text-base max-w-xs leading-relaxed font-medium"
+            >
               Imágenes, textos, videos, logos y más — todo en un solo lugar, con la IA más avanzada.
-            </p>
+            </motion.p>
           </div>
 
           {/* Features */}
           <div className="space-y-5">
-            {features.map((f) => (
-              <div key={f.text} className="flex items-center gap-5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 border border-zinc-200 shrink-0">
+            {features.map((f, i) => (
+              <motion.div
+                key={f.text}
+                initial={{ opacity: 0, x: -24 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.45, delay: 0.45 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className="flex items-center gap-5"
+              >
+                <motion.div
+                  whileHover={{ scale: 1.1 }}
+                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 border border-zinc-200 shrink-0"
+                >
                   <f.icon className="h-4.5 w-4.5 text-zinc-400" />
-                </div>
+                </motion.div>
                 <span className="text-sm font-medium text-zinc-400">{f.text}</span>
                 <Check className="h-4 w-4 text-primary ml-auto shrink-0 opacity-50" />
-              </div>
+              </motion.div>
             ))}
           </div>
 
@@ -127,17 +169,29 @@ const Auth = () => {
               { value: "12+", label: "Herramientas" },
               { value: "$12", label: "Starter/mes" },
               { value: "4.6", label: "Claude" },
-            ].map((s) => (
-              <div key={s.label} className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-2xl border border-zinc-200 p-4 text-center">
+            ].map((s, i) => (
+              <motion.div
+                key={s.label}
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.7 + i * 0.08 }}
+                whileHover={{ y: -3 }}
+                className="rounded-2xl border border-zinc-200 p-4 text-center bg-white"
+              >
                 <p className="text-2xl font-bold text-zinc-900 font-display">{s.value}</p>
                 <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest mt-1">{s.label}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
 
         {/* Bottom */}
-        <div className="relative z-10">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 1 }}
+          className="relative z-10"
+        >
           <p className="text-[11px] font-medium text-zinc-300 leading-relaxed">
             Al registrarte aceptas nuestros{" "}
             <span className="underline underline-offset-2 cursor-pointer hover:text-zinc-400 transition-colors">
@@ -148,7 +202,7 @@ const Auth = () => {
               Política de privacidad
             </span>.
           </p>
-        </div>
+        </motion.div>
 
         {/* Grain */}
         <div className="absolute inset-0 opacity-[0.015] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
@@ -161,9 +215,14 @@ const Auth = () => {
           <Logo size="sm" showText showPro onClick={() => navigate("/")} />
         </div>
 
-        <div className="relative z-10 w-full max-w-[420px]">
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 w-full max-w-[420px]"
+        >
           {/* Form Card */}
-          <div className="rounded-[2.5rem] border border-zinc-200 bg-white p-10 shadow-xl shadow-zinc-200 animate-in fade-in slide-in-from-bottom-6 duration-700 relative overflow-hidden">
+          <div className="rounded-[2.5rem] border border-zinc-200 bg-white p-10 shadow-xl shadow-zinc-200 relative overflow-hidden">
 
             {/* Header */}
             <div className="mb-8">
@@ -391,7 +450,7 @@ const Auth = () => {
               Ver planes y precios →
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Background glow */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
