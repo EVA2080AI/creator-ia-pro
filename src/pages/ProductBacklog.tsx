@@ -6,8 +6,10 @@ import { Progress } from "@/components/ui/progress";
 import {
   ArrowLeft, CheckCircle2, Circle, AlertTriangle, Clock,
   Sparkles, Shield, CreditCard, Palette, Wand2, Users,
-  Globe, Smartphone, Zap, BarChart3, Bug, Rocket,
+  Globe, Smartphone, Zap, BarChart3, Bug, Rocket, Loader2
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 
 type Status = "done" | "partial" | "todo" | "blocked";
 type Priority = "P0" | "P1" | "P2" | "P3";
@@ -147,11 +149,42 @@ const effortColors: Record<string, string> = {
 
 const ProductBacklog = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
 
   const totalCompletion = Math.round(features.reduce((sum, f) => sum + f.completion, 0) / features.length);
   const doneCount = features.filter(f => f.status === "done").length;
   const partialCount = features.filter(f => f.status === "partial").length;
   const todoCount = features.filter(f => f.status === "todo").length;
+
+  if (authLoading || adminLoading) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="flex h-[80vh] flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border border-zinc-200 mb-6">
+          <Shield className="h-8 w-8 text-zinc-400" />
+        </div>
+        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Acceso Restringido</h1>
+        <p className="text-sm text-zinc-500 mt-2 max-w-xs mx-auto">
+          Esta página contiene información interna de desarrollo y solo es accesible para administradores.
+        </p>
+        <Button 
+          onClick={() => navigate("/dashboard")} 
+          variant="outline" 
+          className="mt-8 rounded-xl border-zinc-200 hover:bg-zinc-50"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" /> Volver al Dashboard
+        </Button>
+      </div>
+    );
+  }
 
   const modules = [...new Set(features.map(f => f.module))];
   const moduleStats = modules.map(mod => {

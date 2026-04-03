@@ -6,8 +6,9 @@ import {
   Wand2, Hash, Megaphone, PenLine, Zap,
   Settings, History, CreditCard, Monitor, Sparkles,
   PanelLeftClose, PanelLeftOpen, Terminal, List, Code2,
-  Home, LayoutGrid, Share2, ShieldCheck, Activity
+  Home, LayoutGrid, Share2, ShieldCheck, Activity, Bot
 } from 'lucide-react';
+
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/Logo';
 import { useAuth } from '@/hooks/useAuth';
@@ -25,6 +26,7 @@ const NAV_MAIN = [
   { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     requiresPymes: false },
   { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     requiresPymes: false },
   { path: '/hub',          label: 'Templates',     icon: Sparkles,       requiresPymes: false },
+  { path: '/antigravity',  label: 'Antigravity AI', icon: Bot,            requiresPymes: false },
 ];
 
 const NAV_SOCIAL = [
@@ -36,13 +38,13 @@ const NAV_SOCIAL = [
 const NAV_SYSTEM = [
   { path: '/admin',         label: 'Panel Control', icon: ShieldCheck,   requiresPymes: false },
   { path: '/system-status', label: 'Estatus',       icon: Activity,      requiresPymes: false },
+  { path: '/product-backlog', label: 'Roadmap',     icon: List,          requiresPymes: false },
 ];
 
 const NAV_BOTTOM = [
   { path: '/profile',         label: 'Perfil',      icon: User },
   { path: '/pricing',         label: 'Planes',      icon: CreditCard },
   { path: '/descargar',       label: 'Descargar',   icon: Download },
-  { path: '/product-backlog', label: 'Roadmap',     icon: List },
 ];
 
 export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
@@ -182,7 +184,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
             active={isActive('/chat')}
             expanded={globalExpanded || isMobile}
             isPymes={isPymes}
-            className="text-violet-600 hover:bg-violet-50"
+            className="text-primary hover:bg-primary/5"
             onClick={() => navigate('/chat')}
           />
         </div>

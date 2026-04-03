@@ -58,6 +58,7 @@ const Admin        = lazy(() => import("./pages/Admin"));
 const Formarketing = lazy(() => import("./pages/Formarketing"));
 const Profile      = lazy(() => import("./pages/Profile"));
 const Hub          = lazy(() => import("./pages/Hub"));
+const Antigravity  = lazy(() => import("./pages/Antigravity"));
 const Chat         = lazy(() => import("./pages/Chat"));
 const ShareScreen  = lazy(() => import("./pages/ShareScreen"));
 const SystemStatus = lazy(() => import("./pages/SystemStatus"));
@@ -124,6 +125,7 @@ const App = () => {
                     <Route path="/formarketing" element={<Formarketing />} />
                     <Route path="/profile"      element={<Profile />} />
                     <Route path="/hub"          element={<Hub />} />
+                    <Route path="/antigravity"  element={<Antigravity />} />
                     <Route path="/chat"         element={<Chat />} />
                     <Route path="/sharescreen"  element={<ShareScreen />} />
                     <Route path="/system-status" element={<SystemStatus />} />

@@ -168,6 +168,21 @@ REGLAS DE RESPUESTA:
 
 ${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
 
+const ANTIGRAVITY_CHAT_SYSTEM = `Eres Antigravity — el motor de inteligencia artificial más potente de Creator IA Pro.
+
+TU IDENTIDAD:
+- Eres un Asistente Ejecutivo y Estratega de IA de nivel mundial.
+- Tu enfoque es el razonamiento profundo, la resolución de problemas complejos, el análisis de datos y la creación de contenido estratégico (Marketing, Copywriting, Business Intelligence).
+- No eres un simple generador de código (ese es Genesis), eres el "Cerebro" de la plataforma.
+
+REGLAS DE ORO:
+1. Ofrece respuestas profundas y bien estructuradas.
+2. Usa un tono profesional, inspirador y directo.
+3. Si se te pide código, dalo con un enfoque arquitectónico, pero recuerda que tu fuerte es la estrategia y el análisis multi-nivel.
+
+${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
+
+
 // ─── Clone system prompt ──────────────────────────────────────────────────────
 const CLONE_SYSTEM_PROMPT = `Eres un experto en Reverse-Engineering de Frontend de nivel mundial.
 
@@ -393,15 +408,27 @@ interface StudioChatProps {
   onGeneratingChange?: (v: boolean) => void;
   onStreamCharsChange?: (chars: number, preview: string) => void;
   supabaseConfig?: { url: string; anonKey: string } | null;
+  persona?: 'genesis' | 'antigravity';
 }
 
 export function StudioChat({
   projectId, projectFiles, onCodeGenerated,
   onNewConversation, initialPrompt, onInitialPromptUsed, onAutoName,
   onGeneratingChange, onStreamCharsChange, supabaseConfig,
+  persona = 'genesis',
 }: StudioChatProps) {
   const { user } = useAuth();
-  const [messages,         setMessages]         = useState<Message[]>([WELCOME]);
+  
+  const welcomeMsg: Message = {
+    id: 'welcome',
+    role: 'assistant',
+    content: persona === 'antigravity' 
+      ? `Hola, soy **Antigravity**. \n\nSoy el motor de inteligencia central de Creator IA. Puedo ayudarte con estrategia, razonamiento complejo, análisis de marketing o cualquier desafío creativo. \n\n¿En qué podemos trabajar hoy?`
+      : `Hola, soy **Genesis AI**. \n\nPuedo **generar código** completo (React, Next.js, Python, Node.js…), **diseñar arquitecturas**, **debugear** errores o responder preguntas técnicas. \n\n¿Qué vamos a construir?`,
+    timestamp: new Date(),
+  };
+
+  const [messages,         setMessages]         = useState<Message[]>([welcomeMsg]);
   const [input,            setInput]            = useState('');
   const [isGenerating,     setIsGenerating]     = useState(false);
   const [streamChars,      setStreamChars]      = useState(0);
@@ -543,35 +570,38 @@ export function StudioChat({
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
-    const isChatModeActive = detectIntent(prompt) === 'chat';
-    setCurrentGenIntent(isChatModeActive ? 'chat' : 'codegen');
+      const isChatModeActive = detectIntent(prompt) === 'chat';
+      setCurrentGenIntent(isChatModeActive ? 'chat' : 'codegen');
 
-    try {
-      const fileKeys = Object.keys(projectFiles);
+      try {
+        const fileKeys = Object.keys(projectFiles);
 
-      // ── @file mention injection ───────────────────────────────────────────────
-      const mentionMatches = [...prompt.matchAll(/@([\w./\-]+)/g)];
-      const mentionedFiles = mentionMatches
-        .map(m => m[1])
-        .filter(f => projectFiles[f]);
-      const mentionBlock = mentionedFiles.length > 0
-        ? '\n\n[ARCHIVOS MENCIONADOS]\n' + mentionedFiles.map(f =>
-            `// @${f}\n${projectFiles[f].content.slice(0, 3000)}`).join('\n\n')
-        : '';
+        // ── @file mention injection ───────────────────────────────────────────────
+        const mentionMatches = [...prompt.matchAll(/@([\w./\-]+)/g)];
+        const mentionedFiles = mentionMatches
+          .map(m => m[1])
+          .filter(f => projectFiles[f]);
+        const mentionBlock = mentionedFiles.length > 0
+          ? '\n\n[ARCHIVOS MENCIONADOS]\n' + mentionedFiles.map(f =>
+              `// @${f}\n${projectFiles[f].content.slice(0, 3000)}`).join('\n\n')
+          : '';
 
-      // Build project context for chat (compact — just file names + tech)
-      let contextBlock = mentionBlock;
-      if (isChatModeActive && fileKeys.length > 0 && !mentionBlock) {
-        contextBlock = `\n\n[PROYECTO ACTIVO]\nArchivos: ${fileKeys.join(', ')}\nContenido relevante:\n` +
-          fileKeys.slice(0, 3).map(f => `// ${f}\n${projectFiles[f].content.slice(0, 600)}`).join('\n\n');
-      } else if (!isChatModeActive && fileKeys.length > 0) {
-        contextBlock += '\n\nARCHIVOS ACTUALES DEL PROYECTO:\n' +
-          fileKeys.map(f => `--- ${f} ---\n${projectFiles[f].content.slice(0, 2000)}`).join('\n\n');
-      }
+        // Build project context for chat (compact — just file names + tech)
+        let contextBlock = mentionBlock;
+        if (isChatModeActive && fileKeys.length > 0 && !mentionBlock) {
+          contextBlock = `\n\n[PROYECTO ACTIVO]\nArchivos: ${fileKeys.join(', ')}\nContenido relevante:\n` +
+            fileKeys.slice(0, 3).map(f => `// ${f}\n${projectFiles[f].content.slice(0, 600)}`).join('\n\n');
+        } else if (!isChatModeActive && fileKeys.length > 0) {
+          contextBlock += '\n\nARCHIVOS ACTUALES DEL PROYECTO:\n' +
+            fileKeys.map(f => `--- ${f} ---\n${projectFiles[f].content.slice(0, 2000)}`).join('\n\n');
+        }
 
-      // ── URL Clone injection ────────────────────────────────────────────────────
-      let cloneBlock = '';
-      let effectiveSystemPrompt = isChatModeActive ? GENESIS_CHAT_SYSTEM : CODE_GEN_SYSTEM;
+        // ── URL Clone injection ────────────────────────────────────────────────────
+        let cloneBlock = '';
+        let effectiveSystemPrompt = isChatModeActive 
+          ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM)
+          : CODE_GEN_SYSTEM;
+
       if (pendingUrl) {
         const parsedClone = JSON.parse(pendingUrl);
         // Supports legacy `{url, content}` or new `CloneResult` from cloneWebsiteAdvanced
