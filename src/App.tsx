@@ -52,7 +52,6 @@ const NotFound     = lazy(() => import("./pages/NotFound"));
 // Auth — rendered inside AppLayout
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
 const Spaces       = lazy(() => import("./pages/Spaces"));
-const Assets       = lazy(() => import("./pages/Assets"));
 const Tools        = lazy(() => import("./pages/Tools"));
 const Admin        = lazy(() => import("./pages/Admin"));
 const Formarketing = lazy(() => import("./pages/Formarketing"));
