@@ -9,7 +9,7 @@ const Downloads = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white font-sans overflow-hidden selection:bg-primary/30 selection:text-white">
+    <>
       <Helmet><title>Descargas | Creator IA Pro</title></Helmet>
       {/* Ambient glows */}
       <div className="pointer-events-none fixed inset-0">
@@ -17,28 +17,7 @@ const Downloads = () => {
         <div className="absolute -bottom-40 right-1/3 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[150px]" />
       </div>
 
-      {/* Nav */}
-      <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-white/[0.05] bg-background/40 backdrop-blur-2xl">
-        <button onClick={() => navigate("/")} className="flex items-center gap-4 text-white/60 hover:text-white transition-colors">
-          <ArrowLeft className="h-4 w-4" />
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-[0_0_20px_rgba(255,255,255,0.15)]">
-              <Sparkles className="h-5 w-5 text-black" />
-            </div>
-            <span className="text-sm font-bold font-display uppercase tracking-tight">
-              Creator <span className="text-primary">IA</span> Pro
-            </span>
-          </div>
-        </button>
-        <button
-          onClick={() => navigate("/auth")}
-          className="bg-white text-black hover:bg-white/90 rounded-2xl px-8 py-3 text-xs font-bold uppercase tracking-widest font-display transition-all active:scale-95"
-        >
-          Empezar Gratis
-        </button>
-      </header>
-
-      <main id="main-content" className="relative z-10 flex flex-col items-center px-8 pt-20 pb-32">
+      <div id="main-content" className="relative z-10 flex flex-col items-center px-8 py-10 pb-32">
         {/* Badge */}
         <div className="mb-10 flex items-center gap-3 rounded-full border border-white/5 bg-white/[0.03] px-6 py-3">
           <Globe className="h-3.5 w-3.5 text-primary" />
@@ -142,8 +121,8 @@ const Downloads = () => {
             © {new Date().getFullYear()} Creator IA Pro — Todos los derechos reservados.
           </p>
         </footer>
-      </main>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -211,10 +211,10 @@ export default function Pricing() {
         <meta name="description" content="Esquema de créditos industriales. Paga por lo que usas con la seguridad de Bold.co." />
       </Helmet>
 
-      <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900 selection:bg-primary/15 relative overflow-x-hidden">
+      <div className="h-full bg-background selection:bg-primary/15 relative overflow-x-hidden">
         <MeshGradient />
 
-        <main id="main-content" className="pt-20 pb-40 relative z-10">
+        <div id="main-content" className="pt-10 pb-40 relative z-10">
           
           {/* ── Hero ────────────────────────────────────────────────────────── */}
           <section className="relative px-6 mb-24 overflow-visible">
@@ -294,7 +294,7 @@ export default function Pricing() {
                       <p className="text-zinc-400 text-xs leading-relaxed">{plan.description}</p>
                     </div>
 
-                    <div className="mb-8 overflow-hidden">
+                    <div className="py-10 relative overflow-hidden">
                       <div className="flex items-baseline gap-1">
                         <span className="text-4xl font-black font-display tracking-tighter">
                           ${displayPrice.toLocaleString('es-CO')}
@@ -525,8 +525,7 @@ export default function Pricing() {
               </div>
             ))}
           </section>
-
-        </main>
+        </div>
       </div>
     </>
   );

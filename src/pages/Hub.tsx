@@ -386,10 +386,10 @@ const Hub = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-zinc-900 font-sans">
+    <>
       <Helmet><title>Hub de Plantillas | Creator IA Pro</title></Helmet>
 
-      <main id="main-content" className="pt-10">
+      <div className="mx-auto max-w-[1440px] px-8 py-10 pt-6 font-sans">
         <div className="max-w-[1440px] mx-auto px-8 pb-12">
 
           {/* Header */}
@@ -580,8 +580,8 @@ const Hub = () => {
             {TEMPLATES.length} plantillas disponibles · Más con cada actualización
           </p>
         </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
 };
 

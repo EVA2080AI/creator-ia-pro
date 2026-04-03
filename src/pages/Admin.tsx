@@ -628,7 +628,7 @@ const Admin = () => {
 
   if (authLoading || adminLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="flex h-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
       </div>
     );
@@ -645,7 +645,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-zinc-900 selection:bg-primary/20">
+    <>
       <Helmet><title>Admin | Creator IA Pro</title></Helmet>
 
       {creditModalUser && (
@@ -656,7 +656,7 @@ const Admin = () => {
         />
       )}
 
-      <div className="mx-auto max-w-6xl px-4 pt-10 pb-20 sm:px-6 space-y-6">
+      <div className="mx-auto max-w-6xl px-4 py-10 pb-20 sm:px-6 space-y-6">
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between">
@@ -1238,7 +1238,7 @@ const Admin = () => {
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

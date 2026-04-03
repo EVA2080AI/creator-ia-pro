@@ -170,10 +170,10 @@ export default function ShareScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground selection:bg-[var(--brand)]/30 selection:text-[#020203] lowercase font-sans">
+    <>
       <Helmet><title>ShareScreen | Creator IA Pro</title></Helmet>
       
-      <main id="main-content" className="mx-auto max-w-4xl px-4 py-8">
+      <div className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-6 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} aria-label="volver al dashboard" className="hover:bg-white/5 rounded-xl text-slate-400 hover:text-foreground">
             <ArrowLeft className="h-4 w-4" />
@@ -271,7 +271,7 @@ export default function ShareScreen() {
           </div>
         )}
 
-      </main>
-    </div>
+      </div>
+    </>
   );
 }

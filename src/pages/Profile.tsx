@@ -76,7 +76,7 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="flex h-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -87,10 +87,10 @@ const Profile = () => {
   const joinDate = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" }) : "—";
 
   return (
-    <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900">
+    <>
       <Helmet><title>Perfil | Creator IA Pro</title></Helmet>
 
-      <main id="main-content" className="max-w-5xl mx-auto px-6 pt-10 pb-20">
+      <div className="max-w-5xl mx-auto px-6 py-10 pb-20">
         {/* Header */}
         <div className="mb-10">
           <p className="text-xs text-zinc-400 uppercase tracking-widest font-bold mb-2">Mi cuenta</p>
@@ -299,8 +299,8 @@ const Profile = () => {
             </button>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
 };
 

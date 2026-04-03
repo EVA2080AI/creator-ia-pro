@@ -248,17 +248,17 @@ const SystemStatus = () => {
 
   if (authLoading || adminLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="flex h-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background bg-grid-white/[0.02]">
+    <>
       <Helmet><title>Estado del Sistema | Creator IA Pro</title></Helmet>
 
-      <main id="main-content" className="mx-auto max-w-5xl px-6 py-8">
+      <div className="mx-auto max-w-5xl px-6 py-8">
         <div className="mb-6 flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
             <ArrowLeft className="h-4 w-4" />
@@ -400,8 +400,8 @@ const SystemStatus = () => {
             </div>
           ))}
         </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
 };
 

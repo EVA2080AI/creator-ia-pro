@@ -109,8 +109,10 @@ export default function CodeIDE() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden text-foreground selection:bg-primary/30">
+    <>
       <Helmet><title>Code IDE | Creator IA Pro</title></Helmet>
+      
+      <div className="flex flex-col h-full bg-background overflow-hidden text-foreground selection:bg-primary/30">
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* --- Topbar --- */}
@@ -134,7 +136,7 @@ export default function CodeIDE() {
         />
 
         {/* --- Triple-Column Layout --- */}
-        <main id="main-content" className="flex-1 overflow-hidden relative">
+        <div id="main-content" className="flex-1 overflow-hidden relative">
         <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
           
           {/* 1. File Explorer (Left) */}
@@ -252,8 +254,9 @@ export default function CodeIDE() {
             </>
           )}
         </ResizablePanelGroup>
-      </main>
+        </div>
       </div>
     </div>
+    </>
   );
 }
