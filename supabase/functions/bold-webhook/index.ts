@@ -119,6 +119,23 @@ serve(async (req) => {
 
         if (rpcError) throw rpcError;
 
+        // 3.5. If it is a subscription plan, update the profile's subscription_tier
+        if (["starter", "creator", "pymes"].includes(packId)) {
+          console.log(`Upgrading user ${tx.user_id} to plan: ${packId}`);
+          await supabaseClient
+            .from("profiles")
+            .update({ subscription_tier: packId, updated_at: new Date().toISOString() })
+            .eq("user_id", tx.user_id);
+            
+          // Add a trackable transaction for the tier upgrade itself
+          await supabaseClient.from("transactions").insert({
+            user_id: tx.user_id,
+            type: "subscription_change",
+            amount: 0,
+            description: `Plan activado: ${packId} (Bold)`
+          });
+        }
+
         // 4. Confirm transaction
         await supabaseClient
           .from("transactions")

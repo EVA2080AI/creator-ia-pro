@@ -11,10 +11,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/layout/AppLayout";
 
-// Redirect /canvas → /formarketing preserving query params
+// Redirect /canvas → /studio-flow preserving query params
 const CanvasRedirect = () => {
   const loc = useLocation();
-  return <Navigate to={`/formarketing${loc.search}`} replace />;
+  return <Navigate to={`/studio-flow${loc.search}`} replace />;
 };
 
 // Global auth session watcher — handles token expiry and forced sign-out
@@ -122,7 +122,8 @@ const App = () => {
                     <Route path="/tools"        element={<Tools />} />
                     <Route path="/apps/:appId"  element={<Tools />} />
                     <Route path="/admin"        element={<Admin />} />
-                    <Route path="/formarketing" element={<Formarketing />} />
+                    <Route path="/formarketing" element={<Navigate to="/studio-flow" replace />} />
+                    <Route path="/studio-flow" element={<Formarketing />} />
                     <Route path="/profile"      element={<Profile />} />
                     <Route path="/hub"          element={<Hub />} />
                     <Route path="/antigravity"  element={<Antigravity />} />

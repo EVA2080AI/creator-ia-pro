@@ -383,7 +383,7 @@ const Hub = () => {
       }
 
       toast.success(`Plantilla "${template.title}" cargada`);
-      navigate(`/formarketing?spaceId=${space.id}`);
+      navigate(`/studio-flow?spaceId=${space.id}`);
     } catch {
       toast.error("Error al crear espacio desde plantilla");
     }
@@ -494,8 +494,8 @@ const Hub = () => {
                 supabase.from("spaces").insert({ user_id: user?.id || "", name: "Nuevo Proyecto" })
                   .select().single()
                   .then(({ data }) => {
-                    if (data) navigate(`/formarketing?spaceId=${data.id}`);
-                    else navigate("/formarketing");
+                    if (data) navigate(`/studio-flow?spaceId=${data.id}`);
+                    else navigate("/studio-flow");
                   });
               }}
               className="rounded-[2rem] border border-dashed border-zinc-200 group flex flex-col items-center justify-center py-12 gap-4 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500"

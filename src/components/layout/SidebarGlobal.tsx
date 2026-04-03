@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 // ── Navigation structure ──────────────────────────────────────────────────────
 const NAV_MAIN = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           requiresPymes: false },
-  { path: '/formarketing', label: 'Studio',        icon: LayoutTemplate, requiresPymes: true },
+  { path: '/studio-flow',  label: 'Studio Flow',   icon: LayoutTemplate, requiresPymes: true },
   { path: '/code',         label: 'Editor',        icon: Code2,          requiresPymes: false },
   { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     requiresPymes: false },
   { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     requiresPymes: false },
