@@ -127,183 +127,177 @@ const Spaces = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900">
+    <>
       <Helmet><title>Spaces | Creator IA Pro</title></Helmet>
+      <div className="max-w-[1100px] mx-auto px-6 py-6 font-sans">
+        {/* Top bar */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="relative flex-1 max-w-md group">
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 group-focus-within:text-primary/60 transition-colors pointer-events-none" />
+            <Input
+              placeholder="Buscar en Spaces..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="bg-zinc-50 border-zinc-200 pl-11 h-10 rounded-xl text-[13px] text-zinc-900 placeholder:text-zinc-500 focus:border-primary/30 focus:ring-0 transition-all"
+            />
+          </div>
 
-      <div className="flex h-screen overflow-hidden">
-        {/* Main content */}
-        <main id="main-content" className="flex-1 overflow-y-auto">
-          <div className="max-w-[1100px] mx-auto px-6 py-6">
-            {/* Top bar */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="relative flex-1 max-w-md group">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 group-focus-within:text-primary/60 transition-colors pointer-events-none" />
-                <Input
-                  placeholder="Buscar en Spaces..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="bg-zinc-50 border-zinc-200 pl-11 h-10 rounded-xl text-[13px] text-zinc-900 placeholder:text-zinc-500 focus:border-primary/30 focus:ring-0 transition-all"
-                />
-              </div>
+          {/* Sort */}
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as any)}
+            className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-[11px] text-zinc-500 outline-none hover:border-zinc-300 transition-all cursor-pointer"
+          >
+            <option value="updated">Modificado</option>
+            <option value="created">Creado</option>
+            <option value="name">Nombre</option>
+          </select>
 
-              {/* Sort */}
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-[11px] text-zinc-500 outline-none hover:border-zinc-300 transition-all cursor-pointer"
-              >
-                <option value="updated">Modificado</option>
-                <option value="created">Creado</option>
-                <option value="name">Nombre</option>
-              </select>
+          {/* View toggle */}
+          <div className="flex items-center gap-0.5 bg-zinc-50 border border-zinc-200 rounded-xl p-1">
+            <button onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}>
+              <LayoutGrid className="h-3.5 w-3.5" />
+            </button>
+            <button onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}>
+              <List className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
 
-              {/* View toggle */}
-              <div className="flex items-center gap-0.5 bg-zinc-50 border border-zinc-200 rounded-xl p-1">
-                <button onClick={() => setViewMode('grid')}
-                  className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}>
-                  <LayoutGrid className="h-3.5 w-3.5" />
-                </button>
-                <button onClick={() => setViewMode('list')}
-                  className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}>
-                  <List className="h-3.5 w-3.5" />
-                </button>
-              </div>
+        {/* Section label */}
+        <div className="flex items-center gap-2 mb-4">
+          <HardDrive className="h-4 w-4 text-zinc-500" />
+          <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.25em] font-display">Mis Spaces</span>
+          <span className="text-[10px] text-zinc-500 ml-1">— {filtered.length}</span>
+        </div>
+
+        {/* Content */}
+        {loading ? (
+          <div className="flex h-48 items-center justify-center">
+            <Loader2 className="h-7 w-7 animate-spin text-primary/50" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div
+            onClick={handleOpenCreate}
+            className="flex h-64 flex-col items-center justify-center border border-dashed border-zinc-200 rounded-3xl bg-zinc-50 cursor-pointer hover:border-primary/20 hover:bg-primary/5 transition-all group"
+          >
+            <div className="w-14 h-14 rounded-2xl bg-zinc-100 border border-zinc-200 flex items-center justify-center mb-4 group-hover:scale-105 group-hover:bg-primary/10 group-hover:border-primary/30 transition-all">
+              <Plus className="h-6 w-6 text-zinc-400 group-hover:text-primary transition-colors" />
             </div>
-
-            {/* Section label */}
-            <div className="flex items-center gap-2 mb-4">
-              <HardDrive className="h-4 w-4 text-zinc-500" />
-              <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.25em] font-display">Mis Spaces</span>
-              <span className="text-[10px] text-zinc-500 ml-1">— {filtered.length}</span>
-            </div>
-
-            {/* Content */}
-            {loading ? (
-              <div className="flex h-48 items-center justify-center">
-                <Loader2 className="h-7 w-7 animate-spin text-primary/50" />
-              </div>
-            ) : filtered.length === 0 ? (
+            <p className="text-[14px] font-bold text-zinc-400 font-display mb-1">
+              {search ? "Sin resultados" : "Crea tu primer Space"}
+            </p>
+            <p className="text-[12px] text-zinc-500">
+              {search ? "Prueba con otro término" : "Organiza proyectos y activos creativos"}
+            </p>
+          </div>
+        ) : viewMode === 'grid' ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map((space) => (
               <div
-                onClick={handleOpenCreate}
-                className="flex h-64 flex-col items-center justify-center border border-dashed border-zinc-200 rounded-3xl bg-zinc-50 cursor-pointer hover:border-primary/20 hover:bg-primary/5 transition-all group"
+                key={space.id}
+                className="group cursor-pointer rounded-2xl border border-zinc-200 bg-zinc-50 hover:border-zinc-200 hover:bg-zinc-50 transition-all relative overflow-hidden"
+                onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
               >
-                <div className="w-14 h-14 rounded-2xl bg-zinc-100 border border-zinc-200 flex items-center justify-center mb-4 group-hover:scale-105 group-hover:bg-primary/10 group-hover:border-primary/30 transition-all">
-                  <Plus className="h-6 w-6 text-zinc-400 group-hover:text-primary transition-colors" />
-                </div>
-                <p className="text-[14px] font-bold text-zinc-400 font-display mb-1">
-                  {search ? "Sin resultados" : "Crea tu primer Space"}
-                </p>
-                <p className="text-[12px] text-zinc-500">
-                  {search ? "Prueba con otro término" : "Organiza proyectos y activos creativos"}
-                </p>
-              </div>
-            ) : viewMode === 'grid' ? (
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {filtered.map((space) => (
-                  <div
-                    key={space.id}
-                    className="group cursor-pointer rounded-2xl border border-zinc-200 bg-zinc-50 hover:border-zinc-200 hover:bg-zinc-50 transition-all relative overflow-hidden"
-                    onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
-                  >
-                    {/* Color accent bar */}
-                    <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                {/* Color accent bar */}
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-                    {/* Thumbnail */}
-                    <div className="flex h-32 items-center justify-center bg-zinc-50 border-b border-zinc-200 overflow-hidden">
-                      {space.thumbnail_url ? (
-                        <img src={space.thumbnail_url} alt={space.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                      ) : (
-                        <div className="flex flex-col items-center gap-2">
-                          <BookOpen className="h-7 w-7 text-zinc-900/8 group-hover:text-primary/30 transition-colors" />
-                        </div>
+                {/* Thumbnail */}
+                <div className="flex h-32 items-center justify-center bg-zinc-50 border-b border-zinc-200 overflow-hidden">
+                  {space.thumbnail_url ? (
+                    <img src={space.thumbnail_url} alt={space.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <BookOpen className="h-7 w-7 text-zinc-900/8 group-hover:text-primary/30 transition-colors" />
+                    </div>
+                  )}
+                </div>
+
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-[13px] font-bold text-zinc-700 group-hover:text-zinc-900 transition-colors font-display truncate">{space.name}</h3>
+                      <p className="text-[10px] text-zinc-500 mt-0.5">{new Date(space.updated_at).toLocaleDateString('es', { day: 'numeric', month: 'short' })}</p>
+                      {space.description && (
+                        <p className="text-[11px] text-zinc-500 mt-1.5 line-clamp-2 leading-relaxed">{space.description}</p>
                       )}
                     </div>
-
-                    <div className="p-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-[13px] font-bold text-zinc-700 group-hover:text-zinc-900 transition-colors font-display truncate">{space.name}</h3>
-                          <p className="text-[10px] text-zinc-500 mt-0.5">{new Date(space.updated_at).toLocaleDateString('es', { day: 'numeric', month: 'short' })}</p>
-                          {space.description && (
-                            <p className="text-[11px] text-zinc-500 mt-1.5 line-clamp-2 leading-relaxed">{space.description}</p>
-                          )}
-                        </div>
-                        <button
-                          onClick={(e) => e.stopPropagation()}
-                          className="shrink-0 relative group/menu"
-                        >
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                              <span className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
-                                <MoreVertical className="h-3.5 w-3.5" />
-                              </span>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-xl border-zinc-200 rounded-xl p-1.5 min-w-[140px] shadow-2xl">
-                              <DropdownMenuItem className="rounded-lg text-[11px] font-medium focus:bg-primary/10 focus:text-primary text-zinc-400 py-2 cursor-pointer"
-                                onClick={(e) => { e.stopPropagation(); handleOpenEdit(space); }}>
-                                <Pencil className="mr-2 h-3.5 w-3.5" /> Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDeleteTargetId(space.id); }}
-                                className="rounded-lg text-[11px] font-medium text-rose-400/60 focus:bg-rose-500/10 focus:text-rose-400 py-2 cursor-pointer">
-                                <Trash2 className="mr-2 h-3.5 w-3.5" /> Eliminar
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </button>
-                      </div>
-                      <div className="mt-3 pt-3 border-t border-zinc-200 flex items-center justify-between">
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest font-display">Abrir Canvas</span>
-                        <ChevronRight className="h-3.5 w-3.5 text-zinc-500 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-                      </div>
-                    </div>
+                    <button
+                      onClick={(e) => e.stopPropagation()}
+                      className="shrink-0 relative group/menu"
+                    >
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <span className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+                            <MoreVertical className="h-3.5 w-3.5" />
+                          </span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-xl border-zinc-200 rounded-xl p-1.5 min-w-[140px] shadow-2xl">
+                          <DropdownMenuItem className="rounded-lg text-[11px] font-medium focus:bg-primary/10 focus:text-primary text-zinc-400 py-2 cursor-pointer"
+                            onClick={(e) => { e.stopPropagation(); handleOpenEdit(space); }}>
+                            <Pencil className="mr-2 h-3.5 w-3.5" /> Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDeleteTargetId(space.id); }}
+                            className="rounded-lg text-[11px] font-medium text-rose-400/60 focus:bg-rose-500/10 focus:text-rose-400 py-2 cursor-pointer">
+                            <Trash2 className="mr-2 h-3.5 w-3.5" /> Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </button>
                   </div>
-                ))}
-              </div>
-            ) : (
-              /* List view — Google Drive-like */
-              <div className="flex flex-col gap-0.5">
-                <div className="grid grid-cols-[1fr_140px_120px_40px] px-4 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-display border-b border-zinc-200">
-                  <span>Nombre</span><span>Modificado</span><span>Descripción</span><span />
+                  <div className="mt-3 pt-3 border-t border-zinc-200 flex items-center justify-between">
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest font-display">Abrir Canvas</span>
+                    <ChevronRight className="h-3.5 w-3.5 text-zinc-500 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                  </div>
                 </div>
-                {filtered.map((space) => (
-                  <div key={space.id}
-                    className="group grid grid-cols-[1fr_140px_120px_40px] items-center px-4 py-3 rounded-xl hover:bg-zinc-50 cursor-pointer transition-all border border-transparent hover:border-zinc-200"
-                    onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-zinc-50 border border-zinc-200 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
-                        {space.thumbnail_url
-                          ? <img src={space.thumbnail_url} className="w-full h-full object-cover rounded-xl" />
-                          : <BookOpen className="h-3.5 w-3.5 text-zinc-500 group-hover:text-primary transition-colors" />
-                        }
-                      </div>
-                      <span className="text-[13px] font-medium text-zinc-600 group-hover:text-zinc-900 transition-colors truncate">{space.name}</span>
-                    </div>
-                    <span className="text-[11px] text-zinc-500">{new Date(space.updated_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                    <span className="text-[11px] text-zinc-500 truncate pr-4">{space.description || '—'}</span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <button className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 opacity-0 group-hover:opacity-100 transition-all">
-                          <MoreVertical className="h-3.5 w-3.5" />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-xl border-zinc-200 rounded-xl p-1.5 min-w-[140px] shadow-2xl">
-                        <DropdownMenuItem className="rounded-lg text-[11px] font-medium focus:bg-primary/10 focus:text-primary text-zinc-400 py-2 cursor-pointer"
-                          onClick={(e) => { e.stopPropagation(); handleOpenEdit(space); }}>
-                          <Pencil className="mr-2 h-3.5 w-3.5" /> Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDeleteTargetId(space.id); }}
-                          className="rounded-lg text-[11px] font-medium text-rose-400/60 focus:bg-rose-500/10 focus:text-rose-400 py-2 cursor-pointer">
-                          <Trash2 className="mr-2 h-3.5 w-3.5" /> Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                ))}
               </div>
-            )}
+            ))}
           </div>
-        </main>
+        ) : (
+          /* List view — Google Drive-like */
+          <div className="flex flex-col gap-0.5">
+            <div className="grid grid-cols-[1fr_140px_120px_40px] px-4 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-display border-b border-zinc-200">
+              <span>Nombre</span><span>Modificado</span><span>Descripción</span><span />
+            </div>
+            {filtered.map((space) => (
+              <div key={space.id}
+                className="group grid grid-cols-[1fr_140px_120px_40px] items-center px-4 py-3 rounded-xl hover:bg-zinc-50 cursor-pointer transition-all border border-transparent hover:border-zinc-200"
+                onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-zinc-50 border border-zinc-200 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
+                    {space.thumbnail_url
+                      ? <img src={space.thumbnail_url} className="w-full h-full object-cover rounded-xl" />
+                      : <BookOpen className="h-3.5 w-3.5 text-zinc-500 group-hover:text-primary transition-colors" />
+                    }
+                  </div>
+                  <span className="text-[13px] font-medium text-zinc-600 group-hover:text-zinc-900 transition-colors truncate">{space.name}</span>
+                </div>
+                <span className="text-[11px] text-zinc-500">{new Date(space.updated_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                <span className="text-[11px] text-zinc-500 truncate pr-4">{space.description || '—'}</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                    <button className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 opacity-0 group-hover:opacity-100 transition-all">
+                      <MoreVertical className="h-3.5 w-3.5" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-xl border-zinc-200 rounded-xl p-1.5 min-w-[140px] shadow-2xl">
+                    <DropdownMenuItem className="rounded-lg text-[11px] font-medium focus:bg-primary/10 focus:text-primary text-zinc-400 py-2 cursor-pointer"
+                      onClick={(e) => { e.stopPropagation(); handleOpenEdit(space); }}>
+                      <Pencil className="mr-2 h-3.5 w-3.5" /> Editar
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDeleteTargetId(space.id); }}
+                      className="rounded-lg text-[11px] font-medium text-rose-400/60 focus:bg-rose-500/10 focus:text-rose-400 py-2 cursor-pointer">
+                      <Trash2 className="mr-2 h-3.5 w-3.5" /> Eliminar
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Dialog */}
@@ -392,7 +386,7 @@ const Spaces = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 

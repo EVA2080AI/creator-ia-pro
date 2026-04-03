@@ -147,8 +147,7 @@ const Dashboard = () => {
   return (
     <>
       <Helmet><title>Dashboard | Creator IA Pro</title></Helmet>
-      <main id="main-content" className="min-h-screen bg-background text-foreground font-sans">
-        <div className="max-w-[1440px] mx-auto px-6 pt-10 pb-6 space-y-5">
+      <div className="max-w-[1440px] mx-auto px-6 pt-6 pb-6 space-y-5">
 
           {/* Post-checkout success banner */}
           {(checkoutSuccess || creditsSuccess) && (
@@ -430,8 +429,6 @@ const Dashboard = () => {
           </div>
 
         </div>
-      </main>
-
       {/* Create Space Dialog */}
       <Dialog open={isCreatingSpace} onOpenChange={setIsCreatingSpace}>
         <DialogContent className="max-w-md p-8">

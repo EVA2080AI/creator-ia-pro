@@ -528,7 +528,7 @@ export default function Chat() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="flex h-full items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center animate-spin">
             <Loader2 className="h-6 w-6 text-primary" />
@@ -541,7 +541,7 @@ export default function Chat() {
 
   if (!activeProject) {
     return (
-      <div className="flex flex-col h-screen overflow-hidden">
+      <div className="flex flex-col h-full overflow-hidden">
         <div className="flex-1 overflow-hidden">
           <WelcomeScreen
             onPrompt={handleWelcomePrompt}
@@ -564,7 +564,7 @@ export default function Chat() {
   const credits = profile?.credits_balance ?? 0;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
+    <div className="flex flex-col h-full overflow-hidden bg-background">
       <Helmet><title>Genesis IA | Creator IA Pro</title></Helmet>
 
       {/* ── Topbar ── */}

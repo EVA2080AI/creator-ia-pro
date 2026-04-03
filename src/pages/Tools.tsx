@@ -482,7 +482,7 @@ const Tools = () => {
   const textTools  = tools.filter(t => t.category === "text");
 
   return (
-    <div className="fixed inset-0 flex bg-background text-zinc-900 font-sans overflow-hidden" style={{ top: "64px" }}>
+    <div className="flex h-full w-full bg-background text-zinc-900 font-sans overflow-hidden">
       <Helmet><title>Herramientas IA | Creator IA Pro</title></Helmet>
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}

@@ -102,10 +102,7 @@ const App = () => {
                   {/* ── Public routes (no AppLayout) ── */}
                   <Route path="/"                     element={<Index />} />
                   <Route path="/auth"                 element={<Auth />} />
-                  <Route path="/pricing"              element={<Pricing />} />
-                  <Route path="/descargar"            element={<Downloads />} />
                   <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
-                  <Route path="/product-backlog"      element={<ProductBacklog />} />
                   <Route path="/reset-password"       element={<ResetPassword />} />
 
                   {/* ── Redirects ── */}
@@ -113,9 +110,12 @@ const App = () => {
                   <Route path="/studio"  element={<Navigate to="/tools"  replace />} />
                   <Route path="/genesis" element={<Navigate to="/chat"   replace />} />
 
-                  {/* ── Auth routes (wrapped in AppLayout) ── */}
+                  {/* ── Platform routes (wrapped in AppLayout) ── */}
                   <Route element={<AppLayout />}>
                     <Route path="/dashboard"    element={<Dashboard />} />
+                    <Route path="/pricing"      element={<Pricing />} />
+                    <Route path="/descargar"    element={<Downloads />} />
+                    <Route path="/product-backlog" element={<ProductBacklog />} />
                     <Route path="/spaces"       element={<Spaces />} />
                     <Route path="/assets"       element={<Assets />} />
                     <Route path="/tools"        element={<Tools />} />

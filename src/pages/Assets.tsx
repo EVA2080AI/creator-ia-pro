@@ -151,7 +151,7 @@ const Assets = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-zinc-900 font-sans selection:bg-primary/15">
+    <>
       <Helmet><title>Mis Activos | Creator IA Pro</title></Helmet>
       {/* Ambient */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -159,7 +159,7 @@ const Assets = () => {
         <div className="absolute top-1/4 left-0 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[120px]" />
       </div>
 
-      <main id="main-content" className="relative z-10 mx-auto max-w-[1440px] px-8 py-10 pt-10">
+      <div className="relative z-10 mx-auto max-w-[1440px] px-8 py-10 pt-6 font-sans">
         {/* Header */}
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-zinc-200 pb-12">
           <div className="space-y-4">
@@ -310,7 +310,7 @@ const Assets = () => {
             </button>
           </div>
         )}
-      </main>
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteTargetId} onOpenChange={(o) => !o && setDeleteTargetId(null)}>
@@ -395,7 +395,7 @@ const Assets = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
