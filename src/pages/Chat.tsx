@@ -3,6 +3,7 @@
  * Lovable-like IDE: describe → generate → preview → push to GitHub
  */
 import { useState, useCallback, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import JSZip from 'jszip';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -571,6 +572,7 @@ export default function Chat() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden pt-[72px]" style={{ background: 'hsl(var(--background))' }}>
+      <Helmet><title>Genesis IA | Creator IA Pro</title></Helmet>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       {/* ── Topbar ── */}

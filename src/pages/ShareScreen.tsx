@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { AppHeader } from "@/components/AppHeader";
@@ -171,9 +172,10 @@ export default function ShareScreen() {
 
   return (
     <div className="min-h-screen bg-[#020203] text-white selection:bg-[var(--brand)]/30 selection:text-[#020203] lowercase font-sans">
+      <Helmet><title>ShareScreen | Creator IA Pro</title></Helmet>
       <AppHeader userId={user?.id} onSignOut={signOut} />
       
-      <main className="mx-auto max-w-4xl px-4 py-8">
+      <main id="main-content" className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-6 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} aria-label="volver al dashboard" className="hover:bg-white/5 rounded-xl text-slate-400 hover:text-white">
             <ArrowLeft className="h-4 w-4" />

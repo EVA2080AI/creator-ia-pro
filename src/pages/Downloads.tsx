@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import {
   Sparkles, ArrowLeft, Globe,
   Check, Shield, Zap, RefreshCw, Cloud, Monitor, Smartphone,
@@ -9,6 +10,7 @@ const Downloads = () => {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white font-sans overflow-hidden selection:bg-primary/30 selection:text-white">
+      <Helmet><title>Descargas | Creator IA Pro</title></Helmet>
       {/* Ambient glows */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[180px]" />
@@ -36,7 +38,7 @@ const Downloads = () => {
         </button>
       </header>
 
-      <main className="relative z-10 flex flex-col items-center px-8 pt-20 pb-32">
+      <main id="main-content" className="relative z-10 flex flex-col items-center px-8 pt-20 pb-32">
         {/* Badge */}
         <div className="mb-10 flex items-center gap-3 rounded-full border border-white/5 bg-white/[0.03] px-6 py-3">
           <Globe className="h-3.5 w-3.5 text-primary" />

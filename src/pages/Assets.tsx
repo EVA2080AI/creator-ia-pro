@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -152,6 +153,7 @@ const Assets = () => {
 
   return (
     <div className="min-h-screen bg-background text-zinc-900 font-sans selection:bg-primary/15">
+      <Helmet><title>Mis Activos | Creator IA Pro</title></Helmet>
       {/* Ambient */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[150px]" />
@@ -160,7 +162,7 @@ const Assets = () => {
 
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      <main className="relative z-10 mx-auto max-w-[1440px] px-8 py-12 pt-24">
+      <main id="main-content" className="relative z-10 mx-auto max-w-[1440px] px-8 py-12 pt-24">
         {/* Header */}
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-zinc-200 pb-12">
           <div className="space-y-4">

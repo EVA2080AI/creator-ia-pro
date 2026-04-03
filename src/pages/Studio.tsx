@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useStudioProjects, StudioFile } from '@/hooks/useStudioProjects';
@@ -198,6 +199,7 @@ export default function Studio() {
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden text-foreground selection:bg-primary/30">
+      <Helmet><title>Studio | Creator IA Pro</title></Helmet>
       {/* ── Topbar (Hidden in Fullscreen) ─────────────────────────────────── */}
       {!isFullscreen && (
         <StudioTopbar 
@@ -216,7 +218,7 @@ export default function Studio() {
         />
       )}
 
-      <main className="flex flex-1 overflow-hidden">
+      <main id="main-content" className="flex flex-1 overflow-hidden">
         {/* ── Left Sidebar: Chat (Genesis) ── */}
         <div 
           className={cn(

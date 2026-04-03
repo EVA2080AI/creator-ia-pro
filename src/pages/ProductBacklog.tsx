@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -161,6 +162,7 @@ const ProductBacklog = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet><title>Product Backlog | Creator IA Pro</title></Helmet>
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[150px]" />
       </div>
@@ -177,7 +179,7 @@ const ProductBacklog = () => {
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-7xl px-6 py-8 space-y-10">
+      <main id="main-content" className="relative z-10 mx-auto max-w-7xl px-6 py-8 space-y-10">
         {/* SUMMARY */}
         <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="rounded-2xl border border-border bg-card p-5 text-center">

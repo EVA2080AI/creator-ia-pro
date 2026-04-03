@@ -347,7 +347,7 @@ export default function Index() {
           </button>
         </motion.div>
 
-        <main>
+        <main id="main-content">
 
           {/* ── Hero ─────────────────────────────────────────────────────── */}
           <section ref={heroRef} className="relative flex flex-col items-center text-center px-6 pt-24 pb-20 overflow-hidden">

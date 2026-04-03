@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useStudioProjects, StudioFile } from '@/hooks/useStudioProjects';
@@ -110,6 +111,7 @@ export default function CodeIDE() {
 
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden text-foreground selection:bg-primary/30">
+      <Helmet><title>Code IDE | Creator IA Pro</title></Helmet>
       <AppHeader 
         userId={user?.id} 
         onSignOut={async () => {
@@ -140,7 +142,7 @@ export default function CodeIDE() {
         />
 
         {/* --- Triple-Column Layout --- */}
-        <main className="flex-1 overflow-hidden relative">
+        <main id="main-content" className="flex-1 overflow-hidden relative">
         <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
           
           {/* 1. File Explorer (Left) */}

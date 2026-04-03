@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -146,9 +147,10 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans bg-grid-white/[0.02]">
+      <Helmet><title>Dashboard | Creator IA Pro</title></Helmet>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
-      <main className="pt-16">
+      <main id="main-content" className="pt-16">
         <div className="max-w-[1440px] mx-auto px-6 py-6 space-y-5">
 
           {/* Post-checkout success banner */}

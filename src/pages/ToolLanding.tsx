@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Sparkles, ArrowRight, Check, Wand2, ZoomIn, Eraser,
@@ -301,6 +302,7 @@ const ToolLanding = () => {
     <div className="min-h-screen bg-white">
       <AppHeader />
 
+      <Helmet><title>{tool ? `${tool.name} | Creator IA Pro` : 'Herramienta IA | Creator IA Pro'}</title></Helmet>
       <main id="main-content">
         {/* ── Breadcrumb ─────────────────────────────────── */}
         <div className="border-b border-zinc-100 bg-zinc-50">

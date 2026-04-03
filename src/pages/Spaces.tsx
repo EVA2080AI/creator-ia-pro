@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -128,6 +129,7 @@ const Spaces = () => {
 
   return (
     <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900">
+      <Helmet><title>Spaces | Creator IA Pro</title></Helmet>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <div className="flex pt-16 h-screen overflow-hidden">
@@ -175,7 +177,7 @@ const Spaces = () => {
         </aside>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto">
+        <main id="main-content" className="flex-1 overflow-y-auto">
           <div className="max-w-[1100px] mx-auto px-6 py-6">
             {/* Top bar */}
             <div className="flex items-center gap-3 mb-6">

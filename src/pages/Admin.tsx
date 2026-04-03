@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
@@ -646,6 +647,7 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-background text-zinc-900 selection:bg-primary/20">
+      <Helmet><title>Admin | Creator IA Pro</title></Helmet>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       {creditModalUser && (

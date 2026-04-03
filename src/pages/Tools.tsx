@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { AppHeader } from "@/components/AppHeader";
@@ -483,6 +484,7 @@ const Tools = () => {
 
   return (
     <div className="fixed inset-0 flex bg-[#0a0a0b] text-zinc-900 font-sans overflow-hidden" style={{ top: "64px" }}>
+      <Helmet><title>Herramientas IA | Creator IA Pro</title></Helmet>
       <AppHeader userId={user?.id} onSignOut={signOut} />
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}

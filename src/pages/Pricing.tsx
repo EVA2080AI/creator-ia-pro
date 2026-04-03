@@ -215,7 +215,7 @@ export default function Pricing() {
         <AppHeader userId={userId} onSignOut={() => supabase.auth.signOut()} />
         <MeshGradient />
 
-        <main className="pt-32 pb-40 relative z-10">
+        <main id="main-content" className="pt-32 pb-40 relative z-10">
           
           {/* ── Hero ────────────────────────────────────────────────────────── */}
           <section className="relative px-6 mb-24 overflow-visible">
