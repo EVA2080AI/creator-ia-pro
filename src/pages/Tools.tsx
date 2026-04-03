@@ -3,7 +3,6 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { aiService } from "@/services/ai-service";
@@ -483,9 +482,8 @@ const Tools = () => {
   const textTools  = tools.filter(t => t.category === "text");
 
   return (
-    <div className="fixed inset-0 flex bg-[#0a0a0b] text-zinc-900 font-sans overflow-hidden" style={{ top: "64px" }}>
+    <div className="fixed inset-0 flex bg-background text-zinc-900 font-sans overflow-hidden" style={{ top: "64px" }}>
       <Helmet><title>Herramientas IA | Creator IA Pro</title></Helmet>
-      <AppHeader userId={user?.id} onSignOut={signOut} />
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <aside className="hidden md:flex w-[240px] shrink-0 flex-col border-r border-zinc-200 bg-zinc-50 overflow-hidden">
@@ -597,7 +595,7 @@ const Tools = () => {
         </div>
 
         {/* ── Input bar (same pattern as Chat IA) ─────────────────────────── */}
-        <div className="shrink-0 border-t border-zinc-200 bg-[#0a0a0b] px-5 py-4">
+        <div className="shrink-0 border-t border-zinc-200 bg-background px-5 py-4">
 
           {/* Contextual settings row — always visible, compact */}
           <div className="flex flex-wrap items-center gap-2 mb-3">

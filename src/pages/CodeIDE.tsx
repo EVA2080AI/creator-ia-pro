@@ -10,7 +10,6 @@ import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
 import { PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { AppHeader } from '@/components/AppHeader';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   ResizableHandle, 
@@ -120,7 +119,7 @@ export default function CodeIDE() {
         }} 
       />
       
-      <div className="flex-1 flex flex-col pt-[56px] overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* --- Topbar --- */}
         <StudioTopbar 
           projectName={activeProject.name}

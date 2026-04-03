@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { AppHeader } from "@/components/AppHeader";
 import {
   Plus, Search, Loader2, FolderOpen, MoreVertical,
   Trash2, Pencil, BookOpen, LayoutGrid, ChevronRight,
@@ -130,7 +129,6 @@ const Spaces = () => {
   return (
     <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900">
       <Helmet><title>Spaces | Creator IA Pro</title></Helmet>
-      <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <div className="flex pt-16 h-screen overflow-hidden">
         {/* Drive-like Left Sidebar */}
@@ -283,7 +281,7 @@ const Spaces = () => {
                                 <MoreVertical className="h-3.5 w-3.5" />
                               </span>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="bg-[#0c0c0f]/95 backdrop-blur-xl border-zinc-200 rounded-xl p-1.5 min-w-[140px] shadow-2xl">
+                            <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-xl border-zinc-200 rounded-xl p-1.5 min-w-[140px] shadow-2xl">
                               <DropdownMenuItem className="rounded-lg text-[11px] font-medium focus:bg-primary/10 focus:text-primary text-zinc-400 py-2 cursor-pointer"
                                 onClick={(e) => { e.stopPropagation(); handleOpenEdit(space); }}>
                                 <Pencil className="mr-2 h-3.5 w-3.5" /> Editar
@@ -332,7 +330,7 @@ const Spaces = () => {
                           <MoreVertical className="h-3.5 w-3.5" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-[#0c0c0f]/95 backdrop-blur-xl border-zinc-200 rounded-xl p-1.5 min-w-[140px] shadow-2xl">
+                      <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-xl border-zinc-200 rounded-xl p-1.5 min-w-[140px] shadow-2xl">
                         <DropdownMenuItem className="rounded-lg text-[11px] font-medium focus:bg-primary/10 focus:text-primary text-zinc-400 py-2 cursor-pointer"
                           onClick={(e) => { e.stopPropagation(); handleOpenEdit(space); }}>
                           <Pencil className="mr-2 h-3.5 w-3.5" /> Editar

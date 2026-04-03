@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 /* ============================================
-   LUMINA v1.0 — Clean Light System
+   LUMINA v2.0 — Clean Light System
    Linear / Vercel / Stripe aesthetic
    ============================================ */
 
@@ -55,11 +55,24 @@
     --sidebar-border:              240 6% 90%;
     --sidebar-ring:                271 91% 65%;
 
-    /* ── Canvas stays dark ─────────────────── */
-    --canvas:      240 10% 6%;
-    --node-bg:     0 0% 100% / 0.04;
-    --node-border: 0 0% 100% / 0.12;
-    --node-glow:   271 91% 65% / 0.2;
+    /* ── Canvas v2.0 — light canvas ───────── */
+    --canvas-bg:        210 20% 98%;       /* #F8FAFC */
+    --canvas-grid:      210 16% 87%;       /* #CBD5E1 dot color */
+    --canvas:           210 20% 98%;
+    --node-bg:          0 0% 100%;
+    --node-bg-light:    0 0% 100%;
+    --node-border:      240 6% 88%;
+    --node-border-light: 210 14% 89%;
+    --node-glow:        271 91% 65%;
+
+    /* ── v2.0 surface / text / border tokens ─ */
+    --surface-primary:   0 0% 100%;
+    --surface-secondary: 240 5% 96%;
+    --text-primary:      240 10% 6%;
+    --text-secondary:    240 4% 40%;
+    --text-tertiary:     240 4% 60%;
+    --border-subtle:     240 6% 94%;
+    --border-default:    240 6% 90%;
 
     /* ── Status ────────────────────────────── */
     --success:          142 71% 45%;
@@ -111,9 +124,10 @@
   .bg-grid-white {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(0 0 0 / 0.04)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
   }
-  /* Grid for dark canvas areas */
-  .bg-grid-dark {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(255 255 255 / 0.04)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
+  /* Grid for canvas areas (light) */
+  .bg-grid-canvas {
+    background-image: radial-gradient(circle at 1px 1px, hsl(var(--canvas-grid)) 1px, transparent 0);
+    background-size: 24px 24px;
   }
 
   /* Lumina card utility */
@@ -125,6 +139,16 @@
   /* Brand shadow */
   .shadow-brand {
     box-shadow: 0 0 0 1px rgba(168,85,247,0.15), 0 4px 24px rgba(168,85,247,0.12);
+  }
+  /* Subtle card */
+  .card-light {
+    background: hsl(var(--surface-primary));
+    border: 1px solid hsl(var(--border-default));
+    border-radius: var(--radius);
+  }
+  .card-light:hover {
+    border-color: hsl(var(--border-subtle));
+    background: hsl(var(--surface-secondary));
   }
 }
 
@@ -174,6 +198,10 @@
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
+@keyframes fade-up {
+  0%   { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
 
 /* ============================================
    SCROLLBARS
@@ -192,17 +220,21 @@
 }
 
 /* ============================================
-   REACT FLOW (canvas — stays dark)
+   REACT FLOW — light canvas overrides
    ============================================ */
 .react-flow {
-  background-color: transparent !important;
+  background-color: hsl(var(--canvas-bg)) !important;
+}
+.react-flow__background {
+  color: hsl(var(--canvas-grid)) !important;
 }
 .react-flow__handle {
   width: 8px !important;
   height: 8px !important;
   background: #A855F7 !important;
-  border: 2px solid #1a1a2e !important;
+  border: 2px solid #ffffff !important;
   border-radius: 4px !important;
+  box-shadow: 0 0 0 1px rgba(168,85,247,0.2) !important;
 }
 .react-flow__edge-path {
   stroke-width: 1.5px !important;
@@ -210,7 +242,30 @@
 }
 .react-flow__edge.selected .react-flow__edge-path {
   stroke: #A855F7 !important;
-  filter: drop-shadow(0 0 8px rgba(168,85,247,0.4));
+  filter: drop-shadow(0 0 6px rgba(168,85,247,0.35));
+}
+.react-flow__controls {
+  background: white !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.06) !important;
+}
+.react-flow__controls-button {
+  background: white !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--text-secondary)) !important;
+}
+.react-flow__controls-button:hover {
+  background: hsl(var(--surface-secondary)) !important;
+}
+.react-flow__minimap {
+  background: white !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 10px !important;
+}
+.react-flow__node.selected > * {
+  outline: 2px solid rgba(168,85,247,0.7) !important;
+  outline-offset: 2px;
 }
 
 /* ============================================

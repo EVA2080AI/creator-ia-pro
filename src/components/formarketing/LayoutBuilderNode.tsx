@@ -48,40 +48,40 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
   };
 
   return (
-    <div className={`group relative rounded-2xl border border-white/5 bg-[#191a1f] backdrop-blur-xl w-[270px] shadow-2xl transition-all duration-300 hover:border-white/20
-      ${data.status === 'executing' ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.05)] animate-pulse' : ''}
+    <div className={`group relative rounded-2xl border bg-white backdrop-blur-xl w-[270px] shadow-sm transition-all duration-300 hover:shadow-md
+      ${data.status === 'executing' ? 'border-primary ring-2 ring-primary/20 shadow-lg animate-pulse' : 'border-zinc-200 hover:border-zinc-300'}
     `}>
       {/* Nexus V3 Industrial Header */}
-      <div className="flex h-10 items-center justify-between px-3 border-b border-white/5 bg-white/[0.01]">
+      <div className="flex h-10 items-center justify-between px-3 border-b border-zinc-100 bg-zinc-50/50 rounded-t-2xl">
         <div className="flex items-center gap-2 overflow-hidden">
-            <div className="p-1 rounded-lg bg-white/5 border border-white/10">
-              <Layout className="w-3.5 h-3.5 text-white/50 shrink-0" />
+            <div className="p-1 rounded-lg bg-emerald-50 border border-emerald-100">
+              <Layout className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
             </div>
             <input 
               value={data.title || ""} 
               onChange={(e) => updateField('title', e.target.value)}
-              className="bg-transparent border-none p-0 m-0 text-[10px] font-bold text-white/90 focus:outline-none w-full truncate uppercase tracking-tight transition-all"
+              className="bg-transparent border-none p-0 m-0 text-[10px] font-bold text-zinc-900 focus:outline-none w-full truncate uppercase tracking-tight transition-all placeholder:text-zinc-400"
               placeholder="STRUCTURE_ID"
             />
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <button 
             onClick={() => (data as any).onExecute?.()}
-            className="p-1.5 hover:bg-white/5 text-slate-600 hover:text-white rounded-lg transition-all active:scale-95"
+            className="p-1.5 hover:bg-zinc-100 text-zinc-400 hover:text-emerald-500 rounded-lg transition-all active:scale-95"
           >
              <Zap className="w-3.5 h-3.5" />
           </button>
-          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 hover:bg-white/5 text-slate-500 rounded-xl transition-all">
+          <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 hover:bg-zinc-100 text-zinc-400 rounded-xl transition-all">
              {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
-          <button onClick={deleteNode} className="p-1.5 hover:bg-destructive/5 text-destructive/30 hover:text-destructive rounded-xl transition-all">
+          <button onClick={deleteNode} className="p-1.5 hover:bg-red-50 text-red-300 hover:text-red-500 rounded-xl transition-all">
              <Trash2 className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
       {isExpanded && (
-        <div className="p-4 space-y-4 animate-in fade-in duration-500 bg-white/[0.01]">
+        <div className="p-4 space-y-4 animate-in fade-in duration-500 bg-white rounded-b-2xl">
           <div className="flex gap-1.5">
              {[
                { id: 'mobile', icon: Smartphone },
@@ -91,7 +91,7 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
                <button 
                  key={p.id}
                  onClick={() => { setPlatform(p.id as any); updateField('platform', p.id); }}
-                 className={`flex-1 flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all ${platform === p.id ? 'bg-white/10 border-white/20 text-white shadow-xl' : 'bg-white/[0.02] border-white/5 text-white/20 hover:bg-white/5'}`}
+                 className={`flex-1 flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all ${platform === p.id ? 'bg-zinc-900 border-zinc-900 text-white shadow-sm' : 'bg-white border-zinc-200 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50'}`}
                >
                  <p.icon className="w-3.5 h-3.5" />
                  <span className="text-[8px] font-bold uppercase tracking-widest">{p.id}</span>
@@ -100,36 +100,36 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
           </div>
 
           {/* Preview: show structure if ready, otherwise show wireframe placeholder */}
-          <div className="bg-[#191a1f] rounded-2xl border border-white/5 aspect-[16/10] relative overflow-hidden shadow-inner">
+          <div className="bg-zinc-50 rounded-2xl border border-zinc-200 aspect-[16/10] relative overflow-hidden shadow-sm">
             {data.structure && data.status === 'ready' ? (
               <div className="p-3 h-full overflow-hidden">
                 <div className="flex items-center gap-1 mb-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                  <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">Vista previa generada</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Vista previa generada</span>
                 </div>
                 {/* Render parsed structure sections */}
                 <div className="space-y-1.5">
                   {data.structure.split(/[>|\n,]/).filter(Boolean).slice(0, 5).map((section: string, i: number) => (
-                    <div key={i} className={`h-4 rounded-md flex items-center px-2 ${i === 0 ? 'bg-[#8AB4F8]/20 border border-[#8AB4F8]/20 w-full' : i % 2 === 0 ? 'bg-white/5 border border-white/5 w-3/4' : 'bg-white/[0.03] border border-white/5 w-full'}`}>
-                      <span className="text-[7px] text-white/30 truncate capitalize">{section.trim()}</span>
+                    <div key={i} className={`h-4 rounded-md flex items-center px-2 ${i === 0 ? 'bg-emerald-50 border border-emerald-100 w-full' : i % 2 === 0 ? 'bg-white border border-zinc-200 w-3/4 shadow-sm' : 'bg-zinc-100 border border-zinc-200 w-full shadow-sm'}`}>
+                      <span className="text-[7px] text-zinc-500 truncate capitalize">{section.trim()}</span>
                     </div>
                   ))}
                 </div>
               </div>
             ) : (
               <div className="p-3 flex flex-col justify-center h-full">
-                <div className="absolute inset-x-4 top-3 h-1 bg-white/5 rounded-full" />
+                <div className="absolute inset-x-4 top-3 h-1 bg-zinc-200 rounded-full" />
                 <div className="grid grid-cols-2 gap-2 mt-4 px-1">
-                  <div className="h-8 bg-white/5 rounded-lg border border-white/5" />
-                  <div className="h-8 bg-white/5 rounded-lg border border-white/5" />
-                  <div className="h-10 col-span-2 bg-white/10 rounded-lg border border-white/20 animate-pulse" />
+                  <div className="h-8 bg-white shadow-sm rounded-lg border border-zinc-200" />
+                  <div className="h-8 bg-white shadow-sm rounded-lg border border-zinc-200" />
+                  <div className="h-10 col-span-2 bg-emerald-50 rounded-lg border border-emerald-100 animate-pulse" />
                 </div>
               </div>
             )}
           </div>
 
-          <div className="pt-2 border-t border-white/5 space-y-1.5">
-            <span className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em] px-1 text-center block">Motor de diseño</span>
+          <div className="pt-2 border-t border-zinc-100 space-y-1.5">
+            <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-[0.2em] px-1 text-center block">Motor de diseño</span>
             <div className="grid grid-cols-2 gap-1.5">
               {[
                 { id: 'claude-3.5-sonnet', name: 'claude_v3' },
@@ -142,8 +142,8 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
                   onClick={() => updateField('model', m.id)}
                   className={`px-2 py-1.5 rounded-lg border text-[8px] font-bold lowercase tracking-wider transition-all ${
                     (data.model || 'claude-3.5-sonnet') === m.id 
-                    ? 'bg-white/10 border-white/20 text-white' 
-                    : 'bg-white/5 border-white/5 text-white/20 hover:bg-white/10'
+                    ? 'bg-zinc-900 border-zinc-900 text-white shadow-sm' 
+                    : 'bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-50'
                   }`}
                 >
                   {m.name}
@@ -153,11 +153,11 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
           </div>
 
           <div className="space-y-1.5">
-             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest block px-1">Estructura</span>
+             <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest block px-1">Estructura</span>
               <textarea
                  value={data.structure || ""}
                  onChange={(e) => updateField('structure', e.target.value)}
-                 className="w-full text-[10px] leading-relaxed text-white/50 bg-white/[0.02] p-2.5 rounded-xl border border-white/5 min-h-[70px] focus:outline-none focus:border-white/20 resize-none transition-all font-medium placeholder:text-white/10"
+                 className="w-full text-[10px] leading-relaxed text-zinc-900 bg-white p-2.5 rounded-xl border border-zinc-200 min-h-[70px] focus:outline-none focus:border-zinc-300 focus:ring-2 focus:ring-primary/10 resize-none transition-all font-medium placeholder:text-zinc-400"
                  placeholder="Hero > Características > Precios..."
               />
           </div>
@@ -170,8 +170,8 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
         onAddConnected={data.onAddConnected ?? (() => {})}
       />
 
-      <Handle type="target" position={Position.Left} id="any-in" className="!w-2 !h-2 !-left-1 !bg-[#94a3b8] !border-2 !border-[#191a1f]" />
-      <Handle type="source" position={Position.Right} id="layout-out" className="!w-2 !h-2 !-right-1 !bg-[#60a5fa] !border-2 !border-[#191a1f]" />
+      <Handle type="target" position={Position.Left} id="any-in" className="!w-2 !h-2 !-left-1 !bg-zinc-400 !border-2 !border-white" />
+      <Handle type="source" position={Position.Right} id="layout-out" className="!w-2 !h-2 !-right-1 !bg-emerald-500 !border-2 !border-white" />
     </div>
   );
 };

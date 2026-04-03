@@ -2,12 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { UserCircle, Image, Video, Layout, Megaphone, Sparkles, Search } from 'lucide-react';
 
 const NODE_CATALOG = [
-  { type: 'characterBreakdown', label: 'Personaje / Brief',   desc: 'Define tono, voz y perfil de marca',    icon: UserCircle, color: 'text-[#8AB4F8]', bg: 'bg-[#8AB4F8]/10' },
-  { type: 'modelView',          label: 'Imagen IA',           desc: 'Genera imágenes con inteligencia artificial', icon: Image,       color: 'text-rose-400',     bg: 'bg-rose-500/10'      },
-  { type: 'videoModel',         label: 'Video IA',            desc: 'Genera videos y secuencias animadas',    icon: Video,       color: 'text-[#8AB4F8]',  bg: 'bg-[#8AB4F8]/10'   },
-  { type: 'layoutBuilder',      label: 'Diseño UI',           desc: 'Construye interfaces y páginas web',     icon: Layout,      color: 'text-emerald-400',  bg: 'bg-emerald-500/10'   },
-  { type: 'campaignManager',    label: 'Campaña',             desc: 'Gestiona distribución y paid media',     icon: Megaphone,   color: 'text-amber-400',    bg: 'bg-amber-500/10'     },
-  { type: 'antigravityBridge',  label: 'Antigravity AI',      desc: 'Chat avanzado y razonamiento IA',        icon: Sparkles,    color: 'text-white',        bg: 'bg-white/5'          },
+  { type: 'characterBreakdown', label: 'Personaje / Brief',   desc: 'Define tono, voz y perfil de marca',    icon: UserCircle, color: 'text-blue-500', bg: 'bg-blue-50 border border-blue-100' },
+  { type: 'modelView',          label: 'Imagen IA',           desc: 'Genera imágenes con inteligencia artificial', icon: Image,       color: 'text-rose-500',     bg: 'bg-rose-50 border border-rose-100'      },
+  { type: 'videoModel',         label: 'Video IA',            desc: 'Genera videos y secuencias animadas',    icon: Video,       color: 'text-blue-500',  bg: 'bg-blue-50 border border-blue-100'   },
+  { type: 'layoutBuilder',      label: 'Diseño UI',           desc: 'Construye interfaces y páginas web',     icon: Layout,      color: 'text-emerald-500',  bg: 'bg-emerald-50 border border-emerald-100'   },
+  { type: 'campaignManager',    label: 'Campaña',             desc: 'Gestiona distribución y paid media',     icon: Megaphone,   color: 'text-amber-500',    bg: 'bg-amber-50 border border-amber-100'     },
+  { type: 'antigravityBridge',  label: 'Antigravity AI',      desc: 'Chat avanzado y razonamiento IA',        icon: Sparkles,    color: 'text-zinc-500',        bg: 'bg-zinc-100 border border-zinc-200'          },
 ];
 
 interface CommandPaletteProps {
@@ -50,29 +50,29 @@ export function CommandPalette({ open, onClose, onSelect }: CommandPaletteProps)
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[300] flex items-start justify-center pt-[20vh]" onClick={onClose}>
+    <div className="fixed inset-0 z-[300] flex items-start justify-center pt-[20vh] bg-zinc-900/10 backdrop-blur-[2px]" onClick={onClose}>
       <div
-        className="w-full max-w-md mx-4 bg-[#191a1f] border border-white/10 rounded-2xl shadow-[0_40px_80px_rgba(0,0,0,0.8)] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="w-full max-w-md mx-4 bg-white border border-zinc-200 rounded-[1.5rem] shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         onClick={e => e.stopPropagation()}
       >
         {/* Search */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]">
-          <Search className="w-4 h-4 text-white/25 shrink-0" />
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 bg-zinc-50/50">
+          <Search className="w-4 h-4 text-zinc-400 shrink-0" />
           <input
             ref={inputRef}
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Añadir nodo..."
-            className="flex-1 bg-transparent text-sm text-white placeholder:text-white/20 focus:outline-none"
+            className="flex-1 bg-transparent text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none"
           />
-          <kbd className="text-[10px] text-white/20 font-mono border border-white/[0.08] px-1.5 py-0.5 rounded">Esc</kbd>
+          <kbd className="text-[10px] text-zinc-400 font-mono border border-zinc-200 px-1.5 py-0.5 rounded shadow-sm bg-white">Esc</kbd>
         </div>
 
         {/* Results */}
         <div className="py-1.5 max-h-64 overflow-y-auto">
           {filtered.length === 0 ? (
-            <p className="text-xs text-white/20 text-center py-8">Sin resultados para "{query}"</p>
+            <p className="text-xs text-zinc-400 text-center py-8">Sin resultados para "{query}"</p>
           ) : (
             filtered.map((node, i) => {
               const Icon = node.icon;
@@ -80,16 +80,16 @@ export function CommandPalette({ open, onClose, onSelect }: CommandPaletteProps)
                 <button
                   key={node.type}
                   onClick={() => pick(node.type, node.label)}
-                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors group ${i === highlighted ? 'bg-white/[0.06]' : 'hover:bg-white/[0.03]'}`}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors group ${i === highlighted ? 'bg-zinc-50' : 'hover:bg-zinc-50'}`}
                 >
                   <div className={`w-9 h-9 rounded-xl ${node.bg} flex items-center justify-center shrink-0`}>
                     <Icon className={`w-4 h-4 ${node.color}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-white">{node.label}</p>
-                    <p className="text-xs text-white/30 truncate">{node.desc}</p>
+                    <p className="text-sm font-semibold text-zinc-900 group-hover:text-primary transition-colors">{node.label}</p>
+                    <p className="text-xs text-zinc-500 truncate">{node.desc}</p>
                   </div>
-                  <kbd className="text-[9px] font-mono text-white/15 border border-white/[0.06] px-1.5 py-0.5 rounded shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <kbd className="text-[9px] font-mono text-zinc-400 border border-zinc-200 px-1.5 py-0.5 rounded shrink-0 opacity-0 group-hover:opacity-100 transition-opacity bg-white shadow-sm">
                     ↵
                   </kbd>
                 </button>
@@ -99,10 +99,10 @@ export function CommandPalette({ open, onClose, onSelect }: CommandPaletteProps)
         </div>
 
         {/* Footer hints */}
-        <div className="px-4 py-2 border-t border-white/[0.06] flex items-center gap-4 bg-white/[0.01]">
-          <span className="text-[10px] text-white/20 flex items-center gap-1"><kbd className="font-mono border border-white/[0.08] px-1 rounded">↑↓</kbd> navegar</span>
-          <span className="text-[10px] text-white/20 flex items-center gap-1"><kbd className="font-mono border border-white/[0.08] px-1 rounded">↵</kbd> añadir</span>
-          <span className="ml-auto text-[10px] text-white/15">Espacio / Shift+A</span>
+        <div className="px-4 py-2 border-t border-zinc-100 flex items-center gap-4 bg-zinc-50">
+          <span className="text-[10px] text-zinc-400 flex items-center gap-1"><kbd className="font-mono border border-zinc-200 px-1 rounded bg-white shadow-[0_1px_1px_rgba(0,0,0,0.05)]">↑↓</kbd> navegar</span>
+          <span className="text-[10px] text-zinc-400 flex items-center gap-1"><kbd className="font-mono border border-zinc-200 px-1 rounded bg-white shadow-[0_1px_1px_rgba(0,0,0,0.05)]">↵</kbd> añadir</span>
+          <span className="ml-auto text-[10px] text-zinc-300">Espacio / Shift+A</span>
         </div>
       </div>
     </div>

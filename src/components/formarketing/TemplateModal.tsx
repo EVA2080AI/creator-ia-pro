@@ -59,7 +59,7 @@ export const TEMPLATES: Template[] = [
     description: 'Empieza un proyecto desde cero. Todas las herramientas a tu disposición.',
     category: 'Todos',
     icon: Layout,
-    color: 'text-white/50',
+    color: 'text-zinc-400',
     nodes: [],
   },
   {
@@ -68,7 +68,7 @@ export const TEMPLATES: Template[] = [
     description: 'Crea anuncios visuales de alto impacto para Instagram con copy persuasivo.',
     category: 'Redes Sociales',
     icon: Instagram,
-    color: 'text-rose-400',
+    color: 'text-rose-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Persona de marca', description: 'Define el tono y voz del anuncio', prompt: 'Crea una persona de marca para anuncio de Instagram', status: 'idle' } },
       { type: 'modelView', data: { title: 'Visual del anuncio', description: 'Genera la imagen principal del anuncio', prompt: 'Imagen publicitaria para Instagram, formato cuadrado, alta resolución', status: 'idle' } },
@@ -81,7 +81,7 @@ export const TEMPLATES: Template[] = [
     description: 'Anuncios optimizados para el feed y stories de Facebook con alta conversión.',
     category: 'Publicidad',
     icon: Megaphone,
-    color: 'text-[#8AB4F8]',
+    color: 'text-blue-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Copy del anuncio', description: 'Redacta el texto persuasivo del anuncio', prompt: 'Escribe copy de alto impacto para anuncio de Facebook', status: 'idle' } },
       { type: 'modelView', data: { title: 'Imagen del anuncio', description: 'Visual principal para el feed de Facebook', prompt: 'Imagen publicitaria profesional para Facebook Ads', status: 'idle' } },
@@ -94,7 +94,7 @@ export const TEMPLATES: Template[] = [
     description: 'Contenido vertical corto y viral para maximizar el alcance en TikTok.',
     category: 'Redes Sociales',
     icon: Video,
-    color: 'text-rose-400',
+    color: 'text-rose-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Guión del video', description: 'Crea el guión y el gancho inicial', prompt: 'Escribe un guión viral para TikTok de 30 segundos con gancho en los primeros 3 segundos', status: 'idle' } },
       { type: 'videoModel', data: { title: 'Video TikTok', description: 'Genera el video vertical para TikTok', prompt: 'Video vertical 9:16 para TikTok, estilo dinámico y moderno', status: 'idle' } },
@@ -107,7 +107,7 @@ export const TEMPLATES: Template[] = [
     description: 'Landing page completa con copy, diseño y estructura optimizada para conversión.',
     category: 'Web',
     icon: Globe,
-    color: 'text-emerald-400',
+    color: 'text-emerald-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Copy de la landing', description: 'Redacta todos los textos de la página', prompt: 'Escribe el copy completo de una landing page de alta conversión: titular, subtítulo, beneficios, CTA', status: 'idle' } },
       { type: 'layoutBuilder', data: { title: 'Estructura de la landing', description: 'Diseña la estructura visual de la página', prompt: 'Wireframe y diseño de landing page con hero, beneficios, testimonios y CTA', status: 'idle' } },
@@ -120,7 +120,7 @@ export const TEMPLATES: Template[] = [
     description: 'Diseña el logo y la identidad visual básica de tu marca desde cero.',
     category: 'Marca',
     icon: Palette,
-    color: 'text-[#8AB4F8]',
+    color: 'text-blue-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Brief de marca', description: 'Define los valores y personalidad de la marca', prompt: 'Crea un brief creativo para el diseño de logo y marca: valores, colores, tipografía, estilo', status: 'idle' } },
       { type: 'modelView', data: { title: 'Diseño del logo', description: 'Genera opciones de logo para la marca', prompt: 'Logo minimalista y profesional, fondo transparente, vectorial', status: 'idle' } },
@@ -133,7 +133,7 @@ export const TEMPLATES: Template[] = [
     description: 'Artículo largo, bien estructurado y optimizado para SEO sobre cualquier tema.',
     category: 'Contenido',
     icon: FileText,
-    color: 'text-amber-400',
+    color: 'text-amber-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Estructura del artículo', description: 'Planifica el contenido y los subtítulos', prompt: 'Crea la estructura completa de un artículo de blog SEO: título, meta descripción, H2s y puntos clave', status: 'idle' } },
       { type: 'layoutBuilder', data: { title: 'Formato del artículo', description: 'Define el diseño y layout del contenido', prompt: 'Layout para artículo de blog con imagen destacada, secciones y CTA interno', status: 'idle' } },
@@ -145,7 +145,7 @@ export const TEMPLATES: Template[] = [
     description: 'Anuncios de búsqueda y display para Google Ads con alto CTR y conversión.',
     category: 'Publicidad',
     icon: Search,
-    color: 'text-[#8AB4F8]',
+    color: 'text-blue-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Copy de Google Ads', description: 'Escribe los títulos y descripciones del anuncio', prompt: 'Escribe 5 variaciones de títulos y descripciones para Google Search Ads con máximo CTR', status: 'idle' } },
       { type: 'campaignManager', data: { title: 'Campaña de Google Ads', description: 'Estructura la campaña y las palabras clave', prompt: 'Estructura de campaña de Google Ads con grupos de anuncios y palabras clave negativas', status: 'idle' } },
@@ -170,7 +170,7 @@ export const TEMPLATES: Template[] = [
     description: 'Secuencia de emails de marketing con alta tasa de apertura y conversión.',
     category: 'Publicidad',
     icon: Megaphone,
-    color: 'text-emerald-400',
+    color: 'text-emerald-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Copy de emails', description: 'Redacta los textos de la secuencia', prompt: 'Escribe una secuencia de 5 emails de marketing: bienvenida, valor, caso de éxito, oferta y urgencia', status: 'idle' } },
       { type: 'layoutBuilder', data: { title: 'Diseño de emails', description: 'Estructura visual de los emails', prompt: 'Templates de email responsive con header, contenido y footer para campaña de email marketing', status: 'idle' } },
@@ -183,7 +183,7 @@ export const TEMPLATES: Template[] = [
     description: 'Publicación profesional para LinkedIn que genera engagement y autoridad.',
     category: 'Redes Sociales',
     icon: TrendingUp,
-    color: 'text-[#8AB4F8]',
+    color: 'text-blue-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Texto del post', description: 'Redacta el contenido del post de LinkedIn', prompt: 'Escribe un post de LinkedIn de alto engagement con historia personal, aprendizaje clave y llamada a la acción', status: 'idle' } },
       { type: 'modelView', data: { title: 'Imagen del post', description: 'Visual que acompañe el post', prompt: 'Imagen profesional para LinkedIn, formato 1200x627, estilo corporativo moderno', status: 'idle' } },
@@ -195,7 +195,7 @@ export const TEMPLATES: Template[] = [
     description: 'Sistema de identidad visual completo: logo, colores, tipografía y guía de estilo.',
     category: 'Marca',
     icon: Palette,
-    color: 'text-[#8AB4F8]',
+    color: 'text-blue-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Estrategia de marca', description: 'Define la misión, visión y valores', prompt: 'Desarrolla la estrategia de marca completa: propósito, valores, arquetipo, tono de voz y posicionamiento', status: 'idle' } },
       { type: 'modelView', data: { title: 'Logo principal', description: 'Diseño del logotipo principal', prompt: 'Logo profesional y versátil para la marca, múltiples variaciones: positivo, negativo e icono', status: 'idle' } },
@@ -209,7 +209,7 @@ export const TEMPLATES: Template[] = [
     description: 'Estrategia completa de lanzamiento con contenido visual y campaña multicanal.',
     category: 'Publicidad',
     icon: Rocket,
-    color: 'text-rose-400',
+    color: 'text-rose-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Storytelling del producto', description: 'La historia detrás del producto', prompt: 'Crea el storytelling de lanzamiento: problema, solución, beneficios y propuesta de valor única', status: 'idle' } },
       { type: 'modelView', data: { title: 'Fotos del producto', description: 'Imágenes de producto profesionales', prompt: 'Fotografía de producto profesional con fondo blanco y versión lifestyle en contexto real', status: 'idle' } },
@@ -223,7 +223,7 @@ export const TEMPLATES: Template[] = [
     description: 'Stories verticales atractivos para Instagram con diseño profesional.',
     category: 'Redes Sociales',
     icon: Instagram,
-    color: 'text-rose-400',
+    color: 'text-rose-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Copy del story', description: 'Texto e instrucciones para el story', prompt: 'Escribe el copy para una secuencia de 5 stories de Instagram: gancho, desarrollo, CTA y encuesta', status: 'idle' } },
       { type: 'modelView', data: { title: 'Diseño del story', description: 'Visual del story formato 9:16', prompt: 'Diseño de Instagram Story 1080x1920px, colores vibrantes, texto legible y elementos gráficos', status: 'idle' } },
@@ -235,7 +235,7 @@ export const TEMPLATES: Template[] = [
     description: 'UI/UX de aplicación móvil con pantallas principales y flujo de usuario.',
     category: 'Web',
     icon: Monitor,
-    color: 'text-[#8AB4F8]',
+    color: 'text-blue-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Descripción de la app', description: 'Define el propósito y funcionalidades', prompt: 'Describe la arquitectura de información, flujo de usuario y pantallas principales de la app móvil', status: 'idle' } },
       { type: 'layoutBuilder', data: { title: 'UI de la app', description: 'Diseño de las pantallas principales', prompt: 'Diseño UI de app móvil: pantalla de inicio, lista, detalle y perfil con sistema de diseño consistente', status: 'idle' } },
@@ -248,7 +248,7 @@ export const TEMPLATES: Template[] = [
     description: 'Pins verticales llamativos con diseño optimizado para Pinterest.',
     category: 'Redes Sociales',
     icon: Image,
-    color: 'text-rose-400',
+    color: 'text-rose-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Copy del pin', description: 'Título y descripción del pin', prompt: 'Escribe 10 títulos llamativos y descripciones SEO para pins de Pinterest en la categoría seleccionada', status: 'idle' } },
       { type: 'modelView', data: { title: 'Diseño del pin', description: 'Imagen vertical para Pinterest', prompt: 'Diseño de pin para Pinterest 1000x1500px, estilo editorial, con título superpuesto y branding sutil', status: 'idle' } },
@@ -260,7 +260,7 @@ export const TEMPLATES: Template[] = [
     description: 'Arte de podcast profesional para destacar en plataformas de audio.',
     category: 'Contenido',
     icon: Mic,
-    color: 'text-[#8AB4F8]',
+    color: 'text-blue-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Concepto del podcast', description: 'Define el nombre, tagline y estilo', prompt: 'Desarrolla el concepto visual del podcast: nombre, tagline, colores, tipografía y personalidad', status: 'idle' } },
       { type: 'modelView', data: { title: 'Arte del podcast', description: 'Portada cuadrada 3000x3000px', prompt: 'Portada de podcast 3000x3000px, diseño llamativo para Spotify y Apple Podcasts, estilo profesional', status: 'idle' } },
@@ -272,7 +272,7 @@ export const TEMPLATES: Template[] = [
     description: 'Campaña visual y creativa para fechas especiales o temporadas del año.',
     category: 'Publicidad',
     icon: Sparkles,
-    color: 'text-amber-400',
+    color: 'text-amber-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Concepto de la campaña', description: 'Idea creativa y mensaje central', prompt: 'Crea el concepto creativo de la campaña de temporada: big idea, mensaje emocional y eje de comunicación', status: 'idle' } },
       { type: 'modelView', data: { title: 'Piezas visuales', description: 'Imágenes principales de la campaña', prompt: 'Pack de imágenes para campaña de temporada: banner principal, cuadrado para RRSS y formato story', status: 'idle' } },
@@ -286,7 +286,7 @@ export const TEMPLATES: Template[] = [
     description: 'Presentación corporativa de marca para clientes, inversores o socios.',
     category: 'Marca',
     icon: Layout,
-    color: 'text-[#8AB4F8]',
+    color: 'text-blue-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Contenido de la presentación', description: 'Estructura y textos de la presentación', prompt: 'Escribe el contenido de una presentación de marca de 15 slides: historia, propuesta de valor, productos, equipo y próximos pasos', status: 'idle' } },
       { type: 'layoutBuilder', data: { title: 'Diseño de slides', description: 'Template y layout de la presentación', prompt: 'Template de presentación corporativa en PowerPoint/Keynote con portada, slides de contenido y cierre', status: 'idle' } },
@@ -299,7 +299,7 @@ export const TEMPLATES: Template[] = [
     description: 'Estrategia de contenido diseñada para maximizar el alcance orgánico y compartidos.',
     category: 'Redes Sociales',
     icon: TrendingUp,
-    color: 'text-rose-400',
+    color: 'text-rose-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Idea viral', description: 'Concepto que conecta emocionalmente', prompt: 'Desarrolla 5 ideas de contenido viral con alto potencial de compartidos: formato, gancho emocional y CTA', status: 'idle' } },
       { type: 'videoModel', data: { title: 'Video viral', description: 'Video corto con potencial viral', prompt: 'Video corto 15-30 segundos con gancho en el primer segundo, formato vertical, estilo auténtico y cercano', status: 'idle' } },
@@ -313,7 +313,7 @@ export const TEMPLATES: Template[] = [
     description: 'Diseño y contenido de un sitio web completo de múltiples páginas.',
     category: 'Web',
     icon: Globe,
-    color: 'text-emerald-400',
+    color: 'text-emerald-500',
     nodes: [
       { type: 'characterBreakdown', data: { title: 'Copy del sitio web', description: 'Todos los textos del sitio', prompt: 'Escribe el copy completo para un sitio web de 5 páginas: inicio, nosotros, servicios, blog y contacto', status: 'idle' } },
       { type: 'layoutBuilder', data: { title: 'Diseño del sitio', description: 'Estructura y layout de todas las páginas', prompt: 'Diseño de sitio web completo: wireframes de home, interior pages, sistema de diseño y guía de estilos', status: 'idle' } },
@@ -347,17 +347,17 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="bg-[#191a1f]/95 border border-white/10 rounded-[2rem] text-white max-w-3xl p-0 backdrop-blur-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        <DialogContent className="bg-white border border-zinc-200 rounded-[2rem] text-zinc-900 max-w-3xl p-0 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
           {/* Header */}
           <div className="p-8 pb-0 shrink-0">
             <DialogHeader className="mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-inner">
-                  <Sparkles className="w-5 h-5 text-white/50" />
+                <div className="w-11 h-11 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-center shadow-sm">
+                  <Sparkles className="w-5 h-5 text-zinc-400" />
                 </div>
                 <div>
-                  <DialogTitle className="text-2xl font-bold tracking-tight font-sans">Plantillas</DialogTitle>
-                  <DialogDescription className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mt-0.5 font-sans">
+                  <DialogTitle className="text-2xl font-bold tracking-tight font-sans text-zinc-900">Plantillas</DialogTitle>
+                  <DialogDescription className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] mt-0.5 font-sans">
                     {TEMPLATES.length} plantillas listas para usar
                   </DialogDescription>
                 </div>
@@ -366,12 +366,12 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
 
             {/* Search */}
             <div className="relative mb-5">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 pointer-events-none" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 pointer-events-none" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Buscar plantillas..."
-                className="pl-11 bg-white/[0.03] border-white/10 focus:border-white/20 rounded-2xl h-11 text-xs font-medium text-white placeholder:text-white/20 transition-all"
+                className="pl-11 bg-zinc-50 border-zinc-200 focus:border-zinc-300 focus:bg-white rounded-2xl h-11 text-xs font-medium text-zinc-900 placeholder:text-zinc-400 transition-all shadow-sm"
               />
             </div>
 
@@ -384,8 +384,8 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
                   className={cn(
                     "px-3.5 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all font-sans",
                     activeCategory === cat
-                      ? "bg-white text-black"
-                      : "bg-white/5 text-white/30 hover:bg-white/10 hover:text-white border border-white/5"
+                      ? "bg-zinc-900 text-white"
+                      : "bg-white text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-200"
                   )}
                 >
                   {cat}
@@ -397,7 +397,7 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
           {/* Grid */}
           <div className="overflow-y-auto px-8 pb-8 flex-1 no-scrollbar">
             {filtered.length === 0 ? (
-              <div className="flex items-center justify-center h-40 text-white/20 text-sm">
+              <div className="flex items-center justify-center h-40 text-zinc-400 text-sm">
                 No se encontraron plantillas
               </div>
             ) : (
@@ -406,28 +406,28 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
                   <button
                     key={template.id}
                     onClick={() => handleSelect(template)}
-                    className="group flex flex-col gap-4 p-5 rounded-[1.5rem] bg-white/[0.02] border border-white/[0.06] hover:border-white/15 hover:bg-white/[0.05] transition-all duration-300 text-left active:scale-[0.97]"
+                    className="group flex flex-col gap-4 p-5 rounded-[1.5rem] bg-white border border-zinc-200 shadow-sm hover:border-zinc-300 hover:shadow-md transition-all duration-300 text-left active:scale-[0.97]"
                   >
                     {/* Icon + Arrow */}
                     <div className="flex items-start justify-between">
-                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center bg-white/5 border border-white/5 shadow-inner transition-all group-hover:scale-110 group-hover:rotate-3", template.color)}>
+                      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center bg-zinc-50 border border-zinc-100 shadow-sm transition-all group-hover:scale-110 group-hover:rotate-3", template.color)}>
                         <template.icon className="w-5 h-5" />
                       </div>
-                      <ArrowRight className="w-3.5 h-3.5 text-white/10 group-hover:text-white/40 group-hover:translate-x-0.5 transition-all" />
+                      <ArrowRight className="w-3.5 h-3.5 text-zinc-300 group-hover:text-zinc-500 group-hover:translate-x-0.5 transition-all" />
                     </div>
 
                     {/* Content */}
                     <div className="flex flex-col gap-1.5 flex-1">
-                      <h3 className="text-sm font-bold text-white tracking-tight font-sans leading-snug">{template.title}</h3>
-                      <p className="text-[10px] text-white/30 font-medium leading-relaxed line-clamp-2">{template.description}</p>
+                      <h3 className="text-sm font-bold text-zinc-900 tracking-tight font-sans leading-snug">{template.title}</h3>
+                      <p className="text-[10px] text-zinc-500 font-medium leading-relaxed line-clamp-2">{template.description}</p>
                     </div>
 
                     {/* Footer */}
                     <div className="flex items-center justify-between pt-1">
-                      <span className="px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-[9px] font-bold text-white/30 uppercase tracking-widest font-sans">
+                      <span className="px-2.5 py-1 rounded-lg bg-zinc-100 text-[9px] font-bold text-zinc-500 uppercase tracking-widest font-sans">
                         {template.category}
                       </span>
-                      <span className="text-[9px] text-white/20 font-bold font-sans">
+                      <span className="text-[9px] text-zinc-400 font-bold font-sans">
                         {template.nodes.length} {template.nodes.length === 1 ? 'nodo' : 'nodos'}
                       </span>
                     </div>
@@ -438,8 +438,8 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
           </div>
 
           {/* Footer */}
-          <div className="px-8 py-4 border-t border-white/5 shrink-0">
-            <p className="text-[9px] font-bold text-white/10 uppercase tracking-[0.4em] font-sans text-center">
+          <div className="px-8 py-4 border-t border-zinc-100 bg-zinc-50 shrink-0">
+            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-[0.4em] font-sans text-center">
               Creator IA Pro · Studio
             </p>
           </div>

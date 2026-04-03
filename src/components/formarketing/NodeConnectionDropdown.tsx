@@ -20,12 +20,12 @@ export function NodeConnectionDropdown({ nodeType, nodeId, onAddConnected }: Nod
     <div className="relative flex justify-center mt-2 nodrag nopan">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border"
-        style={{
-          background: open ? `${outputColor}22` : 'rgba(255,255,255,0.04)',
-          borderColor: open ? `${outputColor}50` : 'rgba(255,255,255,0.1)',
-          color: open ? outputColor : 'rgba(255,255,255,0.4)',
-        }}
+        className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold transition-all border ${!open ? 'bg-zinc-50 border-zinc-200 text-zinc-500 hover:bg-zinc-100' : 'shadow-sm'}`}
+        style={open ? {
+          background: `${outputColor}15`,
+          borderColor: `${outputColor}40`,
+          color: outputColor,
+        } : undefined}
       >
         <Plus className="h-3 w-3" />
         Conectar
@@ -35,18 +35,17 @@ export function NodeConnectionDropdown({ nodeType, nodeId, onAddConnected }: Nod
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 z-50 w-56 rounded-2xl overflow-hidden shadow-2xl"
-            style={{ background: '#1e2028', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 z-50 w-56 rounded-2xl overflow-hidden shadow-lg bg-white border border-zinc-200">
 
             {/* Header showing output type */}
-            <div className="px-3 pt-2.5 pb-2 border-b border-white/[0.06]">
+            <div className="px-3 pt-2.5 pb-2 border-b border-zinc-100 bg-zinc-50/50">
               <div className="flex items-center gap-1.5">
-                <div className="h-2 w-2 rounded-full" style={{ background: outputColor }} />
-                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/40">
+                <div className="h-2 w-2 rounded-full shadow-sm" style={{ background: outputColor }} />
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-500">
                   Salida: {outputDataType}
                 </span>
               </div>
-              <p className="text-[10px] text-white/25 mt-0.5">Selecciona el siguiente nodo</p>
+              <p className="text-[10px] text-zinc-400 mt-0.5">Selecciona el siguiente nodo</p>
             </div>
 
             {/* Compatible targets */}
@@ -59,16 +58,16 @@ export function NodeConnectionDropdown({ nodeType, nodeId, onAddConnected }: Nod
                   <button
                     key={targetType}
                     onClick={() => { onAddConnected(nodeId, targetType); setOpen(false); }}
-                    className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-xl text-left transition-all hover:bg-white/[0.06]"
+                    className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-xl text-left transition-all hover:bg-zinc-50"
                   >
                     <span className="text-base shrink-0">{targetMeta.emoji}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[11px] font-semibold text-white/75">{targetMeta.label}</p>
+                      <p className="text-[11px] font-semibold text-zinc-700">{targetMeta.label}</p>
                       <div className="flex items-center gap-1 mt-0.5">
-                        <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: outputColor }} />
-                        <ArrowRight className="h-2 w-2 text-white/20 shrink-0" />
-                        <div className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: inputColor }} />
-                        <span className="text-[9px] text-white/25 truncate">{outputDataType} → {targetMeta.inputHandles[0]?.dataType ?? 'any'}</span>
+                        <div className="h-1.5 w-1.5 rounded-full shrink-0 shadow-sm" style={{ background: outputColor }} />
+                        <ArrowRight className="h-2 w-2 text-zinc-300 shrink-0" />
+                        <div className="h-1.5 w-1.5 rounded-full shrink-0 shadow-sm" style={{ background: inputColor }} />
+                        <span className="text-[9px] text-zinc-500 truncate">{outputDataType} → {targetMeta.inputHandles[0]?.dataType ?? 'any'}</span>
                       </div>
                     </div>
                   </button>

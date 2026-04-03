@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { AppHeader } from "@/components/AppHeader";
 import {
   Search, Loader2, Heart, Download, Trash2,
   Star, Plus, Link, Layers, Sparkles, Copy, Ghost
@@ -145,7 +144,7 @@ const Assets = () => {
 
   if (authLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#050506]">
+      <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -159,8 +158,6 @@ const Assets = () => {
         <div className="absolute -bottom-40 right-1/4 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[150px]" />
         <div className="absolute top-1/4 left-0 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[120px]" />
       </div>
-
-      <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main id="main-content" className="relative z-10 mx-auto max-w-[1440px] px-8 py-12 pt-24">
         {/* Header */}

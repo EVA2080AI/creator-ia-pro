@@ -129,40 +129,40 @@ Devuelve SOLO el caption, sin explicaciones.`;
   const displayText = streamedText || data.output || '';
 
   return (
-    <div className="group relative rounded-3xl overflow-hidden bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors w-[280px] shadow-2xl">
+    <div className="group relative rounded-3xl overflow-hidden bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/50 transition-colors w-[280px] shadow-sm hover:shadow-md">
       {/* Header */}
-      <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">
+      <div className="flex h-12 items-center justify-between px-4 border-b border-zinc-100 bg-zinc-50/50">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-xl bg-[#34d399]/10 border border-[#34d399]/20">
-            <MessageSquare className="w-4 h-4 text-[#34d399]" />
+          <div className="p-1.5 rounded-xl bg-emerald-50 border border-emerald-100">
+            <MessageSquare className="w-4 h-4 text-emerald-500" />
           </div>
-          <h3 className="text-[11px] font-bold text-white/90 tracking-wide font-sans uppercase">
+          <h3 className="text-[11px] font-bold text-zinc-900 tracking-wide font-sans uppercase">
             {data.title || 'Caption IA'}
           </h3>
         </div>
-        <button onClick={deleteNode} className="p-2 hover:bg-rose-500/10 text-white/20 hover:text-rose-500 rounded-lg transition-all">
+        <button onClick={deleteNode} className="p-2 hover:bg-red-50 text-zinc-400 hover:text-red-500 rounded-lg transition-all">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
 
       {/* Body */}
-      <div className="p-4 space-y-3 bg-black/20">
+      <div className="p-4 space-y-3 bg-white">
         {/* Network selector */}
         <div className="relative">
           <button
             onClick={() => setNetworkOpen(!networkOpen)}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[10px] text-white/60 hover:border-[#34d399]/30 transition-all"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white border border-zinc-200 shadow-sm text-[10px] text-zinc-600 hover:border-emerald-300 transition-all font-medium"
           >
             <span>{currentNetwork.emoji} {currentNetwork.label}</span>
             <ChevronDown className={`w-3 h-3 transition-transform ${networkOpen ? 'rotate-180' : ''}`} />
           </button>
           {networkOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-white/10 overflow-hidden z-50" style={{ background: '#1e2028' }}>
+            <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-zinc-200 overflow-hidden z-50 bg-white shadow-lg">
               {NETWORKS.map(n => (
                 <button key={n.id} onClick={() => { update({ network: n.id }); setNetworkOpen(false); }}
-                  className="w-full px-3 py-2 text-left text-[10px] text-white/50 hover:bg-white/[0.06] hover:text-white transition-all flex items-center justify-between">
+                  className="w-full px-3 py-2 text-left text-[10px] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-all flex items-center justify-between">
                   <span>{n.emoji} {n.label}</span>
-                  <span className="text-white/20 text-[9px]">{n.maxChars < 1000 ? `${n.maxChars} chars` : ''}</span>
+                  <span className="text-zinc-400 text-[9px]">{n.maxChars < 1000 ? `${n.maxChars} chars` : ''}</span>
                 </button>
               ))}
             </div>
@@ -175,8 +175,8 @@ Devuelve SOLO el caption, sin explicaciones.`;
             <button key={t} onClick={() => update({ tone: t })}
               className="px-2 py-1 rounded-lg text-[9px] font-semibold transition-all"
               style={data.tone === t || (!data.tone && t === TONES[0])
-                ? { background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.3)', color: '#34d399' }
-                : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.35)' }
+                ? { background: 'var(--emerald-50, #ecfdf5)', border: '1px solid var(--emerald-200, #a7f3d0)', color: 'var(--emerald-600, #059669)' }
+                : { background: '#ffffff', border: '1px solid #e4e4e7', color: '#71717a' }
               }>
               {t}
             </button>
@@ -189,19 +189,19 @@ Devuelve SOLO el caption, sin explicaciones.`;
           onChange={e => update({ topic: e.target.value })}
           onKeyDown={e => e.stopPropagation()}
           placeholder="Tema del caption (ej: nuevo producto, oferta, lifestyle…)"
-          className="w-full text-xs leading-relaxed text-white/60 bg-white/[0.03] border border-white/[0.06] p-3 rounded-xl focus:outline-none focus:border-[#34d399]/40 transition-all resize-none min-h-[48px] placeholder:text-white/15"
+          className="w-full text-xs leading-relaxed text-zinc-900 bg-white border shadow-sm border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/10 transition-all resize-none min-h-[48px] placeholder:text-zinc-400"
         />
 
         {/* Output */}
         {displayText && (
-          <div className="relative rounded-xl bg-white/[0.03] border border-white/[0.06] p-3 max-h-[100px] overflow-y-auto">
+          <div className="relative rounded-xl bg-zinc-50 border border-zinc-200 shadow-sm p-3 max-h-[100px] overflow-y-auto">
             <p className="text-[10px] leading-relaxed whitespace-pre-wrap pr-5"
-              style={{ color: isGenerating ? '#34d399' : 'rgba(255,255,255,0.6)' }}>
+               style={{ color: isGenerating ? 'var(--emerald-600, #059669)' : '#52525b' }}>
               {displayText}{isGenerating ? <span className="animate-pulse">|</span> : null}
             </p>
             {!isGenerating && (
-              <button onClick={handleCopy} className="absolute top-2 right-2 p-1 rounded-lg text-white/20 hover:text-white transition-all hover:bg-white/10">
-                {copied ? <Check className="w-3 h-3 text-[#34d399]" /> : <Copy className="w-3 h-3" />}
+              <button onClick={handleCopy} className="absolute top-2 right-2 p-1 rounded-lg text-zinc-400 hover:text-zinc-700 transition-all hover:bg-white border border-transparent hover:border-zinc-200 shadow-sm">
+                {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
               </button>
             )}
           </div>
@@ -211,7 +211,7 @@ Devuelve SOLO el caption, sin explicaciones.`;
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-[#34d399] text-black text-[11px] font-black uppercase tracking-widest hover:bg-[#34d399]/90 transition-all active:scale-95 disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-emerald-500 shadow-md text-white text-[11px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all active:scale-95 disabled:opacity-50"
         >
           {isGenerating
             ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Generando…</>
@@ -220,16 +220,16 @@ Devuelve SOLO el caption, sin explicaciones.`;
         </button>
 
         {/* Port labels */}
-        <div className="flex items-center justify-between text-[9px] text-white/15 uppercase tracking-widest font-sans">
-          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-yellow-400 inline-block" />Contexto</span>
-          <span className="flex items-center gap-1">Copy salida<span className="w-1.5 h-1.5 rounded-full bg-[#34d399] inline-block" /></span>
+        <div className="flex items-center justify-between text-[9px] text-zinc-400 uppercase tracking-widest font-sans">
+          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block shadow-sm" />Contexto</span>
+          <span className="flex items-center gap-1">Copy salida<span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shadow-sm" /></span>
         </div>
       </div>
 
       <NodeConnectionDropdown nodeType="captionNode" nodeId={id} onAddConnected={data.onAddConnected ?? (() => {})} />
 
-      <Handle type="target" position={Position.Left} id="text-in" className="!w-4 !h-4 !-left-2 !bg-yellow-400 !border-2 !border-[#0f1011] hover:!scale-125 transition-transform cursor-crosshair" />
-      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-[#34d399] !border-2 !border-[#0f1011] hover:!scale-125 transition-transform cursor-crosshair" />
+      <Handle type="target" position={Position.Left} id="text-in" className="!w-4 !h-4 !-left-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-emerald-500 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
     </div>
   );
 };

@@ -18,7 +18,7 @@ const Downloads = () => {
       </div>
 
       {/* Nav */}
-      <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-white/[0.05] bg-[#050506]/40 backdrop-blur-2xl">
+      <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-white/[0.05] bg-background/40 backdrop-blur-2xl">
         <button onClick={() => navigate("/")} className="flex items-center gap-4 text-white/60 hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />
           <div className="flex items-center gap-3">

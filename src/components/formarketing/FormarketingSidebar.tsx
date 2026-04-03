@@ -118,18 +118,18 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
   ];
 
   return (
-    <div className="flex h-full shrink-0 border-r border-white/[0.04] z-20">
+    <div className="flex h-full shrink-0 border-r border-zinc-200 z-20">
 
       {/* Vertical Toolbar */}
-      <div className="flex flex-col items-center gap-2 w-14 py-4 bg-[#222228]/90 backdrop-blur-xl">
+      <div className="flex flex-col items-center gap-2 w-14 py-4 bg-white/90 backdrop-blur-xl border-r border-zinc-100">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-300 mb-1 ${menuOpen ? 'bg-white text-black shadow-xl shadow-white/20' : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white border border-white/5'}`}
+          className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-300 mb-1 ${menuOpen ? 'bg-zinc-900 text-white shadow-md' : 'bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 border border-zinc-200'}`}
         >
           {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
         </button>
 
-        <div className="w-8 h-px bg-white/10 my-1" />
+        <div className="w-8 h-px bg-zinc-200 my-1" />
 
         <TooltipProvider>
           <Tooltip>
@@ -145,7 +145,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
             <Tooltip key={tool.id}>
               <TooltipTrigger asChild>
                 <button
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl text-white/20 hover:bg-white/5 hover:text-white transition-all group ${tool.id === 'settings' ? 'mt-auto border-t border-white/5 pt-3 rounded-none w-8' : ''}`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all group ${tool.id === 'settings' ? 'mt-auto border-t border-zinc-200 pt-3 rounded-none w-8' : ''}`}
                 >
                   <tool.icon className="h-4 w-4 group-hover:scale-110 transition-transform" />
                 </button>
@@ -158,26 +158,26 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
 
       {/* Slide-in Panel */}
       {menuOpen && (
-        <div className="w-72 flex flex-col bg-[#050506] border-l border-white/[0.04] overflow-y-auto no-scrollbar animate-in slide-in-from-left duration-200">
+        <div className="w-72 flex flex-col bg-zinc-50 border-l border-zinc-200 overflow-y-auto no-scrollbar animate-in slide-in-from-left duration-200">
 
           {/* Header */}
-          <div className="px-5 pt-5 pb-3 border-b border-white/[0.05]">
+          <div className="px-5 pt-5 pb-3 border-b border-zinc-200 bg-white">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em]">Módulos</span>
-              <span className="text-[10px] text-white/20 font-bold tabular-nums">{totalNodes} nodos</span>
+              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Módulos</span>
+              <span className="text-[10px] text-zinc-400 font-bold tabular-nums">{totalNodes} nodos</span>
             </div>
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/20 pointer-events-none" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
               <Input
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Buscar nodos..."
-                className="pl-9 pr-8 bg-white/[0.04] border-white/[0.07] focus:border-white/20 rounded-xl h-9 text-[11px] text-white placeholder:text-white/20 transition-all"
+                className="pl-9 pr-8 bg-zinc-50 border-zinc-200 focus:border-zinc-300 rounded-xl h-9 text-[11px] text-zinc-900 placeholder:text-zinc-400 transition-all shadow-sm"
               />
               {search && (
                 <button onClick={() => setSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-white/20 hover:text-white/60 transition-colors">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors">
                   <X className="h-3 w-3" />
                 </button>
               )}
@@ -189,13 +189,13 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
             <TemplateModal
               onSelect={handleSelectTemplate}
               trigger={
-                <button className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border border-white/[0.07] bg-white/[0.02] hover:border-primary/30 hover:bg-primary/[0.06] transition-all group/tpl">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.05] group-hover/tpl:bg-primary/20 transition-colors shrink-0">
+                <button className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border border-zinc-200 bg-white hover:border-primary/30 hover:bg-primary/5 transition-all group/tpl shadow-sm">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-zinc-100 group-hover/tpl:bg-primary/10 transition-colors shrink-0">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
                   </div>
                   <div className="text-left">
-                    <p className="text-[11px] font-bold text-white/60 group-hover/tpl:text-white/90 transition-colors">Ver plantillas</p>
-                    <p className="text-[9px] text-white/20">Flujos pre-armados</p>
+                    <p className="text-[11px] font-bold text-zinc-600 group-hover/tpl:text-zinc-900 transition-colors">Ver plantillas</p>
+                    <p className="text-[9px] text-zinc-400">Flujos pre-armados</p>
                   </div>
                 </button>
               }
@@ -206,9 +206,9 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
           <div className="flex flex-col gap-1 px-3 pb-3">
             {filteredCategories.length === 0 && (
               <div className="flex flex-col items-center gap-3 py-10 text-center">
-                <Search className="h-5 w-5 text-white/10" />
-                <span className="text-[11px] text-white/20">Sin resultados para <span className="text-white/40">"{search}"</span></span>
-                <button onClick={() => setSearch('')} className="text-[10px] text-primary/60 hover:text-primary font-bold uppercase tracking-widest">Limpiar</button>
+                <Search className="h-5 w-5 text-zinc-300" />
+                <span className="text-[11px] text-zinc-400">Sin resultados para <span className="text-zinc-600">"{search}"</span></span>
+                <button onClick={() => setSearch('')} className="text-[10px] text-primary/80 hover:text-primary font-bold uppercase tracking-widest">Limpiar</button>
               </div>
             )}
 
@@ -221,8 +221,8 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                     onClick={() => toggleCategory(cat.id)}
                     className="w-full flex items-center justify-between px-2 py-1.5 mb-1.5 group/cat"
                   >
-                    <span className="text-[9px] font-black text-white/25 uppercase tracking-[0.25em] group-hover/cat:text-white/50 transition-colors">{cat.label}</span>
-                    <ChevronDown className={`h-3 w-3 text-white/20 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`} />
+                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.25em] group-hover/cat:text-zinc-600 transition-colors">{cat.label}</span>
+                    <ChevronDown className={`h-3 w-3 text-zinc-400 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`} />
                   </button>
 
                   {/* Nodes grid */}
@@ -234,15 +234,15 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                           draggable
                           onDragStart={e => onDragStart(e, node.type, node.label)}
                           onClick={() => onAddNode(node.type, node.label)}
-                          className="flex w-full gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] items-center px-3.5 py-3 cursor-pointer hover:bg-white/[0.05] hover:border-white/[0.12] hover:scale-[1.01] transition-all group/item"
+                          className="flex w-full gap-3 rounded-2xl border border-zinc-200 bg-white items-center px-3.5 py-3 cursor-pointer hover:bg-zinc-50 hover:border-zinc-300 hover:scale-[1.01] transition-all group/item shadow-sm"
                         >
                           <div className="flex h-8 w-8 items-center justify-center rounded-xl shrink-0 transition-all group-hover/item:scale-105"
                             style={{ background: `${node.color}15`, border: `1px solid ${node.color}30` }}>
-                            <node.icon className="h-4 w-4" style={{ color: node.color }} />
+                            <node.icon className="h-4 w-4" style={{ color: node.color !== 'rgba(255,255,255,0.5)' && node.color !== 'rgba(255,255,255,0.6)' ? node.color : '#71717a' }} />
                           </div>
                           <div className="flex flex-col text-left min-w-0">
-                            <span className="text-[11px] font-bold text-white/80 group-hover/item:text-white transition-colors truncate">{node.label}</span>
-                            <span className="text-[9px] text-white/25 group-hover/item:text-white/40 transition-colors truncate">{node.description}</span>
+                            <span className="text-[11px] font-bold text-zinc-700 group-hover/item:text-zinc-900 transition-colors truncate">{node.label}</span>
+                            <span className="text-[9px] text-zinc-400 group-hover/item:text-zinc-500 transition-colors truncate">{node.description}</span>
                           </div>
                         </button>
                       ))}
@@ -254,23 +254,23 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
           </div>
 
           {/* Upload + Footer */}
-          <div className="mt-auto px-3 pb-4 pt-2 border-t border-white/[0.05]">
+          <div className="mt-auto px-3 pb-4 pt-2 border-t border-zinc-200 bg-white">
             <button
               onClick={handleFileUpload}
-              className="flex items-center gap-3 w-full px-3.5 py-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-white/20 hover:bg-white/[0.04] transition-all group"
+              className="flex items-center gap-3 w-full px-3.5 py-3 rounded-2xl bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-all group shadow-sm"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-white/[0.06] bg-white/[0.03] group-hover:bg-white/[0.07] transition-colors shrink-0">
-                <Upload className="h-4 w-4 text-white/40 group-hover:text-white transition-colors" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 group-hover:bg-zinc-100 transition-colors shrink-0">
+                <Upload className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-[10px] font-bold text-white/50 group-hover:text-white uppercase tracking-widest">Subir imagen</span>
-                <span className="text-[9px] text-white/20">Drag & drop o clic aquí</span>
+                <span className="text-[10px] font-bold text-zinc-600 group-hover:text-zinc-900 uppercase tracking-widest">Subir imagen</span>
+                <span className="text-[9px] text-zinc-400">Drag & drop o clic aquí</span>
               </div>
             </button>
 
-            <div className="flex items-center justify-between mt-3 text-[9px] font-bold text-white/10 tracking-[0.2em]">
-              <span>Creator IA Pro</span>
-              <span className="hover:text-white/40 transition-colors cursor-pointer">LOGS</span>
+            <div className="flex items-center justify-between mt-3 text-[9px] font-bold text-zinc-300 tracking-[0.2em]">
+              <span className="text-zinc-400">Creator IA Pro</span>
+              <span className="hover:text-zinc-600 transition-colors cursor-pointer text-zinc-400">LOGS</span>
             </div>
           </div>
         </div>

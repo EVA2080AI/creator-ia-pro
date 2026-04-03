@@ -9,11 +9,11 @@ interface NodeNextActionProps {
 }
 
 const NODE_SUGGESTIONS = [
-  { type: "modelView",          label: "Imagen",     icon: Image,     color: "text-[#8AB4F8] bg-[#8AB4F8]/10 border-[#8AB4F8]/20" },
-  { type: "videoModel",         label: "Video",      icon: Video,     color: "text-[#8AB4F8]   bg-[#8AB4F8]/10   border-[#8AB4F8]/20" },
-  { type: "characterBreakdown", label: "Personaje",  icon: FileText,  color: "text-white         bg-white/5          border-white/10" },
-  { type: "layoutBuilder",      label: "Layout",     icon: Layers,    color: "text-emerald-400   bg-emerald-400/10   border-emerald-400/20" },
-  { type: "campaignManager",    label: "Campaña",    icon: Megaphone, color: "text-rose-400      bg-rose-400/10      border-rose-400/20" },
+  { type: "modelView",          label: "Imagen",     icon: Image,     color: "text-blue-500 bg-blue-50 border-blue-100" },
+  { type: "videoModel",         label: "Video",      icon: Video,     color: "text-blue-500 bg-blue-50 border-blue-100" },
+  { type: "characterBreakdown", label: "Personaje",  icon: FileText,  color: "text-zinc-600 bg-zinc-50 border-zinc-200" },
+  { type: "layoutBuilder",      label: "Layout",     icon: Layers,    color: "text-zinc-600 bg-zinc-50 border-zinc-200" },
+  { type: "campaignManager",    label: "Campaña",    icon: Megaphone, color: "text-rose-500 bg-rose-50 border-rose-100" },
 ];
 
 /**
@@ -39,10 +39,10 @@ export function NodeNextAction({ nodeId, hidden }: NodeNextActionProps) {
       <button
         onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
         className={cn(
-          "w-7 h-7 rounded-full flex items-center justify-center border transition-all duration-200 shadow-lg",
+          "w-7 h-7 rounded-full flex items-center justify-center border transition-all duration-200 shadow-sm hover:shadow-md",
           open
-            ? "bg-[#8AB4F8] border-[#8AB4F8]/50 text-white rotate-45"
-            : "bg-[#191a1f] border-white/10 text-white/30 hover:border-[#8AB4F8]/40 hover:text-white/70 hover:scale-110"
+            ? "bg-zinc-800 border-zinc-800 text-white rotate-45"
+            : "bg-white border-zinc-200 text-zinc-400 hover:border-zinc-300 hover:text-zinc-600 hover:scale-110"
         )}
         title="Añadir nodo conectado"
       >
@@ -51,7 +51,7 @@ export function NodeNextAction({ nodeId, hidden }: NodeNextActionProps) {
 
       {/* Suggestion pills */}
       {open && (
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-row gap-1.5 bg-[#0a0a0d]/95 border border-white/10 rounded-2xl p-2 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150 whitespace-nowrap">
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-row gap-1.5 bg-white/95 border border-zinc-200 rounded-2xl p-2 shadow-xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150 whitespace-nowrap">
           {NODE_SUGGESTIONS.map((s) => (
             <button
               key={s.type}

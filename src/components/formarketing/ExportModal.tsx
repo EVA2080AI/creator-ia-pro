@@ -98,16 +98,16 @@ export function ExportModal({ open, onClose, nodes, edges, spaceName }: ExportMo
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md mx-4 bg-[#191a1f] border border-white/[0.08] rounded-[2rem] shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+      <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-md mx-4 bg-white border border-zinc-200 rounded-[2rem] shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/[0.06]">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-100 bg-zinc-50/50">
           <div>
-            <h2 className="text-sm font-bold text-white font-sans">Exportar Canvas</h2>
-            <p className="text-[10px] text-white/30 mt-0.5">{nodes.length} nodo{nodes.length !== 1 ? 's' : ''} · {edges.length} conex.</p>
+            <h2 className="text-sm font-bold text-zinc-900 font-sans">Exportar Canvas</h2>
+            <p className="text-[10px] text-zinc-500 mt-0.5">{nodes.length} nodo{nodes.length !== 1 ? 's' : ''} · {edges.length} conex.</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="w-8 h-8 rounded-xl text-white/20 hover:text-white hover:bg-white/5">
+          <Button variant="ghost" size="icon" onClick={onClose} className="w-8 h-8 rounded-xl text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100">
             <X className="w-4 h-4" />
           </Button>
         </div>
@@ -118,64 +118,64 @@ export function ExportModal({ open, onClose, nodes, edges, spaceName }: ExportMo
           {/* JSON */}
           <button
             onClick={downloadJSON}
-            className="w-full flex items-center gap-4 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all group text-left"
+            className="w-full flex items-center gap-4 p-4 rounded-2xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 hover:border-zinc-300 transition-all group text-left"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#8AB4F8]/10 border border-[#8AB4F8]/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <FileJson className="w-5 h-5 text-[#8AB4F8]" />
+            <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <FileJson className="w-5 h-5 text-blue-500" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-white group-hover:text-white">Creator IA JSON</p>
-              <p className="text-[11px] text-white/30">Nodos, edges y datos — importable al Studio</p>
+              <p className="text-sm font-bold text-zinc-900 group-hover:text-primary">Creator IA JSON</p>
+              <p className="text-[11px] text-zinc-500">Nodos, edges y datos — importable al Studio</p>
             </div>
             {exported === 'json' ? (
-              <Check className="w-4 h-4 text-green-400 shrink-0" />
+              <Check className="w-4 h-4 text-emerald-500 shrink-0" />
             ) : (
-              <Download className="w-4 h-4 text-white/20 shrink-0 group-hover:text-white/60 transition-colors" />
+              <Download className="w-4 h-4 text-zinc-300 shrink-0 group-hover:text-primary/60 transition-colors" />
             )}
           </button>
 
           {/* Lovable */}
           <button
             onClick={downloadLovable}
-            className="w-full flex items-center gap-4 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all group text-left"
+            className="w-full flex items-center gap-4 p-4 rounded-2xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 hover:border-zinc-300 transition-all group text-left"
           >
-            <div className="w-10 h-10 rounded-xl bg-[#8AB4F8]/10 border border-[#8AB4F8]/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <FileJson className="w-5 h-5 text-[#8AB4F8]" />
+            <div className="w-10 h-10 rounded-xl bg-violet-50 border border-violet-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <FileJson className="w-5 h-5 text-violet-500" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-white">Lovable Format</p>
-              <p className="text-[11px] text-white/30">Componentes React + schema para Lovable.dev</p>
+              <p className="text-sm font-bold text-zinc-900 group-hover:text-violet-600">Lovable Format</p>
+              <p className="text-[11px] text-zinc-500">Componentes React + schema para Lovable.dev</p>
             </div>
             {exported === 'lovable' ? (
-              <Check className="w-4 h-4 text-green-400 shrink-0" />
+              <Check className="w-4 h-4 text-emerald-500 shrink-0" />
             ) : (
-              <Download className="w-4 h-4 text-white/20 shrink-0 group-hover:text-white/60 transition-colors" />
+              <Download className="w-4 h-4 text-zinc-300 shrink-0 group-hover:text-violet-600/60 transition-colors" />
             )}
           </button>
 
           {/* PDF */}
           <button
             onClick={printPDF}
-            className="w-full flex items-center gap-4 p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.12] transition-all group text-left"
+            className="w-full flex items-center gap-4 p-4 rounded-2xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-100 hover:border-zinc-300 transition-all group text-left"
           >
-            <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-              <FileText className="w-5 h-5 text-rose-400" />
+            <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <FileText className="w-5 h-5 text-rose-500" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-white">Reporte PDF</p>
-              <p className="text-[11px] text-white/30">Imprime o guarda como PDF desde el navegador</p>
+              <p className="text-sm font-bold text-zinc-900 group-hover:text-rose-600">Reporte PDF</p>
+              <p className="text-[11px] text-zinc-500">Imprime o guarda como PDF desde el navegador</p>
             </div>
             {exported === 'pdf' ? (
-              <Check className="w-4 h-4 text-green-400 shrink-0" />
+              <Check className="w-4 h-4 text-emerald-500 shrink-0" />
             ) : (
-              <Download className="w-4 h-4 text-white/20 shrink-0 group-hover:text-white/60 transition-colors" />
+              <Download className="w-4 h-4 text-zinc-300 shrink-0 group-hover:text-rose-500/60 transition-colors" />
             )}
           </button>
 
         </div>
 
         <div className="px-6 pb-5">
-          <p className="text-[10px] text-center text-white/15">
+          <p className="text-[10px] text-center text-zinc-400">
             creator-ia.com · Studio v2.0
           </p>
         </div>

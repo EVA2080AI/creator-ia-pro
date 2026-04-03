@@ -73,36 +73,36 @@ const PromptBuilderNode = ({ id, data }: { id: string; data: PromptBuilderNodeDa
   const compiled = data.compiledPrompt || compilePrompt(data.template || '', vars);
 
   return (
-    <div className="group relative rounded-3xl overflow-hidden bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors w-[300px] shadow-2xl">
+    <div className="group relative rounded-3xl overflow-hidden bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/50 transition-colors w-[300px] shadow-sm hover:shadow-md">
       {/* Header */}
-      <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">
+      <div className="flex h-12 items-center justify-between px-4 border-b border-zinc-100 bg-zinc-50/50">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-xl bg-[#fb923c]/10 border border-[#fb923c]/20">
-            <Braces className="w-4 h-4 text-[#fb923c]" />
+          <div className="p-1.5 rounded-xl bg-orange-50 border border-orange-100">
+            <Braces className="w-4 h-4 text-orange-500" />
           </div>
-          <h3 className="text-[11px] font-bold text-white/90 tracking-wide font-sans uppercase">
+          <h3 className="text-[11px] font-bold text-zinc-900 tracking-wide font-sans uppercase">
             {data.title || 'Prompt Builder'}
           </h3>
         </div>
-        <button onClick={deleteNode} className="p-2 hover:bg-rose-500/10 text-white/20 hover:text-rose-500 rounded-lg transition-all">
+        <button onClick={deleteNode} className="p-2 hover:bg-red-50 text-zinc-400 hover:text-red-500 rounded-lg transition-all">
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
 
       {/* Body */}
-      <div className="p-4 space-y-3 bg-black/20">
+      <div className="p-4 space-y-3 bg-white">
         {/* Preset templates */}
         <div className="relative">
           <button onClick={() => setPresetsOpen(!presetsOpen)}
-            className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[10px] text-white/40 hover:border-[#fb923c]/30 transition-all">
+            className="w-full flex items-center justify-between px-3 py-1.5 rounded-xl bg-white border border-zinc-200 shadow-sm text-[10px] text-zinc-600 hover:border-orange-300 transition-all font-medium">
             <span>Plantillas rápidas</span>
             <ChevronDown className={`w-3 h-3 transition-transform ${presetsOpen ? 'rotate-180' : ''}`} />
           </button>
           {presetsOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-white/10 overflow-hidden z-50" style={{ background: '#1e2028' }}>
+            <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-zinc-200 overflow-hidden z-50 bg-white shadow-lg">
               {PRESET_TEMPLATES.map(pt => (
                 <button key={pt.label} onClick={() => { handleTemplateChange(pt.template); setPresetsOpen(false); }}
-                  className="w-full px-3 py-2 text-left text-[10px] text-white/50 hover:bg-white/[0.06] hover:text-white transition-all">
+                  className="w-full px-3 py-2 text-left text-[10px] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-all">
                   {pt.label}
                 </button>
               ))}
@@ -112,29 +112,29 @@ const PromptBuilderNode = ({ id, data }: { id: string; data: PromptBuilderNodeDa
 
         {/* Template editor */}
         <div>
-          <p className="text-[9px] text-white/25 uppercase tracking-widest mb-1.5 font-bold">Template — usa {'{{variable}}'}</p>
+          <p className="text-[9px] text-zinc-500 uppercase tracking-widest mb-1.5 font-bold">Template — usa {'{{variable}}'}</p>
           <textarea
             value={data.template || ''}
             onChange={e => handleTemplateChange(e.target.value)}
             onKeyDown={e => e.stopPropagation()}
             placeholder="Ej: Crea un anuncio para {{producto}} dirigido a {{audiencia}}…"
-            className="w-full text-xs leading-relaxed text-white/60 bg-white/[0.03] border border-white/[0.06] p-3 rounded-xl focus:outline-none focus:border-[#fb923c]/40 transition-all resize-none min-h-[60px] placeholder:text-white/15"
+            className="w-full text-xs leading-relaxed text-zinc-900 bg-white border border-zinc-200 shadow-sm p-3 rounded-xl focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-500/10 transition-all resize-none min-h-[60px] placeholder:text-zinc-400"
           />
         </div>
 
         {/* Variable inputs */}
         {vars.length > 0 && (
           <div className="space-y-2">
-            <p className="text-[9px] text-white/25 uppercase tracking-widest font-bold">Variables detectadas</p>
+            <p className="text-[9px] text-zinc-500 uppercase tracking-widest font-bold">Variables detectadas</p>
             {vars.map(v => (
               <div key={v.key} className="flex items-center gap-2">
-                <span className="text-[9px] font-bold text-[#fb923c]/70 font-mono shrink-0 min-w-[70px] truncate">{`{{${v.key}}}`}</span>
+                <span className="text-[9px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded font-mono shrink-0 min-w-[70px] truncate">{`{{${v.key}}}`}</span>
                 <input
                   value={v.value}
                   onChange={e => handleVarChange(v.key, e.target.value)}
                   onKeyDown={e => e.stopPropagation()}
                   placeholder={v.key}
-                  className="flex-1 text-[10px] text-white/70 bg-white/[0.04] border border-white/[0.07] px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-[#fb923c]/40 transition-all placeholder:text-white/15"
+                  className="flex-1 text-[10px] text-zinc-800 bg-white border border-zinc-200 shadow-sm px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-500/10 transition-all placeholder:text-zinc-400"
                 />
               </div>
             ))}
@@ -143,22 +143,22 @@ const PromptBuilderNode = ({ id, data }: { id: string; data: PromptBuilderNodeDa
 
         {/* Compiled preview */}
         {compiled && data.template && (
-          <div className="rounded-xl bg-[#fb923c]/[0.05] border border-[#fb923c]/[0.15] p-3">
-            <p className="text-[9px] text-[#fb923c]/60 uppercase tracking-widest font-bold mb-1">Preview del prompt</p>
-            <p className="text-[10px] text-white/50 leading-relaxed line-clamp-3">{compiled}</p>
+          <div className="rounded-xl bg-orange-50 border border-orange-100 p-3 shadow-sm">
+            <p className="text-[9px] text-orange-700 uppercase tracking-widest font-bold mb-1">Preview del prompt</p>
+            <p className="text-[10px] text-zinc-700 leading-relaxed line-clamp-3">{compiled}</p>
           </div>
         )}
 
         {/* Port label */}
-        <div className="flex items-center justify-end text-[9px] text-white/15 uppercase tracking-widest font-sans">
-          <span className="flex items-center gap-1">Prompt compilado<span className="w-1.5 h-1.5 rounded-full bg-[#fb923c] inline-block" /></span>
+        <div className="flex items-center justify-end text-[9px] text-zinc-400 uppercase tracking-widest font-sans mt-2">
+          <span className="flex items-center gap-1">Prompt compilado<span className="w-1.5 h-1.5 rounded-full bg-orange-500 inline-block shadow-sm" /></span>
         </div>
       </div>
 
       <NodeConnectionDropdown nodeType="promptBuilder" nodeId={id} onAddConnected={data.onAddConnected ?? (() => {})} />
 
-      <Handle type="target" position={Position.Left} id="text-in" className="!w-4 !h-4 !-left-2 !bg-yellow-400 !border-2 !border-[#0f1011] hover:!scale-125 transition-transform cursor-crosshair" />
-      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-[#fb923c] !border-2 !border-[#0f1011] hover:!scale-125 transition-transform cursor-crosshair" />
+      <Handle type="target" position={Position.Left} id="text-in" className="!w-4 !h-4 !-left-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-orange-500 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
     </div>
   );
 };

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
-import { AppHeader } from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { aiService } from "@/services/ai-service";
 import { adminService } from "@/services/billing-service";
@@ -258,7 +257,6 @@ const SystemStatus = () => {
   return (
     <div className="min-h-screen bg-background bg-grid-white/[0.02]">
       <Helmet><title>Estado del Sistema | Creator IA Pro</title></Helmet>
-      <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main id="main-content" className="mx-auto max-w-5xl px-6 py-8">
         <div className="mb-6 flex items-center gap-3">

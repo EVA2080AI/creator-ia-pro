@@ -44,17 +44,17 @@ const CHAT_MODELS = [
 
 // ─── Personalities ────────────────────────────────────────────────────────────
 const PERSONALITIES = [
-  { id: 'assistant',  name: 'Antigravity',          icon: Bot,       color: 'text-white/60',    bg: 'bg-white/5',
+  { id: 'assistant',  name: 'Antigravity',          icon: Bot,       color: 'text-zinc-600',    bg: 'bg-zinc-100',
     prompt: 'Eres Antigravity, un asistente de IA de alto rendimiento. Responde con precisión, claridad y valor. Usa markdown cuando sea útil.' },
-  { id: 'code',       name: 'Code Assistant',       icon: Code2,     color: 'text-sky-400',     bg: 'bg-sky-400/10',
+  { id: 'code',       name: 'Code Assistant',       icon: Code2,     color: 'text-sky-500',     bg: 'bg-sky-50',
     prompt: 'Eres un desarrollador Full-Stack Senior experto. Generas código limpio, moderno con TypeScript, React y Tailwind CSS. SIEMPRE envuelves código en bloques con lenguaje especificado (```tsx, ```html, etc).' },
-  { id: 'marketing',  name: 'Marketing Expert',     icon: Megaphone, color: 'text-rose-400',    bg: 'bg-rose-400/10',
+  { id: 'marketing',  name: 'Marketing Expert',     icon: Megaphone, color: 'text-rose-500',    bg: 'bg-rose-50',
     prompt: 'Eres un Especialista en Marketing Digital Senior con 10+ años de experiencia. Dominas Meta Ads, Google Ads, SEO y copywriting. Hablas en español.' },
-  { id: 'copywriter', name: 'Copywriter',           icon: PenTool,   color: 'text-[#8AB4F8]',  bg: 'bg-[#8AB4F8]/10',
+  { id: 'copywriter', name: 'Copywriter',           icon: PenTool,   color: 'text-blue-500',  bg: 'bg-blue-50',
     prompt: 'Eres un Copywriter creativo experto. Usas AIDA, PAS, FAB. Tu copy es persuasivo y orientado a conversión. Hablas en español.' },
-  { id: 'seo',        name: 'SEO Strategist',       icon: Search,    color: 'text-emerald-400', bg: 'bg-emerald-400/10',
+  { id: 'seo',        name: 'SEO Strategist',       icon: Search,    color: 'text-emerald-500', bg: 'bg-emerald-50',
     prompt: 'Eres un Estratega SEO experto. Conoces el algoritmo de Google, E-E-A-T, keyword research y SEO técnico. Hablas en español.' },
-  { id: 'director',   name: 'Director Creativo',    icon: Palette,   color: 'text-amber-400',   bg: 'bg-amber-400/10',
+  { id: 'director',   name: 'Director Creativo',    icon: Palette,   color: 'text-amber-500',   bg: 'bg-amber-50',
     prompt: 'Eres un Director Creativo de agencia global. Combinas estrategia con creatividad para campañas memorables. Hablas en español.' },
 ];
 
@@ -66,18 +66,18 @@ const saveConvs = (c: Conversation[]) => localStorage.setItem(STORAGE_KEY, JSON.
 // ─── Markdown ─────────────────────────────────────────────────────────────────
 function md(text: string): string {
   return text
-    .replace(/^### (.+)$/gm,   '<h3 class="text-[15px] font-semibold text-white mt-5 mb-1.5 leading-snug">$1</h3>')
-    .replace(/^## (.+)$/gm,    '<h2 class="text-base font-bold text-white mt-6 mb-2 leading-snug">$1</h2>')
-    .replace(/^# (.+)$/gm,     '<h1 class="text-lg font-bold text-white mt-7 mb-2 leading-snug">$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-white">$1</strong>')
-    .replace(/\*(.+?)\*/g,     '<em class="italic text-white/75">$1</em>')
-    .replace(/`([^`\n]+)`/g,   '<code class="bg-white/[0.08] border border-white/[0.07] text-sky-300 px-1.5 py-0.5 rounded-md text-[12.5px] font-mono">$1</code>')
-    .replace(/^---+$/gm,       '<hr class="border-white/[0.08] my-5"/>')
-    .replace(/^\s*[-*•] (.+)$/gm, '<li class="flex gap-2.5 my-1"><span class="text-white/30 shrink-0 mt-[3px] text-[10px]">▸</span><span class="text-white/80">$1</span></li>')
+    .replace(/^### (.+)$/gm,   '<h3 class="text-[15px] font-semibold text-zinc-900 mt-5 mb-1.5 leading-snug">$1</h3>')
+    .replace(/^## (.+)$/gm,    '<h2 class="text-base font-bold text-zinc-900 mt-6 mb-2 leading-snug">$1</h2>')
+    .replace(/^# (.+)$/gm,     '<h1 class="text-lg font-bold text-zinc-900 mt-7 mb-2 leading-snug">$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-zinc-900">$1</strong>')
+    .replace(/\*(.+?)\*/g,     '<em class="italic text-zinc-600">$1</em>')
+    .replace(/`([^`\n]+)`/g,   '<code class="bg-zinc-100 border border-zinc-200 text-sky-600 px-1.5 py-0.5 rounded-md text-[12.5px] font-mono">$1</code>')
+    .replace(/^---+$/gm,       '<hr class="border-zinc-200 my-5"/>')
+    .replace(/^\s*[-*•] (.+)$/gm, '<li class="flex gap-2.5 my-1"><span class="text-zinc-400 shrink-0 mt-[3px] text-[10px]">▸</span><span class="text-zinc-700">$1</span></li>')
     .replace(/(<li[\s\S]*?<\/li>\n?)+/g, m => `<ul class="my-3 space-y-0.5 ml-1">${m}</ul>`)
-    .replace(/^\d+\. (.+)$/gm, '<li class="flex gap-2.5 my-1"><span class="text-white/25 shrink-0 font-mono text-[11px] mt-[2px]">·</span><span class="text-white/80">$1</span></li>')
-    .replace(/\n\n/g,          '</p><p class="mt-3 text-white/75 leading-[1.75]">')
-    .replace(/^(?!<[hublpei])(.+)$/gm, line => line.trim() ? `<p class="text-white/75 leading-[1.75]">${line}</p>` : '');
+    .replace(/^\d+\. (.+)$/gm, '<li class="flex gap-2.5 my-1"><span class="text-zinc-400 shrink-0 font-mono text-[11px] mt-[2px]">·</span><span class="text-zinc-700">$1</span></li>')
+    .replace(/\n\n/g,          '</p><p class="mt-3 text-zinc-600 leading-[1.75]">')
+    .replace(/^(?!<[hublpei])(.+)$/gm, line => line.trim() ? `<p class="text-zinc-600 leading-[1.75]">${line}</p>` : '');
 }
 
 function extractCode(text: string) {
@@ -99,50 +99,50 @@ function CodeBlock({ lang, code, onCanvas }: { lang: string; code: string; onCan
   const iframeSrc = lang === 'html'
     ? `data:text/html;charset=utf-8,${encodeURIComponent(code)}`
     : `data:text/html;charset=utf-8,${encodeURIComponent(
-        `<!DOCTYPE html><html><head><meta charset="utf-8"><script src="https://cdn.tailwindcss.com"><\/script><style>body{background:#191a1f;color:#e5e7eb;font-family:ui-sans-serif,system-ui,sans-serif;padding:1.5rem;margin:0}</style></head><body>${code}</body></html>`,
+        `<!DOCTYPE html><html><head><meta charset="utf-8"><script src="https://cdn.tailwindcss.com"><\/script><style>body{background:#fafafa;color:#18181b;font-family:ui-sans-serif,system-ui,sans-serif;padding:1.5rem;margin:0}</style></head><body>${code}</body></html>`,
       )}`;
 
   const copy = async () => { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); };
 
   return (
-    <div className="my-4 rounded-xl overflow-hidden border border-white/[0.07] bg-[#191a1f]">
+    <div className="my-4 rounded-xl overflow-hidden border border-zinc-200 bg-white">
       {/* Window chrome */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-white/[0.025] border-b border-white/[0.06]">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-50 border-b border-zinc-200">
         <div className="flex items-center gap-3">
           <div className="flex gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-[#FF5F57]" />
-            <span className="w-3 h-3 rounded-full bg-[#FFBD2E]" />
-            <span className="w-3 h-3 rounded-full bg-[#28CA41]" />
+            <span className="w-3 h-3 rounded-full bg-rose-400" />
+            <span className="w-3 h-3 rounded-full bg-amber-400" />
+            <span className="w-3 h-3 rounded-full bg-green-400" />
           </div>
-          <span className="text-[11px] font-medium text-white/25 select-none">{lang}</span>
+          <span className="text-[11px] font-medium text-zinc-400 select-none">{lang}</span>
         </div>
         <div className="flex items-center gap-2">
           {isPrev && onCanvas && (
             <button onClick={() => onCanvas(code, lang)}
-              className="flex items-center gap-1.5 text-[11px] font-medium text-white/30 hover:text-[#8AB4F8] transition-colors px-2 py-1 rounded-lg hover:bg-[#8AB4F8]/10">
+              className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 hover:text-primary transition-colors px-2 py-1 rounded-lg hover:bg-primary/5">
               <Monitor className="h-3.5 w-3.5" /> Canvas
             </button>
           )}
           {isPrev && (
             <button onClick={() => setShowPreview(v => !v)}
-              className="flex items-center gap-1.5 text-[11px] font-medium text-white/30 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-white/5">
+              className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 hover:text-zinc-900 transition-colors px-2 py-1 rounded-lg hover:bg-zinc-100">
               {showPreview ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
               {showPreview ? 'Código' : 'Preview'}
             </button>
           )}
           <button onClick={copy}
-            className="flex items-center gap-1.5 text-[11px] font-medium text-white/30 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-white/5">
-            {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 hover:text-zinc-900 transition-colors px-2 py-1 rounded-lg hover:bg-zinc-100">
+            {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
             {copied ? 'Copiado' : 'Copiar'}
           </button>
         </div>
       </div>
       {showPreview ? (
-        <div className="h-72 bg-[#191a1f]">
+        <div className="h-72 bg-white">
           <iframe src={iframeSrc} className="w-full h-full border-0" sandbox="allow-scripts" title="code-preview" />
         </div>
       ) : (
-        <pre className="p-5 overflow-x-auto text-[13px] font-mono text-white/55 leading-relaxed max-h-80 overflow-y-auto">
+        <pre className="p-5 overflow-x-auto text-[13px] font-mono text-zinc-600 leading-relaxed max-h-80 overflow-y-auto">
           <code>{code}</code>
         </pre>
       )}
@@ -170,31 +170,31 @@ function CanvasPanel({ code, lang, onClose }: { code: string; lang: string; onCl
   const src = lang === 'html'
     ? `data:text/html;charset=utf-8,${encodeURIComponent(code)}`
     : `data:text/html;charset=utf-8,${encodeURIComponent(
-        `<!DOCTYPE html><html><head><meta charset="utf-8"><script src="https://cdn.tailwindcss.com"><\/script><style>body{background:#191a1f;color:#e5e7eb;font-family:ui-sans-serif,system-ui,sans-serif;padding:2rem;margin:0}</style></head><body>${code}</body></html>`,
+        `<!DOCTYPE html><html><head><meta charset="utf-8"><script src="https://cdn.tailwindcss.com"><\/script><style>body{background:#fafafa;color:#18181b;font-family:ui-sans-serif,system-ui,sans-serif;padding:2rem;margin:0}</style></head><body>${code}</body></html>`,
       )}`;
 
   const copy = async () => { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); };
 
   return (
-    <div className="w-[520px] shrink-0 flex flex-col border-l border-white/[0.06] bg-[#191a1f] animate-in slide-in-from-right duration-250">
+    <div className="w-[520px] shrink-0 flex flex-col border-l border-zinc-200 bg-white animate-in slide-in-from-right duration-250">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 h-12 border-b border-white/[0.06] shrink-0">
-        <div className="flex border border-white/[0.07] rounded-lg overflow-hidden bg-white/[0.03]">
+      <div className="flex items-center justify-between px-4 h-12 border-b border-zinc-200 shrink-0">
+        <div className="flex border border-zinc-200 rounded-lg overflow-hidden bg-zinc-50">
           {(['preview', 'code'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={cn('px-4 py-1.5 text-[12px] font-semibold transition-all',
-                tab === t ? 'bg-white/[0.08] text-white' : 'text-white/30 hover:text-white/60')}>
+                tab === t ? 'bg-white shadow-sm text-zinc-900 border-zinc-200' : 'text-zinc-500 hover:text-zinc-900')}>
               {t === 'preview' ? 'Vista previa' : 'Código'}
             </button>
           ))}
         </div>
         <div className="flex items-center gap-1">
           <button onClick={copy}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-white/30 hover:text-white rounded-lg hover:bg-white/[0.05] transition-all">
-            {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-medium text-zinc-500 hover:text-zinc-900 rounded-lg hover:bg-zinc-100 transition-all">
+            {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
             {copied ? 'Copiado' : 'Copiar'}
           </button>
-          <button onClick={onClose} className="p-2 rounded-lg text-white/20 hover:text-white hover:bg-white/[0.05] transition-all">
+          <button onClick={onClose} className="p-2 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -203,7 +203,7 @@ function CanvasPanel({ code, lang, onClose }: { code: string; lang: string; onCl
       <div className="flex-1 overflow-hidden">
         {tab === 'preview'
           ? <iframe src={src} className="w-full h-full border-0" sandbox="allow-scripts" title="canvas" />
-          : <pre className="p-5 h-full overflow-auto text-[12.5px] font-mono text-white/50 leading-relaxed"><code>{code}</code></pre>}
+          : <pre className="p-5 h-full overflow-auto text-[12.5px] font-mono text-zinc-600 leading-relaxed bg-zinc-50"><code>{code}</code></pre>}
       </div>
     </div>
   );
@@ -384,20 +384,20 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
   // ─────────────────────────────────────────────────────────────────────────────
   return (
     <div className={embedded
-      ? "flex flex-col h-full bg-[#1e2028]"
-      : "fixed top-16 left-0 right-0 bottom-0 z-[9000] flex bg-[#191a1f]"
+      ? "flex flex-col h-full bg-slate-50 border border-zinc-200"
+      : "fixed top-16 left-0 right-0 bottom-0 z-[9000] flex bg-canvas"
     }>
 
       {/* ── Sidebar — only in fullscreen page mode ───────────────────────────── */}
       {!embedded && <aside className={cn(
-        'flex-col bg-[#191a1f] border-r border-white/[0.06] transition-all duration-200 overflow-hidden shrink-0',
+        'flex-col bg-slate-50 border-r border-border transition-all duration-200 overflow-hidden shrink-0',
         sidebarOpen ? 'flex w-[260px]' : 'hidden',
       )}>
         {/* Sidebar header */}
-        <div className="flex items-center justify-between px-4 h-12 border-b border-white/[0.06] shrink-0">
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/25">Conversaciones</span>
+        <div className="flex items-center justify-between px-4 h-12 border-b border-border shrink-0">
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400">Conversaciones</span>
           <button onClick={newConv}
-            className="p-1.5 rounded-lg text-white/30 hover:text-white hover:bg-white/[0.06] transition-all" title="Nueva conversación">
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-all" title="Nueva conversación">
             <SquarePen className="h-4 w-4" />
           </button>
         </div>
@@ -406,8 +406,8 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
         <div className="flex-1 overflow-y-auto py-2 px-2">
           {conversations.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-28 gap-2">
-              <MessageSquare className="h-5 w-5 text-white/10" />
-              <p className="text-[11px] text-white/20">Sin conversaciones</p>
+              <MessageSquare className="h-5 w-5 text-zinc-300" />
+              <p className="text-[11px] text-zinc-400">Sin conversaciones</p>
             </div>
           ) : (
             <div className="space-y-0.5">
@@ -416,13 +416,13 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                   className={cn(
                     'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left group transition-all',
                     activeId === conv.id
-                      ? 'bg-white/[0.07] text-white'
-                      : 'text-white/40 hover:bg-white/[0.04] hover:text-white/70',
+                      ? 'bg-zinc-200/50 text-zinc-900 font-semibold'
+                      : 'text-zinc-500 hover:bg-zinc-100/80 hover:text-zinc-800',
                   )}>
                   <MessageSquare className="h-3.5 w-3.5 shrink-0 opacity-50" />
                   <span className="flex-1 text-[13px] truncate">{conv.title}</span>
                   <button onClick={e => delConv(conv.id, e)}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-rose-500/20 hover:text-rose-400 transition-all shrink-0">
+                    className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-red-50 hover:text-red-500 transition-all shrink-0">
                     <Trash2 className="h-3 w-3" />
                   </button>
                 </button>
@@ -432,31 +432,31 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
         </div>
 
         {/* Credits + profile */}
-        <div className="px-3 pb-3 pt-2 border-t border-white/[0.06] space-y-1.5 shrink-0">
-          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/[0.03]">
-            <Zap className="h-3.5 w-3.5 text-[#8AB4F8] shrink-0" />
-            <span className="text-[12px] text-white/50">
-              <span className="font-bold text-white/70">{(profile?.credits_balance ?? 0).toLocaleString()}</span> créditos
+        <div className="px-3 pb-3 pt-2 border-t border-border space-y-1.5 shrink-0">
+          <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-zinc-100">
+            <Zap className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="text-[12px] text-zinc-500">
+              <span className="font-bold text-zinc-800">{(profile?.credits_balance ?? 0).toLocaleString()}</span> créditos
             </span>
           </div>
           {!isPro && (
             <button onClick={() => navigate('/pricing')}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-[#8AB4F8]/10 to-transparent border border-[#8AB4F8]/15 hover:border-[#8AB4F8]/30 transition-all group">
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-gradient-to-r from-primary/10 to-transparent border border-primary/20 hover:border-primary/40 transition-all group">
               <div className="flex items-center gap-2">
-                <CreditCard className="h-3.5 w-3.5 text-[#8AB4F8]" />
-                <span className="text-[12px] text-white/50 group-hover:text-white/80">Upgrade a Pro</span>
+                <CreditCard className="h-3.5 w-3.5 text-primary" />
+                <span className="text-[12px] text-zinc-600 group-hover:text-zinc-900 font-medium">Upgrade a Pro</span>
               </div>
-              <ArrowUpRight className="h-3.5 w-3.5 text-[#8AB4F8]/50" />
+              <ArrowUpRight className="h-3.5 w-3.5 text-primary/60" />
             </button>
           )}
           <button onClick={() => navigate('/profile')}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-white/[0.04] transition-all group">
-            <div className="w-6 h-6 rounded-full bg-white/[0.08] border border-white/[0.08] flex items-center justify-center overflow-hidden shrink-0">
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-zinc-100 transition-all group">
+            <div className="w-6 h-6 rounded-full bg-zinc-200 border border-zinc-300 flex items-center justify-center overflow-hidden shrink-0">
               {profile?.avatar_url
                 ? <img src={profile.avatar_url} className="w-full h-full object-cover" alt="" />
-                : <User className="h-3 w-3 text-white/40" />}
+                : <User className="h-3 w-3 text-zinc-400" />}
             </div>
-            <span className="text-[12px] text-white/40 group-hover:text-white/70 truncate">
+            <span className="text-[12px] text-zinc-500 group-hover:text-zinc-800 font-medium truncate">
               {profile?.display_name?.split(' ')[0] || 'Perfil'}
             </span>
           </button>
@@ -470,11 +470,11 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
         <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
 
           {/* Top bar */}
-          <div className="flex items-center gap-3 px-4 h-12 border-b border-white/[0.06] shrink-0">
+          <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-200 shrink-0 bg-white/50 backdrop-blur-md">
             {/* Sidebar toggle — only in page mode */}
             {!embedded && (
               <button onClick={() => setSidebarOpen(v => !v)}
-                className="p-1.5 rounded-lg text-white/25 hover:text-white hover:bg-white/[0.06] transition-all">
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-all">
                 <ArrowLeft className={cn('h-4 w-4 transition-transform', !sidebarOpen && 'rotate-180')} />
               </button>
             )}
@@ -482,23 +482,23 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
             {/* Model picker */}
             <div className="relative">
               <button onClick={() => { setModelOpen(v => !v); setPersOpen(false); }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.07] transition-all text-[12px] font-medium text-white/60 hover:text-white">
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-zinc-200 hover:bg-zinc-50 shadow-sm transition-all text-[12px] font-medium text-zinc-600 hover:text-zinc-900">
                 <span className="w-2 h-2 rounded-full" style={{ background: curModel.color }} />
                 {curModel.name}
-                <ChevronDown className="h-3 w-3 text-white/25" />
+                <ChevronDown className="h-3 w-3 text-zinc-400" />
               </button>
               {modelOpen && (
-                <div className="absolute top-full left-0 mt-1.5 w-64 bg-[#111115] border border-white/[0.08] rounded-2xl shadow-2xl z-50 overflow-hidden">
+                <div className="absolute top-full left-0 mt-1.5 w-64 bg-white border border-zinc-200 rounded-2xl shadow-xl z-50 overflow-hidden">
                   <div className="p-1">
                     {CHAT_MODELS.map(m => (
                       <button key={m.id} onClick={() => { setModel(m.id); setModelOpen(false); }}
-                        className={cn('w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-white/[0.05] transition-all', model === m.id && 'bg-white/[0.07]')}>
+                        className={cn('w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-zinc-50 transition-all', model === m.id && 'bg-zinc-100')}>
                         <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: m.color }} />
                         <div className="flex-1">
-                          <p className="text-[13px] font-medium text-white/80">{m.name}</p>
-                          <p className="text-[10px] text-white/30 mt-0.5">{m.badge} · {m.cost} cr/msg</p>
+                          <p className="text-[13px] font-medium text-zinc-800">{m.name}</p>
+                          <p className="text-[10px] text-zinc-500 mt-0.5">{m.badge} · {m.cost} cr/msg</p>
                         </div>
-                        {model === m.id && <Check className="h-3.5 w-3.5 text-[#8AB4F8] shrink-0" />}
+                        {model === m.id && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
                       </button>
                     ))}
                   </div>
@@ -509,22 +509,22 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
             {/* Personality picker */}
             <div className="relative">
               <button onClick={() => { setPersOpen(v => !v); setModelOpen(false); }}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.07] transition-all text-[12px] font-medium text-white/60 hover:text-white">
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-zinc-200 hover:bg-zinc-50 shadow-sm transition-all text-[12px] font-medium text-zinc-600 hover:text-zinc-900">
                 <curPers.icon className={cn('h-3.5 w-3.5 shrink-0', curPers.color)} />
                 {curPers.name}
-                <ChevronDown className="h-3 w-3 text-white/25" />
+                <ChevronDown className="h-3 w-3 text-zinc-400" />
               </button>
               {persOpen && (
-                <div className="absolute top-full left-0 mt-1.5 w-56 bg-[#111115] border border-white/[0.08] rounded-2xl shadow-2xl z-50 overflow-hidden">
+                <div className="absolute top-full left-0 mt-1.5 w-56 bg-white border border-zinc-200 rounded-2xl shadow-xl z-50 overflow-hidden">
                   <div className="p-1">
                     {PERSONALITIES.map(p => (
                       <button key={p.id} onClick={() => { setPersonality(p.id); setPersOpen(false); }}
-                        className={cn('w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left hover:bg-white/[0.05] transition-all', personality === p.id && 'bg-white/[0.07]')}>
-                        <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center shrink-0', p.bg)}>
+                        className={cn('w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left hover:bg-zinc-50 transition-all', personality === p.id && 'bg-zinc-100')}>
+                        <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border border-zinc-100', p.bg)}>
                           <p.icon className={cn('h-3.5 w-3.5', p.color)} />
                         </div>
-                        <span className="text-[13px] font-medium text-white/75 flex-1">{p.name}</span>
-                        {personality === p.id && <Check className="h-3 w-3 text-[#8AB4F8]" />}
+                        <span className="text-[13px] font-medium text-zinc-700 flex-1">{p.name}</span>
+                        {personality === p.id && <Check className="h-3 w-3 text-primary" />}
                       </button>
                     ))}
                   </div>
@@ -536,36 +536,36 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
 
             {/* New chat */}
             <button onClick={newConv}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.07] text-[12px] font-medium text-white/50 hover:text-white transition-all">
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-zinc-200 hover:bg-zinc-50 shadow-sm text-[12px] font-medium text-zinc-600 hover:text-zinc-900 transition-all">
               <Plus className="h-3.5 w-3.5" /> Nuevo
             </button>
 
             {/* Close: embedded → close panel; page → go to dashboard */}
             <button
               onClick={() => embedded ? onClose?.() : navigate('/dashboard')}
-              className="p-1.5 rounded-lg text-white/20 hover:text-white hover:bg-white/[0.06] transition-all">
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-800 hover:bg-zinc-100 transition-all">
               <X className="h-4 w-4" />
             </button>
           </div>
 
           {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto bg-canvas">
             {isEmpty ? (
               /* ── Empty state ── */
               <div className="flex flex-col items-center justify-center min-h-full px-8 py-16 text-center">
                 <div className="relative mb-8">
-                  <div className="absolute inset-0 blur-[60px] rounded-full opacity-40"
+                  <div className="absolute inset-0 blur-[60px] rounded-full opacity-30"
                     style={{ background: curModel.color }} />
-                  <div className="relative w-14 h-14 rounded-2xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center">
+                  <div className="relative w-14 h-14 rounded-2xl bg-white border border-zinc-200 shadow-sm flex items-center justify-center">
                     <curPers.icon className={cn('h-6 w-6', curPers.color)} />
                   </div>
                 </div>
-                <h1 className="text-[22px] font-bold text-white tracking-tight mb-2">
+                <h1 className="text-[22px] font-bold text-zinc-900 tracking-tight mb-2">
                   {personality === 'assistant'
                     ? <>Hola, soy <span style={{ color: curModel.color }}>Antigravity</span></>
                     : curPers.name}
                 </h1>
-                <p className="text-[14px] text-white/35 max-w-sm leading-relaxed mb-10">
+                <p className="text-[14px] text-zinc-500 max-w-sm leading-relaxed mb-10">
                   {personality === 'code'       ? 'Cuéntame qué quieres construir. Generaré el código con preview en vivo.' :
                    personality === 'marketing'  ? 'Pregúntame sobre campañas, ads, copywriting o estrategia digital.' :
                    personality === 'seo'        ? 'Ayudo con keyword research, auditorías SEO y estrategia de contenido.' :
@@ -576,7 +576,7 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                 <div className="flex flex-wrap gap-2 justify-center max-w-md">
                   {(quickPrompts[personality] ?? quickPrompts.assistant).map(q => (
                     <button key={q} onClick={() => { setInput(q); inputRef.current?.focus(); }}
-                      className="px-4 py-2 rounded-xl border border-white/[0.07] bg-white/[0.03] text-[13px] text-white/45 hover:text-white/80 hover:bg-white/[0.06] hover:border-white/[0.11] transition-all">
+                      className="px-4 py-2 rounded-xl border border-zinc-200 bg-white text-[13px] text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 hover:border-zinc-300 shadow-sm transition-all focus:outline-none focus:ring-2 ring-primary/20">
                       {q}
                     </button>
                   ))}
@@ -589,7 +589,7 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                   if (msg.role === 'user') {
                     return (
                       <div key={msg.id} className="flex justify-end py-2">
-                        <div className="max-w-[75%] bg-white/[0.07] border border-white/[0.07] text-white/90 rounded-2xl rounded-tr-sm px-4 py-3 text-[14px] leading-relaxed">
+                        <div className="max-w-[75%] bg-zinc-100 border border-zinc-200 text-zinc-900 rounded-2xl rounded-tr-sm px-4 py-3 text-[14px] leading-relaxed shadow-sm">
                           {msg.content}
                         </div>
                       </div>
@@ -601,15 +601,15 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                     <div key={msg.id} className="py-4">
                       {/* AI avatar + name */}
                       <div className="flex items-center gap-2.5 mb-3">
-                        <div className="w-6 h-6 rounded-lg bg-white/[0.06] border border-white/[0.07] flex items-center justify-center shrink-0"
-                          style={{ boxShadow: `0 0 12px ${curModel.color}30` }}>
+                        <div className="w-6 h-6 rounded-lg bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm"
+                          style={{ boxShadow: `0 0 12px ${curModel.color}15` }}>
                           <Sparkles className="h-3 w-3" style={{ color: curModel.color }} />
                         </div>
-                        <span className="text-[12px] font-semibold text-white/40">{curPers.name}</span>
+                        <span className="text-[12px] font-semibold text-zinc-500">{curPers.name}</span>
                       </div>
                       {/* Text */}
                       {text && (
-                        <div className="text-[14px] text-white/75 leading-[1.75] pl-[34px]"
+                        <div className="text-[14px] text-zinc-700 leading-[1.75] pl-[34px]"
                           dangerouslySetInnerHTML={{ __html: md(text) }} />
                       )}
                       {/* Code blocks */}
@@ -628,12 +628,12 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                 {streaming && streamText && (
                   <div className="py-4">
                     <div className="flex items-center gap-2.5 mb-3">
-                      <div className="w-6 h-6 rounded-lg bg-white/[0.06] border border-white/[0.07] flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-lg bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm">
                         <Sparkles className="h-3 w-3 animate-pulse" style={{ color: curModel.color }} />
                       </div>
-                      <span className="text-[12px] font-semibold text-white/40">{curPers.name}</span>
+                      <span className="text-[12px] font-semibold text-zinc-500">{curPers.name}</span>
                     </div>
-                    <div className="pl-[34px] text-[14px] text-white/75 leading-[1.75] whitespace-pre-wrap">
+                    <div className="pl-[34px] text-[14px] text-zinc-700 leading-[1.75] whitespace-pre-wrap">
                       {streamText}
                       <span className="inline-block w-[2px] h-[18px] animate-pulse ml-0.5 rounded-sm align-middle"
                         style={{ background: curModel.color + '80' }} />
@@ -645,11 +645,11 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                 {streaming && !streamText && (
                   <div className="py-4">
                     <div className="flex items-center gap-2.5 mb-3">
-                      <div className="w-6 h-6 rounded-lg bg-white/[0.06] border border-white/[0.07] flex items-center justify-center shrink-0">
+                      <div className="w-6 h-6 rounded-lg bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm">
                         <Loader2 className="h-3 w-3 animate-spin" style={{ color: curModel.color }} />
                       </div>
-                      <span className="text-[12px] font-semibold text-white/40">{curModel.name}</span>
-                      <span className="text-[11px] text-white/20">está procesando</span>
+                      <span className="text-[12px] font-semibold text-zinc-500">{curModel.name}</span>
+                      <span className="text-[11px] text-zinc-400">está procesando</span>
                     </div>
                     <div className="pl-[34px]">
                       <Thinking color={curModel.color} />
@@ -661,11 +661,11 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
           </div>
 
           {/* ── Input ───────────────────────────────────────────────────────── */}
-          <div className="px-4 pb-5 pt-3 shrink-0 border-t border-white/[0.05]">
+          <div className="px-4 pb-5 pt-3 shrink-0 border-t border-zinc-200 bg-white/50 backdrop-blur-md">
             <div className="max-w-[720px] mx-auto">
-              <div className="relative flex items-end gap-2 bg-white/[0.04] border border-white/[0.07] rounded-2xl px-4 py-3.5 focus-within:border-white/[0.13] focus-within:bg-white/[0.05] transition-all">
+              <div className="relative flex items-end gap-2 bg-white border border-zinc-200 shadow-sm rounded-2xl px-4 py-3.5 focus-within:border-zinc-300 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
                 {/* Paperclip */}
-                <button className="flex-shrink-0 text-white/20 hover:text-white/50 transition-colors p-0.5 mb-0.5">
+                <button className="flex-shrink-0 text-zinc-400 hover:text-zinc-600 transition-colors p-0.5 mb-0.5">
                   <Paperclip className="h-4 w-4" />
                 </button>
                 <textarea
@@ -675,7 +675,7 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                   onKeyDown={handleKey}
                   placeholder={`Mensaje a ${curPers.name}…`}
                   rows={1}
-                  className="flex-1 resize-none bg-transparent text-[14px] text-white/90 placeholder:text-white/20 focus:outline-none leading-relaxed"
+                  className="flex-1 resize-none bg-transparent text-[14px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none leading-relaxed"
                   style={{ minHeight: '22px', maxHeight: '140px', overflowY: 'auto' }}
                 />
                 {/* Send button */}
@@ -683,15 +683,15 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                   className={cn(
                     'flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all',
                     input.trim() && !streaming
-                      ? 'bg-white text-black hover:bg-white/90 active:scale-95 shadow-md'
-                      : 'bg-white/[0.06] text-white/20 cursor-not-allowed',
+                      ? 'bg-zinc-900 text-white hover:bg-zinc-800 active:scale-95 shadow-md'
+                      : 'bg-zinc-100 text-zinc-300 cursor-not-allowed',
                   )}>
                   {streaming
                     ? <Loader2 className="h-4 w-4 animate-spin" />
                     : <Send className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-center text-[10px] text-white/12 mt-2 tracking-widest">
+              <p className="text-center text-[10px] text-zinc-400 mt-2 tracking-widest uppercase">
                 Enter · enviar &nbsp;·&nbsp; Shift+Enter · nueva línea
               </p>
             </div>

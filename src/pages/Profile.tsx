@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { AppHeader } from "@/components/AppHeader";
 import { toast } from "sonner";
 import {
   User, Mail, Shield, Coins, Settings, LogOut, Loader2, Save,
@@ -90,7 +89,6 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900">
       <Helmet><title>Perfil | Creator IA Pro</title></Helmet>
-      <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main id="main-content" className="max-w-5xl mx-auto px-6 pt-28 pb-20">
         {/* Header */}

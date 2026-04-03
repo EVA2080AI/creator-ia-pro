@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { motion, useInView } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { AppHeader } from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -389,7 +388,6 @@ const Hub = () => {
   return (
     <div className="min-h-screen bg-background text-zinc-900 font-sans">
       <Helmet><title>Hub de Plantillas | Creator IA Pro</title></Helmet>
-      <AppHeader userId={user?.id} onSignOut={signOut} />
 
       <main id="main-content" className="pt-20">
         <div className="max-w-[1440px] mx-auto px-8 py-12">

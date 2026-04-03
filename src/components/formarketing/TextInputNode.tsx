@@ -27,37 +27,37 @@ const TextInputNode = ({ id, data }: { id: string; data: TextInputNodeData }) =>
   };
 
   return (
-    <div className="group relative rounded-3xl overflow-hidden bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors w-[260px] shadow-2xl">
+    <div className="group relative rounded-3xl overflow-hidden bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/50 transition-colors w-[260px] shadow-sm hover:shadow-md">
       {/* Header */}
-      <div className="flex h-12 items-center justify-between px-4 border-b border-white/[0.05] bg-white/[0.02]">
+      <div className="flex h-12 items-center justify-between px-4 border-b border-zinc-100 bg-zinc-50/50">
         <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
-            <Type className="w-4 h-4 text-yellow-400" />
+          <div className="p-1.5 rounded-xl bg-amber-50 border border-amber-100">
+            <Type className="w-4 h-4 text-amber-500" />
           </div>
-          <h3 className="text-[11px] font-bold text-white/90 tracking-wide font-sans uppercase">
+          <h3 className="text-[11px] font-bold text-zinc-900 tracking-wide font-sans uppercase">
             {data.title || 'Texto de entrada'}
           </h3>
         </div>
         <button
           onClick={deleteNode}
-          className="p-2 hover:bg-rose-500/10 text-white/20 hover:text-rose-500 rounded-lg transition-all"
+          className="p-2 hover:bg-red-50 text-zinc-400 hover:text-red-500 rounded-lg transition-all"
         >
           <Trash2 className="w-4 h-4" />
         </button>
       </div>
 
       {/* Body */}
-      <div className="p-4 bg-black/20">
+      <div className="p-4 bg-white">
         <textarea
           value={data.value || ''}
           onChange={(e) => updateValue(e.target.value)}
           onKeyDown={(e) => e.stopPropagation()}
           placeholder="Escribe tu texto, prompt o instrucción aquí..."
-          className="w-full text-xs font-medium leading-relaxed text-white/80 bg-white/[0.03] border border-white/[0.08] p-3 rounded-2xl focus:outline-none focus:border-yellow-400/40 transition-all resize-none min-h-[80px] placeholder:text-white/15"
+          className="w-full text-xs font-medium leading-relaxed text-zinc-900 bg-white border border-zinc-200 shadow-sm p-3 rounded-2xl focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/10 transition-all resize-none min-h-[80px] placeholder:text-zinc-400"
         />
         <div className="mt-2 flex items-center gap-1.5">
-          <div className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
-          <span className="text-[9px] text-white/20 uppercase tracking-widest font-sans">Salida de texto</span>
+          <div className="h-1.5 w-1.5 rounded-full bg-amber-400 shadow-sm" />
+          <span className="text-[9px] text-zinc-400 uppercase tracking-widest font-sans">Salida de texto</span>
         </div>
       </div>
 
@@ -72,7 +72,7 @@ const TextInputNode = ({ id, data }: { id: string; data: TextInputNodeData }) =>
         type="source"
         position={Position.Right}
         id="text-out"
-        className="!w-4 !h-4 !-right-2 !bg-yellow-400 !border-2 !border-[#0f1011] hover:!scale-125 transition-transform cursor-crosshair"
+        className="!w-4 !h-4 !-right-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm"
       />
     </div>
   );

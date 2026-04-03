@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
-  darkMode: ["class"],
+  // Dark mode intentionally disabled — LUMINA v2.0 is light-only
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
   theme: {
@@ -54,9 +54,19 @@ export default {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         canvas: 'hsl(var(--canvas))',
+        'canvas-bg': 'hsl(var(--canvas-bg))',
+        'canvas-grid': 'hsl(var(--canvas-grid))',
         'node-bg': 'hsl(var(--node-bg))',
         'node-border': 'hsl(var(--node-border))',
         'node-glow': 'hsl(var(--node-glow))',
+        // v2.0 semantic tokens
+        'surface-primary': 'hsl(var(--surface-primary))',
+        'surface-secondary': 'hsl(var(--surface-secondary))',
+        'text-primary': 'hsl(var(--text-primary))',
+        'text-secondary': 'hsl(var(--text-secondary))',
+        'text-tertiary': 'hsl(var(--text-tertiary))',
+        'border-subtle': 'hsl(var(--border-subtle))',
+        'border-default': 'hsl(var(--border-default))',
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
         gold: {

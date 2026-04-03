@@ -116,46 +116,44 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
     <div className="flex h-full overflow-hidden">
 
       {/* ── Left Sidebar ──────────────────────────────────────────────── */}
-      <div className="w-60 shrink-0 flex flex-col border-r border-white/[0.06]" style={{ background: '#0b0c10' }}>
+      <div className="w-60 shrink-0 flex flex-col border-r border-zinc-200 bg-zinc-50">
 
         {/* Brand */}
-        <div className="flex items-center gap-2.5 px-4 py-4 border-b border-white/[0.05]">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg shrink-0" style={{ background: 'rgba(138,180,248,0.1)', border: '1px solid rgba(138,180,248,0.2)' }}>
-            <Code2 className="h-3.5 w-3.5 text-[#8AB4F8]" />
+        <div className="flex items-center gap-2.5 px-4 py-4 border-b border-zinc-200">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg shrink-0 bg-primary/10 border border-primary/20">
+            <Code2 className="h-3.5 w-3.5 text-primary" />
           </div>
-          <span className="text-[13px] font-black text-white tracking-tight">Genesis</span>
-          <ChevronDown className="h-3 w-3 text-white/50 ml-auto" />
+          <span className="text-[13px] font-black text-zinc-900 tracking-tight">Genesis</span>
+          <ChevronDown className="h-3 w-3 text-zinc-400 ml-auto" />
         </div>
 
         {/* Nav */}
-        <div className="px-2 py-2 border-b border-white/[0.05]">
+        <div className="px-2 py-2 border-b border-zinc-200">
           <button onClick={() => navigate('/dashboard')}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/60 hover:text-white hover:bg-white/[0.04] transition-all">
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
             <Home className="h-3.5 w-3.5 shrink-0" />
             Home
           </button>
           <button onClick={onOpenSearch}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/60 hover:text-white hover:bg-white/[0.04] transition-all">
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
             <Search className="h-3.5 w-3.5 shrink-0" />
             <span className="flex-1 text-left">Buscar</span>
-            <kbd className="text-[9px] text-white/50 font-mono px-1.5 py-0.5 rounded border border-white/[0.08]">⌘K</kbd>
+            <kbd className="text-[9px] text-zinc-400 font-mono px-1.5 py-0.5 rounded border border-zinc-200">⌘K</kbd>
           </button>
         </div>
 
-        {/* Search projects */}
-        <div className="px-3 py-2 border-b border-white/[0.05]">
+        <div className="px-3 py-2 border-b border-zinc-200">
           <input
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Filtrar proyectos..."
-            className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-1.5 text-[11px] text-white/60 placeholder:text-white/50 outline-none focus:border-white/[0.12] focus:bg-white/[0.06] transition-all"
+            className="w-full bg-zinc-100 border border-zinc-200 rounded-lg px-3 py-1.5 text-[11px] text-zinc-900 placeholder:text-zinc-400 outline-none focus:border-primary/40 focus:bg-white transition-all"
           />
         </div>
 
-        {/* Projects */}
         <div className="px-4 pt-4 pb-2">
-          <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.3em] mb-2">Proyectos</p>
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] mb-2">Proyectos</p>
         </div>
         <div className="px-2 flex flex-col gap-0.5">
           {[
@@ -167,14 +165,14 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
               disabled={item.disabled}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-all ${
                 item.disabled
-                  ? 'text-white/50 cursor-not-allowed'
-                  : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
+                  ? 'text-zinc-400 cursor-not-allowed'
+                  : 'text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100'
               }`}>
               <item.icon className="h-3.5 w-3.5 shrink-0" />
               <span className="flex-1 text-left">{item.label}</span>
               {item.disabled
-                ? <span className="text-[8px] text-white/50 font-bold uppercase tracking-wider">Pronto</span>
-                : item.count > 0 && <span className="text-[10px] text-white/50">{item.count}</span>
+                ? <span className="text-[8px] text-zinc-400 font-bold uppercase tracking-wider">Pronto</span>
+                : item.count > 0 && <span className="text-[10px] text-zinc-500">{item.count}</span>
               }
             </button>
           ))}
@@ -184,16 +182,16 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
         {projects.length > 0 && (
           <>
             <div className="px-4 pt-4 pb-2">
-              <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.3em]">Recientes</p>
+              <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em]">Recientes</p>
             </div>
             <div className="px-2 flex flex-col gap-0.5 flex-1 overflow-y-auto pb-2 custom-scrollbar">
               {projects.slice(0, 8).map(p => (
                 <button key={p.id} onClick={() => onSelectProject(p)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium text-white/60 hover:text-white hover:bg-white/[0.04] transition-all text-left group">
-                  <div className="h-2 w-2 rounded-sm shrink-0" style={{ background: 'rgba(138,180,248,0.3)', border: '1px solid rgba(138,180,248,0.3)' }} />
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all text-left group">
+                  <div className="h-2 w-2 rounded-sm shrink-0 bg-primary/20 border border-primary/30" />
                   <span className="truncate flex-1">{p.name}</span>
                   <Trash2 
-                    className="h-3 w-3 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all pointer-events-auto" 
+                    className="h-3 w-3 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all pointer-events-auto" 
                     onClick={(e) => onDeleteProject(p.id, e)}
                   />
                 </button>
@@ -203,10 +201,9 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
         )}
 
         {/* Bottom CTA */}
-        <div className="p-3 border-t border-white/[0.05] shrink-0">
+        <div className="p-3 border-t border-zinc-200 shrink-0">
           <button onClick={() => navigate('/pricing')}
-            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all"
-            style={{ background: 'rgba(138,180,248,0.06)', border: '1px solid rgba(138,180,248,0.15)', color: 'rgba(138,180,248,0.8)' }}>
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-[11px] font-bold transition-all bg-primary/10 border border-primary/20 text-primary hover:bg-primary/15">
             <Zap className="h-3.5 w-3.5 shrink-0" />
             Actualizar plan
           </button>
@@ -214,27 +211,25 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
       </div>
 
       {/* ── Main Area ─────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden relative bg-[#010101]">
+      <div className="flex-1 flex flex-col overflow-hidden relative bg-white">
 
-        {/* Rich vibrant genesis background */}
+        {/* Light modern background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-25%] left-[-15%] w-[70%] h-[80%] bg-[#0066FF]/20 rounded-full blur-[160px] mix-blend-screen opacity-40" />
-          <div className="absolute top-[5%] right-[-15%] w-[60%] h-[70%] bg-[#4ADE80]/10 rounded-full blur-[140px] mix-blend-screen opacity-20" />
-          <div className="absolute inset-0 bg-background bg-grid-white/[0.01]" />
+          <div className="absolute top-[-25%] left-[-15%] w-[70%] h-[80%] bg-primary/10 rounded-full blur-[140px] opacity-60" />
+          <div className="absolute inset-0 bg-grid-canvas" />
         </div>
 
         {/* Centered content */}
         <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-10 pb-32">
-          <h1 className="text-[32px] md:text-[42px] font-bold text-white tracking-tight mb-10 text-center leading-tight">
+          <h1 className="text-[32px] md:text-[42px] font-bold text-zinc-900 tracking-tight mb-10 text-center leading-tight">
             {greeting}
           </h1>
 
           {/* Input Box */}
           <div className="w-full max-w-3xl relative z-20">
-            <div className="relative rounded-[28px] overflow-hidden shadow-2xl transition-all"
-              style={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 80px rgba(0,0,0,0.7)' }}>
+            <div className="relative rounded-[28px] overflow-hidden shadow-2xl transition-all border border-zinc-200 bg-white shadow-zinc-200/50">
               
-              <div className="absolute top-6 left-6 text-white/50">
+              <div className="absolute top-6 left-6 text-zinc-400">
                 <Plus className="h-5 w-5" />
               </div>
               
@@ -244,7 +239,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                 onInput={handleTextareaInput}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
                 placeholder="Describe qué quieres construir..."
-                className="w-full bg-transparent pl-14 pr-32 pt-6 pb-6 text-[16px] font-medium text-white placeholder:text-white/50 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px]"
+                className="w-full bg-transparent pl-14 pr-32 pt-6 pb-6 text-[16px] font-medium text-zinc-800 placeholder:text-zinc-400 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px]"
                 rows={1}
                 style={{ overflowY: 'hidden' }}
               />
@@ -252,15 +247,15 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
               <div className="absolute bottom-4 right-4 flex items-center gap-2">
                 <button onClick={onMic}
                   aria-label={isListening ? 'Detener grabación de voz' : 'Activar dictado por voz'}
-                  className={`flex items-center justify-center p-2 rounded-full transition-all ${isListening ? 'text-red-400 bg-red-400/10 animate-pulse' : 'text-white/50 hover:text-white hover:bg-white/[0.08]'}`}>
+                  className={`flex items-center justify-center p-2 rounded-full transition-all ${isListening ? 'text-red-500 bg-red-100 animate-pulse' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}>
                   <Mic className="h-4 w-4" aria-hidden="true" />
                 </button>
                 <button
                   onClick={() => handleSubmit()}
                   disabled={!input.trim() || creating}
                   aria-label="Enviar prompt y crear proyecto"
-                  className="flex items-center justify-center h-10 w-10 rounded-full text-[#18181b] disabled:opacity-30 transition-all active:scale-95 shadow-lg"
-                  style={{ background: input.trim() && !creating ? 'white' : 'rgba(255,255,255,0.2)' }}
+                  className="flex items-center justify-center h-10 w-10 rounded-full text-white disabled:opacity-30 transition-all active:scale-95 shadow-md"
+                  style={{ background: input.trim() && !creating ? 'hsl(var(--primary))' : 'hsl(var(--border))' }}
                 >
                   {creating ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <ArrowUp className="h-5 w-5" aria-hidden="true" />}
                 </button>
@@ -272,7 +267,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
         {/* Bottom Floating Panel */}
         <div className="absolute bottom-0 left-0 right-0 flex justify-center px-4 w-full h-[240px]">
           <div className="w-full max-w-5xl rounded-t-[36px] overflow-hidden flex flex-col relative z-30" 
-            style={{ background: '#111111', borderTop: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 -20px 60px rgba(0,0,0,0.8)' }}>
+            style={{ background: '#ffffff', borderTop: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 -20px 60px rgba(0,0,0,0.1)' }}>
 
             {/* Tabs Header */}
             <div className="flex items-center gap-8 px-12 pt-10 pb-4 shrink-0">
@@ -281,10 +276,10 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className="text-[14px] font-bold transition-all relative pb-2 uppercase tracking-widest"
-                  style={activeTab === tab ? { color: 'white' } : { color: 'rgba(255,255,255,0.5)' }}
+                  style={activeTab === tab ? { color: 'hsl(var(--primary))' } : { color: 'hsl(var(--text-secondary))' }}
                 >
                   {tab === 'projects' ? 'Mis proyectos' : tab === 'recents' ? 'Recientes' : 'Plantillas'}
-                  {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary))]" />}
+                  {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />}
                 </button>
               ))}
             </div>
@@ -295,13 +290,13 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {filteredProjects.map(p => (
                     <button key={p.id} onClick={() => onSelectProject(p)}
-                      className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all group relative">
+                      className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm group relative">
                       <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
                         <Code2 className="h-4 w-4 text-primary" />
                       </div>
-                      <p className="text-[13px] font-bold text-white/80 group-hover:text-white truncate mt-1">{p.name}</p>
+                      <p className="text-[13px] font-bold text-zinc-800 group-hover:text-zinc-900 truncate mt-1">{p.name}</p>
                       <Trash2 
-                        className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all" 
+                        className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all" 
                         onClick={(e) => onDeleteProject(p.id, e)}
                       />
                     </button>
@@ -309,7 +304,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                   {filteredProjects.length === 0 && (
                     <div className="col-span-full flex flex-col items-center gap-3 py-6">
                       <span className="text-4xl">✨</span>
-                      <p className="text-[13px] text-white/60 text-center">Escribe un prompt arriba para crear tu primer proyecto</p>
+                      <p className="text-[13px] text-zinc-500 text-center">Escribe un prompt arriba para crear tu primer proyecto</p>
                     </div>
                   )}
                 </div>
@@ -321,16 +316,16 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                     .slice(0, 10)
                     .map(p => (
                       <button key={p.id} onClick={() => onSelectProject(p)}
-                        className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all group relative">
+                        className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm group relative">
                         <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
                           <Clock className="h-4 w-4 text-primary" />
                         </div>
-                        <p className="text-[13px] font-bold text-white/80 group-hover:text-white truncate mt-1">{p.name}</p>
-                        <p className="text-[10px] text-white/50">
+                        <p className="text-[13px] font-bold text-zinc-800 group-hover:text-zinc-900 truncate mt-1">{p.name}</p>
+                        <p className="text-[10px] text-zinc-500">
                           {new Date(p.updated_at ?? p.created_at ?? Date.now()).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
                         </p>
                         <Trash2 
-                          className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-400 transition-all" 
+                          className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all" 
                           onClick={(e) => onDeleteProject(p.id, e)}
                         />
                       </button>
@@ -339,7 +334,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                   {projects.length === 0 && (
                     <div className="col-span-full flex flex-col items-center gap-3 py-6">
                       <span className="text-4xl">🕐</span>
-                      <p className="text-[13px] text-white/60">Tus proyectos recientes aparecerán aquí</p>
+                      <p className="text-[13px] text-zinc-500">Tus proyectos recientes aparecerán aquí</p>
                     </div>
                   )}
                 </div>
@@ -348,9 +343,9 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {STARTER_PROMPTS.map(s => (
                     <button key={s.label} onClick={() => handleSubmit(s.prompt)}
-                      className="flex items-center gap-4 p-4 rounded-2xl text-left border border-white/[0.04] bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/[0.08] transition-all">
+                      className="flex items-center gap-4 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm">
                       <span className="text-2xl">{s.emoji}</span>
-                      <p className="text-[13px] font-bold text-white/80">{s.label}</p>
+                      <p className="text-[13px] font-bold text-zinc-800">{s.label}</p>
                     </button>
                   ))}
                 </div>
@@ -534,7 +529,7 @@ export default function Chat() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#0a0a0c]">
+      <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center animate-spin">
             <Loader2 className="h-6 w-6 text-primary" />
@@ -547,9 +542,8 @@ export default function Chat() {
 
   if (!activeProject) {
     return (
-      <div className="flex flex-col h-screen" style={{ background: '#0a0a0c' }}>
-        <AppHeader userId={user?.id} onSignOut={signOut} />
-        <div className="flex-1 overflow-hidden pt-20">
+      <div className="flex flex-col h-screen overflow-hidden">
+        <div className="flex-1 overflow-hidden">
           <WelcomeScreen
             onPrompt={handleWelcomePrompt}
             onCreateProject={() => createProject()}
@@ -571,9 +565,8 @@ export default function Chat() {
   const credits = profile?.credits_balance ?? 0;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden pt-[72px]" style={{ background: 'hsl(var(--background))' }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'hsl(var(--background))' }}>
       <Helmet><title>Genesis IA | Creator IA Pro</title></Helmet>
-      <AppHeader userId={user?.id} onSignOut={signOut} />
 
       {/* ── Topbar ── */}
       <div className="flex h-[44px] items-center px-3 shrink-0 z-[40] w-full relative"
@@ -659,7 +652,7 @@ export default function Chat() {
               <div className="w-full max-w-2xl h-[80vh] bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-2xl">
                 <div className="px-6 py-4 border-b border-border"><h3 className="text-sm font-bold flex items-center gap-2"><History className="h-4 w-4 text-muted-foreground" /> Snapshots</h3></div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-                  {snapshots.length === 0 ? <p className="text-center text-muted-foreground py-20 uppercase tracking-widest text-[10px]">No snapshots</p> : snapshots.map((s, i) => <div key={s.id} className="p-4 rounded-xl bg-white/[0.02] border border-border flex justify-between items-center"><div className="flex items-center gap-4"><div className="h-10 w-10 flex items-center justify-center bg-muted/20 border border-border rounded-lg">{i}</div><div><p className="text-[13px] font-bold text-white">{s.label}</p><p className="text-[11px] text-white/60">{Object.keys(s.files).length} files</p></div></div><button onClick={() => { updateProjectFiles(activeProject.id, s.files); setPanelView('preview'); }} className="text-[11px] font-bold hover:text-primary transition-colors">Restore</button></div>)}
+                  {snapshots.length === 0 ? <p className="text-center text-muted-foreground py-20 uppercase tracking-widest text-[10px]">No snapshots</p> : snapshots.map((s, i) => <div key={s.id} className="p-4 rounded-xl bg-zinc-50 border border-border flex justify-between items-center"><div className="flex items-center gap-4"><div className="h-10 w-10 flex items-center justify-center bg-muted/20 border border-border rounded-lg">{i}</div><div><p className="text-[13px] font-bold text-zinc-900">{s.label}</p><p className="text-[11px] text-zinc-500">{Object.keys(s.files).length} files</p></div></div><button onClick={() => { updateProjectFiles(activeProject.id, s.files); setPanelView('preview'); }} className="text-[11px] font-bold hover:text-primary transition-colors">Restore</button></div>)}
                 </div>
               </div>
             </div>

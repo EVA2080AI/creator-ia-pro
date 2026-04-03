@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useSubscription } from "@/hooks/useSubscription";
-import { AppHeader } from "@/components/AppHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -25,7 +24,7 @@ import {
 } from 'recharts';
 
 const Dashboard = () => {
-  const { user, loading: authLoading, signOut } = useAuth("/auth");
+  const { user, loading: authLoading } = useAuth("/auth");
   const { profile, refreshProfile } = useProfile(user?.id);
   const { subscription, checkSubscription } = useSubscription(user?.id);
   const navigate = useNavigate();
@@ -146,11 +145,9 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans bg-grid-white/[0.02]">
+    <>
       <Helmet><title>Dashboard | Creator IA Pro</title></Helmet>
-      <AppHeader userId={user?.id} onSignOut={signOut} />
-
-      <main id="main-content" className="pt-16">
+      <main id="main-content" className="min-h-screen bg-background text-foreground font-sans">
         <div className="max-w-[1440px] mx-auto px-6 py-6 space-y-5">
 
           {/* Post-checkout success banner */}
@@ -477,7 +474,7 @@ const Dashboard = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 };
 
