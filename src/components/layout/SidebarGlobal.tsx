@@ -1,12 +1,13 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import {
   LayoutTemplate, Brain, FolderOpen, Image, Download,
   ChevronDown, Coins, LogOut, User, Shield,
   Wand2, Hash, Megaphone, PenLine, Zap,
   Settings, History, CreditCard, Monitor, Sparkles,
   PanelLeftClose, PanelLeftOpen, Terminal, List, Code2,
-  Home, LayoutGrid, Share2, ShieldCheck, Activity, Bot
+  Home, LayoutGrid, Share2, ShieldCheck, Activity, Bot, ChevronUp
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -21,12 +22,20 @@ import { toast } from 'sonner';
 // ── Navigation structure ──────────────────────────────────────────────────────
 const NAV_MAIN = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           requiresPymes: false },
-  { path: '/studio-flow',  label: 'Studio Flow',   icon: LayoutTemplate, requiresPymes: true },
+  { 
+    id: 'group-studio',
+    label: 'Studio Flow',   
+    icon: LayoutTemplate, 
+    requiresPymes: true,
+    subItems: [
+      { path: '/studio-flow', label: 'Canvas IA', icon: LayoutTemplate },
+      { path: '/hub',         label: 'Templates', icon: Sparkles },
+      { path: '/spaces',      label: 'Proyectos', icon: FolderOpen },
+    ]
+  },
   { path: '/code',         label: 'Editor',        icon: Code2,          requiresPymes: false },
   { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     requiresPymes: false },
-  { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     requiresPymes: false },
-  { path: '/hub',          label: 'Templates',     icon: Sparkles,       requiresPymes: false },
-  { path: '/antigravity',  label: 'Antigravity AI', icon: Bot,            requiresPymes: false },
+  { path: '/antigravity',  label: 'Antigravity',   icon: Bot,            requiresPymes: false },
 ];
 
 const NAV_SOCIAL = [
@@ -53,16 +62,35 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const { user, signOut } = useAuth();
   const { profile } = useProfile(user?.id);
   const { isAdmin } = useAdmin(user?.id);
-  const { globalExpanded, toggleGlobal } = useSidebarV2();
+  const { globalExpanded, toggleGlobal, expandGlobal } = useSidebarV2();
   const { groups, workspaceTitle } = useWorkspaceActions();
+
+  // Acordión Menu State
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   const isPymes = ['pymes', 'agency', 'admin'].includes(
     profile?.subscription_tier?.toLowerCase() ?? 'free'
   );
 
-  const isActive = (path: string) =>
-    location.pathname === path ||
+  const isActive = (path?: string) => {
+    if (!path) return false;
+    return location.pathname === path ||
     (path !== '/dashboard' && location.pathname.startsWith(path));
+  };
+
+  const isGroupActive = (subItems: any[]) => subItems.some(item => isActive(item.path));
+
+  // Automatically open group if a child is active initially
+  useEffect(() => {
+    const newGroups = { ...openGroups };
+    for (const item of NAV_MAIN) {
+      if (item.subItems && isGroupActive(item.subItems)) {
+        newGroups[item.id!] = true;
+      }
+    }
+    setOpenGroups(newGroups);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   const handleNav = (path: string, requiresPymes = false, label = '') => {
     const isPublic = ['/pricing', '/descargar', '/product-backlog'].includes(path);
@@ -79,6 +107,14 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
       return;
     }
     navigate(path);
+  };
+
+  const toggleGroup = (id: string) => {
+    // Si el sidebar principal está colapsado, abrirlo
+    if (!globalExpanded && !isMobile) {
+      expandGlobal();
+    }
+    setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleSignOut = async () => {
@@ -148,16 +184,99 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
               <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-60">Principal</span>
             </div>
           )}
-          {NAV_MAIN.map((item) => (
-            <NavItem 
-              key={item.path} 
-              {...item} 
-              active={isActive(item.path)} 
-              expanded={globalExpanded || isMobile}
-              isPymes={isPymes}
-              onClick={() => handleNav(item.path, item.requiresPymes, item.label)} 
-            />
-          ))}
+          {NAV_MAIN.map((item) => {
+            if (item.subItems) {
+              const activeGroup = isGroupActive(item.subItems);
+              const isOpen = openGroups[item.id!];
+              
+              return (
+                <div key={item.id} className="space-y-0.5">
+                  <button
+                    onClick={() => toggleGroup(item.id!)}
+                    className={cn(
+                      'group w-full flex items-center rounded-xl transition-all duration-200 text-[12.5px] font-medium outline-none',
+                      (globalExpanded || isMobile) ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
+                      activeGroup
+                        ? 'bg-primary/10 text-primary border border-primary/20 font-black shadow-sm'
+                        : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent'
+                    )}
+                  >
+                    <item.icon className={cn(
+                      'shrink-0 transition-all duration-200',
+                      (globalExpanded || isMobile) ? 'w-4 h-4' : 'w-5 h-5',
+                      activeGroup ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-700 group-hover:scale-110'
+                    )} />
+                    {(globalExpanded || isMobile) && (
+                      <>
+                        <span className="truncate flex-1 text-left">{item.label}</span>
+                        {isOpen ? <ChevronUp className="w-3.5 h-3.5 opacity-50" /> : <ChevronDown className="w-3.5 h-3.5 opacity-50" />}
+                      </>
+                    )}
+                    {(globalExpanded || isMobile) && activeGroup && !isOpen && (
+                      <motion.div 
+                        layoutId="active-nav-glow" 
+                        className="w-1.5 h-1.5 rounded-full bg-primary ml-2"
+                      />
+                    )}
+                  </button>
+
+                  <AnimatePresence>
+                    {(globalExpanded || isMobile) && isOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="pl-9 pr-1 pt-0.5 pb-1 space-y-0.5 border-l-2 border-primary/10 ml-4">
+                          {item.subItems.map((subItem) => {
+                            const subActive = isActive(subItem.path);
+                            return (
+                              <button
+                                key={subItem.path}
+                                onClick={() => handleNav(subItem.path, item.requiresPymes, subItem.label)}
+                                className={cn(
+                                  'group w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-150',
+                                  subActive 
+                                    ? 'bg-primary/5 text-primary font-bold' 
+                                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
+                                )}
+                              >
+                                {subItem.icon && (
+                                  <subItem.icon className={cn(
+                                    "w-3.5 h-3.5 shrink-0", 
+                                    subActive ? "text-primary" : "text-zinc-400"
+                                  )} />
+                                )}
+                                <span className={cn("truncate flex-1 text-left", !subItem.icon && "pl-1.5")}>
+                                  {subItem.label}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              );
+            }
+
+            // Regular items
+            return (
+              <NavItem 
+                key={item.path} 
+                path={item.path!}
+                label={item.label}
+                icon={item.icon}
+                active={isActive(item.path)} 
+                expanded={globalExpanded || isMobile}
+                isPymes={isPymes}
+                onClick={() => handleNav(item.path!, item.requiresPymes, item.label)} 
+              />
+            );
+          })}
         </div>
 
         {/* 2. CONTENIDO & SOCIAL */}
@@ -170,7 +289,9 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           {NAV_SOCIAL.map((item) => (
             <NavItem 
               key={item.path} 
-              {...item} 
+              path={item.path}
+              label={item.label}
+              icon={item.icon}
               active={isActive(item.path)} 
               expanded={globalExpanded || isMobile}
               isPymes={isPymes}
@@ -195,15 +316,17 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
             {(globalExpanded || isMobile) && (
               <div className="px-3 py-1.5 mb-1">
                 <span className="text-[10px] font-black text-red-500/60 uppercase tracking-[0.2em] flex items-center gap-2">
-                  <Shield className="w-2.5 h-2.5" />
-                  Sistema
+                   <Shield className="w-2.5 h-2.5" />
+                   Sistema
                 </span>
               </div>
             )}
             {NAV_SYSTEM.map((item) => (
               <NavItem 
                 key={item.path} 
-                {...item} 
+                path={item.path}
+                label={item.label}
+                icon={item.icon}
                 active={isActive(item.path)} 
                 expanded={globalExpanded || isMobile}
                 isPymes={isPymes}
@@ -261,10 +384,10 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
               <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Créditos</span>
             </div>
             <div className="flex items-center gap-2 relative z-10">
-              <Coins className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-[16px] font-black text-zinc-900 tabular-nums">
-                {profile.credits_balance?.toLocaleString() ?? '0'}
-              </span>
+               <Coins className="w-4 h-4 text-primary shrink-0" />
+               <span className="text-[16px] font-black text-zinc-900 tabular-nums">
+                 {profile.credits_balance?.toLocaleString() ?? '0'}
+               </span>
             </div>
             <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
           </div>
@@ -364,7 +487,7 @@ function NavItem({
       {expanded && active && (
         <motion.div 
           layoutId="active-nav-glow" 
-          className="w-1.5 h-1.5 rounded-full bg-primary"
+          className="w-1.5 h-1.5 rounded-full bg-primary ml-2"
         />
       )}
     </button>
