@@ -25,9 +25,15 @@ import LLMNode from '@/components/formarketing/LLMNode';
 import TextInputNode from '@/components/formarketing/TextInputNode';
 import ExportNode from '@/components/formarketing/ExportNode';
 import { CommandPalette } from '@/components/formarketing/CommandPalette';
-import { ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, LayoutDashboard, Circle, MessageSquare, Download, Smartphone, Layers, GitBranch, Play as PlayIcon, ChevronRight, Terminal } from 'lucide-react';
+import { 
+  ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, 
+  LayoutDashboard, Circle, MessageSquare, Download, Smartphone, 
+  Layers, GitBranch, Play as PlayIcon, ChevronRight, Terminal,
+  Plus, BookOpen, Layout as LayoutIcon
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
 import { aiService, classifyError } from '@/services/ai-service';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyInspector } from '@/components/formarketing/PropertyInspector';
@@ -93,6 +99,99 @@ function FormarketingContent() {
   // Execution log
   const [execLog, setExecLog] = useState<{ time: string; node: string; msg: string; type: 'info' | 'success' | 'error' }[]>([]);
   const [logOpen, setLogOpen] = useState(false);
+
+  const { setActions, clearActions } = useWorkspaceActions();
+
+  // ── Contextual Actions Registration ─────────────────────────────────────────
+  useEffect(() => {
+    setActions([
+      {
+        id: 'canvas-nav',
+        label: 'Canvas',
+        actions: [
+          {
+            id: 'templates',
+            label: 'Plantillas',
+            icon: BookOpen,
+            onClick: () => setShowLanding(true)
+          },
+          {
+            id: 'add-node',
+            label: 'Nuevo Nodo',
+            icon: Plus,
+            onClick: () => setCmdOpen(true)
+          }
+        ]
+      },
+      {
+        id: 'canvas-history',
+        label: 'Historial',
+        actions: [
+          {
+            id: 'undo',
+            label: 'Deshacer',
+            icon: RotateCcw,
+            onClick: undo
+          },
+          {
+            id: 'redo',
+            label: 'Rehacer',
+            icon: RotateCw,
+            onClick: redo
+          }
+        ]
+      },
+      {
+        id: 'canvas-ops',
+        label: 'Organización',
+        actions: [
+          {
+            id: 'layout',
+            label: 'Organizar',
+            icon: LayoutDashboard,
+            onClick: autoLayout
+          },
+          {
+            id: 'snap',
+            label: 'Snap Grid',
+            icon: Grid3X3,
+            active: snapEnabled,
+            onClick: () => setSnapEnabled(!snapEnabled)
+          }
+        ]
+      },
+      {
+        id: 'canvas-actions',
+        label: 'Acciones',
+        actions: [
+          {
+            id: 'export',
+            label: 'Exportar',
+            icon: Download,
+            disabled: nodes.length === 0,
+            onClick: () => setExportOpen(true)
+          },
+          {
+            id: 'clear',
+            label: 'Limpiar',
+            icon: Trash2,
+            disabled: nodes.length === 0 && edges.length === 0,
+            onClick: handleClear
+          },
+          {
+            id: 'execute',
+            label: execStatus === 'running' ? `Ejecutando ${execDone}/${execNodeCount}` : 'Ejecutar',
+            icon: Zap,
+            variant: 'primary',
+            disabled: nodes.length === 0 || execStatus === 'running',
+            onClick: handleExecute
+          }
+        ]
+      }
+    ], spaceId ? `Espacio: ${spaceId}` : 'Canvas IA');
+
+    return () => clearActions();
+  }, [nodes.length, edges.length, snapEnabled, execStatus, execDone, execNodeCount, spaceId]);
 
   // HU34 — Undo/Redo history
   const history   = useRef<{ nodes: Node[]; edges: Edge[] }[]>([]);
@@ -1197,91 +1296,6 @@ function FormarketingContent() {
         </div>
       )}
       <div className="w-full h-full bg-canvas font-sans text-foreground flex flex-col overflow-hidden relative">
-      {/* Canvas Toolbar */}
-      <div className="flex h-14 w-full items-center justify-between border-b border-zinc-200/60 bg-white/95 px-5 backdrop-blur-xl shrink-0 z-[90]">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-zinc-100 rounded-xl w-9 h-9 text-zinc-500 hover:text-zinc-900 transition-all">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="h-5 w-px bg-zinc-200" />
-          <span className="hidden md:flex items-center gap-1.5 text-[11px] font-black text-zinc-400 uppercase tracking-widest">
-            <LayoutDashboard className="w-3.5 h-3.5 text-primary/60" />
-            Canvas IA
-          </span>
-          <div className="hidden md:block h-5 w-px bg-zinc-200" />
-          {/* Templates */}
-          <button
-            onClick={() => setShowLanding(true)}
-            aria-label="Ver plantillas de flujo"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200 hover:border-primary/30 hover:bg-primary/5 transition-all text-zinc-600"
-          >
-            <div className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-pulse" aria-hidden="true" />
-            <span className="text-[10px] font-bold uppercase tracking-widest">Plantillas</span>
-          </button>
-          {/* Quick-add node (HU28) */}
-          <button
-            onClick={() => setCmdOpen(true)}
-            title="Añadir nodo (Espacio)"
-            aria-label="Añadir nodo al canvas"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-all text-zinc-600"
-          >
-            <span className="text-[10px] font-bold uppercase tracking-widest">+ Nodo</span>
-            <kbd className="text-[9px] font-mono border border-zinc-200 px-1 rounded" aria-hidden="true">Espacio</kbd>
-          </button>
-        </div>
-
-        <div className="flex items-center gap-1.5">
-          {/* Undo/Redo (HU34) */}
-          <Button variant="ghost" size="icon" onClick={undo} title="Deshacer (Ctrl+Z)" aria-label="Deshacer" className="w-8 h-8 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
-            <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={redo} title="Rehacer (Ctrl+Y)" aria-label="Rehacer" className="w-8 h-8 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
-            <RotateCw className="w-3.5 h-3.5" aria-hidden="true" />
-          </Button>
-          <div className="h-5 w-px bg-zinc-200 mx-1" />
-          {/* Auto-layout */}
-          <Button variant="ghost" onClick={autoLayout} title="Auto-organizar (Dagre)" aria-label="Auto-organizar nodos" className="h-8 px-3 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 text-xs gap-1.5 transition-all">
-            <LayoutDashboard className="w-3.5 h-3.5" aria-hidden="true" />
-            <span className="hidden md:inline text-[10px] font-bold uppercase tracking-wider">Organizar</span>
-          </Button>
-          {/* Snap grid toggle (HU26) */}
-          <Button
-            variant="ghost"
-            onClick={() => setSnapEnabled(s => !s)}
-            title="Snap a rejilla"
-            aria-label={snapEnabled ? 'Desactivar snap a rejilla' : 'Activar snap a rejilla'}
-            aria-pressed={snapEnabled}
-            className={`h-8 px-3 rounded-lg text-xs gap-1.5 transition-all ${snapEnabled ? 'text-primary bg-primary/10' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}
-          >
-            <Grid3X3 className="w-3.5 h-3.5" aria-hidden="true" />
-          </Button>
-          <div className="h-5 w-px bg-zinc-200 mx-1" />
-          {/* Share screen */}
-          <Button variant="ghost" onClick={() => navigate('/sharescreen')} aria-label="Compartir pantalla" className="hidden sm:flex items-center gap-1.5 text-primary/50 hover:text-primary hover:bg-primary/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all">
-            <Monitor className="w-3.5 h-3.5" aria-hidden="true" />
-            <span className="hidden md:inline">Compartir</span>
-          </Button>
-          {/* Export */}
-          <Button variant="ghost" onClick={() => setExportOpen(true)} disabled={nodes.length === 0} aria-label="Exportar canvas" className="hidden sm:flex items-center gap-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl px-3 h-8 text-[10px] font-bold transition-all disabled:opacity-30">
-            <Download className="w-3.5 h-3.5" aria-hidden="true" />
-            <span className="hidden md:inline">Exportar</span>
-          </Button>
-          <Button variant="ghost" onClick={handleClear} disabled={nodes.length === 0 && edges.length === 0} aria-label="Limpiar canvas" className="text-zinc-500 hover:text-red-500 hover:bg-red-50 rounded-xl px-3 h-8 text-[10px] font-bold gap-1.5 transition-all disabled:opacity-30">
-            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
-            <span className="hidden md:inline">Limpiar</span>
-          </Button>
-          <div className="h-5 w-px bg-zinc-200 mx-1" />
-          <Button
-            onClick={handleExecute}
-            disabled={nodes.length === 0 || execStatus === 'running'}
-            className="h-8 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl gap-2 font-bold px-4 shadow-sm text-xs transition-all active:scale-95 disabled:opacity-30"
-          >
-            <Zap className={`w-3.5 h-3.5 fill-current ${execStatus === 'running' ? 'animate-pulse' : ''}`} />
-            {execStatus === 'running' ? `${execDone}/${execNodeCount}` : 'Ejecutar'}
-          </Button>
-        </div>
-      </div>
-
       <div className="flex flex-1 overflow-hidden">
       {/* ── Left Sidebar ────────────────────────────────────────────────── */}
       <FormarketingSidebar onAddNode={handleManualAddNode} />

@@ -1,17 +1,23 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useStudioProjects, StudioFile } from '@/hooks/useStudioProjects';
-import { StudioTopbar, ViewMode, DeviceMode } from '@/components/studio/StudioTopbar';
+import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
 import { StudioChat } from '@/components/studio/StudioChat';
 import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
 import { StudioAITools } from '@/components/studio/StudioAITools';
-import { Loader2, FolderOpen, Code2, Plus, Sparkles, ChevronRight, Layout } from 'lucide-react';
+import { 
+  Loader2, FolderOpen, Code2, Plus, Sparkles, ChevronRight, Layout,
+  Monitor, Tablet, Smartphone, Eye, Code, Share2, Globe, Save
+} from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+import { ViewMode, DeviceMode } from '@/components/studio/StudioTopbar';
 
 /**
  * Studio — Integrated IDE Workspace (Lovable Architecture)
@@ -25,6 +31,8 @@ export default function Studio() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get('project');
+
+  const { setActions, clearActions } = useWorkspaceActions();
 
   // --- Studio State ---
   const { 
@@ -72,6 +80,92 @@ export default function Studio() {
       else if (files.length > 0) setActiveFile(files[0]);
     }
   }, [activeProject, activeFile]);
+
+  // ── Contextual Actions Registration ─────────────────────────────────────────
+  useEffect(() => {
+    if (!activeProject) {
+      clearActions();
+      return;
+    }
+
+    setActions([
+      {
+        id: 'view-mode',
+        label: 'Vistas',
+        actions: [
+          {
+            id: 'v-preview',
+            label: 'Vista Previa',
+            icon: Eye,
+            active: viewMode === 'preview',
+            onClick: () => setViewMode('preview')
+          },
+          {
+            id: 'v-code',
+            label: 'Código',
+            icon: Code,
+            active: viewMode === 'code',
+            onClick: () => setViewMode('code')
+          }
+        ]
+      },
+      {
+        id: 'device-mode',
+        label: 'Dispositivo',
+        actions: [
+          {
+            id: 'd-desktop',
+            label: 'Desktop',
+            icon: Monitor,
+            active: deviceMode === 'desktop',
+            onClick: () => setDeviceMode('desktop')
+          },
+          {
+            id: 'd-tablet',
+            label: 'Tablet',
+            icon: Tablet,
+            active: deviceMode === 'tablet',
+            onClick: () => setDeviceMode('tablet')
+          },
+          {
+            id: 'd-mobile',
+            label: 'Mobile',
+            icon: Smartphone,
+            active: deviceMode === 'mobile',
+            onClick: () => setDeviceMode('mobile')
+          }
+        ]
+      },
+      {
+        id: 'studio-actions',
+        label: 'Acciones',
+        actions: [
+          {
+            id: 'save',
+            label: isSaving ? 'Guardando...' : 'Guardar',
+            icon: Save,
+            disabled: isSaving,
+            onClick: () => toast.success('Proyecto guardado')
+          },
+          {
+            id: 'publish',
+            label: 'Publicar',
+            icon: Globe,
+            variant: 'primary',
+            onClick: () => toast.info('Publicación próximamente')
+          },
+          {
+            id: 'share',
+            label: 'Compartir',
+            icon: Share2,
+            onClick: handleShare
+          }
+        ]
+      }
+    ], activeProject.name);
+
+    return () => clearActions();
+  }, [activeProject, viewMode, deviceMode, isSaving]);
 
   // --- Handlers ---
   const handleFilesChange = async (newFiles: Record<string, StudioFile>) => {
@@ -200,25 +294,6 @@ export default function Studio() {
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden text-foreground selection:bg-primary/30">
       <Helmet><title>Studio | Creator IA Pro</title></Helmet>
-import { StudioFloatingToolbar } from '@/components/studio/StudioFloatingToolbar';
-
-// ... inside Studio component ...
-
-      {/* ── Floating Toolbar (Replaces Topbar for Headerless Architecture) ── */}
-      {!isFullscreen && (
-        <StudioFloatingToolbar 
-          projectName={activeProject.name}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          deviceMode={deviceMode}
-          onDeviceModeChange={(m) => setDeviceMode(m as DeviceMode)}
-          isSaving={isSaving}
-          onShare={handleShare}
-          onBack={() => navigate('/studio')}
-          onGithubSync={() => toast.info('Sincronización con GitHub próximamente')}
-          onPublish={() => toast.info('Publicación próximamente')}
-        />
-      )}
 
       <div className="flex flex-1 overflow-hidden">
         {/* ── Left Sidebar: Chat (Genesis) ── */}
@@ -297,7 +372,3 @@ import { StudioFloatingToolbar } from '@/components/studio/StudioFloatingToolbar
   );
 }
 
-// Utility local for cn
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
-}

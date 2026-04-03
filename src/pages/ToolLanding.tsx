@@ -303,20 +303,7 @@ const ToolLanding = () => {
       <Helmet><title>{tool ? `${tool.name} | Creator IA Pro` : 'Herramienta IA | Creator IA Pro'}</title></Helmet>
 
       <main>
-        {/* ── Breadcrumb ─────────────────────────────────── */}
-        <div className="border-b border-zinc-100 bg-zinc-50">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2.5">
-            <nav className="flex items-center gap-1.5 text-xs text-zinc-500" aria-label="Breadcrumb">
-              <button onClick={() => navigate("/")} className="hover:text-zinc-800 transition-colors">Inicio</button>
-              <ChevronRight className="h-3 w-3 text-zinc-300" />
-              <button onClick={() => navigate(categoryPath)} className="hover:text-zinc-800 transition-colors">Generar IA</button>
-              <ChevronRight className="h-3 w-3 text-zinc-300" />
-              <button onClick={() => navigate("/herramienta/mejorar-imagen")} className="hover:text-zinc-800 transition-colors">{categoryLabel}</button>
-              <ChevronRight className="h-3 w-3 text-zinc-300" />
-              <span className="text-zinc-900 font-medium">{tool.name}</span>
-            </nav>
-          </div>
-        </div>
+        {/* ── Hero section ───────────────────────────────── */}
 
         {/* ── Hero section ───────────────────────────────── */}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 lg:py-16">

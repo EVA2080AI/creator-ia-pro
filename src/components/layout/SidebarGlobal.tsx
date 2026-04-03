@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useSidebarV2 } from '@/hooks/useSidebarV2';
+import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
 import { toast } from 'sonner';
 
 // ── Navigation structure ──────────────────────────────────────────────────────
@@ -38,6 +39,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const { profile } = useProfile(user?.id);
   const { isAdmin } = useAdmin(user?.id);
   const { globalExpanded, toggleGlobal, toggleContextual, activeContextual } = useSidebarV2();
+  const { groups, workspaceTitle } = useWorkspaceActions();
 
   const isPymes = ['pymes', 'agency', 'admin'].includes(
     profile?.subscription_tier?.toLowerCase() ?? 'free'
@@ -70,6 +72,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   };
 
   const W = globalExpanded ? 240 : 64;
+
 
   return (
     <motion.aside
@@ -128,6 +131,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
 
       {/* ── Scrollable nav ── */}
       <nav className="flex-1 overflow-y-auto overflow-x-hidden py-2 no-scrollbar">
+        {/* Main Nav Items */}
         <div className="px-2 space-y-0.5">
           {NAV_MAIN.map((item) => {
             const active = isActive(item.path);
@@ -165,6 +169,46 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           })}
         </div>
 
+        {/* ── Workspace Contextual Actions ── */}
+        {groups.length > 0 && (
+          <div className="mt-4 mb-2 animate-in fade-in slide-in-from-left-2 duration-300">
+            <div className="px-5 mb-2">
+               <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">
+                 {workspaceTitle || 'Herramientas'}
+               </span>
+            </div>
+            <div className="px-2 space-y-3">
+              {groups.map((group) => (
+                <div key={group.id} className="space-y-0.5">
+                  {group.actions.map((action) => (
+                    <button
+                      key={action.id}
+                      onClick={action.onClick}
+                      disabled={action.disabled}
+                      title={!globalExpanded ? (action.tooltip || action.label) : undefined}
+                      className={cn(
+                        'group w-full flex items-center rounded-xl transition-all duration-150 text-[12px] font-bold',
+                        globalExpanded ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
+                        action.active
+                          ? 'bg-zinc-900 text-white shadow-md shadow-black/5'
+                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50',
+                        action.variant === 'primary' && !action.active && 'bg-primary/5 text-primary border border-primary/10 hover:bg-primary/10',
+                        action.disabled && 'opacity-30 cursor-not-allowed'
+                      )}
+                    >
+                      <action.icon className={cn(
+                        'shrink-0 w-4 h-4 transition-colors',
+                        action.active ? 'text-white' : (action.variant === 'primary' ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-600')
+                      )} />
+                      {globalExpanded && <span className="truncate flex-1 text-left">{action.label}</span>}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── Divider ── */}
         <div className="my-3 mx-3 h-px bg-zinc-100" />
 
@@ -186,30 +230,6 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
               activeContextual === 'genesis' ? 'text-violet-600' : 'text-zinc-400 group-hover:text-zinc-600'
             )} />
             {globalExpanded && <span className="truncate flex-1 text-left">Genesis IA</span>}
-          </button>
-
-          <button
-            onClick={() => {/* Trigger Save in Store */}}
-            title={!globalExpanded ? 'Guardar' : undefined}
-            className={cn(
-              'group w-full flex items-center rounded-xl transition-all duration-150 text-[12.5px] font-medium text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50',
-              globalExpanded ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center'
-            )}
-          >
-            <Zap className="shrink-0 w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
-            {globalExpanded && <span className="truncate flex-1 text-left">Guardar</span>}
-          </button>
-
-          <button
-            onClick={() => {/* Trigger Export */}}
-            title={!globalExpanded ? 'Exportar' : undefined}
-            className={cn(
-              'group w-full flex items-center rounded-xl transition-all duration-150 text-[12.5px] font-medium text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50',
-              globalExpanded ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center'
-            )}
-          >
-            <Download className="shrink-0 w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
-            {globalExpanded && <span className="truncate flex-1 text-left">Exportar</span>}
           </button>
         </div>
 

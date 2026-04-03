@@ -19,6 +19,7 @@ import {
   useScroll,
   useTransform,
   AnimatePresence,
+  Variants,
 } from "framer-motion";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -83,28 +84,28 @@ const MARQUEE_ITEMS = [
 ];
 
 // ─── Motion variants ───────────────────────────────────────────────────────────
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 28 },
-  show: (delay = 0) => ({
+  show: (delay: number = 0) => ({
     opacity: 1, y: 0,
     transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1], delay },
   }),
 };
 
-const fadeIn = {
+const fadeIn: Variants = {
   hidden: { opacity: 0 },
-  show: (delay = 0) => ({
+  show: (delay: number = 0) => ({
     opacity: 1,
     transition: { duration: 0.6, ease: "easeOut", delay },
   }),
 };
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.1 } },
 };
 
-const cardEntrance = {
+const cardEntrance: Variants = {
   hidden: { opacity: 0, y: 40, scale: 0.97 },
   show: {
     opacity: 1, y: 0, scale: 1,
@@ -298,27 +299,6 @@ export default function Index() {
       </Helmet>
 
       <div className="min-h-screen bg-background text-foreground selection:bg-primary/15 font-sans overflow-x-hidden">
-
-        {/* ── Announcement bar ─────────────────────────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2 }}
-          className="flex items-center justify-center gap-3 py-2.5 px-4 bg-primary/10 border-b border-primary/20"
-        >
-          <motion.div
-            animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
-            transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-            className="w-1.5 h-1.5 rounded-full bg-primary"
-          />
-          <p className="text-[12px] font-semibold text-zinc-600">
-            Genesis IA · Generar IA · Canvas IA — Starter desde{" "}
-            <span className="text-zinc-900 font-black">$69.000 COP/mes</span>
-          </p>
-          <button onClick={() => navigate("/pricing")} className="flex items-center gap-1 text-[12px] text-primary hover:text-zinc-900 transition-colors font-bold">
-            Ver planes <ChevronRight className="h-3 w-3" />
-          </button>
-        </motion.div>
 
         <main>
 
