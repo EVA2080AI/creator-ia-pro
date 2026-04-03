@@ -17,7 +17,6 @@ import VideoModelNode from '@/components/formarketing/VideoModelNode';
 import LayoutBuilderNode from '@/components/formarketing/LayoutBuilderNode';
 import CampaignManagerNode from '@/components/formarketing/CampaignManagerNode';
 import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
-import { TEMPLATES, CATEGORIES, type Template } from '@/components/formarketing/TemplateModal';
 import AntigravityBridgeNode from '@/components/formarketing/AntigravityBridgeNode';
 import CaptionNode from '@/components/formarketing/CaptionNode';
 import PromptBuilderNode from '@/components/formarketing/PromptBuilderNode';
@@ -53,8 +52,7 @@ function FormarketingContent() {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  // Show template landing only when no spaceId (fresh session)
-  const [showLanding, setShowLanding] = useState(!spaceId);
+
   const { screenToFlowPosition, setNodes: rfSetNodes, setEdges: rfSetEdges, getNodes: rfGetNodes, getEdges: rfGetEdges, fitView } = useReactFlow();
 
   // HU25/26 — Snap & zoom state
@@ -113,7 +111,7 @@ function FormarketingContent() {
             id: 'templates',
             label: 'Plantillas',
             icon: BookOpen,
-            onClick: () => setShowLanding(true)
+            onClick: () => navigate('/hub')
           },
           {
             id: 'add-node',
@@ -276,55 +274,6 @@ function FormarketingContent() {
     setTimeout(() => fitView({ padding: 0.15, duration: 600 }), 50);
     toast.success("Canvas organizado automáticamente");
   }, [rfGetNodes, rfGetEdges, rfSetNodes, fitView]);
-
-  // Handle template selection from landing page
-  const handleTemplateSelect = useCallback((template: { title: string; nodes: Array<{ type: string; data: Record<string, any> }> }) => {
-    // Demo content so templates load looking alive
-    const DEMO_VIDEO = 'https://cdn.pixabay.com/video/2023/10/20/185834-876356744_tiny.mp4';
-    const DEMO_IMAGES = [
-      'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&q=80',
-      'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=600&q=80',
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
-      'https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&q=80',
-    ];
-    let imgIdx = 0;
-
-    const newNodes: Node[] = template.nodes.map((nodeData, index) => {
-      const newNodeId = crypto.randomUUID();
-      // Pre-populate with demo content so the canvas looks ready
-      let demoData: Record<string, any> = {};
-      if (nodeData.type === 'videoModel') {
-        demoData = { assetUrl: DEMO_VIDEO, status: 'ready' };
-      } else if (nodeData.type === 'modelView') {
-        demoData = { assetUrl: DEMO_IMAGES[imgIdx++ % DEMO_IMAGES.length], status: 'ready' };
-      } else if (nodeData.type === 'layoutBuilder') {
-        demoData = { structure: 'Hero > Características > Testimonios > Precios > CTA', status: 'idle' };
-      }
-      return {
-        id: newNodeId,
-        type: nodeData.type,
-        position: { x: 120 + (index % 3) * 380, y: 120 + Math.floor(index / 3) * 290 },
-        data: {
-          ...nodeData.data,
-          ...demoData,
-        },
-      } as Node;
-    });
-
-    // Auto-connect nodes sequentially so the flow is pre-wired
-    const newEdges: Edge[] = newNodes.slice(0, -1).map((node, i) => ({
-      id: `e-${node.id}-${newNodes[i + 1].id}`,
-      source: node.id,
-      target: newNodes[i + 1].id,
-      type: 'smoothstep',
-      animated: true,
-      style: { stroke: 'rgba(168,85,247,0.35)', strokeWidth: 2 },
-    }));
-
-    setNodes(newNodes);
-    setEdges(newEdges);
-    setShowLanding(false);
-  }, [setNodes, setEdges]);
 
   // Load from DB
   useEffect(() => {
@@ -1445,119 +1394,8 @@ function FormarketingContent() {
         </div>
       </div>
 
-      {/* Template Landing Overlay */}
-      {showLanding && (
-        <TemplateLanding
-          onSelect={handleTemplateSelect}
-          onSkip={() => { setShowLanding(false); setNodes(initialNodes); }}
-        />
-      )}
     </div>
     </>
-  );
-}
-
-// ─── Template Landing Component ────────────────────────────────────────────
-function TemplateLanding({
-  onSelect,
-  onSkip,
-}: {
-  onSelect: (template: Template) => void;
-  onSkip: () => void;
-}) {
-  const [activeCategory, setActiveCategory] = useState('Todos');
-  const [search, setSearch] = useState('');
-
-  const filtered = TEMPLATES.filter((t) => {
-    const matchCat = activeCategory === 'Todos' || t.category === activeCategory;
-    const matchSearch = t.title.toLowerCase().includes(search.toLowerCase()) ||
-      t.description.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
-  });
-
-  return (
-    <div className="absolute inset-0 z-50 bg-white/98 backdrop-blur-2xl overflow-y-auto">
-      <div className="max-w-6xl mx-auto px-8 py-16 text-zinc-900">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-sm" />
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em]">Studio · Plantillas</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display mb-4 text-zinc-900">
-            Elige una <span className="bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">plantilla</span>
-          </h1>
-          <p className="text-sm text-zinc-500 font-medium max-w-md mx-auto">
-            Carga el flujo completo en segundos. Puedes editarlo como quieras.
-          </p>
-        </div>
-
-        {/* Search + Filter */}
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <div className="relative flex-1">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar plantilla..."
-              className="w-full h-11 bg-zinc-50 border border-zinc-200 rounded-2xl pl-4 pr-4 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-primary/50 transition-all"
-            />
-          </div>
-          <div className="flex gap-2 flex-wrap">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all font-display ${
-                  activeCategory === cat
-                    ? 'bg-zinc-900 text-white'
-                    : 'bg-white border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((template) => (
-            <button
-              key={template.id}
-              onClick={() => onSelect(template)}
-              className="group bg-white rounded-[2rem] border border-zinc-200 p-6 text-left hover:border-primary/30 hover:bg-zinc-50 hover:shadow-lg transition-all duration-300 active:scale-[0.98]"
-            >
-              <div className="flex items-start gap-4 mb-4">
-                <div className={`w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
-                  <template.icon className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-bold text-zinc-900 truncate font-display tracking-tight">{template.title}</h3>
-                  <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">{template.category}</span>
-                </div>
-              </div>
-              <p className="text-[12px] text-zinc-600 leading-relaxed line-clamp-2">{template.description}</p>
-              <div className="mt-4 flex items-center justify-between">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-                  {template.nodes.length} nodo{template.nodes.length !== 1 ? 's' : ''}
-                </span>
-                <span className="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Usar →</span>
-              </div>
-            </button>
-          ))}
-        </div>
-
-        {/* Skip */}
-        <div className="mt-12 text-center">
-          <button
-            onClick={onSkip}
-            className="text-xs font-bold text-zinc-400 hover:text-zinc-600 transition-colors uppercase tracking-widest"
-          >
-            Empezar con canvas vacío →
-          </button>
-        </div>
-      </div>
-    </div>
   );
 }
 

@@ -315,10 +315,14 @@ const Hub = () => {
   const { profile } = useProfile(user?.id);
   const navigate = useNavigate();
   const [category, setCategory] = useState(TEMPLATE_CATEGORIES[0]);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = category === "Todos"
-    ? TEMPLATES
-    : TEMPLATES.filter(t => t.category === category);
+  const filtered = TEMPLATES.filter(t => {
+    const matchCat = category === "Todos" || t.category === category;
+    const matchSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        t.desc.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchSearch;
+  });
 
   const handleUseTemplate = async (template: typeof TEMPLATES[0]) => {
     if (!user) return;
@@ -437,26 +441,43 @@ const Hub = () => {
             </motion.div>
           </div>
 
-          {/* Category Filter — Tailwind UI style pill tabs */}
-          <div className="flex gap-2 mb-10 overflow-x-auto no-scrollbar pb-1">
-            {TEMPLATE_CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategory(cat)}
-                className={`px-5 py-2.5 rounded-2xl text-[10px] font-bold whitespace-nowrap transition-all duration-300 font-display uppercase tracking-widest ${
-                  category === cat
-                    ? "bg-primary text-white shadow-sm"
-                    : "bg-zinc-50 border border-zinc-200 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100"
-                }`}
-              >
-                {cat}
-                {cat !== "Todos" && (
-                  <span className={`ml-2 text-[9px] tabular-nums ${category === cat ? "opacity-40" : "opacity-40"}`}>
-                    {TEMPLATES.filter(t => t.category === cat).length}
-                  </span>
-                )}
-              </button>
-            ))}
+          {/* Category & Search Filter */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
+            {/* Category Filter — Tailwind UI style pill tabs */}
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 w-full md:w-auto">
+              {TEMPLATE_CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={`px-5 py-2.5 rounded-2xl text-[10px] font-bold whitespace-nowrap transition-all duration-300 font-display uppercase tracking-widest ${
+                    category === cat
+                      ? "bg-primary text-white shadow-sm"
+                      : "bg-zinc-50 border border-zinc-200 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                >
+                  {cat}
+                  {cat !== "Todos" && (
+                    <span className={`ml-2 text-[9px] tabular-nums ${category === cat ? "opacity-40" : "opacity-40"}`}>
+                      {TEMPLATES.filter(t => t.category === cat).length}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full md:w-72 shrink-0">
+              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-zinc-400" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Buscar plantillas..."
+                className="w-full pl-9 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-2xl text-[12px] font-medium text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all font-display"
+              />
+            </div>
           </div>
 
           {/* Template Grid — Tailwind UI card grid pattern */}
