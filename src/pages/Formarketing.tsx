@@ -1274,7 +1274,7 @@ function FormarketingContent() {
           <Button
             onClick={handleExecute}
             disabled={nodes.length === 0 || execStatus === 'running'}
-            className="h-8 bg-black hover:bg-zinc-800 text-white rounded-xl gap-2 font-bold px-4 shadow-sm text-xs transition-all active:scale-95 disabled:opacity-30"
+            className="h-8 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl gap-2 font-bold px-4 shadow-sm text-xs transition-all active:scale-95 disabled:opacity-30"
           >
             <Zap className={`w-3.5 h-3.5 fill-current ${execStatus === 'running' ? 'animate-pulse' : ''}`} />
             {execStatus === 'running' ? `${execDone}/${execNodeCount}` : 'Ejecutar'}

@@ -6,22 +6,31 @@ import { useSidebarV2, type ContextualPanel } from '@/hooks/useSidebarV2';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 
+import { GeniusAssistant } from '@/components/formarketing/GeniusAssistant';
+
 // Lazy-loaded panels — we import them inline to keep the bundle split
 // (GenesisPanel will be a dedicated component after Phase 4)
-function PanelPlaceholder({ id }: { id: ContextualPanel }) {
+function PanelPlaceholder({ id, closeContextual }: { id: ContextualPanel, closeContextual: () => void }) {
+  if (id === 'genesis') {
+    return (
+      <div className="flex-1 h-full flex flex-col relative w-full overflow-hidden">
+        <GeniusAssistant embedded={true} onClose={closeContextual} />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex-1 flex items-center justify-center p-8 text-center">
-      <div>
+    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center h-full">
+      <div className="m-auto">
         <div className="w-10 h-10 rounded-2xl bg-primary/8 flex items-center justify-center mx-auto mb-3">
-          {id === 'genesis' && <Brain className="w-5 h-5 text-primary" />}
           {id === 'history' && <History className="w-5 h-5 text-primary" />}
           {id === 'settings' && <Settings className="w-5 h-5 text-primary" />}
           {id === 'node-properties' && <Settings className="w-5 h-5 text-primary" />}
         </div>
         <p className="text-[13px] font-semibold text-zinc-700 capitalize">
-          {id === 'genesis' ? 'Genesis IA' : id}
+          {id}
         </p>
-        <p className="text-[11px] text-zinc-400 mt-1">Panel cargando…</p>
+        <p className="text-[11px] text-zinc-400 mt-1">Panel en desarrollo…</p>
       </div>
     </div>
   );
@@ -64,25 +73,27 @@ export function ContextualSidebar() {
   const panelContent = (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-100 shrink-0">
-        <div className="w-7 h-7 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
-          <PanelIcon className="w-4 h-4 text-primary" />
+      {activeContextual !== 'genesis' && (
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-100 shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
+            <PanelIcon className="w-4 h-4 text-primary" />
+          </div>
+          <span className="flex-1 text-[13px] font-semibold text-zinc-800 truncate">
+            {panelLabel}
+          </span>
+          <button
+            onClick={closeContextual}
+            aria-label="Cerrar panel"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-        <span className="flex-1 text-[13px] font-semibold text-zinc-800 truncate">
-          {panelLabel}
-        </span>
-        <button
-          onClick={closeContextual}
-          aria-label="Cerrar panel"
-          className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
+      )}
 
       {/* Body */}
-      <div className="flex-1 overflow-auto">
-        <PanelPlaceholder id={activeContextual} />
+      <div className="flex-1 overflow-hidden">
+        <PanelPlaceholder id={activeContextual} closeContextual={closeContextual} />
       </div>
     </div>
   );
@@ -108,10 +119,10 @@ export function ContextualSidebar() {
           animate={{ width: 400, opacity: 1 }}
           exit={{ width: 0, opacity: 0 }}
           transition={{ duration: 0.22, ease: [0.32, 0, 0.08, 1] }}
-          className="relative z-20 h-screen border-l border-zinc-200 bg-white overflow-hidden shrink-0"
+          className="relative z-20 h-screen border-l border-zinc-200 bg-white overflow-hidden shrink-0 flex flex-col"
           aria-label={panelLabel}
         >
-          <div className="w-[400px] h-full">
+          <div className="w-[450px] h-full flex flex-col">
             {panelContent}
           </div>
         </motion.aside>
