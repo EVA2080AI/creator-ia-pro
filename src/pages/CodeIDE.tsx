@@ -136,7 +136,7 @@ export default function CodeIDE() {
         />
 
         {/* --- Triple-Column Layout --- */}
-        <div id="main-content" className="flex-1 overflow-hidden relative">
+        <div className="flex-1 overflow-hidden relative">
         <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
           
           {/* 1. File Explorer (Left) */}

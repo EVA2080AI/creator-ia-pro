@@ -10,10 +10,10 @@ import {
   Code2, Monitor, Smartphone, Tablet, Plus, Trash2,
   Github, Loader2, FolderOpen, Files, MessageSquare,
   Pencil, UploadCloud, Zap, Sparkles, Search, Star,
-  User, Home, Paperclip, Mic, Send, LayoutTemplate,
+  User, Paperclip, Mic, Send, LayoutTemplate,
   Clock, ChevronDown, Eye, History, Download, RotateCcw,
   MoreHorizontal, Globe, BarChart2, Columns, Cloud,
-  Map, ArrowUp, ArrowRight, Layers, X,
+  Map, ArrowUp, ArrowRight, Layers, X, ArrowLeft,
   PanelLeft, PanelLeftClose, Phone, RefreshCw, Database,
 } from 'lucide-react';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
@@ -126,13 +126,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
           <ChevronDown className="h-3 w-3 text-zinc-400 ml-auto" />
         </div>
 
-        {/* Nav */}
         <div className="px-2 py-2 border-b border-zinc-200">
-          <button onClick={() => navigate('/dashboard')}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
-            <Home className="h-3.5 w-3.5 shrink-0" />
-            Home
-          </button>
           <button onClick={onOpenSearch}
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
             <Search className="h-3.5 w-3.5 shrink-0" />
@@ -571,7 +565,7 @@ export default function Chat() {
       <div className="flex h-[44px] items-center px-3 shrink-0 z-[40] w-full relative"
         style={{ background: 'hsl(var(--card))', borderBottom: '1px solid hsl(var(--border) / 0.6)' }}>
         <div className="flex items-center gap-1.5 shrink-0">
-          <button onClick={() => setActiveProject(null)} aria-label="Ir al inicio de Genesis" className="flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground hover:bg-white/[0.05] hover:text-foreground transition-all"><Home className="h-3.5 w-3.5" aria-hidden="true" /></button>
+          <button onClick={() => setActiveProject(null)} aria-label="Volver a mis proyectos" className="flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground hover:bg-white/[0.05] hover:text-foreground transition-all"><ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /></button>
           <button onClick={() => setIsChatOpen(!isChatOpen)} aria-label={isChatOpen ? 'Cerrar panel de chat' : 'Abrir panel de chat'} className={`flex items-center justify-center h-7 w-7 rounded-md transition-all ${isChatOpen ? 'text-foreground bg-accent/10' : 'text-muted-foreground hover:bg-white/5'}`}>{isChatOpen ? <PanelLeftClose className="h-3.5 w-3.5" aria-hidden="true" /> : <PanelLeft className="h-3.5 w-3.5" aria-hidden="true" />}</button>
           <div className="h-4 w-px mx-1 shrink-0 bg-border/40" />
           <div className="flex items-center gap-1.5 min-w-0">

@@ -29,7 +29,11 @@ BEGIN
   SELECT
     p.user_id,
     au.email::TEXT,
-    p.display_name::TEXT,
+    COALESCE(
+      (au.raw_user_meta_data->>'display_name')::TEXT,
+      (au.raw_user_meta_data->>'full_name')::TEXT,
+      au.email::TEXT
+    ) AS display_name,
     p.credits_balance,
     p.subscription_tier::TEXT,
     p.is_active,

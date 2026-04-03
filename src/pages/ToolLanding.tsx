@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { aiService } from "@/services/ai-service";
-import { AppHeader } from "@/components/AppHeader";
+import { Logo } from "@/components/Logo";
 
 // Demo images
 import demoEnhance from "@/assets/demo-enhance.jpg";
@@ -301,7 +301,25 @@ const ToolLanding = () => {
   return (
     <div className="min-h-screen bg-white">
       <Helmet><title>{tool ? `${tool.name} | Creator IA Pro` : 'Herramienta IA | Creator IA Pro'}</title></Helmet>
-      <main id="main-content">
+
+      {/* ── Nav ─────────────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-white/90 backdrop-blur-md border-b border-zinc-100">
+        <Logo size="sm" showText showPro onClick={() => navigate("/")} />
+
+        <div className="flex items-center gap-6">
+          <button onClick={() => navigate("/pricing")} className="hidden sm:block text-[13px] text-zinc-400 hover:text-zinc-800 transition-colors font-medium">
+            Precios
+          </button>
+          <button
+            onClick={() => navigate("/auth")}
+            className="flex items-center gap-2 px-5 py-2 rounded-lg bg-zinc-900 text-white text-[13px] font-bold hover:bg-zinc-800 transition-all active:scale-95"
+          >
+            Empezar gratis
+          </button>
+        </div>
+      </header>
+
+      <main>
         {/* ── Breadcrumb ─────────────────────────────────── */}
         <div className="border-b border-zinc-100 bg-zinc-50 pt-10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2.5">

@@ -115,7 +115,7 @@ export default function Studio() {
   // --- Welcome Screen / Empty State ---
   if (!activeProject) {
     return (
-      <div className="h-screen w-full bg-background overflow-hidden flex flex-col relative selection:bg-primary/30">
+      <div className="h-full w-full bg-background overflow-hidden flex flex-col relative selection:bg-primary/30">
         {/* Animated background background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[-25%] left-[-15%] w-[70%] h-[80%] bg-primary/10 rounded-full blur-[160px] opacity-40" />
@@ -198,7 +198,7 @@ export default function Studio() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-background overflow-hidden text-foreground selection:bg-primary/30">
+    <div className="flex flex-col h-full bg-background overflow-hidden text-foreground selection:bg-primary/30">
       <Helmet><title>Studio | Creator IA Pro</title></Helmet>
       {/* ── Topbar (Hidden in Fullscreen) ─────────────────────────────────── */}
       {!isFullscreen && (
@@ -218,7 +218,7 @@ export default function Studio() {
         />
       )}
 
-      <main id="main-content" className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         {/* ── Left Sidebar: Chat (Genesis) ── */}
         <div 
           className={cn(
@@ -290,7 +290,7 @@ export default function Studio() {
             </div>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

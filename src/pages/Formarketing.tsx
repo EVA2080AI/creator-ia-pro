@@ -1196,7 +1196,7 @@ function FormarketingContent() {
           </div>
         </div>
       )}
-      <div id="main-content" className="w-screen bg-canvas font-sans text-foreground flex flex-col overflow-hidden relative" style={{ height: '100vh' }}>
+      <div className="w-full h-full bg-canvas font-sans text-foreground flex flex-col overflow-hidden relative">
       {/* Canvas Toolbar */}
       <div className="flex h-14 w-full items-center justify-between border-b border-zinc-200/60 bg-white/95 px-5 backdrop-blur-xl shrink-0 z-[90]">
         <div className="flex items-center gap-2">

@@ -17,7 +17,7 @@ const Downloads = () => {
         <div className="absolute -bottom-40 right-1/3 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[150px]" />
       </div>
 
-      <div id="main-content" className="relative z-10 flex flex-col items-center px-8 py-10 pb-32">
+      <div className="relative z-10 flex flex-col items-center px-8 py-10 pb-32">
         {/* Badge */}
         <div className="mb-10 flex items-center gap-3 rounded-full border border-white/5 bg-white/[0.03] px-6 py-3">
           <Globe className="h-3.5 w-3.5 text-primary" />

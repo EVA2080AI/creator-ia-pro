@@ -14,7 +14,6 @@ import {
   TrendingUp, Globe, Lock, Cpu, Star, MessageSquare
 } from "lucide-react";
 import { toast } from "sonner";
-import { AppHeader } from "@/components/AppHeader";
 import { cn } from "@/lib/utils";
 
 // ─── Plan definitions ─────────────────────────────────────────────────────────
@@ -214,7 +213,7 @@ export default function Pricing() {
       <div className="h-full bg-background selection:bg-primary/15 relative overflow-x-hidden">
         <MeshGradient />
 
-        <div id="main-content" className="pt-10 pb-40 relative z-10">
+        <div className="pt-10 pb-40 relative z-10">
           
           {/* ── Hero ────────────────────────────────────────────────────────── */}
           <section className="relative px-6 mb-24 overflow-visible">

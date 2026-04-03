@@ -167,19 +167,7 @@ const ProductBacklog = () => {
         <div className="absolute -top-40 left-1/4 h-[600px] w-[600px] rounded-full bg-primary/5 blur-[150px]" />
       </div>
 
-      <header className="relative z-10 flex items-center gap-3 px-6 py-4 border-b border-border">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="text-lg font-bold text-foreground">
-            Product Backlog — <span className="gradient-text">Creator IA Pro</span>
-          </h1>
-          <p className="text-xs text-muted-foreground">Matriz de funcionalidades & Sprint Backlog</p>
-        </div>
-      </header>
-
-      <div id="main-content" className="relative z-10 mx-auto max-w-7xl px-6 py-8 space-y-10">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 py-8 space-y-10">
         {/* SUMMARY */}
         <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="rounded-2xl border border-border bg-card p-5 text-center">

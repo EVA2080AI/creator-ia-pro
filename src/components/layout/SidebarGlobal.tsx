@@ -5,7 +5,7 @@ import {
   ChevronDown, Coins, LogOut, User, Shield,
   Wand2, Hash, Megaphone, PenLine, Zap,
   Settings, History, CreditCard, Monitor, Sparkles,
-  PanelLeftClose, PanelLeftOpen, Terminal
+  PanelLeftClose, PanelLeftOpen, Terminal, List
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/Logo';
@@ -25,9 +25,10 @@ const NAV_MAIN = [
 ];
 
 const NAV_BOTTOM = [
-  { path: '/profile',  label: 'Mi Perfil', icon: User },
-  { path: '/pricing',  label: 'Planes',    icon: CreditCard },
-  { path: '/descargar',label: 'Descargar', icon: Download },
+  { path: '/profile',         label: 'Mi Perfil', icon: User },
+  { path: '/pricing',         label: 'Planes',    icon: CreditCard },
+  { path: '/descargar',       label: 'Descargar', icon: Download },
+  { path: '/product-backlog', label: 'Roadmap',   icon: List },
 ];
 
 export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
@@ -47,6 +48,11 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
     (path !== '/dashboard' && location.pathname.startsWith(path));
 
   const handleNav = (path: string, requiresPymes = false, label = '') => {
+    const isPublic = ['/pricing', '/descargar', '/product-backlog'].includes(path);
+    if (!user && !isPublic) {
+      navigate('/auth');
+      return;
+    }
     if (requiresPymes && !isPymes) {
       toast.error('Funcionalidad exclusiva', {
         description: `"${label}" es exclusivo del plan Pymes.`,
@@ -257,34 +263,55 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           </button>
         )}
 
-        {/* User row */}
+        {/* User / Guest row */}
         <div className={cn(
-          'flex items-center gap-2 px-2 py-2 rounded-xl mt-1',
+          'flex items-center gap-2 px-2 py-2 rounded-xl mt-1 transition-all',
           globalExpanded ? 'bg-zinc-50 border border-zinc-100' : 'justify-center'
         )}>
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-zinc-100 border border-zinc-200">
-            {profile?.avatar_url
-              ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-              : <User className="w-3.5 h-3.5 text-zinc-400" />}
-          </div>
-          {globalExpanded && (
+          {user ? (
             <>
-              <div className="flex-1 min-w-0">
-                <p className="text-[12px] font-semibold text-zinc-800 truncate">
-                  {profile?.display_name?.split(' ')[0] ?? 'Usuario'}
-                </p>
-                <p className="text-[10px] text-zinc-400 truncate capitalize">
-                  {profile?.subscription_tier ?? 'free'}
-                </p>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-zinc-100 border border-zinc-200">
+                {profile?.avatar_url
+                  ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
+                  : <User className="w-3.5 h-3.5 text-zinc-400" />}
               </div>
-              <button
-                onClick={handleSignOut}
-                aria-label="Cerrar sesión"
-                className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"
-              >
-                <LogOut className="w-3 h-3" />
-              </button>
+              {globalExpanded && (
+                <>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-zinc-800 truncate">
+                      {profile?.display_name?.split(' ')[0] ?? 'Usuario'}
+                    </p>
+                    <p className="text-[10px] text-zinc-400 truncate capitalize">
+                      {profile?.subscription_tier ?? 'free'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleSignOut}
+                    aria-label="Cerrar sesión"
+                    className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                  >
+                    <LogOut className="w-3 h-3" />
+                  </button>
+                </>
+              )}
             </>
+          ) : (
+            <button
+              onClick={() => navigate('/auth')}
+              className={cn(
+                "flex items-center group transition-all",
+                globalExpanded ? "gap-3 px-1 w-full" : "justify-center"
+              )}
+            >
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 border border-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all">
+                <LogOut className="w-3 h-3 rotate-180" />
+              </div>
+              {globalExpanded && (
+                <span className="text-[12px] font-bold text-zinc-600 group-hover:text-primary transition-colors">
+                  Iniciar Sesión
+                </span>
+              )}
+            </button>
           )}
         </div>
       </div>
