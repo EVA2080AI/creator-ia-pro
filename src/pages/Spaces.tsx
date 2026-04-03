@@ -130,50 +130,7 @@ const Spaces = () => {
     <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900">
       <Helmet><title>Spaces | Creator IA Pro</title></Helmet>
 
-      <div className="flex pt-16 h-screen overflow-hidden">
-        {/* Drive-like Left Sidebar */}
-        <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-zinc-200 bg-zinc-50 py-4 px-3 gap-1 overflow-y-auto">
-          <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-primary text-white text-[12px] font-black hover:bg-primary/90 transition-all active:scale-95 shadow-sm mb-3 uppercase tracking-widest"
-          >
-            <Plus className="h-4 w-4 shrink-0" />
-            Nuevo Space
-          </button>
-
-          <div className="space-y-0.5">
-            {[
-              { label: 'Mis Spaces', icon: HardDrive, active: true },
-              { label: 'Recientes',  icon: Clock,     active: false },
-              { label: 'Destacados', icon: Star,      active: false },
-              { label: 'Compartidos', icon: Folder,   active: false },
-            ].map((item) => (
-              <button key={item.label}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium transition-all ${
-                  item.active ? 'bg-zinc-100 text-zinc-900 border border-zinc-200' : 'text-zinc-400 hover:bg-zinc-50 hover:text-zinc-900'
-                }`}
-              >
-                <item.icon className={`h-4 w-4 shrink-0 ${item.active ? 'text-primary' : 'text-zinc-500'}`} />
-                {item.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-zinc-200">
-            <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-[0.3em] font-display px-3 mb-2">Herramientas</p>
-            {[
-              { label: 'Studio',  icon: Wand2,    path: '/studio' },
-              { label: 'Genesis', icon: FolderOpen, path: '/chat' },
-            ].map((item) => (
-              <button key={item.label} onClick={() => navigate(item.path)}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[12px] font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-all">
-                <item.icon className="h-4 w-4 shrink-0 text-zinc-400" />
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </aside>
-
+      <div className="flex h-screen overflow-hidden">
         {/* Main content */}
         <main id="main-content" className="flex-1 overflow-y-auto">
           <div className="max-w-[1100px] mx-auto px-6 py-6">

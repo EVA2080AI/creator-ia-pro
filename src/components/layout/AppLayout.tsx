@@ -1,7 +1,9 @@
 import { Outlet } from 'react-router-dom';
 import { SidebarGlobal } from './SidebarGlobal';
 import { ContextualSidebar } from './ContextualSidebar';
+import { MobileNav } from './MobileNav';
 import { useSidebarKeyboard } from '@/hooks/useSidebarV2';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 /**
  * AppLayout — shared authenticated layout.
@@ -13,21 +15,28 @@ export function AppLayout() {
   useSidebarKeyboard();
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background">
-      {/* Left global navigation sidebar */}
-      <SidebarGlobal />
+    <SidebarProvider>
+      <div className="flex h-screen w-screen overflow-hidden bg-background">
+        {/* Left global navigation sidebar */}
+        <SidebarGlobal />
 
-      {/* Main content area */}
-      <main
-        id="main-content"
-        className="flex-1 min-w-0 overflow-auto"
-        tabIndex={-1}
-      >
-        <Outlet />
-      </main>
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+          {/* Mobile top navigation */}
+          <MobileNav />
 
-      {/* Right contextual panel (Genesis IA, node props, etc.) */}
-      <ContextualSidebar />
-    </div>
+          {/* Main content area */}
+          <main
+            id="main-content"
+            className="flex-1 min-w-0 overflow-auto"
+            tabIndex={-1}
+          >
+          <Outlet />
+          </main>
+        </div>
+
+        {/* Right contextual panel (Genesis IA, node props, etc.) */}
+        <ContextualSidebar />
+      </div>
+    </SidebarProvider>
   );
 }

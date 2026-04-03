@@ -111,17 +111,17 @@ const ModelNode = ({ id, data }: { id: string, data: ModelNodeData }) => {
   };
 
   return (
-    <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
-      ${data.status === 'executing' ? 'bg-white border-primary shadow-lg ring-2 ring-primary/20' : 'bg-white border hover:border-zinc-300 border-zinc-200 hover:shadow-md transition-colors'}
-      w-[260px] shadow-sm
+    <div className={`group relative rounded-[2rem] overflow-hidden transition-all duration-500 hover:scale-[1.02]
+      ${data.status === 'executing' ? 'bg-white border-primary shadow-lg ring-2 ring-primary/20' : 'bg-white border border-zinc-200/60 hover:border-zinc-300 hover:shadow-xl shadow-sm transition-all'}
+      w-[260px]
     `}>
       {/* Aether Node Header */}
-      <div className="flex h-12 items-center justify-between px-4 border-b border-zinc-100 bg-zinc-50/50 rounded-t-3xl">
+      <div className="flex h-12 items-center justify-between px-5 border-b border-zinc-100/80 bg-zinc-50/40">
         <div className="flex items-center gap-2.5 overflow-hidden">
             <div className="p-1.5 rounded-xl bg-orange-50 border border-orange-100 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
               <ImageIcon className="w-4 h-4 text-orange-500 shrink-0" />
             </div>
-            <h3 className="text-[11px] font-bold text-zinc-900 tracking-wide truncate font-display uppercase">
+            <h3 className="text-[10px] font-bold text-zinc-900 tracking-[0.15em] truncate font-display uppercase">
                {data.title || "Visual Engine"}
             </h3>
         </div>

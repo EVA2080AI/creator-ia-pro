@@ -389,8 +389,8 @@ const Hub = () => {
     <div className="min-h-screen bg-background text-zinc-900 font-sans">
       <Helmet><title>Hub de Plantillas | Creator IA Pro</title></Helmet>
 
-      <main id="main-content" className="pt-20">
-        <div className="max-w-[1440px] mx-auto px-8 py-12">
+      <main id="main-content" className="pt-10">
+        <div className="max-w-[1440px] mx-auto px-8 pb-12">
 
           {/* Header */}
           <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-8">

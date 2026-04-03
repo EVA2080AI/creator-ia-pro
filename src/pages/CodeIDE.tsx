@@ -111,13 +111,6 @@ export default function CodeIDE() {
   return (
     <div className="flex flex-col h-screen bg-background overflow-hidden text-foreground selection:bg-primary/30">
       <Helmet><title>Code IDE | Creator IA Pro</title></Helmet>
-      <AppHeader 
-        userId={user?.id} 
-        onSignOut={async () => {
-          await supabase.auth.signOut();
-          navigate('/auth');
-        }} 
-      />
       
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* --- Topbar --- */}

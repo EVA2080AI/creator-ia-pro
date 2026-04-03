@@ -54,7 +54,7 @@ const PERSONALITIES = [
     prompt: 'Eres un Copywriter creativo experto. Usas AIDA, PAS, FAB. Tu copy es persuasivo y orientado a conversión. Hablas en español.' },
   { id: 'seo',        name: 'SEO Strategist',       icon: Search,    color: 'text-emerald-500', bg: 'bg-emerald-50',
     prompt: 'Eres un Estratega SEO experto. Conoces el algoritmo de Google, E-E-A-T, keyword research y SEO técnico. Hablas en español.' },
-  { id: 'director',   name: 'Director Creativo',    icon: Palette,   color: 'text-amber-500',   bg: 'bg-amber-50',
+  { id: 'director',   name: 'Director Creativo',    icon: Palette,   color: 'text-amber-500',   bg: 'bg-amber-50/50 border-amber-100/50',
     prompt: 'Eres un Director Creativo de agencia global. Combinas estrategia con creatividad para campañas memorables. Hablas en español.' },
 ];
 
@@ -66,18 +66,18 @@ const saveConvs = (c: Conversation[]) => localStorage.setItem(STORAGE_KEY, JSON.
 // ─── Markdown ─────────────────────────────────────────────────────────────────
 function md(text: string): string {
   return text
-    .replace(/^### (.+)$/gm,   '<h3 class="text-[15px] font-semibold text-zinc-900 mt-5 mb-1.5 leading-snug">$1</h3>')
-    .replace(/^## (.+)$/gm,    '<h2 class="text-base font-bold text-zinc-900 mt-6 mb-2 leading-snug">$1</h2>')
-    .replace(/^# (.+)$/gm,     '<h1 class="text-lg font-bold text-zinc-900 mt-7 mb-2 leading-snug">$1</h1>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-zinc-900">$1</strong>')
-    .replace(/\*(.+?)\*/g,     '<em class="italic text-zinc-600">$1</em>')
-    .replace(/`([^`\n]+)`/g,   '<code class="bg-zinc-100 border border-zinc-200 text-sky-600 px-1.5 py-0.5 rounded-md text-[12.5px] font-mono">$1</code>')
-    .replace(/^---+$/gm,       '<hr class="border-zinc-200 my-5"/>')
-    .replace(/^\s*[-*•] (.+)$/gm, '<li class="flex gap-2.5 my-1"><span class="text-zinc-400 shrink-0 mt-[3px] text-[10px]">▸</span><span class="text-zinc-700">$1</span></li>')
-    .replace(/(<li[\s\S]*?<\/li>\n?)+/g, m => `<ul class="my-3 space-y-0.5 ml-1">${m}</ul>`)
-    .replace(/^\d+\. (.+)$/gm, '<li class="flex gap-2.5 my-1"><span class="text-zinc-400 shrink-0 font-mono text-[11px] mt-[2px]">·</span><span class="text-zinc-700">$1</span></li>')
-    .replace(/\n\n/g,          '</p><p class="mt-3 text-zinc-600 leading-[1.75]">')
-    .replace(/^(?!<[hublpei])(.+)$/gm, line => line.trim() ? `<p class="text-zinc-600 leading-[1.75]">${line}</p>` : '');
+    .replace(/^### (.+)$/gm,   '<h3 class="text-[13px] font-bold text-zinc-900 mt-6 mb-2 uppercase tracking-widest">$1</h3>')
+    .replace(/^## (.+)$/gm,    '<h2 class="text-sm font-bold text-zinc-900 mt-7 mb-2 uppercase tracking-[0.1em]">$1</h2>')
+    .replace(/^# (.+)$/gm,     '<h1 class="text-base font-black text-zinc-900 mt-8 mb-3 uppercase tracking-wider">$1</h1>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="font-bold text-zinc-900">$1</strong>')
+    .replace(/\*(.+?)\*/g,     '<em class="italic text-zinc-500">$1</em>')
+    .replace(/`([^`\n]+)`/g,   '<code class="bg-zinc-100 border border-zinc-200/60 text-primary-dark px-1.5 py-0.5 rounded-lg text-[11px] font-mono">$1</code>')
+    .replace(/^---+$/gm,       '<hr class="border-zinc-200/60 my-6"/>')
+    .replace(/^\s*[-*•] (.+)$/gm, '<li class="flex gap-2.5 my-2"><span class="text-primary shrink-0 mt-[4px] text-[8px]">●</span><span class="text-zinc-600">$1</span></li>')
+    .replace(/(<li[\s\S]*?<\/li>\n?)+/g, m => `<ul class="my-4 space-y-1 ml-1">${m}</ul>`)
+    .replace(/^\d+\. (.+)$/gm, '<li class="flex gap-2.5 my-2"><span class="text-zinc-400 shrink-0 font-mono text-[10px] mt-[3px]">·</span><span class="text-zinc-600">$1</span></li>')
+    .replace(/\n\n/g,          '</p><p class="mt-4 text-zinc-600 leading-[1.8]">')
+    .replace(/^(?!<[hublpei])(.+)$/gm, line => line.trim() ? `<p class="text-zinc-600 leading-[1.8] font-medium text-[13.5px]">${line}</p>` : '');
 }
 
 function extractCode(text: string) {
@@ -105,21 +105,21 @@ function CodeBlock({ lang, code, onCanvas }: { lang: string; code: string; onCan
   const copy = async () => { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); };
 
   return (
-    <div className="my-4 rounded-xl overflow-hidden border border-zinc-200 bg-white">
+    <div className="my-5 rounded-2xl overflow-hidden border border-zinc-200/60 bg-white shadow-sm">
       {/* Window chrome */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-zinc-50 border-b border-zinc-200">
+      <div className="flex items-center justify-between px-5 py-3 bg-zinc-50/50 border-b border-zinc-200/60">
         <div className="flex items-center gap-3">
-          <div className="flex gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-rose-400" />
-            <span className="w-3 h-3 rounded-full bg-amber-400" />
-            <span className="w-3 h-3 rounded-full bg-green-400" />
+          <div className="flex gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-400/80" />
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
           </div>
-          <span className="text-[11px] font-medium text-zinc-400 select-none">{lang}</span>
+          <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] select-none">{lang}</span>
         </div>
         <div className="flex items-center gap-2">
           {isPrev && onCanvas && (
             <button onClick={() => onCanvas(code, lang)}
-              className="flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 hover:text-primary transition-colors px-2 py-1 rounded-lg hover:bg-primary/5">
+              className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-primary transition-all px-3 py-1.5 rounded-xl hover:bg-primary/10">
               <Monitor className="h-3.5 w-3.5" /> Canvas
             </button>
           )}
@@ -176,15 +176,15 @@ function CanvasPanel({ code, lang, onClose }: { code: string; lang: string; onCl
   const copy = async () => { await navigator.clipboard.writeText(code); setCopied(true); setTimeout(() => setCopied(false), 2000); };
 
   return (
-    <div className="w-[520px] shrink-0 flex flex-col border-l border-zinc-200 bg-white animate-in slide-in-from-right duration-250">
+    <div className="w-[600px] shrink-0 flex flex-col border-l border-zinc-200/60 bg-white/95 backdrop-blur-xl animate-in slide-in-from-right duration-500 shadow-2xl">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 h-12 border-b border-zinc-200 shrink-0">
-        <div className="flex border border-zinc-200 rounded-lg overflow-hidden bg-zinc-50">
+      <div className="flex items-center justify-between px-5 h-14 border-b border-zinc-200/60 shrink-0 bg-zinc-50/40">
+        <div className="flex border border-zinc-200/60 rounded-xl overflow-hidden bg-white/50 p-1 shadow-sm">
           {(['preview', 'code'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
-              className={cn('px-4 py-1.5 text-[12px] font-semibold transition-all',
-                tab === t ? 'bg-white shadow-sm text-zinc-900 border-zinc-200' : 'text-zinc-500 hover:text-zinc-900')}>
-              {t === 'preview' ? 'Vista previa' : 'Código'}
+              className={cn('px-5 py-1.5 rounded-lg text-[11px] font-bold uppercase tracking-widest transition-all',
+                tab === t ? 'bg-zinc-900 text-white shadow-md' : 'text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50')}>
+              {t === 'preview' ? 'Visual' : 'Código'}
             </button>
           ))}
         </div>
@@ -470,7 +470,7 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
         <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
 
           {/* Top bar */}
-          <div className="flex items-center gap-3 px-4 h-12 border-b border-zinc-200 shrink-0 bg-white/50 backdrop-blur-md">
+          <div className={`flex items-center gap-3 px-5 h-14 border-b border-zinc-200/60 shrink-0 bg-white/95 backdrop-blur-xl ${embedded ? 'rounded-tl-3xl' : ''}`}>
             {/* Sidebar toggle — only in page mode */}
             {!embedded && (
               <button onClick={() => setSidebarOpen(v => !v)}
@@ -543,29 +543,29 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
             {/* Close: embedded → close panel; page → go to dashboard */}
             <button
               onClick={() => embedded ? onClose?.() : navigate('/dashboard')}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-800 hover:bg-zinc-100 transition-all">
-              <X className="h-4 w-4" />
+              className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200">
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
 
           {/* Messages */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto bg-canvas">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto bg-zinc-50/30">
             {isEmpty ? (
               /* ── Empty state ── */
               <div className="flex flex-col items-center justify-center min-h-full px-8 py-16 text-center">
                 <div className="relative mb-8">
                   <div className="absolute inset-0 blur-[60px] rounded-full opacity-30"
                     style={{ background: curModel.color }} />
-                  <div className="relative w-14 h-14 rounded-2xl bg-white border border-zinc-200 shadow-sm flex items-center justify-center">
-                    <curPers.icon className={cn('h-6 w-6', curPers.color)} />
+                  <div className="relative w-16 h-16 rounded-[2rem] bg-white border border-zinc-200/60 shadow-sm flex items-center justify-center animate-in zoom-in duration-500">
+                    <curPers.icon className={cn('h-7 w-7', curPers.color)} />
                   </div>
                 </div>
-                <h1 className="text-[22px] font-bold text-zinc-900 tracking-tight mb-2">
+                <h1 className="text-[26px] font-black text-zinc-900 tracking-tight mb-3">
                   {personality === 'assistant'
                     ? <>Hola, soy <span style={{ color: curModel.color }}>Antigravity</span></>
                     : curPers.name}
                 </h1>
-                <p className="text-[14px] text-zinc-500 max-w-sm leading-relaxed mb-10">
+                <p className="text-[14px] text-zinc-500 max-w-sm leading-relaxed mb-10 font-medium">
                   {personality === 'code'       ? 'Cuéntame qué quieres construir. Generaré el código con preview en vivo.' :
                    personality === 'marketing'  ? 'Pregúntame sobre campañas, ads, copywriting o estrategia digital.' :
                    personality === 'seo'        ? 'Ayudo con keyword research, auditorías SEO y estrategia de contenido.' :
@@ -576,7 +576,7 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                 <div className="flex flex-wrap gap-2 justify-center max-w-md">
                   {(quickPrompts[personality] ?? quickPrompts.assistant).map(q => (
                     <button key={q} onClick={() => { setInput(q); inputRef.current?.focus(); }}
-                      className="px-4 py-2 rounded-xl border border-zinc-200 bg-white text-[13px] text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 hover:border-zinc-300 shadow-sm transition-all focus:outline-none focus:ring-2 ring-primary/20">
+                      className="px-5 py-2.5 rounded-2xl border border-zinc-200/60 bg-white text-[13px] text-zinc-500 font-bold hover:text-zinc-900 hover:bg-zinc-50 hover:border-zinc-300 shadow-sm transition-all focus:outline-none focus:ring-4 ring-primary/5">
                       {q}
                     </button>
                   ))}
@@ -588,8 +588,8 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                 {msgs.map(msg => {
                   if (msg.role === 'user') {
                     return (
-                      <div key={msg.id} className="flex justify-end py-2">
-                        <div className="max-w-[75%] bg-zinc-100 border border-zinc-200 text-zinc-900 rounded-2xl rounded-tr-sm px-4 py-3 text-[14px] leading-relaxed shadow-sm">
+                      <div key={msg.id} className="flex justify-end py-3">
+                        <div className="max-w-[85%] bg-zinc-900 text-white rounded-[1.75rem] rounded-tr-md px-5 py-4 text-[13.5px] leading-relaxed shadow-lg font-medium">
                           {msg.content}
                         </div>
                       </div>
@@ -600,12 +600,12 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                   return (
                     <div key={msg.id} className="py-4">
                       {/* AI avatar + name */}
-                      <div className="flex items-center gap-2.5 mb-3">
-                        <div className="w-6 h-6 rounded-lg bg-white border border-zinc-200 flex items-center justify-center shrink-0 shadow-sm"
-                          style={{ boxShadow: `0 0 12px ${curModel.color}15` }}>
-                          <Sparkles className="h-3 w-3" style={{ color: curModel.color }} />
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-8 h-8 rounded-xl bg-white border border-zinc-200/60 flex items-center justify-center shrink-0 shadow-sm"
+                          style={{ boxShadow: `0 8px 16px -4px ${curModel.color}15` }}>
+                          <Sparkles className="h-4 w-4" style={{ color: curModel.color }} />
                         </div>
-                        <span className="text-[12px] font-semibold text-zinc-500">{curPers.name}</span>
+                        <span className="text-[11px] font-black text-zinc-500 uppercase tracking-[0.1em]">{curPers.name}</span>
                       </div>
                       {/* Text */}
                       {text && (
@@ -660,12 +660,11 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
             )}
           </div>
 
-          {/* ── Input ───────────────────────────────────────────────────────── */}
-          <div className="px-4 pb-5 pt-3 shrink-0 border-t border-zinc-200 bg-white/50 backdrop-blur-md">
+          <div className="px-5 pb-6 pt-4 shrink-0 border-t border-zinc-200/60 bg-white/95 backdrop-blur-xl">
             <div className="max-w-[720px] mx-auto">
-              <div className="relative flex items-end gap-2 bg-white border border-zinc-200 shadow-sm rounded-2xl px-4 py-3.5 focus-within:border-zinc-300 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
+              <div className="relative flex items-end gap-3 bg-zinc-50/50 border border-zinc-200/60 shadow-sm rounded-[2rem] px-5 py-4 focus-within:bg-white focus-within:border-primary/40 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
                 {/* Paperclip */}
-                <button className="flex-shrink-0 text-zinc-400 hover:text-zinc-600 transition-colors p-0.5 mb-0.5">
+                <button className="flex-shrink-0 text-zinc-400 hover:text-zinc-900 transition-colors p-1 mb-1">
                   <Paperclip className="h-4 w-4" />
                 </button>
                 <textarea
@@ -673,17 +672,17 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                   value={input}
                   onChange={e => { setInput(e.target.value); resize(e.target); }}
                   onKeyDown={handleKey}
-                  placeholder={`Mensaje a ${curPers.name}…`}
+                  placeholder={`Enviar mensaje a ${curPers.name}…`}
                   rows={1}
-                  className="flex-1 resize-none bg-transparent text-[14px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none leading-relaxed"
-                  style={{ minHeight: '22px', maxHeight: '140px', overflowY: 'auto' }}
+                  className="flex-1 resize-none bg-transparent text-[13.5px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none leading-relaxed min-h-[22px] font-medium"
+                  style={{ maxHeight: '140px', overflowY: 'auto' }}
                 />
                 {/* Send button */}
                 <button onClick={sendMessage} disabled={!input.trim() || streaming}
                   className={cn(
-                    'flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all',
+                    'flex-shrink-0 w-10 h-10 rounded-[1.25rem] flex items-center justify-center transition-all',
                     input.trim() && !streaming
-                      ? 'bg-zinc-900 text-white hover:bg-zinc-800 active:scale-95 shadow-md'
+                      ? 'bg-zinc-900 text-white hover:bg-zinc-800 active:scale-95 shadow-lg'
                       : 'bg-zinc-100 text-zinc-300 cursor-not-allowed',
                   )}>
                   {streaming
@@ -691,7 +690,7 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                     : <Send className="h-4 w-4" />}
                 </button>
               </div>
-              <p className="text-center text-[10px] text-zinc-400 mt-2 tracking-widest uppercase">
+              <p className="text-center text-[9px] text-zinc-400 mt-3 tracking-[0.2em] font-bold uppercase opacity-60">
                 Enter · enviar &nbsp;·&nbsp; Shift+Enter · nueva línea
               </p>
             </div>

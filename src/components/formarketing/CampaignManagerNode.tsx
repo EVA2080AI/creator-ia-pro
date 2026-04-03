@@ -112,16 +112,16 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
   };
 
   return (
-    <div className={`group relative rounded-2xl border bg-white backdrop-blur-xl w-[270px] shadow-sm transition-all duration-300 hover:shadow-md
-      ${data.status === 'processing' ? 'border-primary ring-2 ring-primary/20 shadow-lg animate-pulse' : 'border-zinc-200 hover:border-zinc-300'}
+    <div className={`group relative rounded-[2rem] border bg-white/90 backdrop-blur-xl w-[270px] shadow-sm transition-all duration-300 hover:shadow-xl
+      ${data.status === 'processing' ? 'border-primary ring-2 ring-primary/20 shadow-xl animate-pulse' : 'border-zinc-200/60 hover:border-zinc-300'}
     `}>
       {/* Nexus V3 Industrial Header */}
-      <div className="flex h-10 items-center justify-between px-3 border-b border-zinc-100 bg-zinc-50/50 rounded-t-2xl">
+      <div className="flex h-12 items-center justify-between px-5 border-b border-zinc-100/80 bg-zinc-50/40">
         <div className="flex items-center gap-2 overflow-hidden">
             <div className="p-1 rounded-lg bg-orange-50 border border-orange-100">
               <Megaphone className="w-3.5 h-3.5 text-orange-500 shrink-0" />
             </div>
-            <h3 className="text-[10px] font-bold text-zinc-900 tracking-tight truncate uppercase">
+            <h3 className="text-[10px] font-bold text-zinc-900 tracking-[0.15em] truncate uppercase">
                {data.title || "CAMPAIGN_ENGINE_V3"}
             </h3>
         </div>

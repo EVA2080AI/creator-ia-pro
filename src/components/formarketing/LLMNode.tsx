@@ -42,14 +42,14 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
   const isRunning = data.status === 'running';
 
   return (
-    <div className="group relative rounded-3xl overflow-hidden bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50/50 transition-colors w-[280px] shadow-sm hover:shadow-md">
+    <div className="group relative rounded-[2rem] overflow-hidden bg-white/90 backdrop-blur-xl border border-zinc-200/60 hover:border-zinc-300 hover:bg-white transition-all w-[280px] shadow-sm hover:shadow-xl duration-500">
       {/* Header */}
-      <div className="flex h-12 items-center justify-between px-4 border-b border-zinc-100 bg-zinc-50/50">
+      <div className="flex h-12 items-center justify-between px-5 border-b border-zinc-100/80 bg-zinc-50/40">
         <div className="flex items-center gap-2.5">
           <div className="p-1.5 rounded-xl bg-blue-50 border border-blue-100">
             <Brain className="w-4 h-4 text-blue-500" />
           </div>
-          <h3 className="text-[11px] font-bold text-zinc-900 tracking-wide font-sans uppercase">
+          <h3 className="text-[10px] font-bold text-zinc-900 tracking-[0.15em] font-sans uppercase">
             {data.title || 'LLM · Generación'}
           </h3>
         </div>

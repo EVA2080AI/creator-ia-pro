@@ -1196,9 +1196,9 @@ function FormarketingContent() {
           </div>
         </div>
       )}
-      <div className="w-screen bg-canvas font-sans text-foreground flex flex-col overflow-hidden relative" style={{ height: 'calc(100vh - 64px)', marginTop: '64px' }}>
+      <div id="main-content" className="w-screen bg-canvas font-sans text-foreground flex flex-col overflow-hidden relative" style={{ height: '100vh' }}>
       {/* Canvas Toolbar */}
-      <div className="flex h-14 w-full items-center justify-between border-b border-border bg-white/80 px-5 backdrop-blur-3xl shrink-0 z-[90]">
+      <div className="flex h-14 w-full items-center justify-between border-b border-zinc-200/60 bg-white/95 px-5 backdrop-blur-xl shrink-0 z-[90]">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-zinc-100 rounded-xl w-9 h-9 text-zinc-500 hover:text-zinc-900 transition-all">
             <ArrowLeft className="h-4 w-4" />
@@ -1319,10 +1319,10 @@ function FormarketingContent() {
           }}
         >
           <Background
-            color="#e4e4e7"
+            color="#f1f1f4"
             variant={BackgroundVariant.Dots}
             gap={40}
-            size={1.5}
+            size={1.2}
           />
           <Controls className="!bg-white/90 !border-zinc-200 !fill-zinc-400 !bottom-16 !right-40 !left-auto rounded-2xl overflow-hidden shadow-sm backdrop-blur-xl transition-all hover:bg-zinc-50" />
           <MiniMap
@@ -1405,7 +1405,7 @@ function FormarketingContent() {
       />
 
       {/* HU33 — Status Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-8 border-t border-zinc-200 bg-white/90 backdrop-blur-sm flex items-center px-4 gap-4 z-[80] pointer-events-none">
+      <div className="absolute bottom-0 left-0 right-0 h-9 border-t border-zinc-200/60 bg-white/95 backdrop-blur-md flex items-center px-4 gap-4 z-[80] pointer-events-none">
         <div className="flex items-center gap-2">
           <Circle className={`w-2 h-2 fill-current shrink-0 ${
             execStatus === 'running' ? 'text-amber-500 animate-pulse' :

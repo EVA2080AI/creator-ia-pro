@@ -17,14 +17,11 @@ import { toast } from 'sonner';
 
 // ── Navigation structure ──────────────────────────────────────────────────────
 const NAV_MAIN = [
-  { path: '/dashboard',    label: 'Dashboard',     icon: Monitor,    requiresPymes: false },
-  { path: '/chat',         label: 'Genesis IA',     icon: Brain,       requiresPymes: false },
-  { path: '/formarketing', label: 'Canvas IA',      icon: LayoutTemplate, requiresPymes: true },
-  { path: '/code',         label: 'Code IDE',       icon: Terminal,    requiresPymes: true },
-  { path: '/tools',        label: 'Herramientas',   icon: Wand2,       requiresPymes: false },
-  { path: '/hub',          label: 'Plantillas',     icon: Sparkles,    requiresPymes: false },
-  { path: '/spaces',       label: 'Mis Espacios',   icon: FolderOpen,  requiresPymes: false },
+  { path: '/formarketing', label: 'Studio',        icon: LayoutTemplate, requiresPymes: true },
+  { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,  requiresPymes: false },
+  { path: '/hub',          label: 'Templates',     icon: Sparkles,    requiresPymes: false },
   { path: '/assets',       label: 'Activos',        icon: Image,       requiresPymes: false },
+  { path: '/history',      label: 'Historial',      icon: History,     requiresPymes: false },
 ];
 
 const NAV_BOTTOM = [
@@ -33,7 +30,7 @@ const NAV_BOTTOM = [
   { path: '/descargar',label: 'Descargar', icon: Download },
 ];
 
-export function SidebarGlobal() {
+export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
@@ -70,16 +67,23 @@ export function SidebarGlobal() {
 
   return (
     <motion.aside
-      animate={{ width: W }}
-      transition={{ duration: 0.22, ease: [0.32, 0, 0.08, 1] }}
-      className="relative z-20 flex h-screen flex-col border-r border-zinc-200 bg-white overflow-hidden shrink-0"
-      style={{ width: W }}
+      animate={{ 
+        width: isMobile ? 240 : W,
+        x: 0 
+      }}
+      initial={{ x: isMobile ? 0 : -W }}
+      transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+      className={cn(
+        "relative z-20 h-screen flex flex-col bg-white shrink-0",
+        isMobile ? "w-full border-r-0" : "hidden md:flex border-r border-zinc-200/60 shadow-[10px_0_40px_-10px_rgba(0,0,0,0.03)] bg-white/95 backdrop-blur-xl"
+      )}
+      style={{ width: isMobile ? 240 : W }}
       aria-label="Navegación principal"
     >
       {/* ── Header ── */}
       <div className="flex h-[56px] items-center gap-3 px-3 border-b border-zinc-100 shrink-0">
         <AnimatePresence mode="wait">
-          {globalExpanded ? (
+          {(globalExpanded || isMobile) ? (
             <motion.div
               key="expanded"
               initial={{ opacity: 0 }}
@@ -102,16 +106,18 @@ export function SidebarGlobal() {
             </motion.div>
           )}
         </AnimatePresence>
-        <button
-          onClick={toggleGlobal}
-          aria-label={globalExpanded ? 'Colapsar menú' : 'Expandir menú'}
-          className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all shrink-0"
-          title={globalExpanded ? 'Colapsar (⌘\\)' : 'Expandir (⌘\\)'}
-        >
-          {globalExpanded
-            ? <PanelLeftClose className="w-4 h-4" />
-            : <PanelLeftOpen className="w-4 h-4" />}
-        </button>
+        {!isMobile && (
+          <button
+            onClick={toggleGlobal}
+            aria-label={globalExpanded ? 'Colapsar menú' : 'Expandir menú'}
+            className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all shrink-0"
+            title={globalExpanded ? 'Colapsar (⌘\\)' : 'Expandir (⌘\\)'}
+          >
+            {globalExpanded
+              ? <PanelLeftClose className="w-4 h-4" />
+              : <PanelLeftOpen className="w-4 h-4" />}
+          </button>
+        )}
       </div>
 
       {/* ── Scrollable nav ── */}
@@ -128,24 +134,24 @@ export function SidebarGlobal() {
                 title={!globalExpanded ? item.label : undefined}
                 className={cn(
                   'group w-full flex items-center rounded-xl transition-all duration-150 text-[12.5px] font-medium',
-                  globalExpanded ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center',
+                  (globalExpanded || isMobile) ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center',
                   active
-                    ? 'bg-primary/8 text-primary border border-primary/15'
+                    ? 'bg-primary/8 text-primary border border-primary/15 font-bold shadow-sm'
                     : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50',
                   locked && 'opacity-50'
                 )}
               >
                 <item.icon className={cn(
                   'shrink-0 transition-colors',
-                  globalExpanded ? 'w-4 h-4' : 'w-4.5 h-4.5',
+                  (globalExpanded || isMobile) ? 'w-4 h-4' : 'w-4.5 h-4.5',
                   active ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-600'
                 )} />
-                {globalExpanded && (
+                {(globalExpanded || isMobile) && (
                   <span className="truncate flex-1 text-left">{item.label}</span>
                 )}
-                {globalExpanded && locked && (
-                  <span className="text-[9px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-md shrink-0">
-                    Pymes
+                {(globalExpanded || isMobile) && locked && (
+                  <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-md shrink-0">
+                    Pro
                   </span>
                 )}
               </button>
@@ -156,7 +162,7 @@ export function SidebarGlobal() {
         {/* ── Divider ── */}
         <div className="my-3 mx-3 h-px bg-zinc-100" />
 
-        {/* ── Genesis IA trigger ── */}
+        {/* ── Secondary Actions ── */}
         <div className="px-2 space-y-0.5">
           <button
             onClick={() => toggleContextual('genesis')}
@@ -169,49 +175,52 @@ export function SidebarGlobal() {
                 : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50'
             )}
           >
-            <Sparkles className={cn(
+            <Brain className={cn(
               'shrink-0 w-4 h-4 transition-colors',
               activeContextual === 'genesis' ? 'text-violet-600' : 'text-zinc-400 group-hover:text-zinc-600'
             )} />
-            {globalExpanded && <span className="truncate flex-1 text-left">Asistente IA</span>}
+            {globalExpanded && <span className="truncate flex-1 text-left">Genesis IA</span>}
           </button>
 
           <button
-            onClick={() => toggleContextual('history')}
-            title={!globalExpanded ? 'Historial' : undefined}
+            onClick={() => {/* Trigger Save in Store */}}
+            title={!globalExpanded ? 'Guardar' : undefined}
             className={cn(
-              'group w-full flex items-center rounded-xl transition-all duration-150 text-[12.5px] font-medium',
-              globalExpanded ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center',
-              activeContextual === 'history'
-                ? 'bg-zinc-100 text-zinc-800 border border-zinc-200'
-                : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50'
+              'group w-full flex items-center rounded-xl transition-all duration-150 text-[12.5px] font-medium text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50',
+              globalExpanded ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center'
             )}
           >
-            <History className="shrink-0 w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
-            {globalExpanded && <span className="truncate flex-1 text-left">Historial</span>}
+            <Zap className="shrink-0 w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
+            {globalExpanded && <span className="truncate flex-1 text-left">Guardar</span>}
+          </button>
+
+          <button
+            onClick={() => {/* Trigger Export */}}
+            title={!globalExpanded ? 'Exportar' : undefined}
+            className={cn(
+              'group w-full flex items-center rounded-xl transition-all duration-150 text-[12.5px] font-medium text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50',
+              globalExpanded ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center'
+            )}
+          >
+            <Download className="shrink-0 w-4 h-4 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
+            {globalExpanded && <span className="truncate flex-1 text-left">Exportar</span>}
           </button>
         </div>
 
         {/* ── Credits bar ── */}
-        {globalExpanded && profile && (
-          <div className="mx-3 mt-4 p-3 rounded-xl bg-primary/5 border border-primary/12">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Créditos</span>
-              <button onClick={() => navigate('/pricing')} className="text-[10px] font-bold text-primary hover:underline">
-                + Añadir
+        {(globalExpanded || isMobile) && profile && (
+          <div className="mx-3 mt-4 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/60 shadow-sm">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Créditos</span>
+              <button onClick={() => navigate('/pricing')} className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">
+                + Recargar
               </button>
             </div>
             <div className="flex items-center gap-2">
-              <Coins className="w-3.5 h-3.5 text-primary shrink-0" />
-              <span className="text-[13px] font-bold text-zinc-800 tabular-nums font-mono">
+              <Coins className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-[15px] font-black text-zinc-900 tabular-nums font-mono">
                 {profile.credits_balance?.toLocaleString() ?? '—'}
               </span>
-            </div>
-            <div className="mt-2 h-1 rounded-full bg-primary/10 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-500"
-                style={{ width: `${Math.min(100, ((profile.credits_balance ?? 0) / 50000) * 100)}%` }}
-              />
             </div>
           </div>
         )}

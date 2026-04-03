@@ -656,7 +656,7 @@ const Admin = () => {
         />
       )}
 
-      <div className="mx-auto max-w-6xl px-4 pt-24 pb-20 sm:px-6 space-y-6">
+      <div className="mx-auto max-w-6xl px-4 pt-10 pb-20 sm:px-6 space-y-6">
 
         {/* ── Header ── */}
         <div className="flex items-center justify-between">

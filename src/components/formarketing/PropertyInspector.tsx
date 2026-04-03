@@ -77,12 +77,12 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
   };
 
   return (
-    <div className="w-[280px] shrink-0 flex flex-col border-l border-zinc-200 bg-zinc-50/50 backdrop-blur-xl animate-in slide-in-from-right duration-200 overflow-y-auto no-scrollbar">
+    <div className="w-[300px] shrink-0 flex flex-col border-l border-zinc-200/60 bg-white/95 backdrop-blur-xl animate-in slide-in-from-right duration-500 overflow-y-auto no-scrollbar shadow-[-20px_0_40px_-20px_rgba(0,0,0,0.05)]">
 
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 bg-white/50">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100/80 bg-zinc-50/40">
         <div className="flex items-center gap-2.5">
-          <span className={`text-[9px] font-bold px-2 py-1 rounded-lg border uppercase tracking-widest shadow-sm ${typeColor}`}>
+          <span className={`text-[9px] font-bold px-3 py-1.5 rounded-xl border uppercase tracking-[0.2em] shadow-sm ${typeColor}`}>
             {typeLabel}
           </span>
         </div>
@@ -113,8 +113,8 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
 
         {/* Prompt editor */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Prompt</label>
+          <div className="flex items-center justify-between px-1">
+            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.15em]">Prompt</label>
             <button onClick={handleCopy} className="text-zinc-400 hover:text-zinc-700 transition-colors">
               <Copy className="w-3 h-3" />
             </button>
@@ -124,13 +124,13 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
             onChange={(e) => setLocalPrompt(e.target.value)}
             rows={4}
             placeholder="Describe lo que quieres generar..."
-            className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2.5 text-xs text-zinc-900 placeholder:text-zinc-400 hover:border-zinc-300 focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 resize-none transition-all shadow-sm"
+            className="w-full bg-zinc-50/50 border border-zinc-200/60 rounded-2xl px-4 py-3.5 text-xs text-zinc-900 placeholder:text-zinc-400 hover:border-zinc-300 focus:outline-none focus:border-primary/40 focus:ring-4 focus:ring-primary/5 resize-none transition-all shadow-sm"
           />
         </div>
 
         {/* Model selector */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Modelo</label>
+        <div className="space-y-2 px-1">
+          <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.15em]">Modelo</label>
           <div className="relative">
             <select
               value={localModel}

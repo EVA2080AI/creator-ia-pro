@@ -121,7 +121,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
     <div className="flex h-full shrink-0 border-r border-zinc-200 z-20">
 
       {/* Vertical Toolbar */}
-      <div className="flex flex-col items-center gap-2 w-14 py-4 bg-white/90 backdrop-blur-xl border-r border-zinc-100">
+      <div className="flex flex-col items-center gap-2 w-14 py-4 bg-white/95 backdrop-blur-xl border-r border-zinc-200/60">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
           className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-300 mb-1 ${menuOpen ? 'bg-zinc-900 text-white shadow-md' : 'bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 border border-zinc-200'}`}
@@ -129,12 +129,12 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
           {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
         </button>
 
-        <div className="w-8 h-px bg-zinc-200 my-1" />
+        <div className="w-8 h-px bg-zinc-100 my-1" />
 
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/20 text-primary hover:bg-primary/30 transition-all group/play border border-primary/20">
+              <button className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 transition-all group/play border border-primary/10">
                 <Play className="h-4 w-4 fill-current ml-0.5 group-hover:scale-110 transition-transform" />
               </button>
             </TooltipTrigger>
@@ -145,7 +145,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
             <Tooltip key={tool.id}>
               <TooltipTrigger asChild>
                 <button
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all group ${tool.id === 'settings' ? 'mt-auto border-t border-zinc-200 pt-3 rounded-none w-8' : ''}`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all group ${tool.id === 'settings' ? 'mt-auto border-t border-zinc-100 pt-3 rounded-none w-8' : ''}`}
                 >
                   <tool.icon className="h-4 w-4 group-hover:scale-110 transition-transform" />
                 </button>
@@ -158,10 +158,10 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
 
       {/* Slide-in Panel */}
       {menuOpen && (
-        <div className="w-72 flex flex-col bg-zinc-50 border-l border-zinc-200 overflow-y-auto no-scrollbar animate-in slide-in-from-left duration-200">
+        <div className="w-72 flex flex-col bg-zinc-50/50 border-l border-zinc-200/60 overflow-y-auto no-scrollbar animate-in slide-in-from-left duration-200">
 
           {/* Header */}
-          <div className="px-5 pt-5 pb-3 border-b border-zinc-200 bg-white">
+          <div className="px-5 pt-5 pb-3 border-b border-zinc-200/60 bg-white/80 backdrop-blur-md">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Módulos</span>
               <span className="text-[10px] text-zinc-400 font-bold tabular-nums">{totalNodes} nodos</span>
@@ -173,7 +173,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 placeholder="Buscar nodos..."
-                className="pl-9 pr-8 bg-zinc-50 border-zinc-200 focus:border-zinc-300 rounded-xl h-9 text-[11px] text-zinc-900 placeholder:text-zinc-400 transition-all shadow-sm"
+                className="pl-9 pr-8 bg-zinc-50/80 border-zinc-200/60 focus:border-primary/30 rounded-xl h-9 text-[11px] text-zinc-900 placeholder:text-zinc-400 transition-all shadow-sm"
               />
               {search && (
                 <button onClick={() => setSearch('')}

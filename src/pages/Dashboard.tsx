@@ -148,7 +148,7 @@ const Dashboard = () => {
     <>
       <Helmet><title>Dashboard | Creator IA Pro</title></Helmet>
       <main id="main-content" className="min-h-screen bg-background text-foreground font-sans">
-        <div className="max-w-[1440px] mx-auto px-6 py-6 space-y-5">
+        <div className="max-w-[1440px] mx-auto px-6 pt-10 pb-6 space-y-5">
 
           {/* Post-checkout success banner */}
           {(checkoutSuccess || creditsSuccess) && (
@@ -230,22 +230,22 @@ const Dashboard = () => {
           </div>
 
           {/* Stats — horizontal row */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {stats.map((stat, i) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ y: -3, boxShadow: "0 8px 24px rgba(0,0,0,0.06)" }}
-                className="group flex items-center gap-3 p-4 bg-card border border-zinc-200 transition-all duration-300 rounded-2xl"
+                transition={{ duration: 0.45, delay: i * 0.08, ease: [0.32, 0.72, 0, 1] }}
+                whileHover={{ y: -4, boxShadow: "0 20px 40px -15px rgba(0,0,0,0.06)" }}
+                className="group flex items-center gap-4 p-5 bg-white border border-zinc-200/60 transition-all duration-300 rounded-[2rem] shadow-sm"
               >
-                <div className={`w-9 h-9 rounded-lg flex items-center justify-center bg-zinc-100 border border-zinc-200 shrink-0 transition-all group-hover:scale-110 ${stat.color}`}>
-                  <stat.icon className="w-4 h-4" />
+                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center bg-zinc-50 border border-zinc-100 shrink-0 transition-all group-hover:scale-110 group-hover:bg-white ${stat.color}`}>
+                  <stat.icon className="w-5 h-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold tracking-[0.15em] text-zinc-500 uppercase font-display truncate">{stat.label}</p>
-                  <p className="text-xl font-bold text-zinc-900 tracking-tight font-display tabular-nums truncate">{stat.value}</p>
+                  <p className="text-[10px] font-black tracking-[0.2em] text-zinc-400 uppercase truncate mb-0.5">{stat.label}</p>
+                  <p className="text-2xl font-black text-zinc-900 tracking-tight font-display tabular-nums truncate">{stat.value}</p>
                 </div>
               </motion.div>
             ))}
@@ -276,9 +276,9 @@ const Dashboard = () => {
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 9, fontWeight: 600 }} dy={10} />
                     <YAxis hide />
                     <Tooltip
-                      contentStyle={{ background: 'rgba(10,10,11,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}
-                      labelStyle={{ color: 'rgba(255,255,255,0.4)', marginBottom: '2px' }}
-                      itemStyle={{ color: '#fff' }}
+                      contentStyle={{ background: '#fff', border: '1px solid #e4e4e7', borderRadius: '12px', fontSize: '11px', fontWeight: 600, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}
+                      labelStyle={{ color: '#71717a', marginBottom: '2px' }}
+                      itemStyle={{ color: '#18181b' }}
                     />
                     <Area type="monotone" dataKey="credits" stroke="#2563eb" strokeWidth={2} fill="url(#creditsGrad)" dot={{ r: 3, fill: '#2563eb', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
                   </AreaChart>
@@ -325,24 +325,28 @@ const Dashboard = () => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.35 }}
-            whileHover={{ scale: 1.01 }}
+            whileHover={{ scale: 1.005 }}
             onClick={() => navigate("/chat")}
-            className="group cursor-pointer relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-5 hover:border-primary/40 transition-all duration-300"
+            className="group cursor-pointer relative overflow-hidden rounded-[2.5rem] border border-primary/20 bg-white p-7 hover:border-primary/40 transition-all duration-500 shadow-xl shadow-primary/5"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
-            <div className="relative flex items-center justify-between gap-4">
-
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_6px_rgba(74,222,128,0.9)]" />
-                  <span className="text-[11px] font-semibold text-primary/80">Genesis · BuilderAI</span>
+            <div className="absolute inset-0 bg-primary/[0.03] opacity-0 group-hover:opacity-100 transition-all duration-700" />
+            <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              <div className="flex items-center gap-6">
+                <div className="w-16 h-16 rounded-[2rem] bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                   <Rocket className="w-8 h-8 text-primary group-hover:animate-bounce" />
                 </div>
-                <h2 className="text-xl font-bold text-zinc-900 font-display tracking-tight">¿Qué vas a crear hoy?</h2>
-                <p className="text-xs text-zinc-400 mt-1">Describe tu idea y Genesis la construye en segundos</p>
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(37,99,235,0.6)]" />
+                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Genesis · BuilderAI</span>
+                  </div>
+                  <h2 className="text-2xl font-black text-zinc-900 tracking-tighter">¿Qué vas a crear hoy?</h2>
+                  <p className="text-[13px] text-zinc-500 mt-1 font-medium">Describe tu idea y Genesis la construye en segundos con preview en vivo</p>
+                </div>
               </div>
-              <div className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-widest group-hover:bg-primary/80 transition-all active:scale-95 font-display">
-                <Rocket className="w-3.5 h-3.5" />
-                Crear
+              <div className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-zinc-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] group-hover:bg-primary transition-all active:scale-95 shadow-lg shadow-zinc-900/10">
+                Lanzar Genesis
+                <ArrowRight className="w-4 h-4" />
               </div>
             </div>
           </motion.div>
@@ -355,24 +359,24 @@ const Dashboard = () => {
                 Hub <ArrowRight className="w-3 h-3" />
               </button>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
               {aiApps.map((app, i) => (
                 <motion.button
                   key={app.label}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.35, delay: 0.4 + i * 0.06 }}
-                  whileHover={{ y: -4, scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ y: -6, scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
                   onClick={() => navigate(app.path)}
-                  className="group flex flex-col gap-3 p-4 bg-card border border-zinc-200 rounded-xl text-left"
+                  className="group flex flex-col gap-4 p-5 bg-white border border-zinc-200/60 rounded-2xl text-left shadow-sm transition-all"
                 >
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-zinc-100 border border-zinc-200 transition-all group-hover:bg-primary/10 group-hover:border-primary/20">
-                    <app.icon className="w-4 h-4 text-zinc-400 group-hover:text-primary transition-colors" />
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-zinc-50 border border-zinc-100 transition-all group-hover:bg-primary/5 group-hover:border-primary/20">
+                    <app.icon className="w-5 h-5 text-zinc-400 group-hover:text-primary transition-colors" />
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-zinc-700 group-hover:text-zinc-900 tracking-tight font-display leading-tight">{app.label}</p>
-                    <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5 font-display">{app.desc}</p>
+                    <p className="text-[13px] font-black text-zinc-900 tracking-tight leading-tight">{app.label}</p>
+                    <p className="text-[9px] text-zinc-400 font-black uppercase tracking-[0.1em] mt-1 opacity-70 group-hover:opacity-100 transition-opacity">{app.desc}</p>
                   </div>
                 </motion.button>
               ))}
@@ -394,7 +398,7 @@ const Dashboard = () => {
 
             {spaces.length === 0 ? (
               <div
-                className="rounded-2xl border border-dashed border-zinc-200 bg-zinc-50 p-10 text-center cursor-pointer hover:border-zinc-300 hover:bg-zinc-50 transition-all group"
+                className="rounded-3xl border border-dashed border-zinc-200 bg-zinc-50 p-10 text-center cursor-pointer hover:border-zinc-300 hover:bg-zinc-50 transition-all group"
                 onClick={() => setIsCreatingSpace(true)}
               >
                 <div className="w-12 h-12 rounded-xl bg-zinc-100 flex items-center justify-center mx-auto mb-4 group-hover:bg-white group-hover:scale-110 transition-all">
@@ -404,21 +408,21 @@ const Dashboard = () => {
                 <p className="text-xs text-zinc-400">Organiza proyectos, activos e ideas en un solo lugar</p>
               </div>
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {spaces.map((space) => (
                   <button
                     key={space.id}
                     onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
-                    className="group flex items-center gap-3 p-4 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-xl border border-zinc-200 hover:border-primary/30 hover:scale-[1.02] transition-all duration-300 text-left active:scale-95"
+                    className="group flex items-center gap-3 p-5 bg-white border border-zinc-200/60 hover:border-zinc-300 transition-all rounded-2xl shadow-sm hover:shadow-md hover:scale-[1.02] duration-300 text-left active:scale-95"
                   >
-                    <div className="w-9 h-9 rounded-lg bg-zinc-100 border border-zinc-200 flex items-center justify-center shrink-0 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all">
+                    <div className="w-10 h-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:bg-primary/5 group-hover:border-primary/20 transition-all">
                       <LayoutGrid className="w-4 h-4 text-zinc-400 group-hover:text-primary transition-colors" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold text-zinc-900 truncate font-display">{space.name}</p>
-                      <p className="text-[10px] text-zinc-500 truncate font-medium">{space.description || "Sin descripción"}</p>
+                      <p className="text-[14px] font-black text-zinc-900 truncate">{space.name}</p>
+                      <p className="text-[10px] text-zinc-400 truncate font-bold uppercase tracking-widest mt-0.5">{space.description || "Sin descripción"}</p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-zinc-500 shrink-0 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    <ChevronRight className="w-4 h-4 text-zinc-300 shrink-0 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                   </button>
                 ))}
               </div>

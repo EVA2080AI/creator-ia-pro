@@ -63,12 +63,12 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
   };
 
   return (
-    <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
-      ${data.status === 'executing' ? 'bg-white border-primary shadow-lg ring-2 ring-primary/20' : 'bg-white border hover:border-zinc-300 border-zinc-200 hover:shadow-md transition-colors'}
-      w-[260px] shadow-sm
+    <div className={`group relative rounded-[2rem] overflow-hidden transition-all duration-500 hover:scale-[1.02]
+      ${data.status === 'executing' ? 'bg-white border-primary shadow-lg ring-2 ring-primary/20' : 'bg-white border border-zinc-200/60 hover:border-zinc-300 hover:shadow-xl shadow-sm transition-all'}
+      w-[260px]
     `}>
       {/* Aether Character Header */}
-      <div className="flex h-12 items-center justify-between px-4 border-b border-zinc-100 bg-zinc-50/50 rounded-t-3xl">
+      <div className="flex h-12 items-center justify-between px-5 border-b border-zinc-100/80 bg-zinc-50/40">
         <div className="flex items-center gap-2.5 overflow-hidden">
             <UserCircle className="w-4 h-4 text-zinc-400 group-hover:text-blue-500 transition-colors shrink-0" />
              <input 
@@ -76,7 +76,7 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
               onChange={(e) => setLocalTitle(e.target.value)}
               onBlur={(e) => persistChange('title', e.target.value)}
               onKeyDown={(e) => e.stopPropagation()}
-              className="bg-transparent border-none p-0 m-0 text-xs font-bold tracking-tight text-zinc-900 focus:outline-none w-full truncate transition-all font-sans uppercase placeholder:text-zinc-400"
+              className="bg-transparent border-none p-0 m-0 text-xs font-bold tracking-[0.05em] text-zinc-900 focus:outline-none w-full truncate transition-all font-sans uppercase placeholder:text-zinc-400"
               placeholder="Unnamed Entity"
             />
         </div>

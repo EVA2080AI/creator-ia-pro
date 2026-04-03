@@ -212,10 +212,9 @@ export default function Pricing() {
       </Helmet>
 
       <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900 selection:bg-primary/15 relative overflow-x-hidden">
-        <AppHeader userId={userId} onSignOut={() => supabase.auth.signOut()} />
         <MeshGradient />
 
-        <main id="main-content" className="pt-32 pb-40 relative z-10">
+        <main id="main-content" className="pt-20 pb-40 relative z-10">
           
           {/* ── Hero ────────────────────────────────────────────────────────── */}
           <section className="relative px-6 mb-24 overflow-visible">

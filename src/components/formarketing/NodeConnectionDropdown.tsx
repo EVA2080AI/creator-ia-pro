@@ -35,11 +35,11 @@ export function NodeConnectionDropdown({ nodeType, nodeId, onAddConnected }: Nod
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute top-full mt-1.5 left-1/2 -translate-x-1/2 z-50 w-56 rounded-2xl overflow-hidden shadow-lg bg-white border border-zinc-200">
+          <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 z-50 w-64 rounded-[1.75rem] overflow-hidden shadow-2xl bg-white/95 backdrop-blur-xl border border-zinc-200/60 transition-all animate-in zoom-in-95 duration-200">
 
             {/* Header showing output type */}
-            <div className="px-3 pt-2.5 pb-2 border-b border-zinc-100 bg-zinc-50/50">
-              <div className="flex items-center gap-1.5">
+            <div className="px-4 pt-3.5 pb-2.5 border-b border-zinc-100/80 bg-zinc-50/40">
+              <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full shadow-sm" style={{ background: outputColor }} />
                 <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-500">
                   Salida: {outputDataType}

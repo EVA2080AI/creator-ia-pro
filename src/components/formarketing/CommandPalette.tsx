@@ -52,11 +52,11 @@ export function CommandPalette({ open, onClose, onSelect }: CommandPaletteProps)
   return (
     <div className="fixed inset-0 z-[300] flex items-start justify-center pt-[20vh] bg-zinc-900/10 backdrop-blur-[2px]" onClick={onClose}>
       <div
-        className="w-full max-w-md mx-4 bg-white border border-zinc-200 rounded-[1.5rem] shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        className="w-full max-w-lg mx-4 bg-white/95 backdrop-blur-xl border border-zinc-200/60 rounded-[2rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
         {/* Search */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-100 bg-zinc-50/50">
+        <div className="flex items-center gap-4 px-6 py-4 border-b border-zinc-100/80 bg-zinc-50/40">
           <Search className="w-4 h-4 text-zinc-400 shrink-0" />
           <input
             ref={inputRef}
@@ -99,9 +99,9 @@ export function CommandPalette({ open, onClose, onSelect }: CommandPaletteProps)
         </div>
 
         {/* Footer hints */}
-        <div className="px-4 py-2 border-t border-zinc-100 flex items-center gap-4 bg-zinc-50">
-          <span className="text-[10px] text-zinc-400 flex items-center gap-1"><kbd className="font-mono border border-zinc-200 px-1 rounded bg-white shadow-[0_1px_1px_rgba(0,0,0,0.05)]">↑↓</kbd> navegar</span>
-          <span className="text-[10px] text-zinc-400 flex items-center gap-1"><kbd className="font-mono border border-zinc-200 px-1 rounded bg-white shadow-[0_1px_1px_rgba(0,0,0,0.05)]">↵</kbd> añadir</span>
+        <div className="px-6 py-3 border-t border-zinc-100/80 flex items-center gap-5 bg-zinc-50/40">
+          <span className="text-[10px] text-zinc-400 font-medium flex items-center gap-1.5"><kbd className="font-mono border border-zinc-200/60 px-1.5 py-0.5 rounded-lg bg-white shadow-sm">↑↓</kbd> navegar</span>
+          <span className="text-[10px] text-zinc-400 font-medium flex items-center gap-1.5"><kbd className="font-mono border border-zinc-200/60 px-1.5 py-0.5 rounded-lg bg-white shadow-sm">↵</kbd> añadir</span>
           <span className="ml-auto text-[10px] text-zinc-300">Espacio / Shift+A</span>
         </div>
       </div>

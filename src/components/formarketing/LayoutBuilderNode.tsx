@@ -48,11 +48,11 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
   };
 
   return (
-    <div className={`group relative rounded-2xl border bg-white backdrop-blur-xl w-[270px] shadow-sm transition-all duration-300 hover:shadow-md
-      ${data.status === 'executing' ? 'border-primary ring-2 ring-primary/20 shadow-lg animate-pulse' : 'border-zinc-200 hover:border-zinc-300'}
+    <div className={`group relative rounded-[2rem] border bg-white/90 backdrop-blur-xl w-[270px] shadow-sm transition-all duration-300 hover:shadow-xl
+      ${data.status === 'executing' ? 'border-primary ring-2 ring-primary/20 shadow-xl animate-pulse' : 'border-zinc-200/60 hover:border-zinc-300'}
     `}>
       {/* Nexus V3 Industrial Header */}
-      <div className="flex h-10 items-center justify-between px-3 border-b border-zinc-100 bg-zinc-50/50 rounded-t-2xl">
+      <div className="flex h-12 items-center justify-between px-5 border-b border-zinc-100/80 bg-zinc-50/40">
         <div className="flex items-center gap-2 overflow-hidden">
             <div className="p-1 rounded-lg bg-emerald-50 border border-emerald-100">
               <Layout className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
@@ -60,7 +60,7 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
             <input 
               value={data.title || ""} 
               onChange={(e) => updateField('title', e.target.value)}
-              className="bg-transparent border-none p-0 m-0 text-[10px] font-bold text-zinc-900 focus:outline-none w-full truncate uppercase tracking-tight transition-all placeholder:text-zinc-400"
+              className="bg-transparent border-none p-0 m-0 text-[10px] font-bold text-zinc-900 focus:outline-none w-full truncate uppercase tracking-[0.15em] transition-all placeholder:text-zinc-400"
               placeholder="STRUCTURE_ID"
             />
         </div>

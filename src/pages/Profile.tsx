@@ -90,7 +90,7 @@ const Profile = () => {
     <div className="min-h-screen bg-background bg-grid-white/[0.02] text-zinc-900">
       <Helmet><title>Perfil | Creator IA Pro</title></Helmet>
 
-      <main id="main-content" className="max-w-5xl mx-auto px-6 pt-28 pb-20">
+      <main id="main-content" className="max-w-5xl mx-auto px-6 pt-10 pb-20">
         {/* Header */}
         <div className="mb-10">
           <p className="text-xs text-zinc-400 uppercase tracking-widest font-bold mb-2">Mi cuenta</p>

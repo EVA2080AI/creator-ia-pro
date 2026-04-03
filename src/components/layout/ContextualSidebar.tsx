@@ -78,15 +78,15 @@ export function ContextualSidebar() {
           <div className="w-7 h-7 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
             <PanelIcon className="w-4 h-4 text-primary" />
           </div>
-          <span className="flex-1 text-[13px] font-semibold text-zinc-800 truncate">
+          <span className="flex-1 text-[11px] font-black text-zinc-600 uppercase tracking-[0.2em]">
             {panelLabel}
           </span>
           <button
             onClick={closeContextual}
             aria-label="Cerrar panel"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all"
+            className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all border border-transparent hover:border-zinc-200"
           >
-            <X className="w-4 h-4" />
+            <X className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
@@ -118,11 +118,11 @@ export function ContextualSidebar() {
           initial={{ width: 0, opacity: 0 }}
           animate={{ width: 400, opacity: 1 }}
           exit={{ width: 0, opacity: 0 }}
-          transition={{ duration: 0.22, ease: [0.32, 0, 0.08, 1] }}
-          className="relative z-20 h-screen border-l border-zinc-200 bg-white overflow-hidden shrink-0 flex flex-col"
+          transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
+          className="relative z-20 h-screen border-l border-zinc-200/60 bg-white/95 backdrop-blur-xl overflow-hidden shrink-0 flex flex-col shadow-[-10px_0_40px_-10px_rgba(0,0,0,0.05)]"
           aria-label={panelLabel}
         >
-          <div className="w-[450px] h-full flex flex-col">
+          <div className="w-[400px] h-full flex flex-col">
             {panelContent}
           </div>
         </motion.aside>

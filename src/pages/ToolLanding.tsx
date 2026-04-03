@@ -300,12 +300,10 @@ const ToolLanding = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <AppHeader />
-
       <Helmet><title>{tool ? `${tool.name} | Creator IA Pro` : 'Herramienta IA | Creator IA Pro'}</title></Helmet>
       <main id="main-content">
         {/* ── Breadcrumb ─────────────────────────────────── */}
-        <div className="border-b border-zinc-100 bg-zinc-50">
+        <div className="border-b border-zinc-100 bg-zinc-50 pt-10">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2.5">
             <nav className="flex items-center gap-1.5 text-xs text-zinc-500" aria-label="Breadcrumb">
               <button onClick={() => navigate("/")} className="hover:text-zinc-800 transition-colors">Inicio</button>

@@ -98,18 +98,18 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
   };
 
   return (
-    <div className={`group relative rounded-3xl overflow-hidden transition-all duration-500 hover:scale-[1.02]
-      ${isRendering ? 'bg-white border-primary shadow-lg ring-2 ring-primary/20' : 'bg-white border hover:border-zinc-300 border-zinc-200 hover:shadow-md transition-colors'}
-      w-[260px] shadow-sm
+    <div className={`group relative rounded-[2rem] overflow-hidden transition-all duration-500 hover:scale-[1.02]
+      ${isRendering ? 'bg-white border-primary shadow-lg ring-2 ring-primary/20' : 'bg-white border border-zinc-200/60 hover:border-zinc-300 hover:shadow-xl shadow-sm transition-all'}
+      w-[260px]
     `}>
 
       {/* Aether Node Header */}
-      <div className="flex h-12 items-center justify-between px-4 border-b border-zinc-100 bg-zinc-50/50 rounded-t-3xl">
+      <div className="flex h-12 items-center justify-between px-5 border-b border-zinc-100/80 bg-zinc-50/40">
         <div className="flex items-center gap-2.5 overflow-hidden">
           <div className="p-1.5 rounded-xl bg-blue-50 border border-blue-100 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
             <Video className={`w-4 h-4 text-blue-500 shrink-0 ${isRendering ? 'animate-pulse text-primary' : ''}`} />
           </div>
-          <h3 className="text-[11px] font-bold text-zinc-900 tracking-wide truncate font-display uppercase">{data.title || "Cinema Engine"}</h3>
+          <h3 className="text-[10px] font-bold text-zinc-900 tracking-[0.15em] truncate font-display uppercase">{data.title || "Cinema Engine"}</h3>
         </div>
         <div className="flex items-center gap-1 shrink-0">
           <button onClick={() => setIsExpanded(!isExpanded)} className="p-2 hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 rounded-lg transition-all">

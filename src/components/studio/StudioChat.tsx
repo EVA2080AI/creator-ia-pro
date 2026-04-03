@@ -346,23 +346,23 @@ function renderMarkdown(text: string): string {
   let raw = text
     // Code blocks (multiline) — process FIRST before inline code
     .replace(/```(\w*)\n?([\s\S]*?)```/g, (_m, lang, code) =>
-      `<pre class="my-2 rounded-xl overflow-x-auto p-3 text-[11px] font-mono leading-relaxed" style="background:hsl(var(--secondary)/0.5);border:1px solid hsl(var(--border))"><code class="text-primary/90">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`)
+      `<pre class="my-2 rounded-xl overflow-x-auto p-3 text-[11px] font-mono leading-relaxed bg-zinc-50 border border-zinc-200"><code class="text-primary/90">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`)
     // Headers
-    .replace(/^### (.+)$/gm, '<h3 class="text-[12px] font-bold text-white/90 mt-3 mb-1">$1</h3>')
-    .replace(/^## (.+)$/gm,  '<h2 class="text-[13px] font-bold text-white mt-3 mb-1.5">$1</h2>')
-    .replace(/^# (.+)$/gm,   '<h1 class="text-[14px] font-black text-white mt-3 mb-2">$1</h1>')
+    .replace(/^### (.+)$/gm, '<h3 class="text-[12px] font-bold text-zinc-900 mt-3 mb-1">$1</h3>')
+    .replace(/^## (.+)$/gm,  '<h2 class="text-[13px] font-bold text-zinc-900 mt-3 mb-1.5">$1</h2>')
+    .replace(/^# (.+)$/gm,   '<h1 class="text-[14px] font-black text-zinc-900 mt-3 mb-2">$1</h1>')
     // Bold + italic
     .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white/95">$1</strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-zinc-900 font-bold">$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     // Inline code
-    .replace(/`([^`]+)`/g, '<code class="bg-secondary/40 px-1.5 py-0.5 rounded-md text-primary font-mono text-[10px] border border-border">$1</code>')
+    .replace(/`([^`]+)`/g, '<code class="bg-zinc-100 px-1.5 py-0.5 rounded-md text-primary font-mono text-[10px] border border-zinc-200/50">$1</code>')
     // Numbered lists
-    .replace(/^\d+\. (.+)$/gm, '<li class="flex items-start gap-2 text-muted-foreground mb-0.5"><span class="text-primary shrink-0 font-bold text-[10px] mt-0.5">→</span><span>$1</span></li>')
+    .replace(/^\d+\. (.+)$/gm, '<li class="flex items-start gap-2 text-zinc-600 mb-0.5"><span class="text-primary shrink-0 font-bold text-[10px] mt-0.5">→</span><span>$1</span></li>')
     // Bullet lists
-    .replace(/^[-•] (.+)$/gm, '<li class="flex items-start gap-2 text-muted-foreground mb-0.5"><span class="text-primary shrink-0 mt-1.5 h-1 w-1 rounded-full bg-current inline-block"></span><span>$1</span></li>')
+    .replace(/^[-•] (.+)$/gm, '<li class="flex items-start gap-2 text-zinc-600 mb-0.5"><span class="text-primary shrink-0 mt-1.5 h-1 w-1 rounded-full bg-current inline-block"></span><span>$1</span></li>')
     // Horizontal rule
-    .replace(/^---$/gm, '<hr class="border-white/10 my-3"/>')
+    .replace(/^---$/gm, '<hr class="border-zinc-100 my-3"/>')
     // Line breaks
     .replace(/\n\n/g, '<div class="my-2"></div>')
     .replace(/\n/g, '<br/>');
@@ -1022,14 +1022,14 @@ export function StudioChat({
                 {/* Reaction bar */}
                 <div className="flex items-center gap-0.5 ml-8 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={() => copyMessage(msg.content, msg.id)}
-                    className="flex items-center gap-1 px-2 py-1 rounded-md text-white/25 hover:text-white hover:bg-white/[0.06] transition-all text-[10px]">
-                    {copiedId === msg.id ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all text-[10px]">
+                    {copiedId === msg.id ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
                   </button>
                   <button onClick={() => handleSend(messages[messages.indexOf(msg) - 1]?.content)}
-                    className="px-2 py-1 rounded-md text-white/25 hover:text-white hover:bg-white/[0.06] transition-all">
+                    className="px-2 py-1 rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
                     <RotateCcw className="h-3 w-3" />
                   </button>
-                  <span className="ml-1 text-[10px] text-white/15">
+                  <span className="ml-1 text-[10px] text-zinc-300">
                     {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -1059,8 +1059,8 @@ export function StudioChat({
             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md mt-0.5 bg-primary/10 border border-primary/20">
               <Bot className="h-3 w-3 text-primary" />
             </div>
-            <div className="flex-1 text-[13px] leading-relaxed text-white/75">
-              <div className="prose prose-invert max-w-none"
+            <div className="flex-1 text-[13px] leading-relaxed text-zinc-700">
+              <div className="prose prose-zinc max-w-none"
                 dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent || '​') }} />
               {/* Blinking cursor — only while actively streaming */}
               {genPhase === 'streaming' && (
@@ -1078,7 +1078,7 @@ export function StudioChat({
               <Loader2 className="h-3 w-3 text-[#8AB4F8] animate-spin" />
             </div>
             <div className="flex flex-col justify-center gap-1 py-0.5 flex-1">
-              <span className="text-[11px] text-white/35">
+              <span className="text-[11px] text-zinc-400">
                 {genPhase === 'thinking' ? 'Analizando prompt…' : 'Generando código…'}
               </span>
               {streamChars > 0 && (
@@ -1106,11 +1106,10 @@ export function StudioChat({
 
         {/* Pending image preview */}
         {pendingImage && (
-          <div className="mb-2 flex items-center gap-2 px-3 py-2 rounded-xl"
-            style={{ background: 'rgba(138,180,248,0.08)', border: '1px solid rgba(138,180,248,0.2)' }}>
+          <div className="mb-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/10">
             <img src={pendingImage} alt="Preview" className="h-8 w-8 rounded-lg object-cover shrink-0" />
-            <span className="text-[11px] text-white/50 flex-1">Imagen adjunta · se enviará con el mensaje</span>
-            <button onClick={() => setPendingImage(null)} className="text-white/30 hover:text-white transition-colors">
+            <span className="text-[11px] text-zinc-500 flex-1">Imagen adjunta · se enviará con el mensaje</span>
+            <button onClick={() => setPendingImage(null)} className="text-zinc-400 hover:text-zinc-900 transition-colors">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -1134,9 +1133,8 @@ export function StudioChat({
         {/* URL Input row */}
         {showUrlInput && (
           <div className="mb-2 flex items-center gap-1.5 animate-in slide-in-from-bottom-2 duration-200">
-            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(138,180,248,0.3)' }}>
-              <Link2 className="h-3.5 w-3.5 text-[#8AB4F8]/60 shrink-0" />
+            <div className="flex-1 flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-50 border border-primary/20">
+              <Link2 className="h-3.5 w-3.5 text-primary/40 shrink-0" />
               <input
                 autoFocus
                 type="url"
@@ -1146,11 +1144,11 @@ export function StudioChat({
                   if (e.key === 'Enter') { e.preventDefault(); handleAttachUrl(); }
                   if (e.key === 'Escape') { setShowUrlInput(false); setUrlInput(''); }
                 }}
-                placeholder="https://stripe.com"
-                className="flex-1 bg-transparent text-[12px] text-white placeholder:text-white/20 outline-none"
+                placeholder="https://..."
+                className="flex-1 bg-transparent text-[12px] text-zinc-900 placeholder:text-zinc-300 outline-none"
               />
               {urlInput && (
-                <ExternalLink className="h-3 w-3 text-white/20" />
+                <ExternalLink className="h-3 w-3 text-zinc-300" />
               )}
             </div>
             <button
@@ -1163,8 +1161,7 @@ export function StudioChat({
               {isScraping ? 'Leyendo...' : 'Clonar'}
             </button>
             <button onClick={() => { setShowUrlInput(false); setUrlInput(''); }}
-              className="p-2 rounded-xl text-white/30 hover:text-white transition-colors"
-              style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+              className="p-2 rounded-xl text-zinc-400 hover:text-zinc-900 transition-colors border border-zinc-100">
               <X className="h-3.5 w-3.5" />
             </button>
           </div>
@@ -1179,7 +1176,7 @@ export function StudioChat({
           </div>
         )}
 
-        <div className="rounded-xl transition-all relative focus-within:ring-1 focus-within:ring-primary/40 bg-card/40 border border-border">
+        <div className="rounded-xl transition-all relative focus-within:ring-2 focus-within:ring-primary/10 bg-white border border-zinc-200 shadow-sm">
           <textarea
             ref={inputRef}
             value={input}
@@ -1197,7 +1194,7 @@ export function StudioChat({
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isGenerating}
                 aria-label={currentModel.vision ? 'Adjuntar imagen' : 'Este modelo no soporta imágenes'}
-                className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-white/30 hover:text-white hover:bg-white/[0.06] transition-all disabled:opacity-30"
+                className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all disabled:opacity-30"
                 title={currentModel.vision ? 'Adjuntar imagen (modelo con visión)' : 'Este modelo no soporta imágenes'}
               >
                 <ImageIcon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -1210,14 +1207,11 @@ export function StudioChat({
                 disabled={isGenerating || isScraping}
                 aria-label="Clonar sitio web desde URL"
                 title="Clonar sitio web desde URL"
-                className="flex items-center gap-1 px-2 py-1 rounded-lg transition-all disabled:opacity-30"
-                style={pendingUrl
-                  ? { background: 'rgba(52,211,153,0.15)', color: '#34d399' }
-                  : showUrlInput
-                    ? { background: 'rgba(138,180,248,0.12)', color: '#8AB4F8' }
-                    : { color: 'rgba(255,255,255,0.3)' }}
-                onMouseEnter={e => { if (!pendingUrl && !showUrlInput) (e.currentTarget as HTMLElement).style.color = 'white'; }}
-                onMouseLeave={e => { if (!pendingUrl && !showUrlInput) (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.3)'; }}
+                className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all disabled:opacity-30 ${
+                  pendingUrl ? 'bg-emerald-50 text-emerald-600' : 
+                  showUrlInput ? 'bg-primary/10 text-primary' : 
+                  'text-zinc-400 hover:text-zinc-900'
+                }`}
               >
                 <Globe className="h-3.5 w-3.5" />
               </button>
@@ -1237,24 +1231,22 @@ export function StudioChat({
                 {modelOpen && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setModelOpen(false)} />
-                    <div className="absolute left-0 bottom-full mb-1.5 w-72 rounded-xl overflow-hidden z-50"
-                      style={{ background: '#1e2028', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
-                      <p className="px-3 pt-2.5 pb-1.5 text-[10px] font-bold text-white/25 uppercase tracking-[0.3em]">Modelo de IA para código</p>
+                    <div className="absolute left-0 bottom-full mb-1.5 w-72 rounded-xl overflow-hidden z-50 bg-white border border-zinc-200 shadow-xl">
+                      <p className="px-3 pt-2.5 pb-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em]">Modelo de IA para código</p>
                       {MODELS.map(m => (
                         <button key={m.id} onClick={() => { setSelectedModel(m.id); setModelOpen(false); }}
                           aria-label={`Seleccionar modelo ${m.label}${m.premium ? ' (requiere plan Pymes)' : ''}`}
-                          className="w-full flex items-center justify-between px-3 py-2.5 text-left transition-all"
-                          style={selectedModel === m.id ? { background: 'rgba(138,180,248,0.12)', color: '#E3E3E3' } : { color: 'rgba(255,255,255,0.5)' }}
-                          onMouseEnter={e => { if (selectedModel !== m.id) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
-                          onMouseLeave={e => { if (selectedModel !== m.id) (e.currentTarget as HTMLElement).style.background = ''; }}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 text-left transition-all hover:bg-zinc-50 ${
+                            selectedModel === m.id ? 'bg-primary/5 text-zinc-900' : 'text-zinc-500'
+                          }`}
                         >
                           <div className="flex items-center gap-2">
-                            {m.premium && <Lock className="h-2.5 w-2.5 text-amber-400/60 shrink-0" aria-hidden="true" />}
+                            {m.premium && <Lock className="h-2.5 w-2.5 text-amber-500 shrink-0" aria-hidden="true" />}
                             <span className="text-[12px] font-medium">{m.label}</span>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            {m.vision && <span className="text-[9px] text-emerald-400" aria-label="Soporta visión">👁</span>}
-                            <span className={`text-[9px] ${m.premium ? 'text-amber-400/50' : 'text-emerald-400/60'}`}>{m.badge}</span>
+                            {m.vision && <span className="text-[9px] text-emerald-500" aria-label="Soporta visión">👁</span>}
+                            <span className={`text-[9px] ${m.premium ? 'text-amber-600' : 'text-emerald-600'}`}>{m.badge}</span>
                           </div>
                         </button>
                       ))}
@@ -1284,11 +1276,11 @@ export function StudioChat({
           </div>
         </div>
 
-        <p className="mt-1.5 text-center text-[10px] text-white/15">
+        <p className="mt-1.5 text-center text-[10px] text-zinc-300">
           {currentGenIntent === 'chat' || (currentGenIntent === null && detectIntent(input) === 'chat' && input.length > 3)
             ? 'Gemini Flash · respuesta rápida'
             : `${currentModel.label} · código`}
-          {convHistory.length > 0 && <span className="ml-2 text-[#8AB4F8]/40">· {convHistory.length / 2} turnos</span>}
+          {convHistory.length > 0 && <span className="ml-2 text-primary/40">· {convHistory.length / 2} turnos</span>}
         </p>
       </div>
 

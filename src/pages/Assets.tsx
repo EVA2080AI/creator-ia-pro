@@ -159,7 +159,7 @@ const Assets = () => {
         <div className="absolute top-1/4 left-0 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[120px]" />
       </div>
 
-      <main id="main-content" className="relative z-10 mx-auto max-w-[1440px] px-8 py-12 pt-24">
+      <main id="main-content" className="relative z-10 mx-auto max-w-[1440px] px-8 py-10 pt-10">
         {/* Header */}
         <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-zinc-200 pb-12">
           <div className="space-y-4">

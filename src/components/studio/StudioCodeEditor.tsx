@@ -18,13 +18,13 @@ const TYPES = ['string','number','boolean','void','any','never','null','undefine
 function highlightLine(line: string): React.ReactNode[] {
   const tokens: React.ReactNode[] = [];
   const patterns: { re: RegExp; cls: string }[] = [
-    { re: /(\/\/.*)/, cls: 'text-muted-foreground/60' },
-    { re: new RegExp(`\\b(${KEYWORDS.join('|')})\\b`), cls: 'text-primary' },
-    { re: /('[^']*'|"[^"]*"|`[^`]*`)/, cls: 'text-emerald-400' },
-    { re: /\b(\d+)\b/, cls: 'text-amber-400' },
-    { re: new RegExp(`\\b(${TYPES.join('|')})\\b`), cls: 'text-sky-400' },
-    { re: /(<\/?[A-Za-z]\w*)/, cls: 'text-rose-400' },
-    { re: /(className|onClick|onChange|onSubmit|href|disabled|type|value|key|ref|style|placeholder)/, cls: 'text-yellow-400' },
+    { re: /(\/\/.*)/, cls: 'text-zinc-400' },
+    { re: new RegExp(`\\b(${KEYWORDS.join('|')})\\b`), cls: 'text-primary font-medium' },
+    { re: /('[^']*'|"[^"]*"|`[^`]*`)/, cls: 'text-emerald-600' },
+    { re: /\b(\d+)\b/, cls: 'text-amber-600' },
+    { re: new RegExp(`\\b(${TYPES.join('|')})\\b`), cls: 'text-sky-600' },
+    { re: /(<\/?[A-Za-z]\w*)/, cls: 'text-rose-600' },
+    { re: /(className|onClick|onChange|onSubmit|href|disabled|type|value|key|ref|style|placeholder)/, cls: 'text-amber-700' },
   ];
 
   let remaining = line;
@@ -135,36 +135,36 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
           {/* streaming code area */}
           <div className="flex-1 overflow-hidden p-4 font-mono text-[11px] leading-6 relative">
             <div className="absolute inset-0 p-4 overflow-hidden">
-              <pre className="text-primary/70 whitespace-pre-wrap break-all text-[10px] leading-5 opacity-80">
+              <pre className="text-zinc-600 whitespace-pre-wrap break-all text-[10px] leading-5 opacity-80">
                 {streamPreview || ''}
-                <span className="inline-block w-2 h-4 bg-primary ml-0.5 animate-pulse align-middle" />
+                <span className="inline-block w-2 h-4 bg-primary/40 ml-0.5 animate-pulse align-middle" />
               </pre>
             </div>
             {/* gradient fade at bottom */}
             <div className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none bg-gradient-to-t from-background to-transparent" />
           </div>
           {/* status bar */}
-          <div className="shrink-0 flex items-center gap-2 px-4 py-2 border-t border-border bg-card">
+          <div className="shrink-0 flex items-center gap-2 px-4 py-2 border-t border-zinc-100 bg-white">
             <div className="flex gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: '0ms' }} />
-              <span className="h-1.5 w-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: '120ms' }} />
-              <span className="h-1.5 w-1.5 rounded-full bg-primary/70 animate-bounce" style={{ animationDelay: '240ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '0ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '120ms' }} />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '240ms' }} />
             </div>
-            <span className="text-[10px] text-muted-foreground font-mono">Genesis generating code...</span>
+            <span className="text-[10px] text-zinc-400 font-mono">Genesis generating code...</span>
           </div>
         </div>
       )}
 
       {/* Tabs Layout (GitHub Style) */}
-      <div className="flex items-center border-b border-border bg-secondary/10 overflow-x-auto no-scrollbar h-11 shrink-0">
+      <div className="flex items-center border-b border-border bg-zinc-50 overflow-x-auto no-scrollbar h-11 shrink-0">
         {openTabs.filter((t) => projectFiles[t]).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`group h-full flex items-center gap-2 px-4 text-xs transition-all relative shrink-0 ${
               resolvedTab === tab
-                ? 'bg-background text-foreground'
-                : 'text-muted-foreground hover:bg-secondary/40 hover:text-foreground'
+                ? 'bg-white text-zinc-900'
+                : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
             }`}
           >
             {/* Active Top Border - Like GitHub's tabs */}
@@ -198,7 +198,7 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
             onClick={() => { setIsEditing(true); requestAnimationFrame(() => textareaRef.current?.focus()); }}
           >
             {lines.map((line, i) => (
-              <div key={i} className="whitespace-pre hover:bg-primary/[0.03] transition-colors rounded-sm px-1 -mx-1">
+              <div key={i} className="whitespace-pre hover:bg-zinc-50 transition-colors rounded-sm px-1 -mx-1 text-zinc-800">
                 <code>{highlightLine(line)}</code>
               </div>
             ))}
@@ -228,7 +228,7 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
       </div>
 
       {/* Status bar (GitHub Style) */}
-      <div className="flex items-center justify-between border-t border-border bg-card px-4 py-1 text-[10px] text-muted-foreground font-mono shrink-0">
+      <div className="flex items-center justify-between border-t border-border bg-white px-4 py-1 text-[10px] text-zinc-500 font-mono shrink-0">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
             <Code className="w-3 h-3" />

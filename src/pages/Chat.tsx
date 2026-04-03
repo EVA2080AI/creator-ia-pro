@@ -16,7 +16,6 @@ import {
   Map, ArrowUp, ArrowRight, Layers, X,
   PanelLeft, PanelLeftClose, Phone, RefreshCw, Database,
 } from 'lucide-react';
-import { AppHeader } from '@/components/AppHeader';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
 import { StudioPreview } from '@/components/studio/StudioPreview';
@@ -612,7 +611,7 @@ export default function Chat() {
         <div className="flex flex-col h-full border-r border-border/40 overflow-hidden" style={{ background: 'hsl(var(--card) / 0.3)', backdropFilter: 'blur(20px)' }}>
           <div className="flex-1 min-h-0"><StudioChat projectId={activeProject.id} projectFiles={projectFiles} onCodeGenerated={handleCodeGenerated} initialPrompt={pendingPrompt} onGeneratingChange={setIsGenerating} supabaseConfig={supabaseConfig} /></div>
           <div className="p-4 border-t border-border/40 shrink-0">
-            <div className="p-3 bg-white/[0.02] border border-border rounded-xl">
+            <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-xl">
               <div className="flex justify-between text-[10px] font-bold mb-2 text-muted-foreground uppercase tracking-widest">
                 <span>{credits.toLocaleString()} créditos</span>
                 <Zap className="h-3 w-3" />
@@ -646,7 +645,7 @@ export default function Chat() {
             </div>
           )}
           {(panelView === 'code' || panelView === 'split') && <div className={`flex flex-col overflow-hidden ${panelView === 'split' ? 'w-[45%] border-r border-border/40' : 'flex-1'}`}><StudioCodeEditor selectedFile={selectedFile} projectFiles={projectFiles} onFilesChange={handleFilesChange} isGenerating={isGenerating} streamPreview={streamPreview} /></div>}
-          {(panelView === 'preview' || panelView === 'split') && <div className="flex flex-col overflow-hidden flex-1"><StudioPreview files={projectFiles} deviceMode={deviceMode} onDeviceModeChange={setDeviceMode} isGenerating={isGenerating} supabaseConfig={supabaseConfig} viewMode={panelView === 'code' ? 'code' : 'preview'} onToggleViewMode={(mode) => setPanelView(mode)} isSidebarCollapsed={!isChatOpen} onToggleSidebar={() => setIsChatOpen(!isChatOpen)} isFullscreen={false} onToggleFullscreen={() => {}} /></div>}
+          {(panelView === 'preview' || panelView === 'split') && <div className="flex flex-col overflow-hidden flex-1"><StudioPreview files={projectFiles} deviceMode={deviceMode} onDeviceModeChange={setDeviceMode} isGenerating={isGenerating} supabaseConfig={supabaseConfig} viewMode="preview" onToggleViewMode={(mode) => setPanelView(mode)} isSidebarCollapsed={!isChatOpen} onToggleSidebar={() => setIsChatOpen(!isChatOpen)} isFullscreen={false} onToggleFullscreen={() => {}} /></div>}
           {panelView === 'history' && (
             <div className="w-full h-full flex items-center justify-center p-8 bg-background/50">
               <div className="w-full max-w-2xl h-[80vh] bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-2xl">
