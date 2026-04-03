@@ -118,7 +118,7 @@ const App = () => {
                     <Route path="/descargar"    element={<Downloads />} />
                     <Route path="/product-backlog" element={<ProductBacklog />} />
                     <Route path="/spaces"       element={<Spaces />} />
-                    <Route path="/assets"       element={<Assets />} />
+                    <Route path="/assets"       element={<Navigate to="/spaces" replace />} />
                     <Route path="/tools"        element={<Tools />} />
                     <Route path="/apps/:appId"  element={<Tools />} />
                     <Route path="/admin"        element={<Admin />} />
