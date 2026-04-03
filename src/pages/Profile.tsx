@@ -102,7 +102,7 @@ const Profile = () => {
           <div className="lg:col-span-2 space-y-5">
 
             {/* Identity card */}
-            <div className="rounded-3xl bg-zinc-50 border border-zinc-200 p-8">
+            <div className="rounded-3xl bg-white border border-zinc-200/60 p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20 bg-white/70 backdrop-blur-sm">
               <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">Información personal</h2>
 
               {/* Avatar */}
@@ -162,7 +162,7 @@ const Profile = () => {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="Tu nombre..."
-                    className="w-full px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 focus:border-primary/40 focus:outline-none text-sm text-zinc-900 placeholder:text-zinc-500 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-zinc-50/50 border border-zinc-200 focus:border-primary/40 focus:bg-white focus:outline-none text-sm text-zinc-900 placeholder:text-zinc-500 transition-all font-medium"
                   />
                 </div>
                 <div className="flex justify-end">
@@ -180,7 +180,7 @@ const Profile = () => {
 
             {/* Recent activity */}
             {creditHistory.length > 0 && (
-              <div className="rounded-3xl bg-zinc-50 border border-zinc-200 p-8">
+              <div className="rounded-3xl bg-white border border-zinc-200/60 p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20 bg-white/70 backdrop-blur-sm">
                 <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">Últimas transacciones</h2>
                 <div className="space-y-3">
                   {creditHistory.map((tx: any) => (

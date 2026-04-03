@@ -299,33 +299,6 @@ export default function Index() {
 
       <div className="min-h-screen bg-background text-foreground selection:bg-primary/15 font-sans overflow-x-hidden">
 
-        {/* ── Nav ─────────────────────────────────────────────────────────── */}
-        <motion.header
-          initial={{ opacity: 0, y: -12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
-          className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 bg-background/90 backdrop-blur-md border-b border-zinc-200"
-        >
-          <Logo size="sm" showText showPro onClick={() => navigate("/")} />
-
-          <div className="flex items-center gap-6">
-            <button onClick={() => navigate("/pricing")} className="hidden sm:block text-[13px] text-zinc-400 hover:text-zinc-900 transition-colors font-medium">
-              Precios
-            </button>
-            <button onClick={() => navigate("/hub")} className="hidden sm:block text-[13px] text-zinc-400 hover:text-zinc-900 transition-colors font-medium">
-              Templates
-            </button>
-            <motion.button
-              onClick={() => navigate("/auth")}
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              className="flex items-center gap-2 px-5 py-2 rounded-lg bg-zinc-900 text-white text-[13px] font-bold hover:bg-zinc-800 transition-all"
-            >
-              Empezar gratis
-            </motion.button>
-          </div>
-        </motion.header>
-
         {/* ── Announcement bar ─────────────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}

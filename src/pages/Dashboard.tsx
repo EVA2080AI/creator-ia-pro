@@ -268,8 +268,8 @@ const Dashboard = () => {
                   <AreaChart data={usageData}>
                     <defs>
                       <linearGradient id="creditsGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#2563eb" stopOpacity={0.2} />
-                        <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
+                        <stop offset="0%" stopColor="#A855F7" stopOpacity={0.2} />
+                        <stop offset="100%" stopColor="#A855F7" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 9, fontWeight: 600 }} dy={10} />
@@ -279,7 +279,7 @@ const Dashboard = () => {
                       labelStyle={{ color: '#71717a', marginBottom: '2px' }}
                       itemStyle={{ color: '#18181b' }}
                     />
-                    <Area type="monotone" dataKey="credits" stroke="#2563eb" strokeWidth={2} fill="url(#creditsGrad)" dot={{ r: 3, fill: '#2563eb', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
+                    <Area type="monotone" dataKey="credits" stroke="#A855F7" strokeWidth={2.5} fill="url(#creditsGrad)" dot={{ r: 3, fill: '#A855F7', strokeWidth: 0 }} activeDot={{ r: 5, strokeWidth: 0 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -328,19 +328,19 @@ const Dashboard = () => {
             onClick={() => navigate("/chat")}
             className="group cursor-pointer relative overflow-hidden rounded-[2.5rem] border border-primary/20 bg-white p-7 hover:border-primary/40 transition-all duration-500 shadow-xl shadow-primary/5"
           >
-            <div className="absolute inset-0 bg-primary/[0.03] opacity-0 group-hover:opacity-100 transition-all duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700" />
             <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div className="flex items-center gap-6">
-                <div className="w-16 h-16 rounded-[2rem] bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                <div className="w-16 h-16 rounded-[2rem] bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 shadow-[0_8px_16px_-4px_rgba(168,85,247,0.15)]">
                    <Rocket className="w-8 h-8 text-primary group-hover:animate-bounce" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(37,99,235,0.6)]" />
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.6)]" />
                     <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Genesis · BuilderAI</span>
                   </div>
                   <h2 className="text-2xl font-black text-zinc-900 tracking-tighter">¿Qué vas a crear hoy?</h2>
-                  <p className="text-[13px] text-zinc-500 mt-1 font-medium">Describe tu idea y Genesis la construye en segundos con preview en vivo</p>
+                  <p className="text-[13px] text-zinc-500 mt-1 font-medium italic opacity-80">"Imagina cualquier app, Genesis la construye por ti..."</p>
                 </div>
               </div>
               <div className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-zinc-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] group-hover:bg-primary transition-all active:scale-95 shadow-lg shadow-zinc-900/10">

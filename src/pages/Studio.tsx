@@ -200,9 +200,13 @@ export default function Studio() {
   return (
     <div className="flex flex-col h-full bg-background overflow-hidden text-foreground selection:bg-primary/30">
       <Helmet><title>Studio | Creator IA Pro</title></Helmet>
-      {/* ── Topbar (Hidden in Fullscreen) ─────────────────────────────────── */}
+import { StudioFloatingToolbar } from '@/components/studio/StudioFloatingToolbar';
+
+// ... inside Studio component ...
+
+      {/* ── Floating Toolbar (Replaces Topbar for Headerless Architecture) ── */}
       {!isFullscreen && (
-        <StudioTopbar 
+        <StudioFloatingToolbar 
           projectName={activeProject.name}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
@@ -213,8 +217,6 @@ export default function Studio() {
           onBack={() => navigate('/studio')}
           onGithubSync={() => toast.info('Sincronización con GitHub próximamente')}
           onPublish={() => toast.info('Publicación próximamente')}
-          credits={profile?.credits_balance ?? 0}
-          userProfile={profile}
         />
       )}
 

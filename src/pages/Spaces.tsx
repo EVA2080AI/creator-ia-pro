@@ -198,19 +198,21 @@ const Spaces = () => {
             {filtered.map((space) => (
               <div
                 key={space.id}
-                className="group cursor-pointer rounded-2xl border border-zinc-200 bg-zinc-50 hover:border-zinc-200 hover:bg-zinc-50 transition-all relative overflow-hidden"
+                className="group cursor-pointer rounded-3xl border border-zinc-200/60 bg-white/70 backdrop-blur-sm hover:border-primary/20 hover:shadow-xl transition-all duration-500 relative overflow-hidden shadow-sm"
                 onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
               >
                 {/* Color accent bar */}
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                 {/* Thumbnail */}
-                <div className="flex h-32 items-center justify-center bg-zinc-50 border-b border-zinc-200 overflow-hidden">
+                <div className="flex h-36 items-center justify-center bg-zinc-50/50 border-b border-zinc-100 overflow-hidden relative">
                   {space.thumbnail_url ? (
-                    <img src={space.thumbnail_url} alt={space.name} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img src={space.thumbnail_url} alt={space.name} className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
                   ) : (
                     <div className="flex flex-col items-center gap-2">
-                      <BookOpen className="h-7 w-7 text-zinc-900/8 group-hover:text-primary/30 transition-colors" />
+                       <div className="w-12 h-12 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-sm">
+                          <BookOpen className="h-6 w-6 text-primary/40 group-hover:text-primary transition-colors" />
+                       </div>
                     </div>
                   )}
                 </div>
@@ -247,9 +249,11 @@ const Spaces = () => {
                       </DropdownMenu>
                     </button>
                   </div>
-                  <div className="mt-3 pt-3 border-t border-zinc-200 flex items-center justify-between">
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest font-display">Abrir Canvas</span>
-                    <ChevronRight className="h-3.5 w-3.5 text-zinc-500 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                  <div className="mt-4 pt-4 border-t border-zinc-100 flex items-center justify-between">
+                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest font-display group-hover:text-primary transition-colors">Ver Canvas</span>
+                    <div className="w-6 h-6 rounded-lg bg-zinc-100 group-hover:bg-primary group-hover:text-white flex items-center justify-center transition-all">
+                       <ChevronRight className="h-3.5 w-3.5" />
+                    </div>
                   </div>
                 </div>
               </div>

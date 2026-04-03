@@ -81,16 +81,16 @@ const Auth = () => {
       {/* Left Panel — Value Prop */}
       <div className="hidden lg:flex lg:w-[45%] flex-col justify-between px-16 py-16 relative overflow-hidden bg-zinc-50 border-r border-zinc-200">
         {/* Animated glows */}
-        <div className="pointer-events-none absolute inset-0">
+         <div className="pointer-events-none absolute inset-0">
           <motion.div
             animate={{ x: [0, 20, -10, 0], y: [0, -20, 10, 0], scale: [1, 1.1, 0.95, 1] }}
             transition={{ repeat: Infinity, duration: 14, ease: "easeInOut" }}
-            className="absolute -top-32 -left-32 h-[700px] w-[700px] rounded-full bg-primary/6 blur-[160px]"
+            className="absolute -top-32 -left-32 h-[750px] w-[750px] rounded-full bg-primary/8 blur-[160px]"
           />
           <motion.div
             animate={{ x: [0, -15, 10, 0], y: [0, 15, -10, 0], scale: [1, 0.9, 1.05, 1] }}
             transition={{ repeat: Infinity, duration: 18, ease: "easeInOut", delay: 3 }}
-            className="absolute bottom-0 right-0 h-[500px] w-[500px] rounded-full bg-primary/5 blur-[120px]"
+            className="absolute -bottom-32 -right-32 h-[600px] w-[600px] rounded-full bg-primary/6 blur-[140px]"
           />
         </div>
 
@@ -116,7 +116,7 @@ const Auth = () => {
               <motion.div
                 animate={{ scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(74,222,128,0.8)]"
+                className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(168,85,247,0.8)]"
               />
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] font-display">
                 Plataforma de IA generativa
@@ -172,13 +172,13 @@ const Auth = () => {
               { value: "$69K", label: "COP/mes" },
               { value: "4.6", label: "Claude" },
             ].map((s, i) => (
-              <motion.div
+               <motion.div
                 key={s.label}
                 initial={{ opacity: 0, y: 20, scale: 0.9 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.4, delay: 0.7 + i * 0.08 }}
                 whileHover={{ y: -3 }}
-                className="rounded-2xl border border-zinc-200 p-4 text-center bg-white"
+                className="rounded-2xl border border-zinc-200 bg-white/40 backdrop-blur-sm p-4 text-center shadow-sm hover:shadow-md hover:border-primary/20 transition-all"
               >
                 <p className="text-2xl font-bold text-zinc-900 font-display">{s.value}</p>
                 <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">{s.label}</p>

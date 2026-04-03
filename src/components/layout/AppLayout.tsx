@@ -1,42 +1,49 @@
 import { Outlet } from 'react-router-dom';
 import { SidebarGlobal } from './SidebarGlobal';
-import { ContextualSidebar } from './ContextualSidebar';
-import { MobileNav } from './MobileNav';
-import { useSidebarKeyboard } from '@/hooks/useSidebarV2';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
 
 /**
- * AppLayout — shared authenticated layout.
- * Structure: SidebarGlobal | <Outlet /> | ContextualSidebar
- * No AppHeader — navigation lives in the sidebar.
+ * AppLayout
+ * 
+ * The main structural wrapper for authenticated platform pages.
+ * Implements a 100% headerless architecture:
+ * - Desktop: SidebarGlobal (fixed/collapsible) + Scrollable Main Content
+ * - Mobile: Floating Menu Button + SidebarGlobal (Drawer)
  */
 export function AppLayout() {
-  // Register Cmd+\ and Escape keyboard shortcuts
-  useSidebarKeyboard();
-
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-screen overflow-hidden bg-background">
-        {/* Left global navigation sidebar */}
-        <SidebarGlobal />
+    <div className="flex h-screen w-full bg-white font-sans overflow-hidden">
+      {/* ── Desktop Sidebar ── */}
+      <SidebarGlobal />
 
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Mobile top navigation */}
-          <MobileNav />
-
-          {/* Main content area */}
-          <main
-            id="main-content"
-            className="flex-1 min-w-0 overflow-auto"
-            tabIndex={-1}
-          >
-          <Outlet />
-          </main>
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        {/* ── Mobile Floating Trigger (Headerless Design) ── */}
+        <div className="md:hidden fixed top-4 left-4 z-[60]">
+          <Sheet>
+            <SheetTrigger asChild>
+              <button 
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-zinc-200/60 shadow-lg text-zinc-600 hover:text-zinc-900 active:scale-90 transition-all"
+                aria-label="Abrir menú"
+              >
+                <Menu className="w-5 h-5" strokeWidth={2.5} />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-[240px] border-r-0 shadow-2xl">
+              <SidebarGlobal isMobile />
+            </SheetContent>
+          </Sheet>
         </div>
 
-        {/* Right contextual panel (Genesis IA, node props, etc.) */}
-        <ContextualSidebar />
+        {/* ── Main Content ── */}
+        <main
+          id="main-content"
+          className="flex-1 min-w-0 overflow-auto pt-0"
+          tabIndex={-1}
+        >
+          <Outlet />
+        </main>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }

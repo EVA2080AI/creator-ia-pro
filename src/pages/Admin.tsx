@@ -804,11 +804,14 @@ const Admin = () => {
                   const initials = (u.display_name || u.email || "?")[0].toUpperCase();
 
                   return (
-                    <div key={u.user_id} className="rounded-2xl border border-zinc-200 bg-zinc-50 overflow-hidden transition-all">
+                    <div 
+                      key={u.user_id} 
+                      className="group rounded-2xl border border-zinc-200/60 bg-white/70 backdrop-blur-sm overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary/20"
+                    >
 
                       {/* Card row */}
                       <div
-                        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-zinc-50 transition-colors"
+                        className="flex items-center gap-3 p-4 cursor-pointer hover:bg-zinc-50/50 transition-colors"
                         onClick={() => setExpandedUser(isExpanded ? null : u.user_id)}
                       >
                         {/* Avatar */}
@@ -826,8 +829,12 @@ const Admin = () => {
                               {u.display_name || u.email}
                             </span>
                             <span
-                              className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase shrink-0"
-                              style={{ background: tier.color + "18", color: tier.color }}
+                              className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase shrink-0 border"
+                              style={{ 
+                                background: tier.color + "12", 
+                                color: tier.color,
+                                borderColor: tier.color + "30"
+                              }}
                             >
                               <TierIcon className="h-2.5 w-2.5" />
                               {tier.label}
@@ -856,7 +863,7 @@ const Admin = () => {
 
                       {/* Expanded panel */}
                       {isExpanded && (
-                        <div className="border-t border-zinc-200 bg-black/20 p-4 space-y-5">
+                        <div className="border-t border-zinc-100 bg-zinc-50/50 p-6 space-y-6">
 
                           {/* Meta info */}
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 text-xs">

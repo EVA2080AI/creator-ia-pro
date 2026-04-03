@@ -150,6 +150,17 @@
     border-color: hsl(var(--border-subtle));
     background: hsl(var(--surface-secondary));
   }
+
+  /* Animations */
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient-flow 8s ease infinite;
+  }
 }
 
 /* ============================================
