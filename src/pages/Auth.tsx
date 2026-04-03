@@ -181,7 +181,7 @@ const Auth = () => {
                 className="rounded-2xl border border-zinc-200 p-4 text-center bg-white"
               >
                 <p className="text-2xl font-bold text-zinc-900 font-display">{s.value}</p>
-                <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest mt-1">{s.label}</p>
+                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">{s.label}</p>
               </motion.div>
             ))}
           </div>
@@ -194,7 +194,7 @@ const Auth = () => {
           transition={{ duration: 0.5, delay: 1 }}
           className="relative z-10"
         >
-          <p className="text-[11px] font-medium text-zinc-300 leading-relaxed">
+          <p className="text-[11px] font-medium text-zinc-500 leading-relaxed">
             Al registrarte aceptas nuestros{" "}
             <span className="underline underline-offset-2 cursor-pointer hover:text-zinc-400 transition-colors">
               Términos de servicio
@@ -252,7 +252,7 @@ const Auth = () => {
                     Tu nombre
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300 pointer-events-none" />
+                    <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 pointer-events-none" />
                     <Input
                       id="displayName"
                       type="text"
@@ -260,7 +260,7 @@ const Auth = () => {
                       onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="¿Cómo te llamas?"
                       autoComplete="name"
-                      className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
+                      className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-500 transition-all focus:ring-0 focus:bg-zinc-100"
                     />
                   </div>
                 </div>
@@ -272,7 +272,7 @@ const Auth = () => {
                   Correo electrónico
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300 pointer-events-none" />
+                  <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 pointer-events-none" />
                   <Input
                     id="email"
                     type="email"
@@ -281,7 +281,7 @@ const Auth = () => {
                     placeholder="tu@correo.com"
                     required
                     autoComplete="email"
-                    className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
+                    className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-500 transition-all focus:ring-0 focus:bg-zinc-100"
                   />
                 </div>
               </div>
@@ -297,14 +297,14 @@ const Auth = () => {
                       <button
                         type="button"
                         onClick={() => setMode("forgot")}
-                        className="text-xs text-zinc-300 hover:text-primary transition-colors font-medium"
+                        className="text-xs text-zinc-500 hover:text-primary transition-colors font-medium"
                       >
                         ¿Olvidaste tu contraseña?
                       </button>
                     )}
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300 pointer-events-none" />
+                    <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 pointer-events-none" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
@@ -314,19 +314,19 @@ const Auth = () => {
                       required
                       minLength={6}
                       autoComplete={mode === "login" ? "current-password" : "new-password"}
-                      className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all focus:ring-0 focus:bg-zinc-100"
+                      className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-zinc-900 placeholder:text-zinc-500 transition-all focus:ring-0 focus:bg-zinc-100"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-zinc-500 transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-500 transition-colors"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </button>
                   </div>
                   {mode === "signup" && (
-                    <p className="text-[11px] text-zinc-300 ml-1">
+                    <p className="text-[11px] text-zinc-500 ml-1">
                       Usa al menos 6 caracteres.
                     </p>
                   )}
@@ -421,12 +421,12 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => setMode("login")}
-                  className="text-sm font-medium text-zinc-300 hover:text-zinc-900 transition-colors"
+                  className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
                 >
                   ← Volver al inicio de sesión
                 </button>
               ) : (
-                <p className="text-sm text-zinc-300">
+                <p className="text-sm text-zinc-500">
                   {mode === "login" ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"}{" "}
                   <button
                     type="button"
@@ -447,7 +447,7 @@ const Auth = () => {
           <div className="mt-6 text-center">
             <button
               onClick={() => navigate("/pricing")}
-              className="text-xs font-medium text-zinc-300 hover:text-zinc-400 transition-colors"
+              className="text-xs font-medium text-zinc-500 hover:text-zinc-400 transition-colors"
             >
               Ver planes y precios →
             </button>

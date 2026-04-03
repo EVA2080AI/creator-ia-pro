@@ -138,7 +138,7 @@ function ImageWithFallback({ src, onRetry }: { src: string; onRetry: () => void 
           </div>
           <div>
             <p className="text-sm font-semibold text-zinc-500">La imagen no se pudo cargar</p>
-            <p className="text-xs text-zinc-300 mt-1">El motor puede estar saturado</p>
+            <p className="text-xs text-zinc-500 mt-1">El motor puede estar saturado</p>
           </div>
           <button onClick={onRetry}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary/90 active:scale-95 transition-all">
@@ -385,7 +385,7 @@ const Tools = () => {
               <Copy className="h-4 w-4" />
             </button>
             <button onClick={() => { setResultImage(null); setSavedAsset(false); }}
-              className="h-11 w-11 rounded-xl border border-zinc-200 text-zinc-300 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
+              className="h-11 w-11 rounded-xl border border-zinc-200 text-zinc-500 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -416,7 +416,7 @@ const Tools = () => {
                 <Copy className="h-4 w-4" /> Copiar texto
               </button>
               <button onClick={() => { setResultText(""); setSavedAsset(false); }}
-                className="h-11 w-11 rounded-xl border border-zinc-200 text-zinc-300 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
+                className="h-11 w-11 rounded-xl border border-zinc-200 text-zinc-500 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -439,13 +439,13 @@ const Tools = () => {
         <button onClick={() => fileRef.current?.click()}
           className="flex-1 m-4 flex flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50 hover:border-primary/30 hover:bg-primary/[0.03] transition-all group">
           <div className="w-16 h-16 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-center group-hover:scale-105 transition-transform">
-            <Upload className="h-7 w-7 text-zinc-300 group-hover:text-zinc-400 transition-colors" />
+            <Upload className="h-7 w-7 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
           </div>
           <div className="text-center">
             <p className="text-sm font-semibold text-zinc-400 group-hover:text-zinc-500 transition-colors">
               Arrastra o haz clic para subir
             </p>
-            <p className="text-xs text-zinc-300 mt-1">PNG, JPG, WEBP · Máx 10MB</p>
+            <p className="text-xs text-zinc-500 mt-1">PNG, JPG, WEBP · Máx 10MB</p>
           </div>
         </button>
       );
@@ -462,9 +462,9 @@ const Tools = () => {
         </div>
         <div>
           <h3 className="text-base font-bold text-zinc-400 font-display tracking-tight">{currentTool.name}</h3>
-          <p className="text-sm text-zinc-300 mt-1 max-w-xs leading-relaxed">{currentTool.desc}</p>
+          <p className="text-sm text-zinc-500 mt-1 max-w-xs leading-relaxed">{currentTool.desc}</p>
         </div>
-        <p className="text-[11px] text-zinc-900/12 uppercase tracking-widest">
+        <p className="text-[11px] text-zinc-500 uppercase tracking-widest">
           Escribe un prompt y presiona Generar
         </p>
       </div>
@@ -492,7 +492,7 @@ const Tools = () => {
 
         {/* Sidebar header */}
         <div className="px-4 pt-5 pb-3 shrink-0">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-300 font-display">Herramientas IA</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500 font-display">Herramientas IA</p>
         </div>
 
         {/* Tool list */}
@@ -500,7 +500,7 @@ const Tools = () => {
 
           {/* Image section */}
           <div className="px-2 pt-3 pb-1.5">
-            <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-300">
+            <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-500">
               <Image className="h-3 w-3" /> Imagen
             </span>
           </div>
@@ -517,13 +517,13 @@ const Tools = () => {
                 )}>
                 <div className={cn(
                   "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                  isActive ? "bg-primary/20 text-primary" : "bg-zinc-50 text-zinc-300"
+                  isActive ? "bg-primary/20 text-primary" : "bg-zinc-50 text-zinc-500"
                 )}>
                   {tool.disabled ? <Lock className="h-3.5 w-3.5" /> : <tool.icon className="h-3.5 w-3.5" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-semibold truncate leading-none">{tool.name}</p>
-                  <p className="text-[10px] text-zinc-300 mt-0.5">
+                  <p className="text-[10px] text-zinc-500 mt-0.5">
                     {tool.disabled ? tool.disabledReason : `${tool.credits} crédito${tool.credits !== 1 ? "s" : ""}`}
                   </p>
                 </div>
@@ -534,7 +534,7 @@ const Tools = () => {
 
           {/* Text section */}
           <div className="px-2 pt-4 pb-1.5">
-            <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-300">
+            <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-500">
               <FileText className="h-3 w-3" /> Texto & Copy
             </span>
           </div>
@@ -551,13 +551,13 @@ const Tools = () => {
                 )}>
                 <div className={cn(
                   "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                  isActive ? "bg-primary/20 text-primary" : "bg-zinc-50 text-zinc-300"
+                  isActive ? "bg-primary/20 text-primary" : "bg-zinc-50 text-zinc-500"
                 )}>
                   {tool.disabled ? <Lock className="h-3.5 w-3.5" /> : <tool.icon className="h-3.5 w-3.5" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-semibold truncate leading-none">{tool.name}</p>
-                  <p className="text-[10px] text-zinc-300 mt-0.5">{tool.credits} crédito{tool.credits !== 1 ? "s" : ""}</p>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">{tool.credits} crédito{tool.credits !== 1 ? "s" : ""}</p>
                 </div>
                 {isActive && <div className="w-1 h-4 rounded-full bg-primary shrink-0 shadow-[0_0_6px_rgba(74,222,128,0.7)]" />}
               </button>
@@ -578,7 +578,7 @@ const Tools = () => {
               <p className="text-[11px] font-bold text-zinc-500 truncate leading-none">
                 {profile?.display_name?.split(" ")[0] || "Mi perfil"}
               </p>
-              <p className="text-[10px] text-zinc-300 mt-0.5 flex items-center gap-1">
+              <p className="text-[10px] text-zinc-500 mt-0.5 flex items-center gap-1">
                 <Coins className="h-2.5 w-2.5 text-primary" />
                 {(profile?.credits_balance ?? 0).toLocaleString()} créditos
               </p>
@@ -640,7 +640,7 @@ const Tools = () => {
                       "px-2.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all",
                       aspectRatio.label === ar.label
                         ? "bg-zinc-100 border-zinc-300 text-zinc-900"
-                        : "bg-zinc-50 border-zinc-200 text-zinc-300 hover:text-zinc-500"
+                        : "bg-zinc-50 border-zinc-200 text-zinc-500 hover:text-zinc-500"
                     )}>
                     {ar.label}
                   </button>
@@ -660,19 +660,19 @@ const Tools = () => {
             <div className="mb-3 p-3 rounded-2xl border border-zinc-200 bg-zinc-50 space-y-3">
               {category === "image" && !currentTool.needsUpload && (
                 <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Motor de imagen</p>
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Motor de imagen</p>
                   <ModelSelector selectedModelId={selectedImageModel} onModelChange={setSelectedImageModel} filterType="image" />
                 </div>
               )}
               {category === "text" && (
                 <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Modelo de IA</p>
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Modelo de IA</p>
                   <ModelSelector selectedModelId={selectedTextModel} onModelChange={setSelectedTextModel} filterType="text" />
                 </div>
               )}
               {(activeTool === "generate" || activeTool === "logo") && (
                 <div className="space-y-1.5">
-                  <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">Estilo rápido</p>
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Estilo rápido</p>
                   <div className="flex flex-wrap gap-1.5">
                     {styleList.map((style) => (
                       <button key={style}
@@ -720,7 +720,7 @@ const Tools = () => {
                 }
                 rows={1}
                 maxLength={1000}
-                className="w-full resize-none rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-300 focus:outline-none focus:border-primary/30 focus:bg-zinc-100 transition-all leading-relaxed"
+                className="w-full resize-none rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:border-primary/30 focus:bg-zinc-100 transition-all leading-relaxed"
                 style={{ minHeight: "48px", maxHeight: "140px", overflowY: "auto" }}
               />
             </div>

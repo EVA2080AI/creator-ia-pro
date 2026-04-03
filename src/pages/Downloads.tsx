@@ -19,7 +19,7 @@ const Downloads = () => {
 
       {/* Nav */}
       <header className="relative z-10 flex items-center justify-between px-8 py-6 border-b border-white/[0.05] bg-[#050506]/40 backdrop-blur-2xl">
-        <button onClick={() => navigate("/")} className="flex items-center gap-4 text-white/30 hover:text-white transition-colors">
+        <button onClick={() => navigate("/")} className="flex items-center gap-4 text-white/60 hover:text-white transition-colors">
           <ArrowLeft className="h-4 w-4" />
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-[0_0_20px_rgba(255,255,255,0.15)]">
@@ -42,14 +42,14 @@ const Downloads = () => {
         {/* Badge */}
         <div className="mb-10 flex items-center gap-3 rounded-full border border-white/5 bg-white/[0.03] px-6 py-3">
           <Globe className="h-3.5 w-3.5 text-primary" />
-          <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Web App · Sin instalación</span>
+          <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em] font-display">Web App · Sin instalación</span>
         </div>
 
         <h1 className="max-w-3xl text-center text-5xl font-bold leading-none tracking-tight font-display md:text-7xl mb-6">
           Funciona en<br />
           <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">cualquier dispositivo</span>
         </h1>
-        <p className="text-center text-base text-white/30 font-medium max-w-lg leading-relaxed mb-16">
+        <p className="text-center text-base text-white/60 font-medium max-w-lg leading-relaxed mb-16">
           Creator IA Pro es una aplicación web — no necesitas descargar nada.
           Abre el navegador, inicia sesión y listo.
         </p>
@@ -62,7 +62,7 @@ const Downloads = () => {
             </div>
             <div>
               <h3 className="text-2xl font-bold text-white font-display tracking-tight mb-2">Web App</h3>
-              <p className="text-sm text-white/40 font-medium max-w-sm">
+              <p className="text-sm text-white/60 font-medium max-w-sm">
                 Disponible en cualquier navegador moderno — Chrome, Safari, Firefox, Edge.
                 La misma experiencia en todos tus dispositivos.
               </p>
@@ -95,7 +95,7 @@ const Downloads = () => {
         </div>
 
         {/* Devices illustration */}
-        <div className="mt-16 flex items-center gap-6 text-white/10">
+        <div className="mt-16 flex items-center gap-6 text-white/50">
           <div className="flex flex-col items-center gap-2">
             <Monitor className="h-8 w-8" />
             <span className="text-[10px] font-bold uppercase tracking-widest">Desktop</span>
@@ -124,7 +124,7 @@ const Downloads = () => {
                 <f.icon className="h-5 w-5" />
               </div>
               <h3 className="text-sm font-bold text-white font-display tracking-tight mb-2">{f.title}</h3>
-              <p className="text-[11px] text-white/30 leading-relaxed font-medium">{f.desc}</p>
+              <p className="text-[11px] text-white/60 leading-relaxed font-medium">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -132,13 +132,13 @@ const Downloads = () => {
         {/* Also show credits feature */}
         <div className="mt-10 flex items-center gap-3 rounded-full border border-primary/10 bg-primary/[0.04] px-6 py-3">
           <Zap className="h-3.5 w-3.5 text-primary" />
-          <span className="text-[11px] font-medium text-white/40">
+          <span className="text-[11px] font-medium text-white/60">
             Plan gratuito incluye <span className="text-white/70 font-bold">créditos de prueba</span> — sin tarjeta de crédito
           </span>
         </div>
 
         <footer className="mt-24 w-full max-w-5xl border-t border-white/[0.05] pt-8 text-center">
-          <p className="text-[10px] text-white/15 font-bold uppercase tracking-[0.3em] font-display">
+          <p className="text-[10px] text-white/50 font-bold uppercase tracking-[0.3em] font-display">
             © {new Date().getFullYear()} Creator IA Pro — Todos los derechos reservados.
           </p>
         </footer>

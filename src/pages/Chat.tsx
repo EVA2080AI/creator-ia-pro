@@ -124,21 +124,21 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
             <Code2 className="h-3.5 w-3.5 text-[#8AB4F8]" />
           </div>
           <span className="text-[13px] font-black text-white tracking-tight">Genesis</span>
-          <ChevronDown className="h-3 w-3 text-white/20 ml-auto" />
+          <ChevronDown className="h-3 w-3 text-white/50 ml-auto" />
         </div>
 
         {/* Nav */}
         <div className="px-2 py-2 border-b border-white/[0.05]">
           <button onClick={() => navigate('/dashboard')}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all">
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/60 hover:text-white hover:bg-white/[0.04] transition-all">
             <Home className="h-3.5 w-3.5 shrink-0" />
             Home
           </button>
           <button onClick={onOpenSearch}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all">
+            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium text-white/60 hover:text-white hover:bg-white/[0.04] transition-all">
             <Search className="h-3.5 w-3.5 shrink-0" />
             <span className="flex-1 text-left">Buscar</span>
-            <kbd className="text-[9px] text-white/20 font-mono px-1.5 py-0.5 rounded border border-white/[0.08]">⌘K</kbd>
+            <kbd className="text-[9px] text-white/50 font-mono px-1.5 py-0.5 rounded border border-white/[0.08]">⌘K</kbd>
           </button>
         </div>
 
@@ -149,13 +149,13 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Filtrar proyectos..."
-            className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-1.5 text-[11px] text-white/60 placeholder:text-white/20 outline-none focus:border-white/[0.12] focus:bg-white/[0.06] transition-all"
+            className="w-full bg-white/[0.04] border border-white/[0.06] rounded-lg px-3 py-1.5 text-[11px] text-white/60 placeholder:text-white/50 outline-none focus:border-white/[0.12] focus:bg-white/[0.06] transition-all"
           />
         </div>
 
         {/* Projects */}
         <div className="px-4 pt-4 pb-2">
-          <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mb-2">Proyectos</p>
+          <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.3em] mb-2">Proyectos</p>
         </div>
         <div className="px-2 flex flex-col gap-0.5">
           {[
@@ -167,14 +167,14 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
               disabled={item.disabled}
               className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-medium transition-all ${
                 item.disabled
-                  ? 'text-white/20 cursor-not-allowed'
-                  : 'text-white/40 hover:text-white hover:bg-white/[0.04]'
+                  ? 'text-white/50 cursor-not-allowed'
+                  : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
               }`}>
               <item.icon className="h-3.5 w-3.5 shrink-0" />
               <span className="flex-1 text-left">{item.label}</span>
               {item.disabled
-                ? <span className="text-[8px] text-white/15 font-bold uppercase tracking-wider">Pronto</span>
-                : item.count > 0 && <span className="text-[10px] text-white/20">{item.count}</span>
+                ? <span className="text-[8px] text-white/50 font-bold uppercase tracking-wider">Pronto</span>
+                : item.count > 0 && <span className="text-[10px] text-white/50">{item.count}</span>
               }
             </button>
           ))}
@@ -184,12 +184,12 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
         {projects.length > 0 && (
           <>
             <div className="px-4 pt-4 pb-2">
-              <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em]">Recientes</p>
+              <p className="text-[10px] font-bold text-white/50 uppercase tracking-[0.3em]">Recientes</p>
             </div>
             <div className="px-2 flex flex-col gap-0.5 flex-1 overflow-y-auto pb-2 custom-scrollbar">
               {projects.slice(0, 8).map(p => (
                 <button key={p.id} onClick={() => onSelectProject(p)}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium text-white/40 hover:text-white hover:bg-white/[0.04] transition-all text-left group">
+                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-medium text-white/60 hover:text-white hover:bg-white/[0.04] transition-all text-left group">
                   <div className="h-2 w-2 rounded-sm shrink-0" style={{ background: 'rgba(138,180,248,0.3)', border: '1px solid rgba(138,180,248,0.3)' }} />
                   <span className="truncate flex-1">{p.name}</span>
                   <Trash2 
@@ -234,7 +234,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
             <div className="relative rounded-[28px] overflow-hidden shadow-2xl transition-all"
               style={{ background: '#18181b', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 80px rgba(0,0,0,0.7)' }}>
               
-              <div className="absolute top-6 left-6 text-white/20">
+              <div className="absolute top-6 left-6 text-white/50">
                 <Plus className="h-5 w-5" />
               </div>
               
@@ -244,7 +244,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                 onInput={handleTextareaInput}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
                 placeholder="Describe qué quieres construir..."
-                className="w-full bg-transparent pl-14 pr-32 pt-6 pb-6 text-[16px] font-medium text-white placeholder:text-white/20 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px]"
+                className="w-full bg-transparent pl-14 pr-32 pt-6 pb-6 text-[16px] font-medium text-white placeholder:text-white/50 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px]"
                 rows={1}
                 style={{ overflowY: 'hidden' }}
               />
@@ -252,7 +252,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
               <div className="absolute bottom-4 right-4 flex items-center gap-2">
                 <button onClick={onMic}
                   aria-label={isListening ? 'Detener grabación de voz' : 'Activar dictado por voz'}
-                  className={`flex items-center justify-center p-2 rounded-full transition-all ${isListening ? 'text-red-400 bg-red-400/10 animate-pulse' : 'text-white/20 hover:text-white hover:bg-white/[0.08]'}`}>
+                  className={`flex items-center justify-center p-2 rounded-full transition-all ${isListening ? 'text-red-400 bg-red-400/10 animate-pulse' : 'text-white/50 hover:text-white hover:bg-white/[0.08]'}`}>
                   <Mic className="h-4 w-4" aria-hidden="true" />
                 </button>
                 <button
@@ -309,7 +309,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                   {filteredProjects.length === 0 && (
                     <div className="col-span-full flex flex-col items-center gap-3 py-6">
                       <span className="text-4xl">✨</span>
-                      <p className="text-[13px] text-white/40 text-center">Escribe un prompt arriba para crear tu primer proyecto</p>
+                      <p className="text-[13px] text-white/60 text-center">Escribe un prompt arriba para crear tu primer proyecto</p>
                     </div>
                   )}
                 </div>
@@ -326,7 +326,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                           <Clock className="h-4 w-4 text-primary" />
                         </div>
                         <p className="text-[13px] font-bold text-white/80 group-hover:text-white truncate mt-1">{p.name}</p>
-                        <p className="text-[10px] text-white/25">
+                        <p className="text-[10px] text-white/50">
                           {new Date(p.updated_at ?? p.created_at ?? Date.now()).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
                         </p>
                         <Trash2 
@@ -339,7 +339,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                   {projects.length === 0 && (
                     <div className="col-span-full flex flex-col items-center gap-3 py-6">
                       <span className="text-4xl">🕐</span>
-                      <p className="text-[13px] text-white/40">Tus proyectos recientes aparecerán aquí</p>
+                      <p className="text-[13px] text-white/60">Tus proyectos recientes aparecerán aquí</p>
                     </div>
                   )}
                 </div>
@@ -659,7 +659,7 @@ export default function Chat() {
               <div className="w-full max-w-2xl h-[80vh] bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-2xl">
                 <div className="px-6 py-4 border-b border-border"><h3 className="text-sm font-bold flex items-center gap-2"><History className="h-4 w-4 text-muted-foreground" /> Snapshots</h3></div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-                  {snapshots.length === 0 ? <p className="text-center text-muted-foreground py-20 uppercase tracking-widest text-[10px]">No snapshots</p> : snapshots.map((s, i) => <div key={s.id} className="p-4 rounded-xl bg-white/[0.02] border border-border flex justify-between items-center"><div className="flex items-center gap-4"><div className="h-10 w-10 flex items-center justify-center bg-muted/20 border border-border rounded-lg">{i}</div><div><p className="text-[13px] font-bold text-white">{s.label}</p><p className="text-[11px] text-white/40">{Object.keys(s.files).length} files</p></div></div><button onClick={() => { updateProjectFiles(activeProject.id, s.files); setPanelView('preview'); }} className="text-[11px] font-bold hover:text-primary transition-colors">Restore</button></div>)}
+                  {snapshots.length === 0 ? <p className="text-center text-muted-foreground py-20 uppercase tracking-widest text-[10px]">No snapshots</p> : snapshots.map((s, i) => <div key={s.id} className="p-4 rounded-xl bg-white/[0.02] border border-border flex justify-between items-center"><div className="flex items-center gap-4"><div className="h-10 w-10 flex items-center justify-center bg-muted/20 border border-border rounded-lg">{i}</div><div><p className="text-[13px] font-bold text-white">{s.label}</p><p className="text-[11px] text-white/60">{Object.keys(s.files).length} files</p></div></div><button onClick={() => { updateProjectFiles(activeProject.id, s.files); setPanelView('preview'); }} className="text-[11px] font-bold hover:text-primary transition-colors">Restore</button></div>)}
                 </div>
               </div>
             </div>

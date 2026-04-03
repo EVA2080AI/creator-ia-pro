@@ -197,7 +197,7 @@ function ProductSection({ p, i, navigate }: { p: typeof PRODUCTS[0]; i: number; 
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex gap-1">
                     {(p.preview as any[]).map((f: any) => (
-                      <div key={f.label} className={`px-2 py-1 rounded text-[8px] font-bold ${f.active ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-300'}`}>{f.label}</div>
+                      <div key={f.label} className={`px-2 py-1 rounded text-[8px] font-bold ${f.active ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-500'}`}>{f.label}</div>
                     ))}
                   </div>
                 </div>
@@ -238,13 +238,13 @@ function ProductSection({ p, i, navigate }: { p: typeof PRODUCTS[0]; i: number; 
                     <Sparkles className="h-3 w-3 text-primary" />
                     <span className="text-[9px] font-bold text-primary">Claude 4.6</span>
                   </div>
-                  <span className="text-[9px] text-zinc-300">Generando App.tsx…</span>
+                  <span className="text-[9px] text-zinc-500">Generando App.tsx…</span>
                 </div>
               </div>
             ) : (
               /* Studio preview */
               <div className="p-5">
-                <div className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest mb-3">Herramientas disponibles</div>
+                <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Herramientas disponibles</div>
                 <div className="grid grid-cols-2 gap-2">
                   {(p.preview as any[]).map((t: any, ti: number) => (
                     <motion.div
@@ -259,13 +259,13 @@ function ProductSection({ p, i, navigate }: { p: typeof PRODUCTS[0]; i: number; 
                       </div>
                       <div>
                         <div className="text-[9px] font-bold text-zinc-600">{t.tool}</div>
-                        <div className="text-[8px] text-zinc-300">{t.cr} crédito{t.cr > 1 ? 's' : ''}</div>
+                        <div className="text-[8px] text-zinc-500">{t.cr} crédito{t.cr > 1 ? 's' : ''}</div>
                       </div>
                     </motion.div>
                   ))}
                 </div>
                 <div className="mt-3 w-full h-24 rounded-xl bg-gradient-to-br from-violet-50 via-zinc-50 to-cyan-50 border border-zinc-200 flex items-center justify-center">
-                  <span className="text-[10px] text-zinc-300">Preview en tiempo real</span>
+                  <span className="text-[10px] text-zinc-500">Preview en tiempo real</span>
                 </div>
               </div>
             )}
@@ -550,7 +550,7 @@ export default function Index() {
                   className="flex shrink-0 gap-8 pr-8"
                 >
                   {MARQUEE_ITEMS.map((item, i) => (
-                    <div key={`${copy}-${i}`} className="flex items-center gap-2 text-zinc-300 whitespace-nowrap">
+                    <div key={`${copy}-${i}`} className="flex items-center gap-2 text-zinc-500 whitespace-nowrap">
                       <item.icon className="h-3.5 w-3.5 text-primary/50" />
                       <span className="text-[11px] font-bold uppercase tracking-[0.2em]">{item.label}</span>
                       <span className="text-zinc-200 mx-2">·</span>
@@ -579,7 +579,7 @@ export default function Index() {
                 </div>
                 <div className="flex-1 mx-3 h-5 rounded bg-zinc-50 flex items-center px-2.5 gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
-                  <span className="text-[10px] text-zinc-300 font-mono">creator-ia.com/studio</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">creator-ia.com/studio</span>
                 </div>
               </div>
 
@@ -587,7 +587,7 @@ export default function Index() {
               <div className="flex h-72">
                 {/* Sidebar */}
                 <div className="w-52 shrink-0 border-r border-zinc-200 bg-zinc-50 p-3 flex flex-col gap-1">
-                  <div className="text-[8px] font-bold text-zinc-300 uppercase tracking-[0.3em] px-2 py-2">Herramientas</div>
+                  <div className="text-[8px] font-bold text-zinc-500 uppercase tracking-[0.3em] px-2 py-2">Herramientas</div>
                   {[
                     { name: "Crear imagen", color: "#a855f7", active: true },
                     { name: "Diseñar logo",  color: "#00c2ff" },
@@ -613,7 +613,7 @@ export default function Index() {
 
                 {/* Input panel */}
                 <div className="w-52 shrink-0 border-r border-zinc-200 bg-zinc-50 p-4 flex flex-col gap-3">
-                  <div className="text-[8px] font-bold text-zinc-300 uppercase tracking-widest">Prompt</div>
+                  <div className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Prompt</div>
                   <div className="flex-1 rounded-lg bg-zinc-50 border border-zinc-200 p-2">
                     <div className="text-[9px] text-zinc-400 leading-relaxed">Un gato astronauta en Marte al atardecer, estilo fotorrealista, luz dorada…</div>
                     <motion.div
@@ -623,7 +623,7 @@ export default function Index() {
                     />
                   </div>
                   <div className="flex items-center justify-between text-[8px]">
-                    <span className="text-zinc-300">FLUX Schnell · 2cr</span>
+                    <span className="text-zinc-500">FLUX Schnell · 2cr</span>
                   </div>
                   <div className="w-full py-1.5 rounded-lg bg-primary text-white text-[8px] font-black text-center">Generar</div>
                 </div>
@@ -847,13 +847,13 @@ export default function Index() {
           <footer className="border-t border-zinc-200 px-6 md:px-12 py-8">
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
               <Logo size="sm" showText showPro />
-              <div className="flex items-center gap-6 text-[11px] text-zinc-300">
+              <div className="flex items-center gap-6 text-[11px] text-zinc-500">
                 <button onClick={() => navigate("/pricing")} className="hover:text-zinc-900 transition-colors">Precios</button>
                 <button onClick={() => navigate("/hub")} className="hover:text-zinc-900 transition-colors">Templates</button>
                 <button onClick={() => navigate("/system-status")} className="hover:text-zinc-900 transition-colors">Status</button>
                 <button onClick={() => navigate("/descargar")} className="hover:text-zinc-900 transition-colors">Descargar app</button>
               </div>
-              <p className="text-[11px] text-zinc-300">© 2026 Creator IA Pro</p>
+              <p className="text-[11px] text-zinc-500">© 2026 Creator IA Pro</p>
             </div>
           </footer>
         </main>

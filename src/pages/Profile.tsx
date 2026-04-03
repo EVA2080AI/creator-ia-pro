@@ -129,8 +129,8 @@ const Profile = () => {
                     </>
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                      <User className="w-7 h-7 text-zinc-300" />
-                      <span className="text-[9px] text-zinc-300 font-bold group-hover:text-zinc-400 transition-colors">Subir</span>
+                      <User className="w-7 h-7 text-zinc-500" />
+                      <span className="text-[9px] text-zinc-500 font-bold group-hover:text-zinc-400 transition-colors">Subir</span>
                     </div>
                   )}
                 </button>
@@ -151,7 +151,7 @@ const Profile = () => {
                 <div>
                   <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Correo electrónico</label>
                   <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200">
-                    <Mail className="w-4 h-4 text-zinc-300 shrink-0" />
+                    <Mail className="w-4 h-4 text-zinc-500 shrink-0" />
                     <span className="text-sm text-zinc-400">{user?.email}</span>
                     <span className="ml-auto text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Verificado</span>
                   </div>
@@ -164,7 +164,7 @@ const Profile = () => {
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
                     placeholder="Tu nombre..."
-                    className="w-full px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 focus:border-primary/40 focus:outline-none text-sm text-zinc-900 placeholder:text-zinc-300 transition-colors"
+                    className="w-full px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 focus:border-primary/40 focus:outline-none text-sm text-zinc-900 placeholder:text-zinc-500 transition-colors"
                   />
                 </div>
                 <div className="flex justify-end">
@@ -256,14 +256,14 @@ const Profile = () => {
               <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Detalles de cuenta</h2>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <Calendar className="w-4 h-4 text-zinc-300 shrink-0" />
+                  <Calendar className="w-4 h-4 text-zinc-500 shrink-0" />
                   <div>
                     <p className="text-xs text-zinc-400">Miembro desde</p>
                     <p className="text-sm font-medium text-zinc-600">{joinDate}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Bell className="w-4 h-4 text-zinc-300 shrink-0" />
+                  <Bell className="w-4 h-4 text-zinc-500 shrink-0" />
                   <div>
                     <p className="text-xs text-zinc-400">Notificaciones</p>
                     <p className="text-sm font-medium text-zinc-600">Activas</p>
@@ -288,7 +288,7 @@ const Profile = () => {
                 <Download className="w-4 h-4 text-primary/60" />
                 Descargar App
               </div>
-              <ChevronRight className="w-4 h-4 text-zinc-300" />
+              <ChevronRight className="w-4 h-4 text-zinc-500" />
             </button>
 
             {/* Sign out */}

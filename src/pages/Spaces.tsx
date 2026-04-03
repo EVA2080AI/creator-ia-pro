@@ -155,7 +155,7 @@ const Spaces = () => {
                   item.active ? 'bg-zinc-100 text-zinc-900 border border-zinc-200' : 'text-zinc-400 hover:bg-zinc-50 hover:text-zinc-900'
                 }`}
               >
-                <item.icon className={`h-4 w-4 shrink-0 ${item.active ? 'text-primary' : 'text-zinc-300'}`} />
+                <item.icon className={`h-4 w-4 shrink-0 ${item.active ? 'text-primary' : 'text-zinc-500'}`} />
                 {item.label}
               </button>
             ))}
@@ -182,12 +182,12 @@ const Spaces = () => {
             {/* Top bar */}
             <div className="flex items-center gap-3 mb-6">
               <div className="relative flex-1 max-w-md group">
-                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300 group-focus-within:text-primary/60 transition-colors pointer-events-none" />
+                <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 group-focus-within:text-primary/60 transition-colors pointer-events-none" />
                 <Input
                   placeholder="Buscar en Spaces..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="bg-zinc-50 border-zinc-200 pl-11 h-10 rounded-xl text-[13px] text-zinc-900 placeholder:text-zinc-300 focus:border-primary/30 focus:ring-0 transition-all"
+                  className="bg-zinc-50 border-zinc-200 pl-11 h-10 rounded-xl text-[13px] text-zinc-900 placeholder:text-zinc-500 focus:border-primary/30 focus:ring-0 transition-all"
                 />
               </div>
 
@@ -205,11 +205,11 @@ const Spaces = () => {
               {/* View toggle */}
               <div className="flex items-center gap-0.5 bg-zinc-50 border border-zinc-200 rounded-xl p-1">
                 <button onClick={() => setViewMode('grid')}
-                  className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-300 hover:text-zinc-900'}`}>
+                  className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}>
                   <LayoutGrid className="h-3.5 w-3.5" />
                 </button>
                 <button onClick={() => setViewMode('list')}
-                  className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-300 hover:text-zinc-900'}`}>
+                  className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-zinc-100 text-zinc-900' : 'text-zinc-500 hover:text-zinc-900'}`}>
                   <List className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -217,9 +217,9 @@ const Spaces = () => {
 
             {/* Section label */}
             <div className="flex items-center gap-2 mb-4">
-              <HardDrive className="h-4 w-4 text-zinc-300" />
+              <HardDrive className="h-4 w-4 text-zinc-500" />
               <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.25em] font-display">Mis Spaces</span>
-              <span className="text-[10px] text-zinc-300 ml-1">— {filtered.length}</span>
+              <span className="text-[10px] text-zinc-500 ml-1">— {filtered.length}</span>
             </div>
 
             {/* Content */}
@@ -238,7 +238,7 @@ const Spaces = () => {
                 <p className="text-[14px] font-bold text-zinc-400 font-display mb-1">
                   {search ? "Sin resultados" : "Crea tu primer Space"}
                 </p>
-                <p className="text-[12px] text-zinc-300">
+                <p className="text-[12px] text-zinc-500">
                   {search ? "Prueba con otro término" : "Organiza proyectos y activos creativos"}
                 </p>
               </div>
@@ -268,9 +268,9 @@ const Spaces = () => {
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
                           <h3 className="text-[13px] font-bold text-zinc-700 group-hover:text-zinc-900 transition-colors font-display truncate">{space.name}</h3>
-                          <p className="text-[10px] text-zinc-300 mt-0.5">{new Date(space.updated_at).toLocaleDateString('es', { day: 'numeric', month: 'short' })}</p>
+                          <p className="text-[10px] text-zinc-500 mt-0.5">{new Date(space.updated_at).toLocaleDateString('es', { day: 'numeric', month: 'short' })}</p>
                           {space.description && (
-                            <p className="text-[11px] text-zinc-300 mt-1.5 line-clamp-2 leading-relaxed">{space.description}</p>
+                            <p className="text-[11px] text-zinc-500 mt-1.5 line-clamp-2 leading-relaxed">{space.description}</p>
                           )}
                         </div>
                         <button
@@ -279,7 +279,7 @@ const Spaces = () => {
                         >
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                              <span className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-300 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+                              <span className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
                                 <MoreVertical className="h-3.5 w-3.5" />
                               </span>
                             </DropdownMenuTrigger>
@@ -297,8 +297,8 @@ const Spaces = () => {
                         </button>
                       </div>
                       <div className="mt-3 pt-3 border-t border-zinc-200 flex items-center justify-between">
-                        <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest font-display">Abrir Canvas</span>
-                        <ChevronRight className="h-3.5 w-3.5 text-zinc-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest font-display">Abrir Canvas</span>
+                        <ChevronRight className="h-3.5 w-3.5 text-zinc-500 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                       </div>
                     </div>
                   </div>
@@ -307,7 +307,7 @@ const Spaces = () => {
             ) : (
               /* List view — Google Drive-like */
               <div className="flex flex-col gap-0.5">
-                <div className="grid grid-cols-[1fr_140px_120px_40px] px-4 py-2 text-[10px] font-bold text-zinc-300 uppercase tracking-widest font-display border-b border-zinc-200">
+                <div className="grid grid-cols-[1fr_140px_120px_40px] px-4 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-display border-b border-zinc-200">
                   <span>Nombre</span><span>Modificado</span><span>Descripción</span><span />
                 </div>
                 {filtered.map((space) => (
@@ -319,16 +319,16 @@ const Spaces = () => {
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-zinc-50 border border-zinc-200 group-hover:border-primary/30 group-hover:bg-primary/10 transition-colors">
                         {space.thumbnail_url
                           ? <img src={space.thumbnail_url} className="w-full h-full object-cover rounded-xl" />
-                          : <BookOpen className="h-3.5 w-3.5 text-zinc-300 group-hover:text-primary transition-colors" />
+                          : <BookOpen className="h-3.5 w-3.5 text-zinc-500 group-hover:text-primary transition-colors" />
                         }
                       </div>
                       <span className="text-[13px] font-medium text-zinc-600 group-hover:text-zinc-900 transition-colors truncate">{space.name}</span>
                     </div>
-                    <span className="text-[11px] text-zinc-300">{new Date(space.updated_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                    <span className="text-[11px] text-zinc-300 truncate pr-4">{space.description || '—'}</span>
+                    <span className="text-[11px] text-zinc-500">{new Date(space.updated_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                    <span className="text-[11px] text-zinc-500 truncate pr-4">{space.description || '—'}</span>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                        <button className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-300 hover:text-zinc-900 hover:bg-zinc-100 opacity-0 group-hover:opacity-100 transition-all">
+                        <button className="h-7 w-7 flex items-center justify-center rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 opacity-0 group-hover:opacity-100 transition-all">
                           <MoreVertical className="h-3.5 w-3.5" />
                         </button>
                       </DropdownMenuTrigger>
@@ -422,7 +422,7 @@ const Spaces = () => {
           <DialogFooter className="gap-4 mt-4">
             <button
               onClick={() => setIsDialogOpen(false)}
-              className="flex-1 px-8 py-4 rounded-2xl border border-zinc-200 text-xs font-bold uppercase tracking-widest text-zinc-300 hover:text-zinc-900 hover:bg-zinc-100 transition-all font-display"
+              className="flex-1 px-8 py-4 rounded-2xl border border-zinc-200 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all font-display"
             >
               Cancelar
             </button>

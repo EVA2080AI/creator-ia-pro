@@ -79,12 +79,12 @@ export function ModelSelector({ selectedModelId, onModelChange, filterType }: Mo
             </div>
             <div className="flex flex-col items-start min-w-0">
               <span className="text-[13px] font-semibold text-white truncate">{selectedModel.name}</span>
-              <span className="text-[10px] text-white/25 mt-0.5">
+              <span className="text-[10px] text-white/60 mt-0.5">
                 {selectedModel.tokenCost} crédito{selectedModel.tokenCost > 1 ? "s" : ""}
               </span>
             </div>
           </div>
-          <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 text-white/20 group-hover:text-white/50 transition-colors" />
+          <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 text-white/60 group-hover:text-white/60 transition-colors" />
         </Button>
       </PopoverTrigger>
 
@@ -100,19 +100,19 @@ export function ModelSelector({ selectedModelId, onModelChange, filterType }: Mo
           <div className="flex items-center border-b border-white/[0.06] px-4">
             <CommandInput
               placeholder="Buscar modelo..."
-              className="h-11 text-sm border-none bg-transparent focus:ring-0 placeholder:text-white/20"
+              className="h-11 text-sm border-none bg-transparent focus:ring-0 placeholder:text-white/60"
             />
           </div>
 
           <CommandList className="max-h-[320px] overflow-y-auto p-2">
-            <CommandEmpty className="py-8 text-center text-xs text-white/20 font-medium">
+            <CommandEmpty className="py-8 text-center text-xs text-white/60 font-medium">
               Sin resultados.
             </CommandEmpty>
 
             {imageModels.length > 0 && (
               <CommandGroup
                 heading={
-                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.25em] px-2 py-1 flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.25em] px-2 py-1 flex items-center gap-1.5">
                     <ImageIcon className="w-3 h-3" /> Imagen
                   </span>
                 }
@@ -131,7 +131,7 @@ export function ModelSelector({ selectedModelId, onModelChange, filterType }: Mo
             {textModels.length > 0 && (
               <CommandGroup
                 heading={
-                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.25em] px-2 py-1 flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.25em] px-2 py-1 flex items-center gap-1.5">
                     <Cpu className="w-3 h-3" /> Texto
                   </span>
                 }
@@ -183,23 +183,23 @@ function ModelItem({
         )} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={cn("text-[13px] font-semibold truncate", isSelected ? "text-white" : "text-white/50")}>
+            <span className={cn("text-[13px] font-semibold truncate", isSelected ? "text-white" : "text-white/60")}>
               {model.name}
             </span>
             {model.badge && (
-              <Badge className="text-[9px] h-4 px-2 py-0 bg-white/5 text-white/30 border-none font-semibold">
+              <Badge className="text-[9px] h-4 px-2 py-0 bg-white/5 text-white/60 border-none font-semibold">
                 {model.badge}
               </Badge>
             )}
           </div>
-          <p className="text-[10px] text-white/20 mt-0.5 truncate">{model.description}</p>
+          <p className="text-[10px] text-white/60 mt-0.5 truncate">{model.description}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-2 shrink-0 ml-3">
         <div className="flex items-center gap-1 bg-white/[0.04] px-2 py-0.5 rounded-lg">
           <Zap className="h-2.5 w-2.5 text-primary" />
-          <span className="text-[10px] font-bold text-white/30 tabular-nums">{model.tokenCost}</span>
+          <span className="text-[10px] font-bold text-white/60 tabular-nums">{model.tokenCost}</span>
         </div>
         {isSelected && <Check className="h-3.5 w-3.5 text-primary" />}
       </div>

@@ -486,11 +486,11 @@ const Hub = () => {
                 transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
                 className="w-12 h-12 rounded-2xl bg-zinc-100 border border-dashed border-zinc-200 flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/30 transition-all"
               >
-                <Plus className="w-5 h-5 text-zinc-300 group-hover:text-primary transition-colors" />
+                <Plus className="w-5 h-5 text-zinc-500 group-hover:text-primary transition-colors" />
               </motion.div>
               <div className="text-center space-y-1">
                 <p className="text-xs font-bold text-zinc-400 group-hover:text-zinc-900 transition-colors uppercase tracking-widest font-display">Lienzo en Blanco</p>
-                <p className="text-[10px] text-zinc-300 font-display uppercase tracking-[0.15em]">Empieza desde cero</p>
+                <p className="text-[10px] text-zinc-500 font-display uppercase tracking-[0.15em]">Empieza desde cero</p>
               </div>
             </motion.button>
 

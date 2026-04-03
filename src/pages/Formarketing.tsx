@@ -1137,7 +1137,7 @@ function FormarketingContent() {
           </div>
           <div className="space-y-3 max-w-xs">
             <h2 className="text-xl font-bold text-white font-display">Experiencia de escritorio</h2>
-            <p className="text-sm text-white/40 leading-relaxed">Canvas IA requiere pantalla grande y teclado para la mejor experiencia creativa.</p>
+            <p className="text-sm text-white/60 leading-relaxed">Canvas IA requiere pantalla grande y teclado para la mejor experiencia creativa.</p>
           </div>
           <button
             onClick={() => navigate('/dashboard')}
@@ -1147,7 +1147,7 @@ function FormarketingContent() {
           </button>
           <button
             onClick={() => setIsMobile(false)}
-            className="text-xs text-white/20 hover:text-white/50 transition-colors"
+            className="text-xs text-white/50 hover:text-white/50 transition-colors"
           >
             Continuar de todas formas
           </button>
@@ -1158,18 +1158,18 @@ function FormarketingContent() {
       {showOnboarding && !isMobile && (
         <div className="fixed bottom-8 right-8 z-[150] w-80 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-3xl p-6 shadow-2xl border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between mb-5">
-            <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] font-display">Primeros pasos</span>
-            <button onClick={dismissOnboarding} className="text-white/20 hover:text-white/60 transition-colors text-xs">Saltar</button>
+            <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em] font-display">Primeros pasos</span>
+            <button onClick={dismissOnboarding} className="text-white/50 hover:text-white/60 transition-colors text-xs">Saltar</button>
           </div>
           <div className="space-y-4">
             {ONBOARDING_STEPS.map((step, i) => (
               <div key={i} className={`flex items-start gap-3 transition-all duration-300 ${i === onboardingStep ? 'opacity-100' : 'opacity-30'}`}>
                 <div className={`p-2 rounded-xl shrink-0 ${i === onboardingStep ? 'bg-primary/20 border border-primary/30' : 'bg-white/5 border border-white/5'}`}>
-                  <step.icon className={`w-4 h-4 ${i === onboardingStep ? 'text-primary' : 'text-white/20'}`} />
+                  <step.icon className={`w-4 h-4 ${i === onboardingStep ? 'text-primary' : 'text-white/50'}`} />
                 </div>
                 <div>
                   <p className="text-xs font-bold text-white/80">{step.title}</p>
-                  {i === onboardingStep && <p className="text-[11px] text-white/40 mt-1 leading-relaxed">{step.desc}</p>}
+                  {i === onboardingStep && <p className="text-[11px] text-white/60 mt-1 leading-relaxed">{step.desc}</p>}
                 </div>
               </div>
             ))}
@@ -1204,7 +1204,7 @@ function FormarketingContent() {
       {/* Canvas Toolbar */}
       <div className="flex h-14 w-full items-center justify-between border-b border-white/[0.06] bg-[#050506]/80 px-5 backdrop-blur-3xl shrink-0 z-[90]">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-xl w-9 h-9 text-white/30 hover:text-white transition-all">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="hover:bg-white/5 rounded-xl w-9 h-9 text-white/60 hover:text-white transition-all">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="h-5 w-px bg-white/[0.06]" />
@@ -1220,7 +1220,7 @@ function FormarketingContent() {
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.06] hover:border-primary/30 hover:bg-primary/5 transition-all"
           >
             <div className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-pulse" aria-hidden="true" />
-            <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">Plantillas</span>
+            <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Plantillas</span>
           </button>
           {/* Quick-add node (HU28) */}
           <button
@@ -1229,22 +1229,22 @@ function FormarketingContent() {
             aria-label="Añadir nodo al canvas"
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.06] hover:border-white/20 hover:bg-white/5 transition-all"
           >
-            <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">+ Nodo</span>
-            <kbd className="text-[9px] font-mono text-white/15 border border-white/[0.06] px-1 rounded" aria-hidden="true">Espacio</kbd>
+            <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">+ Nodo</span>
+            <kbd className="text-[9px] font-mono text-white/50 border border-white/[0.06] px-1 rounded" aria-hidden="true">Espacio</kbd>
           </button>
         </div>
 
         <div className="flex items-center gap-1.5">
           {/* Undo/Redo (HU34) */}
-          <Button variant="ghost" size="icon" onClick={undo} title="Deshacer (Ctrl+Z)" aria-label="Deshacer" className="w-8 h-8 rounded-lg text-white/25 hover:text-white hover:bg-white/5 transition-all">
+          <Button variant="ghost" size="icon" onClick={undo} title="Deshacer (Ctrl+Z)" aria-label="Deshacer" className="w-8 h-8 rounded-lg text-white/50 hover:text-white hover:bg-white/5 transition-all">
             <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={redo} title="Rehacer (Ctrl+Y)" aria-label="Rehacer" className="w-8 h-8 rounded-lg text-white/25 hover:text-white hover:bg-white/5 transition-all">
+          <Button variant="ghost" size="icon" onClick={redo} title="Rehacer (Ctrl+Y)" aria-label="Rehacer" className="w-8 h-8 rounded-lg text-white/50 hover:text-white hover:bg-white/5 transition-all">
             <RotateCw className="w-3.5 h-3.5" aria-hidden="true" />
           </Button>
           <div className="h-5 w-px bg-white/[0.06] mx-1" />
           {/* Auto-layout */}
-          <Button variant="ghost" onClick={autoLayout} title="Auto-organizar (Dagre)" aria-label="Auto-organizar nodos" className="h-8 px-3 rounded-lg text-white/25 hover:text-white hover:bg-white/5 text-xs gap-1.5 transition-all">
+          <Button variant="ghost" onClick={autoLayout} title="Auto-organizar (Dagre)" aria-label="Auto-organizar nodos" className="h-8 px-3 rounded-lg text-white/50 hover:text-white hover:bg-white/5 text-xs gap-1.5 transition-all">
             <LayoutDashboard className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden md:inline text-[10px] font-bold uppercase tracking-wider">Organizar</span>
           </Button>
@@ -1255,7 +1255,7 @@ function FormarketingContent() {
             title="Snap a rejilla"
             aria-label={snapEnabled ? 'Desactivar snap a rejilla' : 'Activar snap a rejilla'}
             aria-pressed={snapEnabled}
-            className={`h-8 px-3 rounded-lg text-xs gap-1.5 transition-all ${snapEnabled ? 'text-primary bg-primary/10' : 'text-white/25 hover:text-white hover:bg-white/5'}`}
+            className={`h-8 px-3 rounded-lg text-xs gap-1.5 transition-all ${snapEnabled ? 'text-primary bg-primary/10' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
           >
             <Grid3X3 className="w-3.5 h-3.5" aria-hidden="true" />
           </Button>
@@ -1266,11 +1266,11 @@ function FormarketingContent() {
             <span className="hidden md:inline">Compartir</span>
           </Button>
           {/* Export */}
-          <Button variant="ghost" onClick={() => setExportOpen(true)} disabled={nodes.length === 0} aria-label="Exportar canvas" className="hidden sm:flex items-center gap-1.5 text-white/25 hover:text-white hover:bg-white/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all disabled:opacity-20">
+          <Button variant="ghost" onClick={() => setExportOpen(true)} disabled={nodes.length === 0} aria-label="Exportar canvas" className="hidden sm:flex items-center gap-1.5 text-white/50 hover:text-white hover:bg-white/5 rounded-xl px-3 h-8 text-[10px] font-bold transition-all disabled:opacity-20">
             <Download className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden md:inline">Exportar</span>
           </Button>
-          <Button variant="ghost" onClick={handleClear} disabled={nodes.length === 0 && edges.length === 0} aria-label="Limpiar canvas" className="text-white/25 hover:text-rose-400 hover:bg-rose-500/5 rounded-xl px-3 h-8 text-[10px] font-bold gap-1.5 transition-all disabled:opacity-20">
+          <Button variant="ghost" onClick={handleClear} disabled={nodes.length === 0 && edges.length === 0} aria-label="Limpiar canvas" className="text-white/50 hover:text-rose-400 hover:bg-rose-500/5 rounded-xl px-3 h-8 text-[10px] font-bold gap-1.5 transition-all disabled:opacity-20">
             <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
             <span className="hidden md:inline">Limpiar</span>
           </Button>
@@ -1352,21 +1352,21 @@ function FormarketingContent() {
             className="flex items-center gap-2 px-4 h-8 w-full text-left"
           >
             <div className={`h-1.5 w-1.5 rounded-full ${execStatus === 'running' ? 'bg-yellow-400 animate-pulse' : execLog.some(l => l.type === 'error') ? 'bg-red-400' : 'bg-[#34d399]'}`} />
-            <Terminal className="w-3 h-3 text-white/20" />
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Execution Log</span>
-            <span className="text-[10px] text-white/20">{execLog.length} eventos</span>
+            <Terminal className="w-3 h-3 text-white/50" />
+            <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">Execution Log</span>
+            <span className="text-[10px] text-white/50">{execLog.length} eventos</span>
             <div className="flex-1" />
-            <span className="text-[10px] text-white/20">{logOpen ? '▼' : '▲'}</span>
+            <span className="text-[10px] text-white/50">{logOpen ? '▼' : '▲'}</span>
           </button>
           {logOpen && (
             <div className="overflow-y-auto h-40 px-4 py-2 space-y-0.5 font-mono">
               {execLog.length === 0 ? (
-                <p className="text-[10px] text-white/20 py-4 text-center">Sin eventos. Ejecuta el flujo para ver logs.</p>
+                <p className="text-[10px] text-white/50 py-4 text-center">Sin eventos. Ejecuta el flujo para ver logs.</p>
               ) : [...execLog].reverse().map((log, i) => (
                 <div key={i} className="flex items-start gap-2 py-0.5">
-                  <span className="text-[9px] text-white/20 shrink-0 w-16">{log.time}</span>
+                  <span className="text-[9px] text-white/50 shrink-0 w-16">{log.time}</span>
                   <span className="text-[9px] font-bold shrink-0 w-20 truncate" style={{ color: log.type === 'error' ? '#f87171' : log.type === 'success' ? '#34d399' : '#8AB4F8' }}>{log.node}</span>
-                  <span className="text-[9px] text-white/40">{log.msg}</span>
+                  <span className="text-[9px] text-white/60">{log.msg}</span>
                 </div>
               ))}
             </div>
@@ -1414,12 +1414,12 @@ function FormarketingContent() {
           <Circle className={`w-2 h-2 fill-current shrink-0 ${
             execStatus === 'running' ? 'text-amber-400 animate-pulse' :
             execStatus === 'success' ? 'text-green-400' :
-            execStatus === 'error'   ? 'text-rose-400' : 'text-white/15'
+            execStatus === 'error'   ? 'text-rose-400' : 'text-white/50'
           }`} />
           <span className={`text-[10px] font-medium ${
             execStatus === 'running' ? 'text-amber-400/70' :
             execStatus === 'success' ? 'text-green-400/70' :
-            execStatus === 'error'   ? 'text-rose-400/70' : 'text-white/20'
+            execStatus === 'error'   ? 'text-rose-400/70' : 'text-white/50'
           }`}>
             {execStatus === 'running' ? `Ejecutando... ${execDone}/${execNodeCount}` :
              execStatus === 'success' ? 'Flujo completado' :
@@ -1427,10 +1427,10 @@ function FormarketingContent() {
           </span>
         </div>
         <div className="h-3 w-px bg-white/[0.06]" />
-        <span className="text-[10px] text-white/15">{nodes.length} nodo{nodes.length !== 1 ? 's' : ''} · {edges.length} conex.</span>
+        <span className="text-[10px] text-white/50">{nodes.length} nodo{nodes.length !== 1 ? 's' : ''} · {edges.length} conex.</span>
         <div className="ml-auto flex items-center gap-3">
-          <span className="text-[10px] text-white/10">Espacio: añadir nodo</span>
-          <span className="text-[10px] text-white/10">Ctrl+Z: deshacer</span>
+          <span className="text-[10px] text-white/50">Espacio: añadir nodo</span>
+          <span className="text-[10px] text-white/50">Ctrl+Z: deshacer</span>
           {snapEnabled && <span className="text-[10px] text-primary/50">Snap ON</span>}
         </div>
       </div>
@@ -1472,12 +1472,12 @@ function TemplateLanding({
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-2 mb-6">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
-            <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">Studio · Plantillas</span>
+            <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Studio · Plantillas</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display mb-4">
             Elige una <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">plantilla</span>
           </h1>
-          <p className="text-sm text-white/30 font-medium max-w-md mx-auto">
+          <p className="text-sm text-white/60 font-medium max-w-md mx-auto">
             Carga el flujo completo en segundos. Puedes editarlo como quieras.
           </p>
         </div>
@@ -1489,7 +1489,7 @@ function TemplateLanding({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar plantilla..."
-              className="w-full h-11 bg-white/[0.03] border border-white/5 rounded-2xl pl-4 pr-4 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-primary/30 transition-all"
+              className="w-full h-11 bg-white/[0.03] border border-white/5 rounded-2xl pl-4 pr-4 text-sm text-white placeholder:text-white/50 focus:outline-none focus:border-primary/30 transition-all"
             />
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -1500,7 +1500,7 @@ function TemplateLanding({
                 className={`px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-widest transition-all font-display ${
                   activeCategory === cat
                     ? 'bg-white text-black'
-                    : 'bg-white/[0.03] border border-white/5 text-white/30 hover:text-white hover:bg-white/[0.06]'
+                    : 'bg-white/[0.03] border border-white/5 text-white/60 hover:text-white hover:bg-white/[0.06]'
                 }`}
               >
                 {cat}
@@ -1523,12 +1523,12 @@ function TemplateLanding({
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-bold text-white truncate font-display tracking-tight">{template.title}</h3>
-                  <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{template.category}</span>
+                  <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest">{template.category}</span>
                 </div>
               </div>
-              <p className="text-[12px] text-white/30 leading-relaxed line-clamp-2">{template.description}</p>
+              <p className="text-[12px] text-white/60 leading-relaxed line-clamp-2">{template.description}</p>
               <div className="mt-4 flex items-center justify-between">
-                <span className="text-[10px] font-bold text-white/15 uppercase tracking-widest">
+                <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">
                   {template.nodes.length} nodo{template.nodes.length !== 1 ? 's' : ''}
                 </span>
                 <span className="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">Usar →</span>
@@ -1541,7 +1541,7 @@ function TemplateLanding({
         <div className="mt-12 text-center">
           <button
             onClick={onSkip}
-            className="text-xs font-bold text-white/20 hover:text-white/50 transition-colors uppercase tracking-widest"
+            className="text-xs font-bold text-white/50 hover:text-white/50 transition-colors uppercase tracking-widest"
           >
             Empezar con canvas vacío →
           </button>

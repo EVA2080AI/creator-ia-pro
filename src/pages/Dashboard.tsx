@@ -247,7 +247,7 @@ const Dashboard = () => {
                   <stat.icon className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold tracking-[0.15em] text-zinc-300 uppercase font-display truncate">{stat.label}</p>
+                  <p className="text-[10px] font-bold tracking-[0.15em] text-zinc-500 uppercase font-display truncate">{stat.label}</p>
                   <p className="text-xl font-bold text-zinc-900 tracking-tight font-display tabular-nums truncate">{stat.value}</p>
                 </div>
               </motion.div>
@@ -261,7 +261,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.2em] font-display">Uso de créditos</h3>
-                  <p className="text-[9px] text-zinc-300 mt-0.5 uppercase tracking-widest font-display">Últimos 7 días</p>
+                  <p className="text-[9px] text-zinc-500 mt-0.5 uppercase tracking-widest font-display">Últimos 7 días</p>
                 </div>
                 <div className="p-2 rounded-xl bg-zinc-100">
                   <TrendingUp className="w-4 h-4 text-primary" />
@@ -276,7 +276,7 @@ const Dashboard = () => {
                         <stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 9, fontWeight: 600 }} dy={10} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 9, fontWeight: 600 }} dy={10} />
                     <YAxis hide />
                     <Tooltip
                       contentStyle={{ background: 'rgba(10,10,11,0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', fontSize: '11px', fontWeight: 600 }}
@@ -294,14 +294,14 @@ const Dashboard = () => {
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h3 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.2em] font-display">Distribución</h3>
-                  <p className="text-[9px] text-zinc-300 mt-0.5 uppercase tracking-widest font-display">Por tipo</p>
+                  <p className="text-[9px] text-zinc-500 mt-0.5 uppercase tracking-widest font-display">Por tipo</p>
                 </div>
                 <div className="p-2 rounded-xl bg-zinc-100">
                   <Box className="w-4 h-4 text-primary" />
                 </div>
               </div>
               {toolData.every(d => d.value === 0) ? (
-                <p className="text-[10px] text-zinc-300 text-center font-bold uppercase tracking-widest mt-8">Sin actividad reciente</p>
+                <p className="text-[10px] text-zinc-500 text-center font-bold uppercase tracking-widest mt-8">Sin actividad reciente</p>
               ) : (
                 <div className="space-y-4">
                   {toolData.map((item) => (
@@ -375,7 +375,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="text-xs font-bold text-zinc-700 group-hover:text-zinc-900 tracking-tight font-display leading-tight">{app.label}</p>
-                    <p className="text-[9px] text-zinc-300 font-bold uppercase tracking-widest mt-0.5 font-display">{app.desc}</p>
+                    <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-0.5 font-display">{app.desc}</p>
                   </div>
                 </motion.button>
               ))}
@@ -419,9 +419,9 @@ const Dashboard = () => {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-bold text-zinc-900 truncate font-display">{space.name}</p>
-                      <p className="text-[10px] text-zinc-300 truncate font-medium">{space.description || "Sin descripción"}</p>
+                      <p className="text-[10px] text-zinc-500 truncate font-medium">{space.description || "Sin descripción"}</p>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-zinc-300 shrink-0 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    <ChevronRight className="w-4 h-4 text-zinc-500 shrink-0 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                   </button>
                 ))}
               </div>

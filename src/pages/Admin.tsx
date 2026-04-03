@@ -155,7 +155,7 @@ function CreditModal({
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className="flex flex-1 items-center justify-center gap-1.5 py-3 text-xs font-medium transition-colors"
-                style={{ color: isActive ? t.color : "rgba(255,255,255,0.35)", borderBottom: isActive ? `2px solid ${t.color}` : "2px solid transparent" }}
+                style={{ color: isActive ? t.color : "rgba(113,113,122,1)", borderBottom: isActive ? `2px solid ${t.color}` : "2px solid transparent" }}
               >
                 <Icon className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">{t.label}</span>
@@ -182,7 +182,7 @@ function CreditModal({
               </div>
               <div>
                 <label htmlFor="admin-reason" className="mb-1.5 block text-xs text-zinc-500">
-                  Razón {tab !== "refund" && <span className="text-zinc-300">(opcional)</span>}
+                  Razón {tab !== "refund" && <span className="text-zinc-500">(opcional)</span>}
                 </label>
                 <input
                   id="admin-reason"
@@ -227,7 +227,7 @@ function CreditModal({
                         {tx.description && (
                           <p className="mt-0.5 truncate text-xs text-zinc-400">{tx.description}</p>
                         )}
-                        <p className="text-[10px] text-zinc-300">{new Date(tx.created_at).toLocaleString()}</p>
+                        <p className="text-[10px] text-zinc-500">{new Date(tx.created_at).toLocaleString()}</p>
                       </div>
                       <span className="ml-3 font-mono text-sm font-bold" style={{ color: tx.amount >= 0 ? "#A855F7" : "#EF4444" }}>
                         {tx.amount >= 0 ? "+" : ""}{tx.amount.toLocaleString()}
@@ -285,7 +285,7 @@ function AdminLoginGate() {
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-300 focus:outline-none focus:border-zinc-300 transition-colors"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-300 transition-colors"
           />
           <input
             type="password"
@@ -294,7 +294,7 @@ function AdminLoginGate() {
             placeholder="Contraseña"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-300 focus:outline-none focus:border-[#A855F7]/40 transition-colors"
+            className="w-full px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200 text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:border-[#A855F7]/40 transition-colors"
           />
           {error && (
             <p className="text-xs text-rose-400 text-center">{error}</p>
@@ -311,7 +311,7 @@ function AdminLoginGate() {
 
         <button
           onClick={() => navigate("/")}
-          className="w-full text-xs text-zinc-300 hover:text-zinc-400 transition-colors text-center"
+          className="w-full text-xs text-zinc-500 hover:text-zinc-400 transition-colors text-center"
         >
           ← Volver al inicio
         </button>
@@ -354,7 +354,7 @@ function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () => void 
           <p className="text-sm text-zinc-400 mt-2">
             Tu cuenta aún no tiene el rol de administrador.
           </p>
-          <p className="text-xs text-zinc-300 mt-1 font-mono">{user?.email}</p>
+          <p className="text-xs text-zinc-500 mt-1 font-mono">{user?.email}</p>
         </div>
 
         <button
@@ -630,7 +630,7 @@ const Admin = () => {
   if (authLoading || adminLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-300" />
+        <Loader2 className="h-8 w-8 animate-spin text-zinc-500" />
       </div>
     );
   }
@@ -757,7 +757,7 @@ const Admin = () => {
             {/* Search + refresh */}
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-300 pointer-events-none" />
+                <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 pointer-events-none" />
                 <input
                   placeholder="Buscar por email o nombre…"
                   value={search}
@@ -777,7 +777,7 @@ const Admin = () => {
             {/* States */}
             {loadingUsers ? (
               <div className="flex flex-col items-center justify-center py-20 gap-3">
-                <Loader2 className="h-6 w-6 animate-spin text-zinc-300" />
+                <Loader2 className="h-6 w-6 animate-spin text-zinc-500" />
                 <p className="text-sm text-zinc-400">Cargando usuarios…</p>
               </div>
             ) : loadError ? (
@@ -851,7 +851,7 @@ const Admin = () => {
                         </div>
 
                         {/* Expand icon */}
-                        <div className="text-zinc-300">
+                        <div className="text-zinc-500">
                           {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                         </div>
                       </div>
@@ -948,7 +948,7 @@ const Admin = () => {
                   );
                 })}
 
-                <p className="text-xs text-zinc-300 px-1">
+                <p className="text-xs text-zinc-500 px-1">
                   {filteredUsers.length} usuario{filteredUsers.length !== 1 ? "s" : ""}
                   {search && ` · filtrado de ${users.length}`}
                 </p>
@@ -994,7 +994,7 @@ const Admin = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.2em]">Consumo de créditos</h3>
-                      <p className="text-[9px] text-zinc-300 mt-0.5 uppercase tracking-widest">Últimos 7 días · todas las cuentas</p>
+                      <p className="text-[9px] text-zinc-500 mt-0.5 uppercase tracking-widest">Últimos 7 días · todas las cuentas</p>
                     </div>
                     <Activity className="h-4 w-4 text-[#A855F7]" />
                   </div>
@@ -1009,7 +1009,7 @@ const Admin = () => {
                             style={{ height: `${Math.max(pct, 5)}%` }}
                             title={`${d.credits.toLocaleString()} créditos`}
                           />
-                          <span className="text-[9px] text-zinc-300 font-bold">{d.name}</span>
+                          <span className="text-[9px] text-zinc-500 font-bold">{d.name}</span>
                         </div>
                       );
                     })}
@@ -1021,9 +1021,9 @@ const Admin = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="text-[11px] font-bold text-zinc-900 uppercase tracking-[0.2em]">Uso por herramienta</h3>
-                      <p className="text-[9px] text-zinc-300 mt-0.5 uppercase tracking-widest">Últimos 30 días</p>
+                      <p className="text-[9px] text-zinc-500 mt-0.5 uppercase tracking-widest">Últimos 30 días</p>
                     </div>
-                    <Layers className="h-4 w-4 text-zinc-300" />
+                    <Layers className="h-4 w-4 text-zinc-500" />
                   </div>
                   {analyticsData.toolUsage.every(t => t.count === 0) ? (
                     <p className="text-xs text-zinc-400 text-center py-6">Sin actividad en este período</p>
@@ -1145,7 +1145,7 @@ const Admin = () => {
                   <div key={r.path} className="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 gap-3">
                     <div className="min-w-0">
                       <span className="font-mono text-xs text-zinc-600 block truncate">{r.path}</span>
-                      <span className="text-[10px] text-zinc-300 truncate">{r.desc}</span>
+                      <span className="text-[10px] text-zinc-500 truncate">{r.desc}</span>
                     </div>
                     <span className="flex items-center gap-1.5 shrink-0 rounded-full bg-green-500/10 border border-green-500/15 px-2.5 py-0.5 text-[10px] font-bold text-green-400">
                       <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
@@ -1209,7 +1209,7 @@ const Admin = () => {
                     </button>
                   </div>
                 </div>
-                <p className="text-[10px] text-zinc-300 leading-relaxed">Configura estas llaves desde tu panel de Bold.co para habilitar cobros e integración con webhooks.</p>
+                <p className="text-[10px] text-zinc-500 leading-relaxed">Configura estas llaves desde tu panel de Bold.co para habilitar cobros e integración con webhooks.</p>
               </div>
 
               <button
