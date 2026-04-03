@@ -39,7 +39,6 @@ const NAV_MAIN = [
 ];
 
 const NAV_SOCIAL = [
-  { path: '/assets',       label: 'Activos',       icon: Image,          requiresPymes: false },
   { path: '/sharescreen',  label: 'Compartir',     icon: Share2,         requiresPymes: false },
   { path: '/history',      label: 'Historial',     icon: History,        requiresPymes: false },
 ];
@@ -62,7 +61,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const { user, signOut } = useAuth();
   const { profile } = useProfile(user?.id);
   const { isAdmin } = useAdmin(user?.id);
-  const { globalExpanded, toggleGlobal, expandGlobal } = useSidebarV2();
+  const { globalExpanded, toggleGlobal, setGlobalExpanded } = useSidebarV2();
   const { groups, workspaceTitle } = useWorkspaceActions();
 
   // Acordión Menu State
@@ -112,7 +111,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const toggleGroup = (id: string) => {
     // Si el sidebar principal está colapsado, abrirlo
     if (!globalExpanded && !isMobile) {
-      expandGlobal();
+      setGlobalExpanded(true);
     }
     setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
   };
