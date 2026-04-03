@@ -55,7 +55,7 @@ const Downloads = () => {
         </p>
 
         {/* Single CTA card */}
-        <div className="w-full max-w-2xl bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2.5rem] border border-white/[0.08] p-10 hover:border-white/[0.12] transition-all duration-500 group">
+        <div className="w-full max-w-2xl bg-white/[0.03] rounded-[2.5rem] border border-white/[0.08] p-10 hover:border-white/[0.12] transition-all duration-500 group">
           <div className="flex flex-col items-center text-center gap-6">
             <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 border border-primary/20 group-hover:scale-105 transition-transform">
               <Globe className="h-9 w-9 text-primary" />
@@ -119,7 +119,7 @@ const Downloads = () => {
             { icon: RefreshCw, title: "Siempre Actualizada",     desc: "Recibes las últimas mejoras automáticamente al abrir.",   color: "text-primary" },
             { icon: Shield,    title: "Procesamiento Seguro",    desc: "Tus archivos se procesan con encriptación E2E.",          color: "text-emerald-400" },
           ].map((f) => (
-            <div key={f.title} className="bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2rem] border border-white/5 p-8 text-center group hover:border-white/10 transition-all duration-500">
+            <div key={f.title} className="bg-white/[0.03] rounded-[2rem] border border-white/5 p-8 text-center group hover:border-white/10 transition-all duration-500">
               <div className={`w-12 h-12 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center mx-auto mb-5 group-hover:scale-110 transition-transform ${f.color}`}>
                 <f.icon className="h-5 w-5" />
               </div>

@@ -281,7 +281,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className="text-[14px] font-bold transition-all relative pb-2 uppercase tracking-widest"
-                  style={activeTab === tab ? { color: 'white' } : { color: 'rgba(255,255,255,0.2)' }}
+                  style={activeTab === tab ? { color: 'white' } : { color: 'rgba(255,255,255,0.5)' }}
                 >
                   {tab === 'projects' ? 'Mis proyectos' : tab === 'recents' ? 'Recientes' : 'Plantillas'}
                   {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary))]" />}

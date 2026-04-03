@@ -1156,7 +1156,7 @@ function FormarketingContent() {
 
       {/* ── Onboarding Overlay (primera visita) ─────────────────────────────── */}
       {showOnboarding && !isMobile && (
-        <div className="fixed bottom-8 right-8 z-[150] w-80 bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-3xl p-6 shadow-2xl border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="fixed bottom-8 right-8 z-[150] w-80 bg-[#111111] rounded-3xl p-6 shadow-2xl border border-white/10 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex items-center justify-between mb-5">
             <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em] font-display">Primeros pasos</span>
             <button onClick={dismissOnboarding} className="text-white/50 hover:text-white/60 transition-colors text-xs">Saltar</button>
@@ -1474,7 +1474,7 @@ function TemplateLanding({
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]" />
             <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.3em]">Studio · Plantillas</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display mb-4">
+          <h1 className="text-4xl md:text-6xl font-bold tracking-tight font-display mb-4 text-white">
             Elige una <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">plantilla</span>
           </h1>
           <p className="text-sm text-white/60 font-medium max-w-md mx-auto">
@@ -1515,7 +1515,7 @@ function TemplateLanding({
             <button
               key={template.id}
               onClick={() => onSelect(template)}
-              className="group bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors rounded-[2rem] border border-white/5 p-6 text-left hover:border-primary/30 hover:scale-[1.02] transition-all duration-300 active:scale-[0.98]"
+              className="group bg-white/[0.03] rounded-[2rem] border border-white/5 p-6 text-left hover:border-primary/30 hover:bg-white/[0.05] hover:scale-[1.02] transition-all duration-300 active:scale-[0.98]"
             >
               <div className="flex items-start gap-4 mb-4">
                 <div className={`w-12 h-12 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${template.color}`}>
