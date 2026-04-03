@@ -130,12 +130,36 @@ export function useStudioProjects() {
   }, []);
 
   const deleteProject = useCallback(async (projectId: string) => {
-    const { error } = await supabase.from('studio_projects').delete().eq('id', projectId);
-    if (error) { toast.error('Error al eliminar proyecto'); return; } // Only remove from UI if DB delete succeeded
+    const { error } = await supabase.from('studio_projects' as any).delete().eq('id', projectId);
+    if (error) { toast.error('Error al eliminar proyecto'); return; }
     setProjects((prev) => prev.filter((p) => p.id !== projectId));
     setActiveProject((prev) => prev?.id === projectId ? null : prev);
     toast.success('Proyecto eliminado');
   }, []);
 
-  return { projects, activeProject, setActiveProject, loading, createProject, updateProjectFiles, renameProject, deleteProject, refetch: fetchProjects };
+  const duplicateProject = useCallback(async (project: StudioProject) => {
+    if (!user) return null;
+    const { data, error } = await supabase
+      .from('studio_projects' as any)
+      .insert({ 
+        user_id: user.id, 
+        name: `${project.name} (Copia)`, 
+        files: project.files as any 
+      })
+      .select()
+      .single();
+
+    if (error) { toast.error('Error al duplicar'); return null; }
+
+    const newProject = { ...data, files: typeof data.files === 'string' ? JSON.parse(data.files) : data.files } as StudioProject;
+    setProjects((prev) => [newProject, ...prev]);
+    toast.success('Proyecto duplicado exitosamente');
+    return newProject;
+  }, [user]);
+
+  return { 
+    projects, activeProject, setActiveProject, loading, 
+    createProject, updateProjectFiles, renameProject, 
+    deleteProject, duplicateProject, refetch: fetchProjects 
+  };
 }

@@ -5,7 +5,8 @@ import {
   ChevronDown, Coins, LogOut, User, Shield,
   Wand2, Hash, Megaphone, PenLine, Zap,
   Settings, History, CreditCard, Monitor, Sparkles,
-  PanelLeftClose, PanelLeftOpen, Terminal, List
+  PanelLeftClose, PanelLeftOpen, Terminal, List, Code2,
+  Home, LayoutGrid, Share2, ShieldCheck, Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/Logo';
@@ -18,18 +19,30 @@ import { toast } from 'sonner';
 
 // ── Navigation structure ──────────────────────────────────────────────────────
 const NAV_MAIN = [
+  { path: '/dashboard',    label: 'Inicio',        icon: Home,           requiresPymes: false },
   { path: '/formarketing', label: 'Studio',        icon: LayoutTemplate, requiresPymes: true },
-  { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,  requiresPymes: false },
-  { path: '/hub',          label: 'Templates',     icon: Sparkles,    requiresPymes: false },
-  { path: '/assets',       label: 'Activos',        icon: Image,       requiresPymes: false },
-  { path: '/history',      label: 'Historial',      icon: History,     requiresPymes: false },
+  { path: '/code',         label: 'Editor',        icon: Code2,          requiresPymes: false },
+  { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     requiresPymes: false },
+  { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     requiresPymes: false },
+  { path: '/hub',          label: 'Templates',     icon: Sparkles,       requiresPymes: false },
+];
+
+const NAV_SOCIAL = [
+  { path: '/assets',       label: 'Activos',       icon: Image,          requiresPymes: false },
+  { path: '/sharescreen',  label: 'Compartir',     icon: Share2,         requiresPymes: false },
+  { path: '/history',      label: 'Historial',     icon: History,        requiresPymes: false },
+];
+
+const NAV_SYSTEM = [
+  { path: '/admin',         label: 'Panel Control', icon: ShieldCheck,   requiresPymes: false },
+  { path: '/system-status', label: 'Estatus',       icon: Activity,      requiresPymes: false },
 ];
 
 const NAV_BOTTOM = [
-  { path: '/profile',         label: 'Mi Perfil', icon: User },
-  { path: '/pricing',         label: 'Planes',    icon: CreditCard },
-  { path: '/descargar',       label: 'Descargar', icon: Download },
-  { path: '/product-backlog', label: 'Roadmap',   icon: List },
+  { path: '/profile',         label: 'Perfil',      icon: User },
+  { path: '/pricing',         label: 'Planes',      icon: CreditCard },
+  { path: '/descargar',       label: 'Descargar',   icon: Download },
+  { path: '/product-backlog', label: 'Roadmap',     icon: List },
 ];
 
 export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
@@ -38,7 +51,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const { user, signOut } = useAuth();
   const { profile } = useProfile(user?.id);
   const { isAdmin } = useAdmin(user?.id);
-  const { globalExpanded, toggleGlobal, toggleContextual, activeContextual } = useSidebarV2();
+  const { globalExpanded, toggleGlobal } = useSidebarV2();
   const { groups, workspaceTitle } = useWorkspaceActions();
 
   const isPymes = ['pymes', 'agency', 'admin'].includes(
@@ -73,7 +86,6 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
 
   const W = globalExpanded ? 240 : 64;
 
-
   return (
     <motion.aside
       animate={{ 
@@ -90,7 +102,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
       aria-label="Navegación principal"
     >
       {/* ── Header ── */}
-      <div className="flex h-[56px] items-center gap-3 px-3 border-b border-zinc-100 shrink-0">
+      <div className="flex h-[56px] items-center gap-3 px-3 border-b border-zinc-100 shrink-0 uppercase tracking-tighter">
         <AnimatePresence mode="wait">
           {(globalExpanded || isMobile) ? (
             <motion.div
@@ -120,87 +132,118 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
             onClick={toggleGlobal}
             aria-label={globalExpanded ? 'Colapsar menú' : 'Expandir menú'}
             className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all shrink-0"
-            title={globalExpanded ? 'Colapsar (⌘\\)' : 'Expandir (⌘\\)'}
           >
-            {globalExpanded
-              ? <PanelLeftClose className="w-4 h-4" />
-              : <PanelLeftOpen className="w-4 h-4" />}
+            {globalExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
           </button>
         )}
       </div>
 
-      {/* ── Scrollable nav ── */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden py-2 no-scrollbar">
-        {/* Main Nav Items */}
-        <div className="px-2 space-y-0.5">
-          {NAV_MAIN.map((item) => {
-            const active = isActive(item.path);
-            const locked = item.requiresPymes && !isPymes;
-            return (
-              <button
-                key={item.path}
-                onClick={() => handleNav(item.path, item.requiresPymes, item.label)}
-                aria-current={active ? 'page' : undefined}
-                title={!globalExpanded ? item.label : undefined}
-                className={cn(
-                  'group w-full flex items-center rounded-xl transition-all duration-150 text-[12.5px] font-medium',
-                  (globalExpanded || isMobile) ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center',
-                  active
-                    ? 'bg-primary/8 text-primary border border-primary/15 font-bold shadow-sm'
-                    : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50',
-                  locked && 'opacity-50'
-                )}
-              >
-                <item.icon className={cn(
-                  'shrink-0 transition-colors',
-                  (globalExpanded || isMobile) ? 'w-4 h-4' : 'w-4.5 h-4.5',
-                  active ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-600'
-                )} />
-                {(globalExpanded || isMobile) && (
-                  <span className="truncate flex-1 text-left">{item.label}</span>
-                )}
-                {(globalExpanded || isMobile) && locked && (
-                  <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded-md shrink-0">
-                    Pro
-                  </span>
-                )}
-              </button>
-            );
-          })}
+      <nav className="flex-1 overflow-y-auto py-4 no-scrollbar">
+        {/* 1. PRINCIPAL */}
+        <div className="px-2 space-y-0.5 mb-6">
+          {(globalExpanded || isMobile) && (
+            <div className="px-3 py-1.5 mb-1">
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-60">Principal</span>
+            </div>
+          )}
+          {NAV_MAIN.map((item) => (
+            <NavItem 
+              key={item.path} 
+              {...item} 
+              active={isActive(item.path)} 
+              expanded={globalExpanded || isMobile}
+              isPymes={isPymes}
+              onClick={() => handleNav(item.path, item.requiresPymes, item.label)} 
+            />
+          ))}
         </div>
 
-        {/* ── Workspace Contextual Actions ── */}
-        {groups.length > 0 && (
-          <div className="mt-4 mb-2 animate-in fade-in slide-in-from-left-2 duration-300">
-            <div className="px-5 mb-2">
-               <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">
-                 {workspaceTitle || 'Herramientas'}
-               </span>
+        {/* 2. CONTENIDO & SOCIAL */}
+        <div className="px-2 space-y-0.5 mb-6">
+          {(globalExpanded || isMobile) && (
+            <div className="px-3 py-1.5 mb-1">
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-60">Contenido</span>
             </div>
-            <div className="px-2 space-y-3">
+          )}
+          {NAV_SOCIAL.map((item) => (
+            <NavItem 
+              key={item.path} 
+              {...item} 
+              active={isActive(item.path)} 
+              expanded={globalExpanded || isMobile}
+              isPymes={isPymes}
+              onClick={() => handleNav(item.path, item.requiresPymes, item.label)} 
+            />
+          ))}
+          <NavItem 
+            path="/chat"
+            label="Genesis IA"
+            icon={Brain}
+            active={isActive('/chat')}
+            expanded={globalExpanded || isMobile}
+            isPymes={isPymes}
+            className="text-violet-600 hover:bg-violet-50"
+            onClick={() => navigate('/chat')}
+          />
+        </div>
+
+        {/* 3. SISTEMA (Admin Only) */}
+        {isAdmin && (
+          <div className="px-2 space-y-0.5 mb-6">
+            {(globalExpanded || isMobile) && (
+              <div className="px-3 py-1.5 mb-1">
+                <span className="text-[10px] font-black text-red-500/60 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <Shield className="w-2.5 h-2.5" />
+                  Sistema
+                </span>
+              </div>
+            )}
+            {NAV_SYSTEM.map((item) => (
+              <NavItem 
+                key={item.path} 
+                {...item} 
+                active={isActive(item.path)} 
+                expanded={globalExpanded || isMobile}
+                isPymes={isPymes}
+                onClick={() => handleNav(item.path, item.requiresPymes, item.label)} 
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Workspace Contextual Actions */}
+        {groups.length > 0 && (
+          <div className="mt-8 mb-4 px-2 space-y-4 animate-in fade-in slide-in-from-left-4 duration-500">
+            {(globalExpanded || isMobile) && (
+              <div className="px-3 py-1.5">
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+                  {workspaceTitle || 'Herramientas'}
+                </span>
+              </div>
+            )}
+            <div className="space-y-4">
               {groups.map((group) => (
-                <div key={group.id} className="space-y-0.5">
+                <div key={group.id} className="space-y-1">
                   {group.actions.map((action) => (
                     <button
                       key={action.id}
                       onClick={action.onClick}
                       disabled={action.disabled}
-                      title={!globalExpanded ? (action.tooltip || action.label) : undefined}
                       className={cn(
-                        'group w-full flex items-center rounded-xl transition-all duration-150 text-[12px] font-bold',
-                        globalExpanded ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
+                        'group w-full flex items-center rounded-xl transition-all duration-150 text-[12px] font-bold outline-none',
+                        (globalExpanded || isMobile) ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
                         action.active
-                          ? 'bg-zinc-900 text-white shadow-md shadow-black/5'
-                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/50',
-                        action.variant === 'primary' && !action.active && 'bg-primary/5 text-primary border border-primary/10 hover:bg-primary/10',
-                        action.disabled && 'opacity-30 cursor-not-allowed'
+                          ? 'bg-zinc-900 text-white shadow-lg'
+                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100',
+                        action.variant === 'primary' && !action.active && 'bg-primary/5 text-primary border border-primary/20',
+                        action.disabled && 'opacity-20 cursor-not-allowed'
                       )}
                     >
                       <action.icon className={cn(
-                        'shrink-0 w-4 h-4 transition-colors',
-                        action.active ? 'text-white' : (action.variant === 'primary' ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-600')
+                        'shrink-0 w-4 h-4',
+                        action.active ? 'text-white' : (action.variant === 'primary' ? 'text-primary' : 'text-zinc-400')
                       )} />
-                      {globalExpanded && <span className="truncate flex-1 text-left">{action.label}</span>}
+                      {(globalExpanded || isMobile) && <span className="truncate flex-1 text-left">{action.label}</span>}
                     </button>
                   ))}
                 </div>
@@ -209,132 +252,119 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           </div>
         )}
 
-        {/* ── Divider ── */}
-        <div className="my-3 mx-3 h-px bg-zinc-100" />
-
-        {/* ── Secondary Actions ── */}
-        <div className="px-2 space-y-0.5">
-          <button
-            onClick={() => toggleContextual('genesis')}
-            title={!globalExpanded ? 'Genesis IA' : undefined}
-            className={cn(
-              'group w-full flex items-center rounded-xl transition-all duration-150 text-[12.5px] font-medium',
-              globalExpanded ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center',
-              activeContextual === 'genesis'
-                ? 'bg-violet-50 text-violet-700 border border-violet-200'
-                : 'text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50'
-            )}
-          >
-            <Brain className={cn(
-              'shrink-0 w-4 h-4 transition-colors',
-              activeContextual === 'genesis' ? 'text-violet-600' : 'text-zinc-400 group-hover:text-zinc-600'
-            )} />
-            {globalExpanded && <span className="truncate flex-1 text-left">Genesis IA</span>}
-          </button>
-        </div>
-
-        {/* ── Credits bar ── */}
+        {/* Credits bar */}
         {(globalExpanded || isMobile) && profile && (
-          <div className="mx-3 mt-4 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/60 shadow-sm">
-            <div className="flex items-center justify-between mb-3">
+          <div className="mx-4 mt-6 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/60 shadow-sm overflow-hidden relative group">
+            <div className="flex items-center justify-between mb-3 relative z-10">
               <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Créditos</span>
-              <button onClick={() => navigate('/pricing')} className="text-[10px] font-black text-primary uppercase tracking-widest hover:underline">
-                + Recargar
-              </button>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 relative z-10">
               <Coins className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-[15px] font-black text-zinc-900 tabular-nums font-mono">
-                {profile.credits_balance?.toLocaleString() ?? '—'}
+              <span className="text-[16px] font-black text-zinc-900 tabular-nums">
+                {profile.credits_balance?.toLocaleString() ?? '0'}
               </span>
             </div>
+            <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
           </div>
         )}
       </nav>
 
       {/* ── Footer ── */}
-      <div className="shrink-0 border-t border-zinc-100 p-2 space-y-0.5">
+      <div className="shrink-0 border-t border-zinc-100 p-2 space-y-1 bg-white/50 backdrop-blur-md">
         {NAV_BOTTOM.map((item) => (
           <button
             key={item.path}
             onClick={() => handleNav(item.path)}
-            title={!globalExpanded ? item.label : undefined}
             className={cn(
               'group w-full flex items-center rounded-xl transition-all duration-150 text-[12px] font-medium text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50',
-              globalExpanded ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center'
+              (globalExpanded || isMobile) ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center'
             )}
           >
-            <item.icon className="shrink-0 w-3.5 h-3.5 transition-colors" />
-            {globalExpanded && <span className="truncate flex-1 text-left">{item.label}</span>}
+            <item.icon className="shrink-0 w-4 h-4" />
+            {(globalExpanded || isMobile) && <span className="truncate flex-1 text-left">{item.label}</span>}
           </button>
         ))}
 
-        {isAdmin && (
-          <button
-            onClick={() => handleNav('/admin')}
-            title={!globalExpanded ? 'Admin' : undefined}
-            className={cn(
-              'group w-full flex items-center rounded-xl text-[12px] font-medium text-red-400 hover:bg-red-50 transition-all',
-              globalExpanded ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center'
-            )}
-          >
-            <Shield className="shrink-0 w-3.5 h-3.5" />
-            {globalExpanded && <span className="flex-1 text-left">Admin</span>}
-          </button>
-        )}
-
-        {/* User / Guest row */}
         <div className={cn(
-          'flex items-center gap-2 px-2 py-2 rounded-xl mt-1 transition-all',
-          globalExpanded ? 'bg-zinc-50 border border-zinc-100' : 'justify-center'
+          'flex items-center gap-2 px-2 py-2 rounded-xl mt-2 transition-all',
+          (globalExpanded || isMobile) ? 'bg-zinc-50 border border-zinc-100 shadow-inner' : 'justify-center'
         )}>
           {user ? (
             <>
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-zinc-100 border border-zinc-200">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-white border border-zinc-200 shadow-sm">
                 {profile?.avatar_url
                   ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                  : <User className="w-3.5 h-3.5 text-zinc-400" />}
+                  : <User className="w-4 h-4 text-zinc-300" />}
               </div>
-              {globalExpanded && (
-                <>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-semibold text-zinc-800 truncate">
-                      {profile?.display_name?.split(' ')[0] ?? 'Usuario'}
-                    </p>
-                    <p className="text-[10px] text-zinc-400 truncate capitalize">
-                      {profile?.subscription_tier ?? 'free'}
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleSignOut}
-                    aria-label="Cerrar sesión"
-                    className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"
-                  >
-                    <LogOut className="w-3 h-3" />
-                  </button>
-                </>
+              {(globalExpanded || isMobile) && (
+                <div className="flex-1 min-w-0 pr-1">
+                  <p className="text-[11px] font-black text-zinc-900 truncate leading-tight">
+                    {profile?.display_name || user.email?.split('@')[0]}
+                  </p>
+                  <p className="text-[9px] font-bold text-zinc-400 truncate uppercase tracking-widest">
+                    {profile?.subscription_tier || 'Free'}
+                  </p>
+                </div>
+              )}
+              {(globalExpanded || isMobile) && (
+                <button
+                  onClick={handleSignOut}
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                  title="Cerrar sesión"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               )}
             </>
           ) : (
-            <button
+             <button
               onClick={() => navigate('/auth')}
               className={cn(
-                "flex items-center group transition-all",
-                globalExpanded ? "gap-3 px-1 w-full" : "justify-center"
+                'flex items-center gap-2 text-zinc-500 hover:text-zinc-900 px-3 py-2 w-full',
+                !(globalExpanded || isMobile) && 'justify-center'
               )}
             >
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-primary/10 border border-primary/20 text-primary group-hover:bg-primary group-hover:text-white transition-all">
-                <LogOut className="w-3 h-3 rotate-180" />
-              </div>
-              {globalExpanded && (
-                <span className="text-[12px] font-bold text-zinc-600 group-hover:text-primary transition-colors">
-                  Iniciar Sesión
-                </span>
-              )}
+              <User className="w-4 h-4" />
+              {(globalExpanded || isMobile) && <span className="text-xs font-bold font-black">LOGIN</span>}
             </button>
           )}
         </div>
       </div>
     </motion.aside>
+  );
+}
+
+// ── NavItem Subcomponent ──
+function NavItem({ 
+  path, label, icon: Icon, active, expanded, onClick, className 
+}: { 
+  path: string, label: string, icon: any, active: boolean, expanded: boolean, 
+  isPymes: boolean, onClick: () => void, className?: string 
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'group w-full flex items-center rounded-xl transition-all duration-200 text-[12.5px] font-medium outline-none',
+        expanded ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
+        active
+          ? 'bg-primary/10 text-primary border border-primary/20 font-black shadow-sm'
+          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent',
+        className
+      )}
+    >
+      <Icon className={cn(
+        'shrink-0 transition-all duration-200',
+        expanded ? 'w-4 h-4' : 'w-5 h-5',
+        active ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-700 group-hover:scale-110'
+      )} />
+      {expanded && <span className="truncate flex-1 text-left">{label}</span>}
+      {expanded && active && (
+        <motion.div 
+          layoutId="active-nav-glow" 
+          className="w-1.5 h-1.5 rounded-full bg-primary"
+        />
+      )}
+    </button>
   );
 }
