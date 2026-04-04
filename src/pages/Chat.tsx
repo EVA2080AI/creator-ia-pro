@@ -515,28 +515,6 @@ export default function Chat() {
         {/* Sidebar: Chat */}
         <div className="flex flex-col h-full border-r border-border/40 overflow-hidden" style={{ background: 'hsl(var(--card) / 0.3)', backdropFilter: 'blur(20px)' }}>
           <div className="flex-1 min-h-0"><StudioChat projectId={activeProject.id} projectFiles={projectFiles} onCodeGenerated={handleCodeGenerated} initialPrompt={pendingPrompt} onGeneratingChange={setIsGenerating} supabaseConfig={supabaseConfig} /></div>
-          <div className="p-4 border-t border-border/40 shrink-0">
-            <div className="p-3 bg-zinc-50 border border-zinc-200 rounded-xl">
-              <div className="flex justify-between text-[10px] font-bold mb-2 text-muted-foreground uppercase tracking-widest">
-                <span>{credits.toLocaleString()} créditos</span>
-                <Zap className="h-3 w-3" />
-              </div>
-              {(() => {
-                const tier = profile?.subscription_tier ?? 'free';
-                const limit = PLAN_CREDITS[tier] ?? 1000;
-                const pct = Math.min(100, (credits / limit) * 100);
-                const barColor = pct < 20 ? 'hsl(var(--destructive))' : pct < 50 ? 'hsl(var(--warning))' : 'hsl(var(--primary))';
-                return (
-                  <>
-                    <div className="h-1 bg-border rounded-full overflow-hidden">
-                      <div className="h-full transition-all duration-1000" style={{ width: `${pct}%`, background: barColor }} />
-                    </div>
-                    <p className="text-[9px] text-muted-foreground/50 mt-1 capitalize">{tier} plan · {limit.toLocaleString()} límite</p>
-                  </>
-                );
-              })()}
-            </div>
-          </div>
         </div>
 
         {/* Canvas */}
