@@ -1313,14 +1313,15 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
     if (isGenerating || !user) return;
     
     // ─── NAVIGATION INTENT: Handle file opening commands early ───────────────
-    // Regex matches common commands like "abre el index.html", "show app.tsx", "ver styles", etc.
-    const navMatch = text.toLowerCase().match(/(?:abre|abrir|abrete|mostrar|ver|verme|open|show|view|file|archivo)(?:\s+(?:el|la|los|las))?\s+([\w./\-]+(?:\.\w+)?)/i);
+    // Enhanced regex to match natural language: "muéstrame el código de App.tsx", "abre index", "ver styles", etc.
+    const navMatch = text.toLowerCase().match(/(?:abre|abrir|abrete|mostrar|mostrarme|ver|verme|open|show|view|file|archivo|código de|fuente de)(?:\s+(?:el|la|los|las))?\s+([\w./\-]+(?:\.\w+)?)/i);
     if (navMatch && onSelectFile) {
-      const target = navMatch[1];
-      // Try exact find first, then extensionless find
+      const target = navMatch[1].trim();
+      // Try exact find first, then extensionless find, then fuzzy basename match
       const keys = Object.keys(projectFiles);
       const exactMatch = keys.find(f => f.toLowerCase() === target.toLowerCase()) || 
-                         keys.find(f => f.toLowerCase().startsWith(target.toLowerCase() + '.'));
+                         keys.find(f => f.toLowerCase().split('/').pop()?.split('.')[0] === target.toLowerCase()) ||
+                         keys.find(f => f.toLowerCase().includes(target.toLowerCase()));
       
       if (exactMatch) {
         onSelectFile(exactMatch);
