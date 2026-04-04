@@ -13,7 +13,8 @@ import {
   Code2,
   Database, 
   RefreshCw,
-  Settings
+  Settings,
+  Gamepad2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -54,7 +55,7 @@ interface StudioArtifactsPanelProps {
   onFix?: () => void;
   activeTab?: 'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents';
   agentPhase?: 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
-  activeSpecialist?: 'ux' | 'frontend' | 'backend' | 'devops' | 'none';
+  activeSpecialist?: 'ux' | 'frontend' | 'backend' | 'devops' | 'game' | 'none';
   persona?: 'genesis' | 'antigravity';
 }
 
@@ -274,7 +275,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
           </div>
         ) : activeTab === 'agents' ? (
           <div className="h-full flex flex-col p-6 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <AgentCard 
                 name="UX Engine" 
                 role="UI/UX & Design Systems" 
@@ -314,6 +315,16 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                 icon={<RefreshCw className="w-5 h-5" />}
                 description="Integración continua con GitHub, optimización de build y despliegue automatizado en Vercel."
                 onSettings={() => setSettingsAgent({ id: 'devops', name: 'DevOps Sync' })}
+              />
+              <AgentCard 
+                name="Game Engine" 
+                role="Physics & Logic Orchestrator" 
+                active={activeSpecialist === 'game'} 
+                phase={activeSpecialist === 'game' ? agentPhase : 'idle'} 
+                color="primary"
+                icon={<Gamepad2 className="w-5 h-5" />}
+                description="Matemáticas de juegos, detección de colisiones 2D/3D y gestión de estado sincronizado en tiempo real."
+                onSettings={() => setSettingsAgent({ id: 'game', name: 'Game Engine' })}
               />
               <div className="p-4 bg-zinc-900 border-t border-white/5 flex items-center justify-between shrink-0">
             <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Enjambre de Especialistas Genesis</span>

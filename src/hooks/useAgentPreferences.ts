@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-export type AgentSpecialist = 'ux' | 'frontend' | 'backend' | 'devops';
+export type AgentSpecialist = 'ux' | 'frontend' | 'backend' | 'devops' | 'game';
 
 export interface AgentPreference {
   agent_id: AgentSpecialist;

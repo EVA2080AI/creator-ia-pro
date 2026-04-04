@@ -41,6 +41,8 @@ function detectDeps(files: Record<string, StudioFile>): string[] {
   const SAFE = new Set([
     'react', 'react-dom', 'lucide-react', 'clsx', 'tailwind-merge', 'sonner',
     '@supabase/supabase-js', 'react-router-dom', 'react-hook-form', 'zod',
+    'three', '@types/three', '@react-three/fiber', '@react-three/drei', 
+    'phaser', 'pixi.js', 'zustand', 'framer-motion', 'howler', 'cannon-es',
   ]);
   const deps = new Set<string>();
   for (const file of Object.values(files)) {
@@ -203,56 +205,56 @@ TU ENFOQUE:
 ${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
 
 // ─── Architect Mode system prompt (Plan-First) ────────────────────────────────
-const ARCHITECT_SYSTEM_PROMPT = `🏗️ MODO ARQUITECTO — Genesis AI Planning Agent
+const ARCHITECT_SYSTEM_PROMPT = `🏗️ MODO ARQUITECTO DEEP IA 1A — Genesis Planning Engine
 
-El usuario ha activado el MODO ARQUITECTO. Tu trabajo NO es generar código directamente.
-En su lugar, debes actuar como un Senior Solutions Architect y generar un PLAN DE IMPLEMENTACIÓN detallado.
+El usuario ha activado el MODO DEEP IA 1A. Tu trabajo es actuar como Senior Software Architect & Lead Game Engineer.
+DEBES realizar un análisis profundo de la arquitectura, dependencias y lógica de negocio/juego antes de proponer el plan.
+
+### ESPECIALIZACIÓN DEEP IA 1A:
+1. **Lógica de Juegos & Apps Interactivas**: Determina si usar DOM, Canvas (2D), SVG o WebGL (Three.js).
+2. **Sistemas de Estado**: Selecciona el motor de estado óptimo (Zustand para complejidad, Signals para reactividad extrema).
+3. **Físicas y Matemáticas**: Planifica detección de colisiones, vectores y aceleración si el prompt implica movimiento.
+4. **Resiliencia de Datos**: Diseña esquemas de Supabase con Realtime para estados sincronizados de baja latencia.
 
 FORMATO OBLIGATORIO DE RESPUESTA:
 
-## 🏗️ Plan de Implementación
+## 🏗️ Plan de Implementación Deep IA 1A
 
-### Objetivo
-[Describe brevemente qué se va a construir y por qué]
+### Objetivo & Visión Técnica
+[Resumen ejecutivo de la arquitectura propuesta]
 
-### Archivos a Crear/Modificar
-[Lista cada archivo con una breve descripción de su propósito]
-- [ ] \`App.tsx\` — Layout principal con routing
-- [ ] \`pages/Home.tsx\` — Página de inicio
-- [ ] \`components/Navbar.tsx\` — Navegación
+### Swarm Deployment
+- [ ] **Especialista Líder**: [UX_ENGINE | FRONTEND_DEV | BACKEND_DEV | GAME_ENGINE]
+- [ ] **Lógica de Motor**: [React Component | Game-Loop | Canvas Engine | API Rest]
 
-### Stack Técnico
-| Tecnología | Uso |
-|---|---|
-| React 18 | Framework UI |
-| Tailwind CSS | Estilos |
+### Archivos & Estructura (Deep Engineering)
+[Enumera los archivos con su responsabilidad técnica exacta]
 
-### Visualización de Arquitectura
+### Stack Técnico Seleccionado
+| Hub | Tecnología | Razón |
+|---|---|---|
+| Core | [Stack] | [Razón] |
+| State/Game | [Lib] | [Razón] |
+
+### Visualización de Arquitectura (Mermaid)
 \`\`\`mermaid
 graph TD
-  A[Componente A] --> B[Servicio B]
-  B --> C[(Base de Datos)]
+  A[Input] --> B[Deep Logic Engine]
+  B --> C[State Manager]
+  C --> D[Render Layer]
 \`\`\`
 
-### Decisiones de Diseño
+### Decisiones de Ingeniería Críticas
 > [!IMPORTANT]
-> [Decisiones clave que el usuario debe aprobar antes de proceder]
-
-### Estimación
-- Archivos: X
-- Complejidad: Baja/Media/Alta
-- Tiempo estimado de generación: ~Xs
+> [Analiza cuellos de botella de performance o riesgos de la lógica de juego]
 
 ### Siguiente Paso
-Si apruebas este plan, haré clic en "Aprobar" y generaré todo el código.
+Si apruebas este plan de grado Deep IA 1A, generaré el ecosistema completo.
 
 REGLAS:
-1. NO generes código. Solo el plan.
-2. Genera SIEMPRE un diagrama Mermaid en la sección "Visualización de Arquitectura" que explique la estructura técnica propuesta.
-3. Sé específico con cada archivo y su propósito.
-4. Identifica riesgos o decisiones que requieran input del usuario con alertas > [!WARNING].
-5. El plan debe ser aprobado antes de cualquier generación de código.
-6. Responde en español profesional.`;
+1. NO generes código.
+2. Usa Deep Reasoning para prever conflictos de dependencias.
+3. Responde en español profesional.`;
 
 
 // ─── Clone system prompt ──────────────────────────────────────────────────────
@@ -321,6 +323,7 @@ You are a team of expert agents:
 2. [FRONTEND_DEV]: Focus on React components, states, and logic.
 3. [BACKEND_DEV]: Focus on Supabase, API, and Edge Functions.
 4. [DEVOPS_SYNC]: Focus on deployment and integration.
+5. [GAME_ENGINE]: Focus on game loops, physics, math, and real-time state.
 
 When performing a task, announce the active specialist at the start of their relevant section using the tag [AGENT_NAME].
 Example: "[UX_ENGINE] Designing the layout structure..."
@@ -331,8 +334,10 @@ Example: "[UX_ENGINE] Designing the layout structure..."
 
 EXPERTISE TÉCNICO:
 - Frontend: React 18+, Next.js 14, Vue 3, TypeScript, Tailwind CSS, ShadCN UI
-- Backend: Python/FastAPI, Node.js, Java
-- Cloud/BBDD: Supabase, PostgreSQL, Docker, OpenRouter
+- Game/Graphics: Three.js (R3F), Phaser, PixiJS, Framer Motion, GSAP
+- State/Math: Zustand, TanStack Query, Cannon-es (Physics), Howler (Audio)
+- Backend: Python/FastAPI, Node.js, Java, Supabase Realtime
+- Cloud/BBDD: PostgreSQL, Docker, OpenRouter
 
 REGLAS ABSOLUTAS:
 1. Tu respuesta COMPLETA debe ser SOLO el JSON — sin texto antes, sin texto después
@@ -563,7 +568,7 @@ function renderMarkdown(text: string): string {
 
 // ─── Agent Phases ─────────────────────────────────────────────────────────────
 export type AgentPhase = 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
-export type AgentSpecialist = 'ux' | 'frontend' | 'backend' | 'devops' | 'none';
+export type AgentSpecialist = 'ux' | 'frontend' | 'backend' | 'devops' | 'game' | 'none';
 
 // ─── Props ─────────────────────────────────────────────────────────────────────
 interface StudioChatProps {
@@ -921,6 +926,7 @@ export function StudioChat({
                 if (accumulated.includes('[FRONTEND_DEV]')) updatePhase('generating', 'frontend');
                 if (accumulated.includes('[BACKEND_DEV]')) updatePhase('generating', 'backend');
                 if (accumulated.includes('[DEVOPS_SYNC]')) updatePhase('generating', 'devops');
+                if (accumulated.includes('[GAME_ENGINE]')) updatePhase('generating', 'game');
                 setGenPhase('streaming');
 
                 if (isChatModeActive) {
