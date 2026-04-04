@@ -26,6 +26,7 @@ interface AdminUser {
   created_at: string;
   last_sign_in: string | null;
   subscription_tier: string;
+  is_active: boolean;
 }
 
 interface Transaction {
@@ -790,7 +791,7 @@ const Admin = () => {
 
   // ── Email allowlist — only the platform owner ──────────────────────────────
   const ADMIN_EMAILS = ['sebastian689@gmail.com'];
-  if (!ADMIN_EMAILS.includes(user.email ?? '')) {
+  if (!isAdmin && !ADMIN_EMAILS.includes(user.email ?? '')) {
     return (
       <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-6">
         <div className="w-full max-w-sm rounded-3xl border border-zinc-200 bg-white p-10 text-center space-y-5 shadow-sm">
@@ -1012,6 +1013,18 @@ const Admin = () => {
                               <TierIcon className="h-2.5 w-2.5" />
                               {tier.label}
                             </span>
+                            {!u.is_active && (
+                              <span className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase shrink-0 border border-rose-500/30 bg-rose-500/10 text-rose-400">
+                                <Ban className="h-2 w-2" />
+                                Suspendido
+                              </span>
+                            )}
+                            {u.is_active && (
+                              <span className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[9px] font-black uppercase shrink-0 border border-green-500/30 bg-green-500/10 text-green-400">
+                                <CheckCircle className="h-2 w-2" />
+                                Activo
+                              </span>
+                            )}
                           </div>
                           {u.display_name && (
                             <p className="text-xs text-zinc-400 font-mono truncate mt-0.5">{u.email}</p>

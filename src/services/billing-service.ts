@@ -242,7 +242,7 @@ export const adminService = {
    * Admin: Save platform settings (e.g., Bold API keys).
    */
   async saveSettings(settings: Record<string, string>) {
-    const { data, error } = await supabase.functions.invoke("admin-settings", {
+    const { data, error } = await supabase.functions.invoke("admin-save-settings", {
       body: settings,
     });
     if (error) throw error;
