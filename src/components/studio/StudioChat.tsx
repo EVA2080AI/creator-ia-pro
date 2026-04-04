@@ -3,7 +3,7 @@ import {
   Send, Sparkles, Bot, Loader2,
   ChevronDown, Copy, RotateCcw, Check,
   X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink, Lock,
-  FileCode2,
+  FileCode2, UploadCloud, Zap
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
@@ -1098,7 +1098,67 @@ export function StudioChat({
                   </div>
                 </div>
 
-                {/* Suggestions / Starter Chips */}
+                  {/* Action Grid for Welcome Message */}
+                  {msg.id === 'welcome' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
+                      {/* Card: Upload */}
+                      <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-4 p-5 rounded-2xl border border-zinc-200 bg-white hover:border-black hover:shadow-xl hover:shadow-black/5 transition-all text-left group/card"
+                      >
+                        <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover/card:bg-zinc-900 group-hover/card:text-white transition-all">
+                          <UploadCloud className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <span className="block text-sm font-black uppercase tracking-widest text-zinc-900">Subir Referencia</span>
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Imagen, HTML o captura</span>
+                        </div>
+                      </button>
+
+                      {/* Card: URL */}
+                      <button 
+                        onClick={() => setShowUrlInput(true)}
+                        className="flex items-center gap-4 p-5 rounded-2xl border border-zinc-200 bg-white hover:border-black hover:shadow-xl hover:shadow-black/5 transition-all text-left group/card"
+                      >
+                        <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover/card:bg-zinc-900 group-hover/card:text-white transition-all">
+                          <Globe className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <span className="block text-sm font-black uppercase tracking-widest text-zinc-900">Clonar URL</span>
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Importar sitio web activo</span>
+                        </div>
+                      </button>
+
+                      {/* Card: Model */}
+                      <button 
+                        onClick={() => setModelOpen(true)}
+                        className="flex items-center gap-4 p-5 rounded-2xl border border-zinc-200 bg-white hover:border-black hover:shadow-xl hover:shadow-black/5 transition-all text-left group/card"
+                      >
+                        <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover/card:bg-zinc-900 group-hover/card:text-white transition-all">
+                          <Sparkles className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <span className="block text-sm font-black uppercase tracking-widest text-zinc-900">Motor de IA</span>
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{currentModel.label}</span>
+                        </div>
+                      </button>
+
+                      {/* Card: Plan Mode */}
+                      <button 
+                        className="flex items-center gap-4 p-5 rounded-2xl border border-zinc-200 bg-white hover:border-black hover:shadow-xl hover:shadow-black/5 transition-all text-left group/card opacity-60 hover:opacity-100"
+                      >
+                        <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover/card:bg-zinc-900 group-hover/card:text-white transition-all">
+                          <Zap className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <span className="block text-sm font-black uppercase tracking-widest text-zinc-900">Modo Maestro</span>
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Plan de construcción full-stack</span>
+                        </div>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Suggestions / Starter Chips */}
                 {msg.suggestions && msg.suggestions.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2 pl-2">
                     {msg.suggestions.map((s, i) => (
