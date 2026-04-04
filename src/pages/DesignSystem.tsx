@@ -38,7 +38,8 @@ import {
   Trash2,
   ArrowUpRight,
   GitBranch,
-  Package
+  Package,
+  Database
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -53,8 +54,10 @@ const DesignSystem = () => {
     { id: 'forms', label: 'Formularios', icon: Layout },
     { id: 'chat', label: 'Chat & IA', icon: MessageSquare },
     { id: 'navigation', label: 'Navegación', icon: Layers },
+    { id: 'data', label: 'Datos & Status', icon: Database },
+    { id: 'components', label: 'Componentes', icon: Box },
     { id: 'feedback', label: 'Feedback', icon: Zap },
-    { id: 'layout', label: 'Estructuras', icon: Box },
+    { id: 'layout', label: 'Estructuras', icon: Layout },
   ];
 
   const colors = [
@@ -214,25 +217,20 @@ const DesignSystem = () => {
                     <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
                       <Sparkles className="h-3.5 w-3.5" />
                     </div>
-                    <span className="text-[10px] font-black uppercase text-zinc-900 tracking-widest">Genesis AI</span>
+                    <span className="text-[10px] font-black uppercase text-zinc-900 tracking-widest">Antigravity AI</span>
                   </div>
                   <div className="bg-white border border-zinc-200 px-6 py-4 rounded-2xl rounded-tl-none shadow-sm max-w-[90%] space-y-4 animate-in fade-in slide-in-from-left-4 duration-500">
-                    <p className="text-sm text-zinc-600 leading-relaxed">
-                      Para un sistema distribuido, recomendaría un enfoque de <strong className="text-zinc-900">Micro-agentes</strong> utilizando:
-                    </p>
-                    <ul className="space-y-2">
-                      <li className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        Broker de mensajes RabbitMQ o Redis.
-                      </li>
-                      <li className="flex items-center gap-2 text-xs text-zinc-500 font-medium">
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        Workers escalables en Kubernetes.
-                      </li>
-                    </ul>
+                    <div className="space-y-2">
+                      <p className="text-sm text-zinc-900 font-bold leading-relaxed">
+                        Análisis estratégico completo.
+                      </p>
+                      <p className="text-xs text-zinc-500 leading-relaxed font-medium">
+                        He optimizado la arquitectura de tu aplicación siguiendo el patrón <strong className="text-zinc-800">Aether V8.0</strong>. Se han detectado 3 puntos de mejora en la latencia del canvas.
+                      </p>
+                    </div>
                     <div className="pt-2 flex flex-wrap gap-2">
-                      <button className="px-3 py-1.5 rounded-lg bg-zinc-100 text-zinc-600 text-[10px] font-black uppercase hover:bg-zinc-200 transition-colors">Ver Diagrama</button>
-                      <button className="px-3 py-1.5 rounded-lg bg-primary/5 text-primary text-[10px] font-black uppercase hover:bg-primary/10 transition-colors">Copiar Implementación</button>
+                      <button className="px-3 py-1.5 rounded-lg bg-zinc-900 text-white text-[10px] font-black uppercase hover:bg-black transition-colors">Corregir Errores</button>
+                      <button className="px-3 py-1.5 rounded-lg bg-zinc-100 text-zinc-600 text-[10px] font-black uppercase hover:bg-zinc-200 transition-colors">Ver Reporte</button>
                     </div>
                   </div>
                 </div>
@@ -591,6 +589,116 @@ const DesignSystem = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section: Data & Status */}
+          <section id="data" className="scroll-mt-24">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="h-10 w-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 border border-zinc-200">
+                <Database className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-black text-zinc-900 tracking-tight">Datos & Visualización</h2>
+                <p className="text-zinc-500 font-medium">Componentes para estados y gestión de entidades.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {/* Badges and Tags */}
+              <div className="space-y-6 p-8 rounded-3xl bg-zinc-50 border border-zinc-200">
+                <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-4">Badges de Estado</h3>
+                <div className="flex flex-wrap gap-3">
+                  {[
+                    { l: 'PRODUCCIÓN', c: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+                    { l: 'BETA', c: 'bg-blue-50 text-blue-600 border-blue-100' },
+                    { l: 'ERROR', c: 'bg-red-50 text-red-600 border-red-100' },
+                    { l: 'PAGADO', c: 'bg-violet-50 text-violet-600 border-violet-100' },
+                  ].map(b => (
+                    <div key={b.l} className={cn("px-2.5 py-1 rounded-full border text-[9px] font-black tracking-widest uppercase", b.c)}>
+                      {b.l}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* User Row (Pattern Admin) */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-4">User Card (Admin Style)</h3>
+                <div className="p-4 rounded-2xl bg-white border border-zinc-200 shadow-sm flex items-center gap-4 transition-all hover:border-primary">
+                  <div className="h-12 w-12 rounded-full bg-zinc-100 flex items-center justify-center border border-zinc-200 overflow-hidden">
+                    <User className="h-6 w-6 text-zinc-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm font-bold text-zinc-900 truncate">Juan Másmela</h4>
+                    <p className="text-xs text-zinc-500 truncate font-medium">juan@aether.ai</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="px-2 py-0.5 rounded-lg bg-primary/10 text-primary text-[9px] font-black uppercase">CREATOR</div>
+                    <button className="p-2 hover:bg-zinc-50 rounded-lg text-zinc-400 hover:text-zinc-900 transition-colors">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section: Extra Components */}
+          <section id="components" className="scroll-mt-24">
+            <div className="flex items-center gap-4 mb-12">
+              <div className="h-10 w-10 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-900 border border-zinc-200">
+                <Box className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-3xl font-black text-zinc-900 tracking-tight">Componentes Especiales</h2>
+                <p className="text-zinc-500 font-medium">Contexto, navegación profunda y control avanzado.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              {/* Tabs System */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-4">Sistema de Pestañas</h3>
+                <div className="flex items-center gap-1 p-1 bg-zinc-50 border border-zinc-200 rounded-2xl h-12">
+                  {['Archivos', 'Configuración', 'API'].map((t, i) => (
+                    <button key={t} className={cn(
+                      "flex-1 px-4 py-2 rounded-[14px] text-xs font-bold transition-all",
+                      i === 0 ? "bg-white text-zinc-900 shadow-sm border border-zinc-200" : "text-zinc-400 hover:text-zinc-600"
+                    )}>
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Breadcrumbs */}
+              <div className="space-y-6">
+                <h3 className="text-xs font-black text-zinc-400 uppercase tracking-widest mb-4">Breadcrumbs (Ruta)</h3>
+                <div className="flex items-center gap-2 text-[11px] font-bold text-zinc-400 px-2 py-4 bg-zinc-50/50 rounded-2xl border border-zinc-100">
+                  <span className="hover:text-zinc-900 cursor-pointer transition-colors">Proyectos</span>
+                  <ChevronRight className="h-3 w-3" />
+                  <span className="hover:text-zinc-900 cursor-pointer transition-colors">Workspace</span>
+                  <ChevronRight className="h-3 w-3" />
+                  <span className="text-zinc-900 font-black">Main.tsx</span>
+                </div>
+              </div>
+
+              {/* Modals Showcase */}
+              <div className="col-span-1 lg:col-span-2 bg-zinc-900 rounded-[40px] p-12 text-center space-y-8 relative overflow-hidden group">
+                 <div className="relative z-10 max-w-md mx-auto space-y-6">
+                   <div className="h-16 w-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto text-white">
+                     <Shield className="h-8 w-8" />
+                   </div>
+                   <h3 className="text-2xl font-black text-white tracking-tight leading-tight">Mockup de Dialog / Modal</h3>
+                   <p className="text-sm text-white/40 font-medium">Los modales en Aether usan paneles centrados con altos niveles de blur y tipografía robusta para acciones críticas.</p>
+                   <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                     <button className="flex-1 py-3 bg-white text-zinc-900 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-zinc-100 transition-all">Confirmar Operación</button>
+                     <button className="flex-1 py-3 bg-white/10 text-white rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-white/20 transition-all">Cancelar</button>
+                   </div>
+                 </div>
+                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px]" />
               </div>
             </div>
           </section>
