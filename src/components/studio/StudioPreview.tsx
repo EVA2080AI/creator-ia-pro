@@ -438,12 +438,6 @@ export function StudioPreview({
 
   return (
     <div className="flex h-full flex-col overflow-hidden" style={{ background: '#030303' }}>
-      <StudioViewToolbar 
-        viewMode={viewMode}
-        onToggleViewMode={onToggleViewMode}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={onToggleSidebar}
-      />
 
       <div
         className="flex flex-1 items-start justify-center overflow-auto relative"

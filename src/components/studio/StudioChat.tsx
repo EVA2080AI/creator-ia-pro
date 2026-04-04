@@ -1099,13 +1099,6 @@ export function StudioChat({
   return (
     <div className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-background">
       
-      <StudioProjectHeader 
-        name={projectName} 
-        isSaving={isSaving} 
-        onShare={onShare} 
-        onPublish={onPublish}
-        onBack={onBack}
-      />
 
       {/* ── Messages ─────────────────────────────────────────────────────────── */}
       <div ref={containerRef} onScroll={handleScroll}

@@ -1,34 +1,27 @@
 import { 
-  Layout, 
+  Globe, 
+  FileText, 
   Code, 
-  Monitor, 
-  Tablet, 
-  Smartphone, 
-  Share2, 
+  Cloud, 
+  LineChart, 
+  MoreHorizontal, 
+  ExternalLink, 
+  RotateCcw, 
+  MessageSquare, 
   Github, 
-  ChevronLeft,
-  Cloud,
-  CheckCircle2,
-  ExternalLink,
-  ChevronRight,
-  Sparkles,
-  Home,
-  LayoutGrid,
-  FolderOpen,
-  Shield,
-  CreditCard,
-  Coins,
-  Search,
-  User,
-  Globe,
+  Share2, 
+  Zap, 
   History,
-  Download,
-  Link2,
-  ChevronDown
+  Layout,
+  ChevronDown,
+  Monitor,
+  Tablet,
+  Smartphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
-export type ViewMode = 'preview' | 'code' | 'tools';
+export type ViewMode = 'preview' | 'code' | 'tools' | 'files' | 'cloud' | 'analytics';
 export type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 
 interface StudioTopbarProps {
@@ -42,12 +35,6 @@ interface StudioTopbarProps {
   onBack?: () => void;
   onGithubSync?: () => void;
   onPublish?: () => void;
-  credits?: number;
-  userProfile?: { 
-    full_name?: string; 
-    avatar_url?: string; 
-  } | null;
-  hideGlobalNav?: boolean;
 }
 
 export function StudioTopbar({
@@ -60,204 +47,134 @@ export function StudioTopbar({
   onShare,
   onBack,
   onGithubSync,
-  onPublish,
-  credits = 0,
-  userProfile,
-  hideGlobalNav = false
+  onPublish
 }: StudioTopbarProps) {
   return (
-    <div className="flex flex-col w-full shrink-0 z-50 sticky top-0">
-      {/* ── Level 1: Global Navigation ── */}
-      {!hideGlobalNav && (
-        <nav className="h-14 border-b border-border bg-background flex items-center justify-between px-6 shrink-0 relative">
-          <div className="flex items-center gap-8">
-            {/* Logo Section */}
-            <div className="flex items-center gap-2.5 group cursor-pointer">
-              <div className="h-8 w-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <div className="w-4 h-4 bg-emerald-500 rounded-sm rotate-45" />
-              </div>
-              <span className="text-sm font-black text-white tracking-widest uppercase">CREATOR <span className="text-emerald-500">IA</span></span>
-            </div>
+    <header className="h-[52px] w-full border-b border-white/5 bg-black/40 backdrop-blur-2xl flex items-center justify-between px-4 shrink-0 transition-all z-[100] selection:bg-primary/30">
+      
+      {/* --- Left: Context & Layout --- */}
+      <div className="flex items-center gap-1">
+        <IconButton icon={<History className="w-4 h-4" />} onClick={() => {}} title="Historial" />
+        <IconButton icon={<Layout className="w-4 h-4" />} onClick={() => {}} title="Alternar Sidebar" />
+      </div>
 
-            <div className="h-4 w-px bg-border/40" />
+      {/* --- Center: Navigation & View Controls --- */}
+      <div className="flex items-center gap-4 flex-1 justify-center max-w-4xl px-4">
+        
+        {/* Segmented View Toggles */}
+        <div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-xl">
+          <ViewToggle 
+            label="Preview" 
+            icon={<Globe className="w-3.5 h-3.5" />} 
+            active={viewMode === 'preview'} 
+            onClick={() => onViewModeChange('preview')}
+            variant="success"
+          />
+          <ViewToggle icon={<FileText className="w-3.5 h-3.5" />} active={viewMode === 'files'} onClick={() => onViewModeChange('files')} />
+          <ViewToggle icon={<Code className="w-3.5 h-3.5" />} active={viewMode === 'code'} onClick={() => onViewModeChange('code')} />
+          <ViewToggle icon={<Cloud className="w-3.5 h-3.5" />} active={viewMode === 'cloud'} onClick={() => onViewModeChange('cloud')} />
+          <ViewToggle icon={<LineChart className="w-3.5 h-3.5" />} active={viewMode === 'analytics'} onClick={() => onViewModeChange('analytics')} />
+          <ViewToggle icon={<MoreHorizontal className="w-3.5 h-3.5" />} active={false} onClick={() => {}} />
+        </div>
 
-            {/* Nav Links */}
-            <div className="flex items-center gap-1">
-              <NavLink icon={<Home className="w-3.5 h-3.5" />} label="Home" active={false} />
-              <NavLink icon={<Sparkles className="w-3.5 h-3.5" />} label="Genesis" active={true} />
-              <NavLink icon={<LayoutGrid className="w-3.5 h-3.5" />} label="Studio" active={false} />
-              <NavLink icon={<Layout className="w-3.5 h-3.5" />} label="Canvas" active={false} />
-              <NavLink icon={<FolderOpen className="w-3.5 h-3.5" />} label="Spaces" active={false} />
-              <NavLink icon={<Shield className="w-3.5 h-3.5" />} label="Admin" active={false} />
-            </div>
+        {/* URL / Path Bar */}
+        <div className="flex-1 max-w-[400px] h-8 flex items-center gap-2 px-3 bg-white/5 border border-white/10 rounded-xl group hover:border-white/20 transition-all">
+          <div className="flex items-center gap-2 text-zinc-500">
+             <Layout className="w-3.5 h-3.5" />
+             <span className="text-[11px] font-mono opacity-40">/</span>
           </div>
-
-          {/* Global Toolbar */}
-          <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[10px] font-bold text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-all">
-              <CreditCard className="w-3.5 h-3.5" />
-              Precios
+          <input 
+            type="text" 
+            readOnly 
+            value={projectName.toLowerCase().replace(/\s+/g, '-')} 
+            className="flex-1 bg-transparent border-none outline-none text-[12px] font-medium text-zinc-400 cursor-default"
+          />
+          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <button className="p-1 hover:bg-white/10 rounded-md transition-colors">
+              <ExternalLink className="w-3 h-3 text-zinc-400" />
             </button>
-            
-            <div className="h-4 w-px bg-border/40 mx-1" />
-            
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <Coins className="w-3.5 h-3.5 text-emerald-500" />
-              <span className="text-[11px] font-black text-emerald-500 tracking-wider">
-                {credits.toLocaleString()}
-              </span>
-            </div>
-
-            <button className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-xl bg-secondary/30 border border-border/40 hover:bg-secondary/50 transition-all select-none">
-              <div className="w-7 h-7 rounded-lg overflow-hidden bg-primary/20 border border-primary/20 flex items-center justify-center">
-                {userProfile?.avatar_url ? (
-                  <img src={userProfile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-4 h-4 text-primary" />
-                )}
-              </div>
-              <span className="text-[11px] font-bold text-foreground">Perfil</span>
-              <ChevronDown className="w-3 h-3 text-muted-foreground" />
+            <button className="p-1 hover:bg-white/10 rounded-md transition-colors">
+              <RotateCcw className="w-3 h-3 text-zinc-400" />
             </button>
-          </div>
-        </nav>
-      )}
-
-      {/* ── Level 2: Project Bar ── */}
-      <header className="h-[52px] border-b border-border bg-background/95 backdrop-blur-md flex items-center justify-between px-4 shrink-0">
-        {/* --- Left: Project Info --- */}
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={onBack}
-            className="flex items-center gap-1.5 px-2 py-1 hover:bg-secondary/80 rounded-lg transition-all group"
-          >
-            <ChevronLeft className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:-translate-x-0.5 transition-transform" />
-            <span className="text-xs font-bold text-muted-foreground group-hover:text-foreground">Proyectos</span>
-          </button>
-          
-          <div className="h-4 w-px bg-border mx-1" />
-
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <h1 className="text-xs font-black text-white tracking-tight leading-none truncate max-w-[200px]">
-                {projectName}
-              </h1>
-            </div>
-            <p className="text-[9px] font-medium text-muted-foreground/60 leading-none mt-1">
-              {isSaving ? 'Guardando cambios...' : 'Última versión guardada'}
-            </p>
           </div>
         </div>
 
-        {/* --- Center: Desktop/Mobile/Actions --- */}
-        <div className="flex items-center gap-1.5">
-          {/* View Toggles */}
-          <div className="flex items-center gap-1 p-1 bg-secondary/20 rounded-xl border border-border/40 mr-4">
-            <IconButton 
-              active={viewMode === 'preview'} 
-              onClick={() => onViewModeChange('preview')} 
-              icon={<Globe className="w-3.5 h-3.5" />} 
-              title="Preview"
-            />
-            <IconButton 
-              active={false} 
-              onClick={() => {}} 
-              icon={<Layout className="w-3.5 h-3.5 rotate-90" />} 
-              title="Layout"
-            />
-            <IconButton 
-              active={viewMode === 'code'} 
-              onClick={() => onViewModeChange('code')} 
-              icon={<Code className="w-3.5 h-3.5" />} 
-              title="View Code"
-            />
+        {/* Device Toggles (Only in Preview) */}
+        {viewMode === 'preview' && (
+          <div className="flex items-center gap-0.5 p-1 bg-white/5 border border-white/10 rounded-xl">
+             <IconButton small active={deviceMode === 'desktop'} icon={<Monitor className="w-3.5 h-3.5" />} onClick={() => onDeviceModeChange('desktop')} />
+             <IconButton small active={deviceMode === 'tablet'} icon={<Tablet className="w-3.5 h-3.5" />} onClick={() => onDeviceModeChange('tablet')} />
+             <IconButton small active={deviceMode === 'mobile'} icon={<Smartphone className="w-3.5 h-3.5" />} onClick={() => onDeviceModeChange('mobile')} />
           </div>
+        )}
+      </div>
 
-          {/* Device Toggles */}
-          {viewMode === 'preview' && (
-            <div className="flex items-center gap-1 p-1 bg-secondary/20 rounded-xl border border-border/40 mr-4">
-              <IconButton 
-                active={deviceMode === 'desktop'} 
-                onClick={() => onDeviceModeChange('desktop')} 
-                icon={<Monitor className="w-3.5 h-3.5" />} 
-                title="Desktop"
-              />
-              <IconButton 
-                active={deviceMode === 'tablet'} 
-                onClick={() => onDeviceModeChange('tablet')} 
-                icon={<Tablet className="w-3.5 h-3.5" />} 
-                title="Tablet"
-              />
-              <IconButton 
-                active={deviceMode === 'mobile'} 
-                onClick={() => onDeviceModeChange('mobile')} 
-                icon={<Smartphone className="w-3.5 h-3.5" />} 
-                title="Mobile"
-              />
-            </div>
-          )}
+      {/* --- Right: Actions & Publishing --- */}
+      <div className="flex items-center gap-1.5">
+        <IconButton icon={<MessageSquare className="w-4 h-4" />} onClick={() => {}} title="Chat" />
+        <IconButton icon={<Github className="w-4 h-4" />} onClick={onGithubSync} title="GitHub" />
+        
+        <div className="h-6 w-px bg-white/10 mx-1.5" />
 
-          {/* Sync & History */}
-          <div className="flex items-center gap-1 mr-4">
-            <IconButton icon={<History className="w-3.5 h-3.5" />} onClick={() => {}} title="History" />
-            <IconButton icon={<Cloud className="w-3.5 h-3.5" />} onClick={onGithubSync} title="Sync" />
-          </div>
+        <button 
+          onClick={onShare}
+          className="flex items-center gap-2 px-3 h-8 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-[11px] font-black text-zinc-300 transition-all active:scale-95 whitespace-nowrap"
+        >
+          <Share2 className="w-3.5 h-3.5" />
+          Share
+        </button>
 
-          <div className="h-6 w-px bg-border/60 mx-1" />
+        <button 
+          className="flex items-center gap-2 px-3 h-8 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-[11px] font-black text-white hover:brightness-110 active:scale-95 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] whitespace-nowrap"
+        >
+          <Zap className="w-3.5 h-3.5 fill-current" />
+          Upgrade
+        </button>
 
-          {/* Export & Actions */}
-          <div className="flex items-center gap-2 pl-4">
-            <IconButton icon={<Download className="w-3.5 h-3.5" />} onClick={() => {}} title="Download" />
-            <IconButton icon={<Link2 className="w-4 h-4" />} onClick={onShare} title="Share" />
-            
-            <button 
-              onClick={onPublish}
-              className="flex items-center gap-2 px-5 h-8 rounded-full bg-primary text-white text-[11px] font-black hover:bg-primary/90 transition-all active:scale-95 shadow-lg shadow-primary/20 ml-2"
-            >
-              Publicar
-            </button>
-          </div>
-        </div>
-      </header>
-    </div>
+        <button 
+          onClick={onPublish}
+          className="flex items-center px-4 h-8 rounded-xl bg-blue-600 hover:bg-blue-500 text-[11px] font-black text-white transition-all active:scale-95 shadow-[0_0_20px_rgba(37,99,235,0.2)] whitespace-nowrap"
+        >
+          Publish
+        </button>
+      </div>
+    </header>
   );
 }
 
-// --- Internal Helper Components ---
+// --- Helper Components ---
 
-function NavLink({ icon, label, active }: { icon: React.ReactNode, label: string, active: boolean }) {
+function ViewToggle({ label, icon, active, onClick, variant }: { label?: string, icon: React.ReactNode, active: boolean, onClick: () => void, variant?: 'success' }) {
   return (
-    <button className={cn(
-      "flex items-center gap-2 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all whitespace-nowrap",
-      active 
-        ? "bg-secondary text-foreground shadow-sm" 
-        : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
-    )}>
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-black transition-all duration-200",
+        active 
+          ? (variant === 'success' ? "bg-blue-500/10 text-blue-400" : "bg-white/10 text-white shadow-lg shadow-black/20") 
+          : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+      )}
+    >
       {icon}
-      {label}
+      {label && <span className="hidden lg:inline">{label}</span>}
     </button>
   );
 }
 
-function IconButton({ icon, active, onClick, title }: { icon: React.ReactNode, active?: boolean, onClick: () => void, title?: string }) {
+function IconButton({ icon, active, onClick, title, small }: { icon: React.ReactNode, active?: boolean, onClick: () => void, title?: string, small?: boolean }) {
   return (
     <button
       onClick={onClick}
       title={title}
       className={cn(
-        "p-1.5 rounded-lg transition-all overflow-hidden relative group",
+        "rounded-lg transition-all flex items-center justify-center",
+        small ? "w-7 h-7" : "w-9 h-9",
         active 
-          ? "bg-primary/10 text-primary border border-primary/20 shadow-sm" 
-          : "text-muted-foreground/60 hover:text-foreground hover:bg-secondary/60"
+          ? "bg-white/10 text-white border border-white/10 shadow-lg shadow-black/20" 
+          : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
       )}
     >
-      <div className={cn(
-        "transition-transform",
-        active ? "scale-105" : "group-hover:scale-110"
-      )}>
-        {icon}
-      </div>
+      {icon}
     </button>
   );
 }
