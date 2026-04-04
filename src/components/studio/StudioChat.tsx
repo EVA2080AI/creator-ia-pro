@@ -125,39 +125,34 @@ function detectIntent(prompt: string): 'codegen' | 'chat' {
 }
 
 // ─── Genesis unified system prompt (v3 — Elite Architect & Full-Stack Lead) ──────
-const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Master Brain (v7 + Antigravity DNA)
+const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Master Brain (v8 + Antigravity DNA)
 
 Eres la inteligencia central definitiva de Creator IA Pro. Eres la fusión perfecta entre un **Elite Architect & Full-Stack Lead (Genesis)** y un **Executive Strategist & Growth Architect (Antigravity)**.
 
 TU MISIÓN:
-No solo generas código industrial de clase mundial; diseñas ecosistemas digitales que operan con visión de nivel C-Suite. Tu objetivo es la perfección técnica, la escalabilidad extrema y el éxito estratégico del negocio del usuario.
+No solo generas código industrial; diseñas ecosistemas digitales estratégicos. Tu objetivo es la perfección técnica y el éxito empresarial del usuario.
 
-TUS CAPACIDADES CLAVE (DNA UNIFICADO):
+REGLAS DE OPERACIÓN (ESTRICTAS):
 
-1. 💼 ESTRATEGIA EJECUTIVA (Antigravity Soul):
-   - Razonamiento profundo antes de cualquier acción técnica.
-   - Análisis de Modelos de Negocio, CRO (Conversion Rate Optimization), Marketing Digital y Copywriting Persuasivo.
-   - Visión de producto de nivel Directivo: cada línea de código debe estar justificada por un objetivo de producto o comercial.
+1. **Conversación Natural & Humana:**
+   - Si el usuario solo saluda (ej. "hola", "¿cómo estás?"), responde de forma cálida, breve y humana. **NO** actives el razonamiento estratégico pesado para interacciones triviales.
+   - Eres versátil: puedes hablar de cualquier tema (filosofía, arte, negocios, vida) con una perspectiva inteligente y única.
 
-2. 🏗️ ARQUITECTURA ELITE (Elite Architect):
-   - Experto en el ecosistema aitmpl: Skills, MCPs, Plugins y Slash Commands.
-   - Patrones de diseño industriales (SOLID, DRY, KISS, Hexagonal, Event-Driven).
-   - Core Frontend: React 19, Next.js 15, TypeScript, Tailwind CSS, Framer Motion (micro-interacciones por defecto).
-   - Core Backend & DB: Node.js, Python/FastAPI, Go, Java/Spring Boot y PostgreSQL (Supabase Profiler, RLS, RPC).
+2. **Transparencia Radical (Thinking Process):**
+   - Antes de tu respuesta final, realiza SIEMPRE un análisis interno profundo sobre la intención del usuario, posibles soluciones y riesgos.
+   - Encapsula este análisis EXCLUSIVAMENTE dentro de tags <thinking>...</thinking>. El usuario verá esto como tu proceso mental.
 
-3. 🎬 INGENIERÍA MULTIMEDIA & GAME DEV:
-   - Procesamiento de Audio/Video avanzado (Tone.js, Remotion, FFmpeg.wasm).
-   - Motores de juego y física (Phaser 3, Babylon.js, Three.js, Rapier).
+3. **Master Plan Estratégico:**
+   - Para cualquier solicitud de desarrollo, cambio arquitectónico o estrategia de negocio, inicia tu respuesta (fuera del thinking) con una sección clara titulada "MASTER PLAN".
+   - Usa listas de verificación [ ] para mostrar los pasos a seguir.
 
-REGLAS DE ORO (MANDATOS DE OPERACIÓN):
+4. **Razonamiento "Think-Then-Code":**
+   - Solo para tareas técnicas: explica el "Por Qué" estratégico antes del "Cómo" técnico.
+   - Integra diseño premium y animaciones (Framer Motion) por defecto.
 
-1. **Razonamiento "Think-Then-Code":** Antes de entregar una solución técnica, ofrece SIEMPRE una breve reflexión estratégica (1-2 párrafos) sobre por qué ese enfoque es el mejor desde una perspectiva de negocio, UX y escalabilidad.
-2. **Cero Placeholders:** Jamás uses "// ... resto del código". Entrega archivos 100% funcionales y completos.
-3. **Estética Automática:** Integra diseño premium (Glassmorphism, Bento Grids, Gradientes modernos) y animaciones fluidas sin que se te pida.
-4. **Consultoría Proactiva:** Si detectas una vulnerabilidad o un enfoque estratégico débil, cuestiónalo y propón la solución "Master Brain".
-5. **Idioma:** Habla en español profesional, inspirador y directo. Código y términos técnicos SIEMPRE en inglés.
-
-Eres el CTO y CPO (Chief Product Officer) personal del usuario. Tu objetivo es la perfección técnica y el éxito masivo.`;
+5. **Cero Placeholders:** Entrega archivos 100% funcionales y completos.
+6. **Consultoría Proactiva:** Si detectas un enfoque débil, cuestiónalo y propón la solución "Master Brain".
+7. **Idioma:** Español profesional e inspirador. Términos técnicos en inglés.`;
 
 
 const GENESIS_CHAT_SYSTEM = `Eres Genesis AI — el "Master Brain" de desarrollo. Estás en modo CHAT/ARCHITECT.
@@ -355,32 +350,62 @@ function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
 // ─── Markdown renderer ─────────────────────────────────────────────────────────
 function renderMarkdown(text: string): string {
   let raw = text
-    // Code blocks (multiline) — process FIRST before inline code
+    // Thinking blocks (Design System style)
+    .replace(/<thinking>([\s\S]*?)<\/thinking>/g, (_m, content) => 
+      `<div class="thinking-block my-6 p-5 rounded-3xl bg-zinc-50 border border-zinc-200/60 shadow-sm animate-in fade-in slide-in-from-top-4 duration-700">
+        <div class="flex items-center gap-2.5 mb-3 text-zinc-400">
+          <div class="h-5 w-5 rounded-lg bg-zinc-200 flex items-center justify-center text-zinc-500">
+            <svg class="w-3 h-3 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.989-2.386l-.548-.547z"/></svg>
+          </div>
+          <span class="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">Análisis Mental del Master Brain</span>
+        </div>
+        <div class="text-[11px] text-zinc-500 font-bold italic leading-relaxed pl-1 border-l-2 border-zinc-200 ml-2.5">${content.trim()}</div>
+      </div>`)
+    // Code blocks (Design System Mini-Frame)
     .replace(/```(\w*)\n?([\s\S]*?)```/g, (_m, lang, code) =>
-      `<pre class="my-2 rounded-xl overflow-x-auto p-3 text-[11px] font-mono leading-relaxed bg-zinc-50 border border-zinc-200"><code class="text-primary/90">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>`)
+      `<div class="code-mini-frame group my-6 rounded-[24px] border border-zinc-200 bg-zinc-900 shadow-2xl shadow-zinc-200/50 overflow-hidden animate-in zoom-in-95 duration-500">
+        <div class="flex items-center justify-between px-5 py-3 bg-zinc-800/50 border-b border-white/5">
+          <div class="flex items-center gap-1.5">
+            <div class="w-2.5 h-2.5 rounded-full bg-red-500/30 border border-red-500/40"></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-amber-500/30 border border-amber-500/40"></div>
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500/30 border border-emerald-500/40"></div>
+            <span class="ml-3 text-[10px] font-black text-white/30 uppercase tracking-[0.15em]">${lang || 'archivo'}</span>
+          </div>
+          <div class="h-4 w-4 rounded-md bg-white/5 flex items-center justify-center text-white/20 hover:text-white/60 transition-colors cursor-pointer">
+            <svg class="h-2.5 w-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          </div>
+        </div>
+        <pre class="p-6 text-[11px] font-mono leading-relaxed bg-transparent overflow-x-auto"><code class="text-zinc-300 block">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>
+      </div>`)
     // Headers
-    .replace(/^### (.+)$/gm, '<h3 class="text-[12px] font-bold text-zinc-900 mt-3 mb-1">$1</h3>')
-    .replace(/^## (.+)$/gm,  '<h2 class="text-[13px] font-bold text-zinc-900 mt-3 mb-1.5">$1</h2>')
-    .replace(/^# (.+)$/gm,   '<h1 class="text-[14px] font-black text-zinc-900 mt-3 mb-2">$1</h1>')
+    .replace(/^### (.+)$/gm, '<h3 class="text-[14px] font-black text-zinc-900 mt-6 mb-2 tracking-tight">$1</h3>')
+    .replace(/^## (.+)$/gm,  '<h2 class="text-[16px] font-black text-zinc-900 mt-8 mb-3 tracking-tight">$1</h2>')
+    .replace(/^# (.+)$/gm,   '<h1 class="text-[18px] font-black text-zinc-900 mt-10 mb-4 tracking-tight">$1</h1>')
     // Bold + italic
     .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-zinc-900 font-bold">$1</strong>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong class="text-zinc-900 font-black">$1</strong>')
     .replace(/\*(.+?)\*/g, '<em>$1</em>')
     // Inline code
-    .replace(/`([^`]+)`/g, '<code class="bg-zinc-100 px-1.5 py-0.5 rounded-md text-primary font-mono text-[10px] border border-zinc-200/50">$1</code>')
-    // Numbered lists
-    .replace(/^\d+\. (.+)$/gm, '<li class="flex items-start gap-2 text-zinc-600 mb-0.5"><span class="text-primary shrink-0 font-bold text-[10px] mt-0.5">→</span><span>$1</span></li>')
-    // Bullet lists
-    .replace(/^[-•] (.+)$/gm, '<li class="flex items-start gap-2 text-zinc-600 mb-0.5"><span class="text-primary shrink-0 mt-1.5 h-1 w-1 rounded-full bg-current inline-block"></span><span>$1</span></li>')
+    .replace(/`([^`]+)`/g, '<code class="bg-zinc-100 px-2 py-0.5 rounded-lg text-primary font-mono text-[10px] border border-zinc-200/50 font-bold">$1</code>')
+    // Master Plan Checkboxes
+    .replace(/^\[( |x|X)\] (.+)$/gm, (_m, check, text) => 
+      `<div class="flex items-center gap-3 my-2 group/task">
+        <div class="h-5 w-5 rounded-lg border-2 flex items-center justify-center transition-all ${check.toLowerCase() === 'x' ? 'bg-primary border-primary shadow-lg shadow-primary/20' : 'bg-white border-zinc-200 group-hover/task:border-primary/50'}">
+          ${check.toLowerCase() === 'x' ? '<svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+        </div>
+        <span class="text-xs font-bold ${check.toLowerCase() === 'x' ? 'text-zinc-400 line-through decoration-primary/30' : 'text-zinc-700'}">${text}</span>
+      </div>`)
+    .replace(/^\d+\. (.+)$/gm, '<li class="flex items-start gap-3 text-zinc-600 mb-1.5 font-medium"><span class="text-primary font-black text-[11px] mt-0.5 tracking-tighter">0$1.</span><span>$2</span></li>') // Fixed potential group issue
+    .replace(/^[-•] (.+)$/gm, '<li class="flex items-start gap-3 text-zinc-600 mb-1.5 font-medium"><div class="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0 shadow-sm shadow-primary/50"></div><span>$1</span></li>')
     // Horizontal rule
-    .replace(/^---$/gm, '<hr class="border-zinc-100 my-3"/>')
+    .replace(/^---$/gm, '<hr class="border-zinc-100 my-8"/>')
     // Line breaks
-    .replace(/\n\n/g, '<div class="my-2"></div>')
+    .replace(/\n\n/g, '<div class="my-4"></div>')
     .replace(/\n/g, '<br/>');
 
   return DOMPurify.sanitize(raw, {
-    ALLOWED_TAGS: ['strong','em','code','pre','li','br','h1','h2','h3','span','div','hr'],
-    ALLOWED_ATTR: ['class','style'],
+    ALLOWED_TAGS: ['strong','em','code','pre','li','br','h1','h2','h3','span','div','hr','svg','path'],
+    ALLOWED_ATTR: ['class','style','fill','stroke','viewBox','d','stroke-linecap','stroke-linejoin','stroke-width'],
   });
 }
 
@@ -967,84 +992,78 @@ export function StudioChat({
 
 
         {messages.map((msg) => (
-          <div key={msg.id} className={`group ${msg.role === 'user' ? 'flex justify-end mb-3' : 'mb-4'}`}>
+          <div key={msg.id} className={`group ${msg.role === 'user' ? 'flex flex-col items-end gap-2 mb-4' : 'flex flex-col items-start gap-4 mb-8'}`}>
             {msg.role === 'user' ? (
-              <div className="max-w-[88%] space-y-1.5">
-                {msg.imagePreview && (
-                  <div className="rounded-xl overflow-hidden border border-primary/20">
-                    <img src={msg.imagePreview} alt="Referencia" className="max-h-32 w-auto object-contain" />
-                  </div>
-                )}
-                <div className="rounded-2xl rounded-tr-sm px-3.5 py-2.5 text-[13px] leading-relaxed text-foreground bg-primary/10 border border-primary/20">
+              <>
+                <div className="bg-zinc-900 text-white px-6 py-3.5 rounded-3xl rounded-tr-none text-sm font-bold shadow-2xl shadow-zinc-900/10 max-w-[85%] animate-in fade-in slide-in-from-right-4 duration-500">
+                  {msg.imagePreview && (
+                    <div className="rounded-xl overflow-hidden mb-3 border border-white/10">
+                      <img src={msg.imagePreview} alt="Referencia" className="max-h-48 w-auto object-contain" />
+                    </div>
+                  )}
                   <span className="whitespace-pre-wrap">{msg.content}</span>
                 </div>
-              </div>
+                <span className="text-[9px] text-zinc-400 font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity pr-2">
+                  Tú · {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </>
             ) : (
-              <div>
-                <div className="flex items-start gap-2 px-1">
-                  <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md mt-0.5 bg-primary/10 border border-primary/20">
-                    <Bot className="h-3 w-3 text-primary" />
+              <div className="w-full max-w-[95%]">
+                <div className="flex items-center gap-3 mb-3 pl-1">
+                  <div className="h-7 w-7 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-200 animate-in zoom-in duration-500">
+                    <Sparkles className="h-4 w-4" />
                   </div>
-                  <div className={`flex-1 text-[13px] leading-relaxed ${msg.type === 'code' ? 'text-white/90' : 'text-white/75'}`}>
-                    <div className="prose prose-invert max-w-none"
-                      dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
-
-                    {/* Tech stack badge */}
-                    {msg.stack && msg.stack.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {msg.stack.map(s => (
-                          <span key={s} className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest bg-primary/10 text-primary border border-primary/20">
-                            {s}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Missing deps warning */}
-                    {msg.deps && msg.deps.length > 0 && (
-                      <div className="mt-2 flex items-start gap-2 px-3 py-2 rounded-xl text-[10px]"
-                        style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)' }}>
-                        <AlertCircle className="h-3 w-3 text-amber-400 shrink-0 mt-0.5" />
-                        <div>
-                          <p className="font-bold text-amber-400 mb-0.5">Instalar dependencias:</p>
-                          <code className="text-white/60 text-[9px]">npm i {msg.deps.join(' ')}</code>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Quick suggestions */}
-                    {msg.suggestions && msg.suggestions.length > 0 && (
-                      <div className="mt-2 space-y-1">
-                        <p className="text-[9px] text-white/25 uppercase tracking-widest font-bold px-1">Iteraciones rápidas</p>
-                        {msg.suggestions.map((s, i) => (
-                          <button key={i} onClick={() => handleSend(s)}
-                            className="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-lg text-[11px] text-muted-foreground hover:text-foreground transition-all text-left bg-card/30 border border-border hover:border-primary/30"
-                            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(138,180,248,0.25)'; }}
-                            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.06)'; }}
-                          >
-                            <Wrench className="h-3 w-3 text-primary/40 shrink-0" />
-                            {s}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                  <div className="flex flex-col">
+                    <span className="text-[10px] font-black uppercase text-zinc-900 tracking-[0.2em]">{persona === 'antigravity' ? 'Antigravity AI' : 'Genesis AI'}</span>
+                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest leading-none">Master Brain Engine</span>
                   </div>
                 </div>
 
-                {/* Reaction bar */}
-                <div className="flex items-center gap-0.5 ml-8 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => copyMessage(msg.content, msg.id)}
-                    className="flex items-center gap-1 px-2 py-1 rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all text-[10px]">
-                    {copiedId === msg.id ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
-                  </button>
-                  <button onClick={() => handleSend(messages[messages.indexOf(msg) - 1]?.content)}
-                    className="px-2 py-1 rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
-                    <RotateCcw className="h-3 w-3" />
-                  </button>
-                  <span className="ml-1 text-[10px] text-zinc-300">
-                    {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                <div className="bg-white border border-zinc-200/80 px-7 py-6 rounded-[32px] rounded-tl-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] animate-in fade-in slide-in-from-left-4 duration-500 relative group/msg">
+                  <div className="prose prose-zinc max-w-none prose-sm font-medium"
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+
+                  {/* Tech stack badge */}
+                  {msg.stack && msg.stack.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-6 pt-6 border-t border-zinc-100">
+                      {msg.stack.map(s => (
+                        <span key={s} className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-zinc-50 text-zinc-500 border border-zinc-200">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Reactions / Actions */}
+                  <div className="absolute top-4 right-4 flex items-center gap-1 opacity-0 group-hover/msg:opacity-100 transition-opacity">
+                    <button onClick={() => copyMessage(msg.content, msg.id)}
+                      className="p-2 rounded-xl bg-zinc-50 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+                      {copiedId === msg.id ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+                    </button>
+                    {/* Retry button for assistant messages if context allows */}
+                    <button onClick={() => {
+                      const idx = messages.indexOf(msg);
+                      if (idx > 0) handleSend(messages[idx-1].content);
+                    }}
+                      className="p-2 rounded-xl bg-zinc-50 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+                      <RotateCcw className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
                 </div>
+
+                {/* Suggestions / Starter Chips */}
+                {msg.suggestions && msg.suggestions.length > 0 && (
+                  <div className="mt-4 flex flex-wrap gap-2 pl-2">
+                    {msg.suggestions.map((s, i) => (
+                      <button key={i} onClick={() => handleSend(s)}
+                        className="px-5 py-2.5 rounded-full border border-zinc-200 bg-white text-[11px] font-black text-zinc-500 hover:border-black hover:text-black hover:shadow-xl hover:shadow-black/5 transition-all animate-in fade-in slide-in-from-bottom-2 duration-500"
+                        style={{ animationDelay: `${i * 100}ms` }}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1052,14 +1071,19 @@ export function StudioChat({
 
         {/* ── Phase: THINKING ─────────── */}
         {genPhase === 'thinking' && (
-          <div className="flex items-start gap-2 px-1 mb-4 animate-in fade-in duration-200">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 border border-primary/20">
-              <Bot className="h-3 w-3 text-primary" />
+          <div className="flex flex-col items-start gap-4 mb-8 pl-1 animate-in fade-in duration-500">
+            <div className="flex items-center gap-3 mb-1">
+              <div className="h-7 w-7 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-200">
+                <Sparkles className="h-4 w-4 animate-pulse" />
+              </div>
+              <span className="text-[10px] font-black uppercase text-zinc-900 tracking-[0.2em]">
+                {currentGenIntent === 'codegen' ? 'Generando...' : 'Genesis...'}
+              </span>
             </div>
-            <div className="flex items-center gap-2.5 py-1">
-              <Loader2 className="h-3 w-3 text-primary/40 animate-spin" />
-              <span className="text-[11px] font-medium text-primary/60">
-                {currentGenIntent === 'codegen' ? 'Generando código…' : 'Genesis está pensando…'}
+            <div className="flex items-center gap-3 py-3 px-6 rounded-3xl bg-zinc-50 border border-zinc-200/60 shadow-sm transition-all">
+              <Loader2 className="h-4 w-4 text-primary animate-spin" />
+              <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
+                Realizando Análisis Estratégico...
               </span>
             </div>
           </div>
@@ -1067,38 +1091,41 @@ export function StudioChat({
 
         {/* ── Phase: STREAMING — live content with smooth rate-limited display ─ */}
         {(genPhase === 'streaming' || genPhase === 'done') && streamingContent !== null && (
-          <div className="flex items-start gap-2 px-1 mb-4">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md mt-0.5 bg-primary/10 border border-primary/20">
-              <Bot className="h-3 w-3 text-primary" />
+          <div className="flex flex-col items-start gap-4 mb-8">
+            <div className="flex items-center gap-3 mb-1 pl-1">
+              <div className="h-7 w-7 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-200">
+                <Sparkles className="h-4 w-4" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black uppercase text-zinc-900 tracking-[0.2em]">{persona === 'antigravity' ? 'Antigravity AI' : 'Genesis AI'}</span>
+                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest leading-none tracking-tighter">Procesando...</span>
+              </div>
             </div>
-            <div className="flex-1 text-[13px] leading-relaxed text-zinc-700">
-              <div className="prose prose-zinc max-w-none"
-                dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent || '​') }} />
-              {/* Blinking cursor — only while actively streaming */}
-              {genPhase === 'streaming' && (
-                <span className="inline-block h-3.5 w-0.5 ml-0.5 align-text-bottom rounded-full animate-pulse bg-primary" />
-              )}
-            </div>
-          </div>
-        )}
 
-        {/* ── Code gen progress bar ─────────────────────────────────────────────── */}
-        {isGenerating && currentGenIntent === 'codegen' && (
-          <div className="flex items-start gap-2 px-1 mb-4">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
-              style={{ background: 'rgba(138,180,248,0.1)', border: '1px solid rgba(138,180,248,0.18)' }}>
-              <Loader2 className="h-3 w-3 text-[#8AB4F8] animate-spin" />
-            </div>
-            <div className="flex flex-col justify-center gap-1 py-0.5 flex-1">
-              <span className="text-[11px] text-zinc-400">
-                {genPhase === 'thinking' ? 'Analizando prompt…' : 'Generando código…'}
-              </span>
-              {streamChars > 0 && (
-                <div className="h-0.5 w-full rounded-full overflow-hidden bg-primary/10">
-                  <div className="h-full rounded-full animate-pulse bg-primary" style={{ width: `${Math.min((streamChars / 12000) * 100, 95)}%`, transition: 'width 0.3s ease' }} />
-                </div>
+            <div className="bg-white border border-zinc-200/80 px-7 py-6 rounded-[32px] rounded-tl-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] animate-in fade-in slide-in-from-left-4 duration-500 min-w-[200px]">
+              <div className="prose prose-zinc max-w-none prose-sm font-medium"
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent || '​') }} />
+              {/* Blinking cursor */}
+              {genPhase === 'streaming' && (
+                <span className="inline-block h-3.5 w-1 ml-1 align-text-bottom rounded-full animate-pulse bg-primary" />
               )}
             </div>
+
+            {/* Code gen progress bar overlay */}
+            {isGenerating && currentGenIntent === 'codegen' && (
+              <div className="w-full max-w-xs mt-2 pl-2">
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex justify-between items-center px-1">
+                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Compilando ADN</span>
+                    {streamChars > 0 && <span className="text-[9px] font-black text-primary uppercase">{Math.min(Math.round((streamChars / 12000) * 100), 99)}%</span>}
+                  </div>
+                  <div className="h-1 w-full rounded-full overflow-hidden bg-zinc-100 border border-zinc-200/50">
+                    <div className="h-full rounded-full bg-primary transition-all duration-500 ease-out" 
+                      style={{ width: `${Math.min((streamChars / 12000) * 100, 95)}%` }} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
