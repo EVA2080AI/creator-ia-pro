@@ -97,16 +97,17 @@ export default function Studio() {
     }
   }, [activeProject, activeFile]);
 
-  // --- Auto-Migrator (Nuclear Fix v12.1) ---
+  // --- Auto-Migrator (Nuclear Fix v14.6) ---
   // Silently upgrades legacy CRA projects to the new Vite-Native architecture
   useEffect(() => {
-    if (!activeProject || isGenerating) return;
+    if (!activeProject) return;
 
     const files = activeProject.files;
     const hasRootIndex = !!files['index.html'];
     const hasPackageJson = !!files['package.json'];
     const hasViteConfig = !!files['vite.config.ts'];
 
+    // Nuclear enforcement: missing ANY of these files triggers immediate injection
     if (!hasRootIndex || !hasPackageJson || !hasViteConfig) {
       console.log('Genesis: Legacy project detected. Migrating to Vite-Native...');
       
@@ -161,9 +162,12 @@ export default function Studio() {
       }
 
       updateProjectFiles(activeProject.id, upgradedFiles);
-      toast.success('Proyecto actualizado a Genesis v12.1 (Vite-Native)');
+      // Only toast on manual project load to avoid spamming during generation
+      if (!isGenerating) {
+        toast.info('Sincronizando arquitectura maestra...');
+      }
     }
-  }, [activeProject, isGenerating, updateProjectFiles]);
+  }, [activeProject, updateProjectFiles]); // Removed isGenerating from deps to ensure foundation
 
   // --- Handlers ---
   const handleFilesChange = async (newFiles: Record<string, StudioFile>) => {
