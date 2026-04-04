@@ -1520,7 +1520,9 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
 
   // ─── STATE RESET: Clear input/images when project changes ──────────────────
   useEffect(() => {
-    if (projectId) {
+    // Only reset if we are switching between established projects 
+    // and there is no fresh initialPrompt being injected from props.
+    if (projectId && !initialPrompt) {
       setInput('');
       setPendingImage(null);
       setPendingUrl(null);
@@ -1529,7 +1531,7 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
       autoFixCountRef.current = 0;
       isFirstGen.current = true;
     }
-  }, [projectId]);
+  }, [projectId, initialPrompt]);
 
   // ─── BUG FIX: Initial Prompt Trigger ──────────────────────────────────────
   useEffect(() => {
