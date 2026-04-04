@@ -20,6 +20,10 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface UnifiedProject {
   id: string;
@@ -209,43 +213,61 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
 
   return (
     <>
-      <div className="flex items-center gap-3 mb-6">
-        <div className="relative flex-1 max-w-md group">
-          <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 group-focus-within:text-primary/60 transition-colors pointer-events-none" />
-          <Input
-            placeholder="Buscar proyectos y flujos..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="bg-zinc-50 border-zinc-200 pl-11 h-10 rounded-xl text-[13px] text-zinc-900 placeholder:text-zinc-500 focus:border-primary/30 focus:ring-0 transition-all font-medium"
-          />
-        </div>
-
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as any)}
-          className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500 font-display outline-none hover:border-zinc-300 transition-all cursor-pointer"
-        >
-          <option value="updated">Modificado</option>
-          <option value="created">Creado</option>
-          <option value="name">Nombre</option>
-        </select>
-
-        <div className="flex items-center gap-0.5 bg-zinc-50 border border-zinc-200 rounded-xl p-1">
-          <button onClick={() => setViewMode('grid')}
-            className={`p-1.5 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-zinc-900 border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-900'}`}>
-            <LayoutGrid className="h-3.5 w-3.5" />
-          </button>
-          <button onClick={() => setViewMode('list')}
-            className={`p-1.5 rounded-lg transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-zinc-900 border border-zinc-200/50' : 'text-zinc-500 hover:text-zinc-900'}`}>
-            <List className="h-3.5 w-3.5" />
-          </button>
-        </div>
+      <div className="mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
+        <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em] font-display mb-3 block">Hub Central</span>
+        <h1 className="text-6xl font-black text-zinc-900 tracking-tighter leading-none font-display">
+          Mis <span className="bg-gradient-to-r from-primary via-violet-500 to-indigo-600 bg-clip-text text-transparent italic leading-[1.2]">Proyectos</span>
+        </h1>
+        <p className="text-zinc-500 font-medium text-lg mt-6 max-w-2xl leading-relaxed">
+          El punto de encuentro para todos tus flujos creativos, repositorios de código y biblioteca de activos digitales.
+        </p>
       </div>
 
-      <div className="flex items-center gap-2 mb-4">
-        <HardDrive className="h-4 w-4 text-zinc-500" />
-        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-[0.25em] font-display">Mis Activos Locales</span>
-        <span className="text-[10px] text-zinc-500 ml-1">— {filtered.length} total</span>
+      <div className="flex flex-col md:flex-row items-center gap-4 mb-10 p-1.5 bg-zinc-100/50 backdrop-blur-xl border border-zinc-200/60 rounded-[2rem] shadow-inner animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
+          <input
+            type="text"
+            placeholder="Buscar proyectos, flujos o archivos..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-white border border-transparent focus:border-primary/20 focus:ring-4 focus:ring-primary/5 rounded-[1.5rem] py-3.5 pl-14 pr-6 text-sm font-medium transition-all outline-none shadow-sm"
+          />
+        </div>
+        
+        <div className="flex items-center gap-2 pr-2">
+          <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+            <SelectTrigger className="w-[160px] h-12 bg-white border-zinc-200 rounded-[1.2rem] text-[11px] font-black uppercase tracking-widest text-zinc-500 shadow-sm transition-all focus:ring-4 focus:ring-primary/5">
+              <SelectValue placeholder="Ordenar" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-zinc-200 shadow-2xl">
+              <SelectItem value="updated" className="text-[11px] font-bold">MODIFICADO</SelectItem>
+              <SelectItem value="name" className="text-[11px] font-bold">NOMBRE</SelectItem>
+              <SelectItem value="created" className="text-[11px] font-bold">RECIENTE</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex p-1 bg-white border border-zinc-200 rounded-[1.2rem] shadow-sm shrink-0">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={cn(
+                "p-2.5 rounded-xl transition-all",
+                viewMode === 'grid' ? "bg-zinc-900 text-white shadow-lg" : "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
+              )}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={cn(
+                "p-2.5 rounded-xl transition-all",
+                viewMode === 'list' ? "bg-zinc-900 text-white shadow-lg" : "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
+              )}
+            >
+              <List className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       </div>
 
       <div className="flex items-center gap-4 mb-6">
@@ -311,7 +333,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
             return (
               <div
                 key={space.id}
-                className={`group cursor-pointer rounded-3xl border ${selectedIds.has(space.id) ? 'border-primary ring-2 ring-primary/10 shadow-lg shadow-primary/5' : 'border-zinc-200/60 shadow-sm'} bg-white/70 backdrop-blur-sm hover:border-zinc-300 hover:shadow-xl transition-all duration-500 relative overflow-hidden`}
+                className={`group cursor-pointer rounded-[2.5rem] border ${selectedIds.has(space.id) ? 'border-primary ring-2 ring-primary/10 shadow-[0_30px_90px_rgba(0,0,0,0.15)]' : 'border-zinc-200/60 shadow-sm'} bg-white/70 backdrop-blur-sm hover:border-primary/30 hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 relative overflow-hidden`}
                 onClick={() => handleProjectClick(space)}
               >
                 {/* Selection Checkbox Overlay */}

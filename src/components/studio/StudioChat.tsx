@@ -4,7 +4,8 @@ import {
   ChevronDown, Copy, RotateCcw, Check, ChevronLeft, Share2,
   X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink, Lock,
   FileCode2, UploadCloud, Zap, Plus, Mic, ArrowUp, Save, Paperclip,
-  Shield, CheckCircle2, XCircle, Info, TriangleAlert, Lightbulb, Activity
+  Shield, CheckCircle2, XCircle, Info, TriangleAlert, Lightbulb, Activity,
+  Brain, Code2, LayoutGrid, BookOpen, MicOff
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
@@ -1926,6 +1927,33 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
             <span className="text-[10px] font-black text-primary uppercase tracking-widest">
               Editando: {activeFile.split('/').pop()}
             </span>
+          </div>
+        )}
+
+        {/* --- Quick Action Chips (Empty state) --- */}
+        {messages.length === 1 && messages[0].id === 'welcome' && !pendingContext && !pendingUrl && (
+          <div className="max-w-4xl mx-auto w-full mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {[
+                { label: 'Crear un SaaS de Gestión', icon: Zap, color: 'text-amber-500', bg: 'bg-amber-50/50' },
+                { label: 'Analizar Arquitectura', icon: Brain, color: 'text-indigo-500', bg: 'bg-indigo-50/50' },
+                { label: 'Corregir Errores de UI', icon: LayoutGrid, color: 'text-rose-500', bg: 'bg-rose-50/50' },
+                { label: 'Refactorizar Código', icon: Code2, color: 'text-emerald-500', bg: 'bg-emerald-50/50' },
+                { label: 'Crear Documentación', icon: BookOpen, color: 'text-primary/70', bg: 'bg-primary/5' },
+              ].map((chip, i) => (
+                <button
+                  key={i}
+                  onClick={() => setInput(chip.label)}
+                  className={cn(
+                    "flex items-center gap-2.5 px-6 py-2.5 rounded-2xl border border-transparent transition-all hover:border-zinc-200 hover:shadow-xl hover:-translate-y-0.5 active:scale-95 group",
+                    chip.bg
+                  )}
+                >
+                  <chip.icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", chip.color)} />
+                  <span className="text-[11px] font-black text-zinc-900 uppercase tracking-widest">{chip.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

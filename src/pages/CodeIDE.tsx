@@ -230,22 +230,6 @@ export default function CodeIDE() {
       
       <div className="flex flex-col h-full bg-white overflow-hidden text-zinc-800 font-sans select-none">
       
-        {/* ── StudioTopbar ── */}
-        <StudioTopbar 
-          projectName={activeProject.name}
-          viewMode="code"
-          onViewModeChange={() => navigate('/studio')}
-          deviceMode="desktop"
-          onDeviceModeChange={() => {}}
-          isSaving={isSaving}
-          onShare={() => { navigator.clipboard.writeText(window.location.href); toast.success('Enlace copiado'); }}
-          onBack={() => navigate('/dashboard')}
-          onGithubSync={() => toast.info('Sincronizando con GitHub...')}
-          onPublish={() => toast.info('Desplegando en Vercel...')}
-          credits={profile?.credits_balance ?? 0}
-          userProfile={profile}
-          hideGlobalNav={true}
-        />
 
         {/* ── Main IDE Area ── */}
         <div className="flex-1 overflow-hidden flex flex-col">

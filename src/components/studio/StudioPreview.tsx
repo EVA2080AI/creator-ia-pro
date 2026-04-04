@@ -7,7 +7,7 @@ import {
 } from '@codesandbox/sandpack-react';
 import {
   RotateCcw, Monitor, Smartphone, Tablet, ExternalLink,
-  ZoomIn, ZoomOut, Zap
+  ZoomIn, ZoomOut, Zap, Code, Cloud
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { StudioFile } from '@/hooks/useStudioProjects';
@@ -618,16 +618,74 @@ export function StudioPreview({
             </div>
           </div>
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center text-center p-10 gap-5">
-            <div className="relative">
-              <div className="h-16 w-16 rounded-2xl flex items-center justify-center mx-auto" style={{ background: 'rgba(138,180,248,0.07)', border: '1px solid rgba(138,180,248,0.13)' }}>
-                <Monitor className="h-7 w-7 text-[#8AB4F8]/30" />
-              </div>
-              <div className="absolute -bottom-1 -right-1 h-5 w-5 rounded-full flex items-center justify-center text-[10px]" style={{ background: '#13141a', border: '1px solid rgba(138,180,248,0.2)' }}>⚡</div>
+          <div className="flex flex-1 flex-col items-center justify-center text-center p-6 relative overflow-hidden bg-[#050505]">
+            {/* Cinematic Background Elements */}
+            <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+               <div className="absolute top-[-10%] right-[-5%] w-[60%] h-[70%] bg-primary/5 rounded-full blur-[120px] animate-pulse" />
+               <div className="absolute bottom-[-10%] left-[-5%] w-[50%] h-[60%] bg-blue-500/5 rounded-full blur-[100px]" />
+               <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
             </div>
-            <div>
-              <h3 className="text-[15px] font-bold text-white/40 mb-1.5">Preview en vivo</h3>
-              <p className="text-[12px] text-white/20 max-w-[200px] leading-relaxed">Genera código con Genesis y aparecerá aquí automáticamente</p>
+            
+            <div className="relative z-10 flex flex-col items-center max-w-4xl w-full">
+               <motion.div 
+                 initial={{ opacity: 0, scale: 0.9 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 className="w-20 h-20 rounded-[2.5rem] bg-gradient-to-br from-primary/20 to-purple-500/20 border border-white/10 flex items-center justify-center mb-10 shadow-2xl relative"
+               >
+                 <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-150 animate-pulse opacity-50" />
+                 <Zap className="h-10 w-10 text-primary relative z-10" />
+               </motion.div>
+
+               <motion.h2 
+                 initial={{ opacity: 0, y: 30 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 0.1 }}
+                 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-6 selection:bg-primary/40"
+               >
+                 Génesis <span className="text-zinc-600">Studio Engine</span>
+               </motion.h2>
+               
+               <motion.p 
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 transition={{ delay: 0.2 }}
+                 className="text-zinc-500 text-lg max-w-xl mx-auto mb-16 leading-relaxed font-medium"
+               >
+                 Tu lienzo de alta fidelidad está listo. Describe tu visión en el chat de la izquierda para comenzar la construcción autónoma.
+               </motion.p>
+
+               {/* Feature Grid Onboarding */}
+               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full px-4">
+                  {[
+                    { icon: <Monitor className="w-5 h-5" />, title: 'Previsualización Real', desc: 'Interactúa con tu código en tiempo real con soporte multidispositivo.' },
+                    { icon: <Code className="w-5 h-5" />, title: 'Arquitectura Pura', desc: 'React, Tailwind y TypeScript optimizados para rendimientos extremos.' },
+                    { icon: <Cloud className="w-5 h-5" />, title: 'Despliegue Instantáneo', desc: 'Un solo clic para lanzar tu proyecto a producción en la nube.' }
+                  ].map((feat, i) => (
+                    <motion.div
+                      key={feat.title}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 + (i * 0.1) }}
+                      className="p-8 rounded-[2rem] bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.05] hover:border-primary/20 transition-all text-left group shadow-xl backdrop-blur-sm"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-white/5 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 text-zinc-400 group-hover:text-primary">
+                        {feat.icon}
+                      </div>
+                      <h3 className="text-sm font-black text-white uppercase tracking-wider mb-2">{feat.title}</h3>
+                      <p className="text-[12px] text-zinc-500 leading-relaxed font-bold">{feat.desc}</p>
+                    </motion.div>
+                  ))}
+               </div>
+
+               <motion.div
+                 initial={{ opacity: 0 }}
+                 animate={{ opacity: 1 }}
+                 transition={{ delay: 0.8 }}
+                 className="mt-16 flex items-center gap-3 px-5 py-2 rounded-full bg-white/[0.02] border border-white/[0.03]"
+               >
+                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                 <p className="text-[9px] font-black text-zinc-600 uppercase tracking-[0.4em]">Deep Reasoning Enabled • Genesis v9.2 LTS</p>
+               </motion.div>
             </div>
           </div>
         )}

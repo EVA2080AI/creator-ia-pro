@@ -193,14 +193,13 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
               onOpenChange={setTemplateOpen}
               onSelect={handleSelectTemplate}
               trigger={
-
-                <button className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border border-zinc-200 bg-white hover:border-primary/30 hover:bg-primary/5 transition-all group/tpl shadow-sm">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-zinc-100 group-hover/tpl:bg-primary/10 transition-colors shrink-0">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-[1.5rem] border border-primary/20 bg-primary/5 hover:border-primary/40 hover:bg-primary/10 transition-all group/tpl shadow-[0_10px_30px_rgba(var(--primary-rgb),0.05)] active:scale-95">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-xl shadow-primary/10 group-hover/tpl:bg-primary group-hover/tpl:text-white transition-all shrink-0">
+                    <Sparkles className="h-5 w-5 text-primary group-hover/tpl:text-white transition-colors" />
                   </div>
                   <div className="text-left">
-                    <p className="text-[11px] font-bold text-zinc-600 group-hover/tpl:text-zinc-900 transition-colors">Ver plantillas</p>
-                    <p className="text-[9px] text-zinc-400">Flujos pre-armados</p>
+                    <p className="text-[12px] font-black text-primary/80 group-hover/tpl:text-primary transition-colors uppercase tracking-widest leading-none mb-1">Plantillas</p>
+                    <p className="text-[10px] font-bold text-zinc-400 group-hover/tpl:text-zinc-500 transition-colors">Acelera tu flujo creativo</p>
                   </div>
                 </button>
               }
@@ -239,15 +238,15 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                           draggable
                           onDragStart={e => onDragStart(e, node.type, node.label)}
                           onClick={() => onAddNode(node.type, node.label)}
-                          className="flex w-full gap-3 rounded-2xl border border-zinc-200 bg-white items-center px-3.5 py-3 cursor-pointer hover:bg-zinc-50 hover:border-zinc-300 hover:scale-[1.01] transition-all group/item shadow-sm"
+                          className="flex w-full gap-3 rounded-[1.2rem] border border-zinc-200 bg-white items-center px-4 py-3 cursor-pointer hover:border-primary/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all group/item shadow-sm active:scale-95 duration-300"
                         >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-xl shrink-0 transition-all group-hover/item:scale-105"
-                            style={{ background: `${node.color}15`, border: `1px solid ${node.color}30` }}>
-                            <node.icon className="h-4 w-4" style={{ color: node.color !== 'rgba(255,255,255,0.5)' && node.color !== 'rgba(255,255,255,0.6)' ? node.color : '#71717a' }} />
+                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl shrink-0 transition-transform group-hover/item:scale-110 shadow-sm"
+                            style={{ background: `${node.color}10`, border: `1px solid ${node.color}20` }}>
+                            <node.icon className="h-5 w-5" style={{ color: node.color !== 'rgba(255,255,255,0.5)' && node.color !== 'rgba(255,255,255,0.6)' ? node.color : '#71717a' }} />
                           </div>
-                          <div className="flex flex-col text-left min-w-0">
-                            <span className="text-[11px] font-bold text-zinc-700 group-hover/item:text-zinc-900 transition-colors truncate">{node.label}</span>
-                            <span className="text-[9px] text-zinc-400 group-hover/item:text-zinc-500 transition-colors truncate">{node.description}</span>
+                          <div className="flex flex-col text-left min-w-0 pr-2">
+                            <span className="text-[12px] font-black text-zinc-800 group-hover/item:text-primary transition-colors uppercase tracking-tight truncate leading-none mb-1">{node.label}</span>
+                            <span className="text-[9px] font-bold text-zinc-400 group-hover/item:text-zinc-500 transition-colors truncate tracking-wide">{node.description}</span>
                           </div>
                         </button>
                       ))}

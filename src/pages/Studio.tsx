@@ -314,18 +314,18 @@ export default function Studio() {
     <div className="flex flex-col h-screen bg-[#FCFCFC] overflow-hidden text-foreground selection:bg-primary/20 font-sans">
       <Helmet><title>Studio | Creator IA Pro</title></Helmet>
 
-      {/* --- New High-Fidelity Toolbar (Lovable Architecture) --- */}
-      <StudioTopbar 
+      {/* --- Immersive View Controls (Génesis Floating Toolbar) --- */}
+      <StudioFloatingToolbar 
         projectName={activeProject.name}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         deviceMode={deviceMode}
         onDeviceModeChange={setDeviceMode}
-        isSaving={isSaving}
-        onBack={() => navigate('/studio')}
+        onShare={handleShare}
         onGithubSync={() => toast.info('Sincronización con GitHub iniciada')}
         onPublish={() => setShowDeployModal(true)}
-        onShare={handleShare}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
       <div className="flex flex-1 overflow-hidden">

@@ -84,27 +84,6 @@ export function StudioTopbar({
           <ViewToggle icon={<MoreHorizontal className="w-3.5 h-3.5" />} active={false} onClick={() => {}} />
         </div>
 
-        {/* URL / Path Bar */}
-        <div className="flex-1 max-w-[440px] h-9 flex items-center gap-2.5 px-4 bg-white/[0.02] border border-white/[0.08] rounded-2xl group hover:bg-white/[0.04] hover:border-white/[0.15] hover:shadow-[0_0_20px_rgba(255,255,255,0.03)] transition-all duration-300">
-          <div className="flex items-center gap-2 text-zinc-500">
-             <Layout className="w-3.5 h-3.5" />
-             <span className="text-[11px] font-mono opacity-40">/</span>
-          </div>
-          <input 
-            type="text" 
-            readOnly 
-            value={projectName.toLowerCase().replace(/\s+/g, '-')} 
-            className="flex-1 bg-transparent border-none outline-none text-[12px] font-medium text-zinc-400 cursor-default"
-          />
-          <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button className="p-1 hover:bg-white/10 rounded-md transition-colors">
-              <ExternalLink className="w-3 h-3 text-zinc-400" />
-            </button>
-            <button className="p-1 hover:bg-white/10 rounded-md transition-colors">
-              <RotateCcw className="w-3 h-3 text-zinc-400" />
-            </button>
-          </div>
-        </div>
 
         {/* Device Toggles (Only in Preview) */}
         {viewMode === 'preview' && (
