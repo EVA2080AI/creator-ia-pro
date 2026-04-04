@@ -133,10 +133,9 @@ function WelcomeScreen({
       {/* ── Main Area ─────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden relative bg-white">
 
-        {/* Light modern background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-25%] left-[-15%] w-[70%] h-[80%] bg-primary/10 rounded-full blur-[140px] opacity-60" />
-          <div className="absolute inset-0 bg-grid-canvas" />
+        {/* Genesis Mesh Background (Aether V8.2) */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none genesis-mesh-bg animate-in fade-in duration-1000">
+          <div className="absolute inset-0 bg-grid-canvas opacity-[0.4]" />
         </div>
 
         {/* Centered content */}
