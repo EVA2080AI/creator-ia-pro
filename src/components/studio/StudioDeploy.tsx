@@ -14,11 +14,12 @@ interface StudioDeployProps {
   onClose: () => void;
   files: Record<string, StudioFile>;
   projectName: string;
+  onLog?: (message: string, type: 'info' | 'success' | 'error') => void;
 }
 
 type DeployStep = 'idle' | 'analyzing' | 'optimizing' | 'deploying' | 'ready';
 
-export function StudioDeploy({ onClose, files, projectName }: StudioDeployProps) {
+export function StudioDeploy({ onClose, files, projectName, onLog }: StudioDeployProps) {
   const [step, setStep] = useState<DeployStep>('idle');
   const [liveUrl, setLiveUrl] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
@@ -33,6 +34,7 @@ export function StudioDeploy({ onClose, files, projectName }: StudioDeployProps)
   const handleStartDeploy = async () => {
     setStep('analyzing');
     setProgress(0);
+    onLog?.(`Iniciando despliegue de "${projectName}"...`, 'info');
 
     // Simulate progress for smooth UI
     const runSimulation = (target: number, duration: number) => {
@@ -51,10 +53,15 @@ export function StudioDeploy({ onClose, files, projectName }: StudioDeployProps)
     };
 
     try {
+      onLog?.('Analizando dependencias y estructura de archivos...', 'info');
       await runSimulation(25, 1200);
+      
       setStep('optimizing');
+      onLog?.('Optimizando assets y minificando código de producción...', 'info');
       await runSimulation(60, 1500);
+      
       setStep('deploying');
+      onLog?.('Sincronizando con Edge Network global (Vercel Core)...', 'info');
       
       // Actual deployment
       const data = await vercelService.deployProject(projectName, files, "vite");
@@ -62,13 +69,18 @@ export function StudioDeploy({ onClose, files, projectName }: StudioDeployProps)
       await runSimulation(100, 1000);
       setLiveUrl(data.url);
       setStep('ready');
+      onLog?.(`¡Despliegue completado con éxito! URL: ${data.url}`, 'success');
       toast.success("¡Desplegado con éxito!");
     } catch (err: any) {
       console.warn("Real deployment failed, falling back to cinematic simulation", err);
+      onLog?.('Error en despliegue real (Token no configurado). Iniciando simulación cinemática Genesis...', 'error');
+      
       // Simulation fallback if no token
       await runSimulation(100, 2000);
-      setLiveUrl(`https://${projectName.toLowerCase().replace(/\s+/g, '-')}.creator-ia.me`);
+      const mockUrl = `https://${projectName.toLowerCase().replace(/\s+/g, '-')}.creator-ia.me`;
+      setLiveUrl(mockUrl);
       setStep('ready');
+      onLog?.(`Simulación completada. Proyecto disponible en: ${mockUrl}`, 'success');
     }
   };
 

@@ -105,6 +105,18 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
         setHistory([]);
         break;
 
+      case 'antigravity':
+        addLines([
+          'Accediendo a Antigravity Strategic Core...',
+          'ESTADO: Activo y Sincronizado',
+          'VINCULACIÓN: Master Brain Protocol 8.0',
+          'DIRECTIVA: Maximizar impacto de mercado mediante ejecución técnica superior.'
+        ], 'info');
+        window.dispatchEvent(new CustomEvent('GENESIS_LOG', { 
+           detail: { message: 'Consulta de estado iniciada por Antigravity Core.', type: 'info', source: 'Antigravity' } 
+        }));
+        break;
+
       case 'genesis':
         if (args[0] === 'fix') {
           addLines(['Iniciando protocolo de reparación autónoma GENESIS-FIX...'], 'info');
@@ -118,8 +130,19 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
             `INTEGRIDAD: 98.4% (Sin errores críticos)`,
             'DENSIDAD IA: Optimizada'
           ], 'info');
+        } else if (args[0] === 'consult') {
+          addLines(['Sincronizando con Antigravity para consultoría estratégica...'], 'info');
+          window.dispatchEvent(new CustomEvent('GENESIS_LOG', { 
+            detail: { message: 'Iniciando canal de comunicación binaria con Antigravity Engine...', type: 'info', source: 'Bridge' } 
+          }));
+          // Simulate AI delay
+          setTimeout(() => {
+             window.dispatchEvent(new CustomEvent('GENESIS_LOG', { 
+                detail: { message: 'Antigravity responde: Requiere análisis de viabilidad técnica para escalar la arquitectura.', type: 'success', source: 'Antigravity' } 
+             }));
+          }, 2000);
         } else {
-          addLines(['Comando genesis incompleto. Usa "genesis fix" o "genesis stats".'], 'error');
+          addLines(['Comando genesis incompleto. Usa "genesis fix", "genesis stats" o "genesis consult".'], 'error');
         }
         break;
 

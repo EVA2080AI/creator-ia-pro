@@ -384,6 +384,11 @@ export default function Studio() {
                 onClose={() => setShowDeployModal(false)}
                 files={activeProject.files}
                 projectName={activeProject.name}
+                onLog={(message, type) => {
+                  window.dispatchEvent(new CustomEvent('GENESIS_LOG', { 
+                    detail: { message, type, source: 'Deployer' } 
+                  }));
+                }}
               />
             </motion.div>
           </motion.div>
