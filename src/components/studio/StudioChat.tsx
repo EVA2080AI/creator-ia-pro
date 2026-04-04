@@ -444,7 +444,7 @@ function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
   while ((m = regex.exec(text)) !== null) {
     const lang = m[1].trim().toLowerCase();
     const code = m[2].trim();
-    if (code.length < 50) continue; // skip trivial snippets
+    if (code.length < 10) continue; // skip trivial snippets
 
     // Try to detect filename from the first line or a specific comment
     let filename = '';
@@ -812,27 +812,6 @@ export function StudioChat({
     }
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
-
-    // --- Navigation Intent Detection ---
-    const navMatch = prompt.toLowerCase().match(/(?:abre|mostrar|abrir|abrete|open|show|view|file|archivo)\s+([\w./\-]+\.\w+)/i);
-    if (navMatch && onSelectFile) {
-      const targetFile = navMatch[1];
-      // Search for the file in projectFiles (case-insensitive)
-      const exactMatch = Object.keys(projectFiles).find(f => f.toLowerCase() === targetFile.toLowerCase());
-      if (exactMatch) {
-         onSelectFile(exactMatch);
-         const navMsg: Message = {
-           id: Math.random().toString(36).substr(2, 9),
-           role: 'assistant',
-           content: `Perfecto, he abierto **${exactMatch}** en el editor para ti.`,
-           timestamp: new Date(),
-         };
-         setMessages(prev => [...prev, navMsg]);
-         setIsGenerating(false);
-         onGeneratingChange?.(false);
-         return;
-      }
-    }
 
     const intent = detectIntent(prompt);
     
@@ -1413,10 +1392,36 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
   // ─── Send message ──────────────────────────────────────────────────────────
   const handleSend = useCallback(async (override?: string) => {
     let text = (override || input).trim();
-    if (!text && !pendingContext) {
-      if (!isGenerating && user) return; // avoid empty sends
-    }
     if (isGenerating || !user) return;
+    
+    // ─── NAVIGATION INTENT: Handle file opening commands early ───────────────
+    // Regex matches common commands like "abre el index.html", "show app.tsx", "ver styles", etc.
+    const navMatch = text.toLowerCase().match(/(?:abre|abrir|abrete|mostrar|ver|verme|open|show|view|file|archivo)(?:\s+(?:el|la|los|las))?\s+([\w./\-]+(?:\.\w+)?)/i);
+    if (navMatch && onSelectFile) {
+      const target = navMatch[1];
+      // Try exact find first, then extensionless find
+      const keys = Object.keys(projectFiles);
+      const exactMatch = keys.find(f => f.toLowerCase() === target.toLowerCase()) || 
+                         keys.find(f => f.toLowerCase().startsWith(target.toLowerCase() + '.'));
+      
+      if (exactMatch) {
+        onSelectFile(exactMatch);
+        const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text, timestamp: new Date() };
+        const navMsg: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `Entendido. He abierto **${exactMatch}** para que lo revises.`,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev.filter(m => m.id !== 'welcome'), userMsg, navMsg]);
+        setInput('');
+        if (activeConversationId) {
+          saveMessage(activeConversationId, 'user', text);
+          saveMessage(activeConversationId, 'assistant', navMsg.content);
+        }
+        return;
+      }
+    }
 
     // Inject pending context if present
     if (pendingContext) {
@@ -1549,7 +1554,7 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
         timestamp: new Date(),
       }]);
     }
-  }, [input, isGenerating, user, generateCode, onCodeGenerated, pendingImage, autoNameProject, selectedModel, projectId, pendingUrl, activeConversationId, saveMessage, isArchitectMode, pendingPlanPrompt, projectFiles, aiService]);
+  }, [input, isGenerating, user, generateCode, onCodeGenerated, onSelectFile, onGeneratingChange, onToggleArtifacts, pendingImage, autoNameProject, selectedModel, projectId, pendingUrl, activeConversationId, saveMessage, isArchitectMode, pendingPlanPrompt, projectFiles, aiService]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
