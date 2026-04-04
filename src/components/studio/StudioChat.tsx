@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Send, Sparkles, Bot, Loader2,
-  ChevronDown, Copy, RotateCcw, Check,
+  ChevronDown, Copy, RotateCcw, Check, ChevronLeft, Share2,
   X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink, Lock,
-  FileCode2, UploadCloud, Zap, Plus, Mic, ArrowUp
+  FileCode2, UploadCloud, Zap, Plus, Mic, ArrowUp, Save
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
@@ -448,13 +448,81 @@ interface StudioChatProps {
   supabaseConfig?: { url: string; anonKey: string } | null;
   persona?: 'genesis' | 'antigravity';
   activeFile?: string | null;
+  
+  // Project Header Props
+  projectName?: string;
+  isSaving?: boolean;
+  onShare?: () => void;
+  onPublish?: () => void;
+  onBack?: () => void;
+}
+
+function StudioProjectHeader({ 
+  name = 'Proyecto Sin Nombre', 
+  isSaving, 
+  onShare, 
+  onPublish,
+  onBack 
+}: { 
+  name?: string; 
+  isSaving?: boolean; 
+  onShare?: () => void; 
+  onPublish?: () => void;
+  onBack?: () => void;
+}) {
+  return (
+    <div className="shrink-0 h-14 border-b border-zinc-100 bg-white/80 backdrop-blur-xl px-4 flex items-center justify-between z-30 sticky top-0">
+      <div className="flex items-center gap-3 overflow-hidden">
+        <button 
+          onClick={onBack}
+          className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-50 hover:text-zinc-600 transition-colors"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <div className="flex flex-col min-w-0">
+          <h2 className="text-sm font-black text-zinc-900 truncate leading-none mb-1">{name}</h2>
+          <div className="flex items-center gap-1.5">
+            {isSaving ? (
+              <div className="flex items-center gap-1">
+                <Loader2 className="h-2.5 w-2.5 text-primary animate-spin" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-primary">Guardando...</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1">
+                <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Sincronizado</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-1.5 ml-4">
+        <button 
+          onClick={onShare}
+          className="h-8 px-3 rounded-lg flex items-center gap-2 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all font-black text-[10px] uppercase tracking-widest"
+        >
+          <Share2 className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Compartir</span>
+        </button>
+        <button 
+          onClick={onPublish}
+          className="h-8 px-3 rounded-lg bg-zinc-900 text-white flex items-center gap-2 hover:bg-black transition-all font-black text-[10px] uppercase tracking-widest shadow-lg shadow-zinc-900/10"
+        >
+          <Globe className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Publicar</span>
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function StudioChat({
   projectId, projectFiles, onCodeGenerated,
   onNewConversation, initialPrompt, onInitialPromptUsed, onAutoName,
   onGeneratingChange, onStreamCharsChange, supabaseConfig,
-  persona = 'genesis', activeFile
+  persona = 'genesis', activeFile,
+  projectName, isSaving, onShare, onPublish, onBack
 }: StudioChatProps) {
   const { user } = useAuth();
   
@@ -1030,6 +1098,14 @@ export function StudioChat({
 
   return (
     <div className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-background">
+      
+      <StudioProjectHeader 
+        name={projectName} 
+        isSaving={isSaving} 
+        onShare={onShare} 
+        onPublish={onPublish}
+        onBack={onBack}
+      />
 
       {/* ── Messages ─────────────────────────────────────────────────────────── */}
       <div ref={containerRef} onScroll={handleScroll}

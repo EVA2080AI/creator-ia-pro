@@ -12,6 +12,7 @@ import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
 import { StudioDeploy } from '@/components/studio/StudioDeploy';
 import { StudioAITools } from '@/components/studio/StudioAITools';
+import { StudioFloatingToolbar } from '@/components/studio/StudioFloatingToolbar';
 import { 
   Loader2, FolderOpen, Code2, Plus, Sparkles, ChevronRight, Layout,
   Monitor, Tablet, Smartphone, Eye, Code, Share2, Globe, Save
@@ -337,6 +338,8 @@ export default function Studio() {
           <StudioChat 
             projectId={activeProject.id} 
             projectFiles={activeProject.files}
+            projectName={activeProject.name}
+            isSaving={isSaving}
             activeFile={activeFile}
             onCodeGenerated={handleCodeGenerated}
             onGeneratingChange={setIsGenerating}
@@ -344,6 +347,9 @@ export default function Studio() {
               setStreamChars(chars);
               setStreamPreview(preview);
             }}
+            onShare={() => handleShare()}
+            onPublish={() => setShowDeployModal(true)}
+            onBack={() => navigate('/studio')}
           />
         </div>
 
@@ -429,6 +435,16 @@ export default function Studio() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Floating Controls (Studio V7: Magnetic Pill) ── */}
+      {activeProject && (
+        <StudioFloatingToolbar 
+          viewMode={viewMode as any}
+          onViewModeChange={(m) => setViewMode(m as any)}
+          deviceMode={deviceMode as any}
+          onDeviceModeChange={(m) => setDeviceMode(m as any)}
+        />
+      )}
     </div>
   );
 }
