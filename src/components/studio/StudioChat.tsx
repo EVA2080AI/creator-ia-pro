@@ -158,26 +158,28 @@ function detectIntent(prompt: string, hasContext?: boolean): 'codegen' | 'chat' 
 }
 
 // ─── Genesis unified system prompt (v14.9 — File-Master Protocol) ──────
-const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Agile Master Architect (v14.9)
+const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Agile Master Architect (v14.9.2)
 
-Eres la inteligencia definitiva de la plataforma. Has evolucionado al **Protocolo v14.9 (File-Master Protocol)**.
+Eres la inteligencia definitiva de la plataforma. Has evolucionado al **Protocolo v14.9.2 (Manifest Hardening)**.
 
 **PROTOCOLO FILE-MASTER (Folder Power):**
-1. **Poder de Carpeta**: Tienes permiso ABSOLUTO para manipular la estructura del proyecto (\`files\` object). Puedes renombrar, borrar y crear carpetas/archivos basados en el input del usuario.
-2. **Mastery of Entry Point**: Si el usuario sube un archivo HTML de landing, tu PRIORIDAD es ofrecer (o ejecutar si se pide) la sustitución del punto de entrada principal (ej: establecerlo como \`index.html\` o integrarlo en la lógica de \`App.tsx\`).
-3. **Organización Activa**: No solo generes código; organiza. Propón estructuras como \`src/assets/\`, \`src/components/\`, etc., si ves que el proyecto crece.
-4. **Respuesta a Archivos**: Si te pasan un código, tu respuesta debe ser accionable: "¿Quieres que lo guarde en un nuevo archivo o que lo use como tu index principal?".
+1. **Poder de Estructura**: Tienes permiso ABSOLUTO para manipular la arquitectura del proyecto. Puedes crear, renombrar y organizar archivos y carpetas.
+2. **Formato de Salida Obligatorio**: Utiliza EXCLUSIVAMENTE bloques de código Markdown. La primera línea del bloque DEBE ser un comentario con la ruta del archivo (ej: \`// src/components/Header.tsx\`).
+3. **Prohibición de JSON Crudo**: NUNCA respondas con objetos JSON para representar archivos. Si quieres "escribir archivos", genéralos como bloques de código individuales.
+4. **Mastery of Entry Point**: Prioriza la integración en \`index.html\` o \`App.tsx\` para ver cambios inmediatos.
+5. **Organización Activa**: Propón estructuras profesionales (\`src/assets/\`, \`src/hooks/\`, etc.).
 
 **PROTOCOLO DE EMPATÍA COGNITIVA (v14.8 Legacy):**
-- Reconoce la entrada antes de construir si no hay orden clara.
+- Reconoce la entrada y describe lo que ves antes de construir si la orden no es imperativa.
 
 **MANDATO VITE-NATIVE (v14.7 Legacy):**
+- Prohibido CRA. Todo proyecto nuevo es Vite-Native.
 
 **PROTOCOLO AGUERRIDO & ÁGIL (v14.5 Legacy):**
 - Prioriza acción inmediata en órdenes claras.
 
 **PROTOCOLO DE SEGURIDAD (v14.4 Legacy):**
-- Anti-CDN, Estabilidad de Lucide.
+- Anti-CDN, Lucide stable.
 `;
 
 const GENESIS_CHAT_SYSTEM = `Eres Genesis AI — Maestro de Archivos Consciente.
@@ -333,13 +335,33 @@ const WELCOME: Message = {
 
 // ─── Extract previewable code files from a Genesis chat response ───────────────
 function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
-  const regex = /```(\w*)\n?([\s\S]*?)```/g;
   const files: Record<string, StudioFile> = {};
+  
+  // ── FALLBACK: Detect and parse JSON-style "files" manifests if AI hallucinations occur ──
+  // Matches expressions like: {"files": {"path": "content"}}
+  try {
+    const jsonMatch = text.match(/\{[\s\n]*"files"[\s\n]*:[\s\n]*(\{[\s\S]*?\}[\s\n]*)\}/);
+    if (jsonMatch) {
+      const parsedFiles = JSON.parse(jsonMatch[1]);
+      Object.entries(parsedFiles).forEach(([path, content]) => {
+        if (typeof content === 'string') {
+          const lang = path.split('.').pop()?.toLowerCase() || 'tsx';
+          files[path] = { language: lang, content: content.trim() };
+        }
+      });
+      if (Object.keys(files).length > 0) return files;
+    }
+  } catch (e) {
+    /* silent — proceed to standard markdown parsing */
+  }
+
+  // ── STANDARD: Extract files from Markdown blocks ──
+  const regex = /```(\w*)\n?([\s\S]*?)```/g;
   let m;
   while ((m = regex.exec(text)) !== null) {
     const lang = m[1].trim().toLowerCase();
     const code = m[2].trim();
-    if (code.length < 10) continue; // skip trivial snippets
+    if (code.length < 10) continue; 
 
     // Try to detect filename from the first line or a specific comment
     let filename = '';
@@ -353,14 +375,14 @@ function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
       code.match(/\/\/\s*Filename:\s*([\w./\-]+\.\w+)/i);
 
     if (fileMatch) {
-      filename = fileMatch[1].replace(/^src\//, ''); // strip leading src/ if present
+      filename = fileMatch[1].replace(/^src\//, ''); // strip leading src/
     } else {
       // Intelligent fallback
       if (lang === 'html' || code.includes('<!DOCTYPE')) filename = 'index.html';
       else if (lang === 'css') filename = 'styles.css';
       else if (lang === 'python') filename = 'main.py';
       else if (code.includes('import React') || code.includes('export default')) filename = 'App.tsx';
-      else continue; // ignore random snippets without file context
+      else continue; 
     }
     
     // Determine language based on extension or detected lang
