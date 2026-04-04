@@ -263,6 +263,130 @@ export type Database = {
         }
         Relationships: []
       }
+      studio_projects: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          description: string | null
+          files: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name?: string
+          description?: string | null
+          files?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          description?: string | null
+          files?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      studio_conversations: {
+        Row: {
+          id: string
+          user_id: string
+          project_id: string
+          title: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          project_id: string
+          title?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          project_id?: string
+          title?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_conversations_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "studio_projects"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      studio_messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          role: "user" | "assistant"
+          content: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          role: "user" | "assistant"
+          content: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          role?: "user" | "assistant"
+          content?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "studio_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "studio_conversations"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      github_connections: {
+        Row: {
+          id: string
+          user_id: string
+          github_username: string | null
+          access_token: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          github_username?: string | null
+          access_token: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          github_username?: string | null
+          access_token?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

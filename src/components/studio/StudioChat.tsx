@@ -4,7 +4,7 @@ import {
   ChevronDown, Copy, RotateCcw, Check, ChevronLeft, Share2,
   X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink, Lock,
   FileCode2, UploadCloud, Zap, Plus, Mic, ArrowUp, Save, Paperclip,
-  Shield, CheckCircle2, XCircle, Info, TriangleAlert, Lightbulb
+  Shield, CheckCircle2, XCircle, Info, TriangleAlert, Lightbulb, Activity
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 import { cloneWebsiteAdvanced } from '@/services/clone-service';
 import { aiService, MODEL_COSTS } from '@/services/ai-service';
+import { StudioArtifactsPanel, type UIPlanTask, type UIArtifact, type UILog } from './StudioArtifactsPanel';
 
 // ─── Env ───────────────────────────────────────────────────────────────────────
 const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL as string;
@@ -327,6 +328,8 @@ REGLAS ABSOLUTAS:
 
 ⚡ ARQUITECTURA MULTI-PÁGINA NAVEGABLE (OBLIGATORIA cuando el prompt implica múltiples pages/rutas):
 - Si el prompt dice "multi-page", "varias páginas", "sitio web completo", "prototipo navegable", "web app", o si el contenido naturalmente requiere más de 1 vista:
+  → USA **React Router v6** (react-router-dom ^6.30.1). 
+  → NO uses características exclusivas de v7 (como data APIs de Remix) a menos que se te pida explícitamente.
   → GENERA archivos en "pages/" directory: pages/Home.tsx, pages/About.tsx, pages/Dashboard.tsx, etc.
   → App.tsx DEBE importar react-router-dom y configurar <BrowserRouter> con <Routes> y <Route> para cada página.
   → Incluye un <Navbar> con <Link> o <NavLink> funcionales para navegar entre páginas.
@@ -630,6 +633,15 @@ function StudioProjectHeader({
           <Globe className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Publicar</span>
         </button>
+        <div className="w-px h-4 bg-zinc-200 mx-1" />
+        <button 
+          onClick={() => (window as any).__toggleArtifacts?.()}
+          className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-zinc-50 hover:text-primary transition-all relative group"
+          title="Artefactos y Diagramas"
+        >
+          <Activity className="h-4 w-4" />
+          <div className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full animate-pulse border-2 border-white" />
+        </button>
       </div>
     </div>
   );
@@ -673,193 +685,27 @@ export function StudioChat({
   const [pendingContext,   setPendingContext]   = useState<{ name: string; content: string } | null>(null);
   const [isPlusMenuOpen,   setIsPlusMenuOpen]   = useState(false);
   const [isArchitectMode,  setIsArchitectMode]  = useState(false);
-  const [pendingPlanPrompt, setPendingPlanPrompt] = useState<string | null>(null);
   const [isAutoFixing,     setIsAutoFixing]     = useState(false);
+  const [pendingPlanPrompt, setPendingPlanPrompt] = useState<string | null>(null);
+  const [isArtifactsOpen,  setIsArtifactsOpen]  = useState(false);
+  const [artifacts,        setArtifacts]        = useState<UIArtifact[]>([]);
+  const [activeTasks,      setTasks]            = useState<UIPlanTask[]>([]);
+  const [logs,             setLogs]             = useState<UILog[]>([]);
 
   const messagesEndRef    = useRef<HTMLDivElement>(null);
   const containerRef      = useRef<HTMLDivElement>(null);
   const inputRef          = useRef<HTMLTextAreaElement>(null);
   const fileInputRef      = useRef<HTMLInputElement>(null);
   const isFirstGen        = useRef(true);
-  const streamBufferRef   = useRef('');   // raw accumulator (network side)
+  const streamBufferRef   = useRef('');   
   const genPhaseRef       = useRef<'idle' | 'thinking' | 'streaming' | 'done'>('idle');
   const abortControllerRef = useRef<AbortController | null>(null);
   const hasTriggeredInitial = useRef(false);
   const autoFixCountRef   = useRef(0);
   const lastAutoFixError  = useRef('');
-  // ─── Persist chat per project ────────────────────────────────────────────────
-  useEffect(() => {
-    if (!projectId) return;
-    const key = `genesis-chat-${projectId}`;
-    const saved = localStorage.getItem(key);
-    if (saved) {
-      try {
-        const parsed: Message[] = JSON.parse(saved);
-        // Re-hydrate timestamps
-        setMessages(parsed.map(m => ({ ...m, timestamp: new Date(m.timestamp), imagePreview: undefined })));
-        isFirstGen.current = parsed.filter(m => m.role === 'user').length === 0;
-      } catch { setMessages([WELCOME]); }
-    } else {
-      setMessages([WELCOME]);
-      isFirstGen.current = true;
-    }
-    setConvHistory([]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId]);
+  const errorHistoryRef   = useRef<string[]>([]);
 
-  useEffect(() => {
-    if (!projectId || messages.length <= 1) return;
-    const key = `genesis-chat-${projectId}`;
-    const toSave = messages.map(m => ({ ...m, imagePreview: undefined }));
-    try {
-      localStorage.setItem(key, JSON.stringify(toSave));
-    } catch {
-      console.warn('[Genesis] localStorage quota exceeded — chat not persisted');
-    }
-  }, [messages, projectId]);
-
-  useEffect(() => {
-    if (!showScrollBtn) messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isGenerating, streamingContent]);
-
-  // ─── 40ms visual rate limiter — drain network buffer to display state ────────
-  useEffect(() => {
-    if (genPhase !== 'streaming') return;
-    streamBufferRef.current = '';
-    const id = setInterval(() => {
-      const buf = streamBufferRef.current;
-      if (buf) setStreamingContent(buf);
-    }, 40);
-    return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [genPhase]);
-
-  useEffect(() => {
-    if (initialPrompt && !isGenerating && user && !hasTriggeredInitial.current) {
-      hasTriggeredInitial.current = true;
-      onInitialPromptUsed?.();
-      handleSend(initialPrompt);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialPrompt, user]);
-
-  const handleScroll = () => {
-    if (!containerRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
-    setShowScrollBtn(scrollHeight - scrollTop - clientHeight > 120);
-  };
-
-  // ─── Phase 3: Auto-Fix Engine (Agentic Error Correction) ──────────────────
-  useEffect(() => {
-    if (!previewError || isGenerating || !user) return;
-    if (previewError === lastAutoFixError.current) return; // same error, already tried
-    if (autoFixCountRef.current >= 2) return; // max 2 auto-fix attempts per session
-
-    // Debounce: wait 2s before triggering to avoid rapid-fire
-    const timer = setTimeout(async () => {
-      lastAutoFixError.current = previewError;
-      autoFixCountRef.current += 1;
-      setIsAutoFixing(true);
-
-      // Add a system message showing auto-fix is happening
-      const autoFixMsg: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: `🔧 **Auto-corrección detectada**\n\nEl preview reportó un error:\n\`\`\`\n${previewError.slice(0, 300)}\n\`\`\`\n\nAnalizando y corrigiendo automáticamente...`,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, autoFixMsg]);
-
-      // Build auto-fix prompt
-      const fixPrompt = `[AUTO-FIX] El código generado produjo el siguiente error en el preview de Sandpack:\n\n${previewError}\n\nCorrige los archivos relevantes para solucionar este error. Mantén toda la funcionalidad existente.`;
-
-      try {
-        const result = await generateCode(fixPrompt);
-        if (result && result.files && Object.keys(result.files).length > 0) {
-          const mergedFiles = { ...projectFiles, ...result.files };
-          onCodeGenerated(mergedFiles);
-          const fileList = Object.keys(result.files).map(f => `• \`${f}\``).join('\n');
-          setMessages(prev => [...prev, {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: `✅ **Auto-corrección completada**\n\n${fileList}\n\n${result.explanation || 'Error corregido.'}`,
-            timestamp: new Date(),
-            type: 'code',
-            files: Object.keys(result.files),
-          }]);
-        } else if (result?.isChatOnly) {
-          setMessages(prev => [...prev, {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: result.explanation || '⚠️ No pude generar una corrección automática.',
-            timestamp: new Date(),
-          }]);
-        }
-      } catch {
-        // Silent fail for auto-fix
-      } finally {
-        setIsAutoFixing(false);
-      }
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [previewError, isGenerating, user]);
-
-  // Reset auto-fix counter when project files change (user or AI made changes)
-  useEffect(() => {
-    autoFixCountRef.current = 0;
-    lastAutoFixError.current = '';
-  }, [Object.keys(projectFiles).length]);
-
-  // ─── Image upload handler ──────────────────────────────────────────────────
-  const handleImageFile = (file: File) => {
-    if (!file.type.startsWith('image/')) { toast.error('Solo imágenes'); return; }
-    if (file.size > 5 * 1024 * 1024) { toast.error('Imagen muy grande (máx 5MB)'); return; }
-    const reader = new FileReader();
-    reader.onload = () => setPendingImage(reader.result as string);
-    reader.readAsDataURL(file);
-  };
-
-  const handleTextFile = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target?.result as string;
-      setPendingContext({ name: file.name, content });
-      toast.success(`Archivo "${file.name}" cargado como contexto.`);
-    };
-    reader.readAsText(file);
-  };
-
-  // ─── URL Scraper ───────────────────────────────────────────────────────────
-  const handleAttachUrl = async () => {
-    const raw = urlInput.trim();
-    if (!raw) return;
-    let url = raw;
-    if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
-    try { new URL(url); } catch { toast.error('URL inválida'); return; }
-
-    setIsScraping(true);
-    setShowUrlInput(false);
-    setUrlInput('');
-    try {
-      const cloneData = await cloneWebsiteAdvanced(url);
-      
-      // Store full clone data to be injected into prompt later
-      setPendingUrl(JSON.stringify(cloneData));
-      toast.success('Sitio analizado. Describe cómo quieres clonarlo.');
-    } catch (e: any) {
-      if (e.name === 'TimeoutError') {
-        toast.error('Tiempo agotado leyendo el sitio.');
-      } else {
-        toast.error(`No se pudo leer el sitio: ${e.message ?? e}`);
-      }
-    } finally {
-      setIsScraping(false);
-    }
-  };
-
-  // ─── Streaming generation ─────────────────────────────────────────────────
+  // ─── Phase 1: Main Code Generation Logic ───────────────────────────────────
   const generateCode = useCallback(async (
     prompt: string,
   ): Promise<{ files: Record<string, StudioFile>; explanation: string; stack: string[]; deps: string[]; suggestions: string[]; isChatOnly?: boolean } | null> => {
@@ -877,46 +723,43 @@ export function StudioChat({
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
-      const isChatModeActive = detectIntent(prompt) === 'chat';
-      // If architect mode is on AND it's a codegen request, use architect prompt instead
-      const isArchitectRequest = isArchitectMode && !isChatModeActive;
-      setCurrentGenIntent(isArchitectRequest ? 'chat' : (isChatModeActive ? 'chat' : 'codegen'));
+    const intent = detectIntent(prompt);
+    const isChatModeActive = intent === 'chat';
+    const isArchitectRequest = isArchitectMode && !isChatModeActive;
+    setCurrentGenIntent(isArchitectRequest ? 'chat' : (isChatModeActive ? 'chat' : 'codegen'));
 
-      try {
-        const fileKeys = Object.keys(projectFiles);
+    try {
+      const fileKeys = Object.keys(projectFiles);
 
-        // ── @file mention injection ───────────────────────────────────────────────
-        const mentionMatches = [...prompt.matchAll(/@([\w./\-]+)/g)];
-        const mentionedFiles = mentionMatches
-          .map(m => m[1])
-          .filter(f => projectFiles[f]);
-        const mentionBlock = mentionedFiles.length > 0
-          ? '\n\n[ARCHIVOS MENCIONADOS]\n' + mentionedFiles.map(f =>
-              `// @${f}\n${projectFiles[f].content.slice(0, 3000)}`).join('\n\n')
-          : '';
+      // ── @file mention injection ───────────────────────────────────────────────
+      const mentionMatches = [...prompt.matchAll(/@([\w./\-]+)/g)];
+      const mentionedFiles = mentionMatches
+        .map(m => m[1])
+        .filter(f => projectFiles[f]);
+      const mentionBlock = mentionedFiles.length > 0
+        ? '\n\n[ARCHIVOS MENCIONADOS]\n' + mentionedFiles.map(f =>
+            `// @${f}\n${projectFiles[f].content.slice(0, 3000)}`).join('\n\n')
+        : '';
 
-        // Build project context for chat (compact — just file names + tech)
-        let contextBlock = mentionBlock;
-        if (isChatModeActive && fileKeys.length > 0 && !mentionBlock) {
-          contextBlock = `\n\n[PROYECTO ACTIVO]\nArchivos: ${fileKeys.join(', ')}\n${activeFile ? `\n[ARCHIVO ACTUALMENTE ABIERTO - PRIORIDAD DE EDICIÓN]: ${activeFile}\nCONTENIDO DE ${activeFile}:\n${projectFiles[activeFile]?.content || ''}\n` : ''}\nContenido relevante:\n` +
-            fileKeys.slice(0, 3).map(f => `// ${f}\n${projectFiles[f].content.slice(0, 600)}`).join('\n\n');
-        } else if (!isChatModeActive && fileKeys.length > 0) {
-          contextBlock += '\n\nARCHIVOS ACTUALES DEL PROYECTO:\n' +
-            fileKeys.map(f => `--- ${f} ---\n${projectFiles[f].content.slice(0, 3000)}`).join('\n\n') +
-            (activeFile ? `\n\n[ARCHIVO ACTUALMENTE ABIERTO]: ${activeFile}` : '');
-        }
+      let contextBlock = mentionBlock;
+      if (isChatModeActive && fileKeys.length > 0 && !mentionBlock) {
+        contextBlock = `\n\n[PROYECTO ACTIVO]\nArchivos: ${fileKeys.join(', ')}\n${activeFile ? `\n[ARCHIVO ACTUALMENTE ABIERTO - PRIORIDAD DE EDICIÓN]: ${activeFile}\nCONTENIDO DE ${activeFile}:\n${projectFiles[activeFile]?.content || ''}\n` : ''}\nContenido relevante:\n` +
+          fileKeys.slice(0, 3).map(f => `// ${f}\n${projectFiles[f].content.slice(0, 600)}`).join('\n\n');
+      } else if (!isChatModeActive && fileKeys.length > 0) {
+        contextBlock += '\n\nARCHIVOS ACTUALES DEL PROYECTO:\n' +
+          fileKeys.map(f => `--- ${f} ---\n${projectFiles[f].content.slice(0, 3000)}`).join('\n\n') +
+          (activeFile ? `\n\n[ARCHIVO ACTUALMENTE ABIERTO]: ${activeFile}` : '');
+      }
 
-        // ── URL Clone injection ────────────────────────────────────────────────────
-        let cloneBlock = '';
-        let effectiveSystemPrompt = isArchitectRequest
-          ? ARCHITECT_SYSTEM_PROMPT
-          : (isChatModeActive 
-            ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM)
-            : CODE_GEN_SYSTEM);
+      let cloneBlock = '';
+      let effectiveSystemPrompt = isArchitectRequest
+        ? ARCHITECT_SYSTEM_PROMPT
+        : (isChatModeActive 
+          ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM)
+          : CODE_GEN_SYSTEM);
 
       if (pendingUrl) {
         const parsedClone = JSON.parse(pendingUrl);
-        // Supports legacy `{url, content}` or new `CloneResult` from cloneWebsiteAdvanced
         const cloneUrl = parsedClone.url;
         const cloneMd  = parsedClone.content || parsedClone.markdown || '';
         const colors   = parsedClone.colors && parsedClone.colors.length > 0 ? `\n[COLORES EXTRAÍDOS]: ${parsedClone.colors.join(', ')}` : '';
@@ -926,28 +769,26 @@ export function StudioChat({
         // Always force codegen mode when a URL is attached
         effectiveSystemPrompt = CLONE_SYSTEM_PROMPT + cloneMd + colors + fonts + sitemap;
         cloneBlock = `\n\n[URL OBJETIVO A CLONAR]: ${cloneUrl}\n[INSTRUCCIÓN DEL USUARIO]: ${prompt}`;
-        setPendingUrl(null); // consume once
+        setPendingUrl(null); 
       }
 
-      // Build user content (multimodal if image present)
       const currentModel = MODELS.find(m => m.id === selectedModel) ?? MODELS[0];
       const userContent: any = (pendingImage && currentModel.vision && !isChatModeActive)
         ? [{ type: 'image_url', image_url: { url: pendingImage } }, { type: 'text', text: (cloneBlock || prompt) + contextBlock }]
         : (cloneBlock || prompt) + contextBlock;
 
-      // System prompt + model selection
       const supabaseContext = supabaseConfig
         ? `\n\nSUPABASE CONECTADO AL PROYECTO:\n- URL: ${supabaseConfig.url}\n- Anon Key: ${supabaseConfig.anonKey}\nUSA window.supabaseClient (ya inicializado) para todas las operaciones de base de datos. NO importes ni crees el cliente, ya está disponible globalmente.`
         : '';
+        
       const systemPrompt = cloneBlock
-        ? effectiveSystemPrompt  // clone mode: already built above
+        ? effectiveSystemPrompt 
         : (isChatModeActive ? effectiveSystemPrompt : effectiveSystemPrompt + supabaseContext);
-      // In chat mode: Gemini Flash for speed. Clone/codegen: user-selected model.
+
       const modelToUse = (isChatModeActive && !cloneBlock)
         ? 'google/gemini-2.0-flash-001'
         : selectedModel;
 
-      // Build messages with last 10 turns for memory
       const historySlice = convHistory.slice(-10);
       const messages = [
         { role: 'system', content: systemPrompt },
@@ -955,11 +796,9 @@ export function StudioChat({
         { role: 'user',   content: userContent },
       ];
 
-      // Get session token
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token ?? '';
 
-      // Streaming fetch
       const res = await fetch(`${SUPABASE_URL}/functions/v1/ai-proxy`, {
         method: 'POST',
         signal,
@@ -989,7 +828,6 @@ export function StudioChat({
 
       const contentType = res.headers.get('content-type') ?? '';
 
-      // Non-streaming fallback (edge function returned JSON error)
       if (contentType.includes('application/json')) {
         const data = await res.json();
         if (data?.error) { toast.error(data.error); return null; }
@@ -998,7 +836,6 @@ export function StudioChat({
         return processRaw(rawText, prompt);
       }
 
-      // Parse SSE stream
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
       let accumulated = '';
@@ -1025,7 +862,6 @@ export function StudioChat({
                 accumulated += delta;
                 setStreamChars(accumulated.length);
                 onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
-                // Write to buffer (drained by 40ms interval) — also transition phase on first token
                 if (isChatModeActive) {
                   streamBufferRef.current = accumulated;
                   if (genPhaseRef.current === 'thinking') {
@@ -1034,11 +870,11 @@ export function StudioChat({
                   }
                 }
               }
-            } catch { /* partial JSON chunk, skip */ }
+            } catch { /* skip partial chunk */ }
           }
         }
       } finally {
-        reader.cancel(); // always release the stream
+        reader.cancel();
       }
 
       if (streamError) { toast.error(streamError); return null; }
@@ -1058,11 +894,9 @@ export function StudioChat({
       setIsGenerating(false);
       onGeneratingChange?.(false);
       setStreamChars(0);
-      // Flush remaining buffer before clearing
       if (streamBufferRef.current) setStreamingContent(streamBufferRef.current);
       setGenPhase('done');
       genPhaseRef.current = 'done';
-      // Brief "done" flash, then idle
       setTimeout(() => {
         setGenPhase('idle');
         genPhaseRef.current = 'idle';
@@ -1071,21 +905,16 @@ export function StudioChat({
         setCurrentGenIntent(null);
       }, 400);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectFiles, selectedModel, convHistory, pendingImage, supabaseConfig]);
+  }, [projectFiles, selectedModel, convHistory, pendingImage, supabaseConfig, activeFile, isArchitectMode, onGeneratingChange, onStreamCharsChange, persona, pendingUrl]);
 
-  // ─── Process raw accumulated text into files ───────────────────────────────
   const processRaw = (rawText: string, prompt: string) => {
     if (!rawText) { toast.error('La IA devolvió una respuesta vacía.'); return null; }
-
     const extracted = extractJson(rawText);
-    // No JSON found → treat as a conversational reply (not a code-gen request)
     if (!extracted) {
       return { files: {} as Record<string, StudioFile>, explanation: rawText, stack: [], deps: [], suggestions: [], isChatOnly: true };
     }
     if (!extracted.files || typeof extracted.files !== 'object') { toast.error('Respuesta incompleta. Intenta de nuevo.'); return null; }
 
-    // Normalize files
     const normalizedFiles: Record<string, StudioFile> = {};
     for (const [filename, value] of Object.entries(extracted.files)) {
       if (typeof value === 'string') {
@@ -1104,6 +933,155 @@ export function StudioChat({
     return { files: normalizedFiles, explanation: extracted.explanation || '', stack, deps, suggestions };
   };
 
+  // ─── Side Effects ──────────────────────────────────────────────────────────
+
+  // Auto-correción Loop (Genesis Architect)
+  useEffect(() => {
+    if (!previewError || isGenerating || !user) return;
+    if (previewError === lastAutoFixError.current) return; 
+    
+    if (autoFixCountRef.current >= 3) {
+      toast.error('Genesis no pudo corregir el error automáticamente tras 3 intentos.', {
+        description: 'Por favor, revisa el código o proporciona más detalles del error.'
+      });
+      return;
+    }
+
+    const newLog: UILog = {
+      id: crypto.randomUUID(),
+      type: 'error',
+      message: previewError,
+      timestamp: new Date(),
+      source: 'Sandpack Runtime'
+    };
+    setLogs(prev => [newLog, ...prev]);
+
+    const timer = setTimeout(async () => {
+      lastAutoFixError.current = previewError;
+      autoFixCountRef.current += 1;
+      errorHistoryRef.current.push(previewError); 
+      
+      setIsAutoFixing(true);
+      setIsArtifactsOpen(true); 
+
+      setLogs(prev => [{
+        id: crypto.randomUUID(),
+        type: 'info',
+        message: `🤖 Iniciando Bucle de Auto-corrección (Intento #${autoFixCountRef.current}/3)...`,
+        timestamp: new Date(),
+        source: 'Genesis IA'
+      }, ...prev]);
+
+      const fileContext = Object.keys(projectFiles).map(f => `• ${f} (${projectFiles[f].language})`).join('\n');
+      const errorHistoryFormatted = errorHistoryRef.current.map((err, idx) => `Error de Intento #${idx+1}:\n${err}`).join('\n\n');
+      
+      const fixPrompt = `[AUTO-FIX LOOP - INTENTO #${autoFixCountRef.current}/3]
+      
+CONTEXTO DEL PROYECTO:
+${fileContext}
+
+HISTORIAL DE ERRORES (APRENDIZAJE):
+${errorHistoryFormatted}
+
+TAREA: Analiza la causa raíz del error actual basándote en los intentos fallidos previos. 
+Corrige el código de los archivos necesarios para eliminar este error y asegurar que el preview renderice correctamente. 
+Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
+
+      try {
+        const result = await generateCode(fixPrompt);
+        if (result && result.files && Object.keys(result.files).length > 0) {
+          const mergedFiles = { ...projectFiles, ...result.files };
+          onCodeGenerated(mergedFiles);
+          
+          setLogs(prev => [{
+            id: crypto.randomUUID(),
+            type: 'success',
+            message: `✅ Intento #${autoFixCountRef.current} completado. Archivos actualizados: ${Object.keys(result.files).join(', ')}`,
+            timestamp: new Date(),
+            source: 'Genesis Fixer'
+          }, ...prev]);
+        }
+      } catch (err) {
+        setLogs(prev => [{
+          id: crypto.randomUUID(),
+          type: 'error',
+          message: `Fallo en el intento de corrección #${autoFixCountRef.current}: ${String(err)}`,
+          timestamp: new Date(),
+          source: 'System'
+        }, ...prev]);
+      } finally {
+        setIsAutoFixing(false);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [previewError, isGenerating, user, projectFiles, onCodeGenerated, generateCode]);
+
+  // Reset auto-fix counter when project files change
+  useEffect(() => {
+    autoFixCountRef.current = 0;
+    lastAutoFixError.current = '';
+    errorHistoryRef.current = [];
+  }, [Object.keys(projectFiles).length]);
+
+  // Persist chat per project
+  useEffect(() => {
+    if (!projectId) return;
+    const key = `genesis-chat-${projectId}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      try {
+        const parsed: Message[] = JSON.parse(saved);
+        setMessages(parsed.map(m => ({ ...m, timestamp: new Date(m.timestamp) })));
+        isFirstGen.current = parsed.filter(m => m.role === 'user').length === 0;
+      } catch (e) {
+        console.error("Error loading chat history:", e);
+      }
+    }
+  }, [projectId]);
+
+  // Extract artifacts & tasks
+  useEffect(() => {
+    const newArtifacts: UIArtifact[] = [];
+    const newTasks: UIPlanTask[] = [];
+
+    messages.forEach(m => {
+      const mermaidMatches = m.content.matchAll(/```mermaid\n?([\s\S]*?)```/g);
+      for (const match of mermaidMatches) {
+        newArtifacts.push({
+          id: crypto.randomUUID(),
+          type: 'mermaid',
+          title: 'Arquitectura Sugerida',
+          content: match[1].trim()
+        });
+      }
+
+      const taskMatches = Array.from(m.content.matchAll(/^\[( |x|X|\/)\] (.+)$/gm));
+      for (const match of taskMatches) {
+        const symbol = (match[1] as string).toLowerCase();
+        newTasks.push({
+          id: crypto.randomUUID(),
+          text: (match[2] as string).trim(),
+          status: symbol === 'x' ? 'completed' : symbol === '/' ? 'in-progress' : 'pending'
+        });
+      }
+    });
+
+    if (streamingContent) {
+      const mermaidMatches = streamingContent.matchAll(/```mermaid\n?([\s\S]*?)```/g);
+      for (const match of mermaidMatches) {
+        newArtifacts.push({ id: crypto.randomUUID(), type: 'mermaid', title: 'Arquitectura (Generando...)', content: match[1].trim() });
+      }
+      const taskMatches = Array.from(streamingContent.matchAll(/^\[( |x|X|\/)\] (.+)$/gm));
+      for (const match of taskMatches) {
+        const symbol = (match[1] as string).toLowerCase();
+        newTasks.push({ id: crypto.randomUUID(), text: (match[2] as string).trim(), status: symbol === 'x' ? 'completed' : symbol === '/' ? 'in-progress' : 'pending' });
+      }
+    }
+
+    setArtifacts(newArtifacts);
+    setTasks(newTasks);
+  }, [messages, streamingContent]);
   // ─── Auto-name project from first prompt ────────────────────────────────────
   const autoNameProject = useCallback(async (prompt: string) => {
     if (!onAutoName) return;
@@ -1283,6 +1261,12 @@ export function StudioChat({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  };
+
+  const handleScroll = () => {
+    if (containerRef.current) {
+      setShowScrollBtn(containerRef.current.scrollTop > 400);
+    }
   };
 
   const copyMessage = (content: string, id: string) => {
@@ -1825,6 +1809,23 @@ export function StudioChat({
           e.target.value = ''; 
         }}
       />
+      
+      {/* Artifacts Panel Overlay */}
+      <StudioArtifactsPanel 
+        isOpen={isArtifactsOpen}
+        onClose={() => setIsArtifactsOpen(false)}
+        tasks={activeTasks}
+        artifacts={artifacts}
+        logs={logs}
+      />
     </div>
+  );
+}
+
+function Badge({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest ${className}`}>
+      {children}
+    </span>
   );
 }

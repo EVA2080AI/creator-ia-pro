@@ -54,15 +54,15 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
     // Fetch both spaces (Flows) and studio_projects (CodeIDE)
     const [spacesRes, codeRes] = await Promise.all([
       supabase.from("spaces").select("*").eq("user_id", user.id),
-      (supabase.from("studio_projects") as any).select("*").eq("user_id", user.id)
+      supabase.from("studio_projects").select("*").eq("user_id", user.id)
     ]);
     
     if (spacesRes.error) toast.error("Error al cargar flujos");
     if (codeRes.error) toast.error("Error al cargar desarrollos IDE");
     
     const combined: UnifiedProject[] = [
-      ...(spacesRes.data || []).map((s: any) => ({ ...s, type: 'flow' as const })),
-      ...(codeRes.data || []).map((c: any) => ({
+      ...(spacesRes.data || []).map((s) => ({ ...s, type: 'flow' as const })),
+      ...(codeRes.data || []).map((c) => ({
          ...c, 
          type: 'code' as const, 
          thumbnail_url: null,
@@ -97,7 +97,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
           }).eq("id", editingSpace.id);
           if (error) throw error;
         } else {
-          const { error } = await (supabase.from("studio_projects") as any).update({
+          const { error } = await supabase.from("studio_projects").update({
             name: formData.name,
             description: formData.description,
           }).eq("id", editingSpace.id);
@@ -121,7 +121,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
       const res = await supabase.from("spaces").delete().eq("id", target.id);
       error = res.error;
     } else {
-      const res = await (supabase.from("studio_projects") as any).delete().eq("id", target.id);
+      const res = await supabase.from("studio_projects").delete().eq("id", target.id);
       error = res.error;
     }
     
