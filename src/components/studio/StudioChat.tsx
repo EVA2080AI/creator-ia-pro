@@ -3,7 +3,8 @@ import {
   Send, Sparkles, Bot, Loader2,
   ChevronDown, Copy, RotateCcw, Check, ChevronLeft, Share2,
   X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink, Lock,
-  FileCode2, UploadCloud, Zap, Plus, Mic, ArrowUp, Save, Paperclip
+  FileCode2, UploadCloud, Zap, Plus, Mic, ArrowUp, Save, Paperclip,
+  Shield, CheckCircle2, XCircle, Info, TriangleAlert, Lightbulb
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
@@ -79,12 +80,14 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
-  type?: 'chat' | 'code';
+  type?: 'chat' | 'code' | 'plan';
   files?: string[];
   imagePreview?: string;
   stack?: string[];
   deps?: string[];
   suggestions?: string[];
+  planStatus?: 'pending' | 'approved' | 'rejected';
+  originalPrompt?: string;
 }
 
 interface ConvMsg { role: 'user' | 'assistant'; content: any; }
@@ -130,49 +133,58 @@ function detectIntent(prompt: string): 'codegen' | 'chat' {
   return 'chat';
 }
 
-// ─── Genesis unified system prompt (v3 — Elite Architect & Full-Stack Lead) ──────
-const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Master Brain (v9 + Antigravity DNA)
+// ─── Genesis unified system prompt (v10 — Agentic Architect DNA) ──────
+const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Autonomous Engineering Agent (v10.0)
 
-Eres la inteligencia central definitiva de Creator IA Pro. Eres un **Senior UI/UX Lead & Elite Architect**. Tu misión es la perfección técnica y la excelencia estética adaptativa.
+Eres la inteligencia central definitiva de Creator IA Pro. No eres un chatbot; eres un **Ingeniero Principal de Software Autónomo y Arquitecto de Soluciones de Elite**. Tratas al usuario como tu CTO. Sé conciso, directo y exigente con la calidad.
 
 REGLAS DE OPERACIÓN (ESTRICTAS):
 
-1. **Excelencia de Diseño Universal (Aether Evolution):**
+1. **Comunicación Estructurada:**
+   - Usa encabezados Markdown (##, ###) para organizar tus respuestas.
+   - Usa alertas GitHub cuando sea relevante:
+     - \`> [!NOTE]\` para contexto importante
+     - \`> [!TIP]\` para optimizaciones
+     - \`> [!WARNING]\` para riesgos o breaking changes
+     - \`> [!IMPORTANT]\` para decisiones críticas
+   - Usa checklists \`[ ]\` / \`[x]\` para planes de acción.
+   - Usa tablas Markdown para comparar opciones.
+   - Si explicas arquitectura, usa diagramas Mermaid:
+     \`\`\`mermaid
+     graph TD
+       A[Request] --> B[Process]
+     \`\`\`
+
+2. **Excelencia de Diseño Universal (Aether Evolution):**
    - Prohibido el uso de patrones "Legacy" o básicos.
    - Eres un camaleón del diseño: adapta el estilo al contexto (Dark Premium, Minimalismo Suizo, Glassmorphism, etc.).
    - Mandatory: Sombras suaves, Gradientes HSL, Micro-animaciones.
+   - Cuando diseñes UI, usa animaciones sutiles, bordes suaves y dale un acabado premium de 2026.
 
-2. **Silencio Técnico & Resultados Primero:**
+3. **Silencio Técnico & Resultados Primero:**
    - Realiza TODO tu razonamiento complejo EXCLUSIVAMENTE dentro de tags <thinking>...</thinking>.
-   - En el chat visible, sé extremadamente ejecutivo. NUNCA repitas lo que ya explicaste en el pensamiento interno.
-   - El chat visible debe limitarse al **Resumen Ejecutivo**, el **Master Plan** y los archivos generados.
+   - En el chat visible, sé extremadamente ejecutivo.
+   - El chat visible debe limitarse al **Resumen Ejecutivo**, el **Plan** y los archivos generados.
 
-3. **Master Plan Estratégico:**
-   - Inicia tareas complejas con una sección "MASTER PLAN" con checklists [ ].
-   - Explica el "Por Qué" estratégico antes del "Cómo" técnico.
+4. **Cero Placeholders:** Entrega archivos 100% funcionales. Nunca sirvas prototipos mediocres.
 
-4. **Cero Placeholders:** Entrega archivos 100% funcionales.
-5. **Maestría de Visión (Image-to-Code):**
-   - Si el usuario sube una imagen/captura:
-     - Realiza un análisis exhaustivo del layout, colores, tipografía y espaciado en <thinking>.
-     - Tu objetivo primario es la **Replicación de Alta Fidelidad**.
-     - Genera primero una estructura HTML/Tailwind robusta, a menos que el usuario especifique otro framework.
-
-6. **Protocolo "Social First" (GREETINGS):**
-   - Si detectas que el usuario solo saluda (ej. "hola"):
+5. **Protocolo Social:**
+   - Si detectas que el usuario solo saluda:
      - **OBLIGATORIO**: Responde con una bienvenida de élite, elegante y extremadamente corta (máx 15 palabras).
-     - **PROHIBIDO**: Bajo ninguna circunstancia generes un "MASTER PLAN", análisis de diseño ni código para un "Hola Mundo" o similares. No hagas despliegue de arquitectura para saludos.
+     - **PROHIBIDO**: No generes código ni planes para saludos simples.
 
-7. **Idioma:** Español profesional e inspirador. Términos técnicos en inglés.`;
+6. **Idioma:** Español profesional e inspirador. Términos técnicos en inglés.`;
 
 
 const GENESIS_CHAT_SYSTEM = `Eres Genesis AI — Modo Conversación Directa.
 
 REGLAS PARA CHAT:
-1. Sé 100% humano, ejecutivo y directo.
+1. Sé 100% humano, ejecutivo y directo. Habla como un ingeniero senior que respeta el tiempo del CTO.
 2. NO generes código ni diagramas a menos que se te pida explícitamente.
-3. NO uses MASTER PLAN para saludos o preguntas simples.
-4. Si el usuario solo saluda, responde con una bienvenida elegante y corta.
+3. Si el usuario solo saluda, responde con una bienvenida elegante y corta.
+4. Usa alertas GitHub (> [!NOTE], > [!TIP], > [!WARNING]) para destacar información importante.
+5. Cuando hagas comparaciones, usa tablas Markdown.
+6. Si te preguntan sobre arquitectura, usa diagramas Mermaid.
 
 ${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
 
@@ -181,9 +193,56 @@ const ANTIGRAVITY_CHAT_SYSTEM = `Eres Antigravity — el motor de inteligencia e
 TU ENFOQUE:
 - Eres un Executive Strategist y consultor de nivel mundial.
 - Prioridad: Razonamiento profundo (en <thinking>), análisis de marketing, CRO y Business Intelligence.
-- En el chat visible, sé directo y estratégico.
+- En el chat visible, sé directo y estratégico. Habla como un McKinsey Senior Partner.
+- Usa alertas GitHub (> [!NOTE], > [!TIP], > [!WARNING], > [!IMPORTANT]) para decisiones de negocio.
+- Usa diagramas Mermaid para flujos de marketing y journey maps.
+- Usa tablas Markdown para comparar métricas y opciones estratégicas.
 
 ${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
+
+// ─── Architect Mode system prompt (Plan-First) ────────────────────────────────
+const ARCHITECT_SYSTEM_PROMPT = `🏗️ MODO ARQUITECTO — Genesis AI Planning Agent
+
+El usuario ha activado el MODO ARQUITECTO. Tu trabajo NO es generar código directamente.
+En su lugar, debes actuar como un Senior Solutions Architect y generar un PLAN DE IMPLEMENTACIÓN detallado.
+
+FORMATO OBLIGATORIO DE RESPUESTA:
+
+## 🏗️ Plan de Implementación
+
+### Objetivo
+[Describe brevemente qué se va a construir y por qué]
+
+### Archivos a Crear/Modificar
+[Lista cada archivo con una breve descripción de su propósito]
+- [ ] \`App.tsx\` — Layout principal con routing
+- [ ] \`pages/Home.tsx\` — Página de inicio
+- [ ] \`components/Navbar.tsx\` — Navegación
+
+### Stack Técnico
+| Tecnología | Uso |
+|---|---|
+| React 18 | Framework UI |
+| Tailwind CSS | Estilos |
+
+### Decisiones de Diseño
+> [!IMPORTANT]
+> [Decisiones clave que el usuario debe aprobar antes de proceder]
+
+### Estimación
+- Archivos: X
+- Complejidad: Baja/Media/Alta
+- Tiempo estimado de generación: ~Xs
+
+### Siguiente Paso
+Si apruebas este plan, haré clic en "Aprobar" y generaré todo el código.
+
+REGLAS:
+1. NO generes código. Solo el plan.
+2. Sé específico con cada archivo y su propósito.
+3. Identifica riesgos o decisiones que requieran input del usuario con alertas > [!WARNING].
+4. El plan debe ser aprobado antes de cualquier generación de código.
+5. Responde en español profesional.`;
 
 
 // ─── Clone system prompt ──────────────────────────────────────────────────────
@@ -359,7 +418,7 @@ function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
   return Object.keys(files).length > 0 ? files : null;
 }
 
-// ─── Markdown renderer ─────────────────────────────────────────────────────────
+// ─── Markdown renderer (v2 — GitHub Alerts + Mermaid + Tables) ──────────────
 function renderMarkdown(text: string): string {
   let raw = text
     // Thinking blocks (Resilient regex — handles <thinking>, [thinking] or just 'thinking' at start)
@@ -378,6 +437,51 @@ function renderMarkdown(text: string): string {
           <div class="text-[11px] text-zinc-500 font-bold italic leading-relaxed pl-4 border-l-2 border-primary/20">${content.trim()}</div>
         </div>
       </details>`)
+    // GitHub-style Alerts (MUST come before code blocks to avoid conflicts)
+    .replace(/^>\s*\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]\n((?:>.*\n?)*)/gm, (_m, type, body) => {
+      const content = body.replace(/^>\s?/gm, '').trim();
+      const alertStyles: Record<string, { bg: string; border: string; icon: string; label: string; text: string }> = {
+        'NOTE':      { bg: 'bg-blue-50',    border: 'border-blue-200', icon: '💡', label: 'Nota',       text: 'text-blue-800' },
+        'TIP':       { bg: 'bg-emerald-50',  border: 'border-emerald-200', icon: '✅', label: 'Tip',      text: 'text-emerald-800' },
+        'IMPORTANT': { bg: 'bg-violet-50',   border: 'border-violet-200', icon: '🔮', label: 'Importante', text: 'text-violet-800' },
+        'WARNING':   { bg: 'bg-amber-50',    border: 'border-amber-200', icon: '⚠️', label: 'Advertencia', text: 'text-amber-800' },
+        'CAUTION':   { bg: 'bg-rose-50',     border: 'border-rose-200', icon: '🚨', label: 'Precaución', text: 'text-rose-800' },
+      };
+      const s = alertStyles[type] || alertStyles['NOTE'];
+      return `<div class="my-6 rounded-2xl ${s.bg} ${s.border} border p-5 animate-in fade-in duration-500">
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-sm">${s.icon}</span>
+          <span class="text-[10px] font-black uppercase tracking-[0.2em] ${s.text}">${s.label}</span>
+        </div>
+        <div class="text-[12px] font-medium ${s.text} leading-relaxed">${content}</div>
+      </div>`;
+    })
+    // Mermaid diagrams — render as a styled placeholder with the raw mermaid code
+    .replace(/```mermaid\n?([\s\S]*?)```/g, (_m, code) =>
+      `<div class="my-6 rounded-[24px] border border-indigo-200 bg-indigo-50/50 overflow-hidden animate-in zoom-in-95 duration-500">
+        <div class="flex items-center gap-2 px-5 py-3 border-b border-indigo-100">
+          <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"/></svg>
+          <span class="text-[10px] font-black text-indigo-600 uppercase tracking-[0.15em]">Diagrama de Arquitectura</span>
+        </div>
+        <pre class="p-5 text-[11px] font-mono leading-relaxed text-indigo-700 overflow-x-auto">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>
+      </div>`)
+    // Markdown Tables
+    .replace(/^\|(.+)\|\s*\n\|[-| :]+\|\s*\n((?:\|.+\|\s*\n?)*)/gm, (_m, headerRow, bodyRows) => {
+      const headers = headerRow.split('|').map((h: string) => h.trim()).filter(Boolean);
+      const rows = bodyRows.trim().split('\n').map((row: string) => 
+        row.split('|').map((c: string) => c.trim()).filter(Boolean)
+      );
+      return `<div class="my-6 rounded-2xl border border-zinc-200 overflow-hidden">
+        <table class="w-full text-[11px]">
+          <thead><tr class="bg-zinc-50 border-b border-zinc-200">
+            ${headers.map((h: string) => `<th class="px-4 py-2.5 text-left font-black text-zinc-600 uppercase tracking-widest text-[10px]">${h}</th>`).join('')}
+          </tr></thead>
+          <tbody>
+            ${rows.map((row: string[]) => `<tr class="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors">${row.map((c: string) => `<td class="px-4 py-2.5 text-zinc-600 font-medium">${c}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    })
     // Code blocks (Design System Mini-Frame)
     .replace(/```(\w*)\n?([\s\S]*?)```/g, (_m, lang, code) =>
       `<div class="code-mini-frame group my-6 rounded-[24px] border border-zinc-200 bg-zinc-900 shadow-2xl shadow-zinc-200/50 overflow-hidden animate-in zoom-in-95 duration-500">
@@ -393,6 +497,19 @@ function renderMarkdown(text: string): string {
           </div>
         </div>
         <pre class="p-6 text-[11px] font-mono leading-relaxed bg-transparent overflow-x-auto"><code class="text-zinc-300 block">${code.trim().replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code></pre>
+      </div>`)
+    // Diff blocks
+    .replace(/```diff\n?([\s\S]*?)```/g, (_m, code) =>
+      `<div class="my-6 rounded-[24px] border border-zinc-200 bg-zinc-900 overflow-hidden">
+        <div class="flex items-center gap-2 px-5 py-3 bg-zinc-800/50 border-b border-white/5">
+          <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.15em]">diff</span>
+        </div>
+        <pre class="p-5 text-[11px] font-mono leading-relaxed overflow-x-auto">${code.trim().split('\n').map((line: string) => {
+          const escaped = line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          if (line.startsWith('+')) return `<span class="text-emerald-400">${escaped}</span>`;
+          if (line.startsWith('-')) return `<span class="text-rose-400">${escaped}</span>`;
+          return `<span class="text-zinc-500">${escaped}</span>`;
+        }).join('\n')}</pre>
       </div>`)
     // Headers
     .replace(/^### (.+)$/gm, '<h3 class="text-[14px] font-black text-zinc-900 mt-6 mb-2 tracking-tight">$1</h3>')
@@ -412,7 +529,7 @@ function renderMarkdown(text: string): string {
         </div>
         <span class="text-xs font-bold ${check.toLowerCase() === 'x' ? 'text-zinc-400 line-through decoration-primary/30' : 'text-zinc-700'}">${text}</span>
       </div>`)
-    .replace(/^\d+\. (.+)$/gm, '<li class="flex items-start gap-3 text-zinc-600 mb-1.5 font-medium"><span class="text-primary font-black text-[11px] mt-0.5 tracking-tighter">0$1.</span><span>$2</span></li>') // Fixed potential group issue
+    .replace(/^\d+\. (.+)$/gm, '<li class="flex items-start gap-3 text-zinc-600 mb-1.5 font-medium"><span class="text-primary font-black text-[11px] mt-0.5 tracking-tighter">0$1.</span><span>$2</span></li>')
     .replace(/^[-•] (.+)$/gm, '<li class="flex items-start gap-3 text-zinc-600 mb-1.5 font-medium"><div class="h-1.5 w-1.5 rounded-full bg-primary mt-2 flex-shrink-0 shadow-sm shadow-primary/50"></div><span>$1</span></li>')
     // Horizontal rule
     .replace(/^---$/gm, '<hr class="border-zinc-100 my-8"/>')
@@ -421,7 +538,7 @@ function renderMarkdown(text: string): string {
     .replace(/\n/g, '<br/>');
 
   return DOMPurify.sanitize(raw, {
-    ALLOWED_TAGS: ['strong','em','code','pre','li','br','h1','h2','h3','span','div','hr','svg','path'],
+    ALLOWED_TAGS: ['strong','em','code','pre','li','br','h1','h2','h3','span','div','hr','svg','path','details','summary','table','thead','tbody','tr','th','td'],
     ALLOWED_ATTR: ['class','style','fill','stroke','viewBox','d','stroke-linecap','stroke-linejoin','stroke-width'],
   });
 }
@@ -554,6 +671,8 @@ export function StudioChat({
   const [isScraping,       setIsScraping]       = useState(false);
   const [pendingContext,   setPendingContext]   = useState<{ name: string; content: string } | null>(null);
   const [isPlusMenuOpen,   setIsPlusMenuOpen]   = useState(false);
+  const [isArchitectMode,  setIsArchitectMode]  = useState(false);
+  const [pendingPlanPrompt, setPendingPlanPrompt] = useState<string | null>(null);
 
   const messagesEndRef    = useRef<HTMLDivElement>(null);
   const containerRef      = useRef<HTMLDivElement>(null);
@@ -692,7 +811,9 @@ export function StudioChat({
     const signal = abortControllerRef.current.signal;
 
       const isChatModeActive = detectIntent(prompt) === 'chat';
-      setCurrentGenIntent(isChatModeActive ? 'chat' : 'codegen');
+      // If architect mode is on AND it's a codegen request, use architect prompt instead
+      const isArchitectRequest = isArchitectMode && !isChatModeActive;
+      setCurrentGenIntent(isArchitectRequest ? 'chat' : (isChatModeActive ? 'chat' : 'codegen'));
 
       try {
         const fileKeys = Object.keys(projectFiles);
@@ -720,9 +841,11 @@ export function StudioChat({
 
         // ── URL Clone injection ────────────────────────────────────────────────────
         let cloneBlock = '';
-        let effectiveSystemPrompt = isChatModeActive 
-          ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM)
-          : CODE_GEN_SYSTEM;
+        let effectiveSystemPrompt = isArchitectRequest
+          ? ARCHITECT_SYSTEM_PROMPT
+          : (isChatModeActive 
+            ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM)
+            : CODE_GEN_SYSTEM);
 
       if (pendingUrl) {
         const parsedClone = JSON.parse(pendingUrl);
@@ -984,6 +1107,9 @@ export function StudioChat({
     const modelId = (intent === 'chat' && !pendingUrl) ? 'google/gemini-2.0-flash-001' : selectedModel;
     const cost = MODEL_COSTS[modelId] ?? 1;
 
+    // ── ARCHITECT MODE: if codegen intent + architect mode → plan first ────
+    const shouldPlan = isArchitectMode && intent === 'codegen' && !pendingPlanPrompt;
+
     try {
       // 1. Spend credits
       await aiService.spendCredits(cost, intent, modelId, null);
@@ -998,7 +1124,24 @@ export function StudioChat({
       }
 
       let assistantMsg: Message;
-      if (result.isChatOnly) {
+
+      // ── ARCHITECT MODE: Show plan card instead of generating code ──────
+      if (shouldPlan && result?.isChatOnly && result.explanation) {
+        assistantMsg = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: result.explanation,
+          timestamp: new Date(),
+          type: 'plan',
+          planStatus: 'pending',
+          originalPrompt: text,
+        };
+        setMessages((prev) => [...prev, assistantMsg]);
+        setPendingContext(null);
+        return; // Don't proceed to code gen yet
+      }
+
+      if (result?.isChatOnly) {
         const chatFiles = extractChatCodeFiles(result.explanation);
         if (chatFiles && Object.keys(chatFiles).length > 0) {
           const mergedFiles = { ...projectFiles, ...chatFiles };
@@ -1009,14 +1152,14 @@ export function StudioChat({
           role: 'assistant',
           content: result.explanation,
           timestamp: new Date(),
-          ...(chatFiles ? { files: Object.keys(chatFiles), type: 'code' } : {}),
+          ...(chatFiles ? { files: Object.keys(chatFiles), type: 'code' as const } : {}),
         };
         setConvHistory(prev => [
           ...prev,
           { role: 'user' as const,      content: text },
           { role: 'assistant' as const, content: result.explanation },
         ].slice(-16));
-      } else if (result.files && Object.keys(result.files).length > 0) {
+      } else if (result?.files && Object.keys(result.files).length > 0) {
         const mergedFiles = { ...projectFiles, ...result.files };
         onCodeGenerated(mergedFiles);
         const fileList = Object.keys(result.files).map((f) => `• \`${f}\``).join('\n');
@@ -1136,9 +1279,64 @@ export function StudioChat({
                   </div>
                 </div>
 
-                <div className="bg-white border border-zinc-200/80 px-7 py-6 rounded-[32px] rounded-tl-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] animate-in fade-in slide-in-from-left-4 duration-500 relative group/msg">
+                <div className={`px-7 py-6 rounded-[32px] rounded-tl-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] animate-in fade-in slide-in-from-left-4 duration-500 relative group/msg ${msg.type === 'plan' ? 'bg-gradient-to-br from-indigo-50 to-violet-50 border-2 border-indigo-200' : 'bg-white border border-zinc-200/80'}`}>
+                  {/* Plan Card Header */}
+                  {msg.type === 'plan' && (
+                    <div className="flex items-center gap-3 mb-5 pb-4 border-b border-indigo-200/50">
+                      <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-200">
+                        <Shield className="h-4 w-4 text-white" />
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-700">Modo Arquitecto</span>
+                        <span className="block text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Plan de Implementación</span>
+                      </div>
+                      {msg.planStatus === 'pending' && (
+                        <span className="ml-auto px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[9px] font-black uppercase tracking-widest animate-pulse">Pendiente</span>
+                      )}
+                      {msg.planStatus === 'approved' && (
+                        <span className="ml-auto px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase tracking-widest">✓ Aprobado</span>
+                      )}
+                      {msg.planStatus === 'rejected' && (
+                        <span className="ml-auto px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-[9px] font-black uppercase tracking-widest">✗ Rechazado</span>
+                      )}
+                    </div>
+                  )}
+
                   <div className="prose prose-zinc max-w-none prose-sm font-medium"
                     dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+
+                  {/* Plan Card Action Buttons */}
+                  {msg.type === 'plan' && msg.planStatus === 'pending' && (
+                    <div className="flex items-center gap-3 mt-6 pt-5 border-t border-indigo-200/50">
+                      <button
+                        onClick={async () => {
+                          // Mark as approved
+                          setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, planStatus: 'approved' as const } : m));
+                          // Now generate the actual code with architect mode temporarily disabled
+                          const origArchitect = isArchitectMode;
+                          setIsArchitectMode(false);
+                          setPendingPlanPrompt(msg.originalPrompt || '');
+                          await handleSend(msg.originalPrompt || '');
+                          setPendingPlanPrompt(null);
+                          setIsArchitectMode(origArchitect);
+                        }}
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[11px] font-black uppercase tracking-widest hover:shadow-lg hover:shadow-emerald-200 transition-all active:scale-95"
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                        Aprobar y Generar
+                      </button>
+                      <button
+                        onClick={() => {
+                          setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, planStatus: 'rejected' as const } : m));
+                          toast.info('Plan rechazado. Puedes hacer ajustes y volver a pedir.');
+                        }}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-zinc-200 bg-white text-zinc-500 text-[11px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-500 transition-all active:scale-95"
+                      >
+                        <XCircle className="h-4 w-4" />
+                        Rechazar
+                      </button>
+                    </div>
+                  )}
 
                   {/* Tech stack badge */}
                   {msg.stack && msg.stack.length > 0 && (
@@ -1213,16 +1411,17 @@ export function StudioChat({
                         </div>
                       </button>
 
-                      {/* Card: Plan Mode */}
+                      {/* Card: Architect Mode */}
                       <button 
-                        className="flex items-center gap-4 p-5 rounded-2xl border border-zinc-200 bg-white hover:border-black hover:shadow-xl hover:shadow-black/5 transition-all text-left group/card opacity-60 hover:opacity-100"
+                        onClick={() => setIsArchitectMode(!isArchitectMode)}
+                        className={`flex items-center gap-4 p-5 rounded-2xl border transition-all text-left group/card ${isArchitectMode ? 'border-indigo-300 bg-indigo-50 shadow-lg shadow-indigo-100' : 'border-zinc-200 bg-white hover:border-black hover:shadow-xl hover:shadow-black/5'}`}
                       >
-                        <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover/card:bg-zinc-900 group-hover/card:text-white transition-all">
-                          <Zap className="h-6 w-6" />
+                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-all ${isArchitectMode ? 'bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-200' : 'bg-zinc-50 border border-zinc-100 text-zinc-400 group-hover/card:bg-zinc-900 group-hover/card:text-white'}`}>
+                          <Shield className="h-6 w-6" />
                         </div>
                         <div>
-                          <span className="block text-sm font-black uppercase tracking-widest text-zinc-900">Modo Maestro</span>
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Plan de construcción full-stack</span>
+                          <span className="block text-sm font-black uppercase tracking-widest text-zinc-900">Modo Arquitecto</span>
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{isArchitectMode ? '✓ Activado — planifica antes de generar' : 'Plan de construcción antes de código'}</span>
                         </div>
                       </button>
                     </div>
@@ -1442,7 +1641,7 @@ export function StudioChat({
           )}
 
           {/* Main Centric Bar */}
-          <div className="flex items-center gap-2 p-2 rounded-[28px] bg-white border border-zinc-200 shadow-sm focus-within:ring-4 focus-within:ring-primary/5 focus-within:border-primary/20 transition-all">
+          <div className={`flex items-center gap-2 p-2 rounded-[28px] bg-white border shadow-sm focus-within:ring-4 transition-all ${isArchitectMode ? 'border-indigo-200 focus-within:ring-indigo-100/50 focus-within:border-indigo-300' : 'border-zinc-200 focus-within:ring-primary/5 focus-within:border-primary/20'}`}>
             {/* Plus Trigger */}
             <button
               onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
@@ -1465,6 +1664,15 @@ export function StudioChat({
 
             {/* Right Controls */}
             <div className="flex items-center gap-1 pr-1">
+              {/* Architect Mode Toggle */}
+              <button
+                onClick={() => setIsArchitectMode(!isArchitectMode)}
+                title={isArchitectMode ? 'Modo Arquitecto activado — planifica antes de generar' : 'Activar Modo Arquitecto'}
+                className={`h-10 w-10 rounded-full flex items-center justify-center transition-all ${isArchitectMode ? 'bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-200' : 'text-zinc-300 hover:text-zinc-900 hover:bg-zinc-50'}`}
+              >
+                <Shield className="h-4 w-4" />
+              </button>
+
               {/* Mic Icon */}
               <button className="h-10 w-10 rounded-full flex items-center justify-center text-zinc-300 hover:text-zinc-900 transition-colors">
                 <Mic className="h-4 w-4" />
