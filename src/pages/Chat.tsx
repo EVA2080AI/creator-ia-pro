@@ -131,7 +131,7 @@ function WelcomeScreen({
     >
 
       {/* ── Main Area ─────────────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden relative bg-white">
+      <div className="flex-1 flex flex-col overflow-hidden relative bg-transparent">
 
         {/* Genesis Mesh Background (Aether V8.2) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none genesis-mesh-bg animate-in fade-in duration-1000">

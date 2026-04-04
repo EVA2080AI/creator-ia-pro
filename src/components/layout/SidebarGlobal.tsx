@@ -191,36 +191,6 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           ))}
         </div>
 
-        {/* 2. CONTENIDO & SOCIAL */}
-        <div className="px-2 space-y-0.5 mb-6">
-          {(globalExpanded || isMobile) && (
-            <div className="px-3 py-1.5 mb-1">
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-60">Contenido</span>
-            </div>
-          )}
-          {NAV_SOCIAL.map((item) => (
-            <NavItem 
-              key={item.path} 
-              path={item.path}
-              label={item.label}
-              icon={item.icon}
-              active={isActive(item.path)} 
-              expanded={globalExpanded || isMobile}
-              minTier={item.minTier}
-              onClick={() => handleNav(item.path, item.minTier, item.label)} 
-            />
-          ))}
-          <NavItem 
-            path="/chat"
-            label="Genesis IA"
-            icon={Brain}
-            active={isActive('/chat')}
-            expanded={globalExpanded || isMobile}
-            minTier="starter"
-            className="text-primary hover:bg-primary/5"
-            onClick={() => handleNav('/chat', 'starter', 'Genesis IA')}
-          />
-        </div>
 
         {/* 3. SISTEMA (Admin Only) */}
         {isAdmin && (
