@@ -7,7 +7,8 @@ import {
   Wand2, Hash, Megaphone, PenLine, Zap,
   Settings, History, CreditCard, Monitor, Sparkles,
   PanelLeftClose, PanelLeftOpen, Terminal, List, Code2,
-  Home, LayoutGrid, Share2, ShieldCheck, Activity, Bot, ChevronUp
+  Home, LayoutGrid, ShieldCheck, Activity, Bot, ChevronUp,
+  Users2, Palette
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -30,16 +31,17 @@ const TIER_LEVELS: Record<string, number> = {
 };
 
 const TIER_CONFIG: Record<string, { label: string, color: string, bg: string }> = {
-  'starter': { label: 'STARTER', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100' },
-  'creator': { label: 'CREATOR', color: 'text-violet-600', bg: 'bg-violet-50 border-violet-100' },
-  'pymes':   { label: 'PYMES',   color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' },
-  'agency':  { label: 'AGENCY',  color: 'text-amber-700', bg: 'bg-amber-50 border-amber-100' },
-  'admin':   { label: 'ADMIN',   color: 'text-red-700', bg: 'bg-red-50 border-red-100' },
+  'starter': { label: 'STARTER', color: 'text-blue-500',    bg: 'bg-blue-50/80' },
+  'creator': { label: 'CREATOR', color: 'text-violet-500',  bg: 'bg-violet-50/80' },
+  'pymes':   { label: 'PYMES',   color: 'text-emerald-600', bg: 'bg-emerald-50/80' },
+  'agency':  { label: 'AGENCY',  color: 'text-amber-600',   bg: 'bg-amber-50/80' },
+  'admin':   { label: 'ADMIN',   color: 'text-red-500',     bg: 'bg-red-50/80' },
 };
 
 // ── Navigation structure ──────────────────────────────────────────────────────
 const NAV_MAIN = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
+  { path: '/chat',         label: 'Genesis IA',    icon: Brain,          minTier: 'starter' },
   { path: '/code',         label: 'Editor',        icon: Code2,          minTier: 'starter' },
   { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'creator' },
   { path: '/hub',          label: 'Templates',     icon: Sparkles,       minTier: 'creator' },
@@ -48,14 +50,14 @@ const NAV_MAIN = [
   { path: '/antigravity',  label: 'Antigravity',   icon: Bot,            minTier: 'pymes' },
 ];
 
-const NAV_SOCIAL = [
-  { path: '/sharescreen',  label: 'Compartir',     icon: Share2,         minTier: 'free' },
-];
+const NAV_SOCIAL: typeof NAV_MAIN = [];
 
 const NAV_SYSTEM = [
-  { path: '/admin',         label: 'Panel Control', icon: ShieldCheck,   minTier: 'admin' },
-  { path: '/system-status', label: 'Estatus',       icon: Activity,      minTier: 'admin' },
-  { path: '/product-backlog', label: 'Roadmap',     icon: List,          minTier: 'free' },
+  { path: '/admin',          label: 'Panel Control',    icon: ShieldCheck, minTier: 'admin' },
+  { path: '/admin?tab=usuarios', label: 'Usuarios',     icon: Users2,      minTier: 'admin' },
+  { path: '/design-system',  label: 'Sistema de Diseño', icon: Palette,   minTier: 'admin' },
+  { path: '/system-status',  label: 'Estatus',          icon: Activity,    minTier: 'admin' },
+  { path: '/product-backlog', label: 'Roadmap',         icon: List,        minTier: 'free' },
 ];
 
 const NAV_BOTTOM = [
@@ -397,7 +399,7 @@ function NavItem({
           {label}
           {config && (
             <span className={cn(
-              "text-[8px] font-black px-1.5 py-0.5 rounded-md border tracking-tighter shrink-0",
+              "text-[9px] font-bold px-2.5 py-0.5 rounded-full tracking-wide shrink-0 shadow-sm",
               config.bg, config.color
             )}>
               {config.label}

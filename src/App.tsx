@@ -62,6 +62,7 @@ const Chat         = lazy(() => import("./pages/Chat"));
 const ShareScreen  = lazy(() => import("./pages/ShareScreen"));
 const SystemStatus = lazy(() => import("./pages/SystemStatus"));
 const CodeIDE      = lazy(() => import("./pages/CodeIDE"));
+const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 
 // Light loading screen — no dark bg
 const LoadingScreen = () => (
@@ -129,6 +130,7 @@ const App = () => {
                     <Route path="/chat"         element={<Chat />} />
                     <Route path="/sharescreen"  element={<ShareScreen />} />
                     <Route path="/system-status" element={<SystemStatus />} />
+                    <Route path="/design-system" element={<DesignSystem />} />
                     <Route path="/ide"          element={<CodeIDE />} />
                     <Route path="/code"         element={<CodeIDE />} />
                     <Route path="/code-editor"  element={<CodeIDE />} />
