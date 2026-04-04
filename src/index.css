@@ -86,6 +86,13 @@
     --g-mesh-2: 217 91% 60%;           /* Secundario (Blue) */
     --g-mesh-3: 330 81% 60%;           /* Terciario (Pink) */
     --g-mesh-4: 158 82% 47%;           /* Cuaternario (Emerald) */
+
+    /* ── Solicitud Usuario Genesis Fondo Mesh ────────── */
+    --color-g-fondo-base: #FCFCFC;
+    --color-g-primario: rgba(168, 85, 247, 0.15); /* Purple light */
+    --color-g-secundario: rgba(59, 130, 246, 0.15); /* Blue light */
+    --color-g-terciario: rgba(236, 72, 153, 0.15); /* Pink light */
+    --color-g-cuaternario: rgba(16, 185, 129, 0.15); /* Emerald light */
   }
 }
 
@@ -177,9 +184,19 @@
       radial-gradient(at 100% 0%, hsla(var(--g-mesh-2) / 0.08) 0%, transparent 60%),
       radial-gradient(at 100% 100%, hsla(var(--g-mesh-3) / 0.08) 0%, transparent 60%),
       radial-gradient(at 0% 100%, hsla(var(--g-mesh-4) / 0.08) 0%, transparent 60%);
-    background-size: 200% 200%;
     background-blend-mode: multiply;
     animation: aurora-mesh 25s ease infinite alternate;
+  }
+
+  /* ── Fondo Mesh Solicitado ─────────── */
+  .genesis-panel-background {
+    background-color: var(--color-g-fondo-base);
+    background-image:
+      radial-gradient(at 10% 10%, var(--color-g-primario) 0%, transparent 60%),
+      radial-gradient(at 90% 10%, var(--color-g-secundario) 0%, transparent 60%),
+      radial-gradient(at 10% 90%, var(--color-g-terciario) 0%, transparent 60%),
+      radial-gradient(at 90% 90%, var(--color-g-cuaternario) 0%, transparent 60%);
+    animation: aurora-mesh 30s ease infinite alternate;
   }
 
   /* Organica Grain Texture (SVG feTurbulence) */

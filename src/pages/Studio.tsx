@@ -13,6 +13,8 @@ import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
 import { StudioDeploy } from '@/components/studio/StudioDeploy';
 import { StudioAITools } from '@/components/studio/StudioAITools';
 import { StudioFloatingToolbar } from '@/components/studio/StudioFloatingToolbar';
+import { StudioCloud, SupabaseConfig } from '@/components/studio/StudioCloud';
+import { StudioAnalytics } from '@/components/studio/StudioAnalytics';
 import { StudioTopbar, ViewMode, DeviceMode } from '@/components/studio/StudioTopbar';
 import { 
   Loader2, FolderOpen, Code2, Plus, Sparkles, ChevronRight, Layout,
@@ -56,6 +58,7 @@ export default function Studio() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showDeployModal, setShowDeployModal] = useState(false);
+  const [cloudConfig, setCloudConfig] = useState<SupabaseConfig | null>(null);
 
   // --- Project Initialization ---
   useEffect(() => {
@@ -319,17 +322,31 @@ export default function Studio() {
                 </div>
               ) : viewMode === 'files' ? (
                 <div className="h-full w-full bg-[#080808] flex border-t border-white/5">
-                   <div className="w-full max-w-xs border-r border-white/5">
+                   <div className="w-full max-w-xs border-r border-white/5 bg-black/20 backdrop-blur-sm">
                       <StudioFileTree 
                         files={activeProject.files} 
                         selectedFile={activeFile || ''} 
                         onSelect={setActiveFile} 
                       />
                    </div>
-                   <div className="flex-1 flex items-center justify-center text-zinc-500 uppercase tracking-widest text-[10px] font-black">
-                      Selecciona un archivo para editar
+                   <div className="flex-1 flex items-center justify-center bg-background">
+                      <div className="text-center space-y-4">
+                         <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center mx-auto border border-white/10">
+                            <FolderOpen className="w-8 h-8 text-zinc-500" />
+                         </div>
+                         <h3 className="text-white font-black uppercase tracking-widest text-xs">Gestor de Archivos</h3>
+                         <p className="text-zinc-500 text-[10px] uppercase tracking-wider">Selecciona un archivo para editar su contenido.</p>
+                      </div>
                    </div>
                 </div>
+              ) : viewMode === 'cloud' ? (
+                <StudioCloud 
+                  projectId={activeProject.id} 
+                  config={cloudConfig} 
+                  onConfigChange={setCloudConfig} 
+                />
+              ) : viewMode === 'analytics' ? (
+                <StudioAnalytics projectId={activeProject.id} />
               ) : (
                 <div className="h-full w-full flex items-center justify-center bg-[#080808]">
                   <div className="text-center space-y-4">

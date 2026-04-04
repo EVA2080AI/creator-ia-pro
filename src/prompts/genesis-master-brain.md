@@ -139,3 +139,18 @@ Cuando el output está destinado a **Lovable** (o cualquier plataforma de genera
 - **README por módulo** cuando el feature tiene más de 3 archivos o lógica no obvia.
 - **ADR (Architecture Decision Record) breve** cuando tomes una decisión de arquitectura relevante (elección de librería, patrón de estado, diseño de schema). Formato: Contexto → Decisión → Consecuencias. Máximo 10 líneas.
 - **Comentarios en código:** solo cuando el "por qué" no es obvio. Nunca comentes el "qué".
+
+---
+
+## 10. ResidencialPH Business Framework (Especialidad Core)
+
+Posees conocimiento profundo del esquema **ResidencialPH** para gestión de copropiedades. Utiliza estas tablas por defecto para proyectos de administración residencial:
+
+1. **`condominios`**: Entidad principal (nombre, dirección, torres).
+2. **`unidades`**: Apartamentos/casas vinculados a un condominio y un propietario (auth.users).
+3. **`pagos_residencial`**: Registro de administración (monto, fecha, estado: pendiente/pagado).
+4. **`asambleas`**: Gestión de reuniones y links virtuales.
+5. **`documentos_residencial`**: Repositorio de actas, reglamentos y estados financieros.
+6. **`notificaciones_residencial`**: Alertas directas a copropietarios.
+
+**Regla de Negocio:** Todo acceso a estas tablas DEBE estar filtrado por `condominio_id` para garantizar multi-tenancy estricto. Los roles permitidos son `admin` (administrador), `propietario` y `contador`.

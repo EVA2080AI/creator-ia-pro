@@ -42,32 +42,32 @@ export interface Transaction {
   created_at: string;
 }
 
-// ─── Credit Plans (Synchronized with Pricing.tsx) ───────────────────────────
+// ─── Credit Plans (Synchronized with Pricing.tsx & User Request) ───────────
 export const CREDIT_PLANS: CreditPlan[] = [
   {
-    id: 'starter',
-    name: 'Starter',
-    price_id: 'starter',
-    credits_amount: 500,
-    price_display: '$69.000',
-    description: 'Para creadores individuales. 500 créditos mensuales.',
+    id: 'basico',
+    name: 'Básico',
+    price_id: 'basico',
+    credits_amount: 1500,
+    price_display: '$149.900',
+    description: 'Perfecto para proyectos individuales y pequeñas marcas.',
   },
   {
-    id: 'creator',
-    name: 'Creator',
-    price_id: 'creator',
-    credits_amount: 1200,
-    price_display: '$138.000',
-    description: 'El nivel ideal para creadores e independientes. 1.200 créditos.',
+    id: 'profesional',
+    name: 'Profesional',
+    price_id: 'profesional',
+    credits_amount: 4000,
+    price_display: '$349.900',
+    description: 'La opción ideal para creadores de contenido profesionales.',
     popular: true,
   },
   {
-    id: 'pymes',
-    name: 'Pymes',
-    price_id: 'pymes',
-    credits_amount: 4000,
-    price_display: '$345.000',
-    description: 'Acceso total. Modelos Premium y 4.000 créditos mensuales.',
+    id: 'empresarial',
+    name: 'Empresarial',
+    price_id: 'empresarial',
+    credits_amount: 10000,
+    price_display: '$699.900',
+    description: 'Poder total para agencias y empresas en crecimiento.',
   },
 ];
 
@@ -84,7 +84,6 @@ export const boldService = {
     if (!item) throw new Error("Producto no encontrado");
 
     // Extract numerical COP integer from price string
-    // Handles both CreditPlan (price_display) and CREDIT_PACKS (price)
     const rawPrice = (item as any).price_display || (item as any).price || "0";
     const amountStr = rawPrice.replace(/[^0-9]/g, "");
     const amount = parseInt(amountStr, 10);

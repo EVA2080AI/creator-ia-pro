@@ -50,7 +50,7 @@ export function StudioTopbar({
   onPublish
 }: StudioTopbarProps) {
   return (
-    <header className="h-[52px] w-full border-b border-white/5 bg-black/40 backdrop-blur-2xl flex items-center justify-between px-4 shrink-0 transition-all z-[100] selection:bg-primary/30">
+    <header className="h-[60px] w-full border-b border-white/[0.08] bg-[#0A0A0C]/70 backdrop-blur-[40px] saturate-[1.2] flex items-center justify-between px-6 shrink-0 transition-all z-[100] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] selection:bg-primary/30">
       
       {/* --- Left: Context & Layout --- */}
       <div className="flex items-center gap-1">
@@ -62,7 +62,7 @@ export function StudioTopbar({
       <div className="flex items-center gap-4 flex-1 justify-center max-w-4xl px-4">
         
         {/* Segmented View Toggles */}
-        <div className="flex items-center p-1 bg-white/5 border border-white/10 rounded-xl">
+        <div className="flex items-center p-1 bg-white/[0.03] border border-white/[0.08] rounded-2xl shadow-inner shadow-black/20">
           <ViewToggle 
             label="Preview" 
             icon={<Globe className="w-3.5 h-3.5" />} 
@@ -78,7 +78,7 @@ export function StudioTopbar({
         </div>
 
         {/* URL / Path Bar */}
-        <div className="flex-1 max-w-[400px] h-8 flex items-center gap-2 px-3 bg-white/5 border border-white/10 rounded-xl group hover:border-white/20 transition-all">
+        <div className="flex-1 max-w-[440px] h-9 flex items-center gap-2.5 px-4 bg-white/[0.02] border border-white/[0.08] rounded-2xl group hover:bg-white/[0.04] hover:border-white/[0.15] hover:shadow-[0_0_20px_rgba(255,255,255,0.03)] transition-all duration-300">
           <div className="flex items-center gap-2 text-zinc-500">
              <Layout className="w-3.5 h-3.5" />
              <span className="text-[11px] font-mono opacity-40">/</span>
@@ -101,7 +101,7 @@ export function StudioTopbar({
 
         {/* Device Toggles (Only in Preview) */}
         {viewMode === 'preview' && (
-          <div className="flex items-center gap-0.5 p-1 bg-white/5 border border-white/10 rounded-xl">
+          <div className="flex items-center gap-0.5 p-1 bg-white/[0.03] border border-white/[0.08] rounded-2xl shadow-inner shadow-black/20">
              <IconButton small active={deviceMode === 'desktop'} icon={<Monitor className="w-3.5 h-3.5" />} onClick={() => onDeviceModeChange('desktop')} />
              <IconButton small active={deviceMode === 'tablet'} icon={<Tablet className="w-3.5 h-3.5" />} onClick={() => onDeviceModeChange('tablet')} />
              <IconButton small active={deviceMode === 'mobile'} icon={<Smartphone className="w-3.5 h-3.5" />} onClick={() => onDeviceModeChange('mobile')} />
@@ -118,14 +118,14 @@ export function StudioTopbar({
 
         <button 
           onClick={onShare}
-          className="flex items-center gap-2 px-3 h-8 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-[11px] font-black text-zinc-300 transition-all active:scale-95 whitespace-nowrap"
+          className="flex items-center gap-2 px-4 h-9 rounded-2xl bg-white/[0.03] border border-white/[0.08] hover:bg-white/10 text-[11px] font-black tracking-widest uppercase text-white transition-all active:scale-95 whitespace-nowrap shadow-sm hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]"
         >
           <Share2 className="w-3.5 h-3.5" />
           Share
         </button>
 
         <button 
-          className="flex items-center gap-2 px-3 h-8 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-[11px] font-black text-white hover:brightness-110 active:scale-95 transition-all shadow-[0_0_20px_rgba(99,102,241,0.3)] whitespace-nowrap"
+          className="flex items-center gap-2 px-4 h-9 rounded-2xl bg-gradient-to-r from-primary to-purple-500 text-[11px] font-black tracking-widest uppercase text-white hover:brightness-110 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] active:scale-95 transition-all shadow-[0_0_20px_rgba(168,85,247,0.25)] whitespace-nowrap border border-white/10"
         >
           <Zap className="w-3.5 h-3.5 fill-current" />
           Upgrade
@@ -133,7 +133,7 @@ export function StudioTopbar({
 
         <button 
           onClick={onPublish}
-          className="flex items-center px-4 h-8 rounded-xl bg-blue-600 hover:bg-blue-500 text-[11px] font-black text-white transition-all active:scale-95 shadow-[0_0_20px_rgba(37,99,235,0.2)] whitespace-nowrap"
+          className="flex items-center px-5 h-9 rounded-2xl bg-white text-black hover:bg-zinc-200 text-[11px] font-black tracking-widest uppercase transition-all active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:shadow-[0_0_30px_rgba(255,255,255,0.5)] whitespace-nowrap"
         >
           Publish
         </button>
@@ -149,10 +149,10 @@ function ViewToggle({ label, icon, active, onClick, variant }: { label?: string,
     <button
       onClick={onClick}
       className={cn(
-        "flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-black transition-all duration-200",
+        "flex items-center gap-2 px-4 py-1.5 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300",
         active 
-          ? (variant === 'success' ? "bg-blue-500/10 text-blue-400" : "bg-white/10 text-white shadow-lg shadow-black/20") 
-          : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+          ? (variant === 'success' ? "bg-primary/20 text-primary shadow-[0_0_15px_rgba(168,85,247,0.3)]" : "bg-white/[0.08] text-white shadow-lg shadow-black/40 border border-white/10") 
+          : "text-zinc-500 hover:text-white hover:bg-white/[0.04]"
       )}
     >
       {icon}
@@ -167,11 +167,11 @@ function IconButton({ icon, active, onClick, title, small }: { icon: React.React
       onClick={onClick}
       title={title}
       className={cn(
-        "rounded-lg transition-all flex items-center justify-center",
-        small ? "w-7 h-7" : "w-9 h-9",
+        "rounded-xl transition-all duration-300 flex items-center justify-center",
+        small ? "w-8 h-8" : "w-10 h-10",
         active 
-          ? "bg-white/10 text-white border border-white/10 shadow-lg shadow-black/20" 
-          : "text-zinc-500 hover:text-zinc-300 hover:bg-white/5"
+          ? "bg-white/[0.08] text-white border border-white/10 shadow-lg shadow-black/40" 
+          : "text-zinc-500 hover:text-white hover:bg-white/[0.04]"
       )}
     >
       {icon}

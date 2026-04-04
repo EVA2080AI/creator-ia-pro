@@ -186,7 +186,7 @@ export default function CodeIDE() {
           <div className="flex-1 overflow-hidden relative flex">
 
             {/* ════════════════════ ACTIVITY BAR ════════════════════ */}
-            <div className="w-[48px] shrink-0 bg-zinc-100 border-r border-zinc-200/80 flex flex-col items-center py-2 gap-1 relative z-50">
+            <div className="w-14 shrink-0 bg-white/95 backdrop-blur-xl border-r border-zinc-200/60 flex flex-col items-center py-4 gap-2 relative z-50">
               {/* Top Icons */}
               {[
                 { id: 'explorer' as const, icon: Code2,      label: 'Explorador' },
@@ -199,25 +199,27 @@ export default function CodeIDE() {
                   onClick={() => { setActiveActivityTab(id); if (!showFileTree) setShowFileTree(true); }}
                   title={label}
                   className={cn(
-                    "w-full flex-1 max-h-[48px] flex items-center justify-center transition-all relative",
+                    "flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-300 group shadow-sm",
                     activeActivityTab === id
-                      ? "text-zinc-900 before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-0.5 before:h-6 before:bg-primary before:rounded-r"
-                      : "text-zinc-400 hover:text-zinc-700"
+                      ? "bg-zinc-900 text-white"
+                      : "bg-white text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 border border-zinc-200/50"
                   )}
                 >
-                  <Icon className="w-[22px] h-[22px]" />
+                  <Icon className="h-4 w-4 transition-transform group-hover:scale-110" />
                 </button>
               ))}
 
+              <div className="w-8 h-px bg-zinc-100 my-1" />
+
               {/* Bottom Icons */}
-              <div className="mt-auto flex flex-col items-center w-full gap-1 pb-2">
+              <div className="mt-auto flex flex-col items-center gap-2 w-full pb-2">
                 <button onClick={() => toast.info('Configuración próximamente')} title="Configuración"
-                  className="w-full flex-1 max-h-[48px] flex items-center justify-center text-zinc-400 hover:text-zinc-700 transition-all">
-                  <Settings className="w-[22px] h-[22px]" />
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-zinc-200/50 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all group shadow-sm">
+                  <Settings className="h-4 w-4 transition-transform group-hover:scale-110" />
                 </button>
                 <button onClick={() => navigate('/profile')} title="Perfil"
-                  className="w-full flex-1 max-h-[48px] flex items-center justify-center text-zinc-400 hover:text-zinc-700 transition-all">
-                  <User className="w-[22px] h-[22px]" />
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-white border border-zinc-200/50 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all group shadow-sm">
+                  <User className="h-4 w-4 transition-transform group-hover:scale-110" />
                 </button>
               </div>
             </div>
@@ -412,38 +414,6 @@ export default function CodeIDE() {
                 </div>
               </ResizablePanel>
 
-              {/* ════════════════════ DEV OPTIONS PANEL (RIGHT SIDE) ════════════════════ */}
-              <div className="w-[180px] shrink-0 bg-white border-l border-zinc-200 flex flex-col py-4 px-2 gap-4 relative z-40">
-                {/* Header */}
-                <div className="px-3 mb-1">
-                  <h3 className="text-[10px] font-semibold text-zinc-500 uppercase font-mono tracking-widest">CONTROL DE VERSIONES</h3>
-                </div>
-
-                {/* Actions List */}
-                <div className="flex flex-col w-full gap-1">
-                  {[
-                    { id: 'github', label: 'Sync GitHub', icon: Github },
-                    { id: 'publish', label: 'Publicar', icon: Globe },
-                  ].map(({ id, label, icon: Icon }) => (
-                    <button
-                      key={id}
-                      onClick={() => {
-                        if (id === 'publish') toast.info('Iniciando despliegue...');
-                        if (id === 'github') navigate('/auth?provider=github');
-                      }}
-                      className="group w-full flex items-center gap-3 px-3 py-2 rounded transition-all hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900"
-                    >
-                      <Icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
-                      <span className="text-[11px] font-medium tracking-tight">{label}</span>
-                    </button>
-                  ))}
-                </div>
-
-                <div className="px-3 mt-2 border-t border-zinc-100 pt-4">
-                  <h3 className="text-[10px] font-semibold text-zinc-500 uppercase font-mono tracking-widest mb-2">DESPLIEGUE</h3>
-                  <p className="text-[10px] text-zinc-400 italic px-1">Sin despliegues activos</p>
-                </div>
-              </div>
 
               {/* ════════════════════ ANTIGRAVITY AI PANEL ════════════════════ */}
               {showChat && (

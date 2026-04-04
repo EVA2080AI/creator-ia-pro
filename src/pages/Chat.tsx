@@ -133,8 +133,27 @@ function WelcomeScreen({
       {/* ── Main Area ─────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden relative bg-transparent">
 
-        {/* Genesis Mesh Background (Aether V8.2) */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none genesis-mesh-bg animate-in fade-in duration-1000">
+        {/* Genesis Premium Header (Replicated and Improved) */}
+        <header className="h-[60px] w-full border-b border-black/[0.08] bg-white/[0.85] backdrop-blur-[40px] saturate-[1.2] flex items-center justify-between px-6 shrink-0 transition-all z-[100] absolute top-0 left-0 right-0 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)]">
+          <div className="flex items-center gap-3">
+             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shadow-lg shadow-primary/20">
+                <Sparkles className="w-4 h-4 text-white" />
+             </div>
+             <span className="text-[13px] font-black tracking-widest text-zinc-900 uppercase">Genesis Builder</span>
+          </div>
+          <div className="flex items-center gap-4">
+             <div className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-black/[0.03] border border-black/[0.05] shadow-inner shadow-black/5">
+                <Globe className="w-3.5 h-3.5 text-zinc-500" />
+                <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">IA Mode</span>
+             </div>
+             <button className="flex items-center gap-2 px-5 h-9 rounded-2xl bg-zinc-900 text-white hover:bg-black text-[11px] font-black tracking-widest uppercase transition-all active:scale-95 shadow-md shadow-zinc-900/20">
+                Lanzar Studio
+             </button>
+          </div>
+        </header>
+
+        {/* Genesis Mesh Background (Solicitado) */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none genesis-panel-background animate-in fade-in duration-1000 mt-[60px]">
           <div className="absolute inset-0 bg-grid-canvas opacity-[0.4]" />
         </div>
 
