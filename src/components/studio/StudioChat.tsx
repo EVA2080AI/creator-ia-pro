@@ -3,6 +3,7 @@ import {
   Send, Sparkles, Bot, Loader2,
   ChevronDown, Copy, RotateCcw, Check,
   X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink, Lock,
+  FileCode2,
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
@@ -132,23 +133,20 @@ Eres la inteligencia central definitiva de Creator IA Pro. Eres un **Senior UI/U
 REGLAS DE OPERACIÓN (ESTRICTAS):
 
 1. **Excelencia de Diseño Universal (Aether Evolution):**
-   - Prohibido el uso de patrones "Legacy" o básicos (colores planos sin sombras, layouts mediocres, falta de animaciones).
-   - Eres un camaleón del diseño: debes adaptar el estilo al contexto (Dark Premium, Minimalismo Suizo, Glassmorphism, Bento Grids, Brutalismo Moderno, etc.).
-   - Mandatory: Sombras suaves (box-shadows), Gradientes HSL sutiles, Tipografía moderna (Inter, Outfit), Micro-animaciones (Framer Motion).
-   - Para componentes visuales o juegos: usa Canvas o librerías de alto rendimiento para resultados fluidos y premium.
+   - Prohibido el uso de patrones "Legacy" o básicos.
+   - Eres un camaleón del diseño: adapta el estilo al contexto (Dark Premium, Minimalismo Suizo, Glassmorphism, etc.).
+   - Mandatory: Sombras suaves, Gradientes HSL, Micro-animaciones.
 
-2. **Silencio Técnico & Transparencia (Thinking Protocol):**
-   - Antes de responder, realiza una **Estrategia de Diseño y Análisis** profunda encapsulada EXCLUSIVAMENTE en tags <thinking>...</thinking>.
-   - En el chat visible, sé ejecutivo, estratégico y humano. TODO el código crudo, logs y razonamiento pesado debe estar en el thinking o en los bloques de código.
+2. **Silencio Técnico & Resultados Primero:**
+   - Realiza TODO tu razonamiento complejo EXCLUSIVAMENTE dentro de tags <thinking>...</thinking>.
+   - En el chat visible, sé extremadamente ejecutivo. NUNCA repitas lo que ya explicaste en el pensamiento interno.
+   - El chat visible debe limitarse al **Resumen Ejecutivo**, el **Master Plan** y los archivos generados.
 
 3. **Master Plan Estratégico:**
    - Inicia tareas complejas con una sección "MASTER PLAN" con checklists [ ].
    - Explica el "Por Qué" estratégico antes del "Cómo" técnico.
 
-4. **Cero Placeholders & Proactividad:**
-   - Entrega archivos 100% funcionales.
-   - Si una idea del usuario es estéticamente pobre, cuestiónala proactivamente y propón la versión "Master Brain".
-
+4. **Cero Placeholders:** Entrega archivos 100% funcionales.
 5. **Idioma:** Español profesional e inspirador. Términos técnicos en inglés.`;
 
 
@@ -165,8 +163,8 @@ const ANTIGRAVITY_CHAT_SYSTEM = `Eres Antigravity — el motor de inteligencia e
 
 TU ENFOQUE:
 - Eres un Executive Strategist y consultor de nivel mundial.
-- Tu prioridad es el razonamiento profundo, el análisis de marketing, CRO y Business Intelligence.
-- Aunque conoces la arquitectura de Genesis, tu fuerte es el "Master Plan" estratégico.
+- Prioridad: Razonamiento profundo (en <thinking>), análisis de marketing, CRO y Business Intelligence.
+- En el chat visible, sé directo y estratégico.
 
 ${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
 
@@ -347,17 +345,22 @@ function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
 // ─── Markdown renderer ─────────────────────────────────────────────────────────
 function renderMarkdown(text: string): string {
   let raw = text
-    // Thinking blocks (Design System style)
+    // Thinking blocks (Design System style — Collapsible)
     .replace(/<thinking>([\s\S]*?)<\/thinking>/g, (_m, content) => 
-      `<div class="thinking-block my-6 p-5 rounded-3xl bg-zinc-50 border border-zinc-200/60 shadow-sm animate-in fade-in slide-in-from-top-4 duration-700">
-        <div class="flex items-center gap-2.5 mb-3 text-zinc-400">
-          <div class="h-5 w-5 rounded-lg bg-zinc-200 flex items-center justify-center text-zinc-500">
-            <svg class="w-3 h-3 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.989-2.386l-.548-.547z"/></svg>
+      `<details class="thinking-block group my-6 rounded-[24px] border border-zinc-200 bg-zinc-50/50 overflow-hidden transition-all duration-500">
+        <summary class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-zinc-100/50 transition-colors list-none outline-none">
+          <div class="flex items-center gap-3">
+            <div class="h-6 w-6 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-400 group-open:text-primary group-open:border-primary/20 transition-all">
+              <svg class="w-3.5 h-3.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.989-2.386l-.548-.547z"/></svg>
+            </div>
+            <span class="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-400 group-open:text-zinc-900 transition-colors">Pensamiento Crítico de Genesis AI</span>
           </div>
-          <span class="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-500">Análisis Mental del Master Brain</span>
+          <svg class="w-4 h-4 text-zinc-300 group-open:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </summary>
+        <div class="px-7 pb-6 pt-2">
+          <div class="text-[11px] text-zinc-500 font-bold italic leading-relaxed pl-4 border-l-2 border-primary/20">${content.trim()}</div>
         </div>
-        <div class="text-[11px] text-zinc-500 font-bold italic leading-relaxed pl-1 border-l-2 border-zinc-200 ml-2.5">${content.trim()}</div>
-      </div>`)
+      </details>`)
     // Code blocks (Design System Mini-Frame)
     .replace(/```(\w*)\n?([\s\S]*?)```/g, (_m, lang, code) =>
       `<div class="code-mini-frame group my-6 rounded-[24px] border border-zinc-200 bg-zinc-900 shadow-2xl shadow-zinc-200/50 overflow-hidden animate-in zoom-in-95 duration-500">
@@ -427,13 +430,14 @@ interface StudioChatProps {
   onStreamCharsChange?: (chars: number, preview: string) => void;
   supabaseConfig?: { url: string; anonKey: string } | null;
   persona?: 'genesis' | 'antigravity';
+  activeFile?: string | null;
 }
 
 export function StudioChat({
   projectId, projectFiles, onCodeGenerated,
   onNewConversation, initialPrompt, onInitialPromptUsed, onAutoName,
   onGeneratingChange, onStreamCharsChange, supabaseConfig,
-  persona = 'genesis',
+  persona = 'genesis', activeFile
 }: StudioChatProps) {
   const { user } = useAuth();
   
@@ -463,6 +467,7 @@ export function StudioChat({
   const [urlInput,         setUrlInput]         = useState('');
   const [showUrlInput,     setShowUrlInput]     = useState(false);
   const [isScraping,       setIsScraping]       = useState(false);
+  const [pendingContext,   setPendingContext]   = useState<{ name: string; content: string } | null>(null);
 
   const messagesEndRef    = useRef<HTMLDivElement>(null);
   const containerRef      = useRef<HTMLDivElement>(null);
@@ -472,6 +477,7 @@ export function StudioChat({
   const streamBufferRef   = useRef('');   // raw accumulator (network side)
   const genPhaseRef       = useRef<'idle' | 'thinking' | 'streaming' | 'done'>('idle');
   const abortControllerRef = useRef<AbortController | null>(null);
+  const hasTriggeredInitial = useRef(false);
   // ─── Persist chat per project ────────────────────────────────────────────────
   useEffect(() => {
     if (!projectId) return;
@@ -520,7 +526,8 @@ export function StudioChat({
   }, [genPhase]);
 
   useEffect(() => {
-    if (initialPrompt && !isGenerating && user) {
+    if (initialPrompt && !isGenerating && user && !hasTriggeredInitial.current) {
+      hasTriggeredInitial.current = true;
       onInitialPromptUsed?.();
       handleSend(initialPrompt);
     }
@@ -540,6 +547,16 @@ export function StudioChat({
     const reader = new FileReader();
     reader.onload = () => setPendingImage(reader.result as string);
     reader.readAsDataURL(file);
+  };
+
+  const handleTextFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      setPendingContext({ name: file.name, content });
+      toast.success(`Archivo "${file.name}" cargado como contexto.`);
+    };
+    reader.readAsText(file);
   };
 
   // ─── URL Scraper ───────────────────────────────────────────────────────────
@@ -607,11 +624,12 @@ export function StudioChat({
         // Build project context for chat (compact — just file names + tech)
         let contextBlock = mentionBlock;
         if (isChatModeActive && fileKeys.length > 0 && !mentionBlock) {
-          contextBlock = `\n\n[PROYECTO ACTIVO]\nArchivos: ${fileKeys.join(', ')}\nContenido relevante:\n` +
+          contextBlock = `\n\n[PROYECTO ACTIVO]\nArchivos: ${fileKeys.join(', ')}\n${activeFile ? `\n[ARCHIVO ACTUALMENTE ABIERTO - PRIORIDAD DE EDICIÓN]: ${activeFile}\nCONTENIDO DE ${activeFile}:\n${projectFiles[activeFile]?.content || ''}\n` : ''}\nContenido relevante:\n` +
             fileKeys.slice(0, 3).map(f => `// ${f}\n${projectFiles[f].content.slice(0, 600)}`).join('\n\n');
         } else if (!isChatModeActive && fileKeys.length > 0) {
           contextBlock += '\n\nARCHIVOS ACTUALES DEL PROYECTO:\n' +
-            fileKeys.map(f => `--- ${f} ---\n${projectFiles[f].content.slice(0, 2000)}`).join('\n\n');
+            fileKeys.map(f => `--- ${f} ---\n${projectFiles[f].content.slice(0, 3000)}`).join('\n\n') +
+            (activeFile ? `\n\n[ARCHIVO ACTUALMENTE ABIERTO]: ${activeFile}` : '');
         }
 
         // ── URL Clone injection ────────────────────────────────────────────────────
@@ -851,8 +869,16 @@ export function StudioChat({
 
   // ─── Send message ──────────────────────────────────────────────────────────
   const handleSend = useCallback(async (override?: string) => {
-    const text = (override || input).trim();
-    if (!text || isGenerating || !user) return;
+    let text = (override || input).trim();
+    if (!text && !pendingContext) {
+      if (!isGenerating && user) return; // avoid empty sends
+    }
+    if (isGenerating || !user) return;
+
+    // Inject pending context if present
+    if (pendingContext) {
+      text = `[CONTRATO/CONTEXTO DE ARCHIVO: ${pendingContext.name}]\n\`\`\`\n${pendingContext.content}\n\`\`\`\n\n${text || "Analiza este archivo y propón mejoras según tu criterio de Master Brain."}`;
+    }
 
     const imagePreview = pendingImage ?? undefined;
     const userMsg: Message = {
@@ -939,6 +965,7 @@ export function StudioChat({
 
       // 3. Add assistant message to UI
       setMessages((prev) => [...prev, assistantMsg]);
+      setPendingContext(null); // Clear context after send
 
     } catch (err: any) {
       console.error("[StudioChat] Error in handleSend:", err);
@@ -968,11 +995,17 @@ export function StudioChat({
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  // Drag and drop image into textarea area
+  // Drag and drop handler
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
-    if (file) handleImageFile(file);
+    if (!file) return;
+
+    if (file.type.startsWith('image/')) {
+      handleImageFile(file);
+    } else {
+      handleTextFile(file);
+    }
   };
 
   const currentModel = MODELS.find(m => m.id === selectedModel) ?? MODELS[0];
@@ -1166,6 +1199,20 @@ export function StudioChat({
           </div>
         )}
 
+        {/* Attached text/code context indicator */}
+        {pendingContext && (
+          <div className="mb-2 flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/5 border border-primary/20 animate-in slide-in-from-bottom-1 duration-300">
+            <FileCode2 className="h-3.5 w-3.5 text-primary" />
+            <div className="flex flex-col flex-1 min-w-0">
+              <span className="text-[10px] font-black text-primary uppercase tracking-widest truncate">Contexto: {pendingContext.name}</span>
+              <span className="text-[9px] text-zinc-400 truncate">El código se enviará con tu mensaje</span>
+            </div>
+            <button onClick={() => setPendingContext(null)} className="text-zinc-400 hover:text-zinc-900 transition-colors shrink-0">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        )}
+
         {/* URL Input row */}
         {showUrlInput && (
           <div className="mb-2 flex items-center gap-1.5 animate-in slide-in-from-bottom-2 duration-200">
@@ -1203,12 +1250,13 @@ export function StudioChat({
           </div>
         )}
 
-        {/* Scraping spinner */}
-        {isScraping && !showUrlInput && (
-          <div className="mb-2 flex items-center gap-2 px-3 py-2 rounded-xl"
-            style={{ background: 'rgba(52,211,153,0.05)', border: '1px solid rgba(52,211,153,0.15)' }}>
-            <Loader2 className="h-3.5 w-3.5 text-emerald-400 animate-spin shrink-0" />
-            <span className="text-[11px] text-emerald-300/60">Analizando sitio web objetivo...</span>
+        {/* Active File Context Indicator */}
+        {activeFile && (
+          <div className="mb-2 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/10 w-fit animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <FileCode2 className="h-3 w-3 text-primary" />
+            <span className="text-[10px] font-black text-primary uppercase tracking-widest">
+              Editando: {activeFile.split('/').pop()}
+            </span>
           </div>
         )}
 

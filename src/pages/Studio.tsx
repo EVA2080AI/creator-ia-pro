@@ -10,6 +10,7 @@ import { StudioChat } from '@/components/studio/StudioChat';
 import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
+import { StudioDeploy } from '@/components/studio/StudioDeploy';
 import { StudioAITools } from '@/components/studio/StudioAITools';
 import { 
   Loader2, FolderOpen, Code2, Plus, Sparkles, ChevronRight, Layout,
@@ -53,6 +54,7 @@ export default function Studio() {
   const [streamPreview, setStreamPreview] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showDeployModal, setShowDeployModal] = useState(false);
 
   // --- Project Initialization ---
   useEffect(() => {
@@ -152,7 +154,7 @@ export default function Studio() {
             label: 'Publicar',
             icon: Globe,
             variant: 'primary',
-            onClick: () => toast.info('Publicación próximamente')
+            onClick: () => setShowDeployModal(true)
           },
           {
             id: 'share',
@@ -178,9 +180,8 @@ export default function Studio() {
   const handleCodeGenerated = (newFiles: Record<string, StudioFile>) => {
     if (!activeProject) return;
     handleFilesChange(newFiles);
-    if (Object.keys(newFiles).length > 0) {
-      setViewMode('preview');
-    }
+    // Explicitly stay in 'preview' mode as requested
+    setViewMode('preview');
   };
 
   const handleShare = () => {
@@ -209,71 +210,101 @@ export default function Studio() {
   // --- Welcome Screen / Empty State ---
   if (!activeProject) {
     return (
-      <div className="h-full w-full bg-background overflow-hidden flex flex-col relative selection:bg-primary/30">
-        {/* Animated background background */}
+      <div className="h-full w-full bg-[#030303] overflow-hidden flex flex-col relative selection:bg-primary/30">
+        {/* Cinematic Atmospheric Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-25%] left-[-15%] w-[70%] h-[80%] bg-primary/10 rounded-full blur-[160px] opacity-40" />
-          <div className="absolute bottom-[0%] right-[-5%] w-[60%] h-[70%] bg-emerald-500/5 rounded-full blur-[140px] opacity-20" />
+          <div className="absolute top-[-25%] left-[-15%] w-[80%] h-[90%] bg-primary/20 rounded-full blur-[180px] opacity-30 animate-pulse" />
+          <div className="absolute bottom-[0%] right-[-5%] w-[70%] h-[80%] bg-purple-500/10 rounded-full blur-[160px] opacity-20" />
         </div>
 
-        {/* Minimal Navigation */}
-        <header className="h-[60px] px-6 flex items-center justify-between border-b border-zinc-200 bg-white relative z-20">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-              <Code2 className="h-4 w-4 text-primary" />
+        {/* Minimal High-Fidelity Navigation */}
+        <header className="h-[64px] px-8 flex items-center justify-between border-b border-white/5 bg-black/40 backdrop-blur-2xl relative z-20">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 shadow-[0_0_20px_rgba(var(--primary-rgb),0.1)]">
+              <Code2 className="h-4.5 w-4.5 text-primary" />
             </div>
-            <span className="text-sm font-black text-zinc-900 tracking-widest uppercase">Studio</span>
+            <div className="flex flex-col">
+              <span className="text-[11px] font-black text-white tracking-[0.4em] uppercase leading-none mb-0.5">Studio</span>
+              <span className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase leading-none">Professional Environment</span>
+            </div>
           </div>
-          <button onClick={() => navigate('/dashboard')} className="text-xs font-bold text-zinc-400 hover:text-zinc-900 transition-all">Volver al Dashboard</button>
+          <button 
+            onClick={() => navigate('/dashboard')} 
+            className="px-4 py-2 rounded-xl text-[10px] font-black text-zinc-500 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest border border-transparent hover:border-white/10"
+          >
+            Volver al Dashboard
+          </button>
         </header>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-y-auto p-8 relative z-10 custom-scrollbar">
-          <div className="max-w-6xl mx-auto flex flex-col pt-12 pb-24">
+        {/* Home Content Area */}
+        <div className="flex-1 overflow-y-auto px-8 relative z-10 custom-scrollbar">
+          <div className="max-w-6xl mx-auto flex flex-col pt-24 pb-32">
             
-            {/* Hero Section */}
-            <div className="flex flex-col items-start mb-16">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 mb-6 group cursor-default">
-                <Sparkles className="w-3.5 h-3.5 text-primary" />
-                <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Entorno de Desarrollo Profesional</span>
-              </div>
-              <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight mb-4 max-w-2xl leading-tight">
-                Construye el futuro de la web <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-400">con Studio.</span>
-              </h1>
-              <p className="text-lg text-zinc-500 max-w-xl mb-10 leading-relaxed font-medium font-display">
-                Crea, diseña y despliega aplicaciones completas en minutos. Todo desde una interfaz diseñada para la velocidad.
-              </p>
-
-              <button
-                onClick={handleCreateNew}
-                className="flex items-center gap-3 px-8 py-4 rounded-2xl bg-primary text-white font-black hover:bg-primary/90 hover:scale-105 active:scale-95 transition-all shadow-sm"
+            {/* High-Impact Hero Section */}
+            <div className="flex flex-col items-center text-center mb-24 max-w-3xl mx-auto">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8 group cursor-default"
               >
-                <Plus className="w-5 h-5" />
+                <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em]">Genesis Intelligence Engine</span>
+              </motion.div>
+              
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-8 max-w-2xl leading-[0.9]"
+              >
+                Crea sin límites. <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-blue-400">Construye con IA.</span>
+              </motion.h1>
+              
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-lg text-zinc-500 max-w-xl mb-12 leading-relaxed font-medium font-display"
+              >
+                Diseña, desarrolla y despliega aplicaciones web completas en segundos. Una experiencia de desarrollo cinematográfica impulsada por Genesis.
+              </motion.p>
+
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                onClick={handleCreateNew}
+                className="group relative flex items-center gap-4 px-10 py-5 rounded-2xl bg-white text-black font-black hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_rgba(255,255,255,0.2)] overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary to-purple-500 opacity-0 group-hover:opacity-10 transition-opacity" />
+                <Plus className="w-5 h-5 pointer-events-none" />
                 Empezar nuevo proyecto
-              </button>
+              </motion.button>
             </div>
 
             {/* Recents Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              <div className="col-span-full border-b border-zinc-200 pb-4 mb-4">
-                <h2 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em]">Proyectos Recientes</h2>
+              <div className="col-span-full border-b border-white/5 pb-4 mb-4">
+                <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.5em]">Tus Proyectos Recientes</h2>
               </div>
 
               {projects.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => navigate(`/studio?project=${p.id}`)}
-                  className="group relative flex flex-col gap-4 p-5 rounded-3xl bg-zinc-50 border border-zinc-200 hover:bg-primary/5 hover:border-primary/30 transition-all text-left"
+                  className="group relative flex flex-col gap-5 p-6 rounded-[2rem] bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] hover:border-primary/40 transition-all text-left shadow-2xl backdrop-blur-sm"
                 >
                   <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-2xl bg-zinc-100 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-                      <FolderOpen className="w-5 h-5 text-zinc-400 group-hover:text-primary transition-colors" />
+                    <div className="w-11 h-11 rounded-2xl bg-white/5 group-hover:bg-primary/10 flex items-center justify-center transition-all duration-500 group-hover:rotate-6">
+                      <FolderOpen className="w-5 h-5 text-zinc-500 group-hover:text-primary transition-colors" />
                     </div>
-                    <ChevronRight className="w-4 h-4 text-zinc-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
+                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1">
+                      <ChevronRight className="w-4 h-4 text-primary" />
+                    </div>
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-zinc-900 mb-1">{p.name}</h3>
-                    <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest">{Object.keys(p.files).length} Archivos</p>
+                    <h3 className="text-sm font-black text-white mb-1 group-hover:text-primary transition-colors">{p.name}</h3>
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em]">{Object.keys(p.files).length} Componentes</p>
                   </div>
                 </button>
               ))}
@@ -306,6 +337,7 @@ export default function Studio() {
           <StudioChat 
             projectId={activeProject.id} 
             projectFiles={activeProject.files}
+            activeFile={activeFile}
             onCodeGenerated={handleCodeGenerated}
             onGeneratingChange={setIsGenerating}
             onStreamCharsChange={(chars, preview) => {
@@ -326,6 +358,8 @@ export default function Studio() {
                 <StudioPreview 
                   files={activeProject.files} 
                   isGenerating={isGenerating}
+                  streamChars={streamChars}
+                  streamPreview={streamPreview}
                   deviceMode={deviceMode as any}
                   onDeviceModeChange={setDeviceMode as any}
                   viewMode="preview"
@@ -368,6 +402,33 @@ export default function Studio() {
           )}
         </div>
       </div>
+
+      {/* ── Modals & Overlays ── */}
+      <AnimatePresence>
+        {showDeployModal && activeProject && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+            onClick={() => setShowDeployModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-xl"
+            >
+              <StudioDeploy 
+                onClose={() => setShowDeployModal(false)}
+                files={activeProject.files}
+                projectName={activeProject.name}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

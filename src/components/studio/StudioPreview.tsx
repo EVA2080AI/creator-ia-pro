@@ -6,8 +6,9 @@ import {
 } from '@codesandbox/sandpack-react';
 import {
   RotateCcw, Monitor, Smartphone, Tablet, ExternalLink,
-  ZoomIn, ZoomOut,
+  ZoomIn, ZoomOut, Zap
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 import type { SupabaseConfig } from './StudioCloud';
 import { toast } from 'sonner';
@@ -21,6 +22,8 @@ interface StudioPreviewProps {
   deviceMode?: DeviceMode;
   onDeviceModeChange?: (mode: DeviceMode) => void;
   isGenerating?: boolean;
+  streamChars?: number;
+  streamPreview?: string;
   supabaseConfig?: SupabaseConfig | null;
   
   // Toolbar Props
@@ -361,6 +364,8 @@ export function StudioPreview({
   deviceMode = 'desktop',
   onDeviceModeChange,
   isGenerating,
+  streamChars = 0,
+  streamPreview = '',
   supabaseConfig,
   viewMode,
   onToggleViewMode,
@@ -432,105 +437,18 @@ export function StudioPreview({
   const currentView = pages.find(p => p.path === window.location.hash.split('#')[1] || p.path === '/') || pages[0];
 
   return (
-    <div className="flex h-full flex-col overflow-hidden" style={{ background: '#13141a' }}>
+    <div className="flex h-full flex-col overflow-hidden" style={{ background: '#030303' }}>
       <StudioViewToolbar 
         viewMode={viewMode}
         onToggleViewMode={onToggleViewMode}
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={onToggleSidebar}
-        isFullscreen={isFullscreen}
-        onToggleFullscreen={onToggleFullscreen}
-        onRefresh={() => setRefreshKey(k => k + 1)}
-        currentViewName={currentView?.name || 'Dashboard'}
-        onViewChange={(v) => { toast.info(`Navegando a ${v}`); }}
-        onCopyToFigma={() => {
-          const frame = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
-          if (frame && frame.contentWindow) {
-            toast.loading('Preparando capas para Figma (Alta Resiliencia)...', { id: 'figma-export' });
-            
-            // Timeout safety (15s)
-            if (figmaTimeoutRef.current) clearTimeout(figmaTimeoutRef.current);
-            figmaTimeoutRef.current = setTimeout(() => {
-              toast.dismiss('figma-export');
-              toast.error('Error de comunicación con el preview', {
-                description: 'Asegúrate de que el preview haya cargado completamente. Si el problema persiste, refresca el proyecto.'
-              });
-              figmaTimeoutRef.current = null;
-            }, 15000);
-
-            // Send with retry loop (try every 500ms for 3s until pong or action)
-            let attempts = 0;
-            const sendPing = () => {
-              if (attempts < 6 && figmaTimeoutRef.current) {
-                frame.contentWindow!.postMessage({ type: 'FIGMA_EXTRACT' }, '*');
-                attempts++;
-                if (attempts < 6) setTimeout(sendPing, 500);
-              }
-            };
-            sendPing();
-          } else {
-            toast.error('No se pudo encontrar el preview para exportar');
-          }
-        }}
-        onDownload={() => toast.info('Descargando assets...')}
-        onRun={() => {
-          setRefreshKey(k => k + 1);
-          toast.success('Proyecto ejecutado con éxito');
-        }}
-        onShare={onShare || (() => toast.success('Enlace de colaboración copiado'))}
       />
-
-      <div
-        className="shrink-0 flex items-center gap-1 px-3"
-        style={{ background: '#16171e', borderBottom: '1px solid rgba(255,255,255,0.06)', height: 36 }}
-      >
-        {(['desktop', 'tablet', 'mobile'] as DeviceMode[]).map((m) => {
-          const Icon = m === 'desktop' ? Monitor : m === 'tablet' ? Tablet : Smartphone;
-          return (
-            <button
-              key={m}
-              onClick={() => { onDeviceModeChange?.(m); setZoom(100); }}
-              className="h-7 w-7 flex items-center justify-center rounded-md transition-all"
-              style={deviceMode === m
-                ? { background: 'rgba(138,180,248,0.15)', color: '#8AB4F8' }
-                : { color: 'rgba(255,255,255,0.25)' }}
-            >
-              <Icon className="h-3.5 w-3.5" />
-            </button>
-          );
-        })}
-        <div className="w-px h-4 mx-1.5" style={{ background: 'rgba(255,255,255,0.07)' }} />
-        {isMultiPage && (
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md" style={{ background: 'rgba(138,180,248,0.08)', border: '1px solid rgba(138,180,248,0.15)' }}>
-            <span className="text-[9px] font-bold text-[#8AB4F8] uppercase tracking-widest">{pages.length} páginas</span>
-          </div>
-        )}
-        <div className="flex items-center gap-0.5 ml-auto">
-          <button onClick={() => setZoom(z => Math.max(25, z - 10))} className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06]">
-            <ZoomOut className="h-3 w-3" />
-          </button>
-          <span className="text-[10px] text-white/25 font-mono w-8 text-center">{zoom}%</span>
-          <button onClick={() => setZoom(z => Math.min(200, z + 10))} className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06]">
-            <ZoomIn className="h-3 w-3" />
-          </button>
-        </div>
-        <div className="w-px h-4 mx-1.5" style={{ background: 'rgba(255,255,255,0.07)' }} />
-        <button
-          onClick={() => {
-            const frame = document.querySelector<HTMLIFrameElement>('.sp-preview-iframe');
-            if (frame?.src) window.open(frame.src, '_blank');
-          }}
-          disabled={!hasContent}
-          className="h-7 w-7 flex items-center justify-center rounded-md text-white/20 hover:text-white hover:bg-white/[0.06] disabled:opacity-20"
-        >
-          <ExternalLink className="h-3 w-3" />
-        </button>
-      </div>
 
       <div
         className="flex flex-1 items-start justify-center overflow-auto relative"
         style={{
-          background: deviceMode === 'desktop' ? '#13141a' : 'radial-gradient(ellipse at center, #1c1d26 0%, #13141a 70%)',
+          background: deviceMode === 'desktop' ? '#0d0e14' : 'radial-gradient(ellipse at center, #1c1d26 0%, #0d0e14 70%)',
         }}
       >
         {deviceMode !== 'desktop' && (
@@ -538,18 +456,84 @@ export function StudioPreview({
         )}
 
         {isGenerating && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-5" style={{ background: 'rgba(13,14,20,0.9)', backdropFilter: 'blur(6px)' }}>
-            <div className="h-14 w-14 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(138,180,248,0.1)', border: '1px solid rgba(138,180,248,0.2)' }}>
-              <svg className="h-7 w-7 text-[#8AB4F8] animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2.5"/>
-                <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-              </svg>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-30 flex flex-col items-center justify-center p-8 bg-[#0d0e14]/95 backdrop-blur-xl"
+          >
+            {/* Ambient Background Pulse */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] animate-pulse" />
             </div>
-            <div className="text-center">
-              <p className="text-[14px] font-semibold text-white/80 mb-1">Generando interfaz…</p>
-              <p className="text-[11px] text-white/30">El preview aparecerá automáticamente</p>
+
+            <div className="relative flex flex-col items-center w-full max-w-md z-10">
+              {/* Construction Icon & Progress Circle */}
+              <div className="relative mb-12">
+                <svg className="w-32 h-32 transform -rotate-90">
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r="60"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="transparent"
+                    className="text-white/5"
+                  />
+                  <motion.circle
+                    cx="64"
+                    cy="64"
+                    r="60"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="transparent"
+                    strokeDasharray={377}
+                    initial={{ strokeDashoffset: 377 }}
+                    animate={{ strokeDashoffset: 377 - (Math.min(streamChars / 2500, 1) * 377) }}
+                    className="text-primary transition-all duration-300 ease-out"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="bg-zinc-900 border border-white/10 rounded-3xl p-5 shadow-2xl">
+                    <Zap className="h-8 w-8 text-primary animate-pulse" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Text & Phase Switching */}
+              <div className="text-center mb-10 w-full">
+                <motion.h3 
+                  key={Math.floor(streamChars / 500)}
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-lg font-black text-white mb-2 uppercase tracking-widest"
+                >
+                  {streamChars < 500 ? 'Analizando Arquitectura' : 
+                   streamChars < 1200 ? 'Estructurando Componentes' : 
+                   streamChars < 2500 ? 'Diseñando Estilos UI' : 
+                   'Finalizando Compilación'}
+                </motion.h3>
+                <div className="flex items-center justify-center gap-2 text-zinc-500 font-bold text-[10px] uppercase tracking-tighter">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-ping" />
+                  Code Stream: {streamChars.toLocaleString()} caracteres analizados
+                </div>
+              </div>
+
+              {/* Ghost Code View (Streaming Preview) */}
+              <div className="w-full h-32 overflow-hidden bg-zinc-900/50 border border-white/5 rounded-2xl p-4 flex flex-col justify-end backdrop-blur-sm relative">
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-zinc-900 to-transparent z-10" />
+                <div className="font-mono text-[10px] text-zinc-400 whitespace-pre font-bold leading-relaxed opacity-50">
+                  {streamPreview.slice(-400)}
+                </div>
+              </div>
+
+              <div className="mt-8 flex items-center gap-3">
+                <span className="text-[9px] text-zinc-600 font-black uppercase tracking-widest">Genesis Cloud Core v9.0</span>
+                <div className="w-1 h-1 rounded-full bg-zinc-800" />
+                <span className="text-[9px] text-zinc-600 font-black uppercase tracking-widest">High Fidelity Output</span>
+              </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         {hasContent ? (
