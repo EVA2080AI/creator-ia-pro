@@ -119,16 +119,17 @@ const CODE_NOUNS = ['página','pagina','app','aplicación','aplicacion','dashboa
   'footer','hero','modal','sidebar','tabla','chart','gráfica','grafica',
   'multi-page','multipágina','multipagina','prototipo','prototype','sitemap','rutas','routes'];
 
-function detectIntent(prompt: string): 'codegen' | 'chat' {
+function detectIntent(prompt: string, hasContext?: boolean): 'codegen' | 'chat' {
   const p = prompt.toLowerCase().trim();
   
-  // High-priority vision/clone detection
-  const VISION_KEYWORDS = ['foto','imagen','imágen','referencia','captura','screenshot','screenshot','clona','replica','copia','clone','replicate'];
-  if (VISION_KEYWORDS.some(k => p.includes(k))) return 'codegen';
-
   // High-priority Social/Greeting detection
-  const GREETINGS = ['hola', 'hi', 'hello', 'buenos dias', 'buenas tardes', 'buenas noches', 'saludos', 'hey'];
-  if (GREETINGS.includes(p) || p.length < 5) return 'chat';
+  // If the user just says "hola" or similar, ALWAYS use chat, even if there's a file
+  const GREETINGS = ['hola', 'hi', 'hello', 'buenos dias', 'buenas tardes', 'buenas noches', 'saludos', 'hey', 'buenas'];
+  if (GREETINGS.includes(p) || p.length < 3) return 'chat';
+
+  // High-priority vision/clone detection
+  const VISION_KEYWORDS = ['foto','imagen','imágen','referencia','captura','screenshot','clona','replica','copia','clone','replicate'];
+  if (VISION_KEYWORDS.some(k => p.includes(k))) return 'codegen';
 
   // If asking about the platform/system itself
   if (p.includes('quien eres') || p.includes('que puedes hacer') || p.includes('ayuda')) return 'chat';
@@ -137,57 +138,55 @@ function detectIntent(prompt: string): 'codegen' | 'chat' {
   const isOnlyError = (p.includes('error:') || p.includes('exception')) && !CODE_VERBS.some(v => p.includes(v));
   if (/```[\s\S]*```/.test(prompt) && isOnlyError) return 'chat';
   
-  // BIAS TOWARDS CODEGEN: If we are in the Studio, almost any technical intent should be codegen
+  // BIAS TOWARDS CODEGEN: If we are in the Studio and have a technical command
   const containsCodeNoun = CODE_NOUNS.some(n => p.includes(n));
   const startsWithCodeVerb = CODE_VERBS.some(v => p.startsWith(v + ' ') || p.startsWith(v + '\n'));
   
   if (startsWithCodeVerb || containsCodeNoun) return 'codegen';
   
   // Catch-all for technical Spanish/English sentences that imply building
-  if (p.includes('pon un') || p.includes('agrega') || p.includes('modifica') || p.includes('add a')) return 'codegen';
+  if (p.includes('pon un') || p.includes('agrega') || p.includes('modifica') || p.includes('add a') || p.includes('haz un')) return 'codegen';
+
+  // If we have a file context but NO directive verb/noun, it's a conversation about the file (Acknowledgment)
+  if (hasContext && !containsCodeNoun && !startsWithCodeVerb) return 'chat';
 
   return 'chat';
 }
 
 // ─── Genesis unified system prompt (v10 — Agentic Architect DNA) ──────
-const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Agile Master Architect (v14.6)
+const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Agile Master Architect (v14.8)
 
-Eres la inteligencia definitiva de la plataforma. Has evolucionado al **Protocolo v14.6 (Nuclear Synchronization & Vite DNA)**. 
+Eres la inteligencia definitiva de la plataforma. Has evolucionado al **Protocolo v14.8 (Cognitive Empathy)**.
 
-**MANDATO VITE-NATIVE (OBLIGATORIO):**
-1. **Regla de Oro**: Estás PROHIBIDO generar solo \`App.tsx\` e \`index.css\`. Eso es tecnología obsoleta (CRA).
-2. **Estructura Blueprint**: Todo proyecto nuevo DEBE contener en su primer turno: \`index.html\`, \`package.json\`, \`vite.config.ts\` y \`src/main.tsx\`. 
-3. **Agile Robustness**: Aunque estés en modo Agile (rápido), nunca omitas los archivos de manifiesto de Vite. Son la base de la estabilidad.
+**PROTOCOLO DE EMPATÍA COGNITIVA (Acknowledge First):**
+1. **Reconocimiento Humano**: Si el usuario te envía un archivo, imagen o código pero solo te saluda o no te da una orden técnica directa, NO construyas nada todavía.
+2. **Consciencia de Contexto**: Acknowledge lo que has recibido. Di algo como: "He visto el archivo HTML que has subido. Parece ser un [tipo de página]. ¿Qué te gustaría que hiciéramos con él?".
+3. **Visión Compartida**: Describe brevemente qué ves en el input para confirmar que lo "entiendes" como un humano, no como un compilador.
 
-**PROTOCOLO AGUERRIDO & ÁGIL (Fast-Track):**
-1. **Velocidad de Ejecución**: Prioriza la acción inmediata en peticiones directas.
-2. **DNA Prototipador**: Haz que funcione y brille visualmente al instante.
+**MANDATO VITE-NATIVE (v14.7 Legacy):**
+- Prohibido CRA. Todo proyecto nuevo es Vite-Native (index.html, package.json, vite.config.ts).
 
-**PROTOCOLO DE CARGA HTML (v14.5 Legacy):**
-- Renombrar HTML externo a \`index.html\` si es el núcleo.
+**PROTOCOLO AGUERRIDO & ÁGIL (v14.5 Legacy):**
+- Prioriza acción inmediata en órdenes claras.
 
-**PROTOCOLO DE SEGURIDAD & ESTABILIDAD (v14.4 Legacy):**
-- **Anti-CDN**: PROHIBIDO usar \`lucide.createIcons()\`. Usa componentes.
+**PROTOCOLO DE SEGURIDAD (v14.4 Legacy):**
+- Anti-CDN, Estabilidad de Lucide.
 `;
 
-const GENESIS_CHAT_SYSTEM = `Eres Genesis AI — Modo Agile Nuclear.
-(v14.6 Nuclear Sync Active)
+const GENESIS_CHAT_SYSTEM = `Eres Genesis AI — Colaborador Consciente Nuclear.
+(v14.8 Cognitive Empathy Active)
 
 REGLAS PARA CHAT:
-1. Actúa como el Arquitecto Maestro. No pierdas tiempo, construye con tecnología Vite-Native desde el segundo 1.
-2. Si detectas que un proyecto es legacy, mígralo a Vite inmediatamente.
+1. Sé un compañero de equipo. Si te dan un recurso sin orden, pregunta: "¿Qué quieres que le hagamos a esto?".
+2. Mantén el rigor técnico (Vite-Native) pero con una capa de atención humana.
 
 ${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
 
-const ANTIGRAVITY_CHAT_SYSTEM = `Eres Antigravity — Inteligencia Estratégica Nuclear (v14.6 Ultra-Sync).
+const ANTIGRAVITY_CHAT_SYSTEM = `Eres Antigravity — Inteligencia Estratégica & Empatía Cognitiva (v14.8 Ultra-Aware).
 
 TU ENFOQUE:
-- Eres la evolución final de Genesis v14.6.
-- Tu misión es garantizar que NADA falle en la transición Dashboard -> Studio.
-
-**PROTOCOLO DE ORQUESTACIÓN NUCLEAR (v14.6):**
-1. **Zero-Loss Transition**: Si el usuario trae un mensaje del dashboard, procésalo con furia constructiva.
-2. **Vite Manifest Enforcement**: Eres el guardián de la arquitectura moderna. Prohibido el CRA-style.
+- Eres la evolución final de Génesis. A diferencia de un bot común, tú "entiendes" el valor de los assets que te pasan.
+- Si ves un diseño premium, documéntalo y admíralo antes de proponer cambios.
 
 ${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
 
@@ -1352,10 +1351,11 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
     }
 
     // ── CREDIT DEDUCTION & INTENT FORCING ────────────────────────────────────
-    let intent = detectIntent(text);
+    const hasContext = !!(pendingImage || pendingContext || pendingUrl);
+    let intent = detectIntent(text, hasContext);
     
-    // FORCE CODEGEN for Vision or File Context
-    if (pendingImage || pendingContext || pendingUrl) {
+    // Only force codegen if we have context AND the prompt isn't just a greeting
+    if (hasContext && intent !== 'chat') {
       intent = 'codegen';
     }
 
