@@ -82,12 +82,19 @@ interface WelcomeScreenProps {
   onOpenSearch: () => void;
   onMic: () => void;
   isListening: boolean;
+  onFileSelect?: (file: File) => void;
+  pendingFile?: { name: string } | null;
+  onRemoveFile?: () => void;
 }
 
 // Plan credit limits for bar calculation
 const PLAN_CREDITS: Record<string, number> = { free: 5, starter: 500, creator: 1200, pymes: 4000 };
 
-function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelectProject, onDeleteProject, displayName, onOpenSearch, onMic, isListening }: WelcomeScreenProps) {
+function WelcomeScreen({ 
+  onPrompt, onCreateProject, creating, projects, onSelectProject, onDeleteProject, 
+  displayName, onOpenSearch, onMic, isListening, 
+  onFileSelect, pendingFile, onRemoveFile 
+}: WelcomeScreenProps) {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [activeTab, setActiveTab] = useState<WelcomeTab>('projects');
@@ -108,11 +115,20 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
   const filteredProjects = projects.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
+  
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (file) onFileSelect?.(file);
+  };
 
   const greeting = displayName ? `¿Listo para construir, ${displayName.split(' ')[0]}?` : '¿Listo para construir?';
 
   return (
-    <div className="flex h-full overflow-hidden">
+    <div className="flex h-full overflow-hidden" 
+      onDrop={handleDrop} 
+      onDragOver={(e) => e.preventDefault()}
+    >
 
       {/* ── Main Area ─────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden relative bg-white">
@@ -133,9 +149,23 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
           <div className="w-full max-w-3xl relative z-20">
             <div className="relative rounded-[28px] overflow-hidden shadow-2xl transition-all border border-zinc-200 bg-white shadow-zinc-200/50">
               
-              <div className="absolute top-6 left-6 text-zinc-400">
+              <button 
+                onClick={() => document.getElementById('welcome-file-input')?.click()}
+                className="absolute top-6 left-6 text-zinc-400 hover:text-zinc-900 transition-colors z-30"
+              >
                 <Plus className="h-5 w-5" />
-              </div>
+              </button>
+              
+              {/* File chip */}
+              {pendingFile && (
+                <div className="absolute top-6 left-14 flex items-center gap-2 px-2 py-1 rounded-md bg-zinc-100 border border-zinc-200 animate-in fade-in zoom-in duration-200 z-30">
+                  <Paperclip className="h-3 w-3 text-zinc-500" />
+                  <span className="text-[10px] font-bold text-zinc-600 truncate max-w-[120px]">{pendingFile.name}</span>
+                  <button onClick={(e) => { e.stopPropagation(); onRemoveFile?.(); }} className="text-zinc-400 hover:text-zinc-900">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
               
               <textarea
                 value={input}
@@ -143,7 +173,7 @@ function WelcomeScreen({ onPrompt, onCreateProject, creating, projects, onSelect
                 onInput={handleTextareaInput}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
                 placeholder="Describe qué quieres construir..."
-                className="w-full bg-transparent pl-14 pr-32 pt-6 pb-6 text-[16px] font-medium text-zinc-800 placeholder:text-zinc-400 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px]"
+                className={`w-full bg-transparent pr-32 pt-6 pb-6 text-[16px] font-medium text-zinc-800 placeholder:text-zinc-400 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px] ${pendingFile ? 'pl-48' : 'pl-14'}`}
                 rows={1}
                 style={{ overflowY: 'hidden' }}
               />
@@ -301,6 +331,7 @@ export default function Chat() {
   const [genIncludeSupa, setGenIncludeSupa] = useState(false);
   const [isGeneratingProject, setIsGeneratingProject] = useState(false);
   const [cmdPaletteOpen, setCmdPaletteOpen] = useState(false);
+  const [pendingFile, setPendingFile] = useState<{name: string, content: string} | null>(null);
   const [isListening, setIsListening] = useState(false);
 
   const projectFiles = activeProject?.files || {};
@@ -353,14 +384,29 @@ export default function Chat() {
 
   const handleWelcomePrompt = async (prompt: string) => {
     setCreatingWithPrompt(true);
-    const words = prompt.trim().split(/\s+/).slice(0, 6).join(' ');
+    let finalPrompt = prompt;
+    if (pendingFile) {
+      finalPrompt = `[CONTRATO/CONTEXTO DE ARCHIVO: ${pendingFile.name}]\n\`\`\`\n${pendingFile.content}\n\`\`\`\n\n${prompt || "Analiza este archivo y construye un proyecto basado en él."}`;
+    }
+    const words = finalPrompt.trim().split(/\s+/).slice(0, 6).join(' ');
     const projectName = words.length > 3 ? words.slice(0, 40) : 'Nuevo Proyecto';
     const project = await createProject(projectName);
     if (project) {
       setActiveProject(project);
-      setPendingPrompt(prompt);
+      setPendingPrompt(finalPrompt);
+      setPendingFile(null);
     }
     setCreatingWithPrompt(false);
+  };
+
+  const handleFileSelect = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      setPendingFile({ name: file.name, content });
+      toast.success(`Archivo "${file.name}" cargado.`);
+    };
+    reader.readAsText(file);
   };
 
   const handleAddFile = (name: string) => {
@@ -459,6 +505,20 @@ export default function Chat() {
             onOpenSearch={() => setCmdPaletteOpen(true)}
             onMic={handleMic}
             isListening={isListening}
+            onFileSelect={handleFileSelect}
+            pendingFile={pendingFile}
+            onRemoveFile={() => setPendingFile(null)}
+          />
+          <input 
+            type="file" 
+            id="welcome-file-input" 
+            className="hidden" 
+            accept=".txt,.js,.ts,.tsx,.css,.html,.json,.md,.py,.go,.sh,.sql,.yaml,.yml"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFileSelect(file);
+              e.target.value = '';
+            }}
           />
         </div>
         <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} files={{}} projects={projects} onSelectFile={() => {}} onSelectProject={(p) => { setActiveProject(p); setCmdPaletteOpen(false); }} onAction={handleCmdAction} />

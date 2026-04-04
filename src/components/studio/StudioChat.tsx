@@ -3,7 +3,7 @@ import {
   Send, Sparkles, Bot, Loader2,
   ChevronDown, Copy, RotateCcw, Check, ChevronLeft, Share2,
   X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink, Lock,
-  FileCode2, UploadCloud, Zap, Plus, Mic, ArrowUp, Save
+  FileCode2, UploadCloud, Zap, Plus, Mic, ArrowUp, Save, Paperclip
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
@@ -1425,24 +1425,14 @@ export function StudioChat({
                 <button onClick={() => { setIsPlusMenuOpen(false); fileInputRef.current?.click(); }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-50 transition-colors group">
                   <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-900 group-hover:text-white transition-all">
-                    <ImageIcon className="h-4 w-4" />
+                    <Paperclip className="h-4 w-4" />
                   </div>
                   <div>
-                    <span className="block text-xs font-bold text-zinc-900">Imagen / Captura</span>
-                    <span className="text-[10px] text-zinc-400">Referencia visual</span>
+                    <span className="block text-xs font-bold text-zinc-900">Adjuntar Archivo</span>
+                    <span className="text-[10px] text-zinc-400">Imagen, Código o Texto</span>
                   </div>
                 </button>
 
-                <button onClick={() => { setIsPlusMenuOpen(false); fileInputRef.current?.click(); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-50 transition-colors group">
-                  <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-900 group-hover:text-white transition-all">
-                    <FileCode2 className="h-4 w-4" />
-                  </div>
-                  <div>
-                    <span className="block text-xs font-bold text-zinc-900">Archivo de Código</span>
-                    <span className="text-[10px] text-zinc-400">Contexto técnico</span>
-                  </div>
-                </button>
 
                 <button onClick={() => { setIsPlusMenuOpen(false); setShowUrlInput(true); }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-50 transition-colors group border-t border-zinc-50">
@@ -1553,9 +1543,19 @@ export function StudioChat({
         </p>
       </div>
 
-      {/* Hidden file input */}
-      <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageFile(f); e.target.value = ''; }}
+      {/* Hidden file input — Universal support */}
+      <input 
+        ref={fileInputRef} 
+        type="file" 
+        accept="image/*,.txt,.js,.ts,.tsx,.css,.html,.json,.md,.py,.go,.sh,.sql,.yaml,.yml"
+        className="hidden"
+        onChange={(e) => { 
+          const f = e.target.files?.[0]; 
+          if (!f) return;
+          if (f.type.startsWith('image/')) handleImageFile(f);
+          else handleTextFile(f);
+          e.target.value = ''; 
+        }}
       />
     </div>
   );
