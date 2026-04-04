@@ -63,24 +63,24 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[460px] bg-white/80 backdrop-blur-3xl border-l border-white/20 shadow-[-20px_0_50px_rgba(0,0,0,0.1)] z-[110] flex flex-col animate-in slide-in-from-right duration-500">
+    <div className="h-full w-full bg-white/40 backdrop-blur-3xl border-l border-white/20 flex flex-col animate-in fade-in duration-500 overflow-hidden">
       
       {/* Header */}
-      <div className="h-16 flex items-center justify-between px-6 border-b border-zinc-100/50 bg-white/40 sticky top-0">
+      <div className="h-14 flex items-center justify-between px-6 border-b border-zinc-100/50 bg-white/40 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center text-primary">
-            <Sparkles className="w-4 h-4" />
+          <div className="h-7 w-7 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center text-primary">
+            <Sparkles className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-zinc-900 tracking-tight leading-none mb-1 uppercase tracking-[0.1em]">Centro de Artefactos</h3>
-            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Genesis v10.0 Engineering Engine</span>
+            <h3 className="text-xs font-black text-zinc-900 tracking-tight leading-none mb-0.5 uppercase tracking-[0.1em]">Centro de Artefactos</h3>
+            <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Genesis v10.0 Engineering Engine</span>
           </div>
         </div>
         <button 
           onClick={onClose}
-          className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-50 hover:text-zinc-600 transition-all"
+          className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-50 hover:text-zinc-600 transition-all"
         >
-          <X className="h-4 w-4" />
+          <X className="h-3.5 h-3.5" />
         </button>
       </div>
 

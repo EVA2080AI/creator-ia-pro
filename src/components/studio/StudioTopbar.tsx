@@ -21,7 +21,7 @@ import {
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
-export type ViewMode = 'preview' | 'code' | 'tools' | 'files' | 'cloud' | 'analytics';
+export type ViewMode = 'preview' | 'code' | 'artifacts' | 'tools' | 'files' | 'cloud' | 'analytics';
 export type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 
 interface StudioTopbarProps {
@@ -59,7 +59,7 @@ export function StudioTopbar({
       </div>
 
       {/* --- Center: Navigation & View Controls --- */}
-      <div className="flex items-center gap-4 flex-1 justify-center max-w-4xl px-4">
+      <div className="flex items-center gap-4 flex-1 justify-center max-w-5xl px-4">
         
         {/* Segmented View Toggles */}
         <div className="flex items-center p-1 bg-white/[0.03] border border-white/[0.08] rounded-2xl shadow-inner shadow-black/20">
@@ -70,8 +70,15 @@ export function StudioTopbar({
             onClick={() => onViewModeChange('preview')}
             variant="success"
           />
-          <ViewToggle icon={<FileText className="w-3.5 h-3.5" />} active={viewMode === 'files'} onClick={() => onViewModeChange('files')} />
           <ViewToggle icon={<Code className="w-3.5 h-3.5" />} active={viewMode === 'code'} onClick={() => onViewModeChange('code')} />
+          <ViewToggle 
+            label="Artefactos" 
+            icon={<Zap className="w-3.5 h-3.5" />} 
+            active={viewMode === 'artifacts'} 
+            onClick={() => onViewModeChange('artifacts')} 
+            variant="primary"
+          />
+          <ViewToggle icon={<FileText className="w-3.5 h-3.5" />} active={viewMode === 'files'} onClick={() => onViewModeChange('files')} />
           <ViewToggle icon={<Cloud className="w-3.5 h-3.5" />} active={viewMode === 'cloud'} onClick={() => onViewModeChange('cloud')} />
           <ViewToggle icon={<LineChart className="w-3.5 h-3.5" />} active={viewMode === 'analytics'} onClick={() => onViewModeChange('analytics')} />
           <ViewToggle icon={<MoreHorizontal className="w-3.5 h-3.5" />} active={false} onClick={() => {}} />
@@ -144,14 +151,16 @@ export function StudioTopbar({
 
 // --- Helper Components ---
 
-function ViewToggle({ label, icon, active, onClick, variant }: { label?: string, icon: React.ReactNode, active: boolean, onClick: () => void, variant?: 'success' }) {
+function ViewToggle({ label, icon, active, onClick, variant }: { label?: string, icon: React.ReactNode, active: boolean, onClick: () => void, variant?: 'success' | 'primary' }) {
   return (
     <button
       onClick={onClick}
       className={cn(
         "flex items-center gap-2 px-4 py-1.5 rounded-xl text-[11px] font-black tracking-widest uppercase transition-all duration-300",
         active 
-          ? (variant === 'success' ? "bg-primary/20 text-primary shadow-[0_0_15px_rgba(168,85,247,0.3)]" : "bg-white/[0.08] text-white shadow-lg shadow-black/40 border border-white/10") 
+          ? (variant === 'success' ? "bg-primary/20 text-primary shadow-[0_0_15px_rgba(168,85,247,0.3)]" : 
+             variant === 'primary' ? "bg-blue-500/20 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]" :
+             "bg-white/[0.08] text-white shadow-lg shadow-black/40 border border-white/10") 
           : "text-zinc-500 hover:text-white hover:bg-white/[0.04]"
       )}
     >

@@ -576,6 +576,15 @@ interface StudioChatProps {
   onShare?: () => void;
   onPublish?: () => void;
   onBack?: () => void;
+  onToggleArtifacts?: () => void;
+
+  // Lifted Engineering State
+  artifacts: UIArtifact[];
+  setArtifacts: React.Dispatch<React.SetStateAction<UIArtifact[]>>;
+  tasks: UIPlanTask[];
+  setTasks: React.Dispatch<React.SetStateAction<UIPlanTask[]>>;
+  logs: UILog[];
+  setLogs: React.Dispatch<React.SetStateAction<UILog[]>>;
 }
 
 function StudioProjectHeader({ 
@@ -583,13 +592,15 @@ function StudioProjectHeader({
   isSaving, 
   onShare, 
   onPublish,
-  onBack 
+  onBack,
+  onToggleArtifacts
 }: { 
   name?: string; 
   isSaving?: boolean; 
   onShare?: () => void; 
   onPublish?: () => void;
   onBack?: () => void;
+  onToggleArtifacts?: () => void;
 }) {
   return (
     <div className="shrink-0 h-14 border-b border-zinc-100 bg-white/80 backdrop-blur-xl px-4 flex items-center justify-between z-30 sticky top-0">
@@ -635,9 +646,9 @@ function StudioProjectHeader({
         </button>
         <div className="w-px h-4 bg-zinc-200 mx-1" />
         <button 
-          onClick={() => (window as any).__toggleArtifacts?.()}
+          onClick={onToggleArtifacts}
           className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-zinc-50 hover:text-primary transition-all relative group"
-          title="Artefactos y Diagramas"
+          title="Centro de Artefactos"
         >
           <Activity className="h-4 w-4" />
           <div className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full animate-pulse border-2 border-white" />
@@ -652,7 +663,9 @@ export function StudioChat({
   onNewConversation, initialPrompt, onInitialPromptUsed, onAutoName,
   onGeneratingChange, onStreamCharsChange, supabaseConfig,
   persona = 'genesis', activeFile, previewError,
-  projectName, isSaving, onShare, onPublish, onBack
+  projectName, isSaving, onShare, onPublish, onBack,
+  onToggleArtifacts,
+  artifacts, setArtifacts, tasks: activeTasks, setTasks, logs, setLogs
 }: StudioChatProps) {
   const { user } = useAuth();
   
@@ -687,10 +700,6 @@ export function StudioChat({
   const [isArchitectMode,  setIsArchitectMode]  = useState(false);
   const [isAutoFixing,     setIsAutoFixing]     = useState(false);
   const [pendingPlanPrompt, setPendingPlanPrompt] = useState<string | null>(null);
-  const [isArtifactsOpen,  setIsArtifactsOpen]  = useState(false);
-  const [artifacts,        setArtifacts]        = useState<UIArtifact[]>([]);
-  const [activeTasks,      setTasks]            = useState<UIPlanTask[]>([]);
-  const [logs,             setLogs]             = useState<UILog[]>([]);
 
   const messagesEndRef    = useRef<HTMLDivElement>(null);
   const containerRef      = useRef<HTMLDivElement>(null);
@@ -962,7 +971,7 @@ export function StudioChat({
       errorHistoryRef.current.push(previewError); 
       
       setIsAutoFixing(true);
-      setIsArtifactsOpen(true); 
+      onToggleArtifacts?.(); 
 
       setLogs(prev => [{
         id: crypto.randomUUID(),
@@ -1856,29 +1865,6 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
           if (f.type.startsWith('image/')) handleImageFile(f);
           else handleTextFile(f);
           e.target.value = ''; 
-        }}
-      />
-      
-      {/* Artifacts Panel Overlay */}
-      <StudioArtifactsPanel 
-        isOpen={isArtifactsOpen}
-        onClose={() => setIsArtifactsOpen(false)}
-        tasks={activeTasks}
-        artifacts={artifacts}
-        logs={logs}
-        files={projectFiles}
-        onFix={() => {
-          if (previewError) {
-             // Logic to trigger fix manually from terminal
-             setMessages(prev => [...prev, {
-               id: crypto.randomUUID(),
-               role: 'assistant',
-               content: 'Iniciando reparación manual solicitada desde la terminal...',
-               timestamp: new Date()
-             }]);
-          } else {
-             toast.info('No se detectaron errores críticos para reparar.');
-          }
         }}
       />
     </div>

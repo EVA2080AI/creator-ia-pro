@@ -7,6 +7,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useStudioProjects, StudioFile } from '@/hooks/useStudioProjects';
 import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
 import { StudioChat } from '@/components/studio/StudioChat';
+import { StudioArtifactsPanel } from '@/components/studio/StudioArtifactsPanel';
 import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
@@ -58,6 +59,11 @@ export default function Studio() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showDeployModal, setShowDeployModal] = useState(false);
+
+  // --- Engineering State (Lifted from StudioChat) ---
+  const [artifacts,   setArtifacts]   = useState<any[]>([]);
+  const [activeTasks, setTasks]       = useState<any[]>([]);
+  const [logs,        setLogs]        = useState<any[]>([]);
   const [cloudConfig, setCloudConfig] = useState<SupabaseConfig | null>(null);
 
   // --- Project Initialization ---
@@ -257,6 +263,13 @@ export default function Studio() {
             activeFile={activeFile}
             onCodeGenerated={handleCodeGenerated}
             onGeneratingChange={setIsGenerating}
+            // Lifted State
+            artifacts={artifacts}
+            setArtifacts={setArtifacts}
+            tasks={activeTasks}
+            setTasks={setTasks}
+            logs={logs}
+            setLogs={setLogs}
             onStreamCharsChange={(chars, preview) => {
               setStreamChars(chars);
               setStreamPreview(preview);
@@ -264,6 +277,7 @@ export default function Studio() {
             onShare={handleShare}
             onPublish={() => setShowDeployModal(true)}
             onBack={() => navigate('/studio')}
+            onToggleArtifacts={() => setViewMode('artifacts')}
           />
         </div>
 
@@ -302,7 +316,14 @@ export default function Studio() {
                   </div>
                 </div>
               ) : viewMode === 'code' ? (
-                <div className="flex h-full w-full bg-[#080808]">
+                <motion.div 
+                  key="code"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className="flex h-full w-full bg-[#080808]"
+                >
                   <div className="w-64 shrink-0 border-r border-white/5 bg-black/20 backdrop-blur-sm">
                     <StudioFileTree 
                       files={activeProject.files} 
@@ -319,7 +340,30 @@ export default function Studio() {
                       streamPreview={streamPreview}
                     />
                   </div>
-                </div>
+                </motion.div>
+              ) : viewMode === 'artifacts' ? (
+                <motion.div 
+                  key="artifacts"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full w-full bg-[#080808]"
+                >
+                  <StudioArtifactsPanel 
+                    isOpen={true}
+                    onClose={() => setViewMode('preview')}
+                    tasks={activeTasks}
+                    artifacts={artifacts}
+                    logs={logs}
+                    files={activeProject.files}
+                    onFix={() => {
+                       window.dispatchEvent(new CustomEvent('GENESIS_LOG', { 
+                         detail: { message: 'Iniciando reparación manual...', type: 'info', source: 'UI' } 
+                       }));
+                    }}
+                  />
+                </motion.div>
               ) : viewMode === 'files' ? (
                 <div className="h-full w-full bg-[#080808] flex border-t border-white/5">
                    <div className="w-full max-w-xs border-r border-white/5 bg-black/20 backdrop-blur-sm">
