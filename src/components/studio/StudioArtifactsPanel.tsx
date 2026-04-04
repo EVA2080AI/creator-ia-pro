@@ -8,10 +8,13 @@ import {
   Loader2, 
   ChevronRight,
   Sparkles,
-  Zap
+  Zap,
+  Terminal as TerminalIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Mermaid } from './Mermaid';
+import { StudioTerminal } from './StudioTerminal';
+import type { StudioFile } from '@/hooks/useStudioProjects';
 
 export interface UIPlanTask {
   id: string;
@@ -38,25 +41,29 @@ interface StudioArtifactsPanelProps {
   tasks: UIPlanTask[];
   artifacts: UIArtifact[];
   logs: UILog[];
+  files: Record<string, StudioFile>;
   isOpen: boolean;
   onClose: () => void;
-  activeTab?: 'progress' | 'diagrams' | 'logs';
+  onFix?: () => void;
+  activeTab?: 'progress' | 'diagrams' | 'logs' | 'terminal';
 }
 
 export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
   tasks,
   artifacts,
   logs,
+  files,
   isOpen,
   onClose,
+  onFix,
   activeTab: initialTab = 'progress'
 }) => {
-  const [activeTab, setActiveTab] = useState<'progress' | 'diagrams' | 'logs'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'progress' | 'diagrams' | 'logs' | 'terminal'>(initialTab);
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-[420px] bg-white/80 backdrop-blur-3xl border-l border-white/20 shadow-[-20px_0_50px_rgba(0,0,0,0.1)] z-[110] flex flex-col animate-in slide-in-from-right duration-500">
+    <div className="fixed inset-y-0 right-0 w-[460px] bg-white/80 backdrop-blur-3xl border-l border-white/20 shadow-[-20px_0_50px_rgba(0,0,0,0.1)] z-[110] flex flex-col animate-in slide-in-from-right duration-500">
       
       {/* Header */}
       <div className="h-16 flex items-center justify-between px-6 border-b border-zinc-100/50 bg-white/40 sticky top-0">
@@ -78,11 +85,11 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
       </div>
 
       {/* Tabs */}
-      <div className="p-4 flex items-center gap-1">
+      <div className="p-4 flex items-center gap-1 overflow-x-auto custom-scrollbar no-scrollbar-x shrink-0">
         <button
           onClick={() => setActiveTab('progress')}
           className={cn(
-            "flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest",
+            "flex-1 h-10 min-w-[80px] rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest px-3",
             activeTab === 'progress' 
               ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/10" 
               : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-100"
@@ -94,19 +101,19 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
         <button
           onClick={() => setActiveTab('diagrams')}
           className={cn(
-            "flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest",
+            "flex-1 h-10 min-w-[100px] rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest px-3",
             activeTab === 'diagrams' 
               ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/10" 
               : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-100"
           )}
         >
           <Layout className="w-3 h-3" />
-          Arquitectura
+          Arqui
         </button>
         <button
           onClick={() => setActiveTab('logs')}
           className={cn(
-            "flex-1 h-10 rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest",
+            "flex-1 h-10 min-w-[80px] rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest px-3",
             activeTab === 'logs' 
               ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/10" 
               : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-100"
@@ -118,12 +125,24 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
             <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse ml-0.5" />
           )}
         </button>
+        <button
+          onClick={() => setActiveTab('terminal')}
+          className={cn(
+            "flex-1 h-10 min-w-[90px] rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest px-3",
+            activeTab === 'terminal' 
+              ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/10" 
+              : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-100"
+          )}
+        >
+          <TerminalIcon className="w-3 h-3" />
+          Shell
+        </button>
       </div>
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
         {activeTab === 'progress' ? (
-          <div className="space-y-4">
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Lista de Tareas (task.md)</span>
               <Badge variant="outline" className="text-[9px] border-emerald-500/20 text-emerald-600 bg-emerald-50/50">
@@ -179,7 +198,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
             </div>
           </div>
         ) : activeTab === 'diagrams' ? (
-          <div className="space-y-6">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Visualización de Arquitectura</span>
             
             {artifacts.filter(a => a.type === 'mermaid').length > 0 ? (
@@ -206,8 +225,8 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
               </div>
             )}
           </div>
-        ) : (
-          <div className="space-y-4">
+        ) : activeTab === 'logs' ? (
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center justify-between mb-2">
                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Logs de Ejecución & Debugging</span>
                <div className="flex items-center gap-2">
@@ -250,23 +269,34 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                 </div>
               )}
             </div>
-            {logs.length > 0 && logs.some(l => l.type === 'error') && (
-              <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 flex items-center gap-3">
-                 <Loader2 className="w-3.5 h-3.5 text-primary animate-spin" />
-                 <p className="text-[9px] font-black text-primary uppercase tracking-widest leading-relaxed">
-                   Genesis está analizando los errores capturados para auto-corrección...
-                 </p>
-              </div>
-            )}
+          </div>
+        ) : (
+          <div className="h-full flex flex-col space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+             <div className="flex items-center justify-between mb-2 shrink-0">
+               <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Terminal Interactiva (Experimental)</span>
+               <div className="flex items-center gap-2">
+                  <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                  <span className="text-[9px] font-bold text-primary uppercase">Active Shell</span>
+               </div>
+            </div>
+            <div className="flex-1 min-h-0">
+               <StudioTerminal 
+                 files={files} 
+                 onFix={onFix}
+               />
+            </div>
           </div>
         )}
       </div>
 
       {/* Footer Info */}
-      <div className="p-6 border-t border-zinc-100 bg-white/40">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-900/5 border border-white/40">
-           <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-           <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Agente Autónomo Sincronizado</span>
+      <div className="p-6 border-t border-zinc-100 bg-white/40 shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-900/5 border border-white/40">
+            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Agente Autónomo Sincronizado</span>
+          </div>
+          <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-tighter">Genesis Engine LTS v10</span>
         </div>
       </div>
     </div>
@@ -284,4 +314,3 @@ function Badge({ children, variant = 'default', className }: { children: React.R
     </span>
   );
 }
-

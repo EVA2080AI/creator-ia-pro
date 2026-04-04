@@ -1121,6 +1121,55 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
     setStreamingContent(null);
   };
 
+  // ─── File Handlers ────────────────────────────────────────────────────────
+  const handleImageFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPendingImage(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+    toast.success('Imagen adjuntada');
+  };
+
+  const handleTextFile = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setPendingContext({
+        name: file.name,
+        content: e.target?.result as string
+      });
+      toast.success(`Archivo "${file.name}" cargado como contexto`);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleAttachUrl = async () => {
+    if (!urlInput) return;
+    setIsScraping(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token ?? '';
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/scrape-url`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'apikey': SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ url: urlInput })
+      });
+      const data = await response.json();
+      setPendingContext({ name: data.title || urlInput, content: data.content });
+      toast.success('Contenido web adjuntado');
+      setShowUrlInput(false);
+      setUrlInput('');
+    } catch (err) {
+      toast.error('Error al capturar la URL');
+    } finally {
+      setIsScraping(false);
+    }
+  };
+
   // ─── Send message ──────────────────────────────────────────────────────────
   const handleSend = useCallback(async (override?: string) => {
     let text = (override || input).trim();
@@ -1817,6 +1866,20 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
         tasks={activeTasks}
         artifacts={artifacts}
         logs={logs}
+        files={projectFiles}
+        onFix={() => {
+          if (previewError) {
+             // Logic to trigger fix manually from terminal
+             setMessages(prev => [...prev, {
+               id: crypto.randomUUID(),
+               role: 'assistant',
+               content: 'Iniciando reparación manual solicitada desde la terminal...',
+               timestamp: new Date()
+             }]);
+          } else {
+             toast.info('No se detectaron errores críticos para reparar.');
+          }
+        }}
       />
     </div>
   );
