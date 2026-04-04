@@ -96,7 +96,10 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
 
     const requiredLevel = TIER_LEVELS[minTier] || 0;
     
-    if (userTierLevel < requiredLevel) {
+    // Bypass tier check for Admins
+    const canAccess = isAdmin || userTierLevel >= requiredLevel;
+
+    if (!canAccess) {
       toast.error('Acceso Restringido', {
         description: `"${label}" requiere el plan ${minTier.toUpperCase()} o superior.`,
         action: { label: 'Mejorar Plan', onClick: () => navigate('/pricing') },
