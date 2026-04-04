@@ -562,6 +562,9 @@ const STARTER_CHIPS = [
   { emoji: '🐛', label: 'Debug rápido',     prompt: 'Tengo un componente React con demasiados re-renders. ¿Cómo lo diagnostico y optimizo? Dame el proceso paso a paso.' },
 ];
 
+// ─── Agent Phases ─────────────────────────────────────────────────────────────
+export type AgentPhase = 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
+
 // ─── Props ─────────────────────────────────────────────────────────────────────
 interface StudioChatProps {
   projectId: string | null;
@@ -593,6 +596,7 @@ interface StudioChatProps {
   setTasks?: React.Dispatch<React.SetStateAction<UIPlanTask[]>>;
   logs?: UILog[];
   setLogs?: React.Dispatch<React.SetStateAction<UILog[]>>;
+  onPhaseChange?: (phase: AgentPhase) => void;
 }
 
 function StudioProjectHeader({ 
@@ -673,7 +677,8 @@ export function StudioChat({
   persona = 'genesis', activeFile, previewError,
   projectName, isSaving, onShare, onPublish, onBack,
   onToggleArtifacts,
-  artifacts, setArtifacts, tasks, setTasks, logs, setLogs
+  artifacts, setArtifacts, tasks, setTasks, logs, setLogs,
+  onPhaseChange
 }: StudioChatProps) {
   const { user } = useAuth();
   
@@ -728,7 +733,14 @@ export function StudioChat({
   const fileInputRef      = useRef<HTMLInputElement>(null);
   const isFirstGen        = useRef(true);
   const streamBufferRef   = useRef('');   
-  const genPhaseRef       = useRef<'idle' | 'thinking' | 'streaming' | 'done'>('idle');
+  const genPhaseRef = useRef<AgentPhase>('idle');
+
+  // Helper to update phase and notify parent
+  const updatePhase = useCallback((phase: AgentPhase) => {
+    genPhaseRef.current = phase;
+    onPhaseChange?.(phase);
+  }, [onPhaseChange]);
+
   const abortControllerRef = useRef<AbortController | null>(null);
   const hasTriggeredInitial = useRef(false);
   const autoFixCountRef   = useRef(0);
@@ -741,9 +753,9 @@ export function StudioChat({
   ): Promise<{ files: Record<string, StudioFile>; explanation: string; stack: string[]; deps: string[]; suggestions: string[]; isChatOnly?: boolean } | null> => {
     setIsGenerating(true);
     onGeneratingChange?.(true);
+    updatePhase('thinking');
     setStreamChars(0);
     setGenPhase('thinking');
-    genPhaseRef.current = 'thinking';
     streamBufferRef.current = '';
     setStreamingContent(null);
     
@@ -853,6 +865,7 @@ export function StudioChat({
       if (!res.ok) {
         const errText = await res.text().catch(() => '');
         toast.error(`Error ${res.status}: ${errText.slice(0, 100)}`);
+        updatePhase('idle');
         return null;
       }
 
@@ -860,8 +873,9 @@ export function StudioChat({
 
       if (contentType.includes('application/json')) {
         const data = await res.json();
-        if (data?.error) { toast.error(data.error); return null; }
+        if (data?.error) { toast.error(data.error); updatePhase('idle'); return null; }
         const rawText: string = data?.choices?.[0]?.message?.content ?? '';
+        updatePhase('idle');
         if (isChatModeActive) return { files: {}, explanation: rawText, stack: [], deps: [], suggestions: [], isChatOnly: true };
         return processRaw(rawText, prompt);
       }
@@ -894,10 +908,10 @@ export function StudioChat({
                 onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
                 if (isChatModeActive) {
                   streamBufferRef.current = accumulated;
-                  if (genPhaseRef.current === 'thinking') {
-                    genPhaseRef.current = 'streaming';
-                    setGenPhase('streaming');
+                  if (genPhaseRef.current !== 'generating') {
+                    updatePhase('generating');
                   }
+                  setGenPhase('streaming');
                 }
               }
             } catch { /* skip partial chunk */ }
@@ -907,18 +921,19 @@ export function StudioChat({
         reader.cancel();
       }
 
-      if (streamError) { toast.error(streamError); return null; }
-      if (isChatModeActive) return { files: {}, explanation: accumulated, stack: [], deps: [], suggestions: [], isChatOnly: true };
+      if (streamError) { toast.error(streamError); updatePhase('idle'); return null; }
+      if (isChatModeActive) { updatePhase('idle'); return { files: {}, explanation: accumulated, stack: [], deps: [], suggestions: [], isChatOnly: true }; }
       return processRaw(accumulated, prompt);
 
     } catch (e: any) {
       if (e.name === 'AbortError') {
         toast.info('Generación detenida');
-        return null;
+      } else {
+        const msg = e?.message || String(e);
+        console.error('[Genesis] error:', msg);
+        toast.error(msg.length > 120 ? msg.slice(0, 120) + '…' : msg, { duration: 6000 });
       }
-      const msg = e?.message || String(e);
-      console.error('[Genesis] error:', msg);
-      toast.error(msg.length > 120 ? msg.slice(0, 120) + '…' : msg, { duration: 6000 });
+      updatePhase('idle');
       return null;
     } finally {
       setIsGenerating(false);
@@ -926,16 +941,15 @@ export function StudioChat({
       setStreamChars(0);
       if (streamBufferRef.current) setStreamingContent(streamBufferRef.current);
       setGenPhase('done');
-      genPhaseRef.current = 'done';
+      updatePhase('idle');
       setTimeout(() => {
         setGenPhase('idle');
-        genPhaseRef.current = 'idle';
         setStreamingContent(null);
         streamBufferRef.current = '';
         setCurrentGenIntent(null);
       }, 400);
     }
-  }, [projectFiles, selectedModel, convHistory, pendingImage, supabaseConfig, activeFile, isArchitectMode, onGeneratingChange, onStreamCharsChange, persona, pendingUrl]);
+  }, [projectFiles, selectedModel, convHistory, pendingImage, supabaseConfig, activeFile, isArchitectMode, onGeneratingChange, onStreamCharsChange, persona, pendingUrl, updatePhase]);
 
   const processRaw = (rawText: string, prompt: string) => {
     if (!rawText) { toast.error('La IA devolvió una respuesta vacía.'); return null; }
@@ -986,6 +1000,7 @@ export function StudioChat({
     };
     setLogsState(prev => [newLog, ...prev]);
 
+    updatePhase('fixing');
     const timer = setTimeout(async () => {
       lastAutoFixError.current = previewError;
       autoFixCountRef.current += 1;
@@ -1147,7 +1162,7 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
     setIsGenerating(false);
     onGeneratingChange?.(false);
     setGenPhase('idle');
-    genPhaseRef.current = 'idle';
+    updatePhase('idle');
     setStreamingContent(null);
   };
 

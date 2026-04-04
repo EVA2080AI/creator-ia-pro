@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,8 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useStudioProjects, StudioFile } from '@/hooks/useStudioProjects';
 import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
-import { StudioChat } from '@/components/studio/StudioChat';
-import { StudioArtifactsPanel } from '@/components/studio/StudioArtifactsPanel';
+import { StudioChat, type AgentPhase } from '@/components/studio/StudioChat';
+import { StudioArtifactsPanel, type UIPlanTask, type UIArtifact, type UILog } from '@/components/studio/StudioArtifactsPanel';
 import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
@@ -61,10 +61,13 @@ export default function Studio() {
   const [showDeployModal, setShowDeployModal] = useState(false);
 
   // --- Engineering State (Lifted from StudioChat) ---
-  const [artifacts,   setArtifacts]   = useState<any[]>([]);
-  const [activeTasks, setTasks]       = useState<any[]>([]);
-  const [logs,        setLogs]        = useState<any[]>([]);
+  const [artifacts, setArtifacts] = useState<UIArtifact[]>([]);
+  const [tasks, setTasks] = useState<UIPlanTask[]>([]);
+  const [logs, setLogs] = useState<UILog[]>([]);
+  const [agentPhase, setAgentPhase] = useState<AgentPhase>('idle');
   const [cloudConfig, setCloudConfig] = useState<SupabaseConfig | null>(null);
+
+  const activeTasks = useMemo(() => tasks, [tasks]);
 
   // --- Project Initialization ---
   useEffect(() => {
@@ -270,6 +273,7 @@ export default function Studio() {
             setTasks={setTasks}
             logs={logs}
             setLogs={setLogs}
+            onPhaseChange={setAgentPhase}
             onStreamCharsChange={(chars, preview) => {
               setStreamChars(chars);
               setStreamPreview(preview);
@@ -353,10 +357,12 @@ export default function Studio() {
                   <StudioArtifactsPanel 
                     isOpen={true}
                     onClose={() => setViewMode('preview')}
-                    tasks={activeTasks}
-                    artifacts={artifacts}
+                    artifacts={artifacts} 
+                    tasks={activeTasks} 
                     logs={logs}
                     files={activeProject.files}
+                    agentPhase={agentPhase}
+                    persona="genesis"
                     onFix={() => {
                        window.dispatchEvent(new CustomEvent('GENESIS_LOG', { 
                          detail: { message: 'Iniciando reparación manual...', type: 'info', source: 'UI' } 

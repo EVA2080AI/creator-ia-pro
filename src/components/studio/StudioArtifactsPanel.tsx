@@ -45,7 +45,9 @@ interface StudioArtifactsPanelProps {
   isOpen: boolean;
   onClose: () => void;
   onFix?: () => void;
-  activeTab?: 'progress' | 'diagrams' | 'logs' | 'terminal';
+  activeTab?: 'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents';
+  agentPhase?: 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
+  persona?: 'genesis' | 'antigravity';
 }
 
 export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
@@ -56,9 +58,11 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
   isOpen,
   onClose,
   onFix,
-  activeTab: initialTab = 'progress'
+  activeTab: initialTab = 'progress',
+  agentPhase = 'idle',
+  persona = 'genesis'
 }) => {
-  const [activeTab, setActiveTab] = useState<'progress' | 'diagrams' | 'logs' | 'terminal'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents'>(initialTab);
 
   if (!isOpen) return null;
 
@@ -109,6 +113,18 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
         >
           <Layout className="w-3 h-3" />
           Arqui
+        </button>
+        <button
+          onClick={() => setActiveTab('agents')}
+          className={cn(
+            "flex-1 h-10 min-w-[80px] rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest px-3",
+            activeTab === 'agents' 
+              ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/10" 
+              : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-100"
+          )}
+        >
+          <Sparkles className="w-3 h-3" />
+          Agentes
         </button>
         <button
           onClick={() => setActiveTab('logs')}
@@ -246,6 +262,36 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
               </div>
             )}
           </div>
+        ) : activeTab === 'agents' ? (
+          <div className="h-full flex flex-col p-6 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <AgentCard 
+                name="Genesis AI" 
+                role="Engineering & UI Execution" 
+                active={persona === 'genesis' && agentPhase !== 'idle'} 
+                phase={persona === 'genesis' ? agentPhase : 'idle'} 
+                color="primary"
+                description="Especialista en desarrollo Frontend, arquitectura de sistemas y renderizado React de alta fidelidad."
+              />
+              <AgentCard 
+                name="Antigravity AI" 
+                role="Strategy & Intelligence" 
+                active={persona === 'antigravity' && agentPhase !== 'idle'} 
+                phase={persona === 'antigravity' ? agentPhase : 'idle'} 
+                color="blue"
+                description="Orquestador estratégico enfocado en análisis de negocio, optimización de flujos y razonamiento lógico avanzado."
+              />
+            </div>
+
+            <div className="pt-6 border-t border-white/5">
+              <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Métricas de Colaboración</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <MetricBox label="Velocidad" value="98%" />
+                <MetricBox label="Precisión" value="99.2%" />
+                <MetricBox label="Autonomía" value="Activa" />
+              </div>
+            </div>
+          </div>
         ) : activeTab === 'logs' ? (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center justify-between mb-2">
@@ -333,5 +379,85 @@ function Badge({ children, variant = 'default', className }: { children: React.R
     )}>
       {children}
     </span>
+  );
+}
+
+function AgentCard({ name, role, active, phase, color, description }: { name: string, role: string, active: boolean, phase: string, color: 'primary' | 'blue', description: string }) {
+  const isThinking = phase === 'thinking' || phase === 'architecting' || phase === 'fixing';
+  const isGenerating = phase === 'generating';
+
+  return (
+    <div className={cn(
+      "p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden group",
+      active ? "bg-white/[0.03] border-white/10 shadow-2xl" : "bg-black/20 border-white/5 opacity-60"
+    )}>
+      {active && (
+        <div className={cn(
+          "absolute -top-12 -right-12 w-24 h-24 blur-[60px] opacity-20",
+          color === 'primary' ? "bg-primary" : "bg-blue-500"
+        )} />
+      )}
+      
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className={cn(
+            "w-10 h-10 rounded-xl flex items-center justify-center relative",
+            color === 'primary' ? "bg-primary/10 border border-primary/20" : "bg-blue-500/10 border border-blue-500/20"
+          )}>
+            <Sparkles className={cn("w-5 h-5", color === 'primary' ? "text-primary" : "text-blue-400")} />
+            {active && (
+              <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", color === 'primary' ? "bg-primary" : "bg-blue-400")}></span>
+                <span className={cn("relative inline-flex rounded-full h-2 w-2", color === 'primary' ? "bg-primary" : "bg-blue-400")}></span>
+              </span>
+            )}
+          </div>
+          <div>
+            <h3 className="text-sm font-black text-white">{name}</h3>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{role}</p>
+          </div>
+        </div>
+      </div>
+
+      <p className="text-[11px] text-zinc-400 leading-relaxed mb-6 group-hover:text-zinc-300 transition-colors">
+        {description}
+      </p>
+
+      <div className="flex items-center justify-between mt-auto">
+         <div className="flex items-center gap-2">
+            <div className={cn(
+              "px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5",
+              active ? (color === 'primary' ? "bg-primary/20 text-primary" : "bg-blue-500/20 text-blue-400") : "bg-zinc-800 text-zinc-500"
+            )}>
+               {active ? (
+                 <>
+                   {isThinking && <Loader2 className="w-3 h-3 animate-spin" />}
+                   {isGenerating && <Zap className="w-3 h-3 animate-pulse fill-current" />}
+                   {phase === 'idle' ? 'Listo' : phase.charAt(0).toUpperCase() + phase.slice(1)}
+                 </>
+               ) : 'En Espera'}
+            </div>
+         </div>
+         {active && (isThinking || isGenerating) && (
+           <div className="flex gap-0.5">
+             {[1, 2, 3].map(i => (
+               <div key={i} className={cn(
+                 "w-1 h-3 rounded-full animate-pulse",
+                 color === 'primary' ? "bg-primary" : "bg-blue-400"
+               )} style={{ animationDelay: `${i * 0.15}s` }} />
+             ))}
+           </div>
+         )}
+      </div>
+    </div>
+  );
+}
+
+function MetricBox({ label, value }: { label: string, value: string }) {
+  return (
+    <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3">
+      <p className="text-[9px] font-black text-zinc-600 uppercase tracking-widest mb-1">{label}</p>
+      <p className="text-xs font-bold text-zinc-300 tracking-tight">{value}</p>
+    </div>
   );
 }
