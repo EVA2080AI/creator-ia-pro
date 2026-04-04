@@ -3,6 +3,7 @@ import {
   SandpackProvider,
   SandpackPreview,
   SandpackLayout,
+  useSandpackConsole,
 } from '@codesandbox/sandpack-react';
 import {
   RotateCcw, Monitor, Smartphone, Tablet, ExternalLink,
@@ -25,6 +26,7 @@ interface StudioPreviewProps {
   streamChars?: number;
   streamPreview?: string;
   supabaseConfig?: SupabaseConfig | null;
+  onError?: (error: string) => void;
   
   // Toolbar Props
   viewMode: 'preview' | 'code';
@@ -365,6 +367,34 @@ function toSandpackFiles(
   return result;
 }
 
+// ─── Error Bridge: captures Sandpack console errors and reports them ─────────
+function SandpackErrorBridge({ onError }: { onError?: (error: string) => void }) {
+  const { logs } = useSandpackConsole({ maxMessageCount: 50, showSyntaxError: true, resetOnPreviewRestart: true });
+  const lastReportedRef = useState({ current: '' })[0];
+
+  useEffect(() => {
+    if (!onError || logs.length === 0) return;
+    // Find the latest error log
+    const errorLogs = logs.filter(log => log.method === 'error' || log.method === 'warn');
+    if (errorLogs.length === 0) return;
+
+    const latestError = errorLogs[errorLogs.length - 1];
+    const errorText = (latestError.data ?? []).map((d: any) => {
+      if (typeof d === 'string') return d;
+      if (d?.message) return d.message;
+      try { return JSON.stringify(d); } catch { return String(d); }
+    }).join(' ').slice(0, 500);
+
+    // Avoid reporting the same error repeatedly
+    if (errorText && errorText !== lastReportedRef.current && errorText.length > 10) {
+      lastReportedRef.current = errorText;
+      onError(errorText);
+    }
+  }, [logs, onError, lastReportedRef]);
+
+  return null; // Invisible component — just a hook bridge
+}
+
 export function StudioPreview({
   files,
   deviceMode = 'desktop',
@@ -373,6 +403,7 @@ export function StudioPreview({
   streamChars = 0,
   streamPreview = '',
   supabaseConfig,
+  onError,
   viewMode,
   onToggleViewMode,
   isSidebarCollapsed,
@@ -582,6 +613,7 @@ export function StudioPreview({
                 <SandpackLayout style={{ border: 'none', borderRadius: 0, height: '100%' }}>
                   <SandpackPreview showOpenInCodeSandbox={false} showRefreshButton={false} style={{ height: '100%', minHeight: '100%', flex: 1 }} />
                 </SandpackLayout>
+                <SandpackErrorBridge onError={onError} />
               </SandpackProvider>
             </div>
           </div>

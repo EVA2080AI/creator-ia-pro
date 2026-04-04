@@ -565,6 +565,7 @@ interface StudioChatProps {
   supabaseConfig?: { url: string; anonKey: string } | null;
   persona?: 'genesis' | 'antigravity';
   activeFile?: string | null;
+  previewError?: string | null;
   
   // Project Header Props
   projectName?: string;
@@ -638,7 +639,7 @@ export function StudioChat({
   projectId, projectFiles, onCodeGenerated,
   onNewConversation, initialPrompt, onInitialPromptUsed, onAutoName,
   onGeneratingChange, onStreamCharsChange, supabaseConfig,
-  persona = 'genesis', activeFile,
+  persona = 'genesis', activeFile, previewError,
   projectName, isSaving, onShare, onPublish, onBack
 }: StudioChatProps) {
   const { user } = useAuth();
@@ -673,6 +674,7 @@ export function StudioChat({
   const [isPlusMenuOpen,   setIsPlusMenuOpen]   = useState(false);
   const [isArchitectMode,  setIsArchitectMode]  = useState(false);
   const [pendingPlanPrompt, setPendingPlanPrompt] = useState<string | null>(null);
+  const [isAutoFixing,     setIsAutoFixing]     = useState(false);
 
   const messagesEndRef    = useRef<HTMLDivElement>(null);
   const containerRef      = useRef<HTMLDivElement>(null);
@@ -683,6 +685,8 @@ export function StudioChat({
   const genPhaseRef       = useRef<'idle' | 'thinking' | 'streaming' | 'done'>('idle');
   const abortControllerRef = useRef<AbortController | null>(null);
   const hasTriggeredInitial = useRef(false);
+  const autoFixCountRef   = useRef(0);
+  const lastAutoFixError  = useRef('');
   // ─── Persist chat per project ────────────────────────────────────────────────
   useEffect(() => {
     if (!projectId) return;
@@ -744,6 +748,69 @@ export function StudioChat({
     const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
     setShowScrollBtn(scrollHeight - scrollTop - clientHeight > 120);
   };
+
+  // ─── Phase 3: Auto-Fix Engine (Agentic Error Correction) ──────────────────
+  useEffect(() => {
+    if (!previewError || isGenerating || !user) return;
+    if (previewError === lastAutoFixError.current) return; // same error, already tried
+    if (autoFixCountRef.current >= 2) return; // max 2 auto-fix attempts per session
+
+    // Debounce: wait 2s before triggering to avoid rapid-fire
+    const timer = setTimeout(async () => {
+      lastAutoFixError.current = previewError;
+      autoFixCountRef.current += 1;
+      setIsAutoFixing(true);
+
+      // Add a system message showing auto-fix is happening
+      const autoFixMsg: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: `🔧 **Auto-corrección detectada**\n\nEl preview reportó un error:\n\`\`\`\n${previewError.slice(0, 300)}\n\`\`\`\n\nAnalizando y corrigiendo automáticamente...`,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, autoFixMsg]);
+
+      // Build auto-fix prompt
+      const fixPrompt = `[AUTO-FIX] El código generado produjo el siguiente error en el preview de Sandpack:\n\n${previewError}\n\nCorrige los archivos relevantes para solucionar este error. Mantén toda la funcionalidad existente.`;
+
+      try {
+        const result = await generateCode(fixPrompt);
+        if (result && result.files && Object.keys(result.files).length > 0) {
+          const mergedFiles = { ...projectFiles, ...result.files };
+          onCodeGenerated(mergedFiles);
+          const fileList = Object.keys(result.files).map(f => `• \`${f}\``).join('\n');
+          setMessages(prev => [...prev, {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: `✅ **Auto-corrección completada**\n\n${fileList}\n\n${result.explanation || 'Error corregido.'}`,
+            timestamp: new Date(),
+            type: 'code',
+            files: Object.keys(result.files),
+          }]);
+        } else if (result?.isChatOnly) {
+          setMessages(prev => [...prev, {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: result.explanation || '⚠️ No pude generar una corrección automática.',
+            timestamp: new Date(),
+          }]);
+        }
+      } catch {
+        // Silent fail for auto-fix
+      } finally {
+        setIsAutoFixing(false);
+      }
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewError, isGenerating, user]);
+
+  // Reset auto-fix counter when project files change (user or AI made changes)
+  useEffect(() => {
+    autoFixCountRef.current = 0;
+    lastAutoFixError.current = '';
+  }, [Object.keys(projectFiles).length]);
 
   // ─── Image upload handler ──────────────────────────────────────────────────
   const handleImageFile = (file: File) => {
@@ -1459,7 +1526,7 @@ export function StudioChat({
             <div className="flex items-center gap-3 py-3 px-6 rounded-3xl bg-zinc-50 border border-zinc-200/60 shadow-sm transition-all">
               <Loader2 className="h-4 w-4 text-primary animate-spin" />
               <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
-                Realizando Análisis Estratégico...
+                {isAutoFixing ? '🔧 Auto-corrigiendo error detectado...' : 'Realizando Análisis Estratégico...'}
               </span>
             </div>
           </div>
