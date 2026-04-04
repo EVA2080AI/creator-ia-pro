@@ -1420,6 +1420,15 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
           saveMessage(activeConversationId, 'assistant', navMsg.content);
         }
         return;
+      } else if (target.toLowerCase() === 'html' || target.toLowerCase() === 'pantalla') {
+        // Fuzzy match for "html" or general UI
+        const htmlFile = keys.find(f => f.endsWith('.html')) || keys.find(f => f.endsWith('.tsx'));
+        if (htmlFile) {
+          onSelectFile(htmlFile);
+          const navMsg: Message = { id: crypto.randomUUID(), role: 'assistant', content: `He abierto **${htmlFile}**, que es el punto de entrada principal.`, timestamp: new Date() };
+          setMessages(prev => [...prev, navMsg]);
+          return;
+        }
       }
     }
 
