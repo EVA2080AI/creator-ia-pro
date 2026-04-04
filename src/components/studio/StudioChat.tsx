@@ -312,6 +312,17 @@ Eres Creator IA Pro OS, un Arquitecto de Soluciones de IA y Lead Product Designe
 - Arquitectura Modular: Divide el código en componentes reutilizables (DDD) en React o Python (main.py, models/, services/).
 - Integraciones: Experto conectando OpenRouter, Supabase, y Bold.co.
 - Optimización: Código eficiente, seguro y con manejo de errores elegante.
+- Use standard UI components and best practices for the chosen stack.
+
+### AGENT SWARM MODE
+You are a team of expert agents:
+1. [UX_ENGINE]: Focus on UI/UX, Design Systems, and Layout.
+2. [FRONTEND_DEV]: Focus on React components, states, and logic.
+3. [BACKEND_DEV]: Focus on Supabase, API, and Edge Functions.
+4. [DEVOPS_SYNC]: Focus on deployment and integration.
+
+When performing a task, announce the active specialist at the start of their relevant section using the tag [AGENT_NAME].
+Example: "[UX_ENGINE] Designing the layout structure..."
 
 4. Generación de Contenido y Multimedia
 - Copywriting de Conversión: Usa marcos como AIDA o PAS. Tono profesional y humano.
@@ -564,6 +575,7 @@ const STARTER_CHIPS = [
 
 // ─── Agent Phases ─────────────────────────────────────────────────────────────
 export type AgentPhase = 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
+export type AgentSpecialist = 'ux' | 'frontend' | 'backend' | 'devops' | 'none';
 
 // ─── Props ─────────────────────────────────────────────────────────────────────
 interface StudioChatProps {
@@ -596,7 +608,7 @@ interface StudioChatProps {
   setTasks?: React.Dispatch<React.SetStateAction<UIPlanTask[]>>;
   logs?: UILog[];
   setLogs?: React.Dispatch<React.SetStateAction<UILog[]>>;
-  onPhaseChange?: (phase: AgentPhase) => void;
+  onPhaseChange?: (phase: AgentPhase, specialist: AgentSpecialist) => void;
 }
 
 function StudioProjectHeader({ 
@@ -736,9 +748,9 @@ export function StudioChat({
   const genPhaseRef = useRef<AgentPhase>('idle');
 
   // Helper to update phase and notify parent
-  const updatePhase = useCallback((phase: AgentPhase) => {
+  const updatePhase = useCallback((phase: AgentPhase, specialist: AgentSpecialist = 'none') => {
     genPhaseRef.current = phase;
-    onPhaseChange?.(phase);
+    onPhaseChange?.(phase, specialist);
   }, [onPhaseChange]);
 
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -908,9 +920,15 @@ export function StudioChat({
                 onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
                 if (isChatModeActive) {
                   streamBufferRef.current = accumulated;
-                  if (genPhaseRef.current !== 'generating') {
-                    updatePhase('generating');
-                  }
+                if (genPhaseRef.current !== 'generating') {
+                  updatePhase('generating', 'frontend'); // Default to frontend for streaming
+                }
+
+                // Real-time agent detection from stream
+                if (accumulated.includes('[UX_ENGINE]')) updatePhase('generating', 'ux');
+                if (accumulated.includes('[FRONTEND_DEV]')) updatePhase('generating', 'frontend');
+                if (accumulated.includes('[BACKEND_DEV]')) updatePhase('generating', 'backend');
+                if (accumulated.includes('[DEVOPS_SYNC]')) updatePhase('generating', 'devops');
                   setGenPhase('streaming');
                 }
               }

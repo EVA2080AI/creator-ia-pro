@@ -19,7 +19,7 @@ import {
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
 import { StudioPreview } from '@/components/studio/StudioPreview';
-import { StudioChat, type AgentPhase } from '@/components/studio/StudioChat';
+import { StudioChat, type AgentPhase, type AgentSpecialist } from '@/components/studio/StudioChat';
 import { SitemapView } from '@/components/studio/SitemapView';
 import { CommandPalette } from '@/components/studio/CommandPalette';
 import { StudioArtifactsPanel, type UIArtifact, type UIPlanTask, type UILog } from '@/components/studio/StudioArtifactsPanel';
@@ -367,6 +367,7 @@ export default function Chat() {
   const [tasks, setTasks] = useState<UIPlanTask[]>([]);
   const [logs, setLogs] = useState<UILog[]>([]);
   const [agentPhase, setAgentPhase] = useState<AgentPhase>('idle');
+  const [activeSpecialist, setActiveSpecialist] = useState<AgentSpecialist>('none');
 
   const projectFiles = activeProject?.files || {};
 
@@ -739,7 +740,10 @@ export default function Chat() {
               setTasks={setTasks}
               logs={logs}
               setLogs={setLogs}
-              onPhaseChange={setAgentPhase}
+              onPhaseChange={(phase, specialist) => {
+                setAgentPhase(phase);
+                setActiveSpecialist(specialist);
+              }}
               onToggleArtifacts={() => setPanelView('artifacts')}
             />
           </div>
@@ -777,6 +781,7 @@ export default function Chat() {
                 logs={logs} 
                 files={projectFiles}
                 agentPhase={agentPhase}
+                activeSpecialist={activeSpecialist}
                 persona="genesis"
               />
             </div>

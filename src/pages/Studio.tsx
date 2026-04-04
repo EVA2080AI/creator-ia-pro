@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useStudioProjects, StudioFile } from '@/hooks/useStudioProjects';
 import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
-import { StudioChat, type AgentPhase } from '@/components/studio/StudioChat';
+import { StudioChat, type AgentPhase, type AgentSpecialist } from '@/components/studio/StudioChat';
 import { StudioArtifactsPanel, type UIPlanTask, type UIArtifact, type UILog } from '@/components/studio/StudioArtifactsPanel';
 import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
@@ -65,6 +65,7 @@ export default function Studio() {
   const [tasks, setTasks] = useState<UIPlanTask[]>([]);
   const [logs, setLogs] = useState<UILog[]>([]);
   const [agentPhase, setAgentPhase] = useState<AgentPhase>('idle');
+  const [activeSpecialist, setActiveSpecialist] = useState<AgentSpecialist>('none');
   const [cloudConfig, setCloudConfig] = useState<SupabaseConfig | null>(null);
 
   const activeTasks = useMemo(() => tasks, [tasks]);
@@ -273,7 +274,10 @@ export default function Studio() {
             setTasks={setTasks}
             logs={logs}
             setLogs={setLogs}
-            onPhaseChange={setAgentPhase}
+            onPhaseChange={(phase, specialist) => {
+              setAgentPhase(phase);
+              setActiveSpecialist(specialist);
+            }}
             onStreamCharsChange={(chars, preview) => {
               setStreamChars(chars);
               setStreamPreview(preview);
@@ -362,6 +366,7 @@ export default function Studio() {
                     logs={logs}
                     files={activeProject.files}
                     agentPhase={agentPhase}
+                    activeSpecialist={activeSpecialist}
                     persona="genesis"
                     onFix={() => {
                        window.dispatchEvent(new CustomEvent('GENESIS_LOG', { 

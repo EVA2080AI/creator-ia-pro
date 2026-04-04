@@ -9,7 +9,10 @@ import {
   ChevronRight,
   Sparkles,
   Zap,
-  Terminal as TerminalIcon
+  Terminal as TerminalIcon,
+  Code2,
+  Database,
+  RefreshCw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Mermaid } from './Mermaid';
@@ -47,6 +50,7 @@ interface StudioArtifactsPanelProps {
   onFix?: () => void;
   activeTab?: 'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents';
   agentPhase?: 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
+  activeSpecialist?: 'ux' | 'frontend' | 'backend' | 'devops' | 'none';
   persona?: 'genesis' | 'antigravity';
 }
 
@@ -60,6 +64,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
   onFix,
   activeTab: initialTab = 'progress',
   agentPhase = 'idle',
+  activeSpecialist = 'none',
   persona = 'genesis'
 }) => {
   const [activeTab, setActiveTab] = useState<'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents'>(initialTab);
@@ -264,22 +269,42 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
           </div>
         ) : activeTab === 'agents' ? (
           <div className="h-full flex flex-col p-6 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <AgentCard 
-                name="Genesis AI" 
-                role="Engineering & UI Execution" 
-                active={persona === 'genesis' && agentPhase !== 'idle'} 
-                phase={persona === 'genesis' ? agentPhase : 'idle'} 
+                name="UX Engine" 
+                role="UI/UX & Design Systems" 
+                active={activeSpecialist === 'ux' || (persona === 'genesis' && agentPhase !== 'idle' && activeSpecialist === 'none')} 
+                phase={activeSpecialist === 'ux' ? agentPhase : 'idle'} 
                 color="primary"
-                description="Especialista en desarrollo Frontend, arquitectura de sistemas y renderizado React de alta fidelidad."
+                icon={<Layout className="w-5 h-5" />}
+                description="Optimización de experiencia de usuario, jerarquía visual y flujos conversacionales tácticos."
               />
               <AgentCard 
-                name="Antigravity AI" 
-                role="Strategy & Intelligence" 
-                active={persona === 'antigravity' && agentPhase !== 'idle'} 
-                phase={persona === 'antigravity' ? agentPhase : 'idle'} 
+                name="Frontend Core" 
+                role="React & Logic execution" 
+                active={activeSpecialist === 'frontend'} 
+                phase={activeSpecialist === 'frontend' ? agentPhase : 'idle'} 
                 color="blue"
-                description="Orquestador estratégico enfocado en análisis de negocio, optimización de flujos y razonamiento lógico avanzado."
+                icon={<Code2 className="w-5 h-5" />}
+                description="Generación de componentes de alto rendimiento, gestión de estados y animaciones premium."
+              />
+              <AgentCard 
+                name="Backend Logic" 
+                role="Database & API Architect" 
+                active={activeSpecialist === 'backend'} 
+                phase={activeSpecialist === 'backend' ? agentPhase : 'idle'} 
+                color="purple"
+                icon={<Database className="w-5 h-5" />}
+                description="Orquestación de esquemas de datos, Edge Functions y seguridad robusta en Supabase."
+              />
+              <AgentCard 
+                name="DevOps Sync" 
+                role="Deployment & CI/CD" 
+                active={activeSpecialist === 'devops'} 
+                phase={activeSpecialist === 'devops' ? agentPhase : 'idle'} 
+                color="orange"
+                icon={<RefreshCw className="w-5 h-5" />}
+                description="Integración continua con GitHub, optimización de build y despliegue automatizado en Vercel."
               />
             </div>
 
@@ -382,57 +407,79 @@ function Badge({ children, variant = 'default', className }: { children: React.R
   );
 }
 
-function AgentCard({ name, role, active, phase, color, description }: { name: string, role: string, active: boolean, phase: string, color: 'primary' | 'blue', description: string }) {
+function AgentCard({ name, role, active, phase, color, description, icon }: { name: string, role: string, active: boolean, phase: string, color: 'primary' | 'blue' | 'purple' | 'orange', description: string, icon: React.ReactNode }) {
   const isThinking = phase === 'thinking' || phase === 'architecting' || phase === 'fixing';
   const isGenerating = phase === 'generating';
 
   return (
     <div className={cn(
-      "p-5 rounded-2xl border transition-all duration-500 relative overflow-hidden group",
-      active ? "bg-white/[0.03] border-white/10 shadow-2xl" : "bg-black/20 border-white/5 opacity-60"
+      "p-4 rounded-2xl border transition-all duration-500 relative overflow-hidden group",
+      active ? "bg-white/[0.04] border-white/20 shadow-2xl scale-[1.02]" : "bg-black/20 border-white/5 opacity-40 hover:opacity-60"
     )}>
       {active && (
         <div className={cn(
           "absolute -top-12 -right-12 w-24 h-24 blur-[60px] opacity-20",
-          color === 'primary' ? "bg-primary" : "bg-blue-500"
+          color === 'primary' ? "bg-primary" : 
+          color === 'blue' ? "bg-blue-500" :
+          color === 'purple' ? "bg-purple-500" : "bg-orange-500"
         )} />
       )}
       
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className={cn(
-            "w-10 h-10 rounded-xl flex items-center justify-center relative",
-            color === 'primary' ? "bg-primary/10 border border-primary/20" : "bg-blue-500/10 border border-blue-500/20"
+            "w-9 h-9 rounded-xl flex items-center justify-center relative",
+            color === 'primary' ? "bg-primary/10 border border-primary/20" : 
+            color === 'blue' ? "bg-blue-500/10 border border-blue-500/20" :
+            color === 'purple' ? "bg-purple-500/10 border border-purple-500/20" : "bg-orange-500/10 border border-orange-500/20"
           )}>
-            <Sparkles className={cn("w-5 h-5", color === 'primary' ? "text-primary" : "text-blue-400")} />
+            {React.cloneElement(icon as React.ReactElement, { 
+              className: cn("w-4.5 h-4.5", 
+                color === 'primary' ? "text-primary" : 
+                color === 'blue' ? "text-blue-400" :
+                color === 'purple' ? "text-purple-400" : "text-orange-400"
+              ) 
+            })}
             {active && (
               <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-                <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", color === 'primary' ? "bg-primary" : "bg-blue-400")}></span>
-                <span className={cn("relative inline-flex rounded-full h-2 w-2", color === 'primary' ? "bg-primary" : "bg-blue-400")}></span>
+                <span className={cn("animate-ping absolute inline-flex h-full w-full rounded-full opacity-75", 
+                  color === 'primary' ? "bg-primary" : 
+                  color === 'blue' ? "bg-blue-400" :
+                  color === 'purple' ? "bg-purple-400" : "bg-orange-400"
+                )}></span>
+                <span className={cn("relative inline-flex rounded-full h-2 w-2", 
+                  color === 'primary' ? "bg-primary" : 
+                  color === 'blue' ? "bg-blue-400" :
+                   color === 'purple' ? "bg-purple-400" : "bg-orange-400"
+                )}></span>
               </span>
             )}
           </div>
           <div>
-            <h3 className="text-sm font-black text-white">{name}</h3>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">{role}</p>
+            <h3 className="text-xs font-black text-white">{name}</h3>
+            <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">{role}</p>
           </div>
         </div>
       </div>
 
-      <p className="text-[11px] text-zinc-400 leading-relaxed mb-6 group-hover:text-zinc-300 transition-colors">
+      <p className="text-[10px] text-zinc-400 leading-relaxed mb-4 line-clamp-2">
         {description}
       </p>
 
       <div className="flex items-center justify-between mt-auto">
          <div className="flex items-center gap-2">
             <div className={cn(
-              "px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest flex items-center gap-1.5",
-              active ? (color === 'primary' ? "bg-primary/20 text-primary" : "bg-blue-500/20 text-blue-400") : "bg-zinc-800 text-zinc-500"
+              "px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-widest flex items-center gap-1",
+              active ? (
+                color === 'primary' ? "bg-primary/20 text-primary" : 
+                color === 'blue' ? "bg-blue-500/20 text-blue-400" :
+                color === 'purple' ? "bg-purple-500/20 text-purple-400" : "bg-orange-500/20 text-orange-400"
+              ) : "bg-zinc-800 text-zinc-500"
             )}>
                {active ? (
                  <>
-                   {isThinking && <Loader2 className="w-3 h-3 animate-spin" />}
-                   {isGenerating && <Zap className="w-3 h-3 animate-pulse fill-current" />}
+                   {isThinking && <Loader2 className="w-2.5 h-2.5 animate-spin" />}
+                   {isGenerating && <Zap className="w-2.5 h-2.5 animate-pulse fill-current" />}
                    {phase === 'idle' ? 'Listo' : phase.charAt(0).toUpperCase() + phase.slice(1)}
                  </>
                ) : 'En Espera'}
@@ -442,8 +489,10 @@ function AgentCard({ name, role, active, phase, color, description }: { name: st
            <div className="flex gap-0.5">
              {[1, 2, 3].map(i => (
                <div key={i} className={cn(
-                 "w-1 h-3 rounded-full animate-pulse",
-                 color === 'primary' ? "bg-primary" : "bg-blue-400"
+                 "w-0.5 h-2.5 rounded-full animate-pulse",
+                 color === 'primary' ? "bg-primary" : 
+                 color === 'blue' ? "bg-blue-400" :
+                 color === 'purple' ? "bg-purple-400" : "bg-orange-400"
                )} style={{ animationDelay: `${i * 0.15}s` }} />
              ))}
            </div>
