@@ -158,16 +158,18 @@ function detectIntent(prompt: string, hasContext?: boolean): 'codegen' | 'chat' 
 }
 
 // ─── Genesis unified system prompt (v14.9 — File-Master Protocol) ──────
-const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Agile Master Architect (v14.9.2)
+const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Agile Master Architect (v14.9.3)
 
-Eres la inteligencia definitiva de la plataforma. Has evolucionado al **Protocolo v14.9.2 (Manifest Hardening)**.
+Eres la inteligencia definitiva de la plataforma. Has evolucionado al **Protocolo v14.9.3 (Universal Atomic Actions)**.
 
-**PROTOCOLO FILE-MASTER (Folder Power):**
-1. **Poder de Estructura**: Tienes permiso ABSOLUTO para manipular la arquitectura del proyecto. Puedes crear, renombrar y organizar archivos y carpetas.
-2. **Formato de Salida Obligatorio**: Utiliza EXCLUSIVAMENTE bloques de código Markdown. La primera línea del bloque DEBE ser un comentario con la ruta del archivo (ej: \`// src/components/Header.tsx\`).
-3. **Prohibición de JSON Crudo**: NUNCA respondas con objetos JSON para representar archivos. Si quieres "escribir archivos", genéralos como bloques de código individuales.
-4. **Mastery of Entry Point**: Prioriza la integración en \`index.html\` o \`App.tsx\` para ver cambios inmediatos.
-5. **Organización Activa**: Propón estructuras profesionales (\`src/assets/\`, \`src/hooks/\`, etc.).
+**PROTOCOLO FILE-MASTER (Absolute REST):**
+1. **Poder de Estructura**: Tienes permiso ABSOLUTO para manipular la arquitectura. Puedes crear, borrar y renombrar archivos.
+2. **Atomic Actions**: 
+   - **Borrado**: Para borrar un archivo, genera un bloque de código con su ruta y el contenido \`// DELETE\`.
+   - **Renombrado/Movimiento**: Borra el archivo en la ruta antigua (con \`// DELETE\`) y créalo en la nueva ruta.
+3. **Formato Obligatorio**: Utiliza bloques de código Markdown con la ruta del archivo en el primer comentario (ej: \`// src/App.tsx\`). NUNCA respondas con JSON crudo.
+4. **Mastery of Entry Point**: Prioriza \`index.html\` o \`App.tsx\` para ver cambios inmediatos.
+5. **Organización Activa**: Mantén el proyecto limpio. Elimina archivos temporales o redundantes.
 
 **PROTOCOLO DE EMPATÍA COGNITIVA (v14.8 Legacy):**
 - Reconoce la entrada y describe lo que ves antes de construir si la orden no es imperativa.
@@ -338,7 +340,6 @@ function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
   const files: Record<string, StudioFile> = {};
   
   // ── FALLBACK: Detect and parse JSON-style "files" manifests if AI hallucinations occur ──
-  // Matches expressions like: {"files": {"path": "content"}}
   try {
     const jsonMatch = text.match(/\{[\s\n]*"files"[\s\n]*:[\s\n]*(\{[\s\S]*?\}[\s\n]*)\}/);
     if (jsonMatch) {
@@ -351,9 +352,7 @@ function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
       });
       if (Object.keys(files).length > 0) return files;
     }
-  } catch (e) {
-    /* silent — proceed to standard markdown parsing */
-  }
+  } catch (e) { /* ignore */ }
 
   // ── STANDARD: Extract files from Markdown blocks ──
   const regex = /```(\w*)\n?([\s\S]*?)```/g;
@@ -361,38 +360,36 @@ function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
   while ((m = regex.exec(text)) !== null) {
     const lang = m[1].trim().toLowerCase();
     const code = m[2].trim();
-    if (code.length < 10) continue; 
+    if (code.length < 5) continue; // Allow shorter codes for deletion markers 
 
     // Try to detect filename from the first line or a specific comment
     let filename = '';
     const lines = code.split('\n');
     const firstLine = lines[0].trim();
     
-    // Look for "// path/to/file.tsx" or "/* path/to/file.tsx */" or "// Filename: file.tsx"
     const fileMatch = 
       firstLine.match(/\/\/\s*([\w./\-]+\.\w+)/) || 
       firstLine.match(/\/\*\s*([\w./\-]+\.\w+)\s*\*\//) ||
       code.match(/\/\/\s*Filename:\s*([\w./\-]+\.\w+)/i);
 
     if (fileMatch) {
-      filename = fileMatch[1].replace(/^src\//, ''); // strip leading src/
+      filename = fileMatch[1].replace(/^src\//, ''); 
     } else {
-      // Intelligent fallback
       if (lang === 'html' || code.includes('<!DOCTYPE')) filename = 'index.html';
       else if (lang === 'css') filename = 'styles.css';
-      else if (lang === 'python') filename = 'main.py';
       else if (code.includes('import React') || code.includes('export default')) filename = 'App.tsx';
       else continue; 
     }
     
-    // Determine language based on extension or detected lang
     let finalLang = lang;
     if (filename.endsWith('.tsx')) finalLang = 'tsx';
     else if (filename.endsWith('.ts')) finalLang = 'ts';
     else if (filename.endsWith('.js')) finalLang = 'javascript';
     else if (filename.endsWith('.json')) finalLang = 'json';
 
-    files[filename] = { language: finalLang, content: code };
+    // SPECIAL: Support for file deletion/removal markers
+    const isDeletion = code.includes('// DELETE') || code.includes('// REMOVE') || code.includes('/* DELETE */');
+    files[filename] = { language: finalLang, content: isDeletion ? '__genesis_delete__' : code };
   }
   return Object.keys(files).length > 0 ? files : null;
 }
@@ -1428,7 +1425,15 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
       if (result?.isChatOnly) {
         const chatFiles = extractChatCodeFiles(result.explanation);
         if (chatFiles && Object.keys(chatFiles).length > 0) {
-          const mergedFiles = { ...projectFiles, ...chatFiles };
+          // Atomic Merge: Handle removals as well
+          const mergedFiles = { ...projectFiles };
+          Object.entries(chatFiles).forEach(([path, file]) => {
+            if (file.content === '__genesis_delete__') {
+              delete mergedFiles[path];
+            } else {
+              mergedFiles[path] = file;
+            }
+          });
           onCodeGenerated(mergedFiles);
         }
         assistantMsg = {
@@ -1444,7 +1449,16 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
           { role: 'assistant' as const, content: result.explanation },
         ].slice(-16));
       } else if (result?.files && Object.keys(result.files).length > 0) {
-        const mergedFiles = { ...projectFiles, ...result.files };
+        // Atomic Merge: Handle removals as well
+        const mergedFiles = { ...projectFiles };
+        Object.entries(result.files).forEach(([path, file]) => {
+          if (file.content === '__genesis_delete__') {
+            delete mergedFiles[path];
+          } else {
+            mergedFiles[path] = file;
+          }
+        });
+        
         onCodeGenerated(mergedFiles);
         const fileList = Object.keys(result.files).map((f) => `• \`${f}\``).join('\n');
         assistantMsg = {
