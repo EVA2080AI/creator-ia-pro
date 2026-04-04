@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import {
   Plus, Search, Loader2, FolderOpen, MoreVertical,
   Trash2, Pencil, BookOpen, LayoutGrid, ChevronRight,
-  List, HardDrive, LayoutTemplate, Code2, Sparkles, Brain
+  List, HardDrive, LayoutTemplate, Code2, Sparkles, Brain,
+  Square, CheckSquare, X, Check
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -47,6 +48,9 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'updated' | 'name' | 'created'>('updated');
   const [openingProject, setOpeningProject] = useState<UnifiedProject | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [showBulkConfirm, setShowBulkConfirm] = useState(false);
 
   const fetchSpaces = useCallback(async () => {
     if (!user) return;
@@ -138,10 +142,60 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
   };
 
   const handleProjectClick = (space: UnifiedProject) => {
+    if (selectedIds.size > 0) {
+      toggleSelect(space.id);
+      return;
+    }
+
     if (space.type === 'flow') {
       navigate(`/studio-flow?spaceId=${space.id}`);
     } else {
       setOpeningProject(space);
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map(s => s.id)));
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    setIsBulkDeleting(true);
+    const selected = spaces.filter(s => selectedIds.has(s.id));
+    
+    const flowIds = selected.filter(s => s.type === 'flow').map(s => s.id);
+    const codeIds = selected.filter(s => s.type === 'code').map(s => s.id);
+
+    try {
+      if (flowIds.length > 0) {
+        const { error } = await supabase.from("spaces").delete().in("id", flowIds);
+        if (error) throw error;
+      }
+      if (codeIds.length > 0) {
+        const { error } = await supabase.from("studio_projects").delete().in("id", codeIds);
+        if (error) throw error;
+      }
+
+      toast.success(`${selectedIds.size} proyectos eliminados correctamente`);
+      setSelectedIds(new Set());
+      fetchSpaces();
+    } catch (err: any) {
+      toast.error(err.message || "Error al eliminar múltiples proyectos");
+    } finally {
+      setIsBulkDeleting(false);
+      setShowBulkConfirm(false);
     }
   };
 
@@ -194,6 +248,29 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
         <span className="text-[10px] text-zinc-500 ml-1">— {filtered.length} total</span>
       </div>
 
+      <div className="flex items-center gap-4 mb-6">
+        <button 
+          onClick={toggleSelectAll}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl border border-zinc-200 bg-white hover:bg-zinc-50 text-[11px] font-bold text-zinc-600 transition-all font-display shadow-sm"
+        >
+          {selectedIds.size === filtered.length && filtered.length > 0 ? (
+            <CheckSquare className="h-3.5 w-3.5 text-primary" />
+          ) : (
+            <Square className="h-3.5 w-3.5" />
+          )}
+          {selectedIds.size === filtered.length && filtered.length > 0 ? 'Desmarcar Todo' : 'Seleccionar Todo'}
+        </button>
+
+        {selectedIds.size > 0 && (
+          <button 
+            onClick={() => setSelectedIds(new Set())}
+            className="flex items-center gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+          >
+            <X className="h-3 w-3" /> Limpiar Selección
+          </button>
+        )}
+      </div>
+
       {loading ? (
         <div className="flex h-48 items-center justify-center">
           <Loader2 className="h-7 w-7 animate-spin text-primary/50" />
@@ -225,9 +302,19 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
             return (
               <div
                 key={space.id}
-                className="group cursor-pointer rounded-3xl border border-zinc-200/60 bg-white/70 backdrop-blur-sm hover:border-zinc-300 hover:shadow-xl transition-all duration-500 relative overflow-hidden shadow-sm"
+                className={`group cursor-pointer rounded-3xl border ${selectedIds.has(space.id) ? 'border-primary ring-2 ring-primary/10 shadow-lg shadow-primary/5' : 'border-zinc-200/60 shadow-sm'} bg-white/70 backdrop-blur-sm hover:border-zinc-300 hover:shadow-xl transition-all duration-500 relative overflow-hidden`}
                 onClick={() => handleProjectClick(space)}
               >
+                {/* Selection Checkbox Overlay */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleSelect(space.id); }}
+                  className={`absolute top-3 right-3 z-20 h-7 w-7 rounded-lg border flex items-center justify-center transition-all 
+                    ${selectedIds.has(space.id) 
+                      ? 'bg-primary border-primary text-white shadow-lg' 
+                      : 'bg-white/80 border-zinc-200 text-zinc-400 opacity-0 group-hover:opacity-100'}`}
+                >
+                  {selectedIds.has(space.id) ? <Check className="h-4 w-4" /> : <Plus className="h-3 w-3" />}
+                </button>
                 {/* Color accent bar */}
                 <div className={`absolute top-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity ${isCode ? 'bg-gradient-to-r from-emerald-500/60 to-transparent' : 'bg-gradient-to-r from-primary/60 to-transparent'}`} />
 
@@ -267,7 +354,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
                     </div>
                     <button
                       onClick={(e) => e.stopPropagation()}
-                      className="shrink-0 relative group/menu"
+                      className={`shrink-0 relative group/menu ${selectedIds.has(space.id) ? 'pointer-events-none opacity-0' : ''}`}
                     >
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
@@ -304,16 +391,27 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
       ) : (
         /* List view */
         <div className="flex flex-col gap-0.5">
-          <div className="grid grid-cols-[1fr_120px_140px_120px_40px] px-4 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-display border-b border-zinc-200">
-            <span>Nombre</span><span>Tipo</span><span>Modificado</span><span>Descripción</span><span />
+          <div className="grid grid-cols-[40px_1fr_120px_140px_120px_40px] px-4 py-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest font-display border-b border-zinc-200">
+            <span /><span>Nombre</span><span>Tipo</span><span>Modificado</span><span>Descripción</span><span />
           </div>
           {filtered.map((space) => {
             const isCode = space.type === 'code';
+            const isSelected = selectedIds.has(space.id);
             return (
               <div key={space.id}
-                className="group grid grid-cols-[1fr_120px_140px_120px_40px] items-center px-4 py-3 rounded-xl hover:bg-zinc-50 cursor-pointer transition-all border border-transparent hover:border-zinc-200"
+                className={`group grid grid-cols-[40px_1fr_120px_140px_120px_40px] items-center px-4 py-3 rounded-xl cursor-pointer transition-all border 
+                  ${isSelected ? 'bg-primary/5 border-primary/20' : 'hover:bg-zinc-50 border-transparent hover:border-zinc-200'}`}
                 onClick={() => handleProjectClick(space)}
               >
+                <div onClick={(e) => { e.stopPropagation(); toggleSelect(space.id); }} className="flex items-center justify-center">
+                   {isSelected ? (
+                     <div className="h-5 w-5 rounded-md bg-primary flex items-center justify-center text-white shadow-sm transition-all animate-in zoom-in duration-300">
+                        <Check className="h-3.5 w-3.5" />
+                     </div>
+                   ) : (
+                     <div className="h-5 w-5 rounded-md border border-zinc-200 bg-white group-hover:border-zinc-300 transition-all" />
+                   )}
+                </div>
                 <div className="flex items-center gap-3 min-w-0 pr-4">
                   <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-zinc-50 border border-zinc-200 transition-colors ${isCode ? 'group-hover:border-emerald-500/30 group-hover:bg-emerald-500/10' : 'group-hover:border-primary/30 group-hover:bg-primary/10'}`}>
                     {space.thumbnail_url
@@ -357,6 +455,68 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
           })}
         </div>
       )}
+
+      {/* ── Bulk Actions Floating Toolbar ──────────────────────────────────────── */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-8 duration-500">
+          <div className="flex items-center gap-6 px-8 py-5 bg-white border border-zinc-200 rounded-[2.5rem] shadow-[0_30px_90px_rgba(0,0,0,0.15)] backdrop-blur-3xl">
+            <div className="flex items-center gap-4 border-r border-zinc-100 pr-6 mr-1">
+              <div className="h-10 w-10 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
+                <span className="text-[14px] font-black">{selectedIds.size}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[12px] font-black text-zinc-900 tracking-tight leading-none mb-1">Seleccionados</span>
+                <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none">Listo para procesar</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowBulkConfirm(true)}
+                disabled={isBulkDeleting}
+                className="flex items-center gap-3 px-8 py-3.5 bg-rose-500 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-rose-600 transition-all shadow-lg shadow-rose-100 active:scale-95 disabled:opacity-50"
+              >
+                {isBulkDeleting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                Eliminar Selección
+              </button>
+              
+              <button 
+                onClick={() => setSelectedIds(new Set())}
+                className="px-6 py-3.5 bg-zinc-50 text-zinc-400 hover:text-zinc-900 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Delete Confirm Dialog */}
+      <Dialog open={showBulkConfirm} onOpenChange={setShowBulkConfirm}>
+        <DialogContent className="sm:max-w-[420px] rounded-[2.5rem] p-12 bg-white border-zinc-200 shadow-2xl">
+          <DialogHeader className="items-center text-center">
+            <div className="h-16 w-16 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center mb-8">
+              <Trash2 className="h-8 w-8 text-rose-500" />
+            </div>
+            <DialogTitle className="text-3xl font-bold text-zinc-900 tracking-tight font-display">Borrado Masivo</DialogTitle>
+            <DialogDescription className="text-zinc-500 font-medium leading-relaxed mt-4">
+              Estás a punto de eliminar <span className="font-black text-rose-500">{selectedIds.size}</span> proyectos permanentemente. Esta acción es definitiva y no puede deshacerse.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-4 mt-10">
+             <button onClick={() => setShowBulkConfirm(false)} className="flex-1 px-8 py-4 rounded-2xl border border-zinc-200 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-all font-display">
+                Cancelar
+             </button>
+             <button
+               onClick={handleBulkDelete}
+               disabled={isBulkDeleting}
+               className="flex-[1.5] flex items-center justify-center gap-3 px-8 py-4 bg-rose-500 text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-rose-600 active:scale-95 transition-all shadow-xl shadow-rose-100 font-display disabled:opacity-50"
+             >
+               {isBulkDeleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar Eliminación"}
+             </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
