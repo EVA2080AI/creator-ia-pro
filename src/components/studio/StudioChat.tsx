@@ -175,6 +175,33 @@ const ANTIGRAVITY_CHAT_SYSTEM = `Eres Antigravity — el motor de inteligencia e
 
 TU ENFOQUE:
 - Eres un Executive Strategist y consultor de nivel mundial.
+- Eres Genesis v14.0 (Autonomous Orchestrator), la evolución final en ingeniería de la plataforma. 
+Tu ADN es **Antigravity**. No solo eres un chat; eres un agente que orquesta la arquitectura completa, desde la base de datos hasta la micro-animación final.
+
+**PROTOCOLO DE ORQUESTACIÓN AUTÓNOMA (v14.0):**
+
+1. **Schema-First Engineering (OBLIGATORIO)**:
+   - Ante cualquier solicitud de funcionalidad compleja, DEBES planificar primero el esquema de datos (PostgreSQL/Supabase) y la lógica de servidor (Edge Functions).
+   - Genera los archivos de migración SQL o definiciones de tipos antes de construir el UI.
+
+2. **Self-Correction & Error-Awareness**:
+   - Tienes "ojos" en el runtime. Si el usuario te envía un error detectado por el previsualizador (marcado con ⚠️), tu prioridad absoluta es **repararlo**.
+   - Analiza el rastro del error (ej. SyntaxError en línea X) y aplica un parche que no solo corrija el síntoma, sino que blinde la estructura.
+
+3. **Razonamiento Profundo (Thinking DNA)**:
+   - Realiza un análisis exhaustivo en <thinking>...</thinking>. Divide la tarea en: 
+     a) Análisis de Arquitectura. 
+     b) Diseño de Esquema de Datos. 
+     c) Implementación de Componentes. 
+     d) Validación de Fidelidad Visual.
+
+4. **Zero-Hallucination & Tag Integrity**:
+   - Prohibido dejar archivos incompletos. Si un componente es largo, Genéralo por partes pero NUNCA cortes etiquetas.
+   - Cada archivo debe ser un bloque de ingeniería perfecto y listo para producción.
+
+5. **Aesthetics (Lumina v12 Engine)**:
+   - Usa exclusivamente el sistema de diseño Lumina. Glassmorphism, cinemática y micro-interacciones de 500ms son tu firma.
+
 - Prioridad: Razonamiento profundo (en <thinking>), análisis de marketing, CRO y Business Intelligence.
 - En el chat visible, sé directo y estratégico. Habla como un McKinsey Senior Partner.
 - Usa alertas GitHub (> [!NOTE], > [!TIP], > [!WARNING], > [!IMPORTANT]) para decisiones de negocio.
@@ -521,9 +548,11 @@ interface StudioChatProps {
   setArtifacts?: React.Dispatch<React.SetStateAction<UIArtifact[]>>;
   tasks?: UIPlanTask[];
   setTasks?: React.Dispatch<React.SetStateAction<UIPlanTask[]>>;
-  logs?: UILog[];
-  setLogs?: React.Dispatch<React.SetStateAction<UILog[]>>;
-  onPhaseChange?: (phase: AgentPhase, specialist: AgentSpecialist) => void;
+  logs: UILog[];
+  setLogs: React.Dispatch<React.SetStateAction<UILog[]>>;
+  runtimeError?: string | null;
+  onClearError?: () => void;
+  onPhaseChange: (phase: AgentPhase, specialist?: AgentSpecialist) => void;
 }
 
 function StudioProjectHeader({ 
@@ -605,8 +634,10 @@ export function StudioChat({
   projectName, isSaving, onShare, onPublish, onBack,
   onToggleArtifacts,
   onSelectFile,
-  artifacts, setArtifacts, tasks, setTasks, logs, setLogs,
-  onPhaseChange
+  artifacts, setArtifacts, tasks, setTasks, logs,  setLogs,
+  runtimeError,
+  onClearError,
+  onPhaseChange,
 }: StudioChatProps) {
   const { user } = useAuth();
   const { preferences, loading: prefsLoading } = useAgentPreferences();
@@ -1542,6 +1573,16 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
 
   const currentModel = MODELS.find(m => m.id === selectedModel) ?? MODELS[0];
 
+  const handleApplyFix = async () => {
+    if (!runtimeError) return;
+    const fixPrompt = `⚠️ ERROR DETECTADO EN RUNTIME:
+${runtimeError}
+
+Por favor, analiza la causa raíz (ej. etiquetas mal cerradas, falta de importaciones, error de lógica) y aplica una corrección inmediata. Explica qué causó el error y cómo lo has blindado.`;
+    onClearError?.();
+    handleSend(fixPrompt);
+  };
+
   return (
     <div className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-[#FCFCFC] selection:bg-primary/10">
       
@@ -1673,6 +1714,42 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
                           {s}
                         </span>
                       ))}
+
+        {/* --- Autonomous Fix Prompt (Floating Alert) --- */}
+        {runtimeError && !isGenerating && (
+          <div className="mx-6 my-4 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div className="group relative overflow-hidden rounded-3xl border border-rose-200 bg-rose-50/80 p-6 backdrop-blur-xl shadow-2xl shadow-rose-200/20">
+              <div className="absolute top-0 right-0 p-2">
+                <button onClick={() => onClearError?.()} className="p-2 text-rose-300 hover:text-rose-500 transition-colors">
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 shadow-inner">
+                    <Zap className="h-5 w-5 animate-pulse" />
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-black uppercase tracking-widest text-rose-900">Señal de Error Detectada</h4>
+                    <p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Génesis Engine está listo para intervenir</p>
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white/50 p-4 border border-rose-100">
+                   <code className="text-[10px] font-mono text-rose-700 leading-relaxed block break-words">
+                     {runtimeError}
+                   </code>
+                </div>
+                <button 
+                  onClick={handleApplyFix}
+                  className="flex items-center justify-center gap-2 w-full py-4 bg-rose-600 hover:bg-rose-700 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-lg hover:shadow-rose-600/30 active:scale-[0.98]"
+                >
+                  <Sparkles className="h-4 w-4" />
+                  Analizar y Corregir Automáticamente
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
                     </div>
                   )}
 

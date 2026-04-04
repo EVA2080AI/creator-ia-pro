@@ -58,6 +58,7 @@ export default function Studio() {
   const [streamPreview, setStreamPreview] = useState('');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [runtimeError, setRuntimeError] = useState<string | null>(null);
   const [showDeployModal, setShowDeployModal] = useState(false);
 
   // --- Engineering State (Lifted from StudioChat) ---
@@ -419,6 +420,9 @@ export default function Studio() {
             setTasks={setTasks}
             logs={logs}
             setLogs={setLogs}
+            // --- v14.0 Interconnect ---
+            runtimeError={runtimeError}
+            onClearError={() => setRuntimeError(null)}
             onPhaseChange={(phase, specialist) => {
               setAgentPhase(phase);
               setActiveSpecialist(specialist);
@@ -469,6 +473,7 @@ export default function Studio() {
                       isFullscreen={isFullscreen}
                       onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
                       onShare={handleShare}
+                      onError={setRuntimeError}
                     />
                   </div>
                 </div>
