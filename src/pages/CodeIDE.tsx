@@ -222,42 +222,7 @@ export default function CodeIDE() {
               </div>
             </div>
 
-            {/* ════════════════════ INTERNAL ACTION SIDEBAR ════════════════════ */}
-            <div className="w-[120px] shrink-0 bg-white border-r border-zinc-200 flex flex-col items-center py-4 gap-6 relative z-40">
-              {/* Badge */}
-              <div className="px-3 py-1 rounded-full bg-primary/5 border border-primary/20">
-                <span className="text-[8px] font-black text-primary uppercase tracking-[0.2em] whitespace-nowrap">HOLA COMO ESTAS</span>
-              </div>
 
-              {/* Actions List */}
-              <div className="flex flex-col w-full px-2 gap-1.5">
-                {[
-                  { id: 'save',    label: 'Guardar',   icon: Save,   active: false },
-                  { id: 'run',     label: 'Ejecutar',  icon: Play,   active: true },
-                  { id: 'publish', label: 'Publicar',  icon: Globe,  active: false },
-                  { id: 'github',  label: 'Sync GitHub', icon: Github, active: false },
-                ].map(({ id, label, icon: Icon, active }) => (
-                  <button
-                    key={id}
-                    onClick={() => {
-                      if (id === 'save') toast.success('Cambios guardados');
-                      if (id === 'run') toast.info('Iniciando entorno...');
-                      if (id === 'publish') toast.info('Publicación próximamente');
-                      if (id === 'github') navigate('/auth?provider=github');
-                    }}
-                    className={cn(
-                      "group w-full flex flex-col items-center justify-center py-3 rounded-2xl transition-all gap-1.5",
-                      active 
-                        ? "bg-primary/5 border border-primary/20 text-primary shadow-sm" 
-                        : "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
-                    )}
-                  >
-                    <Icon className={cn("w-5 h-5", active ? "text-primary" : "group-hover:scale-110 transition-transform")} />
-                    <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
 
             <ResizablePanelGroup direction="horizontal" className="flex-1 items-stretch">
               
@@ -446,6 +411,39 @@ export default function CodeIDE() {
                   </div>
                 </div>
               </ResizablePanel>
+
+              {/* ════════════════════ DEV OPTIONS PANEL (RIGHT SIDE) ════════════════════ */}
+              <div className="w-[180px] shrink-0 bg-white border-l border-zinc-200 flex flex-col py-4 px-2 gap-4 relative z-40">
+                {/* Header */}
+                <div className="px-3 mb-1">
+                  <h3 className="text-[10px] font-semibold text-zinc-500 uppercase font-mono tracking-widest">CONTROL DE VERSIONES</h3>
+                </div>
+
+                {/* Actions List */}
+                <div className="flex flex-col w-full gap-1">
+                  {[
+                    { id: 'github', label: 'Sync GitHub', icon: Github },
+                    { id: 'publish', label: 'Publicar', icon: Globe },
+                  ].map(({ id, label, icon: Icon }) => (
+                    <button
+                      key={id}
+                      onClick={() => {
+                        if (id === 'publish') toast.info('Iniciando despliegue...');
+                        if (id === 'github') navigate('/auth?provider=github');
+                      }}
+                      className="group w-full flex items-center gap-3 px-3 py-2 rounded transition-all hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900"
+                    >
+                      <Icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
+                      <span className="text-[11px] font-medium tracking-tight">{label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="px-3 mt-2 border-t border-zinc-100 pt-4">
+                  <h3 className="text-[10px] font-semibold text-zinc-500 uppercase font-mono tracking-widest mb-2">DESPLIEGUE</h3>
+                  <p className="text-[10px] text-zinc-400 italic px-1">Sin despliegues activos</p>
+                </div>
+              </div>
 
               {/* ════════════════════ ANTIGRAVITY AI PANEL ════════════════════ */}
               {showChat && (
