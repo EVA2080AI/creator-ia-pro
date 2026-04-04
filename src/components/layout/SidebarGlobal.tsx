@@ -183,7 +183,8 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
               path={item.path}
               label={item.label}
               icon={item.icon}
-              active={isActive(item.path)} 
+              active={isActive(item.path)}
+              aria-current={isActive(item.path) ? 'page' : undefined}
               expanded={globalExpanded || isMobile}
               minTier={item.minTier}
               onClick={() => handleNav(item.path, item.minTier, item.label)} 

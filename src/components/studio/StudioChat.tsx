@@ -15,6 +15,7 @@ import { cloneWebsiteAdvanced } from '@/services/clone-service';
 import { aiService, MODEL_COSTS } from '@/services/ai-service';
 import { StudioArtifactsPanel, type UIPlanTask, type UIArtifact, type UILog } from './StudioArtifactsPanel';
 import { useAgentPreferences } from '@/hooks/useAgentPreferences';
+import { cn } from '@/lib/utils';
 
 // ─── Env ───────────────────────────────────────────────────────────────────────
 const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL as string;
@@ -406,12 +407,14 @@ REGLAS CRÍTICAS DE DISEÑO UX/UI (OBLIGATORIAS para frontend):
 - Implementa footer REAL con columnas de links, redes sociales, copyright
 - Hero: headline en text-6xl md:text-8xl font-black, subtítulo, CTA button con gradiente
 - Animaciones: hover:scale-105 hover:-translate-y-1 transition-all duration-300 en cards
-- Tema de Color: bg-[Var-Background], text-[Var-Text]. Define colores en Tailwind configurados armónicamente. Evita el azul eléctrico (#0066FF) a menos que encaje con la marca. **ESTILO**: Usa \`rounded-3xl\`, glassmorphism y separadores de sección elegantes.
+- Tema de Color: bg-[#FCFCFC], text-[#1A1A1A]. Define colores en Tailwind configurados armónicamente. **ESTILO**: Usa \`rounded-[2.5rem]\`, glassmorphism y sombras suaves (\`shadow-xl\`).
 - Botones: Diseña el componente de botón según el estilo (Ej: Glassy para moderno, Flat para minimalista, Gradientes para marketing). Mínimo h-12 y px-8.
 - Iconos: SOLO importar nombres reales de lucide-react (VERIFICA los nombres, ej. usa PawPrint en lugar de Paw. Si dudas, usa un icono básico como Star o Heart).
 - Grid Layout: SIEMPRE utiliza clases \`w-full min-h-screen\` en el div/sección padre principal para que el contenido jamás se corte visualmente.
 - Mobile-first: grid-cols-1 md:grid-cols-2 lg:grid-cols-3 en todos los grids
-- Secciones completas: hero → features → testimonios → pricing → CTA → footer
+- NAVBARS FUNCIONALES: Todo navbar generado DEBE incluir lógica de toggle móvil (\`useState\`) y ser 100% interactivo. PROHIBIDO generar botones de menú estáticos que no funcionen.
+- ACCESIBILIDAD WCAG: Cada elemento interactivo (botones, links, iconos) DEBE tener \`aria-label\` y \`role\` descriptivos. Usa etiquetas semánticas (\`header\`, \`main\`, \`footer\`).
+- Secciones completas (MÍNIMO 5): hero → trust (logos/stats) → interactive features → social proof/testimonials → high-conversion CTA → deep footer.
 - CONTENIDO MOCK REALISTA: JAMÁS uses "Lorem Ipsum". Escribe copywriting persuasivo real en español (o el idioma pedido). Si necesitas imágenes de relleno, USA urls reales de \`https://images.unsplash.com/...\`.
 
 FORMATO EXACTO — EMPIEZA CON { Y TERMINA CON }:
@@ -1433,12 +1436,12 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
   const currentModel = MODELS.find(m => m.id === selectedModel) ?? MODELS[0];
 
   return (
-    <div className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-background">
+    <div className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-[#FCFCFC] selection:bg-primary/10">
       
 
       {/* ── Messages ─────────────────────────────────────────────────────────── */}
       <div ref={containerRef} onScroll={handleScroll}
-        className="flex-1 min-h-0 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar"
+        className="flex-1 min-h-0 overflow-y-auto pt-8 pb-32 px-6 space-y-8 custom-scrollbar scroll-smooth"
         onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
 
 
@@ -1448,64 +1451,89 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
           <div key={msg.id} className={`group ${msg.role === 'user' ? 'flex flex-col items-end gap-2 mb-4' : 'flex flex-col items-start gap-4 mb-8'}`}>
             {msg.role === 'user' ? (
               <>
-                <div className="bg-zinc-900 text-white px-6 py-3.5 rounded-3xl rounded-tr-none text-sm font-bold shadow-2xl shadow-zinc-900/10 max-w-[85%] animate-in fade-in slide-in-from-right-4 duration-500">
+                <div className="bg-primary text-white px-8 py-5 rounded-[2.5rem] rounded-tr-none text-[13px] font-bold shadow-2xl shadow-primary/20 max-w-[85%] animate-in fade-in slide-in-from-right-4 duration-500">
                   {msg.imagePreview && (
-                    <div className="rounded-xl overflow-hidden mb-3 border border-white/10">
-                      <img src={msg.imagePreview} alt="Referencia" className="max-h-48 w-auto object-contain" />
+                    <div className="rounded-2xl overflow-hidden mb-4 border border-white/20 shadow-xl">
+                      <img src={msg.imagePreview} alt="Referencia" className="max-h-64 w-auto object-contain" />
                     </div>
                   )}
-                  <span className="whitespace-pre-wrap">{msg.content}</span>
+                  <span className="whitespace-pre-wrap leading-relaxed">{msg.content}</span>
                 </div>
-                <span className="text-[9px] text-zinc-400 font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity pr-2">
-                  Tú · {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <span className="text-[9px] text-zinc-400 font-black uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-opacity pr-4 mt-2">
+                  Verificado · {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </>
             ) : (
               <div className="w-full max-w-[95%]">
-                <div className="flex items-center gap-3 mb-3 pl-1">
-                  <div className="h-7 w-7 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-200 animate-in zoom-in duration-500">
-                    <Sparkles className="h-4 w-4" />
+                <div className="flex items-center gap-4 mb-4 pl-3">
+                  <div className="h-9 w-9 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center text-primary shadow-xl shadow-zinc-200/50 animate-in zoom-in duration-700">
+                    <Sparkles className="h-5 w-5" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] font-black uppercase text-zinc-900 tracking-[0.2em]">{persona === 'antigravity' ? 'Antigravity AI' : 'Genesis AI'}</span>
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest leading-none">Master Brain Engine</span>
+                    <span className="text-[11px] font-black uppercase text-zinc-900 tracking-[0.2em] leading-none mb-1">
+                      {persona === 'antigravity' ? 'Antigravity Core' : 'Genesis Engine'}
+                    </span>
+                    <div className="flex items-center gap-2">
+                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                       <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest">Protocolo Lumina Online</span>
+                    </div>
                   </div>
                 </div>
 
-                <div className={`px-7 py-6 rounded-[32px] rounded-tl-none shadow-[0_8px_30px_rgb(0,0,0,0.02)] animate-in fade-in slide-in-from-left-4 duration-500 relative group/msg ${msg.type === 'plan' ? 'bg-gradient-to-br from-indigo-50 to-violet-50 border-2 border-indigo-200' : 'bg-white border border-zinc-200/80'}`}>
+                <div className={cn(
+                  "px-9 py-8 rounded-[2.5rem] rounded-tl-none shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all duration-700 relative group/msg border overflow-hidden",
+                  msg.type === 'plan' 
+                    ? "bg-indigo-50/50 border-indigo-200/50" 
+                    : "bg-white/80 border-zinc-100 backdrop-blur-xl"
+                )}>
+                  {/* --- Light Blueprint Overlay (if Plan) --- */}
+                  {msg.type === 'plan' && (
+                    <div className="absolute inset-0 pointer-events-none opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(var(--primary) 1px, transparent 1px)', backgroundSize: '16px 16px' }} />
+                  )}
+
                   {/* Plan Card Header */}
                   {msg.type === 'plan' && (
-                    <div className="flex items-center gap-3 mb-5 pb-4 border-b border-indigo-200/50">
-                      <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-200">
-                        <Shield className="h-4 w-4 text-white" />
+                    <div className="flex items-center gap-4 mb-8 pb-6 border-b border-indigo-100 relative z-10">
+                      <div className="h-10 w-10 rounded-2xl bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-100">
+                        <Shield className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-700">Modo Arquitecto</span>
-                        <span className="block text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Plan de Implementación</span>
+                        <span className="text-[12px] font-black uppercase tracking-[0.3em] text-indigo-700">Génesis Arquitecto</span>
+                        <div className="flex items-center gap-2 mt-1">
+                           <span className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest leading-none">Plano de Implementación Élite</span>
+                        </div>
                       </div>
-                      {msg.planStatus === 'pending' && (
-                        <span className="ml-auto px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-[9px] font-black uppercase tracking-widest animate-pulse">Pendiente</span>
-                      )}
-                      {msg.planStatus === 'approved' && (
-                        <span className="ml-auto px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase tracking-widest">✓ Aprobado</span>
-                      )}
-                      {msg.planStatus === 'rejected' && (
-                        <span className="ml-auto px-3 py-1 rounded-full bg-rose-100 text-rose-700 text-[9px] font-black uppercase tracking-widest">✗ Rechazado</span>
-                      )}
+                      
+                      <div className="ml-auto flex flex-col items-end">
+                        {msg.planStatus === 'pending' && (
+                          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100/50 border border-amber-200/50">
+                             <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                             <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest">Revisión</span>
+                          </div>
+                        )}
+                        {msg.planStatus === 'approved' && (
+                          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100/50 border border-emerald-200/50">
+                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                             <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Ejecutando</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
 
-                  <div className="prose prose-zinc max-w-none prose-sm font-medium"
-                    dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} />
+                  <div className={cn(
+                    "prose max-w-none relative z-10",
+                    msg.type === 'plan' ? "prose-indigo font-sans text-[13px] leading-relaxed text-indigo-900/80" : "prose-zinc prose-sm font-medium text-zinc-600"
+                  )}
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} 
+                  />
 
                   {/* Plan Card Action Buttons */}
                   {msg.type === 'plan' && msg.planStatus === 'pending' && (
-                    <div className="flex items-center gap-3 mt-6 pt-5 border-t border-indigo-200/50">
+                    <div className="flex items-center gap-3 mt-8 pt-6 border-t border-indigo-100 relative z-10">
                       <button
                         onClick={async () => {
-                          // Mark as approved
                           setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, planStatus: 'approved' as const } : m));
-                          // Now generate the actual code with architect mode temporarily disabled
                           const origArchitect = isArchitectMode;
                           setIsArchitectMode(false);
                           setPendingPlanPrompt(msg.originalPrompt || '');
@@ -1513,20 +1541,19 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
                           setPendingPlanPrompt(null);
                           setIsArchitectMode(origArchitect);
                         }}
-                        className="flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[11px] font-black uppercase tracking-widest hover:shadow-lg hover:shadow-emerald-200 transition-all active:scale-95"
+                        className="flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-indigo-600 text-white text-[11px] font-black uppercase tracking-widest hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-200 transition-all active:scale-95"
                       >
-                        <CheckCircle2 className="h-4 w-4" />
-                        Aprobar y Generar
+                        <CheckCircle2 className="w-4 h-4" />
+                        Comenzar Construcción
                       </button>
-                      <button
+                      <button 
                         onClick={() => {
                           setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, planStatus: 'rejected' as const } : m));
                           toast.info('Plan rechazado. Puedes hacer ajustes y volver a pedir.');
                         }}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl border border-zinc-200 bg-white text-zinc-500 text-[11px] font-black uppercase tracking-widest hover:border-rose-200 hover:text-rose-500 transition-all active:scale-95"
+                        className="px-6 py-3.5 rounded-2xl bg-white border border-zinc-200 text-zinc-500 text-[11px] font-black uppercase tracking-widest hover:bg-zinc-50 transition-all"
                       >
-                        <XCircle className="h-4 w-4" />
-                        Rechazar
+                        Revisar Prompt
                       </button>
                     </div>
                   )}

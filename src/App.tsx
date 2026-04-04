@@ -66,10 +66,11 @@ const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 
 // Light loading screen — no dark bg
 const LoadingScreen = () => (
-  <div className="flex h-screen w-screen items-center justify-center bg-white">
+  <div className="flex h-screen w-screen items-center justify-center bg-white" role="status" aria-live="polite">
     <div className="relative">
       <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full animate-pulse" />
       <Loader2 className="relative h-9 w-9 animate-spin text-primary" />
+      <span className="sr-only">Cargando plataforma...</span>
     </div>
   </div>
 );
@@ -103,6 +104,9 @@ const App = () => {
                   {/* ── Public routes (no AppLayout) ── */}
                   <Route path="/"                     element={<Index />} />
                   <Route path="/auth"                 element={<Auth />} />
+                  <Route path="/pricing"              element={<Pricing />} />
+                  <Route path="/descargar"            element={<Downloads />} />
+                  <Route path="/product-backlog"      element={<ProductBacklog />} />
                   <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
                   <Route path="/reset-password"       element={<ResetPassword />} />
 
@@ -114,16 +118,13 @@ const App = () => {
                   {/* ── Platform routes (wrapped in AppLayout) ── */}
                   <Route element={<AppLayout />}>
                     <Route path="/dashboard"    element={<Dashboard />} />
-                    <Route path="/pricing"      element={<Pricing />} />
-                    <Route path="/descargar"    element={<Downloads />} />
-                    <Route path="/product-backlog" element={<ProductBacklog />} />
                     <Route path="/spaces"       element={<Spaces />} />
                     <Route path="/assets"       element={<Navigate to="/spaces" replace />} />
                     <Route path="/tools"        element={<Tools />} />
                     <Route path="/apps/:appId"  element={<Tools />} />
                     <Route path="/admin"        element={<Admin />} />
+                    <Route path="/studio-flow"  element={<Formarketing />} />
                     <Route path="/formarketing" element={<Navigate to="/studio-flow" replace />} />
-                    <Route path="/studio-flow" element={<Formarketing />} />
                     <Route path="/profile"      element={<Profile />} />
                     <Route path="/hub"          element={<Hub />} />
                     <Route path="/antigravity"  element={<Antigravity />} />

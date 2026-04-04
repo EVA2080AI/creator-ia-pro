@@ -311,7 +311,7 @@ export default function Studio() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-background overflow-hidden text-foreground selection:bg-primary/30">
+    <div className="flex flex-col h-screen bg-[#FCFCFC] overflow-hidden text-foreground selection:bg-primary/20 font-sans">
       <Helmet><title>Studio | Creator IA Pro</title></Helmet>
 
       {/* --- New High-Fidelity Toolbar (Lovable Architecture) --- */}
@@ -332,7 +332,7 @@ export default function Studio() {
         {/* ── Left Sidebar: Chat (Genesis) ── */}
         <div 
           className={cn(
-            "shrink-0 border-r border-white/5 bg-background flex flex-col relative z-20 transition-all duration-300",
+            "shrink-0 border-r border-black/5 bg-white flex flex-col relative z-20 transition-all duration-300 shadow-sm",
             isSidebarCollapsed ? "w-0 opacity-0 -translate-x-full" : "w-[410px] opacity-100 translate-x-0"
           )}
         >
@@ -367,7 +367,7 @@ export default function Studio() {
         </div>
 
         {/* ── Main Workspace: Preview, Code, Files, Cloud or Analytics ────────────────── */}
-        <div className="flex-1 overflow-hidden bg-background relative">
+        <div className="flex-1 overflow-hidden bg-[#FCFCFC] relative">
           <AnimatePresence mode="wait">
             <motion.div
               key={viewMode}

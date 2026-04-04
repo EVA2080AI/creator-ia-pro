@@ -78,92 +78,54 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="h-full w-full bg-white/40 backdrop-blur-3xl border-l border-white/20 flex flex-col animate-in fade-in duration-500 overflow-hidden">
+    <div className="h-full w-full bg-white/70 backdrop-blur-3xl border-l border-black/5 flex flex-col animate-in fade-in slide-in-from-right-4 duration-700 overflow-hidden relative">
+      <div className="absolute inset-0 bg-grid-black opacity-[0.02] pointer-events-none" />
       
       {/* Header */}
-      <div className="h-14 flex items-center justify-between px-6 border-b border-zinc-100/50 bg-white/40 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="h-7 w-7 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center text-primary">
-            <Sparkles className="w-3.5 h-3.5" />
+      <div className="h-16 flex items-center justify-between px-8 border-b border-black/5 bg-white/40 shrink-0 relative z-10">
+        <div className="flex items-center gap-4">
+          <div className="h-9 w-9 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center text-primary shadow-sm">
+            <Sparkles className="w-4.5 h-4.5" />
           </div>
           <div>
-            <h3 className="text-xs font-black text-zinc-900 tracking-tight leading-none mb-0.5 uppercase tracking-[0.1em]">Centro de Artefactos</h3>
-            <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">Genesis v10.0 Engineering Engine</span>
+            <h3 className="text-[11px] font-black text-zinc-900 tracking-[0.2em] leading-none mb-1 uppercase">Centro de Inteligencia</h3>
+            <div className="flex items-center gap-2">
+               <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
+               <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-zinc-400">Deep IA Protocol V18</span>
+            </div>
           </div>
         </div>
         <button 
           onClick={onClose}
-          className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:bg-zinc-50 hover:text-zinc-600 transition-all"
+          className="h-8 w-8 rounded-xl flex items-center justify-center text-zinc-400 hover:bg-black/5 hover:text-zinc-600 transition-all border border-transparent hover:border-black/5"
         >
-          <X className="h-3.5 h-3.5" />
+          <X className="h-4 w-4" />
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="p-4 flex items-center gap-1 overflow-x-auto custom-scrollbar no-scrollbar-x shrink-0">
-        <button
-          onClick={() => setActiveTab('progress')}
-          className={cn(
-            "flex-1 h-10 min-w-[80px] rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest px-3",
-            activeTab === 'progress' 
-              ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/10" 
-              : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-100"
-          )}
-        >
-          <Activity className="w-3 h-3" />
-          Plan
-        </button>
-        <button
-          onClick={() => setActiveTab('diagrams')}
-          className={cn(
-            "flex-1 h-10 min-w-[100px] rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest px-3",
-            activeTab === 'diagrams' 
-              ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/10" 
-              : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-100"
-          )}
-        >
-          <Layout className="w-3 h-3" />
-          Arqui
-        </button>
-        <button
-          onClick={() => setActiveTab('agents')}
-          className={cn(
-            "flex-1 h-10 min-w-[80px] rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest px-3",
-            activeTab === 'agents' 
-              ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/10" 
-              : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-100"
-          )}
-        >
-          <Sparkles className="w-3 h-3" />
-          Agentes
-        </button>
-        <button
-          onClick={() => setActiveTab('logs')}
-          className={cn(
-            "flex-1 h-10 min-w-[80px] rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest px-3",
-            activeTab === 'logs' 
-              ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/10" 
-              : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-100"
-          )}
-        >
-          <Zap className="w-3 h-3" />
-          Logs
-          {logs.filter(l => l.type === 'error').length > 0 && (
-            <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse ml-0.5" />
-          )}
-        </button>
-        <button
-          onClick={() => setActiveTab('terminal')}
-          className={cn(
-            "flex-1 h-10 min-w-[90px] rounded-xl flex items-center justify-center gap-1.5 transition-all font-black text-[9px] uppercase tracking-widest px-3",
-            activeTab === 'terminal' 
-              ? "bg-zinc-900 text-white shadow-lg shadow-zinc-900/10" 
-              : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 border border-zinc-100"
-          )}
-        >
-          <TerminalIcon className="w-3 h-3" />
-          Shell
-        </button>
+      <div className="p-5 flex items-center gap-1.5 overflow-x-auto custom-scrollbar no-scrollbar-x shrink-0 relative z-10">
+        {[
+          { id: 'progress', icon: Activity, label: 'Plan' },
+          { id: 'diagrams', icon: Layout, label: 'Arquitectura' },
+          { id: 'agents', icon: Sparkles, label: 'Agentes' },
+          { id: 'logs', icon: Zap, label: 'Logs' },
+          { id: 'terminal', icon: TerminalIcon, label: 'Shell' }
+        ].map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={cn(
+              "flex-1 h-10 min-w-[90px] rounded-2xl flex items-center justify-center gap-2 transition-all font-black text-[9px] uppercase tracking-widest px-4 border",
+              activeTab === tab.id 
+                ? "bg-zinc-900 text-white border-zinc-900 shadow-lg shadow-zinc-200" 
+                : "bg-white text-zinc-500 border-zinc-100 hover:bg-zinc-50 hover:text-zinc-900"
+            )}
+          >
+            <tab.icon className="w-3.5 h-3.5" />
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Content Area */}
@@ -182,35 +144,38 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                 <div 
                   key={task.id}
                   className={cn(
-                    "p-4 rounded-2xl border transition-all flex items-start gap-4",
+                    "p-5 rounded-[2rem] border transition-all duration-500 flex items-start gap-4 relative overflow-hidden",
                     task.status === 'completed' 
-                      ? "bg-emerald-50/30 border-emerald-100/50" 
+                      ? "bg-emerald-50/20 border-emerald-100 opacity-60" 
                       : task.status === 'in-progress'
                         ? "bg-primary/5 border-primary/20 shadow-sm"
-                        : "bg-white border-zinc-100"
+                        : "bg-white border-zinc-100 shadow-sm"
                   )}
                 >
-                  <div className="mt-0.5">
+                  <div className="mt-1">
                     {task.status === 'completed' ? (
-                      <div className="h-4 w-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                      <div className="h-5 w-5 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-100">
                         <CheckCircle2 className="h-3 w-3 text-white" />
                       </div>
                     ) : task.status === 'in-progress' ? (
-                      <Loader2 className="h-4 w-4 text-primary animate-spin" />
+                      <div className="relative">
+                         <div className="absolute inset-0 bg-primary/20 blur-md rounded-full animate-pulse" />
+                         <Loader2 className="h-5 w-5 text-primary animate-spin relative" />
+                      </div>
                     ) : (
-                      <Circle className="h-4 w-4 text-zinc-200" />
+                      <Circle className="h-5 w-5 text-zinc-100" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className={cn(
-                      "text-xs font-bold leading-relaxed",
-                      task.status === 'completed' ? "text-emerald-800 line-through decoration-emerald-300" : "text-zinc-700"
+                      "text-[12px] font-bold leading-relaxed tracking-tight",
+                      task.status === 'completed' ? "text-emerald-800/60 line-through decoration-emerald-200" : "text-zinc-700"
                     )}>
                       {task.text}
                     </p>
                   </div>
                   {task.status === 'in-progress' && (
-                    <Zap className="h-3 w-3 text-primary animate-pulse shrink-0" />
+                    <Zap className="h-4 w-4 text-primary animate-pulse shrink-0" />
                   )}
                 </div>
               )) : (
@@ -421,13 +386,13 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
       </div>
 
       {/* Footer Info */}
-      <div className="p-6 border-t border-zinc-100 bg-white/40 shrink-0">
+      <div className="p-8 border-t border-black/5 bg-white/40 shrink-0 relative z-10">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-900/5 border border-white/40">
-            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[9px] font-black uppercase tracking-widest text-zinc-500">Agente Autónomo Sincronizado</span>
+          <div className="flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-zinc-50/50 border border-zinc-100 shadow-inner">
+            <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary-rgb),0.3)]" />
+            <span className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-400">Deep Reasoning Sync</span>
           </div>
-          <span className="text-[8px] font-bold text-zinc-300 uppercase tracking-tighter">Genesis Engine LTS v10</span>
+          <span className="text-[10px] font-black text-zinc-300 uppercase tracking-widest">Genesis Architecture Hub</span>
         </div>
       </div>
     </div>

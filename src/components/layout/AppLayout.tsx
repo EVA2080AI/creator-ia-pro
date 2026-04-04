@@ -38,8 +38,7 @@ export function AppLayout() {
         {/* ── Main Content ── */}
         <main
           id="main-content"
-          className="flex-1 min-w-0 overflow-auto pt-0"
-          tabIndex={-1}
+          className="flex-1 min-w-0 overflow-auto pt-0 focus:outline-none"
         >
           <Outlet />
         </main>
