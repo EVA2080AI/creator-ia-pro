@@ -9,6 +9,8 @@ interface Profile {
   credits_balance: number;
   subscription_tier: string;
   avatar_url: string | null;
+  condominio_id: string | null;
+  telefono: string | null;
 }
 
 export function useProfile(userId: string | undefined) {

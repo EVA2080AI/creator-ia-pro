@@ -22,6 +22,7 @@ import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioChat } from '@/components/studio/StudioChat';
 import { SitemapView } from '@/components/studio/SitemapView';
 import { CommandPalette } from '@/components/studio/CommandPalette';
+import { StudioTopbar } from '@/components/studio/StudioTopbar';
 import { useStudioProjects, type StudioFile, type StudioProject } from '@/hooks/useStudioProjects';
 import { StudioCloud, type SupabaseConfig } from '@/components/studio/StudioCloud';
 import { useProfile } from '@/hooks/useProfile';
@@ -550,43 +551,19 @@ export default function Chat() {
     <div className="flex flex-col h-full overflow-hidden bg-background">
       <Helmet><title>Genesis IA | Creator IA Pro</title></Helmet>
 
-      {/* ── Topbar ── */}
-      <div className="flex h-[44px] items-center px-3 shrink-0 z-[40] w-full relative"
-        style={{ background: 'hsl(var(--card))', borderBottom: '1px solid hsl(var(--border) / 0.6)' }}>
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button onClick={() => setActiveProject(null)} aria-label="Volver a mis proyectos" className="flex items-center justify-center h-7 w-7 rounded-md text-muted-foreground hover:bg-white/[0.05] hover:text-foreground transition-all"><ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" /></button>
-          <button onClick={() => setIsChatOpen(!isChatOpen)} aria-label={isChatOpen ? 'Cerrar panel de chat' : 'Abrir panel de chat'} className={`flex items-center justify-center h-7 w-7 rounded-md transition-all ${isChatOpen ? 'text-foreground bg-accent/10' : 'text-muted-foreground hover:bg-white/5'}`}>{isChatOpen ? <PanelLeftClose className="h-3.5 w-3.5" aria-hidden="true" /> : <PanelLeft className="h-3.5 w-3.5" aria-hidden="true" />}</button>
-          <div className="h-4 w-px mx-1 shrink-0 bg-border/40" />
-          <div className="flex items-center gap-1.5 min-w-0">
-            <div className="h-1.5 w-1.5 rounded-full" style={{ background: isGenerating ? 'hsl(var(--warning))' : 'hsl(var(--success))' }} />
-            <button onClick={() => { setRenameTopBarValue(activeProject.name); setRenamingTopBar(true); }} aria-label={`Renombrar proyecto: ${activeProject.name}`} className="text-[13px] font-bold text-foreground/90 truncate max-w-[150px]">{activeProject.name}</button>
-          </div>
-        </div>
-        <div className="flex items-center gap-0.5 ml-4">
-          {([
-            { id: 'code',    icon: Code2,    label: 'Código'   },
-            { id: 'preview', icon: Monitor,  label: 'Preview'  },
-            { id: 'split',   icon: Columns,  label: 'Split'    },
-            { id: 'files',   icon: Files,    label: 'Files'    },
-            { id: 'history', icon: History,  label: 'History'  },
-          ] as { id: PanelView; icon: any; label: string }[]).map(({ id, icon: Icon, label }) => (
-            <button key={id} onClick={() => setPanelView(id)}
-              title={label}
-              className={`flex items-center gap-1.5 h-7 px-2.5 rounded-md text-[11px] font-bold transition-all ${panelView === id ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-white/5'}`}>
-              <Icon className="h-3.5 w-3.5 shrink-0" />
-              <span className="hidden sm:inline">{label}</span>
-            </button>
-          ))}
-        </div>
-        <div className="flex-1" />
-        <div className="flex items-center gap-2">
-          {profile?.subscription_tier !== 'pymes' && (
-            <button onClick={() => navigate('/pricing')} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all"><Zap className="h-3 w-3" /> Upgrade</button>
-          )}
-          <button onClick={() => setDeployOpen(!deployOpen)} aria-label="Publicar proyecto" className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[11px] font-bold bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition-all">Publish</button>
-          {profile?.avatar_url && <img src={profile.avatar_url} alt="" className="h-7 w-7 rounded-full border border-border/40 ml-1" />}
-        </div>
-      </div>
+      {/* ── Topbar (Replicated Premium Style) ── */}
+      <StudioTopbar
+        projectName={activeProject.name}
+        viewMode={(panelView as any)}
+        onViewModeChange={(mode) => setPanelView(mode as any)}
+        deviceMode={deviceMode as any}
+        onDeviceModeChange={setDeviceMode as any}
+        isSaving={isGenerating}
+        onShare={() => { navigator.clipboard.writeText(window.location.href); toast.success('Enlace copiado'); }}
+        onBack={() => setActiveProject(null)}
+        onGithubSync={() => setGithubOpen(true)}
+        onPublish={() => setDeployOpen(!deployOpen)}
+      />
 
       {/* ── Main Content ── */}
       <div className="flex-1 grid overflow-hidden relative" style={{ gridTemplateColumns: `${isChatOpen ? '380px' : '0px'} 1fr`, transition: 'grid-template-columns 350ms cubic-bezier(0.4, 0, 0.2, 1)' }}>

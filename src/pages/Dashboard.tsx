@@ -12,7 +12,7 @@ import {
   Image, LayoutGrid, ArrowRight, Coins,
   TrendingUp, MessageSquare, FileText, PenTool, Megaphone,
   Type, Hash, CreditCard, Settings, Zap, Plus,
-  FolderPlus, Box, ChevronRight, Rocket
+  FolderPlus, Box, ChevronRight, Rocket, Building2, Users, Wallet, AlertCircle
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -38,6 +38,7 @@ const Dashboard = () => {
   const [spacesCount, setSpacesCount] = useState(0);
   const [usageData, setUsageData] = useState<{ name: string; credits: number }[]>([]);
   const [toolData, setToolData] = useState<{ name: string; value: number; color: string }[]>([]);
+  const [condominioStats, setCondominioStats] = useState<{ total_unidades: number; unidades_al_dia: number; recaudo_mes: number; cartera_mora: number } | null>(null);
 
   useEffect(() => {
     if (searchParams.get("checkout") === "success") {
@@ -69,6 +70,12 @@ const Dashboard = () => {
         setSpacesCount(spacesCountData.count || 0);
         setSpaces(spacesData.data || []);
 
+        if (profile?.condominio_id) {
+          // @ts-ignore
+          const { data: statsData } = await supabase.rpc("get_condominio_stats", { _condominio_id: profile.condominio_id });
+          if (statsData) setCondominioStats(statsData as any);
+        }
+
         const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
         const dayMap: Record<string, { name: string; credits: number }> = {};
         for (let i = 6; i >= 0; i--) {
@@ -98,7 +105,7 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, [user]);
+  }, [user, profile?.condominio_id]);
 
   const tierLabels: Record<string, string> = { free: "Gratis", starter: "Starter", creator: "Creator", pymes: "Pymes" };
   const currentTier = profile?.subscription_tier || "free";
@@ -123,6 +130,13 @@ const Dashboard = () => {
     { label: "Espacios", value: spacesCount, icon: LayoutGrid, color: "text-rose-400" },
     { label: "Activos", value: assetsCount, icon: Image, color: "text-emerald-400" },
   ];
+
+  const resStats = condominioStats ? [
+    { label: "Unidades", value: condominioStats.total_unidades, icon: Building2, color: "text-blue-500" },
+    { label: "Al Día", value: condominioStats.unidades_al_dia, icon: Users, color: "text-emerald-500" },
+    { label: "Recaudo Mes", value: `$${condominioStats.recaudo_mes.toLocaleString()}`, icon: Wallet, color: "text-primary" },
+    { label: "Mora", value: `$${condominioStats.cartera_mora.toLocaleString()}`, icon: AlertCircle, color: "text-rose-500" },
+  ] : [];
 
   const aiApps = [
     { icon: Zap,        label: "Genesis IDE",   desc: "BuilderAI · Lovable", path: "/chat"         },
