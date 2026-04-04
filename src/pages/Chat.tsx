@@ -119,16 +119,14 @@ function WelcomeScreen({
   
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file) onFileSelect?.(file);
+    // handled by parent Chat onDrop wrapper to allow full folder drops
   };
 
   const greeting = displayName ? `¿Listo para construir, ${displayName.split(' ')[0]}?` : '¿Listo para construir?';
 
   return (
     <div className="flex h-full overflow-hidden" 
-      onDrop={handleDrop} 
-      onDragOver={(e) => e.preventDefault()}
+      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
 
       {/* ── Main Area ─────────────────────────────────────────────────── */}
@@ -170,17 +168,17 @@ function WelcomeScreen({
               
               <button 
                 onClick={() => document.getElementById('welcome-file-input')?.click()}
-                className="absolute top-6 left-6 text-zinc-400 hover:text-zinc-900 transition-colors z-30"
+                className="absolute top-4 left-5 text-zinc-400 hover:text-zinc-900 transition-colors z-30 p-1 rounded-md hover:bg-zinc-100"
               >
                 <Plus className="h-5 w-5" />
               </button>
               
               {/* File chip */}
               {pendingFile && (
-                <div className="absolute top-6 left-14 flex items-center gap-2 px-2 py-1 rounded-md bg-zinc-100 border border-zinc-200 animate-in fade-in zoom-in duration-200 z-30">
+                <div className="absolute top-4 left-14 flex items-center gap-2 px-2 py-1 rounded-md bg-zinc-100 border border-zinc-200 animate-in fade-in zoom-in duration-200 z-30">
                   <Paperclip className="h-3 w-3 text-zinc-500" />
                   <span className="text-[10px] font-bold text-zinc-600 truncate max-w-[120px]">{pendingFile.name}</span>
-                  <button onClick={(e) => { e.stopPropagation(); onRemoveFile?.(); }} className="text-zinc-400 hover:text-zinc-900">
+                  <button onClick={(e) => { e.stopPropagation(); onRemoveFile?.(); }} className="text-zinc-400 hover:text-zinc-900 p-0.5 rounded hover:bg-zinc-200">
                     <X className="h-3 w-3" />
                   </button>
                 </div>
@@ -192,7 +190,7 @@ function WelcomeScreen({
                 onInput={handleTextareaInput}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
                 placeholder="Describe qué quieres construir..."
-                className={`w-full bg-transparent pr-32 pt-6 pb-6 text-[16px] font-medium text-zinc-800 placeholder:text-zinc-400 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px] ${pendingFile ? 'pl-48' : 'pl-14'}`}
+                className={`w-full bg-transparent pr-32 pb-6 text-[16px] font-medium text-zinc-800 placeholder:text-zinc-400 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px] ${pendingFile ? 'pt-14 pl-5' : 'pt-5 pl-14'}`}
                 rows={1}
                 style={{ overflowY: 'hidden' }}
               />
@@ -223,18 +221,27 @@ function WelcomeScreen({
             style={{ background: '#ffffff', borderTop: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 -20px 60px rgba(0,0,0,0.1)' }}>
 
             {/* Tabs Header */}
-            <div className="flex items-center gap-8 px-12 pt-10 pb-4 shrink-0">
-              {(['projects', 'recents', 'templates'] as WelcomeTab[]).map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className="text-[14px] font-bold transition-all relative pb-2 uppercase tracking-widest"
-                  style={activeTab === tab ? { color: 'hsl(var(--primary))' } : { color: 'hsl(var(--text-secondary))' }}
-                >
-                  {tab === 'projects' ? 'Mis proyectos' : tab === 'recents' ? 'Recientes' : 'Plantillas'}
-                  {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />}
-                </button>
-              ))}
+            <div className="flex items-center justify-between px-12 pt-10 pb-4 shrink-0">
+              <div className="flex items-center gap-8">
+                {(['projects', 'recents', 'templates'] as WelcomeTab[]).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className="text-[14px] font-bold transition-all relative pb-2 uppercase tracking-widest"
+                    style={activeTab === tab ? { color: 'hsl(var(--primary))' } : { color: 'hsl(var(--text-secondary))' }}
+                  >
+                    {tab === 'projects' ? 'Mis proyectos' : tab === 'recents' ? 'Recientes' : 'Plantillas'}
+                    {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />}
+                  </button>
+                ))}
+              </div>
+              <button 
+                onClick={() => document.getElementById('welcome-folder-input')?.click()}
+                className="flex items-center gap-2 px-4 py-1.5 rounded-xl border border-zinc-200 bg-white text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 transition-all text-[11px] font-black uppercase tracking-widest shadow-sm hover:shadow-md"
+              >
+                <UploadCloud className="w-3.5 h-3.5 text-primary" />
+                Importar Carpeta
+              </button>
             </div>
 
             {/* Tab content area */}
@@ -428,6 +435,133 @@ export default function Chat() {
     reader.readAsText(file);
   };
 
+  const handleFolderUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    toast.info('Construyendo proyecto desde la carpeta...');
+    const newProjectFiles: Record<string, StudioFile> = {};
+    const readPromises = Array.from(files).map((file) => {
+      return new Promise<void>((resolve) => {
+        const pathPart = file.webkitRelativePath || file.name;
+        if (pathPart.includes('node_modules/') || pathPart.includes('.git/') || file.type.startsWith('image/')) {
+          resolve(); return;
+        }
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const content = event.target?.result as string;
+          if (content) {
+            const pathParts = pathPart.split('/');
+            const filePath = pathParts.length > 1 ? pathParts.slice(1).join('/') : pathPart;
+            let lang = 'plaintext';
+            if (file.name.endsWith('.ts') || file.name.endsWith('.tsx')) lang = 'tsx';
+            else if (file.name.endsWith('.js') || file.name.endsWith('.jsx')) lang = 'jsx';
+            else if (file.name.endsWith('.html')) lang = 'html';
+            else if (file.name.endsWith('.css')) lang = 'css';
+            else if (file.name.endsWith('.json')) lang = 'json';
+            else if (file.name.endsWith('.md')) lang = 'markdown';
+            newProjectFiles[filePath] = { language: lang, content };
+          }
+          resolve();
+        };
+        reader.onerror = () => resolve();
+        reader.readAsText(file);
+      });
+    });
+
+    await Promise.all(readPromises);
+
+    if (Object.keys(newProjectFiles).length > 0) {
+      if (activeProject) {
+        await updateProjectFiles(activeProject.id, newProjectFiles);
+      } else {
+        const p = await createProject('Proyecto Importado');
+        if (p) {
+          await updateProjectFiles(p.id, newProjectFiles);
+          setActiveProject(p);
+        }
+      }
+      toast.success('Proyecto importado exitosamente');
+    } else {
+      toast.error('No se encontraron archivos de texto válidos.');
+    }
+    e.target.value = '';
+  };
+
+  // Full folder/file drag and drop using DataTransferItem recursion
+  const handleWorkspaceDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!e.dataTransfer.items) return;
+    const items = e.dataTransfer.items;
+    
+    // Si solo sueltan un archivo simple y no hay proyecto activo, actuamos onFileSelect (como el adjuntar archivo simple)
+    if (!activeProject && items.length === 1 && items[0].webkitGetAsEntry()?.isFile) {
+       const f = items[0].getAsFile();
+       if (f) handleFileSelect(f);
+       return;
+    }
+
+    toast.info('Extrayendo archivos...');
+    const newProjectFiles: Record<string, StudioFile> = {};
+
+    const traverseFileTree = async (item: any, path?: string): Promise<void> => {
+      path = path || "";
+      if (item.isFile) {
+        return new Promise<void>((resolve) => {
+          item.file((file: File) => {
+            if(file.name.includes('node_modules') || file.type.startsWith('image/')){ resolve(); return; }
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              let lang = 'plaintext';
+              if (file.name.endsWith('.ts') || file.name.endsWith('.tsx')) lang = 'tsx';
+              else if (file.name.endsWith('.js') || file.name.endsWith('.jsx')) lang = 'jsx';
+              else if (file.name.endsWith('.html')) lang = 'html';
+              else if (file.name.endsWith('.css')) lang = 'css';
+              else if (file.name.endsWith('.json')) lang = 'json';
+              else if (file.name.endsWith('.md')) lang = 'markdown';
+              const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+              newProjectFiles[cleanPath + file.name] = { language: lang, content: ev.target?.result as string };
+              resolve();
+            };
+            reader.readAsText(file);
+          });
+        });
+      } else if (item.isDirectory) {
+        const dirReader = item.createReader();
+        return new Promise<void>((resolve) => {
+          dirReader.readEntries(async (entries: any[]) => {
+            for (let i = 0; i < entries.length; i++) {
+              await traverseFileTree(entries[i], path + item.name + "/");
+            }
+            resolve();
+          });
+        });
+      }
+    };
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i].webkitGetAsEntry();
+      if (item) await traverseFileTree(item);
+    }
+
+    if (Object.keys(newProjectFiles).length > 0) {
+      if (activeProject) {
+        await updateProjectFiles(activeProject.id, newProjectFiles);
+      } else {
+        const p = await createProject('Proyecto Importado');
+        if (p) {
+          await updateProjectFiles(p.id, newProjectFiles);
+          setActiveProject(p);
+        }
+      }
+      toast.success('Proyecto importado exitosamente');
+    } else {
+      toast.error('No se encontraron archivos de texto válidos.');
+    }
+  };
+
   const handleAddFile = (name: string) => {
     if (!activeProject) return;
     const updated = {
@@ -539,6 +673,16 @@ export default function Chat() {
               e.target.value = '';
             }}
           />
+          <input 
+            type="file" 
+            id="welcome-folder-input" 
+            className="hidden" 
+            onChange={handleFolderUpload}
+            /* @ts-expect-error webkitdirectory */
+            webkitdirectory="true" 
+            directory="true" 
+            multiple 
+          />
         </div>
         <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} files={{}} projects={projects} onSelectFile={() => {}} onSelectProject={(p) => { setActiveProject(p); setCmdPaletteOpen(false); }} onAction={handleCmdAction} />
       </div>
@@ -548,7 +692,10 @@ export default function Chat() {
   const credits = profile?.credits_balance ?? 0;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-background">
+    <div className="flex flex-col h-full overflow-hidden bg-background relative"
+      onDrop={handleWorkspaceDrop}
+      onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+    >
       <Helmet><title>Genesis IA | Creator IA Pro</title></Helmet>
 
       {/* ── Topbar (Replicated Premium Style) ── */}

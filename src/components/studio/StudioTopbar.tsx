@@ -50,7 +50,7 @@ export function StudioTopbar({
   onPublish
 }: StudioTopbarProps) {
   return (
-    <header className="h-[60px] w-full border-b border-white/[0.08] bg-[#0A0A0C]/70 backdrop-blur-[40px] saturate-[1.2] flex items-center justify-between px-6 shrink-0 transition-all z-[100] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)] selection:bg-primary/30">
+    <header className="h-[48px] w-full border-b border-black/[0.08] bg-white/[0.85] backdrop-blur-[40px] saturate-[1.2] flex items-center justify-between px-6 shrink-0 transition-all z-[100] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] selection:bg-primary/30">
       
       {/* --- Left: Context & Layout --- */}
       <div className="flex items-center gap-1">
