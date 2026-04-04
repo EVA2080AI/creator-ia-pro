@@ -19,34 +19,43 @@ import { useSidebarV2 } from '@/hooks/useSidebarV2';
 import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
 import { toast } from 'sonner';
 
+// ── Tier Hierarchy ──────────────────────────────────────────────────────────
+const TIER_LEVELS: Record<string, number> = {
+  'free': 0,
+  'starter': 1,
+  'creator': 2,
+  'pymes': 3,
+  'agency': 4,
+  'admin': 5
+};
+
+const TIER_CONFIG: Record<string, { label: string, color: string, bg: string }> = {
+  'starter': { label: 'STARTER', color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100' },
+  'creator': { label: 'CREATOR', color: 'text-violet-600', bg: 'bg-violet-50 border-violet-100' },
+  'pymes':   { label: 'PYMES',   color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-100' },
+  'agency':  { label: 'AGENCY',  color: 'text-amber-700', bg: 'bg-amber-50 border-amber-100' },
+  'admin':   { label: 'ADMIN',   color: 'text-red-700', bg: 'bg-red-50 border-red-100' },
+};
+
 // ── Navigation structure ──────────────────────────────────────────────────────
 const NAV_MAIN = [
-  { path: '/dashboard',    label: 'Inicio',        icon: Home,           requiresPymes: false },
-  { 
-    id: 'group-studio',
-    label: 'Studio Flow',   
-    icon: LayoutTemplate, 
-    requiresPymes: true,
-    subItems: [
-      { path: '/studio-flow', label: 'Canvas IA', icon: LayoutTemplate },
-      { path: '/hub',         label: 'Templates', icon: Sparkles },
-      { path: '/spaces',      label: 'Proyectos', icon: FolderOpen },
-    ]
-  },
-  { path: '/code',         label: 'Editor',        icon: Code2,          requiresPymes: false },
-  { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     requiresPymes: false },
-  { path: '/antigravity',  label: 'Antigravity',   icon: Bot,            requiresPymes: false },
+  { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
+  { path: '/code',         label: 'Editor',        icon: Code2,          minTier: 'starter' },
+  { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'creator' },
+  { path: '/hub',          label: 'Templates',     icon: Sparkles,       minTier: 'creator' },
+  { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'creator' },
+  { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     minTier: 'free' },
+  { path: '/antigravity',  label: 'Antigravity',   icon: Bot,            minTier: 'pymes' },
 ];
 
 const NAV_SOCIAL = [
-  { path: '/sharescreen',  label: 'Compartir',     icon: Share2,         requiresPymes: false },
-  { path: '/history',      label: 'Historial',     icon: History,        requiresPymes: false },
+  { path: '/sharescreen',  label: 'Compartir',     icon: Share2,         minTier: 'free' },
 ];
 
 const NAV_SYSTEM = [
-  { path: '/admin',         label: 'Panel Control', icon: ShieldCheck,   requiresPymes: false },
-  { path: '/system-status', label: 'Estatus',       icon: Activity,      requiresPymes: false },
-  { path: '/product-backlog', label: 'Roadmap',     icon: List,          requiresPymes: false },
+  { path: '/admin',         label: 'Panel Control', icon: ShieldCheck,   minTier: 'admin' },
+  { path: '/system-status', label: 'Estatus',       icon: Activity,      minTier: 'admin' },
+  { path: '/product-backlog', label: 'Roadmap',     icon: List,          minTier: 'free' },
 ];
 
 const NAV_BOTTOM = [
@@ -67,9 +76,8 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   // Acordión Menu State
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
-  const isPymes = ['pymes', 'agency', 'admin'].includes(
-    profile?.subscription_tier?.toLowerCase() ?? 'free'
-  );
+  const userTier = profile?.subscription_tier?.toLowerCase() ?? 'free';
+  const userTierLevel = TIER_LEVELS[userTier] || 0;
 
   const isActive = (path?: string) => {
     if (!path) return false;
@@ -77,43 +85,24 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
     (path !== '/dashboard' && location.pathname.startsWith(path));
   };
 
-  const isGroupActive = (subItems: any[]) => subItems.some(item => isActive(item.path));
-
-  // Automatically open group if a child is active initially
-  useEffect(() => {
-    const newGroups = { ...openGroups };
-    for (const item of NAV_MAIN) {
-      if (item.subItems && isGroupActive(item.subItems)) {
-        newGroups[item.id!] = true;
-      }
-    }
-    setOpenGroups(newGroups);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname]);
-
-  const handleNav = (path: string, requiresPymes = false, label = '') => {
+  const handleNav = (path: string, minTier = 'free', label = '') => {
     const isPublic = ['/pricing', '/descargar', '/product-backlog'].includes(path);
     if (!user && !isPublic) {
       navigate('/auth');
       return;
     }
-    if (requiresPymes && !isPymes) {
-      toast.error('Funcionalidad exclusiva', {
-        description: `"${label}" es exclusivo del plan Pymes.`,
-        action: { label: 'Ver planes', onClick: () => navigate('/pricing') },
-        duration: 6000,
+
+    const requiredLevel = TIER_LEVELS[minTier] || 0;
+    
+    if (userTierLevel < requiredLevel) {
+      toast.error('Acceso Restringido', {
+        description: `"${label}" requiere el plan ${minTier.toUpperCase()} o superior.`,
+        action: { label: 'Mejorar Plan', onClick: () => navigate('/pricing') },
+        duration: 5000,
       });
       return;
     }
     navigate(path);
-  };
-
-  const toggleGroup = (id: string) => {
-    // Si el sidebar principal está colapsado, abrirlo
-    if (!globalExpanded && !isMobile) {
-      setGlobalExpanded(true);
-    }
-    setOpenGroups(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleSignOut = async () => {
@@ -183,99 +172,18 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
               <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-60">Principal</span>
             </div>
           )}
-          {NAV_MAIN.map((item) => {
-            if (item.subItems) {
-              const activeGroup = isGroupActive(item.subItems);
-              const isOpen = openGroups[item.id!];
-              
-              return (
-                <div key={item.id} className="space-y-0.5">
-                  <button
-                    onClick={() => toggleGroup(item.id!)}
-                    className={cn(
-                      'group w-full flex items-center rounded-xl transition-all duration-200 text-[12.5px] font-medium outline-none',
-                      (globalExpanded || isMobile) ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
-                      activeGroup
-                        ? 'bg-primary/10 text-primary border border-primary/20 font-black shadow-sm'
-                        : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent'
-                    )}
-                  >
-                    <item.icon className={cn(
-                      'shrink-0 transition-all duration-200',
-                      (globalExpanded || isMobile) ? 'w-4 h-4' : 'w-5 h-5',
-                      activeGroup ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-700 group-hover:scale-110'
-                    )} />
-                    {(globalExpanded || isMobile) && (
-                      <>
-                        <span className="truncate flex-1 text-left">{item.label}</span>
-                        {isOpen ? <ChevronUp className="w-3.5 h-3.5 opacity-50" /> : <ChevronDown className="w-3.5 h-3.5 opacity-50" />}
-                      </>
-                    )}
-                    {(globalExpanded || isMobile) && activeGroup && !isOpen && (
-                      <motion.div 
-                        layoutId="active-nav-glow" 
-                        className="w-1.5 h-1.5 rounded-full bg-primary ml-2"
-                      />
-                    )}
-                  </button>
-
-                  <AnimatePresence>
-                    {(globalExpanded || isMobile) && isOpen && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="pl-9 pr-1 pt-0.5 pb-1 space-y-0.5 border-l-2 border-primary/10 ml-4">
-                          {item.subItems.map((subItem) => {
-                            const subActive = isActive(subItem.path);
-                            return (
-                              <button
-                                key={subItem.path}
-                                onClick={() => handleNav(subItem.path, item.requiresPymes, subItem.label)}
-                                className={cn(
-                                  'group w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[12px] font-medium transition-all duration-150',
-                                  subActive 
-                                    ? 'bg-primary/5 text-primary font-bold' 
-                                    : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50'
-                                )}
-                              >
-                                {subItem.icon && (
-                                  <subItem.icon className={cn(
-                                    "w-3.5 h-3.5 shrink-0", 
-                                    subActive ? "text-primary" : "text-zinc-400"
-                                  )} />
-                                )}
-                                <span className={cn("truncate flex-1 text-left", !subItem.icon && "pl-1.5")}>
-                                  {subItem.label}
-                                </span>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            }
-
-            // Regular items
-            return (
-              <NavItem 
-                key={item.path} 
-                path={item.path!}
-                label={item.label}
-                icon={item.icon}
-                active={isActive(item.path)} 
-                expanded={globalExpanded || isMobile}
-                isPymes={isPymes}
-                onClick={() => handleNav(item.path!, item.requiresPymes, item.label)} 
-              />
-            );
-          })}
+          {NAV_MAIN.map((item) => (
+            <NavItem 
+              key={item.path} 
+              path={item.path}
+              label={item.label}
+              icon={item.icon}
+              active={isActive(item.path)} 
+              expanded={globalExpanded || isMobile}
+              minTier={item.minTier}
+              onClick={() => handleNav(item.path, item.minTier, item.label)} 
+            />
+          ))}
         </div>
 
         {/* 2. CONTENIDO & SOCIAL */}
@@ -293,8 +201,8 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
               icon={item.icon}
               active={isActive(item.path)} 
               expanded={globalExpanded || isMobile}
-              isPymes={isPymes}
-              onClick={() => handleNav(item.path, item.requiresPymes, item.label)} 
+              minTier={item.minTier}
+              onClick={() => handleNav(item.path, item.minTier, item.label)} 
             />
           ))}
           <NavItem 
@@ -303,9 +211,9 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
             icon={Brain}
             active={isActive('/chat')}
             expanded={globalExpanded || isMobile}
-            isPymes={isPymes}
+            minTier="starter"
             className="text-primary hover:bg-primary/5"
-            onClick={() => navigate('/chat')}
+            onClick={() => handleNav('/chat', 'starter', 'Genesis IA')}
           />
         </div>
 
@@ -328,8 +236,8 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
                 icon={item.icon}
                 active={isActive(item.path)} 
                 expanded={globalExpanded || isMobile}
-                isPymes={isPymes}
-                onClick={() => handleNav(item.path, item.requiresPymes, item.label)} 
+                minTier={item.minTier}
+                onClick={() => handleNav(item.path, item.minTier, item.label)} 
               />
             ))}
           </div>
@@ -460,11 +368,13 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
 
 // ── NavItem Subcomponent ──
 function NavItem({ 
-  path, label, icon: Icon, active, expanded, onClick, className 
+  path, label, icon: Icon, active, expanded, onClick, className, minTier = 'free' 
 }: { 
   path: string, label: string, icon: any, active: boolean, expanded: boolean, 
-  isPymes: boolean, onClick: () => void, className?: string 
+  onClick: () => void, className?: string, minTier?: string
 }) {
+  const config = TIER_CONFIG[minTier.toLowerCase()];
+
   return (
     <button
       onClick={onClick}
@@ -482,8 +392,20 @@ function NavItem({
         expanded ? 'w-4 h-4' : 'w-5 h-5',
         active ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-700 group-hover:scale-110'
       )} />
-      {expanded && <span className="truncate flex-1 text-left">{label}</span>}
-      {expanded && active && (
+      {expanded && (
+        <span className="truncate flex-1 text-left flex items-center justify-between gap-2">
+          {label}
+          {config && (
+            <span className={cn(
+              "text-[8px] font-black px-1.5 py-0.5 rounded-md border tracking-tighter shrink-0",
+              config.bg, config.color
+            )}>
+              {config.label}
+            </span>
+          )}
+        </span>
+      )}
+      {expanded && active && !config && (
         <motion.div 
           layoutId="active-nav-glow" 
           className="w-1.5 h-1.5 rounded-full bg-primary ml-2"

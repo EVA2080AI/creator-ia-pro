@@ -963,22 +963,8 @@ export function StudioChat({
         className="flex-1 min-h-0 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar"
         onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
 
-        {/* Starter chips — shown only when chat is empty (welcome only) */}
-        {messages.length === 1 && messages[0].id === 'welcome' && !isGenerating && (
-          <div className="px-1 pb-2">
-            <p className="text-[9px] font-bold text-muted-foreground/40 uppercase tracking-[0.3em] mb-2 px-1">Quick start</p>
-            <div className="grid grid-cols-2 gap-1.5">
-              {STARTER_CHIPS.map(chip => (
-                <button key={chip.label} onClick={() => handleSend(chip.prompt)}
-                  className="flex items-center gap-2 p-2.5 rounded-xl text-left transition-all group/chip bg-card/40 border border-border hover:border-primary/40 hover:bg-primary/5"
-                >
-                  <span className="text-base shrink-0">{chip.emoji}</span>
-                  <span className="text-[11px] font-semibold text-muted-foreground group-hover/chip:text-foreground transition-colors leading-tight">{chip.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+
+
 
         {messages.map((msg) => (
           <div key={msg.id} className={`group ${msg.role === 'user' ? 'flex justify-end mb-3' : 'mb-4'}`}>

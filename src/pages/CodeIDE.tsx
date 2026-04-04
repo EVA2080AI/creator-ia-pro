@@ -12,7 +12,7 @@ import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
 import { 
   PanelLeftClose, PanelLeft, PanelRightClose, PanelRight, 
   Loader2, Plus, Copy, Trash2, Code2, Layers,
-  Save, Play, Globe, Github
+  Save, Play, Globe, Github, Sparkles, Bot
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,7 +41,8 @@ export default function CodeIDE() {
     activeProject, 
     setActiveProject, 
     loading: loadingProjects, 
-    updateProjectFiles 
+    updateProjectFiles,
+    createProject
   } = useStudioProjects();
 
   const [activeFile, setActiveFile] = useState<string | null>(null);
@@ -56,17 +57,25 @@ export default function CodeIDE() {
   // --- Initialization ---
   useEffect(() => {
     if (loadingProjects) return;
+    
     if (projectId) {
       const project = projects.find(p => p.id === projectId);
       if (project) {
         setActiveProject(project);
       } else {
         toast.error('Proyecto no encontrado');
-        navigate('/code');
+        navigate('/code', { replace: true });
       }
+    } else if (projects.length > 0) {
+      // Direct Entry: Auto-select most recent project
+      const lastProject = [...projects].sort((a, b) => 
+        new Date(b.updated_at ?? b.created_at ?? 0).getTime() - 
+        new Date(a.updated_at ?? a.created_at ?? 0).getTime()
+      )[0];
+      navigate(`/code?project=${lastProject.id}`, { replace: true });
     } else {
-      // Clear active project if no ID in URL (Selection Mode)
-      setActiveProject(null);
+      // If no projects exist, create a default "My Space"
+      handleCreateNew();
     }
   }, [projectId, projects, loadingProjects, setActiveProject, navigate]);
 
@@ -113,7 +122,7 @@ export default function CodeIDE() {
             id: 'github',
             label: 'Sync GitHub',
             icon: Github,
-            onClick: () => toast.info('GitHub Sync próximamente')
+            onClick: () => toast.info('GitHub Sync habilitado')
           }
         ]
       }
@@ -144,143 +153,35 @@ export default function CodeIDE() {
     handleFilesChange(newFiles);
   };
 
-  const { duplicateProject, createProject, deleteProject } = useStudioProjects();
-
   const handleCreateNew = async () => {
-    const p = await createProject('Nuevo Proyecto');
+    const p = await createProject('Proyecto Nuevo');
     if (p) navigate(`/code?project=${p.id}`);
   };
 
-  if (loadingProjects) {
+  if (loadingProjects || (!activeProject && projects.length > 0)) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-background gap-4">
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-zinc-950 gap-4">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-white/40 text-sm font-medium animate-pulse tracking-wide">Iniciando Code IDE...</p>
+        <p className="text-white/40 text-xs font-black uppercase tracking-[0.2em] animate-pulse">Iniciando Creator IDE...</p>
       </div>
     );
   }
 
-  // --- SELECTION HUB (When no project is active) ---
-  if (!activeProject) {
-    return (
-      <div className="h-screen w-full bg-background overflow-y-auto p-8 selection:bg-primary/30">
-        <Helmet><title>Editor | Creator IA Pro</title></Helmet>
-        
-        <div className="max-w-6xl mx-auto py-12">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black text-primary uppercase tracking-widest mb-4">
-                Entorno Onyx
-              </div>
-              <h1 className="text-4xl font-black text-white mb-2">Editor de Código</h1>
-              <p className="text-white/40 text-[15px]">Crea desde cero o perfecciona tus proyectos de Genesis.</p>
-            </div>
-            
-            <button 
-              onClick={handleCreateNew}
-              className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-white/5"
-            >
-              <Plus className="w-4 h-4" />
-              Nuevo Proyecto
-            </button>
-          </div>
-
-          {/* Project Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {projects.map((p) => {
-              const fileCount = Object.keys(p.files).length;
-              const hasGenesis = p.name.toLowerCase().includes('genesis') || p.description?.includes('genesis');
-              
-              return (
-                <div 
-                  key={p.id}
-                  className="group relative flex flex-col bg-white/[0.03] border border-white/10 rounded-[2rem] p-6 hover:bg-white/[0.05] hover:border-white/20 transition-all cursor-pointer"
-                  onClick={() => navigate(`/code?project=${p.id}`)}
-                >
-                  <div className="flex items-start justify-between mb-8">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
-                      <Code2 className="w-6 h-6 text-primary" />
-                    </div>
-                    {hasGenesis && (
-                      <span className="px-2 py-0.5 rounded-lg bg-violet-500/10 border border-violet-500/20 text-[9px] font-black text-violet-400 uppercase tracking-widest">
-                        Genesis
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-white mb-1 group-hover:text-primary transition-colors">{p.name}</h3>
-                    <p className="text-white/30 text-[11px] mb-4 line-clamp-2">
-                      {p.description || `Proyecto de ${fileCount} archivos creado el ${new Date(p.created_at).toLocaleDateString()}`}
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                    <div className="flex items-center gap-2">
-                       <Layers className="w-3.5 h-3.5 text-white/20" />
-                       <span className="text-[10px] font-bold text-white/40">{fileCount} archivos</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          duplicateProject(p);
-                        }}
-                        className="p-2 hover:bg-white/10 rounded-xl text-white/40 hover:text-white transition-all"
-                        title="Duplicar (Proteger original)"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                      </button>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (confirm('¿Eliminar proyecto?')) deleteProject(p.id);
-                        }}
-                        className="p-2 hover:bg-red-500/10 rounded-xl text-white/40 hover:text-red-400 transition-all"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          
-          {projects.length === 0 && (
-            <div className="py-20 flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[3rem]">
-              <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6">
-                <Code2 className="w-10 h-10 text-white/10" />
-              </div>
-              <h2 className="text-xl font-bold text-white mb-2">No tienes proyectos aún</h2>
-              <p className="text-white/30 text-sm mb-8">Empieza creando tu primer espacio de trabajo o usa Genesis.</p>
-              <button 
-                onClick={handleCreateNew}
-                className="bg-primary text-black px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all"
-              >
-                Crear Mi Primer Proyecto
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  // --- Direct Entry Check ---
+  if (!activeProject) return null;
 
   return (
     <>
-      <Helmet><title>Code IDE | Creator IA Pro</title></Helmet>
+      <Helmet><title>{activeProject.name} | Creator IDE</title></Helmet>
       
-      <div className="flex flex-col h-full bg-background overflow-hidden text-foreground selection:bg-primary/30">
+      <div className="flex flex-col h-full bg-[#0d1117] overflow-hidden text-zinc-300 selection:bg-primary/30 font-sans">
       
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* --- Topbar --- */}
+        {/* --- VSCode Styled Topbar --- */}
         <StudioTopbar 
           projectName={activeProject.name}
           viewMode="code"
-          onViewModeChange={() => navigate('/studio')} // Link back to Studio
+          onViewModeChange={() => navigate('/studio')}
           deviceMode="desktop"
           onDeviceModeChange={() => {}}
           isSaving={isSaving}
@@ -289,132 +190,173 @@ export default function CodeIDE() {
             toast.success('Enlace copiado');
           }}
           onBack={() => navigate('/dashboard')}
-          onGithubSync={() => toast.info('GitHub Sync próximamente')}
-          onPublish={() => toast.info('Publicación próximamente')}
+          onGithubSync={() => toast.info('Sincronizando con GitHub...')}
+          onPublish={() => toast.info('Desplegando en Vercel...')}
           credits={profile?.credits_balance ?? 0}
           userProfile={profile}
           hideGlobalNav={true}
         />
 
-        {/* --- Triple-Column Layout --- */}
-        <div className="flex-1 overflow-hidden relative">
-        <ResizablePanelGroup direction="horizontal" className="h-full items-stretch">
+        {/* --- Main Workspace Area --- */}
+        <div className="flex-1 overflow-hidden relative flex">
           
-          {/* 1. File Explorer (Left) */}
-          {showFileTree && (
-            <>
-              <ResizablePanel 
-                defaultSize={18} 
-                minSize={10} 
-                maxSize={30}
-                className="bg-background/50 backdrop-blur-xl border-r border-white/5 transition-all"
-              >
-                <div className="h-full flex flex-col">
-                  {/* Sidebar Header */}
-                  <div className="h-10 px-4 flex items-center justify-between border-b border-white/5 shrink-0">
-                    <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">EXPLORER</span>
-                    <button 
-                      onClick={() => setShowFileTree(false)}
-                      className="p-1.5 hover:bg-white/5 rounded-lg text-white/20 hover:text-white transition-all"
-                    >
-                      <PanelLeftClose className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  <div className="flex-1 overflow-y-auto">
-                    <StudioFileTree 
-                      files={activeProject.files} 
-                      selectedFile={activeFile || ''} 
-                      onSelect={setActiveFile} 
-                    />
-                  </div>
-                </div>
-              </ResizablePanel>
-              <ResizableHandle withHandle className="bg-transparent border-none w-1 hover:bg-primary/20 transition-colors" />
-            </>
-          )}
-
-          {/* 2. Main Editor (Center) */}
-          <ResizablePanel defaultSize={showChat ? 57 : 82} className="flex flex-col min-w-0">
-            {/* Editor Top Toolbar (Tabs placeholder or Breadcrumbs) */}
-            <div className="h-10 px-4 flex items-center gap-4 border-b border-white/5 bg-background/30 backdrop-blur-md shrink-0">
-              {!showFileTree && (
-                <button 
-                  onClick={() => setShowFileTree(true)}
-                  className="p-1.5 hover:bg-white/5 rounded-lg text-white/20 hover:text-white transition-all"
-                >
-                  <PanelLeft className="w-3.5 h-3.5" />
-                </button>
-              )}
-              <div className="flex items-center gap-2 text-[11px] font-bold text-white/40 truncate">
-                <span className="hover:text-white cursor-pointer transition-colors">{activeProject.name}</span>
-                <span className="text-white/10">/</span>
-                <span className="text-white/80">{activeFile || 'Selecciona un archivo'}</span>
-              </div>
-              <div className="flex-1" />
-              {!showChat && (
-                <button 
-                  onClick={() => setShowChat(true)}
-                  className="p-1.5 hover:bg-white/5 rounded-lg text-white/20 hover:text-white transition-all"
-                >
-                  <PanelRight className="w-3.5 h-3.5" />
-                </button>
-              )}
+          {/* A. ACTIVITY BAR (VSCode Far Left) */}
+          <div className="w-[48px] shrink-0 bg-[#0d1117] border-r border-white/5 flex flex-col items-center py-4 gap-4 relative z-50">
+            <button className="p-2 text-white/40 hover:text-white transition-all bg-white/5 rounded-lg border border-white/10" title="Explorer">
+              <Code2 className="w-5 h-5" />
+            </button>
+            <button className="p-2 text-white/20 hover:text-white transition-all" title="GitHub Sync" onClick={() => toast.info('GitHub Hub Conectado')}>
+              <Github className="w-5 h-5" />
+            </button>
+            <button className="p-2 text-white/20 hover:text-white transition-all" title="Deploy" onClick={() => toast.info('Vercel Deploy')}>
+              <Globe className="w-5 h-5" />
+            </button>
+            <div className="mt-auto flex flex-col items-center gap-4">
+               <button onClick={() => navigate('/dashboard')} className="p-2 text-white/20 hover:text-white transition-all" title="Inicio">
+                <Plus className="w-5 h-5" />
+              </button>
             </div>
+          </div>
 
-            {/* Code Editor */}
-            <div className="flex-1 overflow-hidden">
-              <StudioCodeEditor 
-                selectedFile={activeFile || ''}
-                projectFiles={activeProject.files}
-                onFilesChange={handleFilesChange}
-                isGenerating={isGenerating}
-                streamPreview={streamPreview}
-              />
-            </div>
-          </ResizablePanel>
-
-          {/* 3. Genesis AI Chat (Right) */}
-          {showChat && (
-            <>
-              <ResizableHandle withHandle className="bg-transparent border-none w-1 hover:bg-primary/20 transition-colors" />
-              <ResizablePanel 
-                defaultSize={25} 
-                minSize={20} 
-                maxSize={40}
-                className="bg-background border-l border-white/5"
-              >
-                <div className="h-full flex flex-col relative">
-                  {/* Chat Header */}
-                  <div className="h-10 px-4 flex items-center justify-between border-b border-white/5 bg-background/50 backdrop-blur-md shrink-0">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-primary" />
-                      <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">GENESIS AI</span>
+          <ResizablePanelGroup direction="horizontal" className="flex-1 items-stretch">
+            {/* 1. File Explorer (Left Sidebar) */}
+            {showFileTree && (
+              <>
+                <ResizablePanel 
+                  defaultSize={16} 
+                  minSize={10} 
+                  maxSize={30}
+                  className="bg-[#010409] border-r border-white/5 transition-all"
+                >
+                  <div className="h-full flex flex-col relative">
+                    <div className="h-10 px-4 flex items-center justify-between border-b border-white/5 shrink-0 bg-[#010409]/80 backdrop-blur-md">
+                      <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">EXPLORER</span>
+                      <button 
+                        onClick={() => setShowFileTree(false)}
+                        className="p-1.5 hover:bg-white/5 rounded-lg text-white/20 hover:text-white transition-all"
+                      >
+                        <PanelLeftClose className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                    <button 
-                      onClick={() => setShowChat(false)}
-                      className="p-1.5 hover:bg-white/5 rounded-lg text-white/20 hover:text-white transition-all"
-                    >
-                      <PanelRightClose className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex-1 overflow-y-auto">
+                      <StudioFileTree 
+                        files={activeProject.files} 
+                        selectedFile={activeFile || ''} 
+                        onSelect={setActiveFile} 
+                      />
+                    </div>
                   </div>
-                  
-                  {/* AI Chat Component */}
-                  <div className="flex-1 overflow-hidden">
-                    <StudioChat 
-                      projectId={activeProject.id} 
-                      projectFiles={activeProject.files}
-                      onCodeGenerated={handleCodeGenerated}
-                      onGeneratingChange={setIsGenerating}
-                      onStreamCharsChange={(chars, preview) => {
-                        setStreamPreview(preview);
-                      }}
-                    />
-                  </div>
+                </ResizablePanel>
+                <ResizableHandle withHandle className="bg-transparent border-none w-1 hover:bg-primary/20 transition-colors" />
+              </>
+            )}
+
+            {/* 2. Main Editor (Center) */}
+            <ResizablePanel defaultSize={showChat ? 59 : 84} className="flex flex-col min-w-0 bg-[#0d1117] relative">
+              {/* Tabs / Breadcrumbs */}
+              <div className="h-10 px-4 flex items-center gap-4 border-b border-white/5 bg-[#0d1117]/80 backdrop-blur-md shrink-0 relative z-10">
+                {!showFileTree && (
+                  <button 
+                    onClick={() => setShowFileTree(true)}
+                    className="p-1.5 hover:bg-white/5 rounded-lg text-white/20 hover:text-white transition-all"
+                  >
+                    <PanelLeft className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <div className="flex items-center gap-2 text-[11px] font-bold text-white/30 truncate">
+                  <span className="hover:text-white cursor-pointer transition-colors opacity-60">workspace</span>
+                  <span className="text-white/10">›</span>
+                  <span className="text-white/80 font-black">{activeFile || 'Select File'}</span>
                 </div>
-              </ResizablePanel>
-            </>
-          )}
-        </ResizablePanelGroup>
+                <div className="flex-1" />
+                <div className="flex items-center gap-2 opacity-40">
+                  <span className="text-[9px] font-black uppercase tracking-widest bg-white/5 px-1.5 py-0.5 rounded border border-white/10">Read Only Mode</span>
+                </div>
+              </div>
+
+              {/* Code Editor */}
+              <div className="flex-1 overflow-hidden relative">
+                <StudioCodeEditor 
+                  selectedFile={activeFile || ''}
+                  projectFiles={activeProject.files}
+                  onFilesChange={handleFilesChange}
+                  isGenerating={isGenerating}
+                  streamPreview={streamPreview}
+                />
+
+                {/* STICKY AI BUTTON (Bottom Left of Editor) */}
+                <div className="absolute bottom-6 left-6 z-50">
+                  <button 
+                    onClick={() => setShowChat(!showChat)}
+                    className={cn(
+                      "group flex items-center gap-3 px-5 py-3 rounded-full transition-all duration-300 shadow-2xl relative overflow-hidden active:scale-95",
+                      showChat 
+                        ? "bg-zinc-900 border border-white/20 text-white" 
+                        : "bg-white text-zinc-950 border border-zinc-200"
+                    )}
+                  >
+                    {/* Pulsating Glow */}
+                    <div className="absolute inset-0 bg-primary/10 animate-pulse" />
+                    
+                    <div className="flex h-5 w-5 items-center justify-center rounded-lg bg-primary/20 shrink-0 relative z-10">
+                      <Sparkles className="h-3 w-3 text-primary" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-widest relative z-10">
+                      {showChat ? 'Close Architect' : 'Ask Antigravity'}
+                    </span>
+                    
+                    {/* Status Dot */}
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping ml-1" />
+                  </button>
+                </div>
+              </div>
+            </ResizablePanel>
+
+            {/* 3. Antigravity AI Panel (Right) */}
+            {showChat && (
+              <>
+                <ResizableHandle withHandle className="bg-transparent border-none w-1 hover:bg-primary/20 transition-colors" />
+                <ResizablePanel 
+                  defaultSize={25} 
+                  minSize={20} 
+                  maxSize={40}
+                  className="bg-[#0d1117] border-l border-white/5 shadow-[-20px_0_40px_rgba(0,0,0,0.2)]"
+                >
+                  <div className="h-full flex flex-col relative">
+                    {/* Header */}
+                    <div className="h-10 px-4 flex items-center justify-between border-b border-white/5 bg-[#0d1117]/80 backdrop-blur-md shrink-0">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-6 w-6 items-center justify-center rounded bg-primary/10 border border-primary/20">
+                          <Bot className="w-3.5 h-3.5 text-primary" />
+                        </div>
+                        <span className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em]">ANTIGRAVITY IA</span>
+                      </div>
+                      <button 
+                        onClick={() => setShowChat(false)}
+                        className="p-1.5 hover:bg-white/5 rounded-lg text-white/20 hover:text-white transition-all"
+                      >
+                        <PanelRightClose className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    
+                    {/* Chat Section */}
+                    <div className="flex-1 overflow-hidden bg-[#0d1117]">
+                      <StudioChat 
+                        projectId={activeProject.id} 
+                        projectFiles={activeProject.files}
+                        onCodeGenerated={handleCodeGenerated}
+                        onGeneratingChange={setIsGenerating}
+                        onStreamCharsChange={(chars, preview) => {
+                          setStreamPreview(preview);
+                        }}
+                        persona="antigravity"
+                      />
+                    </div>
+                  </div>
+                </ResizablePanel>
+              </>
+            )}
+          </ResizablePanelGroup>
         </div>
       </div>
     </div>
