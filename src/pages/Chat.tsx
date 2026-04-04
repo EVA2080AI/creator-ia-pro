@@ -22,6 +22,7 @@ import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioChat } from '@/components/studio/StudioChat';
 import { SitemapView } from '@/components/studio/SitemapView';
 import { CommandPalette } from '@/components/studio/CommandPalette';
+import { StudioArtifactsPanel, type UIArtifact, type UIPlanTask, type UILog } from '@/components/studio/StudioArtifactsPanel';
 import { StudioTopbar } from '@/components/studio/StudioTopbar';
 import { useStudioProjects, type StudioFile, type StudioProject } from '@/hooks/useStudioProjects';
 import { StudioCloud, type SupabaseConfig } from '@/components/studio/StudioCloud';
@@ -34,7 +35,7 @@ import { generateProject, downloadBlob, type ProjectType, type ScaffoldOptions }
 import { StudioDeploy } from '@/components/studio/StudioDeploy';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
-type PanelView = 'code' | 'preview' | 'split' | 'files' | 'history' | 'sitemap';
+type PanelView = 'code' | 'preview' | 'split' | 'files' | 'history' | 'sitemap' | 'artifacts';
 type LeftTab = 'chat' | 'files' | 'projects' | 'github' | 'history' | 'cloud';
 
 interface Snapshot {
@@ -360,6 +361,11 @@ export default function Chat() {
   const [pendingFile, setPendingFile] = useState<{name: string, content: string} | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
+
+  // --- Lifted Engineering State ---
+  const [artifacts, setArtifacts] = useState<UIArtifact[]>([]);
+  const [tasks, setTasks] = useState<UIPlanTask[]>([]);
+  const [logs, setLogs] = useState<UILog[]>([]);
 
   const projectFiles = activeProject?.files || {};
 
@@ -717,7 +723,24 @@ export default function Chat() {
       <div className="flex-1 grid overflow-hidden relative" style={{ gridTemplateColumns: `${isChatOpen ? '380px' : '0px'} 1fr`, transition: 'grid-template-columns 350ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
         {/* Sidebar: Chat */}
         <div className="flex flex-col h-full border-r border-border/40 overflow-hidden" style={{ background: 'hsl(var(--card) / 0.3)', backdropFilter: 'blur(20px)' }}>
-          <div className="flex-1 min-h-0"><StudioChat projectId={activeProject.id} projectFiles={projectFiles} onCodeGenerated={handleCodeGenerated} initialPrompt={pendingPrompt} onGeneratingChange={setIsGenerating} supabaseConfig={supabaseConfig} previewError={previewError} /></div>
+          <div className="flex-1 min-h-0">
+            <StudioChat 
+              projectId={activeProject.id} 
+              projectFiles={projectFiles} 
+              onCodeGenerated={handleCodeGenerated} 
+              initialPrompt={pendingPrompt} 
+              onGeneratingChange={setIsGenerating} 
+              supabaseConfig={supabaseConfig} 
+              previewError={previewError}
+              artifacts={artifacts}
+              setArtifacts={setArtifacts}
+              tasks={tasks}
+              setTasks={setTasks}
+              logs={logs}
+              setLogs={setLogs}
+              onToggleArtifacts={() => setPanelView('artifacts')}
+            />
+          </div>
         </div>
 
         {/* Canvas */}
@@ -740,6 +763,18 @@ export default function Chat() {
                   {snapshots.length === 0 ? <p className="text-center text-muted-foreground py-20 uppercase tracking-widest text-[10px]">No snapshots</p> : snapshots.map((s, i) => <div key={s.id} className="p-4 rounded-xl bg-zinc-50 border border-border flex justify-between items-center"><div className="flex items-center gap-4"><div className="h-10 w-10 flex items-center justify-center bg-muted/20 border border-border rounded-lg">{i}</div><div><p className="text-[13px] font-bold text-zinc-900">{s.label}</p><p className="text-[11px] text-zinc-500">{Object.keys(s.files).length} files</p></div></div><button onClick={() => { updateProjectFiles(activeProject.id, s.files); setPanelView('preview'); }} className="text-[11px] font-bold hover:text-primary transition-colors">Restore</button></div>)}
                 </div>
               </div>
+            </div>
+          )}
+          {panelView === 'artifacts' && (
+            <div className="flex-1 overflow-hidden">
+              <StudioArtifactsPanel 
+                isOpen={true} 
+                onClose={() => setPanelView('preview')} 
+                artifacts={artifacts} 
+                tasks={tasks} 
+                logs={logs} 
+                files={projectFiles}
+              />
             </div>
           )}
         </div>
