@@ -136,96 +136,173 @@ export default function Studio() {
   // --- Welcome Screen / Empty State ---
   if (!activeProject) {
     return (
-      <div className="h-full w-full bg-[#030303] overflow-hidden flex flex-col relative selection:bg-primary/30">
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-25%] left-[-15%] w-[80%] h-[90%] bg-primary/20 rounded-full blur-[180px] opacity-30 animate-pulse" />
-          <div className="absolute bottom-[0%] right-[-5%] w-[70%] h-[80%] bg-purple-500/10 rounded-full blur-[160px] opacity-20" />
+      <div className="h-full w-full bg-[#020202] overflow-hidden flex flex-col relative selection:bg-primary/30 font-sans">
+        {/* --- Cinematic Background (Mesh Grid + Light Orbs) --- */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="absolute top-[-25%] left-[-15%] w-[80%] h-[90%] bg-primary/10 rounded-full blur-[200px] opacity-30 animate-pulse" />
+          <div className="absolute bottom-[0%] right-[-5%] w-[70%] h-[80%] bg-purple-500/5 rounded-full blur-[180px] opacity-20" />
+          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
+          <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
         </div>
 
-        <header className="h-[64px] px-8 flex items-center justify-between border-b border-white/5 bg-black/40 backdrop-blur-2xl relative z-20">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 border border-primary/20 shadow-[0_0_20px_rgba(var(--primary-rgb),0.1)]">
-              <Code2 className="h-4.5 w-4.5 text-primary" />
+        {/* --- Elite Header --- */}
+        <header className="h-[72px] px-10 flex items-center justify-between border-b border-white/[0.03] bg-black/40 backdrop-blur-3xl relative z-50">
+          <div className="flex items-center gap-4">
+            <div className="group flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-purple-500/20 border border-white/10 shadow-[0_0_30px_rgba(var(--primary-rgb),0.2)] transition-transform hover:rotate-12 duration-500">
+              <Sparkles className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[11px] font-black text-white tracking-[0.4em] uppercase leading-none mb-0.5">Studio</span>
-              <span className="text-[9px] font-bold text-zinc-500 tracking-widest uppercase leading-none">Professional Environment</span>
+              <span className="text-[12px] font-black text-white tracking-[0.5em] uppercase leading-none mb-1">Genesis IA</span>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                <span className="text-[8px] font-bold text-zinc-500 tracking-widest uppercase leading-none">Deep Reasoning Enabled</span>
+              </div>
             </div>
           </div>
-          <button 
-            onClick={() => navigate('/dashboard')} 
-            className="px-4 py-2 rounded-xl text-[10px] font-black text-zinc-500 hover:text-white hover:bg-white/5 transition-all uppercase tracking-widest border border-transparent hover:border-white/10"
-          >
-            Volver al Dashboard
-          </button>
+          <div className="flex items-center gap-6">
+            <button 
+              onClick={() => navigate('/dashboard')} 
+              className="text-[10px] font-black text-zinc-500 hover:text-white transition-all uppercase tracking-[0.3em]"
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={handleCreateNew}
+              className="px-6 py-2.5 rounded-xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
+            >
+              Lanzar Studio
+            </button>
+          </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-8 relative z-10 custom-scrollbar">
-          <div className="max-w-6xl mx-auto flex flex-col pt-24 pb-32">
-            <div className="flex flex-col items-center text-center mb-24 max-w-3xl mx-auto">
+        <div className="flex-1 overflow-y-auto px-10 relative z-10 custom-scrollbar scroll-smooth">
+          <div className="max-w-7xl mx-auto flex flex-col pt-28 pb-40">
+            {/* --- Quantum Compositor --- */}
+            <div className="flex flex-col items-center text-center mb-32 max-w-4xl mx-auto">
               <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 mb-8 group cursor-default"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 mb-10 shadow-2xl backdrop-blur-md"
               >
-                <Sparkles className="w-3.5 h-3.5 text-primary animate-pulse" />
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em]">Genesis Intelligence Engine</span>
+                <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]" />
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em]">Engine Status: High-Fidelity Prototype Mode</span>
               </motion.div>
               
               <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-8 max-w-2xl leading-[0.9]"
+                transition={{ delay: 0.1, duration: 0.8 }}
+                className="text-6xl md:text-8xl font-black text-white tracking-tighter mb-10 max-w-4xl leading-[0.85]"
               >
-                Crea sin límites. <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-blue-400">Construye con IA.</span>
+                ¿Listo para construir el <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-purple-500">futuro?</span>
               </motion.h1>
-              
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-lg text-zinc-500 max-w-xl mb-12 leading-relaxed font-medium font-display"
-              >
-                Diseña, desarrolla y despliega aplicaciones web completas en segundos. Una experiencia de desarrollo cinematográfica impulsada por Genesis.
-              </motion.p>
 
-              <motion.button
-                initial={{ opacity: 0, y: 20 }}
+              {/* Futuristic Prompt Unit */}
+              <motion.div 
+                initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                onClick={handleCreateNew}
-                className="group relative flex items-center gap-4 px-10 py-5 rounded-2xl bg-white text-black font-black hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_rgba(255,255,255,0.2)] overflow-hidden"
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="w-full max-w-3xl group"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary to-purple-500 opacity-0 group-hover:opacity-10 transition-opacity" />
-                <Plus className="w-5 h-5 pointer-events-none" />
-                Empezar nuevo proyecto
-              </motion.button>
+                <div className="relative p-1 rounded-[2.5rem] bg-gradient-to-r from-white/10 via-white/5 to-white/10 shadow-2xl transition-all group-hover:shadow-primary/20 group-hover:scale-[1.01]">
+                  <div className="absolute inset-0 bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity rounded-[2.5rem]" />
+                  <div className="relative flex flex-col gap-4 p-5 md:p-8 rounded-[2.4rem] bg-[#080808]/80 backdrop-blur-3xl border border-white/5">
+                    <div className="flex items-start gap-5">
+                       <div className="mt-1 w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                          <Plus className="w-6 h-6 text-primary" />
+                       </div>
+                       <textarea 
+                          placeholder="Describe tu visión... (ej: Plataforma de e-commerce de lujo con visuales dorados)"
+                          className="flex-1 bg-transparent border-none focus:ring-0 text-xl font-medium text-white placeholder:text-zinc-700 resize-none h-32 custom-scrollbar"
+                          disabled
+                       />
+                    </div>
+                    <div className="flex items-center justify-between border-t border-white/5 pt-5">
+                       <div className="flex items-center gap-4">
+                          <button className="p-2.5 rounded-xl hover:bg-white/5 transition-colors text-zinc-500 hover:text-white"><Smartphone className="w-4 h-4" /></button>
+                          <button className="p-2.5 rounded-xl hover:bg-white/5 transition-colors text-zinc-500 hover:text-white"><Globe className="w-4 h-4" /></button>
+                       </div>
+                       <button 
+                        onClick={handleCreateNew}
+                        className="px-8 py-3.5 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all"
+                       >
+                          Lanzar Genesis
+                       </button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              <div className="col-span-full border-b border-white/5 pb-4 mb-4">
-                <h2 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.5em]">Tus Proyectos Recientes</h2>
+            {/* --- Bento Gallery --- */}
+            <div className="space-y-10">
+              <div className="flex items-center justify-between border-b border-white/[0.03] pb-6">
+                <div className="flex items-center gap-3">
+                  <FolderOpen className="w-5 h-5 text-zinc-500" />
+                  <h2 className="text-[11px] font-black text-zinc-500 uppercase tracking-[0.6em]">Proyectos Recientes</h2>
+                </div>
+                <div className="flex gap-2">
+                  <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Favoritos</div>
+                  <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary uppercase tracking-widest">Ver Todos</div>
+                </div>
               </div>
 
-              {projects.map((p) => (
-                <button
-                  key={p.id}
-                  onClick={() => navigate(`/studio?project=${p.id}`)}
-                  className="group relative flex flex-col gap-5 p-6 rounded-[2rem] bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] hover:border-primary/40 transition-all text-left shadow-2xl backdrop-blur-sm"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="w-11 h-11 rounded-2xl bg-white/5 group-hover:bg-primary/10 flex items-center justify-center transition-all duration-500 group-hover:rotate-6">
-                      <FolderOpen className="w-5 h-5 text-zinc-500 group-hover:text-primary transition-colors" />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {projects.slice(0, 6).map((p, idx) => (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.4 + (idx * 0.05) }}
+                    key={p.id}
+                    onClick={() => navigate(`/studio?project=${p.id}`)}
+                    className="group relative flex flex-col gap-6 p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] hover:border-primary/30 transition-all text-left shadow-2xl backdrop-blur-sm overflow-hidden"
+                  >
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors" />
+                    
+                    <div className="flex items-center justify-between relative z-10">
+                      <div className="w-14 h-14 rounded-2xl bg-zinc-900/50 border border-white/5 group-hover:border-primary/20 flex items-center justify-center transition-all duration-700 group-hover:rotate-[15deg]">
+                        <Code2 className="w-6 h-6 text-zinc-500 group-hover:text-primary transition-colors" />
+                      </div>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1">
+                        <ChevronRight className="w-4 h-4 text-white" />
+                      </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:translate-x-1 transition-transform" />
+
+                    <div className="flex flex-col gap-2 relative z-10">
+                      <div className="flex items-center gap-2 mb-1">
+                         <span className="text-[9px] font-black text-primary/60 uppercase tracking-widest">Deep AI 1A</span>
+                         <span className="text-zinc-800 tracking-widest">•</span>
+                         <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">React v18</span>
+                      </div>
+                      <h3 className="text-2xl font-black text-white group-hover:text-primary transition-colors truncate tracking-tighter">{p.name}</h3>
+                      <div className="flex items-center gap-2 mt-4">
+                        <div className="flex -space-x-2">
+                           <div className="w-6 h-6 rounded-full bg-blue-500/20 border border-white/10 flex items-center justify-center"><Layout className="w-3 h-3 text-blue-400" /></div>
+                           <div className="w-6 h-6 rounded-full bg-purple-500/20 border border-white/10 flex items-center justify-center"><Sparkles className="w-3 h-3 text-purple-400" /></div>
+                        </div>
+                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest ml-2">Editado recientemente</p>
+                      </div>
+                    </div>
+                  </motion.button>
+                ))}
+
+                {/* --- Add New Card --- */}
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7 }}
+                  onClick={handleCreateNew}
+                  className="flex flex-col items-center justify-center gap-6 p-8 rounded-[2.5rem] border-2 border-dashed border-white/5 hover:border-primary/40 hover:bg-primary/[0.02] transition-all group min-h-[240px]"
+                >
+                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                    <Plus className="w-8 h-8 text-zinc-600 group-hover:text-primary group-hover:rotate-90 transition-all duration-500" />
                   </div>
-                  <div className="flex flex-col gap-1">
-                    <h3 className="font-bold text-white group-hover:text-primary transition-colors truncate">{p.name}</h3>
-                    <p className="text-xs text-zinc-600 font-medium tracking-tight">Última edición hace 2 horas</p>
+                  <div className="text-center">
+                    <h3 className="text-lg font-black text-white uppercase tracking-tighter">Nuevo Proyecto</h3>
+                    <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.2em] mt-1">Empieza desde cero</p>
                   </div>
-                </button>
-              ))}
+                </motion.button>
+              </div>
             </div>
           </div>
         </div>
