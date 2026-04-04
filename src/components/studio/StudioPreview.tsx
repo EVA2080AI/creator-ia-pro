@@ -204,6 +204,12 @@ function toSandpackFiles(
         result[abs] = { code: file.content };
       }
       result['/App.tsx'] = { code: entryContent, active: true };
+    } else {
+      // Fallback for purely non-React projects (like a single index.html)
+      for (const [name, file] of Object.entries(files)) {
+        const abs = (name.startsWith('/') ? name : `/${name}`).replace(/^\/src\//, '/');
+        result[abs] = { code: file.content, active: name.endsWith('.html') };
+      }
     }
   }
 
@@ -422,6 +428,9 @@ export function StudioPreview({
   const pages = useMemo(() => detectPages(files), [files]);
   const isMultiPage = pages.length >= 2;
 
+  const isVanillaHtml = Object.values(files).some(f => f.language === 'html') && !Object.keys(sandpackFiles || {}).some(k => k.endsWith('.tsx') || k.endsWith('.jsx') || k.endsWith('.ts'));
+  const sandpackTemplate = isVanillaHtml ? 'vanilla' : 'react-ts';
+
   const frameWidth: Record<DeviceMode, string> = {
     desktop: '100%',
     tablet:  '768px',
@@ -544,8 +553,8 @@ export function StudioPreview({
               className="flex-shrink-0 flex flex-col"
             >
               <SandpackProvider
-                key={JSON.stringify(sandpackFiles)}
-                template="react-ts"
+                key={JSON.stringify(sandpackFiles) + sandpackTemplate}
+                template={sandpackTemplate as any}
                 files={sandpackFiles!}
                 customSetup={{
                   dependencies: {

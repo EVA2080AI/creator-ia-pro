@@ -21,24 +21,13 @@ export interface StudioProject {
 const DEFAULT_FILES: Record<string, StudioFile> = {
   'App.tsx': {
     language: 'tsx',
-    content: `import React from 'react';
-
-const App = () => {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-5xl font-bold text-white mb-4">¡Hola Mundo! 🚀</h1>
-        <p className="text-gray-400 text-lg">Empieza a construir con BuilderAI</p>
-      </div>
-    </div>
-  );
-};
-
-export default App;`,
+    content: `export default function App() {
+  return null;
+}`,
   },
   'index.css': {
     language: 'css',
-    content: `@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\nbody {\n  margin: 0;\n  font-family: 'Inter', sans-serif;\n}`,
+    content: `@tailwind base;\n@tailwind components;\n@tailwind utilities;`,
   },
 };
 
