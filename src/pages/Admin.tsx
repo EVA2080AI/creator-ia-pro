@@ -1090,11 +1090,11 @@ const Admin = () => {
                                     key={key}
                                     disabled={active || busy}
                                     onClick={() => handleChangeTier(u.user_id, key)}
-                                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all disabled:cursor-default"
+                                    className="flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-all disabled:cursor-default"
                                     style={{
-                                      background: active ? cfg.color + "22" : "rgba(255,255,255,0.04)",
-                                      border: `1px solid ${active ? cfg.color + "55" : "rgba(255,255,255,0.08)"}`,
-                                      color: active ? cfg.color : "rgba(255,255,255,0.45)",
+                                      background: active ? cfg.color + "15" : "#f4f4f5",
+                                      border: `1px solid ${active ? cfg.color + "30" : "#e4e4e7"}`,
+                                      color: active ? cfg.color : "#71717a",
                                     }}
                                   >
                                     {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <Icon className="h-3 w-3" />}
