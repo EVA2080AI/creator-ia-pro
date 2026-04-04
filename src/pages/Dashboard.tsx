@@ -12,7 +12,8 @@ import {
   Image, LayoutGrid, ArrowRight, Coins,
   TrendingUp, MessageSquare, FileText, PenTool, Megaphone,
   Type, Hash, CreditCard, Settings, Zap, Plus,
-  FolderPlus, Box, ChevronRight, Rocket, Building2, Users, Wallet, AlertCircle
+  FolderPlus, Box, ChevronRight, Rocket, Building2, Users, Wallet, AlertCircle,
+  Brain, Code2, LayoutTemplate
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -39,6 +40,7 @@ const Dashboard = () => {
   const [usageData, setUsageData] = useState<{ name: string; credits: number }[]>([]);
   const [toolData, setToolData] = useState<{ name: string; value: number; color: string }[]>([]);
   const [condominioStats, setCondominioStats] = useState<{ total_unidades: number; unidades_al_dia: number; recaudo_mes: number; cartera_mora: number } | null>(null);
+  const [openingProject, setOpeningProject] = useState<any | null>(null);
 
   useEffect(() => {
     if (searchParams.get("checkout") === "success") {
@@ -58,17 +60,24 @@ const Dashboard = () => {
       setLoading(true);
       try {
         const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-        const [assetsCountData, spacesCountData, spacesData, txnsData] = await Promise.all([
+        const [assetsCountData, spacesCountData, spacesData, codeRes, txnsData] = await Promise.all([
           supabase.from("saved_assets").select("id", { count: "exact", head: true }).eq("user_id", user.id),
           supabase.from("spaces").select("id", { count: "exact", head: true }).eq("user_id", user.id),
-          supabase.from("spaces").select("*").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(8),
+          supabase.from("spaces").select("*").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(4),
+          supabase.from("studio_projects").select("*").eq("user_id", user.id).order("updated_at", { ascending: false }).limit(4),
           supabase.from("transactions").select("amount, type, description, created_at")
             .eq("user_id", user.id).gte("created_at", sevenDaysAgo)
             .not("type", "in", '("subscription_reload","credit_purchase")'),
         ]);
+        
+        const combined = [
+          ...(spacesData.data || []).map(s => ({ ...s, type: 'flow' })),
+          ...(codeRes.data || []).map(c => ({ ...c, type: 'code' }))
+        ].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 8);
+
         setAssetsCount(assetsCountData.count || 0);
         setSpacesCount(spacesCountData.count || 0);
-        setSpaces(spacesData.data || []);
+        setSpaces(combined);
 
         if (profile?.condominio_id) {
           // @ts-ignore
@@ -425,15 +434,23 @@ const Dashboard = () => {
                 {spaces.map((space) => (
                   <button
                     key={space.id}
-                    onClick={() => navigate(`/formarketing?spaceId=${space.id}`)}
+                    onClick={() => {
+                      if (space.type === 'code') {
+                        setOpeningProject(space);
+                      } else {
+                        navigate(`/formarketing?spaceId=${space.id}`);
+                      }
+                    }}
                     className="group flex items-center gap-3 p-5 bg-white border border-zinc-200/60 hover:border-zinc-300 transition-all rounded-2xl shadow-sm hover:shadow-md hover:scale-[1.02] duration-300 text-left active:scale-95"
                   >
                     <div className="w-10 h-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:bg-primary/5 group-hover:border-primary/20 transition-all">
-                      <LayoutGrid className="w-4 h-4 text-zinc-400 group-hover:text-primary transition-colors" />
+                      {space.type === 'code' ? <Code2 className="w-4 h-4 text-zinc-400 group-hover:text-emerald-500" /> : <LayoutGrid className="w-4 h-4 text-zinc-400 group-hover:text-primary" />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-[14px] font-black text-zinc-900 truncate">{space.name}</p>
-                      <p className="text-[10px] text-zinc-400 truncate font-bold uppercase tracking-widest mt-0.5">{space.description || "Sin descripción"}</p>
+                      <p className="text-[10px] text-zinc-400 truncate font-bold uppercase tracking-widest mt-0.5">
+                        {space.type === 'code' ? 'Code Project' : 'Canvas IA'} · {space.description || "Sin descripción"}
+                      </p>
                     </div>
                     <ChevronRight className="w-4 h-4 text-zinc-300 shrink-0 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                   </button>
@@ -487,6 +504,70 @@ const Dashboard = () => {
               Crear Space
             </button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Interface Selector Modal (Génesis vs Code) */}
+      <Dialog open={!!openingProject} onOpenChange={(o) => !o && setOpeningProject(null)}>
+        <DialogContent className="sm:max-w-[540px] p-0 overflow-hidden bg-white/95 backdrop-blur-xl border-zinc-200 rounded-[2.5rem] shadow-2xl">
+          <div className="p-10 pb-6 text-center">
+            <DialogHeader className="items-center">
+              <div className="w-16 h-16 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center mb-6 shadow-sm">
+                <Rocket className="w-8 h-8 text-zinc-400" />
+              </div>
+              <DialogTitle className="text-3xl font-bold text-zinc-900 tracking-tight font-display text-center">
+                ¿Cómo quieres <span className="text-primary italic font-medium">trabajar</span> hoy?
+              </DialogTitle>
+              <DialogDescription className="text-zinc-500 font-medium text-sm mt-3 leading-relaxed max-w-sm mx-auto text-center">
+                Elige la interfaz para <span className="font-bold text-zinc-800 underline decoration-primary/30 decoration-2">{openingProject?.name}</span>.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          
+          <div className="px-10 pb-10 grid grid-cols-2 gap-5">
+            <button
+              onClick={() => {
+                navigate(`/chat?project=${openingProject?.id}`);
+                setOpeningProject(null);
+              }}
+              className="group relative flex flex-col items-center gap-5 p-8 rounded-[2rem] border border-zinc-200/60 bg-white hover:border-primary/40 hover:shadow-xl transition-all duration-500 text-center active:scale-[0.98]"
+            >
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-primary scale-x-0 group-hover:scale-x-75 transition-transform duration-700" />
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-white shadow-sm">
+                <Brain className="w-7 h-7" />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-[13px] font-black text-zinc-900 tracking-tight">Génesis IA</p>
+                <p className="text-[10px] text-zinc-500 font-medium leading-relaxed opacity-80">Evoluciona tu app con lenguaje natural y ayuda inteligente.</p>
+              </div>
+            </button>
+            
+            <button
+              onClick={() => {
+                navigate(`/code?project=${openingProject?.id}`);
+                setOpeningProject(null);
+              }}
+              className="group relative flex flex-col items-center gap-5 p-8 rounded-[2rem] border border-zinc-200/60 bg-white hover:border-emerald-500/40 hover:shadow-xl transition-all duration-500 text-center active:scale-[0.98]"
+            >
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-emerald-500 scale-x-0 group-hover:scale-x-75 transition-transform duration-700" />
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white shadow-sm">
+                <Code2 className="w-7 h-7" />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-[13px] font-black text-zinc-900 tracking-tight">Code Editor</p>
+                <p className="text-[10px] text-zinc-500 font-medium leading-relaxed opacity-80">Control total manual sobre archivos, código y terminal.</p>
+              </div>
+            </button>
+          </div>
+          
+          <div className="bg-zinc-50/50 py-4 px-10 border-t border-zinc-100 flex justify-center">
+            <button 
+              onClick={() => setOpeningProject(null)}
+              className="text-[10px] font-bold text-zinc-400 hover:text-zinc-900 uppercase tracking-widest transition-colors font-display"
+            >
+              Cancelar y volver
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

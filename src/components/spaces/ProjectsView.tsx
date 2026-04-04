@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import {
   Plus, Search, Loader2, FolderOpen, MoreVertical,
   Trash2, Pencil, BookOpen, LayoutGrid, ChevronRight,
-  List, HardDrive, LayoutTemplate, Code2
+  List, HardDrive, LayoutTemplate, Code2, Sparkles, Brain
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -46,6 +46,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
   const [deleting, setDeleting] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'updated' | 'name' | 'created'>('updated');
+  const [openingProject, setOpeningProject] = useState<UnifiedProject | null>(null);
 
   const fetchSpaces = useCallback(async () => {
     if (!user) return;
@@ -140,7 +141,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
     if (space.type === 'flow') {
       navigate(`/studio-flow?spaceId=${space.id}`);
     } else {
-      navigate(`/code?project=${space.id}`);
+      setOpeningProject(space);
     }
   };
 
@@ -442,6 +443,72 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
               Guardar
             </button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Selection Dialog (Génesis vs Code) */}
+      <Dialog open={!!openingProject} onOpenChange={(o) => !o && setOpeningProject(null)}>
+        <DialogContent className="sm:max-w-[540px] p-0 overflow-hidden bg-white/95 backdrop-blur-xl border-zinc-200 rounded-[2.5rem] shadow-2xl">
+          <div className="p-10 pb-6 text-center">
+            <DialogHeader className="items-center">
+              <div className="w-16 h-16 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center mb-6 shadow-sm">
+                <LayoutTemplate className="w-8 h-8 text-zinc-400" />
+              </div>
+              <DialogTitle className="text-3xl font-bold text-zinc-900 tracking-tight font-display">
+                ¿Cómo quieres <span className="text-primary italic font-medium">trabajar</span> hoy?
+              </DialogTitle>
+              <DialogDescription className="text-zinc-500 font-medium text-sm mt-3 leading-relaxed max-w-sm mx-auto">
+                Elige la interfaz que mejor se adapte a tu flujo creativo para <span className="font-bold text-zinc-800 underline decoration-primary/30 decoration-2">{openingProject?.name}</span>.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          
+          <div className="px-10 pb-10 grid grid-cols-2 gap-5">
+            {/* Opción 1: Génesis IA */}
+            <button
+              onClick={() => {
+                navigate(`/chat?project=${openingProject?.id}`);
+                setOpeningProject(null);
+              }}
+              className="group relative flex flex-col items-center gap-5 p-8 rounded-[2rem] border border-zinc-200/60 bg-white hover:border-primary/40 hover:shadow-xl transition-all duration-500 text-center active:scale-[0.98]"
+            >
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-primary scale-x-0 group-hover:scale-x-75 transition-transform duration-700" />
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-primary group-hover:text-white shadow-sm">
+                <Brain className="w-7 h-7" />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-[13px] font-black text-zinc-900 tracking-tight">Génesis IA</p>
+                <p className="text-[10px] text-zinc-500 font-medium leading-relaxed opacity-80">Evoluciona tu app con lenguaje natural y ayuda inteligente.</p>
+              </div>
+            </button>
+            
+            {/* Opción 2: Code Editor */}
+            <button
+              onClick={() => {
+                navigate(`/code?project=${openingProject?.id}`);
+                setOpeningProject(null);
+              }}
+              className="group relative flex flex-col items-center gap-5 p-8 rounded-[2rem] border border-zinc-200/60 bg-white hover:border-emerald-500/40 hover:shadow-xl transition-all duration-500 text-center active:scale-[0.98]"
+            >
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-emerald-500 scale-x-0 group-hover:scale-x-75 transition-transform duration-700" />
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white shadow-sm">
+                <Code2 className="w-7 h-7" />
+              </div>
+              <div className="space-y-1.5">
+                <p className="text-[13px] font-black text-zinc-900 tracking-tight">Code Editor</p>
+                <p className="text-[10px] text-zinc-500 font-medium leading-relaxed opacity-80">Control total manual sobre archivos, código y terminal.</p>
+              </div>
+            </button>
+          </div>
+          
+          <div className="bg-zinc-50/50 py-4 px-10 border-t border-zinc-100 flex justify-center">
+            <button 
+              onClick={() => setOpeningProject(null)}
+              className="text-[10px] font-bold text-zinc-400 hover:text-zinc-900 uppercase tracking-widest transition-colors font-display"
+            >
+              Cancelar y volver
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </>

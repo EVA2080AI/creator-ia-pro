@@ -759,11 +759,14 @@ export function StudioChat({
   const [isScraping,       setIsScraping]       = useState(false);
   const [pendingContext,   setPendingContext]   = useState<{ name: string; content: string } | null>(null);
   const [isPlusMenuOpen,   setIsPlusMenuOpen]   = useState(false);
-  const [isArchitectMode,  setIsArchitectMode]  = useState(false);
+  const [isArchitectMode, setIsArchitectMode] = useState(false);
+  const [initialPromptProcessed, setInitialPromptProcessed] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isAutoFixing,     setIsAutoFixing]     = useState(false);
   const [pendingPlanPrompt, setPendingPlanPrompt] = useState<string | null>(null);
 
-  const messagesEndRef    = useRef<HTMLDivElement>(null);
   const containerRef      = useRef<HTMLDivElement>(null);
   const inputRef          = useRef<HTMLTextAreaElement>(null);
   const fileInputRef      = useRef<HTMLInputElement>(null);
@@ -1266,6 +1269,99 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
     }
   };
 
+  // ─── PERSISTENCE: Save message to Supabase ─────────────────────────────────
+  const saveMessage = useCallback(async (convId: string, role: 'user' | 'assistant', content: string) => {
+    if (!user) return;
+    try {
+      await supabase.from('studio_messages').insert({
+        conversation_id: convId,
+        role,
+        content,
+      });
+    } catch (err) {
+      console.error("[StudioChat] Error saving message:", err);
+    }
+  }, [user]);
+
+  // ─── PERSISTENCE: Find or Create Conversation ──────────────────────────────
+  const ensureConversation = useCallback(async (pid: string) => {
+    if (!user) return null;
+    try {
+      // Look for existing
+      const { data: existing } = await supabase
+        .from('studio_conversations')
+        .select('id')
+        .eq('project_id', pid)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (existing) return existing.id;
+
+      // Create new
+      const { data: created, error } = await supabase
+        .from('studio_conversations')
+        .insert({
+          project_id: pid,
+          user_id: user.id,
+          title: 'Main Chat'
+        })
+        .select('id')
+        .single();
+      
+      if (error) throw error;
+      return created.id;
+    } catch (err) {
+      console.error("[StudioChat] Error ensuring conversation:", err);
+      return null;
+    }
+  }, [user]);
+
+  // ─── PERSISTENCE: Load History ──────────────────────────────────────────────
+  useEffect(() => {
+    async function loadHistory() {
+      if (!projectId || !user) return;
+      
+      const convId = await ensureConversation(projectId);
+      if (!convId) return;
+      setActiveConversationId(convId);
+
+      const { data: history, error } = await supabase
+        .from('studio_messages')
+        .select('*')
+        .eq('conversation_id', convId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error("[StudioChat] Error loading history:", error);
+        return;
+      }
+
+      if (history && history.length > 0) {
+        const mapped: Message[] = history.map(m => ({
+          id: m.id,
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+          timestamp: new Date(m.created_at)
+        }));
+        setMessages(mapped);
+        
+        // Populate conversation history for the AI service
+        setConvHistory(mapped.map(m => ({ role: m.role, content: m.content })).slice(-16));
+        isFirstGen.current = false;
+      } else {
+        // Only show welcome if no history
+        setMessages([{
+          id: 'welcome',
+          role: 'assistant',
+          content: '✨ ¡Bienvenido a Génesis! Estoy listo para evolucionar tu visión. ¿Qué construiremos hoy?',
+          timestamp: new Date()
+        }]);
+      }
+    }
+    loadHistory();
+  }, [projectId, user, ensureConversation]);
+
   // ─── Send message ──────────────────────────────────────────────────────────
   const handleSend = useCallback(async (override?: string) => {
     let text = (override || input).trim();
@@ -1287,10 +1383,17 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
       timestamp: new Date(),
       imagePreview,
     };
+    
+    // UI update
     setMessages((prev) => [...prev.filter((m) => m.id !== 'welcome'), userMsg]);
     setInput('');
     setPendingImage(null);
     if (inputRef.current) inputRef.current.style.height = 'auto';
+
+    // Persist user msg
+    if (activeConversationId) {
+      saveMessage(activeConversationId, 'user', text);
+    }
 
     // ── CREDIT DEDUCTION ─────────────────────────────────────────────────────
     const intent = detectIntent(text);
@@ -1328,7 +1431,8 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
         };
         setMessages((prev) => [...prev, assistantMsg]);
         setPendingContext(null);
-        return; // Don't proceed to code gen yet
+        if (activeConversationId) saveMessage(activeConversationId, 'assistant', result.explanation);
+        return;
       }
 
       if (result?.isChatOnly) {
@@ -1382,10 +1486,12 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
         };
       }
 
-      // 3. Add assistant message to UI
       setMessages((prev) => [...prev, assistantMsg]);
-      setPendingContext(null); // Clear context after send
-
+      setPendingContext(null);
+      
+      if (activeConversationId) {
+        saveMessage(activeConversationId, 'assistant', assistantMsg.content);
+      }
     } catch (err: any) {
       console.error("[StudioChat] Error in handleSend:", err);
       setMessages((prev) => [...prev, {
@@ -1395,7 +1501,7 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
         timestamp: new Date(),
       }]);
     }
-  }, [input, isGenerating, user, generateCode, onCodeGenerated, pendingImage, autoNameProject, selectedModel, projectId, pendingUrl]);
+  }, [input, isGenerating, user, generateCode, onCodeGenerated, pendingImage, autoNameProject, selectedModel, projectId, pendingUrl, activeConversationId, saveMessage, isArchitectMode, pendingPlanPrompt, projectFiles, aiService]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
@@ -1407,6 +1513,63 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
+
+  // ─── PERSISTENCE: Load History ──────────────────────────────────────────────
+  useEffect(() => {
+    async function loadHistory() {
+      if (!projectId || !user) return;
+      
+      const convId = await ensureConversation(projectId);
+      if (!convId) return;
+      setActiveConversationId(convId);
+
+      const { data: history, error } = await supabase
+        .from('studio_messages')
+        .select('*')
+        .eq('conversation_id', convId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error("[StudioChat] Error loading history:", error);
+        return;
+      }
+
+      if (history && history.length > 0) {
+        const mapped: Message[] = history.map(m => ({
+          id: m.id,
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+          timestamp: new Date(m.created_at)
+        }));
+        setMessages(mapped);
+        
+        // Populate conversation history for the AI service
+        setConvHistory(mapped.map(m => ({ role: m.role, content: m.content })).slice(-16));
+        isFirstGen.current = false;
+      } else {
+        // Only show welcome if no history
+        setMessages([{
+          id: 'welcome',
+          role: 'assistant',
+          content: '✨ ¡Bienvenido a Génesis! Estoy listo para evolucionar tu visión. ¿Qué construiremos hoy?',
+          timestamp: new Date()
+        }]);
+      }
+    }
+    loadHistory();
+  }, [projectId, user, ensureConversation]);
+
+  // ─── BUG FIX: Initial Prompt Trigger ──────────────────────────────────────
+  useEffect(() => {
+    if (initialPrompt && !initialPromptProcessed && messages.length > 0 && !isGenerating) {
+      // Only trigger if no real conversation yet or if it's the welcome message
+      const hasHistory = messages.some(m => m.id !== 'welcome');
+      if (!hasHistory) {
+        setInitialPromptProcessed(true);
+        handleSend(initialPrompt);
+      }
+    }
+  }, [initialPrompt, initialPromptProcessed, messages, isGenerating, handleSend]);
 
   const handleScroll = () => {
     if (containerRef.current) {
