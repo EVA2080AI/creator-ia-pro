@@ -261,10 +261,19 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
           {selectedIds.size === filtered.length && filtered.length > 0 ? 'Desmarcar Todo' : 'Seleccionar Todo'}
         </button>
 
+        {selectedIds.size === filtered.length && filtered.length > 0 && (
+          <button 
+            onClick={() => setShowBulkConfirm(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500 text-white hover:bg-rose-600 text-[11px] font-bold transition-all font-display shadow-lg shadow-rose-100 animate-in zoom-in duration-300"
+          >
+            <Trash2 className="h-3.5 w-3.5" /> Eliminar Todo el Contenido
+          </button>
+        )}
+
         {selectedIds.size > 0 && (
           <button 
             onClick={() => setSelectedIds(new Set())}
-            className="flex items-center gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
+            className="flex items-center gap-2 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 rounded-xl transition-all"
           >
             <X className="h-3 w-3" /> Limpiar Selección
           </button>
