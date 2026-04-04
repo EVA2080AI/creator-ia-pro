@@ -177,7 +177,9 @@
       radial-gradient(at 100% 0%, hsla(var(--g-mesh-2) / 0.08) 0%, transparent 60%),
       radial-gradient(at 100% 100%, hsla(var(--g-mesh-3) / 0.08) 0%, transparent 60%),
       radial-gradient(at 0% 100%, hsla(var(--g-mesh-4) / 0.08) 0%, transparent 60%);
+    background-size: 200% 200%;
     background-blend-mode: multiply;
+    animation: aurora-mesh 25s ease infinite alternate;
   }
 
   /* Organica Grain Texture (SVG feTurbulence) */
@@ -242,6 +244,11 @@
 @keyframes fade-up {
   0%   { opacity: 0; transform: translateY(16px); }
   100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes aurora-mesh {
+  0%   { background-position: 0% 0%; }
+  50%  { background-position: 100% 100%; }
+  100% { background-position: 100% 0%; }
 }
 
 /* ============================================
