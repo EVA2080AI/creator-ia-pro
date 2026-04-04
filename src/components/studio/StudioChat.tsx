@@ -586,13 +586,13 @@ interface StudioChatProps {
   onBack?: () => void;
   onToggleArtifacts?: () => void;
 
-  // Lifted Engineering State
-  artifacts: UIArtifact[];
-  setArtifacts: React.Dispatch<React.SetStateAction<UIArtifact[]>>;
-  tasks: UIPlanTask[];
-  setTasks: React.Dispatch<React.SetStateAction<UIPlanTask[]>>;
-  logs: UILog[];
-  setLogs: React.Dispatch<React.SetStateAction<UILog[]>>;
+  // Lifted Engineering State (Optional fallbacks for backward compatibility)
+  artifacts?: UIArtifact[];
+  setArtifacts?: React.Dispatch<React.SetStateAction<UIArtifact[]>>;
+  tasks?: UIPlanTask[];
+  setTasks?: React.Dispatch<React.SetStateAction<UIPlanTask[]>>;
+  logs?: UILog[];
+  setLogs?: React.Dispatch<React.SetStateAction<UILog[]>>;
 }
 
 function StudioProjectHeader({ 
@@ -673,10 +673,23 @@ export function StudioChat({
   persona = 'genesis', activeFile, previewError,
   projectName, isSaving, onShare, onPublish, onBack,
   onToggleArtifacts,
-  artifacts, setArtifacts, tasks: activeTasks, setTasks, logs, setLogs
+  artifacts, setArtifacts, tasks, setTasks, logs, setLogs
 }: StudioChatProps) {
   const { user } = useAuth();
   
+  // Internal state fallbacks if props are not provided
+  const [internalArtifacts, setInternalArtifacts] = useState<UIArtifact[]>([]);
+  const [internalTasks, setInternalTasks] = useState<UIPlanTask[]>([]);
+  const [internalLogs, setInternalLogs] = useState<UILog[]>([]);
+
+  // Resolve active state (prop or internal)
+  const activeArtifacts = artifacts || internalArtifacts;
+  const setArtifactsState = setArtifacts || setInternalArtifacts;
+  const activeTasks = tasks || internalTasks;
+  const setTasksState = setTasks || setInternalTasks;
+  const activeLogs = logs || internalLogs;
+  const setLogsState = setLogs || setInternalLogs;
+
   const welcomeMsg: Message = {
     id: 'welcome',
     role: 'assistant',
@@ -971,7 +984,7 @@ export function StudioChat({
       timestamp: new Date(),
       source: 'Sandpack Runtime'
     };
-    setLogs(prev => [newLog, ...prev]);
+    setLogsState(prev => [newLog, ...prev]);
 
     const timer = setTimeout(async () => {
       lastAutoFixError.current = previewError;
@@ -981,7 +994,7 @@ export function StudioChat({
       setIsAutoFixing(true);
       onToggleArtifacts?.(); 
 
-      setLogs(prev => [{
+      setLogsState(prev => [{
         id: crypto.randomUUID(),
         type: 'info',
         message: `🤖 Iniciando Bucle de Auto-corrección (Intento #${autoFixCountRef.current}/3)...`,
@@ -1010,7 +1023,7 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
           const mergedFiles = { ...projectFiles, ...result.files };
           onCodeGenerated(mergedFiles);
           
-          setLogs(prev => [{
+          setLogsState(prev => [{
             id: crypto.randomUUID(),
             type: 'success',
             message: `✅ Intento #${autoFixCountRef.current} completado. Archivos actualizados: ${Object.keys(result.files).join(', ')}`,
@@ -1019,7 +1032,7 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
           }, ...prev]);
         }
       } catch (err) {
-        setLogs(prev => [{
+        setLogsState(prev => [{
           id: crypto.randomUUID(),
           type: 'error',
           message: `Fallo en el intento de corrección #${autoFixCountRef.current}: ${String(err)}`,
@@ -1096,9 +1109,9 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
       }
     }
 
-    setArtifacts(newArtifacts);
-    setTasks(newTasks);
-  }, [messages, streamingContent]);
+    setArtifactsState(newArtifacts);
+    setTasksState(newTasks);
+  }, [messages, streamingContent, setArtifactsState, setTasksState]);
   // ─── Auto-name project from first prompt ────────────────────────────────────
   const autoNameProject = useCallback(async (prompt: string) => {
     if (!onAutoName) return;
