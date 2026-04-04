@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import {
   SandpackProvider,
   SandpackPreview,
@@ -7,7 +7,7 @@ import {
 } from '@codesandbox/sandpack-react';
 import {
   RotateCcw, Monitor, Smartphone, Tablet, ExternalLink,
-  ZoomIn, ZoomOut, Zap, Code, Cloud
+  ZoomIn, ZoomOut, Zap, Code, Cloud, Bot
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { StudioFile } from '@/hooks/useStudioProjects';
@@ -253,13 +253,40 @@ function toSandpackFiles(
   })()`;
 
   if (!isVanilla) {
+    // 1. Force package.json to trigger Vite environment
+    result['/package.json'] = {
+      code: JSON.stringify({
+        name: "genesis-preview",
+        private: true,
+        type: "module",
+        dependencies: {
+          "react": "^18.3.1",
+          "react-dom": "^18.3.1",
+          "framer-motion": "^11.0.0",
+          "lucide-react": "^0.460.0",
+          "clsx": "^2.1.1",
+          "tailwind-merge": "^2.5.4"
+        },
+        devDependencies: {
+          "vite": "^5.4.10",
+          "@vitejs/plugin-react": "^4.3.3",
+          "typescript": "^5.6.3",
+          "autoprefixer": "^10.4.20",
+          "postcss": "^8.4.47",
+          "tailwindcss": "^3.4.14"
+        },
+        scripts: { "dev": "vite", "build": "vite build" }
+      }, null, 2)
+    };
+
+    // 2. Root index.html
     result['/index.html'] = {
       code: `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Genesis v12.0</title>
+    <title>Genesis Preview</title>
   </head>
   <body>
     <div id="root"></div>
@@ -268,6 +295,8 @@ function toSandpackFiles(
   </body>
 </html>`
     };
+
+    // 3. vite.config.ts
     result['/vite.config.ts'] = {
       code: `import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
@@ -275,6 +304,8 @@ export default defineConfig({
   plugins: [react()],
 });`
     };
+
+    // 4. src/main.tsx
     result['/src/main.tsx'] = {
       code: `import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -286,10 +317,12 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>
 );`
     };
+
     if (!result['/index.css']) {
-      result['/index.css'] = { code: '@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\nbody { background: #030303; color: white; -webkit-font-smoothing: antialiased; }' };
+      result['/index.css'] = { code: '@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\nbody { background: #030303; color: white; margin: 0; font-family: system-ui; }' };
     }
   } else {
+    // Vanilla mode
     const hasHtml = result['/index.html'];
     const htmlCode = hasHtml ? hasHtml.code : `<!DOCTYPE html><html><head></head><body><div id="root"></div></body></html>`;
     result['/index.html'] = {
@@ -407,13 +440,10 @@ export function StudioPreview({
         )}
       </div>
       <StudioViewToolbar 
-        viewMode={viewMode} onToggleViewMode={onToggleViewMode} 
-        deviceMode={deviceMode} onDeviceModeChange={onDeviceModeChange}
-        zoom={zoom} onZoomChange={setZoom}
-        isSidebarCollapsed={isSidebarCollapsed} onToggleSidebar={onToggleSidebar}
-        isFullscreen={isFullscreen} onToggleFullscreen={onToggleFullscreen}
-        onRefresh={() => setRefreshKey(k => k + 1)}
-        onShare={onShare}
+        viewMode={viewMode} 
+        onToggleViewMode={onToggleViewMode} 
+        isSidebarCollapsed={isSidebarCollapsed} 
+        onToggleSidebar={onToggleSidebar}
       />
     </div>
   );

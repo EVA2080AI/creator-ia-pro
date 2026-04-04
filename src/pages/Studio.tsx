@@ -96,6 +96,74 @@ export default function Studio() {
     }
   }, [activeProject, activeFile]);
 
+  // --- Auto-Migrator (Nuclear Fix v12.1) ---
+  // Silently upgrades legacy CRA projects to the new Vite-Native architecture
+  useEffect(() => {
+    if (!activeProject || isGenerating) return;
+
+    const files = activeProject.files;
+    const hasRootIndex = !!files['index.html'];
+    const hasPackageJson = !!files['package.json'];
+    const hasViteConfig = !!files['vite.config.ts'];
+
+    if (!hasRootIndex || !hasPackageJson || !hasViteConfig) {
+      console.log('Genesis: Legacy project detected. Migrating to Vite-Native...');
+      
+      const upgradedFiles = { ...files };
+
+      // Ensure root index.html exists
+      if (!hasRootIndex) {
+        upgradedFiles['index.html'] = {
+          language: 'html',
+          content: `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genesis Project</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>`
+        };
+      }
+
+      // Ensure package.json exists
+      if (!hasPackageJson) {
+        upgradedFiles['package.json'] = {
+          language: 'json',
+          content: JSON.stringify({
+            name: "genesis-project",
+            private: true,
+            type: "module",
+            scripts: { "dev": "vite", "build": "vite build" }
+          }, null, 2)
+        };
+      }
+
+      // Ensure vite.config.ts exists
+      if (!hasViteConfig) {
+        upgradedFiles['vite.config.ts'] = {
+          language: 'typescript',
+          content: "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\nexport default defineConfig({ plugins: [react()] });"
+        };
+      }
+
+      // Ensure src/main.tsx exists if it's a React project
+      if (!files['src/main.tsx']) {
+        upgradedFiles['src/main.tsx'] = {
+          language: 'tsx',
+          content: "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from '../App';\nimport '../index.css';\nReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);"
+        };
+      }
+
+      updateProjectFiles(activeProject.id, upgradedFiles);
+      toast.success('Proyecto actualizado a Genesis v12.1 (Vite-Native)');
+    }
+  }, [activeProject, isGenerating, updateProjectFiles]);
+
   // --- Handlers ---
   const handleFilesChange = async (newFiles: Record<string, StudioFile>) => {
     if (!activeProject) return;
