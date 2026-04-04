@@ -335,11 +335,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 }
 
 function SandpackErrorBridge({ onError }: { onError?: (error: string) => void }) {
-  const { logs } = useSandpackConsole({ maxMessageCount: 50, showSyntaxError: true, resetOnPreviewRestart: true });
+  // IMPORTANT: Set showSyntaxError to false to prevent the library from attempting to mutate read-only Error objects,
+  // which was causing the "Cannot assign to read only property 'message' of SyntaxError" UI crash.
+  const { logs } = useSandpackConsole({ maxMessageCount: 50, showSyntaxError: false, resetOnPreviewRestart: true });
   const lastReportedRef = useRef('');
 
   useEffect(() => {
     if (!onError || logs.length === 0) return;
+    
+    // Manual detection of SyntaxErrors/Babel errors without touching the internal object
     const errorLogs = logs.filter(log => log.method === 'error');
     if (errorLogs.length === 0) return;
     
