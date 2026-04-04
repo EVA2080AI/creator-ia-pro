@@ -14,6 +14,7 @@ import type { StudioFile } from '@/hooks/useStudioProjects';
 import { cloneWebsiteAdvanced } from '@/services/clone-service';
 import { aiService, MODEL_COSTS } from '@/services/ai-service';
 import { StudioArtifactsPanel, type UIPlanTask, type UIArtifact, type UILog } from './StudioArtifactsPanel';
+import { useAgentPreferences } from '@/hooks/useAgentPreferences';
 
 // ─── Env ───────────────────────────────────────────────────────────────────────
 const SUPABASE_URL      = import.meta.env.VITE_SUPABASE_URL as string;
@@ -381,18 +382,13 @@ REGLAS CRÍTICAS DE DISEÑO UX/UI (OBLIGATORIAS para frontend):
 
 FORMATO EXACTO — EMPIEZA CON { Y TERMINA CON }:
 {"files":{"App.tsx":{"language":"tsx","content":"..."},"pages/Home.tsx":{"language":"tsx","content":"..."},"README.md":{"language":"markdown","content":"..."}},"explanation":"descripción breve","tech_stack":["React","TypeScript","Tailwind CSS","React Router"]}
-
 Si el usuario pide modificar código existente, incluye los archivos modificados con contenido COMPLETO.`;
 
 // ─── Welcome message ───────────────────────────────────────────────────────────
 const WELCOME: Message = {
   id: 'welcome',
   role: 'assistant',
-  content: `Hola, soy **Genesis AI**.
-
-Puedo **generar código** completo (React, Next.js, Python, Node.js…), **diseñar arquitecturas**, **debugear** errores, responder preguntas técnicas o de marketing.
-
-Solo dime qué necesitas — detecto automáticamente si quieres código o una respuesta.`,
+  content: `Hola, soy **Genesis AI**. Estoy listo para construir contigo. Dime qué tienes en mente hoy.`,
   timestamp: new Date(),
 };
 
@@ -565,14 +561,6 @@ function renderMarkdown(text: string): string {
   });
 }
 
-// ─── Starter chips shown below welcome ─────────────────────────────────────────
-const STARTER_CHIPS = [
-  { emoji: '🚀', label: 'Landing SaaS',    prompt: 'Crea una landing page SaaS moderna con hero animado, features con iconos, testimonios y footer. Dark mode, gradientes violeta.' },
-  { emoji: '📊', label: 'Dashboard',        prompt: 'Crea un dashboard con métricas KPI, tabla de datos con paginación y gráfico de líneas. Dark, minimalista.' },
-  { emoji: '🏗️', label: 'System Design',   prompt: '¿Cómo diseñarías la arquitectura de un SaaS multi-tenant con auth, billing y base de datos por tenant? Dame el diseño completo con trade-offs.' },
-  { emoji: '🐛', label: 'Debug rápido',     prompt: 'Tengo un componente React con demasiados re-renders. ¿Cómo lo diagnostico y optimizo? Dame el proceso paso a paso.' },
-];
-
 // ─── Agent Phases ─────────────────────────────────────────────────────────────
 export type AgentPhase = 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
 export type AgentSpecialist = 'ux' | 'frontend' | 'backend' | 'devops' | 'none';
@@ -693,6 +681,7 @@ export function StudioChat({
   onPhaseChange
 }: StudioChatProps) {
   const { user } = useAuth();
+  const { preferences, loading: prefsLoading } = useAgentPreferences();
   
   // Internal state fallbacks if props are not provided
   const [internalArtifacts, setInternalArtifacts] = useState<UIArtifact[]>([]);
@@ -710,9 +699,7 @@ export function StudioChat({
   const welcomeMsg: Message = {
     id: 'welcome',
     role: 'assistant',
-    content: persona === 'antigravity' 
-      ? `Hola, soy **Antigravity**. \n\nSoy el motor de inteligencia central de Creator IA. Puedo ayudarte con estrategia, razonamiento complejo, análisis de marketing o cualquier desafío creativo. \n\n¿En qué podemos trabajar hoy?`
-      : `Hola, soy **Genesis AI**. \n\nPuedo **generar código** completo (React, Next.js, Python, Node.js…), **diseñar arquitecturas**, **debugear** errores o responder preguntas técnicas. \n\n¿Qué vamos a construir?`,
+    content: `Hola, soy **Genesis AI**. Estoy listo para construir contigo. Dime qué tienes en mente hoy.`,
     timestamp: new Date(),
   };
 
@@ -778,6 +765,13 @@ export function StudioChat({
     const signal = abortControllerRef.current.signal;
 
     const intent = detectIntent(prompt);
+    
+    // FETCH AND INJECT AGENT PREFERENCES
+    const prefContext = preferences.map(p => `[MEMORIA ${p.agent_id.toUpperCase()}]: ${p.instructions}`).join('\n');
+    const dynamicSystem = intent === 'chat' 
+      ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM)
+      : (isArchitectMode ? `${ARCHITECT_SYSTEM_PROMPT}\n\n${prefContext}` : `${CODE_GEN_SYSTEM}\n\n${prefContext}`);
+
     const isChatModeActive = intent === 'chat';
     const isArchitectRequest = isArchitectMode && !isChatModeActive;
     setCurrentGenIntent(isArchitectRequest ? 'chat' : (isChatModeActive ? 'chat' : 'codegen'));
@@ -810,7 +804,7 @@ export function StudioChat({
         ? ARCHITECT_SYSTEM_PROMPT
         : (isChatModeActive 
           ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM)
-          : CODE_GEN_SYSTEM);
+          : dynamicSystem);
 
       if (pendingUrl) {
         const parsedClone = JSON.parse(pendingUrl);
@@ -918,8 +912,6 @@ export function StudioChat({
                 accumulated += delta;
                 setStreamChars(accumulated.length);
                 onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
-                if (isChatModeActive) {
-                  streamBufferRef.current = accumulated;
                 if (genPhaseRef.current !== 'generating') {
                   updatePhase('generating', 'frontend'); // Default to frontend for streaming
                 }
@@ -929,7 +921,10 @@ export function StudioChat({
                 if (accumulated.includes('[FRONTEND_DEV]')) updatePhase('generating', 'frontend');
                 if (accumulated.includes('[BACKEND_DEV]')) updatePhase('generating', 'backend');
                 if (accumulated.includes('[DEVOPS_SYNC]')) updatePhase('generating', 'devops');
-                  setGenPhase('streaming');
+                setGenPhase('streaming');
+
+                if (isChatModeActive) {
+                  streamBufferRef.current = accumulated;
                 }
               }
             } catch { /* skip partial chunk */ }
@@ -967,7 +962,7 @@ export function StudioChat({
         setCurrentGenIntent(null);
       }, 400);
     }
-  }, [projectFiles, selectedModel, convHistory, pendingImage, supabaseConfig, activeFile, isArchitectMode, onGeneratingChange, onStreamCharsChange, persona, pendingUrl, updatePhase]);
+  }, [projectFiles, selectedModel, convHistory, pendingImage, supabaseConfig, activeFile, isArchitectMode, onGeneratingChange, onStreamCharsChange, persona, pendingUrl, updatePhase, preferences]);
 
   const processRaw = (rawText: string, prompt: string) => {
     if (!rawText) { toast.error('La IA devolvió una respuesta vacía.'); return null; }
@@ -1529,66 +1524,6 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
                   </div>
                 </div>
 
-                  {/* Action Grid for Welcome Message */}
-                  {msg.id === 'welcome' && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8 max-w-2xl animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
-                      {/* Card: Upload */}
-                      <button 
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-4 p-5 rounded-2xl border border-zinc-200 bg-white hover:border-black hover:shadow-xl hover:shadow-black/5 transition-all text-left group/card"
-                      >
-                        <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover/card:bg-zinc-900 group-hover/card:text-white transition-all">
-                          <UploadCloud className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <span className="block text-sm font-black uppercase tracking-widest text-zinc-900">Subir Referencia</span>
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Imagen, HTML o captura</span>
-                        </div>
-                      </button>
-
-                      {/* Card: URL */}
-                      <button 
-                        onClick={() => setShowUrlInput(true)}
-                        className="flex items-center gap-4 p-5 rounded-2xl border border-zinc-200 bg-white hover:border-black hover:shadow-xl hover:shadow-black/5 transition-all text-left group/card"
-                      >
-                        <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover/card:bg-zinc-900 group-hover/card:text-white transition-all">
-                          <Globe className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <span className="block text-sm font-black uppercase tracking-widest text-zinc-900">Clonar URL</span>
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Importar sitio web activo</span>
-                        </div>
-                      </button>
-
-                      {/* Card: Model */}
-                      <button 
-                        onClick={() => setModelOpen(true)}
-                        className="flex items-center gap-4 p-5 rounded-2xl border border-zinc-200 bg-white hover:border-black hover:shadow-xl hover:shadow-black/5 transition-all text-left group/card"
-                      >
-                        <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover/card:bg-zinc-900 group-hover/card:text-white transition-all">
-                          <Sparkles className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <span className="block text-sm font-black uppercase tracking-widest text-zinc-900">Motor de IA</span>
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{currentModel.label}</span>
-                        </div>
-                      </button>
-
-                      {/* Card: Architect Mode */}
-                      <button 
-                        onClick={() => setIsArchitectMode(!isArchitectMode)}
-                        className={`flex items-center gap-4 p-5 rounded-2xl border transition-all text-left group/card ${isArchitectMode ? 'border-indigo-300 bg-indigo-50 shadow-lg shadow-indigo-100' : 'border-zinc-200 bg-white hover:border-black hover:shadow-xl hover:shadow-black/5'}`}
-                      >
-                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-all ${isArchitectMode ? 'bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-200' : 'bg-zinc-50 border border-zinc-100 text-zinc-400 group-hover/card:bg-zinc-900 group-hover/card:text-white'}`}>
-                          <Shield className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <span className="block text-sm font-black uppercase tracking-widest text-zinc-900">Modo Arquitecto</span>
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">{isArchitectMode ? '✓ Activado — planifica antes de generar' : 'Plan de construcción antes de código'}</span>
-                        </div>
-                      </button>
-                    </div>
-                  )}
 
                   {/* Suggestions / Starter Chips */}
                 {msg.suggestions && msg.suggestions.length > 0 && (

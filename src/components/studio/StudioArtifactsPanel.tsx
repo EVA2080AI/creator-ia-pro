@@ -11,11 +11,15 @@ import {
   Zap,
   Terminal as TerminalIcon,
   Code2,
-  Database,
-  RefreshCw
+  Database, 
+  RefreshCw,
+  Settings
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Mermaid } from './Mermaid';
+import { AgentSettingsModal } from './AgentSettingsModal';
+import { type AgentSpecialist } from '@/hooks/useAgentPreferences';
 import { StudioTerminal } from './StudioTerminal';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 
@@ -68,6 +72,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
   persona = 'genesis'
 }) => {
   const [activeTab, setActiveTab] = useState<'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents'>(initialTab);
+  const [settingsAgent, setSettingsAgent] = useState<{ id: AgentSpecialist, name: string } | null>(null);
 
   if (!isOpen) return null;
 
@@ -278,6 +283,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                 color="primary"
                 icon={<Layout className="w-5 h-5" />}
                 description="Optimización de experiencia de usuario, jerarquía visual y flujos conversacionales tácticos."
+                onSettings={() => setSettingsAgent({ id: 'ux', name: 'UX Engine' })}
               />
               <AgentCard 
                 name="Frontend Core" 
@@ -287,6 +293,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                 color="blue"
                 icon={<Code2 className="w-5 h-5" />}
                 description="Generación de componentes de alto rendimiento, gestión de estados y animaciones premium."
+                onSettings={() => setSettingsAgent({ id: 'frontend', name: 'Frontend Core' })}
               />
               <AgentCard 
                 name="Backend Logic" 
@@ -296,6 +303,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                 color="purple"
                 icon={<Database className="w-5 h-5" />}
                 description="Orquestación de esquemas de datos, Edge Functions y seguridad robusta en Supabase."
+                onSettings={() => setSettingsAgent({ id: 'backend', name: 'Backend Logic' })}
               />
               <AgentCard 
                 name="DevOps Sync" 
@@ -305,8 +313,28 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                 color="orange"
                 icon={<RefreshCw className="w-5 h-5" />}
                 description="Integración continua con GitHub, optimización de build y despliegue automatizado en Vercel."
+                onSettings={() => setSettingsAgent({ id: 'devops', name: 'DevOps Sync' })}
               />
+              <div className="p-4 bg-zinc-900 border-t border-white/5 flex items-center justify-between shrink-0">
+            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Enjambre de Especialistas Genesis</span>
+            <div className="flex gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" style={{ animationDelay: '0.2s' }} />
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
             </div>
+          </div>
+
+          <AnimatePresence>
+            {settingsAgent && (
+              <AgentSettingsModal 
+                isOpen={true} 
+                onClose={() => setSettingsAgent(null)} 
+                agentId={settingsAgent.id} 
+                agentName={settingsAgent.name} 
+              />
+            )}
+          </AnimatePresence>
+        </div>
 
             <div className="pt-6 border-t border-white/5">
               <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Métricas de Colaboración</h4>
@@ -407,14 +435,16 @@ function Badge({ children, variant = 'default', className }: { children: React.R
   );
 }
 
-function AgentCard({ name, role, active, phase, color, description, icon }: { name: string, role: string, active: boolean, phase: string, color: 'primary' | 'blue' | 'purple' | 'orange', description: string, icon: React.ReactNode }) {
+function AgentCard({ name, role, active, phase, color, description, icon, onSettings }: { name: string, role: string, active: boolean, phase: string, color: 'primary' | 'blue' | 'purple' | 'orange', description: string, icon: React.ReactNode, onSettings: () => void }) {
   const isThinking = phase === 'thinking' || phase === 'architecting' || phase === 'fixing';
   const isGenerating = phase === 'generating';
 
   return (
     <div className={cn(
-      "p-4 rounded-2xl border transition-all duration-500 relative overflow-hidden group",
-      active ? "bg-white/[0.04] border-white/20 shadow-2xl scale-[1.02]" : "bg-black/20 border-white/5 opacity-40 hover:opacity-60"
+      "p-6 rounded-[32px] border transition-all duration-500 relative overflow-hidden group flex flex-col h-full",
+      active 
+        ? "bg-white/5 border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.1)] scale-[1.02] z-10" 
+        : "bg-zinc-900/10 border-white/5 opacity-50 hover:opacity-80"
     )}>
       {active && (
         <div className={cn(
@@ -456,13 +486,19 @@ function AgentCard({ name, role, active, phase, color, description, icon }: { na
             )}
           </div>
           <div>
-            <h3 className="text-xs font-black text-white">{name}</h3>
-            <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">{role}</p>
+            <h3 className={cn("text-xs font-black transition-colors", active ? "text-white" : "text-zinc-500")}>{name}</h3>
+            <p className={cn("text-[9px] font-bold uppercase tracking-widest transition-colors", active ? "text-zinc-400" : "text-zinc-600")}>{role}</p>
           </div>
         </div>
+        <button 
+          onClick={(e) => { e.stopPropagation(); onSettings(); }}
+          className="p-1.5 hover:bg-white/10 rounded-lg text-zinc-500 hover:text-white transition-colors"
+        >
+          <Settings className="w-3.5 h-3.5" />
+        </button>
       </div>
 
-      <p className="text-[10px] text-zinc-400 leading-relaxed mb-4 line-clamp-2">
+      <p className={cn("text-[10px] leading-relaxed mb-6 line-clamp-3 transition-colors", active ? "text-zinc-300" : "text-zinc-500")}>
         {description}
       </p>
 
