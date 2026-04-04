@@ -342,11 +342,23 @@ function SandpackErrorBridge({ onError }: { onError?: (error: string) => void })
     if (!onError || logs.length === 0) return;
     const errorLogs = logs.filter(log => log.method === 'error');
     if (errorLogs.length === 0) return;
+    
+    // Extract only the plain text message to avoid read-only mutation of Error objects
     const latestError = errorLogs[errorLogs.length - 1];
-    const errorText = (latestError.data ?? []).join(' ').slice(0, 500);
-    if (errorText && errorText !== lastReportedRef.current) {
-      lastReportedRef.current = errorText;
-      onError(errorText);
+    let errorMessage = '';
+    
+    if (latestError.data) {
+      errorMessage = latestError.data.map(item => {
+        if (typeof item === 'string') return item;
+        if (item instanceof Error) return item.message;
+        try { return JSON.stringify(item); } catch { return String(item); }
+      }).join(' ');
+    }
+
+    const sanitizedError = errorMessage.slice(0, 500);
+    if (sanitizedError && sanitizedError !== lastReportedRef.current) {
+      lastReportedRef.current = sanitizedError;
+      onError(sanitizedError);
     }
   }, [logs, onError]);
   return null;
