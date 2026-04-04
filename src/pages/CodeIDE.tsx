@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/hooks/useAuth';
@@ -15,7 +15,7 @@ import {
   Save, Play, Globe, Github, Sparkles, Bot,
   Search, GitBranch, Package, Settings, User,
   ChevronRight, ChevronDown, Clock, AlertCircle,
-  CheckCircle2, Terminal, MoreHorizontal
+  CheckCircle2, Terminal, MoreHorizontal, UploadCloud
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -61,7 +61,8 @@ export default function CodeIDE() {
   const [showOutline, setShowOutline] = useState(true);
   const [showTimeline, setShowTimeline] = useState(false);
 
-  // --- Initialization ---
+  // --- Folder Upload ---
+  const folderInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (loadingProjects) return;
     
@@ -130,6 +131,71 @@ export default function CodeIDE() {
   const handleCreateNew = async () => {
     const p = await createProject('Proyecto Nuevo');
     if (p) navigate(`/code?project=${p.id}`);
+  };
+
+  const handleFolderUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    if (!activeProject) {
+      toast.error('Crea un proyecto primero antes de importar.');
+      return;
+    }
+
+    setIsSaving(true);
+    toast.info('Cargando archivos del proyecto...');
+    const newProjectFiles: Record<string, StudioFile> = {};
+
+    const readPromises = Array.from(files).map((file) => {
+      return new Promise<void>((resolve) => {
+        // Ignorar binarios pesados y node_modules / dependencias obvias
+        const pathPart = file.webkitRelativePath || file.name;
+        if (pathPart.includes('node_modules/') || pathPart.includes('.git/') || file.type.startsWith('image/')) {
+          resolve();
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const content = event.target?.result as string;
+          if (content) {
+            const pathParts = pathPart.split('/');
+            // The first part is the folder name itself (webkitRelativePath), so we slice it out.
+            const filePath = pathParts.length > 1 ? pathParts.slice(1).join('/') : pathPart;
+
+            let lang = 'plaintext';
+            if (file.name.endsWith('.ts') || file.name.endsWith('.tsx')) lang = 'tsx';
+            else if (file.name.endsWith('.js') || file.name.endsWith('.jsx')) lang = 'jsx';
+            else if (file.name.endsWith('.html')) lang = 'html';
+            else if (file.name.endsWith('.css')) lang = 'css';
+            else if (file.name.endsWith('.json')) lang = 'json';
+            else if (file.name.endsWith('.md')) lang = 'markdown';
+
+            newProjectFiles[filePath] = { language: lang, content };
+          }
+          resolve();
+        };
+        reader.onerror = () => resolve(); // Skip on read error
+        reader.readAsText(file);
+      });
+    });
+
+    await Promise.all(readPromises);
+
+    if (Object.keys(newProjectFiles).length > 0) {
+      await updateProjectFiles(activeProject.id, newProjectFiles);
+      toast.success('Proyecto cargado exitosamente');
+      // Set active file to index.html or App.tsx if they exist
+      const loadedKeys = Object.keys(newProjectFiles);
+      if (loadedKeys.includes('index.html')) setActiveFile('index.html');
+      else if (loadedKeys.includes('App.tsx')) setActiveFile('App.tsx');
+      else if (loadedKeys.length > 0) setActiveFile(loadedKeys[0]);
+    } else {
+      toast.error('No se encontraron archivos de texto válidos.');
+    }
+
+    setIsSaving(false);
+    e.target.value = '';
   };
 
   if (loadingProjects || (!activeProject && projects.length > 0)) {
@@ -238,10 +304,24 @@ export default function CodeIDE() {
                     <div className="h-9 px-4 flex items-center justify-between border-b border-zinc-200/60 shrink-0">
                       <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">EXPLORADOR</span>
                       <div className="flex items-center gap-1">
-                        <button onClick={handleCreateNew} title="Nuevo Archivo"
+                        <button onClick={handleCreateNew} title="Nuevo Proyecto"
                           className="p-1 rounded hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 transition-all">
                           <Plus className="w-3.5 h-3.5" />
                         </button>
+                        <button onClick={() => folderInputRef.current?.click()} title="Importar Proyecto"
+                          className="p-1 rounded hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 transition-all">
+                          <UploadCloud className="w-3.5 h-3.5" />
+                        </button>
+                        <input 
+                          type="file" 
+                          ref={folderInputRef} 
+                          onChange={handleFolderUpload} 
+                          className="hidden" 
+                          /* @ts-expect-error Typescript doesn't strictly know webkitdirectory in standard types */
+                          webkitdirectory="true" 
+                          directory="true" 
+                          multiple 
+                        />
                         <button onClick={() => setShowFileTree(false)} title="Cerrar Explorador"
                           className="p-1 rounded hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 transition-all">
                           <PanelLeftClose className="w-3.5 h-3.5" />
