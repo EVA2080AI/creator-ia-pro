@@ -3,7 +3,7 @@ import {
   Send, Sparkles, Bot, Loader2,
   ChevronDown, Copy, RotateCcw, Check,
   X, Image as ImageIcon, AlertCircle, Wrench, Globe, Link2, ExternalLink, Lock,
-  FileCode2, UploadCloud, Zap
+  FileCode2, UploadCloud, Zap, Plus, Mic, ArrowUp
 } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { supabase } from '@/integrations/supabase/client';
@@ -485,6 +485,7 @@ export function StudioChat({
   const [showUrlInput,     setShowUrlInput]     = useState(false);
   const [isScraping,       setIsScraping]       = useState(false);
   const [pendingContext,   setPendingContext]   = useState<{ name: string; content: string } | null>(null);
+  const [isPlusMenuOpen,   setIsPlusMenuOpen]   = useState(false);
 
   const messagesEndRef    = useRef<HTMLDivElement>(null);
   const containerRef      = useRef<HTMLDivElement>(null);
@@ -1337,102 +1338,133 @@ export function StudioChat({
           </div>
         )}
 
-        <div className="rounded-xl transition-all relative focus-within:ring-2 focus-within:ring-primary/10 bg-white border border-zinc-200 shadow-sm">
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Type or describe what you need... @file to cite code"
-            className="w-full bg-transparent px-3.5 pt-3 pb-2 text-[13px] text-foreground placeholder:text-muted-foreground/30 outline-none resize-none min-h-[20px] max-h-[350px] leading-relaxed"
-            disabled={isGenerating}
-            rows={1}
-          />
-          <div className="flex items-center justify-between px-3 pb-2.5">
-            <div className="flex items-center gap-1.5">
-              {/* Image attach button */}
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isGenerating}
-                aria-label={currentModel.vision ? 'Adjuntar imagen' : 'Este modelo no soporta imágenes'}
-                className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all disabled:opacity-30"
-                title={currentModel.vision ? 'Adjuntar imagen (modelo con visión)' : 'Este modelo no soporta imágenes'}
-              >
-                <ImageIcon className="h-3.5 w-3.5" aria-hidden="true" />
-                {!currentModel.vision && <span className="text-[9px]" aria-hidden="true">—</span>}
-              </button>
-
-              {/* URL Clone button */}
-              <button
-                onClick={() => { setShowUrlInput(v => !v); setUrlInput(''); }}
-                disabled={isGenerating || isScraping}
-                aria-label="Clonar sitio web desde URL"
-                title="Clonar sitio web desde URL"
-                className={`flex items-center gap-1 px-2 py-1 rounded-lg transition-all disabled:opacity-30 ${
-                  pendingUrl ? 'bg-emerald-50 text-emerald-600' : 
-                  showUrlInput ? 'bg-primary/10 text-primary' : 
-                  'text-zinc-400 hover:text-zinc-900'
-                }`}
-              >
-                <Globe className="h-3.5 w-3.5" />
-              </button>
-
-              {/* Model selector — compact chip */}
-              <div className="relative">
-                <button
-                  onClick={() => setModelOpen(!modelOpen)}
-                  className="flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-                >
-                  <Sparkles className="h-3 w-3 text-primary/50" />
-                  <span className="max-w-[80px] truncate">{currentModel.label}</span>
-                  <span className="text-[9px] text-muted-foreground/40 ml-0.5">code</span>
-                  <ChevronDown className={`h-2.5 w-2.5 transition-transform ${modelOpen ? 'rotate-180' : ''}`} />
+        <div className="max-w-4xl mx-auto w-full relative">
+          {/* Plus Menu Popover */}
+          {isPlusMenuOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setIsPlusMenuOpen(false)} />
+              <div className="absolute left-0 bottom-full mb-3 w-64 rounded-2xl bg-white border border-zinc-200 shadow-2xl z-50 overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
+                <div className="p-3 border-b border-zinc-100 italic text-[10px] text-zinc-400 font-medium">Adjuntar recurso...</div>
+                
+                <button onClick={() => { setIsPlusMenuOpen(false); fileInputRef.current?.click(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-50 transition-colors group">
+                  <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-900 group-hover:text-white transition-all">
+                    <ImageIcon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-zinc-900">Imagen / Captura</span>
+                    <span className="text-[10px] text-zinc-400">Referencia visual</span>
+                  </div>
                 </button>
 
-                {modelOpen && (
-                  <>
-                    <div className="fixed inset-0 z-40" onClick={() => setModelOpen(false)} />
-                    <div className="absolute left-0 bottom-full mb-1.5 w-72 rounded-xl overflow-hidden z-50 bg-white border border-zinc-200 shadow-xl">
-                      <p className="px-3 pt-2.5 pb-1.5 text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em]">Modelo de IA para código</p>
-                      {MODELS.map(m => (
-                        <button key={m.id} onClick={() => { setSelectedModel(m.id); setModelOpen(false); }}
-                          aria-label={`Seleccionar modelo ${m.label}${m.premium ? ' (requiere plan Pymes)' : ''}`}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 text-left transition-all hover:bg-zinc-50 ${
-                            selectedModel === m.id ? 'bg-primary/5 text-zinc-900' : 'text-zinc-500'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            {m.premium && <Lock className="h-2.5 w-2.5 text-amber-500 shrink-0" aria-hidden="true" />}
-                            <span className="text-[12px] font-medium">{m.label}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            {m.vision && <span className="text-[9px] text-emerald-500" aria-label="Soporta visión">👁</span>}
-                            <span className={`text-[9px] ${m.premium ? 'text-amber-600' : 'text-emerald-600'}`}>{m.badge}</span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </>
-                )}
+                <button onClick={() => { setIsPlusMenuOpen(false); fileInputRef.current?.click(); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-50 transition-colors group">
+                  <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-900 group-hover:text-white transition-all">
+                    <FileCode2 className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-zinc-900">Archivo de Código</span>
+                    <span className="text-[10px] text-zinc-400">Contexto técnico</span>
+                  </div>
+                </button>
+
+                <button onClick={() => { setIsPlusMenuOpen(false); setShowUrlInput(true); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-50 transition-colors group border-t border-zinc-50">
+                  <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-900 group-hover:text-white transition-all">
+                    <Globe className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <span className="block text-xs font-bold text-zinc-900">Clonar URL</span>
+                    <span className="text-[10px] text-zinc-400">Importar sitio web</span>
+                  </div>
+                </button>
               </div>
+            </>
+          )}
+
+          {/* Main Centric Bar */}
+          <div className="flex items-center gap-2 p-2 rounded-[28px] bg-white border border-zinc-200 shadow-sm focus-within:ring-4 focus-within:ring-primary/5 focus-within:border-primary/20 transition-all">
+            {/* Plus Trigger */}
+            <button
+              onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
+              className={`h-11 w-11 rounded-full flex items-center justify-center transition-all ${isPlusMenuOpen ? 'bg-zinc-900 text-white' : 'text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50'}`}
+            >
+              <Plus className={`h-5 w-5 transition-transform duration-300 ${isPlusMenuOpen ? 'rotate-45' : ''}`} />
+            </button>
+
+            {/* Input Textarea */}
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder="Describe qué quieres construir..."
+              className="flex-1 bg-transparent px-2 py-3 text-[14px] text-foreground placeholder:text-zinc-300 outline-none resize-none min-h-[44px] max-h-[350px] leading-relaxed"
+              disabled={isGenerating}
+              rows={1}
+            />
+
+            {/* Right Controls */}
+            <div className="flex items-center gap-1 pr-1">
+              {/* Mic Icon */}
+              <button className="h-10 w-10 rounded-full flex items-center justify-center text-zinc-300 hover:text-zinc-900 transition-colors">
+                <Mic className="h-4 w-4" />
+              </button>
+
+              {/* Send / Stop */}
+              {isGenerating ? (
+                <button
+                  onClick={handleStop}
+                  className="h-10 w-10 rounded-full flex items-center justify-center text-rose-500 bg-rose-50 hover:bg-rose-100 transition-all"
+                >
+                  <div className="h-3 w-3 rounded-sm bg-rose-500 animate-pulse" />
+                </button>
+              ) : (
+                <button
+                  onClick={() => handleSend()}
+                  disabled={!input.trim()}
+                  className="h-10 w-10 rounded-full flex items-center justify-center bg-zinc-50 text-zinc-300 hover:bg-zinc-900 hover:text-white transition-all disabled:opacity-30 disabled:hover:bg-zinc-50 disabled:hover:text-zinc-300"
+                >
+                  <ArrowUp className="h-5 w-5" />
+                </button>
+              )}
             </div>
-            {isGenerating ? (
-              <button
-                onClick={handleStop}
-                aria-label="Detener generación"
-                className="flex items-center gap-1.5 px-3 h-8 rounded-lg text-rose-500 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all text-[11px] font-bold ml-2 shadow-sm"
-              >
-                <div className="h-2 w-2 rounded-sm bg-rose-500" aria-hidden="true" /> Stop
-              </button>
-            ) : (
-              <button
-                onClick={() => handleSend()}
-                disabled={!input.trim()}
-                aria-label="Enviar mensaje"
-                className="flex flex-col items-center justify-center p-2 rounded-xl text-white disabled:opacity-30 transition-all active:scale-95 bg-primary hover:shadow-lg shadow-primary/20 ml-2"
-              >
-                <Send className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
+          </div>
+
+          {/* Model selector — repositioned below as a floating chip */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2">
+            <button
+              onClick={() => setModelOpen(!modelOpen)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-zinc-200 text-[10px] font-bold text-zinc-500 hover:text-zinc-900 hover:shadow-lg transition-all"
+            >
+              <Sparkles className="h-3 w-3 text-primary/60" />
+              <span>{currentModel.label}</span>
+              <ChevronDown className={`h-2.5 w-2.5 transition-transform ${modelOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {modelOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setModelOpen(false)} />
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-72 rounded-2xl overflow-hidden z-50 bg-white border border-zinc-200 shadow-2xl">
+                  <p className="px-4 pt-3 pb-2 text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em]">IA Engine</p>
+                  {MODELS.map(m => (
+                    <button key={m.id} onClick={() => { setSelectedModel(m.id); setModelOpen(false); }}
+                      className={`w-full flex items-center justify-between px-4 py-3 text-left transition-all hover:bg-zinc-50 ${
+                        selectedModel === m.id ? 'bg-primary/5 text-zinc-900 font-bold' : 'text-zinc-500'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        {m.premium && <Lock className="h-2.5 w-2.5 text-amber-500 shrink-0" />}
+                        <span className="text-[12px]">{m.label}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        {m.vision && <span className="text-[9px] text-emerald-500">👁</span>}
+                        <span className={`text-[9px] font-bold uppercase tracking-widest ${m.premium ? 'text-amber-600' : 'text-emerald-600'}`}>{m.badge.split(' ')[0]}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </>
             )}
           </div>
         </div>
