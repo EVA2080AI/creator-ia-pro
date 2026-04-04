@@ -138,7 +138,7 @@ export default {
     <title>${opts.projectName}</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   </head>
-  <body class="${opts.darkMode ? 'bg-gray-950 text-white' : 'bg-white text-gray-900'}">
+  <body class="${opts.darkMode ? 'bg-zinc-950 text-zinc-100' : 'bg-white text-zinc-900'}">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
@@ -188,7 +188,7 @@ ${routeElements}
   // src/components/Layout.tsx — Navbar + Footer
   const navLinks = opts.pages.map((p, i) => {
     const path = i === 0 ? '/' : `/${slugify(p)}`;
-    return `          <NavLink to="${path}" className={({ isActive }) => \`px-3 py-2 rounded-lg text-sm font-medium transition-colors \${isActive ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white hover:bg-white/10'}\`}>${p}</NavLink>`;
+    return `          <NavLink to="${path}" className={({ isActive }) => \`px-3 py-2 rounded-lg text-sm font-medium transition-colors \${isActive ? 'bg-primary text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'}\`}>${p}</NavLink>`;
   }).join('\n');
 
   files.set('src/components/Layout.tsx', `import { NavLink, Outlet } from 'react-router-dom';
@@ -213,7 +213,7 @@ ${navLinks}
       <footer className="${opts.darkMode ? 'bg-gray-900 border-t border-white/10' : 'bg-gray-50 border-t border-gray-200'} py-8">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-sm ${opts.darkMode ? 'text-gray-500' : 'text-gray-400'}">
-            © {new Date().getFullYear()} ${opts.projectName}. Generado con Genesis AI.
+            © {new Date().getFullYear()} ${opts.projectName}.
           </p>
         </div>
       </footer>
@@ -242,7 +242,7 @@ ${navLinks}
             ${opts.description || 'Bienvenido a tu nuevo proyecto. Construido con React, TypeScript y Tailwind CSS.'}
           </p>
           <div className="flex gap-4 justify-center">
-            <button className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-blue-600/25 active:scale-95">
+            <button className="px-8 py-3 bg-primary hover:opacity-90 text-white font-semibold rounded-xl transition-all hover:shadow-lg active:scale-95">
               Comenzar
             </button>
             <button className="px-8 py-3 ${opts.darkMode ? 'bg-white/10 hover:bg-white/20 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-900'} font-semibold rounded-xl transition-all">
