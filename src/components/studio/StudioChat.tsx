@@ -632,6 +632,7 @@ interface StudioChatProps {
   onPublish?: () => void;
   onBack?: () => void;
   onToggleArtifacts?: () => void;
+  onSelectFile?: (filename: string) => void;
 
   // Lifted Engineering State (Optional fallbacks for backward compatibility)
   artifacts?: UIArtifact[];
@@ -721,6 +722,7 @@ export function StudioChat({
   persona = 'genesis', activeFile, previewError,
   projectName, isSaving, onShare, onPublish, onBack,
   onToggleArtifacts,
+  onSelectFile,
   artifacts, setArtifacts, tasks, setTasks, logs, setLogs,
   onPhaseChange
 }: StudioChatProps) {
@@ -810,6 +812,27 @@ export function StudioChat({
     }
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
+
+    // --- Navigation Intent Detection ---
+    const navMatch = prompt.toLowerCase().match(/(?:abre|mostrar|abrir|abrete|open|show|view|file|archivo)\s+([\w./\-]+\.\w+)/i);
+    if (navMatch && onSelectFile) {
+      const targetFile = navMatch[1];
+      // Search for the file in projectFiles (case-insensitive)
+      const exactMatch = Object.keys(projectFiles).find(f => f.toLowerCase() === targetFile.toLowerCase());
+      if (exactMatch) {
+         onSelectFile(exactMatch);
+         const navMsg: Message = {
+           id: Math.random().toString(36).substr(2, 9),
+           role: 'assistant',
+           content: `Perfecto, he abierto **${exactMatch}** en el editor para ti.`,
+           timestamp: new Date(),
+         };
+         setMessages(prev => [...prev, navMsg]);
+         setIsGenerating(false);
+         onGeneratingChange?.(false);
+         return;
+      }
+    }
 
     const intent = detectIntent(prompt);
     

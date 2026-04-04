@@ -363,6 +363,10 @@ export default function Studio() {
             onPublish={() => setShowDeployModal(true)}
             onBack={() => navigate('/studio')}
             onToggleArtifacts={() => setViewMode('artifacts')}
+            onSelectFile={(f) => {
+              setActiveFile(f);
+              setViewMode('code');
+            }}
           />
         </div>
 

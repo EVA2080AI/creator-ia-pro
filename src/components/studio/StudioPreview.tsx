@@ -155,6 +155,7 @@ ${routes}
 function toSandpackFiles(
   files: Record<string, StudioFile>,
   supabaseConfig?: SupabaseConfig | null,
+  isVanilla?: boolean,
 ): Record<string, { code: string; active?: boolean }> | null {
   if (Object.keys(files).length === 0) return null;
 
@@ -349,8 +350,22 @@ function toSandpackFiles(
     window.parent.postMessage({ type: 'FIGMA_BRIDGE_READY' }, '*');
   })()`;
 
-  result['/public/index.html'] = {
-    code: `<!DOCTYPE html>
+  if (isVanilla) {
+    // For vanilla, ensure we have an index.html at root
+    const hasHtml = result['/index.html'];
+    if (!hasHtml) {
+      result['/index.html'] = {
+        code: `<!DOCTYPE html><html><head><script>${figmaBridgeCode}</script></head><body><div id="root"></div></body></html>`,
+        active: true
+      };
+    } else {
+      // Inject bridge into existing index.html
+      result['/index.html'].code = result['/index.html'].code.replace('</head>', `<script>${figmaBridgeCode}</script></head>`);
+    }
+  } else {
+    // React mode remains unchanged
+    result['/public/index.html'] = {
+      code: `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -362,7 +377,8 @@ function toSandpackFiles(
     <script>${figmaBridgeCode}</script>
   </body>
 </html>`
-  };
+    };
+  }
 
   return result;
 }
@@ -417,7 +433,14 @@ export function StudioPreview({
   const [isBridgeReady, setIsBridgeReady] = useState(false);
   const figmaTimeoutRef = useMemo(() => ({ current: null as ReturnType<typeof setTimeout> | null }), []);
 
-  const sandpackFiles = useMemo(() => toSandpackFiles(files, supabaseConfig), [files, supabaseConfig]);
+  const isVanillaHtml = useMemo(() => {
+    return Object.values(files).some(f => f.language === 'html' || f.language === 'javascript') && 
+           !Object.values(files).some(f => f.language === 'tsx' || f.language === 'jsx');
+  }, [files]);
+  
+  const sandpackTemplate = isVanillaHtml ? 'vanilla' : 'react-ts';
+
+  const sandpackFiles = useMemo(() => toSandpackFiles(files, supabaseConfig, isVanillaHtml), [files, supabaseConfig, isVanillaHtml]);
   
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
@@ -458,9 +481,6 @@ export function StudioPreview({
   const hasContent    = !!sandpackFiles;
   const pages = useMemo(() => detectPages(files), [files]);
   const isMultiPage = pages.length >= 2;
-
-  const isVanillaHtml = Object.values(files).some(f => f.language === 'html') && !Object.keys(sandpackFiles || {}).some(k => k.endsWith('.tsx') || k.endsWith('.jsx') || k.endsWith('.ts'));
-  const sandpackTemplate = isVanillaHtml ? 'vanilla' : 'react-ts';
 
   const frameWidth: Record<DeviceMode, string> = {
     desktop: '100%',
