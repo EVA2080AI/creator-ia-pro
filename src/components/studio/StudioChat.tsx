@@ -1518,6 +1518,19 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
     loadHistory();
   }, [projectId, user, ensureConversation]);
 
+  // ─── STATE RESET: Clear input/images when project changes ──────────────────
+  useEffect(() => {
+    if (projectId) {
+      setInput('');
+      setPendingImage(null);
+      setPendingUrl(null);
+      setPendingContext(null);
+      setInitialPromptProcessed(false);
+      autoFixCountRef.current = 0;
+      isFirstGen.current = true;
+    }
+  }, [projectId]);
+
   // ─── BUG FIX: Initial Prompt Trigger ──────────────────────────────────────
   useEffect(() => {
     if (initialPrompt && !initialPromptProcessed && messages.length > 0 && !isGenerating) {
