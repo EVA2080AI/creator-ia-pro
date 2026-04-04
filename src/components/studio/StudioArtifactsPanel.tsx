@@ -202,19 +202,40 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
             <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Visualización de Arquitectura</span>
             
             {artifacts.filter(a => a.type === 'mermaid').length > 0 ? (
-              artifacts.filter(a => a.type === 'mermaid').map((artifact) => (
-                <div key={artifact.id} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-[11px] font-black text-zinc-900 uppercase tracking-widest flex items-center gap-2">
-                       <Layout className="w-3.5 h-3.5 text-primary" />
-                       {artifact.title}
-                    </h4>
+              <div className="grid grid-cols-1 gap-6">
+                {artifacts.filter(a => a.type === 'mermaid').map((artifact) => (
+                  <div key={artifact.id} className="group space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div className="flex items-center justify-between px-1">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm">
+                          <Layout className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="text-[11px] font-black text-zinc-900 uppercase tracking-widest">{artifact.title}</h4>
+                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">SVG Blueprint Generated</span>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="opacity-0 group-hover:opacity-100 transition-opacity text-[8px] bg-white border-zinc-200">
+                        Vector Map
+                      </Badge>
+                    </div>
+                    
+                    <div className="relative p-8 rounded-[32px] border border-zinc-100 bg-[#fafafa] shadow-md overflow-hidden flex items-center justify-center min-h-[300px] group/chart cursor-zoom-in transition-all hover:shadow-xl hover:border-primary/20">
+                      {/* Architectural Grid Background */}
+                      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+                      
+                      <div className="relative z-10 w-full flex justify-center">
+                        <Mermaid chart={artifact.content} className="w-full max-w-full transform transition-transform group-hover/chart:scale-[1.02]" />
+                      </div>
+                      
+                      {/* Watermark */}
+                      <div className="absolute bottom-4 right-6 text-[8px] font-black uppercase tracking-[0.3em] text-zinc-300 pointer-events-none">
+                        Genesis Core Engineering
+                      </div>
+                    </div>
                   </div>
-                  <div className="p-6 rounded-[28px] border border-zinc-100 bg-zinc-50/50 shadow-sm overflow-hidden flex items-center justify-center min-h-[200px]">
-                    <Mermaid chart={artifact.content} className="w-full" />
-                  </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="h-12 w-12 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-300 mb-4">

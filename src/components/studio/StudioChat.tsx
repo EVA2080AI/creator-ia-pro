@@ -226,6 +226,13 @@ FORMATO OBLIGATORIO DE RESPUESTA:
 | React 18 | Framework UI |
 | Tailwind CSS | Estilos |
 
+### Visualización de Arquitectura
+\`\`\`mermaid
+graph TD
+  A[Componente A] --> B[Servicio B]
+  B --> C[(Base de Datos)]
+\`\`\`
+
 ### Decisiones de Diseño
 > [!IMPORTANT]
 > [Decisiones clave que el usuario debe aprobar antes de proceder]
@@ -240,10 +247,11 @@ Si apruebas este plan, haré clic en "Aprobar" y generaré todo el código.
 
 REGLAS:
 1. NO generes código. Solo el plan.
-2. Sé específico con cada archivo y su propósito.
-3. Identifica riesgos o decisiones que requieran input del usuario con alertas > [!WARNING].
-4. El plan debe ser aprobado antes de cualquier generación de código.
-5. Responde en español profesional.`;
+2. Genera SIEMPRE un diagrama Mermaid en la sección "Visualización de Arquitectura" que explique la estructura técnica propuesta.
+3. Sé específico con cada archivo y su propósito.
+4. Identifica riesgos o decisiones que requieran input del usuario con alertas > [!WARNING].
+5. El plan debe ser aprobado antes de cualquier generación de código.
+6. Responde en español profesional.`;
 
 
 // ─── Clone system prompt ──────────────────────────────────────────────────────

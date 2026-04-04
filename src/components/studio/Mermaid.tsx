@@ -4,14 +4,20 @@ import mermaid from 'mermaid';
 // Initialize mermaid
 mermaid.initialize({
   startOnLoad: true,
-  theme: 'base',
+  theme: 'dark',
   themeVariables: {
-    primaryColor: '#0066FF',
+    fontFamily: 'Inter, system-ui, sans-serif',
+    primaryColor: '#3b82f6', // blue-500
     primaryTextColor: '#fff',
-    primaryBorderColor: '#0066FF',
-    lineColor: '#0066FF',
-    secondaryColor: '#f3f4f6',
-    tertiaryColor: '#fff',
+    primaryBorderColor: '#3b82f6',
+    lineColor: '#52525b', // zinc-500
+    secondaryColor: '#18181b', // zinc-900
+    tertiaryColor: '#09090b', // zinc-950
+  },
+  flowchart: {
+    curve: 'basis',
+    useMaxWidth: true,
+    htmlLabels: true,
   },
   securityLevel: 'loose',
 });
