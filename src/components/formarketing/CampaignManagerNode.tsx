@@ -3,6 +3,7 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Share2, Trash2, Instagram, Facebook, Twitter, CheckCircle2, Clock, ChevronDown, ChevronUp, Users, MousePointer2, Zap, Megaphone, Loader2, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { NodeNextAction } from './NodeNextAction';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
@@ -14,6 +15,8 @@ interface CampaignNodeData {
   platforms?: Record<string, 'pending' | 'ready' | 'error'>;
   platformCopy?: Record<string, string>;
   generatingCopy?: Record<string, boolean>;
+  onExecute?: () => void;
+  onAddConnected?: () => void;
 }
 
 const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData }) => {
@@ -235,9 +238,11 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
         </div>
       )}
 
-    <Handle type="target" position={Position.Left} className="!w-2 !h-2 !-left-1 !bg-zinc-400 !border-2 !border-white" />
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !-right-1 !bg-orange-500 !border-2 !border-white" />
+      <Handle type="target" position={Position.Left} id="any-in" className="!w-4 !h-4 !-left-2 !bg-zinc-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <Handle type="source" position={Position.Right} id="any-out" className="!w-4 !h-4 !-right-2 !bg-emerald-500 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <NodeNextAction nodeId={id} />
     </div>
+
   );
 };
 

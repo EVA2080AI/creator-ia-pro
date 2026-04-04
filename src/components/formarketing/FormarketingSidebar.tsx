@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import {
   Search, LayoutGrid, Image, Video,
@@ -66,6 +66,15 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
   const [search, setSearch] = useState('');
   const [menuOpen, setMenuOpen] = useState(true);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [templateOpen, setTemplateOpen] = useState(false);
+
+  // Global listener to open templates from the top toolbar
+  useEffect(() => {
+    const handleOpen = () => setTemplateOpen(true);
+    window.addEventListener('open-template-modal', handleOpen);
+    return () => window.removeEventListener('open-template-modal', handleOpen);
+  }, []);
+
 
   const handleFileUpload = () => {
     const input = document.createElement('input');
@@ -84,8 +93,9 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
 
   const handleSelectTemplate = (template: Template) => {
     toast.success(`Plantilla aplicada: ${template.title}`);
-    window.dispatchEvent(new CustomEvent('add-template', { detail: { title: template.title, nodes: template.nodes } }));
+    window.dispatchEvent(new CustomEvent('add-template', { detail: template }));
   };
+
 
   const onDragStart = (event: React.DragEvent, nodeType: string, label: string) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
@@ -112,10 +122,9 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
     { icon: Scissors,    id: 'scissors', label: 'Cortar' },
     { icon: Square,      id: 'square',   label: 'Seleccionar' },
     { icon: MessageSquare, id: 'message', label: 'Notas' },
-    { icon: Undo,        id: 'undo',     label: 'Deshacer' },
-    { icon: Redo,        id: 'redo',     label: 'Rehacer' },
     { icon: Settings,    id: 'settings', label: 'Configuración' },
   ];
+
 
   return (
     <div className="flex h-full shrink-0 border-r border-zinc-200 z-20">
@@ -132,14 +141,7 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
         <div className="w-8 h-px bg-zinc-100 my-1" />
 
         <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary/10 text-primary hover:bg-primary/20 transition-all group/play border border-primary/10">
-                <Play className="h-4 w-4 fill-current ml-0.5 group-hover:scale-110 transition-transform" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Ejecutar flujo</TooltipContent>
-          </Tooltip>
+
 
           {toolbarIcons.map(tool => (
             <Tooltip key={tool.id}>
@@ -187,8 +189,11 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
           {/* Templates CTA */}
           <div className="px-4 pt-3 pb-2">
             <TemplateModal
+              open={templateOpen}
+              onOpenChange={setTemplateOpen}
               onSelect={handleSelectTemplate}
               trigger={
+
                 <button className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-2xl border border-zinc-200 bg-white hover:border-primary/30 hover:bg-primary/5 transition-all group/tpl shadow-sm">
                   <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-zinc-100 group-hover/tpl:bg-primary/10 transition-colors shrink-0">
                     <Sparkles className="h-3.5 w-3.5 text-primary" />

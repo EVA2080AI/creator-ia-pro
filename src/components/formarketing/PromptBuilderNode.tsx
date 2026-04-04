@@ -3,7 +3,9 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Braces, Trash2, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { NodeConnectionDropdown } from './NodeConnectionDropdown';
+import { NodeNextAction } from './NodeNextAction';
+
+
 
 interface Variable {
   key: string;
@@ -155,11 +157,12 @@ const PromptBuilderNode = ({ id, data }: { id: string; data: PromptBuilderNodeDa
         </div>
       </div>
 
-      <NodeConnectionDropdown nodeType="promptBuilder" nodeId={id} onAddConnected={data.onAddConnected ?? (() => {})} />
+      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <NodeNextAction nodeId={id} />
 
       <Handle type="target" position={Position.Left} id="text-in" className="!w-4 !h-4 !-left-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
-      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-orange-500 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
     </div>
+
   );
 };
 

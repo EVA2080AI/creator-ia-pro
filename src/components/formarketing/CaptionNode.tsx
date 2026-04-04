@@ -3,7 +3,9 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { MessageSquare, Trash2, Sparkles, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { NodeConnectionDropdown } from './NodeConnectionDropdown';
+import { NodeNextAction } from './NodeNextAction';
+
+
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
@@ -226,11 +228,11 @@ Devuelve SOLO el caption, sin explicaciones.`;
         </div>
       </div>
 
-      <NodeConnectionDropdown nodeType="captionNode" nodeId={id} onAddConnected={data.onAddConnected ?? (() => {})} />
-
       <Handle type="target" position={Position.Left} id="text-in" className="!w-4 !h-4 !-left-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
-      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-emerald-500 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <NodeNextAction nodeId={id} />
     </div>
+
   );
 };
 

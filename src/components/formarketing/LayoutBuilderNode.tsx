@@ -4,6 +4,8 @@ import { Layout, Trash2, Globe, Smartphone, Monitor, Zap, ChevronDown, ChevronUp
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { NodeConnectionDropdown } from './NodeConnectionDropdown';
+import { NodeNextAction } from './NodeNextAction';
+
 
 interface LayoutNodeData {
   title?: string;
@@ -164,15 +166,11 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
         </div>
       )}
 
-      <NodeConnectionDropdown
-        nodeType="layoutBuilder"
-        nodeId={id}
-        onAddConnected={data.onAddConnected ?? (() => {})}
-      />
-
-      <Handle type="target" position={Position.Left} id="any-in" className="!w-2 !h-2 !-left-1 !bg-zinc-400 !border-2 !border-white" />
-      <Handle type="source" position={Position.Right} id="layout-out" className="!w-2 !h-2 !-right-1 !bg-emerald-500 !border-2 !border-white" />
+      <Handle type="target" position={Position.Left} id="any-in" className="!w-4 !h-4 !-left-2 !bg-zinc-400 !border-2 !border-white shadow-sm hover:scale-125 transition-transform" />
+      <Handle type="source" position={Position.Right} id="ui-out" className="!w-4 !h-4 !-right-2 !bg-blue-400 !border-2 !border-white shadow-sm hover:scale-125 transition-transform" />
+      <NodeNextAction nodeId={id} />
     </div>
+
   );
 };
 

@@ -24,6 +24,8 @@ import LLMNode from '@/components/formarketing/LLMNode';
 import TextInputNode from '@/components/formarketing/TextInputNode';
 import ExportNode from '@/components/formarketing/ExportNode';
 import { CommandPalette } from '@/components/formarketing/CommandPalette';
+import { Template } from '@/components/formarketing/TemplateModal';
+
 import { 
   ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, 
   LayoutDashboard, Circle, MessageSquare, Download, Smartphone, 
@@ -37,6 +39,9 @@ import { aiService, classifyError } from '@/services/ai-service';
 import { supabase } from '@/integrations/supabase/client';
 import { PropertyInspector } from '@/components/formarketing/PropertyInspector';
 import { ExportModal } from '@/components/formarketing/ExportModal';
+import { StudioToolbar } from '@/components/studio/StudioToolbar';
+import { useCanvasHistory } from '@/hooks/useCanvasHistory';
+import { useReactFlow as useRF } from '@xyflow/react';
 
 // Dynamic nodeTypes will be defined inside the component
 
@@ -60,6 +65,22 @@ function FormarketingContent() {
 
   // HU28 — Command palette
   const [cmdOpen, setCmdOpen]                 = useState(false);
+
+  // Canvas History (Undo/Redo)
+  const { takeSnapshot, undo, redo, canUndo, canRedo, clearHistory } = useCanvasHistory();
+
+  // On any change that should be undoable, we take a snapshot.
+  const record = useCallback(() => {
+    takeSnapshot(rfGetNodes(), rfGetEdges());
+  }, [takeSnapshot, rfGetNodes, rfGetEdges]);
+
+  // Hook into ReactFlow changes to record snapshots
+  // We only record on persistent changes (drag stop, connect, delete)
+  const onNodeDragStop = useCallback(() => record(), [record]);
+  const onSelectionDragStop = useCallback(() => record(), [record]);
+  const onNodesDelete = useCallback(() => record(), [record]);
+  const onEdgesDelete = useCallback(() => record(), [record]);
+
 
 
   // Property Inspector
@@ -98,182 +119,12 @@ function FormarketingContent() {
   const [execLog, setExecLog] = useState<{ time: string; node: string; msg: string; type: 'info' | 'success' | 'error' }[]>([]);
   const [logOpen, setLogOpen] = useState(false);
 
-  const { setActions, clearActions } = useWorkspaceActions();
-
-  // ── Contextual Actions Registration ─────────────────────────────────────────
+  // useWorkspaceActions is no longer needed here as we use StudioToolbar
+  const { clearActions } = useWorkspaceActions();
   useEffect(() => {
-    setActions([
-      {
-        id: 'canvas-nav',
-        label: 'Canvas',
-        actions: [
-          {
-            id: 'templates',
-            label: 'Plantillas',
-            icon: BookOpen,
-            onClick: () => navigate('/hub')
-          },
-          {
-            id: 'add-node',
-            label: 'Nuevo Nodo',
-            icon: Plus,
-            onClick: () => setCmdOpen(true)
-          }
-        ]
-      },
-      {
-        id: 'canvas-history',
-        label: 'Historial',
-        actions: [
-          {
-            id: 'undo',
-            label: 'Deshacer',
-            icon: RotateCcw,
-            onClick: undo
-          },
-          {
-            id: 'redo',
-            label: 'Rehacer',
-            icon: RotateCw,
-            onClick: redo
-          }
-        ]
-      },
-      {
-        id: 'canvas-ops',
-        label: 'Organización',
-        actions: [
-          {
-            id: 'layout',
-            label: 'Organizar',
-            icon: LayoutDashboard,
-            onClick: autoLayout
-          },
-          {
-            id: 'snap',
-            label: 'Snap Grid',
-            icon: Grid3X3,
-            active: snapEnabled,
-            onClick: () => setSnapEnabled(!snapEnabled)
-          }
-        ]
-      },
-      {
-        id: 'canvas-actions',
-        label: 'Acciones',
-        actions: [
-          {
-            id: 'export',
-            label: 'Exportar',
-            icon: Download,
-            disabled: nodes.length === 0,
-            onClick: () => setExportOpen(true)
-          },
-          {
-            id: 'clear',
-            label: 'Limpiar',
-            icon: Trash2,
-            disabled: nodes.length === 0 && edges.length === 0,
-            onClick: handleClear
-          },
-          {
-            id: 'execute',
-            label: execStatus === 'running' ? `Ejecutando ${execDone}/${execNodeCount}` : 'Ejecutar',
-            icon: Zap,
-            variant: 'primary',
-            disabled: nodes.length === 0 || execStatus === 'running',
-            onClick: handleExecute
-          }
-        ]
-      }
-    ], spaceId ? `Espacio: ${spaceId}` : 'Canvas IA');
-
     return () => clearActions();
-  }, [nodes.length, edges.length, snapEnabled, execStatus, execDone, execNodeCount, spaceId]);
+  }, [clearActions]);
 
-  // HU34 — Undo/Redo history
-  const history   = useRef<{ nodes: Node[]; edges: Edge[] }[]>([]);
-  const historyIdx = useRef(-1);
-  const skipHistory = useRef(false);
-
-  const pushHistory = useCallback((ns: Node[], es: Edge[]) => {
-    if (skipHistory.current) return;
-    // Trim forward history
-    history.current = history.current.slice(0, historyIdx.current + 1);
-    history.current.push({ nodes: ns, edges: es });
-    historyIdx.current = history.current.length - 1;
-  }, []);
-
-  const undo = useCallback(() => {
-    if (historyIdx.current <= 0) return;
-    historyIdx.current--;
-    const snap = history.current[historyIdx.current];
-    skipHistory.current = true;
-    setNodes(snap.nodes);
-    setEdges(snap.edges);
-    skipHistory.current = false;
-    toast.info("Cambio deshecho");
-  }, [setNodes, setEdges]);
-
-  const redo = useCallback(() => {
-    if (historyIdx.current >= history.current.length - 1) return;
-    historyIdx.current++;
-    const snap = history.current[historyIdx.current];
-    skipHistory.current = true;
-    setNodes(snap.nodes);
-    setEdges(snap.edges);
-    skipHistory.current = false;
-    toast.info("Cambio rehecho");
-  }, [setNodes, setEdges]);
-
-  // Auto-layout: arrange nodes left-to-right based on edge topology
-  const autoLayout = useCallback(() => {
-    const ns = rfGetNodes();
-    const es = rfGetEdges();
-    if (ns.length === 0) return;
-
-    // Build adjacency: find roots (no incoming edges)
-    const hasIncoming = new Set(es.map(e => e.target));
-    const roots = ns.filter(n => !hasIncoming.has(n.id));
-    const rootIds = new Set(roots.map(n => n.id));
-
-    const levels: string[][] = [[]];
-    const visited = new Set<string>();
-
-    // BFS from roots
-    const queue: { id: string; level: number }[] = roots.map(n => ({ id: n.id, level: 0 }));
-    if (queue.length === 0) queue.push({ id: ns[0].id, level: 0 });
-
-    while (queue.length) {
-      const { id, level } = queue.shift()!;
-      if (visited.has(id)) continue;
-      visited.add(id);
-      if (!levels[level]) levels[level] = [];
-      levels[level].push(id);
-      es.filter(e => e.source === id).forEach(e => {
-        if (!visited.has(e.target)) queue.push({ id: e.target, level: level + 1 });
-      });
-    }
-
-    // Remaining unvisited nodes (disconnected)
-    const disconnected = ns.filter(n => !visited.has(n.id));
-    if (disconnected.length) levels.push(disconnected.map(n => n.id));
-
-    const COL_GAP = 400;
-    const ROW_GAP = 300;
-    const nodeMap = new Map(ns.map(n => [n.id, n]));
-
-    const positioned = levels.flatMap((col, ci) =>
-      col.map((id, ri) => {
-        const node = nodeMap.get(id)!;
-        return { ...node, position: { x: 80 + ci * COL_GAP, y: 80 + ri * ROW_GAP } };
-      })
-    );
-
-    rfSetNodes(positioned);
-    setTimeout(() => fitView({ padding: 0.15, duration: 600 }), 50);
-    toast.success("Canvas organizado automáticamente");
-  }, [rfGetNodes, rfGetEdges, rfSetNodes, fitView]);
 
   // Load from DB
   useEffect(() => {
@@ -386,34 +237,12 @@ function FormarketingContent() {
   );
 
   const onConnect = useCallback((params: Connection) => {
-    setEdges((eds) => {
-      const next = addEdge(params, eds);
-      pushHistory(rfGetNodes(), next);
-      return next;
-    });
-  }, [setEdges, pushHistory, rfGetNodes]);
+    record();
+    setEdges((eds) => addEdge(params, eds));
+  }, [setEdges, record]);
 
-  // HU28 + HU34 — Global keyboard shortcuts
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      const isInput = tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable;
+  // Keyboard listener moved to handleKeyboardHistory specialized handler
 
-      // Ctrl/Cmd+Z → Undo
-      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
-      // Ctrl/Cmd+Y or Ctrl+Shift+Z → Redo
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return; }
-
-      if (isInput) return;
-
-      // Space → Command palette
-      if (e.key === ' ') { e.preventDefault(); setCmdOpen(true); return; }
-      // Shift+A → Command palette
-      if (e.shiftKey && e.key === 'A') { e.preventDefault(); setCmdOpen(true); return; }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [undo, redo]);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -473,22 +302,8 @@ function FormarketingContent() {
   );
 
 
-  const handleClear = async () => {
-    if (!spaceId) {
-      setNodes([]);
-      setEdges([]);
-      return;
-    }
-    
-    if (confirm("¿Estás seguro de que deseas limpiar todo el canvas? Esta acción no se puede deshacer.")) {
-      const { error } = await supabase.from('canvas_nodes').delete().eq('space_id', spaceId);
-      if (!error) {
-        setNodes([]);
-        setEdges([]);
-        toast.success("Canvas limpiado correctamente");
-      }
-    }
-  };
+  // handleClear logic now integrated into specialized handleClear defined below
+
 
   const ensureNodePersisted = async (nodeId: string) => {
     if (!spaceId || !user) return false;
@@ -1055,47 +870,100 @@ function FormarketingContent() {
 
   // Listen for template injection - Moved here to ensure executeNode/Variation are defined
   useEffect(() => {
-    const handleAddTemplate = async (e: any) => {
-      const template = e.detail;
-      const basePos = { x: 100, y: 100 };
-      
-      const newNodes: Node[] = template.nodes.map((nodeData: any, index: number) => {
+    const handleAddTemplate = (e: any) => {
+      const template = e.detail as any; // Cast as any for flexibility, but follows Template interface
+      if (!template || !template.nodes) return;
+
+      const centerX = (window.innerWidth / 2 - 400);
+      const centerY = (window.innerHeight / 2 - 200);
+
+      // 1. Create Nodes and build ID mapping (index -> new ID)
+      const idMap: Record<number, string> = {};
+      const newNodes: Node[] = template.nodes.map((n: any, i: number) => {
         const newNodeId = crypto.randomUUID();
+        idMap[i] = newNodeId;
         return {
           id: newNodeId,
-          type: nodeData.type,
-          position: { x: basePos.x + (index * 350), y: basePos.y + (index * 50) },
+          type: n.type,
+          position: { x: centerX + (i * 320), y: centerY },
           data: { 
-            ...nodeData.data,
-            // Handlers injected by nodeTypes factory
-          }
+            ...n.data,
+            onAddConnected: handleAddConnected 
+          },
         };
       });
 
-      setNodes((nds) => nds.concat(newNodes));
+      // 2. Create Edges with handle associations
+      const newEdges: Edge[] = (template.edges || []).map((e: any, idx: number) => {
+        const sourceId = idMap[e.source];
+        const targetId = idMap[e.target];
+        if (!sourceId || !targetId) return null;
 
-      if (spaceId && user) {
-        for (const node of newNodes) {
-          await supabase.from('canvas_nodes').insert({
-             id: node.id,
-             space_id: spaceId,
-             user_id: user.id,
-             type: node.type,
-             pos_x: node.position.x,
-             pos_y: node.position.y,
-             prompt: (node.data.title as string) || node.type,
-             status: 'idle',
-             data_payload: node.data as any
-          });
+        return {
+          id: `edge-${crypto.randomUUID()}`,
+          source: sourceId,
+          target: targetId,
+          sourceHandle: e.sourceHandle || null,
+          targetHandle: e.targetHandle || null,
+          animated: true,
+          style: { stroke: '#a855f7', strokeWidth: 3 },
+          type: 'smoothstep'
+        };
+      }).filter(Boolean) as Edge[];
+
+      // 3. Update canvas state
+      setNodes((nds) => [...nds, ...newNodes]);
+      setEdges((eds) => {
+        const updatedEdges = [...eds, ...newEdges];
+        
+        // 4. Persistence side-effect
+        if (spaceId && user) {
+          const syncToDB = async () => {
+            try {
+              // Persist nodes
+              for (const node of newNodes) {
+                await supabase.from('canvas_nodes').insert({
+                  id: node.id,
+                  space_id: spaceId,
+                  user_id: user.id,
+                  type: node.type,
+                  pos_x: node.position.x,
+                  pos_y: node.position.y,
+                  prompt: (node.data as any).title || 'Template Node',
+                  status: 'idle',
+                  data_payload: node.data as any
+                });
+              }
+
+              // Update Metadata with ALL edges
+              await supabase.from('canvas_nodes').upsert({
+                space_id: spaceId,
+                user_id: user.id,
+                type: 'flow_metadata',
+                data_payload: { edges: updatedEdges },
+                prompt: 'metadata'
+              } as any, { onConflict: 'space_id,type' });
+            } catch (err) {
+              console.error("Template Sync Error:", err);
+            }
+          };
+          syncToDB();
         }
-      }
-      
-      toast.success(`Inyectado pack: ${template.title}`);
+        
+        return updatedEdges;
+      });
+
+      // 6. Visual feedback
+      toast.success(`Plantilla "${template.title}" inyectada`);
+      setTimeout(() => fitView({ duration: 800, padding: 0.2 }), 400);
     };
 
     window.addEventListener('add-template', handleAddTemplate);
     return () => window.removeEventListener('add-template', handleAddTemplate);
-  }, [user, spaceId, setNodes, executeNode, executeVariation]);
+  }, [user, spaceId, setNodes, setEdges, fitView, handleAddConnected]);
+
+
+
 
   // Harmonized listener for event-based node generation (NodeNextAction)
   useEffect(() => {
@@ -1166,6 +1034,104 @@ function FormarketingContent() {
         console.warn("Acción de asistente no reconocida:", action);
     }
   }, [setNodes, setEdges, spaceId, user, executeNode]);
+
+  const handleUndo = useCallback(() => {
+    const prev = undo(nodes, edges);
+    if (prev) {
+      rfSetNodes(prev.nodes);
+      rfSetEdges(prev.edges);
+      toast.info("Deshacer completado");
+    }
+  }, [undo, nodes, edges, rfSetNodes, rfSetEdges]);
+
+  const handleRedo = useCallback(() => {
+    const next = redo(nodes, edges);
+    if (next) {
+      rfSetNodes(next.nodes);
+      rfSetEdges(next.edges);
+      toast.info("Rehacer completado");
+    }
+  }, [redo, nodes, edges, rfSetNodes, rfSetEdges]);
+
+  const handleClear = useCallback(async () => {
+    if (nodes.length === 0) return;
+    
+    const confirmed = window.confirm("¿Estás seguro de que deseas limpiar todo el canvas? Esta acción no se puede deshacer.");
+    if (!confirmed) return;
+
+    record();
+    
+    if (spaceId) {
+      const { error } = await supabase.from('canvas_nodes').delete().eq('space_id', spaceId);
+      if (error) {
+        toast.error("Error al limpiar en la base de datos");
+        return;
+      }
+    }
+    
+    setNodes([]);
+    setEdges([]);
+    toast.success("Canvas limpiado");
+  }, [nodes, record, setNodes, setEdges, spaceId]);
+
+
+  const handleAutoLayout = useCallback(() => {
+    if (nodes.length === 0) return;
+    record();
+    
+    // Categorías funcionales para el layout (Columnas)
+    const GROUPS: Record<string, number> = {
+      // Columna 0: Inputs & Blueprints
+      'textInput': 0, 'characterBreakdown': 0, 'promptBuilder': 0,
+      // Columna 1: Inteligencia
+      'llmNode': 1,
+      // Columna 2: Generación de Assets
+      'modelView': 2, 'videoModel': 2,
+      // Columna 3: Estructura & UI
+      'layoutBuilder': 3,
+      // Columna 4: Distribución & Export
+      'captionNode': 4, 'campaignManager': 4, 'exportNode': 4, 'antigravityBridge': 4
+    };
+
+    const COL_WIDTH = 400;
+    const ROW_HEIGHT = 280;
+    const padding = { x: 100, y: 150 };
+
+    // Trackers for vertical positioning in each column
+    const columnCounters: Record<number, number> = {};
+
+    const newNodes = nodes.map((node) => {
+      const col = GROUPS[node.type as string] ?? 5; // Default to column 5 if unknown
+      const row = columnCounters[col] || 0;
+      columnCounters[col] = row + 1;
+
+      return {
+        ...node,
+        position: { 
+          x: padding.x + (col * COL_WIDTH), 
+          y: padding.y + (row * ROW_HEIGHT) 
+        }
+      };
+    });
+
+    setNodes(newNodes);
+    toast.success("Flujo organizado por categorías");
+    setTimeout(() => fitView({ duration: 800, padding: 0.2 }), 100);
+  }, [nodes, record, setNodes, fitView]);
+
+
+  const handleKeyboardHistory = useCallback((e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      if (e.shiftKey) handleRedo();
+      else handleUndo();
+    }
+  }, [handleUndo, handleRedo]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyboardHistory);
+    return () => window.removeEventListener('keydown', handleKeyboardHistory);
+  }, [handleKeyboardHistory]);
+
 
 
   return (
@@ -1245,9 +1211,34 @@ function FormarketingContent() {
         </div>
       )}
       <div className="w-full h-full bg-canvas font-sans text-foreground flex flex-col overflow-hidden relative">
+      {/* ── Studio Toolbar (New UX Central) ──────────────────────────────── */}
+      <StudioToolbar 
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onToggleSnap={() => setSnapEnabled(!snapEnabled)}
+        snapEnabled={snapEnabled}
+        onLayout={handleAutoLayout}
+        onClear={handleClear}
+        onExport={() => setExportOpen(true)}
+        onExecute={handleExecute}
+        execStatus={execStatus}
+        onAddNode={() => setCmdOpen(true)}
+        onOpenTemplates={() => {
+          // Find the template button in sidebar or dispatch global event
+          window.dispatchEvent(new CustomEvent('open-template-modal'));
+        }}
+        spaceName={spaceId ? `Espacio: ${spaceId.slice(0, 8)}` : "Nuevo Flujo"}
+        onBack={() => navigate('/spaces')}
+      />
+
       <div className="flex flex-1 overflow-hidden">
       {/* ── Left Sidebar ────────────────────────────────────────────────── */}
-      <FormarketingSidebar onAddNode={handleManualAddNode} />
+      <FormarketingSidebar onAddNode={(type, label) => {
+        record();
+        handleManualAddNode(type, label);
+      }} />
 
       {/* ── Canvas ──────────────────────────────────────────────────────── */}
       <div className="relative flex-1 flex flex-col" ref={reactFlowWrapper}>
@@ -1256,9 +1247,18 @@ function FormarketingContent() {
           edges={edges}
           onNodesChange={handleNodesChange}
           onEdgesChange={handleEdgesChange}
-          onConnect={onConnect}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
+          onConnect={(params) => {
+            record();
+            onConnect(params);
+          }}
+          onNodeDragStop={onNodeDragStop}
+          onSelectionDragStop={onSelectionDragStop}
+          onNodesDelete={onNodesDelete}
+          onEdgesDelete={onEdgesDelete}
+          onDrop={(e) => {
+            record();
+            onDrop(e);
+          }}
           onNodeClick={(_, node) => {
             setSelectedNodeId(node.id);
           }}

@@ -4,7 +4,6 @@ import { UserCircle, Trash2, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { NodeNextAction } from './NodeNextAction';
-import { NodeConnectionDropdown } from './NodeConnectionDropdown';
 
 interface CharacterNodeData {
   title?: string;
@@ -149,16 +148,11 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
         </div>
       </div>
 
-      <NodeConnectionDropdown
-        nodeType="characterBreakdown"
-        nodeId={id}
-        onAddConnected={data.onAddConnected ?? (() => {})}
-      />
-
       <Handle type="target" position={Position.Left} id="text-in" className="!w-4 !h-4 !-left-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
       <Handle type="source" position={Position.Right} id="context-out" className="!w-4 !h-4 !-right-2 !bg-orange-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
       <NodeNextAction nodeId={id} />
     </div>
+
   );
 };
 

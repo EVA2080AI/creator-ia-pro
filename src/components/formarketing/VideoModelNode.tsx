@@ -1,6 +1,7 @@
 import { memo, useState, useEffect } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Video, Trash2, Zap, ChevronDown, ChevronUp, Play, Download, Loader2 } from 'lucide-react';
+import { NodeNextAction } from './NodeNextAction';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -12,7 +13,8 @@ const DURATIONS = [
 
 interface VideoNodeData {
   title?: string;
-  status?: 'idle' | 'rendering' | 'executing' | 'ready' | 'error';
+  status?: 'idle' | 'loading' | 'executing' | 'ready' | 'error';
+  onAddConnected?: (sourceId: string, targetType: string) => void;
   duration?: string;
   selectedDuration?: string;
   assetUrl?: string;
@@ -49,7 +51,7 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
     data.dataPayload?.asset_url ||
     null;
 
-  const isRendering = data.status === 'rendering' || data.status === 'executing';
+  const isRendering = data.status === 'loading' || data.status === 'executing';
   const isReady = data.status === 'ready';
   const isError = data.status === 'error';
 
@@ -268,11 +270,11 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
         </div>
       )}
 
-    <Handle type="target" position={Position.Left} id="any-in" style={{ top: '40%' }} className="!w-4 !h-4 !-left-2 !bg-zinc-300 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
-    <Handle type="target" position={Position.Left} id="image-in" style={{ top: '60%' }} className="!w-4 !h-4 !-left-2 !bg-blue-500 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
-    <div className="absolute left-4 text-[8px] text-blue-500 font-bold bg-white/80 px-1 rounded shadow-sm backdrop-blur-sm" style={{ top: 'calc(60% - 6px)', transform: 'translateY(-50%)' }}>img→vid</div>
-    <Handle type="source" position={Position.Right} className="!w-4 !h-4 !-right-2 !bg-white !border-2 !border-zinc-200 hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <Handle type="target" position={Position.Left} id="any-in" className="!w-4 !h-4 !-left-2 !bg-zinc-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <Handle type="source" position={Position.Right} id="video-out" className="!w-4 !h-4 !-right-2 !bg-rose-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <NodeNextAction nodeId={id} />
     </div>
+
   );
 };
 

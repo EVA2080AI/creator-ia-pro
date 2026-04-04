@@ -43,12 +43,24 @@ export interface Template {
   icon: React.ElementType;
   color: string;
   nodes: TemplateNode[];
+  edges?: { 
+    source: number; 
+    target: number;
+    sourceHandle?: string;
+    targetHandle?: string;
+  }[];
 }
+
+
+
 
 interface TemplateModalProps {
   trigger: React.ReactNode;
   onSelect: (template: Template) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
+
 
 export const CATEGORIES = ['Todos', 'Redes Sociales', 'Publicidad', 'Marca', 'Contenido', 'Web'];
 
@@ -64,16 +76,54 @@ export const TEMPLATES: Template[] = [
   },
   {
     id: 'instagram_ads',
-    title: 'Anuncio de Instagram',
-    description: 'Crea anuncios visuales de alto impacto para Instagram con copy persuasivo.',
+    title: "Anuncio de Instagram",
+    description: "Flujo completo de anuncio: Personaje ➔ Visual ➔ Campaña",
     category: 'Redes Sociales',
     icon: Instagram,
     color: 'text-rose-500',
     nodes: [
-      { type: 'characterBreakdown', data: { title: 'Persona de marca', description: 'Define el tono y voz del anuncio', prompt: 'Crea una persona de marca para anuncio de Instagram', status: 'idle' } },
-      { type: 'modelView', data: { title: 'Visual del anuncio', description: 'Genera la imagen principal del anuncio', prompt: 'Imagen publicitaria para Instagram, formato cuadrado, alta resolución', status: 'idle' } },
-      { type: 'campaignManager', data: { title: 'Campaña de Instagram Ads', description: 'Gestiona la distribución del anuncio', prompt: 'Configura campaña de Instagram Ads con targeting óptimo', status: 'idle' } },
+      { type: 'characterBreakdown', data: { title: "PERSONA DE MARCA", flavor: "Estética Nexus V3", description: "Identidad visual de marca tech futurista" } },
+      { type: 'modelView', data: { title: "VISUAL DEL ANUNCIO", prompt: "Professional product showcase, nexus v3 aesthetic, 8k, cinematic lighting" } },
+      { type: 'campaignManager', data: { title: "CAMPAÑA DE INSTAGRAM ADS", platforms: { instagram: 'pending', facebook: 'pending' } } }
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'context-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'any-out', targetHandle: 'any-in' }
+    ]
+  },
+  {
+    id: 'video_omnichannel',
+    title: "Video Omnicanal",
+    description: "De guion a video final distribuido",
+    category: 'Contenido',
+    icon: Video,
+    color: 'text-rose-500',
+    nodes: [
+      { type: 'llmNode', data: { title: "GUIONISTA IA", prompt: "Escribe un guion de 15 segundos para video promocional" } },
+      { type: 'videoModel', data: { title: "GENERADOR DE VIDEO", model: "video" } },
+      { type: 'layoutBuilder', data: { title: "EDITOR VISUAL", ratio: "9:16" } },
+    ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'any-out', targetHandle: 'any-in' }
+    ]
+  },
+  {
+    id: 'copy_generator',
+    title: "Generador de Copy",
+    description: "Input de texto ➔ GPT-4 ➔ Redes sociales",
+    category: 'Contenido',
+    icon: FileText,
+    color: 'text-amber-500',
+    nodes: [
+      { type: 'textInput', data: { title: "IDEA INICIAL", value: "" } },
+      { type: 'llmNode', data: { title: "GPT-4 STRATEGIST", model: "gpt-4" } },
+      { type: 'captionNode', data: { title: "COPY CREATOR", platform: "Instagram" } },
+    ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'any-out', targetHandle: 'any-in' }
+    ]
   },
   {
     id: 'facebook_ads',
@@ -83,23 +133,34 @@ export const TEMPLATES: Template[] = [
     icon: Megaphone,
     color: 'text-blue-500',
     nodes: [
-      { type: 'characterBreakdown', data: { title: 'Copy del anuncio', description: 'Redacta el texto persuasivo del anuncio', prompt: 'Escribe copy de alto impacto para anuncio de Facebook', status: 'idle' } },
-      { type: 'modelView', data: { title: 'Imagen del anuncio', description: 'Visual principal para el feed de Facebook', prompt: 'Imagen publicitaria profesional para Facebook Ads', status: 'idle' } },
-      { type: 'campaignManager', data: { title: 'Campaña de Facebook Ads', description: 'Configura y distribuye la campaña', prompt: 'Estructura de campaña de Facebook Ads con segmentación por intereses', status: 'idle' } },
+      { type: 'characterBreakdown', data: { title: 'Copy del anuncio', status: 'idle' } },
+      { type: 'modelView', data: { title: 'Imagen del anuncio', status: 'idle' } },
+      { type: 'campaignManager', data: { title: 'Campaña de Facebook Ads', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'image-out', targetHandle: 'any-in' }
+    ],
+
   },
   {
     id: 'tiktok_video',
+
     title: 'Video para TikTok',
     description: 'Contenido vertical corto y viral para maximizar el alcance en TikTok.',
     category: 'Redes Sociales',
     icon: Video,
     color: 'text-rose-500',
     nodes: [
-      { type: 'characterBreakdown', data: { title: 'Guión del video', description: 'Crea el guión y el gancho inicial', prompt: 'Escribe un guión viral para TikTok de 30 segundos con gancho en los primeros 3 segundos', status: 'idle' } },
-      { type: 'videoModel', data: { title: 'Video TikTok', description: 'Genera el video vertical para TikTok', prompt: 'Video vertical 9:16 para TikTok, estilo dinámico y moderno', status: 'idle' } },
-      { type: 'campaignManager', data: { title: 'Estrategia TikTok', description: 'Plan de publicación y hashtags', prompt: 'Estrategia de publicación en TikTok con hashtags y horarios óptimos', status: 'idle' } },
+      { type: 'characterBreakdown', data: { title: 'Guión del video', status: 'idle' } },
+      { type: 'videoModel', data: { title: 'Video TikTok', status: 'idle' } },
+      { type: 'campaignManager', data: { title: 'Estrategia TikTok', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'video-out', targetHandle: 'any-in' }
+    ],
+
   },
   {
     id: 'landing_page',
@@ -113,7 +174,13 @@ export const TEMPLATES: Template[] = [
       { type: 'layoutBuilder', data: { title: 'Estructura de la landing', description: 'Diseña la estructura visual de la página', prompt: 'Wireframe y diseño de landing page con hero, beneficios, testimonios y CTA', status: 'idle' } },
       { type: 'modelView', data: { title: 'Imagen hero', description: 'Visual principal de la landing', prompt: 'Imagen hero profesional para landing page, estilo corporativo moderno', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'ui-out', targetHandle: 'any-in' }
+    ],
+
   },
+
   {
     id: 'logo_brand',
     title: 'Crear logo y marca',
@@ -126,7 +193,13 @@ export const TEMPLATES: Template[] = [
       { type: 'modelView', data: { title: 'Diseño del logo', description: 'Genera opciones de logo para la marca', prompt: 'Logo minimalista y profesional, fondo transparente, vectorial', status: 'idle' } },
       { type: 'layoutBuilder', data: { title: 'Manual de marca', description: 'Crea las guías de uso de la identidad', prompt: 'Manual de identidad visual básico: colores, tipografías, uso del logo', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'image-out', targetHandle: 'any-in' }
+    ],
+
   },
+
   {
     id: 'blog_article',
     title: 'Artículo de blog',
@@ -138,7 +211,11 @@ export const TEMPLATES: Template[] = [
       { type: 'characterBreakdown', data: { title: 'Estructura del artículo', description: 'Planifica el contenido y los subtítulos', prompt: 'Crea la estructura completa de un artículo de blog SEO: título, meta descripción, H2s y puntos clave', status: 'idle' } },
       { type: 'layoutBuilder', data: { title: 'Formato del artículo', description: 'Define el diseño y layout del contenido', prompt: 'Layout para artículo de blog con imagen destacada, secciones y CTA interno', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1 }
+    ],
   },
+
   {
     id: 'google_ads',
     title: 'Anuncio de Google',
@@ -150,7 +227,11 @@ export const TEMPLATES: Template[] = [
       { type: 'characterBreakdown', data: { title: 'Copy de Google Ads', description: 'Escribe los títulos y descripciones del anuncio', prompt: 'Escribe 5 variaciones de títulos y descripciones para Google Search Ads con máximo CTR', status: 'idle' } },
       { type: 'campaignManager', data: { title: 'Campaña de Google Ads', description: 'Estructura la campaña y las palabras clave', prompt: 'Estructura de campaña de Google Ads con grupos de anuncios y palabras clave negativas', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1 }
+    ],
   },
+
   {
     id: 'youtube_video',
     title: 'Video de YouTube',
@@ -163,7 +244,13 @@ export const TEMPLATES: Template[] = [
       { type: 'videoModel', data: { title: 'Video de YouTube', description: 'Genera el video o clips principales', prompt: 'Video horizontal 16:9 para YouTube, estilo profesional y dinámico', status: 'idle' } },
       { type: 'modelView', data: { title: 'Thumbnail del video', description: 'Crea el thumbnail llamativo para YouTube', prompt: 'Thumbnail de YouTube con texto impactante, colores vivos y rostro expresivo', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'video-out', targetHandle: 'any-in' }
+    ],
+
   },
+
   {
     id: 'email_campaign',
     title: 'Campaña de email',
@@ -176,7 +263,13 @@ export const TEMPLATES: Template[] = [
       { type: 'layoutBuilder', data: { title: 'Diseño de emails', description: 'Estructura visual de los emails', prompt: 'Templates de email responsive con header, contenido y footer para campaña de email marketing', status: 'idle' } },
       { type: 'campaignManager', data: { title: 'Estrategia de email', description: 'Plan de envío y segmentación', prompt: 'Estrategia de email marketing: segmentación, horarios de envío, KPIs y métricas de seguimiento', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'ui-out', targetHandle: 'any-in' }
+    ],
+
   },
+
   {
     id: 'linkedin_post',
     title: 'Post de LinkedIn',
@@ -188,7 +281,11 @@ export const TEMPLATES: Template[] = [
       { type: 'characterBreakdown', data: { title: 'Texto del post', description: 'Redacta el contenido del post de LinkedIn', prompt: 'Escribe un post de LinkedIn de alto engagement con historia personal, aprendizaje clave y llamada a la acción', status: 'idle' } },
       { type: 'modelView', data: { title: 'Imagen del post', description: 'Visual que acompañe el post', prompt: 'Imagen profesional para LinkedIn, formato 1200x627, estilo corporativo moderno', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1 }
+    ],
   },
+
   {
     id: 'brand_identity',
     title: 'Identidad de marca',
@@ -202,7 +299,14 @@ export const TEMPLATES: Template[] = [
       { type: 'layoutBuilder', data: { title: 'Sistema visual', description: 'Paleta de colores y tipografías', prompt: 'Sistema visual completo: paleta de colores primarios y secundarios, tipografías principal y secundaria', status: 'idle' } },
       { type: 'campaignManager', data: { title: 'Guía de marca', description: 'Manual de uso de la identidad', prompt: 'Guía de marca completa con reglas de uso del logo, colores, tipografía y ejemplos de aplicación', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'image-out', targetHandle: 'any-in' },
+      { source: 2, target: 3, sourceHandle: 'ui-out', targetHandle: 'any-in' }
+    ],
+
   },
+
   {
     id: 'product_launch',
     title: 'Lanzamiento de producto',
@@ -216,7 +320,14 @@ export const TEMPLATES: Template[] = [
       { type: 'videoModel', data: { title: 'Video de lanzamiento', description: 'Teaser o video principal del producto', prompt: 'Video de lanzamiento de producto: 60 segundos, estilo cinematográfico, con beneficios clave', status: 'idle' } },
       { type: 'campaignManager', data: { title: 'Campaña de lanzamiento', description: 'Plan de medios y distribución', prompt: 'Plan de lanzamiento multicanal: redes sociales, email, paid media y PR en 30 días', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'image-out', targetHandle: 'any-in' },
+      { source: 2, target: 3, sourceHandle: 'video-out', targetHandle: 'any-in' }
+    ],
+
   },
+
   {
     id: 'instagram_story',
     title: 'Historia de Instagram',
@@ -228,7 +339,11 @@ export const TEMPLATES: Template[] = [
       { type: 'characterBreakdown', data: { title: 'Copy del story', description: 'Texto e instrucciones para el story', prompt: 'Escribe el copy para una secuencia de 5 stories de Instagram: gancho, desarrollo, CTA y encuesta', status: 'idle' } },
       { type: 'modelView', data: { title: 'Diseño del story', description: 'Visual del story formato 9:16', prompt: 'Diseño de Instagram Story 1080x1920px, colores vibrantes, texto legible y elementos gráficos', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1 }
+    ],
   },
+
   {
     id: 'web_app_ui',
     title: 'Diseño de app móvil',
@@ -241,7 +356,13 @@ export const TEMPLATES: Template[] = [
       { type: 'layoutBuilder', data: { title: 'UI de la app', description: 'Diseño de las pantallas principales', prompt: 'Diseño UI de app móvil: pantalla de inicio, lista, detalle y perfil con sistema de diseño consistente', status: 'idle' } },
       { type: 'modelView', data: { title: 'Mockups de la app', description: 'Visualizaciones realistas de la app', prompt: 'Mockup de app móvil en iPhone 16 Pro, estilo minimalista y moderno, fondo oscuro', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'ui-out', targetHandle: 'any-in' }
+    ],
+
   },
+
   {
     id: 'pinterest_content',
     title: 'Contenido para Pinterest',
@@ -253,7 +374,11 @@ export const TEMPLATES: Template[] = [
       { type: 'characterBreakdown', data: { title: 'Copy del pin', description: 'Título y descripción del pin', prompt: 'Escribe 10 títulos llamativos y descripciones SEO para pins de Pinterest en la categoría seleccionada', status: 'idle' } },
       { type: 'modelView', data: { title: 'Diseño del pin', description: 'Imagen vertical para Pinterest', prompt: 'Diseño de pin para Pinterest 1000x1500px, estilo editorial, con título superpuesto y branding sutil', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1 }
+    ],
   },
+
   {
     id: 'podcast_cover',
     title: 'Portada de podcast',
@@ -265,7 +390,11 @@ export const TEMPLATES: Template[] = [
       { type: 'characterBreakdown', data: { title: 'Concepto del podcast', description: 'Define el nombre, tagline y estilo', prompt: 'Desarrolla el concepto visual del podcast: nombre, tagline, colores, tipografía y personalidad', status: 'idle' } },
       { type: 'modelView', data: { title: 'Arte del podcast', description: 'Portada cuadrada 3000x3000px', prompt: 'Portada de podcast 3000x3000px, diseño llamativo para Spotify y Apple Podcasts, estilo profesional', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1 }
+    ],
   },
+
   {
     id: 'seasonal_campaign',
     title: 'Campaña de temporada',
@@ -279,7 +408,14 @@ export const TEMPLATES: Template[] = [
       { type: 'videoModel', data: { title: 'Video de la campaña', description: 'Spot o video principal', prompt: 'Video de campaña de temporada: 30 segundos, emotivo, con producto/servicio en contexto festivo', status: 'idle' } },
       { type: 'campaignManager', data: { title: 'Plan de medios', description: 'Estrategia de distribución', prompt: 'Plan de medios para campaña de temporada: canales, presupuesto sugerido, calendario de publicación', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'image-out', targetHandle: 'any-in' },
+      { source: 2, target: 3, sourceHandle: 'video-out', targetHandle: 'any-in' }
+    ],
+
   },
+
   {
     id: 'brand_presentation',
     title: 'Presentación de marca',
@@ -292,7 +428,13 @@ export const TEMPLATES: Template[] = [
       { type: 'layoutBuilder', data: { title: 'Diseño de slides', description: 'Template y layout de la presentación', prompt: 'Template de presentación corporativa en PowerPoint/Keynote con portada, slides de contenido y cierre', status: 'idle' } },
       { type: 'campaignManager', data: { title: 'Estrategia de presentación', description: 'Cómo y cuándo usar la presentación', prompt: 'Guía de uso de la presentación de marca: versiones, contextos de uso y mensaje clave por audiencia', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'ui-out', targetHandle: 'any-in' }
+    ],
+
   },
+
   {
     id: 'viral_content',
     title: 'Contenido viral',
@@ -306,7 +448,14 @@ export const TEMPLATES: Template[] = [
       { type: 'modelView', data: { title: 'Visual viral', description: 'Imagen o meme con potencial de difusión', prompt: 'Imagen con alto potencial viral: meme, infografía o visual impactante relacionado con el tema', status: 'idle' } },
       { type: 'campaignManager', data: { title: 'Distribución viral', description: 'Plan de difusión del contenido', prompt: 'Estrategia de distribución para maximizar el alcance: plataformas, comunidades, influencers y timing', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'video-out', targetHandle: 'any-in' },
+      { source: 2, target: 3, sourceHandle: 'image-out', targetHandle: 'any-in' }
+    ],
+
   },
+
   {
     id: 'full_website',
     title: 'Sitio web completo',
@@ -320,11 +469,21 @@ export const TEMPLATES: Template[] = [
       { type: 'modelView', data: { title: 'Imágenes del sitio', description: 'Fotografías y visuales del sitio', prompt: 'Pack de imágenes para sitio web: hero, about us, servicios y blog, estilo fotográfico consistente', status: 'idle' } },
       { type: 'antigravityBridge', data: { title: 'Integración del sitio', description: 'Conecta todos los módulos del sitio', prompt: 'Conecta todos los elementos del sitio: copywriting, diseño e imágenes en un flujo de producción coherente', status: 'idle' } },
     ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'any-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'ui-out', targetHandle: 'any-in' },
+      { source: 2, target: 3, sourceHandle: 'image-out', targetHandle: 'any-in' }
+    ],
+
   },
+
 ];
 
-export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
-  const [open, setOpen] = useState(false);
+export function TemplateModal({ trigger, onSelect, open: externalOpen, onOpenChange }: TemplateModalProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
+
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('Todos');
 
@@ -348,6 +507,7 @@ export function TemplateModal({ trigger, onSelect }: TemplateModalProps) {
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="bg-white border border-zinc-200 rounded-[2rem] text-zinc-900 max-w-3xl p-0 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+
           {/* Header */}
           <div className="p-8 pb-0 shrink-0">
             <DialogHeader className="mb-6">

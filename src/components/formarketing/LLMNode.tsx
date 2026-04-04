@@ -3,7 +3,8 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Brain, Trash2, Play, Loader2, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { NodeConnectionDropdown } from './NodeConnectionDropdown';
+import { NodeNextAction } from './NodeNextAction';
+
 
 interface LLMNodeData {
   title?: string;
@@ -119,12 +120,6 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
         </div>
       </div>
 
-      <NodeConnectionDropdown
-        nodeType="llmNode"
-        nodeId={id}
-        onAddConnected={data.onAddConnected ?? (() => {})}
-      />
-
       {/* Input handle — text (yellow) */}
       <Handle
         type="target"
@@ -139,7 +134,9 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
         id="text-out"
         className="!w-4 !h-4 !-right-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm"
       />
+      <NodeNextAction nodeId={id} />
     </div>
+
   );
 };
 

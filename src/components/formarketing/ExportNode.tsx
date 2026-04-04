@@ -3,11 +3,13 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Download, Trash2, Share2, Copy, Check } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { NodeNextAction } from './NodeNextAction';
 
 interface ExportNodeData {
   title?: string;
   content?: string;   // text or image URL received from upstream
   contentType?: 'text' | 'image' | 'video';
+  onAddConnected?: (nodeType: string) => void;
 }
 
 const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
@@ -106,14 +108,10 @@ const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
         </div>
       </div>
 
-      {/* Input handle — accepts any type (emerald) */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        id="any-in"
-        className="!w-3 !h-3 !-left-1.5 !bg-emerald-500 !border-2 !border-white hover:scale-125 transition-transform shadow-sm"
-      />
+      <Handle type="target" position={Position.Left} id="any-in" className="!w-4 !h-4 !-left-2 !bg-zinc-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      <NodeNextAction nodeId={id} />
     </div>
+
   );
 };
 
