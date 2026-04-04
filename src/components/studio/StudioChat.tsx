@@ -126,16 +126,22 @@ function detectIntent(prompt: string): 'codegen' | 'chat' {
   const GREETINGS = ['hola', 'hi', 'hello', 'buenos dias', 'buenas tardes', 'buenas noches', 'saludos', 'hey'];
   if (GREETINGS.includes(p) || p.length < 5) return 'chat';
 
+  // If asking about the platform/system itself
+  if (p.includes('quien eres') || p.includes('que puedes hacer') || p.includes('ayuda')) return 'chat';
+
   // If prompt is just an error report with no instruction to fix/build, use chat
   const isOnlyError = (p.includes('error:') || p.includes('exception')) && !CODE_VERBS.some(v => p.includes(v));
   if (/```[\s\S]*```/.test(prompt) && isOnlyError) return 'chat';
   
-  // Starts with imperative build verb → codegen
-  if (CODE_VERBS.some(v => p.startsWith(v + ' ') || p.startsWith(v + '\n'))) return 'codegen';
-  // Contains code noun → codegen (weighted)
-  const nounHit = CODE_NOUNS.filter(n => p.includes(n)).length;
-  const verbHit = CODE_VERBS.filter(v => p.includes(v)).length;
-  if (nounHit + verbHit >= 2) return 'codegen';
+  // BIAS TOWARDS CODEGEN: If we are in the Studio, almost any technical intent should be codegen
+  const containsCodeNoun = CODE_NOUNS.some(n => p.includes(n));
+  const startsWithCodeVerb = CODE_VERBS.some(v => p.startsWith(v + ' ') || p.startsWith(v + '\n'));
+  
+  if (startsWithCodeVerb || containsCodeNoun) return 'codegen';
+  
+  // Catch-all for technical Spanish/English sentences that imply building
+  if (p.includes('pon un') || p.includes('agrega') || p.includes('modifica') || p.includes('add a')) return 'codegen';
+
   return 'chat';
 }
 
@@ -202,8 +208,8 @@ const GENESIS_CHAT_SYSTEM = `Eres Genesis AI — Modo Conversación Directa.
 
 REGLAS PARA CHAT:
 1. Sé 100% humano, ejecutivo y directo. Habla como un ingeniero senior que respeta el tiempo del CTO.
-2. NO generes código ni diagramas a menos que se te pida explícitamente.
-3. Si el usuario solo saluda, responde con una bienvenida elegante y corta.
+2. IMPORTANTE: Estás integrado en un entorno de ejecución en tiempo real (Sandpack). NUNCA sugieras "clonar el repositorio", "instalar npm" o ejecutar comandos locales. El usuario ya está viendo el previsualizador en vivo.
+3. Si el usuario te pide un cambio o creación, aunque sea en lenguaje natural, actúa como ingeniero y propón construirlo directamente.
 4. Usa alertas GitHub (> [!NOTE], > [!TIP], > [!WARNING]) para destacar información importante.
 5. Cuando hagas comparaciones, usa tablas Markdown.
 6. Si te preguntan sobre arquitectura, usa diagramas Mermaid.
@@ -1132,13 +1138,31 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
     if (saved) {
       try {
         const parsed: Message[] = JSON.parse(saved);
-        setMessages(parsed.map(m => ({ ...m, timestamp: new Date(m.timestamp) })));
-        isFirstGen.current = parsed.filter(m => m.role === 'user').length === 0;
+        const mapped = parsed.map(m => ({ ...m, timestamp: new Date(m.timestamp) }));
+        setMessages(mapped);
+        isFirstGen.current = mapped.filter(m => m.role === 'user').length === 0;
+
+        // Force immediate sync of artifacts/tasks on load
+        const initialArtifacts: UIArtifact[] = [];
+        const initialTasks: UIPlanTask[] = [];
+        mapped.forEach(m => {
+          const mermaidMatches = m.content.matchAll(/```mermaid\n?([\s\S]*?)```/g);
+          for (const match of mermaidMatches) {
+            initialArtifacts.push({ id: crypto.randomUUID(), type: 'mermaid', title: 'Arquitectura Recuperada', content: match[1].trim() });
+          }
+          const taskMatches = Array.from(m.content.matchAll(/^\[( |x|X|\/)\] (.+)$/gm));
+          for (const match of taskMatches) {
+            const symbol = (match[1] as string).toLowerCase();
+            initialTasks.push({ id: crypto.randomUUID(), text: (match[2] as string).trim(), status: symbol === 'x' ? 'completed' : symbol === '/' ? 'in-progress' : 'pending' });
+          }
+        });
+        setArtifactsState(initialArtifacts);
+        setTasksState(initialTasks);
       } catch (e) {
         console.error("Error loading chat history:", e);
       }
     }
-  }, [projectId]);
+  }, [projectId, setArtifactsState, setTasksState]);
 
   // Extract artifacts & tasks
   useEffect(() => {

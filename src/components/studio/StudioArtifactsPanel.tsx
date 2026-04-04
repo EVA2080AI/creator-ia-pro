@@ -14,7 +14,9 @@ import {
   Database, 
   RefreshCw,
   Settings,
-  Gamepad2
+  Gamepad2,
+  Image as ImageIcon,
+  Copy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -192,55 +194,117 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
         ) : activeTab === 'diagrams' ? (
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Visualización de Arquitectura</span>
-            
-            {artifacts.filter(a => a.type === 'mermaid').length > 0 ? (
-              <div className="grid grid-cols-1 gap-6">
-                {artifacts.filter(a => a.type === 'mermaid').map((artifact) => (
+
+            {artifacts.length > 0 ? (
+              <div className="grid grid-cols-1 gap-8 pb-10">
+                {/* Visual Artifacts (Mermaid & Images) */}
+                {artifacts.filter(a => a.type === 'mermaid' || a.type === 'image').map((artifact) => (
                   <div key={artifact.id} className="group space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     <div className="flex items-center justify-between px-1">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm">
-                          <Layout className="w-4 h-4" />
+                        <div className={cn(
+                          "h-10 w-10 rounded-2xl flex items-center justify-center shadow-xl border transition-all",
+                          artifact.type === 'mermaid' ? "bg-primary/5 border-primary/20 text-primary" : "bg-blue-500/5 border-blue-500/20 text-blue-500"
+                        )}>
+                          {artifact.type === 'mermaid' ? <Layout className="w-5 h-5" /> : <ImageIcon className="w-5 h-5" />}
                         </div>
                         <div>
-                          <h4 className="text-[11px] font-black text-zinc-900 uppercase tracking-widest">{artifact.title}</h4>
-                          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">SVG Blueprint Generated</span>
+                          <div className="flex items-center gap-2">
+                             <h4 className="text-[12px] font-black text-zinc-900 uppercase tracking-widest">{artifact.title}</h4>
+                             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                          </div>
+                          <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-[0.2em]">{artifact.type === 'mermaid' ? 'Architecture Blueprint v2.0' : 'Visual Asset Optimized'}</p>
                         </div>
                       </div>
-                      <Badge variant="outline" className="opacity-0 group-hover:opacity-100 transition-opacity text-[8px] bg-white border-zinc-200">
-                        Vector Map
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <button className="h-8 px-4 rounded-xl border border-zinc-100 bg-white text-[9px] font-black uppercase tracking-widest text-zinc-600 hover:border-primary/30 hover:text-primary transition-all">
+                          Export SVG
+                        </button>
+                      </div>
                     </div>
                     
-                    <div className="relative p-8 rounded-[32px] border border-zinc-100 bg-[#fafafa] shadow-md overflow-hidden flex items-center justify-center min-h-[300px] group/chart cursor-zoom-in transition-all hover:shadow-xl hover:border-primary/20">
+                    <div className="relative p-10 rounded-[3rem] border border-zinc-100 bg-white shadow-2xl overflow-hidden flex items-center justify-center min-h-[300px] group/chart cursor-zoom-in transition-all hover:border-primary/30">
                       {/* Architectural Grid Background */}
-                      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+                      <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
                       
                       <div className="relative z-10 w-full flex justify-center">
-                        <Mermaid chart={artifact.content} className="w-full max-w-full transform transition-transform group-hover/chart:scale-[1.02]" />
+                        {artifact.type === 'mermaid' ? (
+                          <Mermaid chart={artifact.content} className="w-full max-w-full transform transition-transform group-hover/chart:scale-[1.02]" />
+                        ) : (
+                          <img src={artifact.content} alt={artifact.title} className="max-w-full h-auto rounded-xl shadow-lg" />
+                        )}
                       </div>
                       
-                      {/* Watermark */}
-                      <div className="absolute bottom-4 right-6 text-[8px] font-black uppercase tracking-[0.3em] text-zinc-300 pointer-events-none">
-                        Genesis Core Engineering
+                      <div className="absolute bottom-6 right-8 text-[9px] font-black uppercase tracking-[0.4em] text-zinc-300 pointer-events-none mix-blend-difference">
+                        Genesis OS • Deep Engineering
                       </div>
                     </div>
                   </div>
                 ))}
+
+                {/* Text Artifacts (Refined Notes, Copywriting, Schemas) */}
+                {artifacts.filter(a => a.type === 'text').length > 0 && (
+                  <div className="space-y-4 pt-10 mt-10 border-t border-black/5">
+                    <div className="flex items-center gap-3 mb-6">
+                       <div className="h-8 w-8 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-white">
+                          <Code2 className="w-4 h-4" />
+                       </div>
+                       <h4 className="text-[10px] font-black text-zinc-900 uppercase tracking-widest">Activos de Documentación</h4>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {artifacts.filter(a => a.type === 'text').map(artifact => (
+                        <div key={artifact.id} className="p-8 rounded-[2.5rem] bg-white border border-zinc-100 hover:border-primary/20 hover:shadow-xl hover:shadow-zinc-100 transition-all group relative overflow-hidden">
+                          <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                             <Copy className="w-3.5 h-3.5 text-zinc-300 hover:text-primary cursor-pointer" />
+                          </div>
+                          <h4 className="text-[12px] font-black text-zinc-900 mb-3 uppercase tracking-widest leading-tight">{artifact.title}</h4>
+                          <p className="text-[11px] text-zinc-500 leading-relaxed font-medium line-clamp-6">{artifact.content}</p>
+                          <div className="mt-6 flex items-center gap-2 opacity-40">
+                             <div className="w-1 h-1 rounded-full bg-zinc-400" />
+                             <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-500">Texto Optimizado por Genesis</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="h-12 w-12 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-300 mb-4">
-                  <Layout className="w-5 h-5" />
+              <div className="flex flex-col items-center justify-center py-24 px-12 text-center rounded-[3rem] bg-white border border-dashed border-zinc-100 relative overflow-hidden">
+                <div className="absolute inset-0 bg-primary/[0.01] pointer-events-none" />
+                <div className="relative z-10">
+                  <motion.div 
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="h-20 w-20 rounded-[2.5rem] bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-300 mb-8 mx-auto shadow-sm"
+                  >
+                    <Layout className="w-8 h-8 opacity-40" />
+                  </motion.div>
+                  <h3 className="text-[18px] font-black text-zinc-900 mb-3 uppercase tracking-tighter">Sin Arquitectura Detectada</h3>
+                  <p className="text-[12px] text-zinc-500 mt-2 max-w-sm mx-auto leading-relaxed font-bold">
+                    Genesis no ha capturado un blueprint estructural en el chat todavía.
+                  </p>
+                  
+                  <button 
+                    onClick={onFix}
+                    className="mt-10 px-8 py-3.5 rounded-[1.8rem] bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary shadow-2xl shadow-primary/20 transition-all flex items-center gap-3 mx-auto"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    Analizar Arquitectura con UX Engine
+                  </button>
+                  
+                  <div className="mt-8 flex items-center justify-center gap-1.5 opacity-30">
+                     <div className="w-1 h-1 rounded-full bg-zinc-400" />
+                     <div className="w-1 h-1 rounded-full bg-zinc-400" />
+                     <div className="w-1 h-1 rounded-full bg-zinc-400" />
+                  </div>
                 </div>
-                <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Sin diagramas</p>
-                <p className="text-[10px] text-zinc-500 mt-2 max-w-[200px]">Los diagramas que genere Genesis aparecerán aquí.</p>
               </div>
             )}
           </div>
         ) : activeTab === 'agents' ? (
-          <div className="h-full flex flex-col p-6 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="h-full flex flex-col space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-1">
               <AgentCard 
                 name="UX Engine" 
                 role="UI/UX & Design Systems" 
@@ -291,35 +355,45 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                 description="Matemáticas de juegos, detección de colisiones 2D/3D y gestión de estado sincronizado en tiempo real."
                 onSettings={() => setSettingsAgent({ id: 'game', name: 'Game Engine' })}
               />
-              <div className="p-4 bg-zinc-900 border-t border-white/5 flex items-center justify-between shrink-0">
-            <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Enjambre de Especialistas Genesis</span>
-            <div className="flex gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" style={{ animationDelay: '0.2s' }} />
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" style={{ animationDelay: '0.4s' }} />
-            </div>
-          </div>
-
-          <AnimatePresence>
-            {settingsAgent && (
-              <AgentSettingsModal 
-                isOpen={true} 
-                onClose={() => setSettingsAgent(null)} 
-                agentId={settingsAgent.id} 
-                agentName={settingsAgent.name} 
-              />
-            )}
-          </AnimatePresence>
-        </div>
-
-            <div className="pt-6 border-t border-white/5">
-              <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-4">Métricas de Colaboración</h4>
-              <div className="grid grid-cols-3 gap-4">
-                <MetricBox label="Velocidad" value="98%" />
-                <MetricBox label="Precisión" value="99.2%" />
-                <MetricBox label="Autonomía" value="Activa" />
+              
+              {/* Special Swarm Card */}
+              <div className="p-8 rounded-[2.5rem] bg-zinc-900 border border-zinc-800 flex flex-col justify-between items-start group relative overflow-hidden">
+                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                <div className="flex items-center justify-between w-full mb-6">
+                   <div className="h-10 w-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
+                      <Sparkles className="w-5 h-5" />
+                   </div>
+                   <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" style={{ animationDelay: '0.2s' }} />
+                   </div>
+                </div>
+                <div>
+                   <h3 className="text-white text-[12px] font-black uppercase tracking-widest mb-1">Enjambre Genesis</h3>
+                   <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest">Multiprocesamiento Activo</p>
+                </div>
               </div>
             </div>
+
+            <div className="pt-8 mt-4 border-t border-black/5">
+              <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-6">Métrica de Rendimiento Neural</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <MetricBox label="Velocidad de Síntesis" value="98.4%" />
+                <MetricBox label="Precisión Global" value="99.2%" />
+                <MetricBox label="Estado Neural" value="Estable" />
+              </div>
+            </div>
+
+            <AnimatePresence>
+              {settingsAgent && (
+                <AgentSettingsModal 
+                  isOpen={true} 
+                  onClose={() => setSettingsAgent(null)} 
+                  agentId={settingsAgent.id} 
+                  agentName={settingsAgent.name} 
+                />
+              )}
+            </AnimatePresence>
           </div>
         ) : activeTab === 'logs' ? (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
