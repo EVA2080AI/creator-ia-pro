@@ -112,6 +112,11 @@ const CODE_NOUNS = ['página','pagina','app','aplicación','aplicacion','dashboa
 
 function detectIntent(prompt: string): 'codegen' | 'chat' {
   const p = prompt.toLowerCase().trim();
+  
+  // High-priority Social/Greeting detection
+  const GREETINGS = ['hola', 'hi', 'hello', 'buenos dias', 'buenas tardes', 'buenas noches', 'saludos', 'hey'];
+  if (GREETINGS.includes(p) || p.length < 5) return 'chat';
+
   // If prompt is just an error report with no instruction to fix/build, use chat
   const isOnlyError = (p.includes('error:') || p.includes('exception')) && !CODE_VERBS.some(v => p.includes(v));
   if (/```[\s\S]*```/.test(prompt) && isOnlyError) return 'chat';
@@ -153,15 +158,21 @@ REGLAS DE OPERACIÓN (ESTRICTAS):
      - Tu objetivo primario es la **Replicación de Alta Fidelidad**.
      - Genera primero una estructura HTML/Tailwind robusta, a menos que el usuario especifique otro framework.
 
-6. **Idioma:** Español profesional e inspirador. Términos técnicos en inglés.`;
+6. **Protocolo "Social First" (GREETINGS):**
+   - Si detectas que el usuario solo saluda (ej. "hola"):
+     - **OBLIGATORIO**: Responde con una bienvenida de élite, elegante y extremadamente corta (máx 15 palabras).
+     - **PROHIBIDO**: Bajo ninguna circunstancia generes un "MASTER PLAN", análisis de diseño ni código para un "Hola Mundo" o similares. No hagas despliegue de arquitectura para saludos.
+
+7. **Idioma:** Español profesional e inspirador. Términos técnicos en inglés.`;
 
 
-const GENESIS_CHAT_SYSTEM = `Eres Genesis AI — el "Master Brain" de desarrollo. Estás en modo CHAT/ARCHITECT.
+const GENESIS_CHAT_SYSTEM = `Eres Genesis AI — Modo Conversación Directa.
 
-Sigue rigurosamente estas pautas:
-1. EXPLICA el "Por qué" estratégico antes del "Cómo" técnico.
-2. Si propones código, incluye la ruta del archivo en la primera línea del bloque.
-3. Prioriza la mantenibilidad y el diseño premium "out-of-the-box".
+REGLAS PARA CHAT:
+1. Sé 100% humano, ejecutivo y directo.
+2. NO generes código ni diagramas a menos que se te pida explícitamente.
+3. NO uses MASTER PLAN para saludos o preguntas simples.
+4. Si el usuario solo saluda, responde con una bienvenida elegante y corta.
 
 ${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
 
@@ -351,8 +362,8 @@ function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
 // ─── Markdown renderer ─────────────────────────────────────────────────────────
 function renderMarkdown(text: string): string {
   let raw = text
-    // Thinking blocks (Design System style — Collapsible)
-    .replace(/<thinking>([\s\S]*?)<\/thinking>/g, (_m, content) => 
+    // Thinking blocks (Resilient regex — handles <thinking>, [thinking] or just 'thinking' at start)
+    .replace(/(?:<thinking>|\[thinking\]|thinking\n)([\s\S]*?)(?:<\/thinking>|\[\/thinking\]|(?=\s*\n\w+:\s*)|$)/gi, (_m, content) => 
       `<details class="thinking-block group my-6 rounded-[24px] border border-zinc-200 bg-zinc-50/50 overflow-hidden transition-all duration-500">
         <summary class="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-zinc-100/50 transition-colors list-none outline-none">
           <div class="flex items-center gap-3">
