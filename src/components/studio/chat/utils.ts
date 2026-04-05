@@ -69,16 +69,19 @@ export function detectIntent(prompt: string, hasContext?: boolean): IntentType {
   
   // High-complexity "Creation" keywords for FULLSTACK intent
   const CREATION_KEYWORDS = [
-    'crea un mvp', 'crea un proyecto', 'crea un saas', 'crea una app completa',
+    'crea un web', 'hazme una web', 'crea un proyecto', 'crea un saas', 'crea una app completa',
     'create a full mvp', 'create a saas', 'industrial project', 'sistema completo',
     'build a complete system', 'dashboard completo', 'diseña un', 'armar una plataforma',
-    'genera el alma del producto', 'visión estratégica'
+    'genera el alma del producto', 'visión estratégica', 'arquitectura de', 'propuesta de landing',
+    'haz una pagina de', 'monta un sistema', 'create a website', 'make a landing'
   ];
 
   if (GREETINGS.includes(p) || p.length < 3) return 'chat';
   
   const isVisionRequest = p.includes('estrategia') || p.includes('arquitectura') || p.includes('pensamiento') || p.includes('planifica');
-  if (isVisionRequest) return 'fullstack';
+  const isCreationRequest = CREATION_KEYWORDS.some(k => p.includes(k));
+
+  if (isVisionRequest || isCreationRequest) return 'fullstack';
 
   // [FIX] Priority
   if (p.includes('[auto-fix]') || p.includes('[fix]')) return 'codegen';
@@ -95,6 +98,7 @@ export function detectIntent(prompt: string, hasContext?: boolean): IntentType {
   if (hasContext && !containsCodeNoun && !startsWithCodeVerb) return 'chat';
   return 'chat';
 }
+
 
 export function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
   const files: Record<string, StudioFile> = {};

@@ -260,7 +260,7 @@ export function StudioChat(props: StudioChatProps) {
 
     const intent = detectIntent(text, !!(pendingImage || pendingContext || pendingUrl));
     const cost = MODEL_COSTS[selectedModel] || 1;
-    const shouldPlan = isArchitectMode && intent === 'codegen';
+    const shouldPlan = (isArchitectMode && intent === 'codegen') || intent === 'fullstack';
 
     try {
       addLog(`Iniciando ciclo: ${intent}...`);
