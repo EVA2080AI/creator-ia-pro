@@ -323,11 +323,15 @@ export function StudioChat(props: StudioChatProps) {
       addLog(`🤖 PROTOCOLO FIX #${autoFixCountRef.current}/3: Analizando error...`, "info");
       
       // Enriched Fix Prompt
-      const fixPrompt = `[AUTO-FIX] Error detectado en el preview:
+      let fixPrompt = `[AUTO-FIX] Error detectado en el preview:
 \`\`\`
 ${error}
 \`\`\`
 Por favor, analiza el código generado recientemente y el archivo activo (${props.activeFile || 'N/A'}) para corregir esta regresión. Prioriza la integridad de tipos y dependencias.`;
+
+      if (error.toLowerCase().includes('could not find module') || error.toLowerCase().includes('cannot find module')) {
+        fixPrompt += `\n\nIMPORTANTE: El error indica que falta un módulo o archivo local. REVISA todos los imports (especialmente en App.tsx) y ASEGÚRATE de crear cualquier archivo (hooks, components, utils) que esté siendo referenciado y no exista en la estructura actual.`;
+      }
 
       await handleSend(fixPrompt);
       setIsAutoFixing(false);
