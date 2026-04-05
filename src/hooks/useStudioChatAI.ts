@@ -195,11 +195,12 @@ export function useStudioChatAI({
               streamBufferRef.current = accumulated;
               
               // Specialist detection
-              if (accumulated.includes('[UX_ENGINE]')) { setGenSpecialist('ux'); onPhaseChange?.('generating', 'ux'); }
-              else if (accumulated.includes('[FRONTEND_DEV]')) { setGenSpecialist('frontend'); onPhaseChange?.('generating', 'frontend'); }
-              else if (accumulated.includes('[BACKEND_DEV]')) { setGenSpecialist('backend'); onPhaseChange?.('generating', 'backend'); }
-              else if (accumulated.includes('[ARCHITECT]')) { setGenSpecialist('architect'); onPhaseChange?.('generating', 'architect'); }
-              else if (accumulated.includes('[ENGINEER]')) { setGenSpecialist('engineer'); onPhaseChange?.('generating', 'engineer'); }
+              if (accumulated.includes('[UX_ENGINE]') || accumulated.includes('🧭 UX')) { setGenSpecialist('ux'); onPhaseChange?.('generating', 'ux'); }
+              else if (accumulated.includes('[FRONTEND_DEV]') || accumulated.includes('🎨 UI')) { setGenSpecialist('frontend'); onPhaseChange?.('generating', 'frontend'); }
+              else if (accumulated.includes('[BACKEND_DEV]') || accumulated.includes('⚙️ BE')) { setGenSpecialist('backend'); onPhaseChange?.('generating', 'backend'); }
+              else if (accumulated.includes('[ARCHITECT]') || accumulated.includes('🏗️ ESTRATEGA')) { setGenSpecialist('architect'); onPhaseChange?.('generating', 'architect'); }
+              else if (accumulated.includes('[ENGINEER]') || accumulated.includes('🧠 GENESIS')) { setGenSpecialist('engineer'); onPhaseChange?.('generating', 'engineer'); }
+
             }
           } catch {}
         }

@@ -124,7 +124,7 @@ export function useStudioChatMessages({
     const newTasks: UIPlanTask[] = [];
 
     messages.forEach(m => {
-      // Improved Mermaid Regex: Handle extra spaces, lowercase tags, and trailing content
+      // Improved Mermaid Regex: Case-insensitive and handles extra spaces
       const mermaidMatches = m.content.matchAll(/```[Mm]ermaid\s*([\s\S]*?)```/g);
       for (const match of mermaidMatches) {
         newArtifacts.push({
@@ -135,7 +135,20 @@ export function useStudioChatMessages({
         });
       }
 
-      // Improved Task Regex: Handle more variations in task symbols
+      // Sitemap Fallback: If no mermaid, look for common bullet-point sitemap patterns
+      if (newArtifacts.filter(a => a.type === 'mermaid').length === 0) {
+        const listSitemap = m.content.match(/\* \/(\w+)? \(.*\)/g);
+        if (listSitemap && listSitemap.length > 2) {
+           newArtifacts.push({
+             id: crypto.randomUUID(),
+             type: 'text',
+             title: 'Sitemap Detectado (Lista)',
+             content: listSitemap.join('\n')
+           });
+        }
+      }
+
+      // Improved Task Regex: Handle variations in symbols ([], [ ], [x], [/], [-])
       const taskMatches = Array.from(m.content.matchAll(/^\[( |x|X|\/|-)\] (.+)$/gm));
       for (const match of taskMatches) {
         const symbol = (match[1] as string).toLowerCase();
@@ -146,6 +159,7 @@ export function useStudioChatMessages({
         });
       }
     });
+
 
 
     setArtifacts(newArtifacts);
