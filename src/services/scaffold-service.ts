@@ -46,6 +46,25 @@ function pascalCase(s: string): string {
   return s.replace(/(^|[\s-_]+)\w/g, (m) => m.toUpperCase()).replace(/[\s-_]+/g, '');
 }
 
+const DEPENDENCY_RULES = [
+  { keywords: ['pago', 'stripe', 'venda', 'checkout'], deps: { 'stripe': '^16.0.0', '@stripe/stripe-js': '^4.0.0' } },
+  { keywords: ['animac', 'motion', 'framer'], deps: { 'framer-motion': '^11.0.0' } },
+  { keywords: ['grafic', 'chart', 'data', 'recharts'], deps: { 'recharts': '^2.12.0', 'lucide-react': '^0.462.0' } },
+  { keywords: ['chat', 'mensaje', 'realtime'], deps: { '@supabase/supabase-js': '^2.45.0', 'lucide-react': '^0.462.0' } },
+  { keywords: ['mapa', 'google maps', 'leaflet'], deps: { 'leaflet': '^1.9.4', '@types/leaflet': '^1.9.12' } },
+];
+
+function getDynamicDeps(description: string = ''): Record<string, string> {
+  const d = description.toLowerCase();
+  const extra: Record<string, string> = {};
+  DEPENDENCY_RULES.forEach(rule => {
+    if (rule.keywords.some(k => d.includes(k))) {
+      Object.assign(extra, rule.deps);
+    }
+  });
+  return extra;
+}
+
 // ─── React (Vite) Templates ────────────────────────────────────────────────
 
 function generateReactProject(opts: ScaffoldOptions): Map<string, string> {
@@ -69,6 +88,7 @@ function generateReactProject(opts: ScaffoldOptions): Map<string, string> {
       'react-router-dom': '^6.30.1',
       'lucide-react': '^0.462.0',
       ...(opts.includeSupa ? { '@supabase/supabase-js': '^2.98.0' } : {}),
+      ...getDynamicDeps(opts.description || opts.projectName),
     },
     devDependencies: {
       '@vitejs/plugin-react-swc': '^3.11.0',
@@ -357,6 +377,7 @@ function generateNextProject(opts: ScaffoldOptions): Map<string, string> {
       'react-dom': '^18.3.1',
       'lucide-react': '^0.462.0',
       ...(opts.includeSupa ? { '@supabase/supabase-js': '^2.98.0' } : {}),
+      ...getDynamicDeps(opts.description || opts.projectName),
     },
     devDependencies: {
       '@types/node': '^22.0.0',

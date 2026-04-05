@@ -176,7 +176,7 @@ export function StudioChat(props: StudioChatProps) {
   });
 
   const {
-    isGenerating, streamChars, streamingContent, genPhase, currentGenIntent, generateCode, stopGeneration
+    isGenerating, streamChars, streamingContent, genPhase, genSpecialist, currentGenIntent, generateCode, stopGeneration
   } = useStudioChatAI({
     projectFiles: props.projectFiles,
     selectedModel,
@@ -395,8 +395,17 @@ export function StudioChat(props: StudioChatProps) {
           <div className="flex flex-col items-start gap-4 mb-8 pl-1 animate-in fade-in duration-500">
              <div className="flex items-center gap-3 py-3 px-6 rounded-3xl bg-zinc-50 border border-zinc-200/60 shadow-sm transition-all">
                 <Loader2 className="h-4 w-4 text-primary animate-spin" />
-                <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
-                  {isAutoFixing ? '🔧 Corrigiendo error...' : 'Analizando estrategia...'}
+                <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                  {isAutoFixing ? '🔧 Corrigiendo error...' : (
+                    <>
+                      {genSpecialist === 'architect' && '🏗️ Arquitecto planificando...'}
+                      {genSpecialist === 'ux' && '🎨 Diseñando experiencia...'}
+                      {genSpecialist === 'frontend' && '💻 Desarrollando interfaz...'}
+                      {genSpecialist === 'backend' && '⚙️ Configurando sistemas...'}
+                      {genSpecialist === 'engineer' && '🛠️ Ingeniería en proceso...'}
+                      {genSpecialist === 'none' && '🧠 Analizando estrategia...'}
+                    </>
+                  )}
                 </span>
              </div>
           </div>

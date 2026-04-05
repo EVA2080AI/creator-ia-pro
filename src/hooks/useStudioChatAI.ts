@@ -45,6 +45,7 @@ export function useStudioChatAI({
   const [streamChars, setStreamChars] = useState(0);
   const [streamingContent, setStreamingContent] = useState<string | null>(null);
   const [genPhase, setGenPhase] = useState<'idle' | 'thinking' | 'streaming' | 'done'>('idle');
+  const [genSpecialist, setGenSpecialist] = useState<AgentSpecialist>('none');
   const [currentGenIntent, setCurrentGenIntent] = useState<'codegen' | 'chat' | null>(null);
   
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -58,6 +59,7 @@ export function useStudioChatAI({
     setIsGenerating(false);
     onGeneratingChange?.(false);
     setGenPhase('idle');
+    setGenSpecialist('none');
     onPhaseChange?.('idle', 'none');
     setStreamingContent(null);
   }, [onGeneratingChange, onPhaseChange]);
@@ -81,8 +83,10 @@ export function useStudioChatAI({
     const intent = detectIntent(prompt);
     const prefContext = (options?.preferences || []).map(p => `[MEMORIA ${p.agent_id.toUpperCase()}]: ${p.instructions}`).join('\n');
     
+    // Auto-trigger Architect Mode for fullstack creation intents
     const isChatModeActive = intent === 'chat';
-    const isArchitectRequest = isArchitectMode && !isChatModeActive;
+    const isArchitectRequest = (isArchitectMode || intent === 'fullstack') && !isChatModeActive;
+    
     setCurrentGenIntent(isArchitectRequest ? 'chat' : (isChatModeActive ? 'chat' : 'codegen'));
 
     try {
@@ -166,10 +170,11 @@ export function useStudioChatAI({
               streamBufferRef.current = accumulated;
               
               // Specialist detection
-              if (accumulated.includes('[UX_ENGINE]')) onPhaseChange?.('generating', 'ux');
-              else if (accumulated.includes('[FRONTEND_DEV]')) onPhaseChange?.('generating', 'frontend');
-              else if (accumulated.includes('[BACKEND_DEV]')) onPhaseChange?.('generating', 'backend');
-              else if (accumulated.includes('[ARCHITECT]')) onPhaseChange?.('generating', 'architect');
+              if (accumulated.includes('[UX_ENGINE]')) { setGenSpecialist('ux'); onPhaseChange?.('generating', 'ux'); }
+              else if (accumulated.includes('[FRONTEND_DEV]')) { setGenSpecialist('frontend'); onPhaseChange?.('generating', 'frontend'); }
+              else if (accumulated.includes('[BACKEND_DEV]')) { setGenSpecialist('backend'); onPhaseChange?.('generating', 'backend'); }
+              else if (accumulated.includes('[ARCHITECT]')) { setGenSpecialist('architect'); onPhaseChange?.('generating', 'architect'); }
+              else if (accumulated.includes('[ENGINEER]')) { setGenSpecialist('engineer'); onPhaseChange?.('generating', 'engineer'); }
             }
           } catch {}
         }
@@ -196,6 +201,7 @@ export function useStudioChatAI({
     streamChars,
     streamingContent,
     genPhase,
+    genSpecialist,
     currentGenIntent,
     generateCode,
     stopGeneration

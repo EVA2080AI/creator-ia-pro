@@ -62,9 +62,22 @@ export function buildSuggestions(stack: string[], prompt: string): string[] {
   return s.slice(0, 3);
 }
 
-export function detectIntent(prompt: string, hasContext?: boolean): 'codegen' | 'chat' {
+export type IntentType = 'codegen' | 'chat' | 'fullstack';
+
+export function detectIntent(prompt: string, hasContext?: boolean): IntentType {
   const p = prompt.toLowerCase().trim();
+  
+  // High-complexity "Creation" keywords for FULLSTACK intent
+  const CREATION_KEYWORDS = [
+    'crea un mvp', 'crea un proyecto', 'crea un saas', 'crea una app completa',
+    'create a full mvp', 'create a saas', 'industrial project', 'sistema completo',
+    'build a complete system', 'dashboard completo'
+  ];
+
   if (GREETINGS.includes(p) || p.length < 3) return 'chat';
+  
+  if (CREATION_KEYWORDS.some(k => p.includes(k))) return 'fullstack';
+
   if (FILE_MGMT_KEYWORDS.some(k => p.includes(k)) && hasContext) return 'codegen';
   if (VISION_KEYWORDS.some(k => p.includes(k))) return 'codegen';
   if (p.includes('quien eres') || p.includes('que puedes hacer') || p.includes('ayuda')) return 'chat';
