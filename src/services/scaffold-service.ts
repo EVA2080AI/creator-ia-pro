@@ -170,10 +170,14 @@ export default {
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  padding: 0;
+  min-height: 100vh;
 }
 `);
 
@@ -205,36 +209,31 @@ ${routeElements}
 );
 `);
 
-  // src/components/Layout.tsx — Navbar + Footer
+  // src/components/Layout.tsx — Abstract Architecture
   const navLinks = opts.pages.map((p, i) => {
     const path = i === 0 ? '/' : `/${slugify(p)}`;
-    return `          <NavLink to="${path}" className={({ isActive }) => \`px-3 py-2 rounded-lg text-sm font-medium transition-colors \${isActive ? 'bg-primary text-white shadow-sm' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/5'}\`}>${p}</NavLink>`;
+    return `          <NavLink to="${path}" className={({ isActive }) => \`nav-link \${isActive ? 'active' : ''}\`}>${p}</NavLink>`;
   }).join('\n');
 
   files.set('src/components/Layout.tsx', `import { NavLink, Outlet } from 'react-router-dom';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Navbar */}
-      <nav className="sticky top-0 z-50 ${opts.darkMode ? 'bg-gray-900/80 backdrop-blur-xl border-b border-white/10' : 'bg-white/80 backdrop-blur-xl border-b border-gray-200'}">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
-          <span className="text-lg font-bold tracking-tight">${opts.projectName}</span>
-          <div className="flex items-center gap-1">
+    <div className="app-container">
+      <nav className="app-nav">
+        <div className="nav-content">
+          <span className="brand">${opts.projectName}</span>
+          <div className="nav-links">
 ${navLinks}
           </div>
         </div>
       </nav>
 
-      {/* Main content */}
-      <main className="flex-1">{children}</main>
+      <main className="app-main">{children}</main>
 
-      {/* Footer */}
-      <footer className="${opts.darkMode ? 'bg-gray-900 border-t border-white/10' : 'bg-gray-50 border-t border-gray-200'} py-8">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-sm ${opts.darkMode ? 'text-gray-500' : 'text-gray-400'}">
-            © {new Date().getFullYear()} ${opts.projectName}.
-          </p>
+      <footer className="app-footer">
+        <div className="footer-content">
+          <p>© {new Date().getFullYear()} ${opts.projectName}</p>
         </div>
       </footer>
     </div>
