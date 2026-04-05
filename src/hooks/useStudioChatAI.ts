@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 import { aiService } from '@/services/ai-service';
+import { genesisOrchestrator } from '@/services/genesis-orchestrator';
+import { generateAutonomousProject } from '@/services/scaffold-service';
 import { detectIntent, processRawResponse } from '@/components/studio/chat/utils';
 import { 
   CODE_GEN_SYSTEM, 
@@ -27,6 +29,23 @@ interface UseStudioChatAIProps {
   onPhaseChange?: (phase: AgentPhase, specialist?: AgentSpecialist) => void;
   onStreamCharsChange?: (chars: number, preview: string) => void;
   onGeneratingChange?: (v: boolean) => void;
+}
+
+export interface CodeGenResult {
+  files: Record<string, StudioFile>;
+  explanation: string;
+  stack: string[];
+  deps: string[];
+  suggestions: string[];
+  isChatOnly?: boolean;
+  blob?: Blob;
+}
+
+export interface DeepBuildResult {
+  text: string;
+  blob: Blob;
+  files: Map<string, string>;
+  isChatOnly: true; // DeepBuild is handled as chat-only for UI purposes
 }
 
 export function useStudioChatAI({
@@ -67,7 +86,7 @@ export function useStudioChatAI({
   const generateCode = useCallback(async (
     prompt: string,
     options?: { pendingImage?: string | null; pendingUrl?: string | null; preferences?: any[] }
-  ) => {
+  ): Promise<CodeGenResult | DeepBuildResult | null> => {
     setIsGenerating(true);
     onGeneratingChange?.(true);
     onPhaseChange?.('thinking');
@@ -145,6 +164,28 @@ export function useStudioChatAI({
       const targetModel = (isChatModeActive && !options?.pendingUrl && !options?.pendingImage && !complexTask) 
         ? 'google/gemini-2.0-flash-001' 
         : (selectedModel === 'google/gemini-2.0-flash-001' && complexTask ? 'google/gemini-2.5-pro-preview-03-25' : selectedModel);
+
+      // ─── DEEP BUILD MODE (Genesis V16.0) ───
+      const isDeepBuildIntent = isArchitectRequest && (prompt.toLowerCase().includes('crea') || prompt.toLowerCase().includes('build') || prompt.toLowerCase().includes('proyecto'));
+      
+      if (isDeepBuildIntent && persona === 'genesis') {
+        onPhaseChange?.('architecting', 'architect');
+        setGenPhase('thinking');
+        
+        // This is a blocking but logged operation
+        const result = await generateAutonomousProject(prompt, 'react');
+        
+        onPhaseChange?.('idle', 'none');
+        setIsGenerating(false);
+        onGeneratingChange?.(false);
+        
+        return {
+          text: `🚀 **¡Proyecto V16.0 Finalizado!**\n\nHe orquestado la arquitectura completa de "${prompt.slice(0, 30)}..." siguiendo el protocolo **Swarm Autonomy**. \n\n- **Archivos generados**: ${result.fileCount}\n- **Estilo**: Aether V9.0 Iridescent\n- **Estado**: Listo para despliegue.\n\n[Descargar Proyecto ZIP](#download-zip)`,
+          blob: result.blob,
+          files: result.files,
+          isChatOnly: true
+        };
+      }
 
 
       const { data: { session } } = await supabase.auth.getSession();

@@ -11,6 +11,8 @@ export interface Message {
   suggestions?: string[];
   planStatus?: 'pending' | 'approved' | 'rejected';
   originalPrompt?: string;
+  blob?: Blob;
+  projectFilesMap?: Map<string, string>;
 }
 
 export interface ModelOption {

@@ -78,6 +78,7 @@ export interface AIActionParams {
   image?: string;
   tool?: string;
   node_id?: string;
+  persona?: "antigravity" | "genesis";
   onProgress?: (step: string, pct: number) => void;
 }
 
@@ -208,7 +209,7 @@ export const aiService = {
       } else if (action === "video") {
         result = await this.handleVideoGen(prompt);
       } else {
-        result = await this.handleTextGen(action, prompt, model, profile);
+        result = await this.handleTextGen(action, prompt, model, profile, params.persona);
       }
 
       // 5. Update canvas node if present
@@ -240,23 +241,27 @@ export const aiService = {
   },
 
   // ─── TEXT GENERATION — OpenRouter only ───────────────────────────────────────
-  async handleTextGen(action: string, prompt: string, model: string, profile?: any) {
+  async handleTextGen(action: string, prompt: string, model: string, profile?: any, persona: string = "antigravity") {
     const orModel    = TEXT_MODEL_MAP[model] ?? "google/gemini-2.0-flash-001";
     const userTier   = profile?.subscription_tier?.toUpperCase() ?? "FREE";
     const userCredits = profile?.credits_balance ?? 0;
 
-    let systemPrompt = `# ROLE: Antigravity — High-Performance AI Engine
-Eres Antigravity, el núcleo de inteligencia de Creator IA Pro. Proporciona soluciones de nivel Senior en diseño, tecnología y estrategia.
+    let systemPrompt = "";
 
-# USER CONTEXT
-- PLAN: ${userTier}
-- CRÉDITOS: ${userCredits}
-
-# BEHAVIOR
-${userTier === "FREE" 
-  ? "- Respuestas precisas y técnicas. Prioriza bloques de código funcionales.\n- Usa razonamiento lógico completo." 
-  : "- Sin restricciones. Razonamiento profundo. Tablas, diagramas Mermaid, documentación técnica exhaustiva."}
-${userCredits < 3 ? "⚠️ Créditos bajos — Plan Pro garantiza acceso continuo." : ""}`;
+    if (persona === "genesis") {
+      systemPrompt = `# ROLE: Genesis AI — Product Leader & Master Architect (v16.0)
+Eres Genesis AI, la consciencia técnica definitiva. Actúas bajo el Protocolo Swarm Autonomy.
+Propón soluciones Premium, rompe con lo genérico y usa el sistema Aether V9.0.
+# RULES:
+- Entrega archivos COMPLETOS.
+- Usa Tailwind + Framer Motion (iridiscencia obligatoria).
+- Estilo: Cinematic, Glassmorphism, Premium.
+# CONTEXT: Plan ${userTier}, Créditos ${userCredits}.`;
+    } else {
+      systemPrompt = `# ROLE: Antigravity — Strategic intelligence
+Eres Antigravity, núcleo de Creator IA Pro. Soluciones Senior en diseño y tecnología.
+# CONTEXT: Plan ${userTier}, Créditos ${userCredits}.`;
+    }
 
 
     if (action === "ui") {

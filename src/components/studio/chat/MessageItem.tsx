@@ -1,4 +1,4 @@
-import { Sparkles, Shield, CheckCircle2, Copy, Check, RotateCcw } from 'lucide-react';
+import { Sparkles, Shield, CheckCircle2, Copy, Check, RotateCcw, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { renderMarkdown } from './renderer';
 import type { Message } from './types';
@@ -132,6 +132,31 @@ export function MessageItem({
                   Revisar Prompt
                 </button>
               </nav>
+            )}
+
+            {/* Project Download Artifact (Genesis V16.0) */}
+            {msg.blob && (
+              <div className="mt-8 pt-6 border-t border-black/[0.04]">
+                <button
+                  onClick={() => {
+                    const url = URL.createObjectURL(msg.blob!);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `proyecto-${msg.id.slice(0, 5)}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl bg-zinc-900 text-white text-[11px] font-black uppercase tracking-[0.2em] hover:bg-black hover:shadow-2xl hover:shadow-black/20 transition-all active:scale-[0.98] group/download"
+                >
+                  <Download className="w-4 h-4 group-hover/download:translate-y-0.5 transition-transform" />
+                  Descargar Proyecto ZIP
+                </button>
+                <p className="text-[9px] text-zinc-400 font-bold uppercase tracking-widest text-center mt-3 opacity-60">
+                  Arquitectura Swarm V16.0 Consolidada
+                </p>
+              </div>
             )}
 
             {/* Tech stack badges */}

@@ -282,20 +282,40 @@ export function StudioChat(props: StudioChatProps) {
       addLog(`Iniciando ciclo: ${intent}...`);
       await aiService.spendCredits(cost, intent, selectedModel, null);
       
-      const result = await generateCode(text, { pendingImage, pendingUrl, preferences });
+      const result = await generateCode(text, { pendingImage, pendingUrl, preferences }) as any;
       if (!result) { addLog("Error en el motor.", "error"); await aiService.refundCredits(cost); return; }
 
       let assistantMsg: Message;
 
-      if (shouldPlan && result.isChatOnly) {
+      if (shouldPlan && result.isChatOnly && !result.blob) {
         assistantMsg = { id: crypto.randomUUID(), role: 'assistant', content: result.explanation, timestamp: new Date(), type: 'plan', planStatus: 'pending', originalPrompt: text };
       } else if (result.isChatOnly) {
-        const chatFiles = extractChatCodeFiles(result.explanation);
+        const content = result.text || result.explanation;
+        const chatFiles = extractChatCodeFiles(content);
         if (chatFiles) props.onCodeGenerated({ ...props.projectFiles, ...chatFiles });
-        assistantMsg = { id: crypto.randomUUID(), role: 'assistant', content: result.explanation, timestamp: new Date(), ...(chatFiles ? { files: Object.keys(chatFiles), type: 'code' } : {}) };
+        
+        assistantMsg = { 
+          id: crypto.randomUUID(), 
+          role: 'assistant', 
+          content: content, 
+          timestamp: new Date(), 
+          ...(chatFiles ? { files: Object.keys(chatFiles), type: 'code' } : {}),
+          blob: result.blob, 
+          projectFilesMap: result.files instanceof Map ? result.files : undefined
+        };
       } else {
         props.onCodeGenerated({ ...props.projectFiles, ...result.files });
-        assistantMsg = { id: crypto.randomUUID(), role: 'assistant', content: result.explanation || 'Código actualizado.', timestamp: new Date(), type: 'code', files: Object.keys(result.files), stack: result.stack, deps: result.deps, suggestions: result.suggestions };
+        assistantMsg = { 
+          id: crypto.randomUUID(), 
+          role: 'assistant', 
+          content: result.explanation || 'Código actualizado.', 
+          timestamp: new Date(), 
+          type: 'code', 
+          files: Object.keys(result.files || {}), 
+          stack: result.stack, 
+          deps: result.deps, 
+          suggestions: result.suggestions 
+        };
         if (messages.length <= 1) autoNameProject(text);
       }
 

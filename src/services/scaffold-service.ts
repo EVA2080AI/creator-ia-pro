@@ -11,6 +11,7 @@
  *   - Python (FastAPI)
  */
 import JSZip from 'jszip';
+import { genesisOrchestrator } from "./genesis-orchestrator";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -815,6 +816,46 @@ const GENERATORS: Record<ProjectType, (opts: ScaffoldOptions) => Map<string, str
   python: generatePythonProject,
   game: generateGameProject,
 };
+
+/**
+ * Genesis V16.0: The Autonomous Architect — Deep Build Mode
+ * Generates a project from a single prompt using blueprint-driven synthesis.
+ */
+export async function generateAutonomousProject(prompt: string, type: ProjectType = 'react'): Promise<ScaffoldResult> {
+  const zip = new JSZip();
+  const files = new Map<string, string>();
+
+  // 1. Architect Mode — Build the Blueprint
+  const blueprint = await genesisOrchestrator.architectProject(prompt, type);
+  
+  // 2. Synthesis Mode — Context-Aware Synthesis
+  const fileTasks: { path: string; context: string }[] = [
+    { path: 'package.json', context: 'Standard package.json with dependencies from techStack' },
+    { path: 'index.html', context: 'HTML5 entry point with Inter font and Aether V9.0 meta tags (Glassmorphism bg)' },
+    { path: 'src/index.css', context: 'Tailwind directives and Aether V9.0 design tokens injection' },
+    { path: 'src/main.tsx', context: 'React-Router-Dom entry point mounting all pages' },
+    { path: 'src/components/Layout.tsx', context: 'Global Layout with Navbar and Footer following Aether glassmorphism' },
+    { path: 'README.md', context: 'Professional project documentation and setup guide' },
+  ];
+
+  // Add pages to tasks from blueprint
+  blueprint.pages.forEach(page => {
+    fileTasks.push({ 
+      path: `src/pages/${page.name.replace(/\s+/g, '')}.tsx`, 
+      context: `Full page implementation for ${page.name}. Purpose: ${page.purpose}. Components: ${page.components.join(', ')}.` 
+    });
+  });
+
+  // Execute synthesis for each file
+  for (const task of fileTasks) {
+    const code = await genesisOrchestrator.synthesizeFile(blueprint, task.path, task.context);
+    files.set(task.path, code);
+    zip.file(task.path, code);
+  }
+
+  const blob = await zip.generateAsync({ type: 'blob' });
+  return { files, blob, fileCount: files.size, projectType: type };
+}
 
 export async function generateProject(opts: ScaffoldOptions): Promise<ScaffoldResult> {
   const generator = GENERATORS[opts.projectType];
