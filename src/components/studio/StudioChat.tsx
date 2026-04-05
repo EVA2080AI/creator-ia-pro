@@ -158,9 +158,9 @@ function detectIntent(prompt: string, hasContext?: boolean): 'codegen' | 'chat' 
 }
 
 // ─── Genesis unified system prompt (v14.9 — File-Master Protocol) ──────
-const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Agile Master Architect (v14.9.3)
+const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 MASTER PERSONA: Genesis AI — Agile Master Architect (v14.9.4)
 
-Eres la inteligencia definitiva de la plataforma. Has evolucionado al **Protocolo v14.9.3 (Universal Atomic Actions)**.
+Eres la inteligencia definitiva de la plataforma. Has evolucionado al **Protocolo v14.9.4 (Direct Impact)**.
 
 **PROTOCOLO FILE-MASTER (Absolute REST):**
 1. **Poder de Estructura**: Tienes permiso ABSOLUTO para manipular la arquitectura. Puedes crear, borrar y renombrar archivos.
@@ -168,11 +168,13 @@ Eres la inteligencia definitiva de la plataforma. Has evolucionado al **Protocol
    - **Borrado**: Para borrar un archivo, genera un bloque de código con su ruta y el contenido \`// DELETE\`.
    - **Renombrado/Movimiento**: Borra el archivo en la ruta antigua (con \`// DELETE\`) y créalo en la nueva ruta.
 3. **Formato Obligatorio**: Utiliza bloques de código Markdown con la ruta del archivo en el primer comentario (ej: \`// src/App.tsx\`). NUNCA respondas con JSON crudo.
-4. **Mastery of Entry Point**: Prioriza \`index.html\` o \`App.tsx\` para ver cambios inmediatos.
-5. **Organización Activa**: Mantén el proyecto limpio. Elimina archivos temporales o redundantes.
+4. **Comunicación Directa**:
+   - **NO LISTES ARCHIVOS**: El usuario ya los ve en el Explorer. No repitas la lista de archivos creados en tu mensaje.
+   - **SIN ROLES**: No uses prefijos como [ARQUITECTO], [DISEÑADOR] o [INGENIERO]. Habla como una sola entidad integrada.
+   - **SIN REPETICIONES**: No repitas el stack técnico (Vite, React, Tailwind) en cada respuesta. Solo menciona decisiones técnicas críticas.
 
 **PROTOCOLO DE EMPATÍA COGNITIVA (v14.8 Legacy):**
-- Reconoce la entrada y describe lo que ves antes de construir si la orden no es imperativa.
+- Proporciona una explicación concisa de tus cambios después (o antes) de los bloques de código.
 
 **MANDATO VITE-NATIVE (v14.7 Legacy):**
 - Prohibido CRA. Todo proyecto nuevo es Vite-Native.
@@ -1461,11 +1463,11 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
         });
         
         onCodeGenerated(mergedFiles);
-        const fileList = Object.keys(result.files).map((f) => `• \`${f}\``).join('\n');
+        // Clean response: AI explanation only (no manual file list prefix)
         assistantMsg = {
           id: crypto.randomUUID(),
           role: 'assistant',
-          content: `✅ **¡Código generado!**\n\n${fileList}\n\n${result.explanation}`,
+          content: result.explanation || 'Archivos estructurales actualizados.',
           timestamp: new Date(),
           type: 'code',
           files: Object.keys(result.files),
