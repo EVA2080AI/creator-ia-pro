@@ -71,12 +71,17 @@ export function detectIntent(prompt: string, hasContext?: boolean): IntentType {
   const CREATION_KEYWORDS = [
     'crea un mvp', 'crea un proyecto', 'crea un saas', 'crea una app completa',
     'create a full mvp', 'create a saas', 'industrial project', 'sistema completo',
-    'build a complete system', 'dashboard completo'
+    'build a complete system', 'dashboard completo', 'diseña un', 'armar una plataforma',
+    'genera el alma del producto', 'visión estratégica'
   ];
 
   if (GREETINGS.includes(p) || p.length < 3) return 'chat';
   
-  if (CREATION_KEYWORDS.some(k => p.includes(k))) return 'fullstack';
+  const isVisionRequest = p.includes('estrategia') || p.includes('arquitectura') || p.includes('pensamiento') || p.includes('planifica');
+  if (isVisionRequest) return 'fullstack';
+
+  // [FIX] Priority
+  if (p.includes('[auto-fix]') || p.includes('[fix]')) return 'codegen';
 
   if (FILE_MGMT_KEYWORDS.some(k => p.includes(k)) && hasContext) return 'codegen';
   if (VISION_KEYWORDS.some(k => p.includes(k))) return 'codegen';

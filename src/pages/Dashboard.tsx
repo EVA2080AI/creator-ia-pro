@@ -13,8 +13,10 @@ import {
   TrendingUp, MessageSquare, FileText, PenTool, Megaphone,
   Type, Hash, CreditCard, Settings, Zap, Plus,
   FolderPlus, Box, ChevronRight, Rocket, Building2, Users, Wallet, AlertCircle,
-  Brain, Code2, LayoutTemplate
+  Brain, Code2, LayoutTemplate, Trash2, Copy, MoreVertical
 } from "lucide-react";
+import { ProjectCard } from "@/components/dashboard/ProjectCard";
+import { useStudioProjects } from "@/hooks/useStudioProjects";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from "@/components/ui/dialog";
@@ -41,6 +43,7 @@ const Dashboard = () => {
   const [toolData, setToolData] = useState<{ name: string; value: number; color: string }[]>([]);
   const [condominioStats, setCondominioStats] = useState<{ total_unidades: number; unidades_al_dia: number; recaudo_mes: number; cartera_mora: number } | null>(null);
   const [openingProject, setOpeningProject] = useState<any | null>(null);
+  const { duplicateProject, deleteProject: deleteStudioProject } = useStudioProjects();
 
   useEffect(() => {
     if (searchParams.get("checkout") === "success") {
@@ -131,6 +134,44 @@ const Dashboard = () => {
     setIsCreatingSpace(false);
     setNewSpaceName(""); setNewSpaceDesc("");
     navigate(`/formarketing?spaceId=${data.id}`);
+  };
+
+  const handleDuplicate = async (e: React.MouseEvent, project: any) => {
+    e.stopPropagation();
+    if (project.type === 'code') {
+      const newProj = await duplicateProject(project);
+      if (newProj) {
+        setSpaces(prev => [ { ...newProj, type: 'code' }, ...prev ]);
+      }
+    } else {
+      // Duplicate Space (Canvas IA)
+      const { data, error } = await supabase.from("spaces")
+        .insert({ 
+          user_id: user?.id, 
+          name: `${project.name} (Copia)`, 
+          description: project.description 
+        })
+        .select().single();
+      
+      if (error) { toast.error("Error al duplicar espacio"); return; }
+      toast.success("Espacio duplicado");
+      setSpaces(prev => [ { ...data, type: 'flow' }, ...prev ]);
+    }
+  };
+
+  const handleDelete = async (e: React.MouseEvent, project: any) => {
+    e.stopPropagation();
+    if (!window.confirm(`¿Estás seguro de eliminar "${project.name}"?`)) return;
+
+    if (project.type === 'code') {
+      await deleteStudioProject(project.id);
+    } else {
+      const { error } = await supabase.from("spaces").delete().eq("id", project.id);
+      if (error) { toast.error("Error al eliminar espacio"); return; }
+    }
+    
+    setSpaces(prev => prev.filter(p => p.id !== project.id));
+    toast.success("Proyecto eliminado");
   };
 
   const stats = [
@@ -432,8 +473,9 @@ const Dashboard = () => {
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {spaces.map((space) => (
-                  <button
+                  <ProjectCard 
                     key={space.id}
+                    project={space}
                     onClick={() => {
                       if (space.type === 'code') {
                         setOpeningProject(space);
@@ -441,19 +483,9 @@ const Dashboard = () => {
                         navigate(`/formarketing?spaceId=${space.id}`);
                       }
                     }}
-                    className="group flex items-center gap-3 p-5 bg-white border border-zinc-200/60 hover:border-zinc-300 transition-all rounded-2xl shadow-sm hover:shadow-md hover:scale-[1.02] duration-300 text-left active:scale-95"
-                  >
-                    <div className="w-10 h-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:bg-primary/5 group-hover:border-primary/20 transition-all">
-                      {space.type === 'code' ? <Code2 className="w-4 h-4 text-zinc-400 group-hover:text-emerald-500" /> : <LayoutGrid className="w-4 h-4 text-zinc-400 group-hover:text-primary" />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[14px] font-black text-zinc-900 truncate">{space.name}</p>
-                      <p className="text-[10px] text-zinc-400 truncate font-bold uppercase tracking-widest mt-0.5">
-                        {space.type === 'code' ? 'Code Project' : 'Canvas IA'} · {space.description || "Sin descripción"}
-                      </p>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-zinc-300 shrink-0 group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                  </button>
+                    onDuplicate={(e) => handleDuplicate(e, space)}
+                    onDelete={(e) => handleDelete(e, space)}
+                  />
                 ))}
               </div>
             )}

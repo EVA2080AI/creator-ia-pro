@@ -21,7 +21,7 @@ import {
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
-export type ViewMode = 'preview' | 'code' | 'artifacts' | 'tools' | 'files' | 'cloud' | 'analytics';
+export type ViewMode = 'preview' | 'code' | 'artifacts' | 'tools' | 'files' | 'cloud' | 'analytics' | 'nexus';
 export type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 
 interface StudioTopbarProps {

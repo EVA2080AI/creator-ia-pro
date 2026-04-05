@@ -95,14 +95,31 @@ export function useStudioChatAI({
       const mentionedFiles = mentionMatches.map(m => m[1]).filter(f => projectFiles[f]);
       
       let contextBlock = mentionedFiles.length > 0
-        ? '\n\n[ARCHIVOS MENCIONADOS]\n' + mentionedFiles.map(f => `// @${f}\n${projectFiles[f].content.slice(0, 3000)}`).join('\n\n')
+        ? '\n\n[ARCHIVOS MENCIONADOS]\n' + mentionedFiles.map(f => `// @${f}\n${projectFiles[f].content.slice(0, 4000)}`).join('\n\n')
         : '';
 
-      if (isChatModeActive && fileKeys.length > 0 && !contextBlock) {
-        contextBlock = `\n\n[PROYECTO ACTIVO]\nArchivos: ${fileKeys.join(', ')}\n${activeFile ? `\n[ARCHIVO ACTUALMENTE ABIERTO]: ${activeFile}\nCONTENIDO: ${projectFiles[activeFile]?.content || ''}\n` : ''}\nContenido relevante:\n` +
-          fileKeys.slice(0, 3).map(f => `// ${f}\n${projectFiles[f].content.slice(0, 600)}`).join('\n\n');
-      } else if (!isChatModeActive && fileKeys.length > 0) {
-        contextBlock += '\n\nARCHIVOS ACTUALES:\n' + fileKeys.map(f => `--- ${f} ---\n${projectFiles[f].content.slice(0, 3000)}`).join('\n\n');
+      // Smart Context: If no mentions, find high-relevance files based on intent
+      if (fileKeys.length > 0 && !contextBlock) {
+        const pLower = prompt.toLowerCase();
+        let importantFiles = [];
+        
+        if (pLower.includes('db') || pLower.includes('base de datos') || pLower.includes('supabase')) {
+          importantFiles = fileKeys.filter(f => f.includes('sql') || f.includes('service') || f.includes('integration'));
+        } else if (pLower.includes('ui') || pLower.includes('estética') || pLower.includes('diseño') || pLower.includes('css')) {
+          importantFiles = fileKeys.filter(f => f.includes('css') || f.includes('components') || f.includes('App.tsx'));
+        } else if (pLower.includes('nav') || pLower.includes('sidebar') || pLower.includes('route')) {
+          importantFiles = fileKeys.filter(f => f.includes('sidebar') || f.includes('Navbar') || f.includes('App.tsx'));
+        }
+        
+        const finalSelection = [...new Set([...importantFiles, activeFile].filter(Boolean) as string[])].slice(0, 4);
+        
+        if (finalSelection.length > 0) {
+          contextBlock = `\n\n[CONTEXTO RELEVANTE]:\n` +
+            finalSelection.map(f => `// ${f}\n${projectFiles[f].content.slice(0, 3500)}`).join('\n\n');
+        } else {
+          // Fallback to basic overview
+          contextBlock = `\n\n[PROYECTO ACTIVO]:\nArchivos: ${fileKeys.join(', ')}\n${activeFile ? `\n[ARCHIVO ACTUALMENTE ABIERTO]: ${activeFile}\nCONTENIDO: ${projectFiles[activeFile]?.content || ''}\n` : ''}\n`;
+        }
       }
 
       const supabaseContext = supabaseConfig ? `\n\nSUPABASE: URL: ${supabaseConfig.url} | Key: ${supabaseConfig.anonKey}. Usa window.supabaseClient.` : '';
@@ -116,12 +133,18 @@ export function useStudioChatAI({
          userContent = `[URL]: ${parsedClone.url}\n[PROMPT]: ${prompt}`;
       }
 
-      const historySlice = convHistory.slice(-10);
+      const historySlice = convHistory.slice(-12); // Slightly more history
       const messages = [
         { role: 'system', content: effectiveSystemPrompt + (isChatModeActive ? '' : supabaseContext) + `\n\n${prefContext}` },
         ...historySlice,
         { role: 'user', content: options?.pendingImage ? [{ type: 'image_url', image_url: { url: options.pendingImage } }, { type: 'text', text: userContent }] : userContent }
       ];
+
+      // Logic to detect if we need a "PRO" model for complex tasks
+      const complexTask = prompt.length > 500 || prompt.toLowerCase().includes('refactor') || prompt.toLowerCase().includes('arquitectura') || isArchitectRequest;
+      const targetModel = (isChatModeActive && !options?.pendingUrl && !options?.pendingImage && !complexTask) 
+        ? 'google/gemini-2.0-flash-001' 
+        : (selectedModel === 'google/gemini-2.0-flash-001' && complexTask ? 'google/gemini-pro-1.5' : selectedModel);
 
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
@@ -132,11 +155,11 @@ export function useStudioChatAI({
           provider: 'openrouter',
           path: 'chat/completions',
           body: {
-            model: (isChatModeActive && !options?.pendingUrl && !options?.pendingImage) ? 'google/gemini-2.0-flash-001' : selectedModel,
+            model: targetModel,
             messages,
             stream: true,
-            temperature: isChatModeActive ? 0.6 : 0.2,
-            max_tokens: isChatModeActive ? 4096 : 16000,
+            temperature: isChatModeActive ? 0.7 : 0.2, // Slightly more creative in chat
+            max_tokens: isChatModeActive ? 4096 : 20000, // More tokens for complex code
           },
         }),
       });

@@ -101,9 +101,16 @@ export function StudioFloatingToolbar({
           icon={<Cloud className="w-4 h-4 text-sky-500" />} 
         />
         <ViewButton 
+          active={viewMode === 'nexus'} 
+          onClick={() => onViewModeChange('nexus')} 
+          icon={<Link2 className="w-4 h-4 text-purple-500" />} 
+          label="Nexus" 
+        />
+        <ViewButton 
           active={viewMode === 'analytics'} 
           onClick={() => onViewModeChange('analytics')} 
           icon={<LineChart className="w-4 h-4 text-rose-500" />} 
+          label="Analytics" 
         />
       </div>
 

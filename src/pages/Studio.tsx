@@ -16,6 +16,7 @@ import { StudioAITools } from '@/components/studio/StudioAITools';
 import { StudioFloatingToolbar } from '@/components/studio/StudioFloatingToolbar';
 import { StudioCloud, SupabaseConfig } from '@/components/studio/StudioCloud';
 import { StudioAnalytics } from '@/components/studio/StudioAnalytics';
+import { StudioNexus } from '@/components/studio/Nexus/StudioNexus';
 import { StudioTopbar, ViewMode, DeviceMode } from '@/components/studio/StudioTopbar';
 import { 
   Loader2, FolderOpen, Code2, Plus, Sparkles, ChevronRight, Layout,
@@ -405,49 +406,57 @@ export default function Studio() {
         {/* ── Left Sidebar: Chat (Genesis) ── */}
         <div 
           className={cn(
-            "shrink-0 border-r border-black/5 bg-white flex flex-col relative z-20 transition-all duration-300 shadow-sm",
-            isSidebarCollapsed ? "w-0 opacity-0 -translate-x-full" : "w-[410px] opacity-100 translate-x-0"
+            "shrink-0 z-30 transition-all duration-500 ease-in-out relative",
+            isSidebarCollapsed ? "w-0 opacity-0 -translate-x-full" : "w-[380px] md:w-[420px] opacity-100 translate-x-0"
           )}
         >
-          <StudioChat 
-            projectId={activeProject.id} 
-            projectFiles={activeProject.files}
-            projectName={activeProject.name}
-            isSaving={isSaving}
-            activeFile={activeFile}
-            onCodeGenerated={handleCodeGenerated}
-            onGeneratingChange={setIsGenerating}
-            // Lifted State
-            artifacts={artifacts}
-            setArtifacts={setArtifacts}
-            tasks={activeTasks}
-            setTasks={setTasks}
-            logs={logs}
-            setLogs={setLogs}
-            // --- v14.0 Interconnect ---
-            runtimeError={runtimeError}
-            onClearError={() => setRuntimeError(null)}
-            onPhaseChange={(phase, specialist) => {
-              setAgentPhase(phase);
-              setActiveSpecialist(specialist);
-            }}
-            onStreamCharsChange={(chars, preview) => {
-              setStreamChars(chars);
-              setStreamPreview(preview);
-            }}
-            onShare={handleShare}
-            onPublish={() => setShowDeployModal(true)}
-            onBack={() => navigate('/studio')}
-            onToggleArtifacts={() => setViewMode('artifacts')}
-            onSelectFile={(f) => {
-              setActiveFile(f);
-              setViewMode('code');
-            }}
-          />
+          {/* Glass Overlay for the sidebar area */}
+          <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl border-r border-black/[0.03] shadow-2xl z-0" />
+          
+          <div className="relative h-full flex flex-col z-10">
+            <StudioChat 
+              projectId={activeProject.id} 
+              projectFiles={activeProject.files}
+              projectName={activeProject.name}
+              isSaving={isSaving}
+              activeFile={activeFile}
+              onCodeGenerated={handleCodeGenerated}
+              onGeneratingChange={setIsGenerating}
+              // Lifted State
+              artifacts={artifacts}
+              setArtifacts={setArtifacts}
+              tasks={activeTasks}
+              setTasks={setTasks}
+              logs={logs}
+              setLogs={setLogs}
+              // --- v16.0 Interconnect ---
+              runtimeError={runtimeError}
+              onClearError={() => setRuntimeError(null)}
+              onPhaseChange={(phase, specialist) => {
+                setAgentPhase(phase);
+                setActiveSpecialist(specialist);
+              }}
+              onStreamCharsChange={(chars, preview) => {
+                setStreamChars(chars);
+                setStreamPreview(preview);
+              }}
+              onShare={handleShare}
+              onPublish={() => setShowDeployModal(true)}
+              onBack={() => navigate('/studio')}
+              onToggleArtifacts={() => setViewMode('artifacts')}
+              onSelectFile={(f) => {
+                setActiveFile(f);
+                setViewMode('code');
+              }}
+            />
+          </div>
         </div>
 
-        {/* ── Main Workspace: Preview, Code, Files, Cloud or Analytics ────────────────── */}
-        <div className="flex-1 overflow-hidden bg-[#FCFCFC] relative">
+        {/* ── Main Workspace: Immersive Stage ────────────────── */}
+        <div className="flex-1 overflow-hidden bg-[#FAFAFA] relative z-0">
+          {/* Subtle global gradient backdrop for preview */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_#F0F0F0_0%,_transparent_100%)] pointer-events-none" />
+          
           <AnimatePresence mode="wait">
             <motion.div
               key={viewMode}
@@ -560,6 +569,11 @@ export default function Studio() {
                 />
               ) : viewMode === 'analytics' ? (
                 <StudioAnalytics projectId={activeProject.id} />
+              ) : viewMode === 'nexus' ? (
+                <StudioNexus 
+                  currentProject={activeProject} 
+                  allProjects={projects} 
+                />
               ) : (
                 <div className="h-full w-full flex items-center justify-center bg-[#080808]">
                   <div className="text-center space-y-4">

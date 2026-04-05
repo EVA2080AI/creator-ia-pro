@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { 
   Globe, UploadCloud, CheckCircle, Loader2, ArrowRight, 
-  ExternalLink, Sparkles, Box, ShieldCheck, Zap, X
+  ExternalLink, Sparkles, Box, ShieldCheck, Zap, X, Github, Download, QrCode
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { vercelService } from "@/services/vercel-service";
@@ -148,22 +149,60 @@ export function StudioDeploy({ onClose, files, projectName, onLog }: StudioDeplo
               <h3 className="text-xl font-black text-white mb-1">¡Despliegue Exitoso!</h3>
               <p className="text-xs text-zinc-500 uppercase tracking-widest font-black mb-8">Tu proyecto está en vivo</p>
               
-              <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 mb-8 flex flex-col items-center gap-4 group cursor-pointer hover:bg-white/[0.08] transition-all">
-                <div className="flex flex-col items-center gap-2">
-                  <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-none">URL de Producción</p>
-                  <p className="text-sm font-bold text-primary group-hover:underline break-all text-center">{liveUrl}</p>
+              {/* Professional Handover Card */}
+              <div className="w-full bg-white/5 border border-white/10 rounded-[2rem] p-8 mb-8 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                   <QrCode className="w-24 h-24 text-white" />
                 </div>
-                <a href={liveUrl!} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 text-white font-bold text-[12px] hover:bg-white/20 transition-all leading-none">
-                  Visitar Sitio <ExternalLink className="h-3.5 w-3.5" />
-                </a>
+                
+                <div className="flex flex-col md:flex-row gap-8 items-center relative z-10">
+                  <div className="p-3 bg-white rounded-3xl shadow-2xl">
+                    <QRCodeSVG value={liveUrl || ""} size={120} />
+                  </div>
+                  
+                  <div className="flex-1 space-y-4 text-center md:text-left">
+                    <div>
+                      <p className="text-[10px] text-zinc-500 font-black uppercase tracking-widest mb-1">Production URL</p>
+                      <a href={liveUrl!} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-primary hover:underline transition-all block break-all">
+                        {liveUrl}
+                      </a>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
+                        <p className="text-[8px] text-zinc-500 font-black uppercase tracking-widest">Files</p>
+                        <p className="text-sm font-bold text-white">{Object.keys(files).length}</p>
+                      </div>
+                      <div className="p-3 rounded-2xl bg-white/5 border border-white/5">
+                        <p className="text-[8px] text-zinc-500 font-black uppercase tracking-widest">Stack</p>
+                        <p className="text-sm font-bold text-white">Vite+React</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex gap-3 w-full">
-                <button onClick={onClose} className="flex-1 py-4 rounded-2xl border border-white/10 text-white font-black text-xs hover:bg-white/5 transition-all">
-                  Cerrar
-                </button>
-                <button className="flex-1 py-4 rounded-2xl bg-zinc-900 border border-white/5 text-white font-black text-xs flex items-center justify-center gap-2 hover:bg-zinc-800 transition-all">
-                  Comprar Dominio <Globe className="h-4 w-4" />
+              <div className="flex flex-col gap-3 w-full">
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => toast.info("Generando repositorio en GitHub...")}
+                    className="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 transition-all active:scale-95"
+                  >
+                    <Github className="h-4 w-4" /> Export to GitHub
+                  </button>
+                  <button 
+                    onClick={() => toast.info("Preparando descarga del proyecto...")}
+                    className="flex-1 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white/10 transition-all active:scale-95"
+                  >
+                    <Download className="h-4 w-4" /> Download ZIP
+                  </button>
+                </div>
+                
+                <button 
+                  onClick={onClose}
+                  className="w-full py-4 rounded-2xl bg-white text-black font-black text-xs uppercase tracking-[0.2em] hover:scale-[1.02] transition-all shadow-xl shadow-white/5"
+                >
+                  Confirmar y Finalizar
                 </button>
               </div>
             </motion.div>
