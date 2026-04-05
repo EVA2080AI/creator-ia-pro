@@ -418,13 +418,32 @@ export default function Chat() {
   }, [activeProject, renameProject, setActiveProject]);
 
   const handleWelcomePrompt = async (prompt: string) => {
+    const p = (prompt || "").toLowerCase().trim();
+    const GREETINGS = ['hola', 'hi', 'hello', 'buenos dias', 'buenas tardes', 'buenas noches', 'saludos', 'hey', 'buenas'];
+    
+    // 1. Detect simple greetings to avoid "hola" projects
+    if (GREETINGS.includes(p) || p.length < 3) {
+      toast("¡Hola! 👋 ¿Qué quieres construir hoy? Describe tu idea para empezar.");
+      return;
+    }
+
     setCreatingWithPrompt(true);
     let finalPrompt = prompt;
     if (pendingFile) {
       finalPrompt = `[CONTRATO/CONTEXTO DE ARCHIVO: ${pendingFile.name}]\n\`\`\`\n${pendingFile.content}\n\`\`\`\n\n${prompt || "Analiza este archivo y construye un proyecto basado en él."}`;
     }
-    const words = finalPrompt.trim().split(/\s+/).slice(0, 6).join(' ');
-    const projectName = words.length > 3 ? words.slice(0, 40) : 'Nuevo Proyecto';
+
+    // 2. Improved Automated Naming (avoid stop words at start)
+    const stopWords = ['crea', 'un', 'una', 'el', 'la', 'de', 'para', 'mi', 'con', 'construye'];
+    const namingWords = p.split(/\s+/).filter(w => !stopWords.includes(w)).slice(0, 4);
+    let projectName = namingWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    
+    if (!projectName || projectName.length < 3) {
+      projectName = 'Nuevo Proyecto Genesis';
+    } else if (projectName.length > 40) {
+      projectName = projectName.slice(0, 37) + '...';
+    }
+
     const project = await createProject(projectName);
     if (project) {
       setActiveProject(project);
@@ -433,6 +452,7 @@ export default function Chat() {
     }
     setCreatingWithPrompt(false);
   };
+
 
   const handleFileSelect = (file: File) => {
     const reader = new FileReader();
@@ -833,7 +853,29 @@ export default function Chat() {
       <div className="lg:hidden fixed bottom-6 right-6 z-[60]">
         <Sheet>
           <SheetTrigger asChild><button className="h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center border border-primary/20"><MessageSquare className="h-5 w-5" /></button></SheetTrigger>
-          <SheetContent side="left" className="w-full p-0 border-r border-border bg-background"><StudioChat projectId={activeProject.id} projectFiles={projectFiles} onCodeGenerated={handleCodeGenerated} initialPrompt={pendingPrompt} onGeneratingChange={setIsGenerating} supabaseConfig={supabaseConfig} /></SheetContent>
+          <SheetContent side="left" className="w-full p-0 border-r border-border bg-background">
+            <StudioChat 
+              projectId={activeProject.id} 
+              projectFiles={projectFiles} 
+              onCodeGenerated={handleCodeGenerated} 
+              initialPrompt={pendingPrompt} 
+              onGeneratingChange={setIsGenerating} 
+              supabaseConfig={supabaseConfig} 
+              previewError={previewError}
+              artifacts={artifacts}
+              setArtifacts={setArtifacts}
+              tasks={tasks}
+              setTasks={setTasks}
+              logs={logs}
+              setLogs={setLogs}
+              onPhaseChange={(phase, specialist) => {
+                setAgentPhase(phase);
+                setActiveSpecialist(specialist);
+              }}
+              onToggleArtifacts={() => setPanelView('artifacts')}
+            />
+          </SheetContent>
+
         </Sheet>
       </div>
     </div>

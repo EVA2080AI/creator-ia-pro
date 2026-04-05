@@ -57,7 +57,7 @@ interface StudioArtifactsPanelProps {
   onFix?: () => void;
   activeTab?: 'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents';
   agentPhase?: 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
-  activeSpecialist?: 'ux' | 'frontend' | 'backend' | 'devops' | 'game' | 'none';
+  activeSpecialist?: 'ux' | 'frontend' | 'backend' | 'devops' | 'game' | 'architect' | 'engineer' | 'none';
   persona?: 'genesis' | 'antigravity';
 }
 

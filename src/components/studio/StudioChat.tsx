@@ -523,7 +523,7 @@ function renderMarkdown(text: string): string {
 
 // ─── Agent Phases ─────────────────────────────────────────────────────────────
 export type AgentPhase = 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
-export type AgentSpecialist = 'ux' | 'frontend' | 'backend' | 'devops' | 'game' | 'none';
+export type AgentSpecialist = 'ux' | 'frontend' | 'backend' | 'devops' | 'game' | 'architect' | 'engineer' | 'none';
 
 // ─── Props ─────────────────────────────────────────────────────────────────────
 interface StudioChatProps {
@@ -648,7 +648,17 @@ export function StudioChat({
 }: StudioChatProps) {
   const { user } = useAuth();
   const { preferences, loading: prefsLoading } = useAgentPreferences();
-  
+
+  const addLog = useCallback((message: string, type: UILog['type'] = 'info') => {
+    const newLog: UILog = {
+      id: crypto.randomUUID(),
+      timestamp: new Date(),
+      message,
+      type,
+    };
+    setLogs(prev => [...prev, newLog]);
+  }, [setLogs]);
+
   // Internal state fallbacks if props are not provided
   const [internalArtifacts, setInternalArtifacts] = useState<UIArtifact[]>([]);
   const [internalTasks, setInternalTasks] = useState<UIPlanTask[]>([]);
@@ -1209,8 +1219,12 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
       toast.success('Contenido web adjuntado');
       setShowUrlInput(false);
       setUrlInput('');
-    } catch (err) {
-      toast.error('Error al capturar la URL');
+      // 4. Final: Idle
+      onPhaseChange('idle', 'none');
+    } catch (err: any) {
+      addLog(`Fallo crítico: ${err.message}`, "error");
+      onPhaseChange('idle', 'none');
+      toast.error('Génesis encontró una anomalía en el flujo.');
     } finally {
       setIsScraping(false);
     }
@@ -1394,19 +1408,31 @@ Asegúrate de NO repetir las mismas soluciones que fallaron anteriormente.`;
     const shouldPlan = isArchitectMode && intent === 'codegen' && !pendingPlanPrompt;
 
     try {
-      // 1. Spend credits
-      await aiService.spendCredits(cost, intent, modelId, null);
+      // 1. Phase: Planning
+      onPhaseChange('architecting', 'architect');
+      addLog(`Iniciando ciclo de construcción [${intent === 'codegen' ? 'INGENIERÍA' : 'CHAT'}]...`);
 
-      // 2. Generate code/chat
+      // 2. Spend credits
+      await aiService.spendCredits(cost, intent, modelId, null);
+      addLog(`Créditos procesados [Modelo: ${modelId}].`);
+
+      // 3. Generate code/chat
+      addLog("Génesis está sintetizando la respuesta...");
       const result = await generateCode(text);
 
+
       if (!result) {
-        // Refund if result is empty
+        addLog("Error: El motor no devolvió ninguna señal usable.", "error");
+        onPhaseChange('idle', 'none');
         await aiService.refundCredits(cost);
         return;
       }
 
+      onPhaseChange('generating', 'engineer');
+      addLog("Respuesta recibida. Procesando Manifiesto de Archivos...");
+
       let assistantMsg: Message;
+
 
       // ── ARCHITECT MODE: Show plan card instead of generating code ──────
       if (shouldPlan && result?.isChatOnly && result.explanation) {
