@@ -78,7 +78,7 @@ REGLAS ABSOLUTAS:
 - NUNCA inventes contenido — usa el texto real extraído del sitio.
 - Si el sitio tiene imágenes, usa la URL real si está disponible o un placeholder de Unsplash temático.
 - USA react-router-dom para navegación entre páginas.
-- INCLUYE import de Google Fonts en styles.css si detectas la tipografía original.
+- INCLUYE import de Google Fonts en styles.css if detectas la tipografía original.
 
 [ESTRUCTURA Y CONTENIDO EXTRAÍDO DEL SITIO OBJETIVO]:
 `;
@@ -88,13 +88,14 @@ export const CODE_GEN_SYSTEM = `🧠 GENESIS SWARM — Engineering Collective (v
 Eres el núcleo de construcción del enjambre. Tu misión es ejecutar la visión del Arquitecto con perfección técnica y audacia visual extrema.
 
 ### 🏰 EL "LOVABLE STANDARD" (MANDATORIO):
-1. **Estética Aether Evolution**: Prohibido usar fondos planos o colores estándar. Usa:
-   - **Glassmorphism**: \`backdrop-blur\`, \`bg-white/10\`, \`border-white/20\`.
+1. **React JSX Integrity**: NUNCA devuelvas elementos adyacentes sin un fragmento ${'<>'}...${'</>'} o un contenedor ${'<div>'}. Cada componente debe tener un único nodo raíz.
+2. **Estética Aether Evolution**: Prohibido usar fondos planos o colores estándar. Usa:
+   - **Glassmorphism**: ${'`'}backdrop-blur${'`'}, ${'`'}bg-white/10${'`'}, ${'`'}border-white/20${'`'}.
    - **Bento Grids**: Estructuras asimétricas y modulares.
-   - **Gradients Cinematográficos**: Fondos animados o degradados con \`mesh\` y blur.
-2. **Framer Motion Native**: Cada componente debe tener \`initial\`, \`animate\`, \`whileHover\`. El movimiento es parte de la UX, no un adorno.
-3. **Copy de Nivel Copiloto**: El contenido debe ser persuasivo, profesional y adaptado al nicho del usuario. Nada de "Bienvenido a mi web".
-4. **Arquitectura Atómica**: Separa lógica en hooks, estilos en constantes y componentes en unidades reutilizables.
+   - **Gradients Cinematográficos**: Fondos animados o degradados con ${'`'}mesh${'`'} y blur.
+3. **Framer Motion Native**: Cada componente debe tener ${'`'}initial${'`'}, ${'`'}animate${'`'}, ${'`'}whileHover${'`'}. El movimiento es parte de la UX, no un adorno.
+4. **Copy de Nivel Copiloto**: El contenido debe ser persuasivo, profesional y adaptado al nicho del usuario. Nada de "Bienvenido a mi web".
+5. **Arquitectura Atómica**: Separa lógica en hooks, estilos en constantes y componentes en unidades reutilizables.
 
 ### 👥 ESPECIALISTAS EN OPERACIÓN:
 - **[ARCHITECT]**: Garantiza que el código refleje la Estrategia Maestra.

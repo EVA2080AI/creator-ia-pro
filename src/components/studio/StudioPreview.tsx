@@ -362,8 +362,10 @@ function SandpackErrorBridge({ onError }: { onError?: (error: string) => void })
     const sanitizedError = errorMessage.slice(0, 500);
     if (sanitizedError && sanitizedError !== lastReportedRef.current) {
       lastReportedRef.current = sanitizedError;
-      onError(sanitizedError);
+      // Always cast to string to prevent read-only property mutation issues
+      onError(String(sanitizedError));
     }
+
   }, [logs, onError]);
   return null;
 }
@@ -443,7 +445,11 @@ export function StudioPreview({
               theme="dark"
             >
               <SandpackLayout style={{ border: 'none', borderRadius: 0, height: '100%' }}>
-                <SandpackPreview showOpenInCodeSandbox={false} showRefreshButton={false} style={{ height: '100%' }} />
+                <SandpackPreview 
+                  showOpenInCodeSandbox={false} 
+                  showRefreshButton={false} 
+                  style={{ height: '100%' }} 
+                />
               </SandpackLayout>
               <SandpackErrorBridge onError={onError} />
             </SandpackProvider>
