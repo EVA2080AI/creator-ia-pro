@@ -64,7 +64,7 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
       case 'help':
         addLines([
           'Comandos disponibles:',
-          '  ls              Liata los archivos del proyecto',
+          '  ls              Lista los archivos del proyecto',
           '  cat <archivo>   Muestra el contenido de un archivo',
           '  genesis fix     Inicia el bucle de auto-corrección IA',
           '  genesis stats   Muestra estadísticas del proyecto',

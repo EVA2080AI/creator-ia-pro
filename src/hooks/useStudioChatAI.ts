@@ -106,7 +106,7 @@ export function useStudioChatAI({
     const isChatModeActive = intent === 'chat';
     const isArchitectRequest = (isArchitectMode || intent === 'fullstack') && !isChatModeActive;
     
-    setCurrentGenIntent(isArchitectRequest ? 'chat' : (isChatModeActive ? 'chat' : 'codegen'));
+    setCurrentGenIntent(isChatModeActive ? 'chat' : 'codegen');
 
     try {
       const fileKeys = Object.keys(projectFiles);

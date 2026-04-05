@@ -54,7 +54,7 @@ const NAV_SOCIAL: typeof NAV_MAIN = [];
 
 const NAV_SYSTEM = [
   { path: '/admin',          label: 'Panel Control',    icon: ShieldCheck, minTier: 'admin' },
-  { path: '/admin?tab=usuarios', label: 'Usuarios',     icon: Users2,      minTier: 'admin' },
+  { path: '/admin',          label: 'Usuarios',         icon: Users2,      minTier: 'admin', tab: 'usuarios' },
   { path: '/design-system',  label: 'Sistema de Diseño', icon: Palette,   minTier: 'admin' },
   { path: '/system-status',  label: 'Estatus',          icon: Activity,    minTier: 'admin' },
   { path: '/product-backlog', label: 'Roadmap',         icon: List,        minTier: 'free' },
@@ -83,11 +83,13 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
 
   const isActive = (path?: string) => {
     if (!path) return false;
-    return location.pathname === path ||
-    (path !== '/dashboard' && location.pathname.startsWith(path));
+    // Compare only pathnames, ignoring query strings
+    const cleanPath = path.split('?')[0];
+    return location.pathname === cleanPath ||
+      (cleanPath !== '/dashboard' && location.pathname.startsWith(cleanPath));
   };
 
-  const handleNav = (path: string, minTier = 'free', label = '') => {
+  const handleNav = (path: string, minTier = 'free', label = '', tab?: string) => {
     const isPublic = ['/pricing', '/descargar', '/product-backlog'].includes(path);
     if (!user && !isPublic) {
       navigate('/auth');
@@ -107,7 +109,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
       });
       return;
     }
-    navigate(path);
+    navigate(tab ? `${path}?tab=${tab}` : path);
   };
 
   const handleSignOut = async () => {
@@ -206,14 +208,14 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
             )}
             {NAV_SYSTEM.map((item) => (
               <NavItem 
-                key={item.path} 
+                key={`${item.path}-${item.label}`} 
                 path={item.path}
                 label={item.label}
                 icon={item.icon}
                 active={isActive(item.path)} 
                 expanded={globalExpanded || isMobile}
                 minTier={item.minTier}
-                onClick={() => handleNav(item.path, item.minTier, item.label)} 
+                onClick={() => handleNav(item.path, item.minTier, item.label, (item as any).tab)} 
               />
             ))}
           </div>

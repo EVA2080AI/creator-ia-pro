@@ -225,8 +225,8 @@ export function StudioChat(props: StudioChatProps) {
           path: 'chat/completions',
           body: {
             model: 'deepseek/deepseek-chat',
-            messages: [{ role: 'user', content: `Give a short 2-4 word project title for: "${p.slice(0, 100)}". Return ONLY the title.` }],
-            max_tokens: 1
+            messages: [{ role: 'user', content: `Give a short 2-4 word project title for: "${p.slice(0, 100)}". Return ONLY the title, no quotes.` }],
+            max_tokens: 30
           },
         }),
       });
@@ -332,7 +332,8 @@ export function StudioChat(props: StudioChatProps) {
   // ─── INITIAL PROMPT TRIGGER ──────────────────────────────────────────────
   useEffect(() => {
     if (props.initialPrompt && !initialPromptTriggered.current && messages.length > 0 && !isGenerating) {
-      if (!messages.some(m => m.id !== 'welcome')) {
+      // Only fire when chat only has the welcome message (all messages have id 'welcome')
+      if (messages.every(m => m.id === 'welcome')) {
         initialPromptTriggered.current = true;
         handleSend(props.initialPrompt);
         props.onInitialPromptUsed?.();

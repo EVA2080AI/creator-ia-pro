@@ -118,29 +118,29 @@ export function useStudioChatMessages({
     loadHistory();
   }, [loadHistory]);
 
-  // Artifact & Task Extraction
+  // Artifact & Task Extraction — use stable IDs derived from msg.id + index to avoid UUID churn
   useEffect(() => {
     const newArtifacts: UIArtifact[] = [];
     const newTasks: UIPlanTask[] = [];
 
     messages.forEach(m => {
       // Improved Mermaid Regex: Case-insensitive and handles extra spaces
-      const mermaidMatches = m.content.matchAll(/```[Mm]ermaid\s*([\s\S]*?)```/g);
-      for (const match of mermaidMatches) {
+      const mermaidMatches = [...m.content.matchAll(/```[Mm]ermaid\s*([\s\S]*?)```/g)];
+      mermaidMatches.forEach((match, idx) => {
         newArtifacts.push({
-          id: crypto.randomUUID(),
+          id: `${m.id}-mermaid-${idx}`,   // ← Stable ID based on message + index
           type: 'mermaid',
           title: 'Arquitectura Sugerida',
           content: match[1].trim()
         });
-      }
+      });
 
-      // Sitemap Fallback: If no mermaid, look for common bullet-point sitemap patterns
+      // Sitemap Fallback
       if (newArtifacts.filter(a => a.type === 'mermaid').length === 0) {
         const listSitemap = m.content.match(/\* \/(\w+)? \(.*\)/g);
         if (listSitemap && listSitemap.length > 2) {
            newArtifacts.push({
-             id: crypto.randomUUID(),
+             id: `${m.id}-sitemap`,       // ← Stable ID
              type: 'text',
              title: 'Sitemap Detectado (Lista)',
              content: listSitemap.join('\n')
@@ -150,17 +150,15 @@ export function useStudioChatMessages({
 
       // Improved Task Regex: Handle variations in symbols ([], [ ], [x], [/], [-])
       const taskMatches = Array.from(m.content.matchAll(/^\[( |x|X|\/|-)\] (.+)$/gm));
-      for (const match of taskMatches) {
+      taskMatches.forEach((match, idx) => {
         const symbol = (match[1] as string).toLowerCase();
         newTasks.push({
-          id: crypto.randomUUID(),
+          id: `${m.id}-task-${idx}`,       // ← Stable ID
           text: (match[2] as string).trim(),
           status: symbol === 'x' ? 'completed' : symbol === '/' ? 'in-progress' : 'pending'
         });
-      }
+      });
     });
-
-
 
     setArtifacts(newArtifacts);
     setTasks(newTasks);

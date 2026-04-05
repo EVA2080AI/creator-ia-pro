@@ -9,6 +9,7 @@ export function useAuth(redirectTo?: string) {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // onAuthStateChange already fires with INITIAL_SESSION — no need for getSession() separately
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setUser(session?.user ?? null);
@@ -19,22 +20,9 @@ export function useAuth(redirectTo?: string) {
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (!session?.user && redirectTo) {
-        navigate(redirectTo);
-      }
-    });
-
     // Proactive refresh every 10 minutes to prevent edge-function 401s
     const refreshInterval = setInterval(async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (!error && session) {
-        // Just calling getSession() can refresh the token if autoRefreshToken is true 
-        // We can also force refresh with refreshSession() if needed:
-        // await supabase.auth.refreshSession();
-      }
+      await supabase.auth.getSession(); // Keeps token refreshed via autoRefreshToken
     }, 10 * 60 * 1000);
 
     return () => {

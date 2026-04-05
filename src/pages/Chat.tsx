@@ -2,7 +2,7 @@
  * Genesis — AI Code Builder
  * Lovable-like IDE: describe → generate → preview → push to GitHub
  */
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import JSZip from 'jszip';
 import { useNavigate } from 'react-router-dom';
@@ -101,7 +101,8 @@ function WelcomeScreen({
   const [input, setInput] = useState('');
   const [activeTab, setActiveTab] = useState<WelcomeTab>('projects');
   const [search, setSearch] = useState('');
-  const textareaRef = useState<HTMLTextAreaElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
 
   const handleTextareaInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
     const t = e.currentTarget;
@@ -649,8 +650,50 @@ export default function Chat() {
   const handleGithubPush = async () => {
     if (!githubToken || !githubRepo || !activeProject) { toast.error('Faltan datos'); return; }
     setPushingGithub(true);
-    toast.success('Pushed to GitHub (simulado)');
-    setPushingGithub(false);
+    try {
+      const parts = githubRepo.includes('/') ? githubRepo.split('/') : ['', githubRepo];
+      const owner = parts[0];
+      const repoName = parts[1];
+      if (!owner || !repoName) { toast.error('Formato: usuario/repositorio'); return; }
+
+      // Verificar si el repo existe, crearlo si no
+      const repoCheck = await fetch(`https://api.github.com/repos/${owner}/${repoName}`, {
+        headers: { Authorization: `token ${githubToken}`, Accept: 'application/vnd.github.v3+json' },
+      });
+      if (!repoCheck.ok) {
+        const createRes = await fetch('https://api.github.com/user/repos', {
+          method: 'POST',
+          headers: { Authorization: `token ${githubToken}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
+          body: JSON.stringify({ name: repoName, description: activeProject.name, private: false, auto_init: true }),
+        });
+        if (!createRes.ok) { toast.error('No se pudo crear el repositorio'); return; }
+        await new Promise(r => setTimeout(r, 2000));
+      }
+
+      const pushFile = async ([filename, file]: [string, StudioFile]) => {
+        const content = btoa(unescape(encodeURIComponent(file.content)));
+        const shaRes = await fetch(`https://api.github.com/repos/${owner}/${repoName}/contents/${filename}`, {
+          headers: { Authorization: `token ${githubToken}`, Accept: 'application/vnd.github.v3+json' },
+        });
+        const sha = shaRes.ok ? (await shaRes.json())?.sha : undefined;
+        const pushRes = await fetch(`https://api.github.com/repos/${owner}/${repoName}/contents/${filename}`, {
+          method: 'PUT',
+          headers: { Authorization: `token ${githubToken}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
+          body: JSON.stringify({ message: `feat: update ${filename} via Genesis`, content, ...(sha ? { sha } : {}) }),
+        });
+        if (!pushRes.ok) throw new Error(filename);
+      };
+
+      const results = await Promise.allSettled(Object.entries(projectFiles).map(pushFile));
+      const pushed = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+      if (failed > 0) toast.warning(`${pushed} enviados, ${failed} fallaron — revisa el token`);
+      else toast.success(`${pushed} archivos enviados a github.com/${owner}/${repoName}`);
+    } catch {
+      toast.error('Error al enviar a GitHub');
+    } finally {
+      setPushingGithub(false);
+    }
   };
 
   const handleDeleteProject = useCallback(async (projectId: string, e: React.MouseEvent) => {
@@ -762,8 +805,10 @@ export default function Chat() {
               setLogs={setLogs}
               onPhaseChange={(phase, specialist) => {
                 setAgentPhase(phase);
-                setActiveSpecialist(specialist);
+                setActiveSpecialist(specialist ?? 'none');
               }}
+              onInitialPromptUsed={() => setPendingPrompt(null)}
+              onStreamCharsChange={(_chars, preview) => setStreamPreview(preview)}
               onToggleArtifacts={() => setPanelView('artifacts')}
             />
           </div>
@@ -870,8 +915,10 @@ export default function Chat() {
               setLogs={setLogs}
               onPhaseChange={(phase, specialist) => {
                 setAgentPhase(phase);
-                setActiveSpecialist(specialist);
+                setActiveSpecialist(specialist ?? 'none');
               }}
+              onInitialPromptUsed={() => setPendingPrompt(null)}
+              onStreamCharsChange={(_chars, preview) => setStreamPreview(preview)}
               onToggleArtifacts={() => setPanelView('artifacts')}
             />
           </SheetContent>

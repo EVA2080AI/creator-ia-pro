@@ -34,7 +34,7 @@ export function useAgentPreferences() {
     }
   }, [user]);
 
-  const updatePreference = async (agentId: AgentSpecialist, instructions: string, settings: any = {}) => {
+  const updatePreference = useCallback(async (agentId: AgentSpecialist, instructions: string, settings: any = {}) => {
     if (!user) return;
     try {
       const { error } = await (supabase as any)
@@ -55,7 +55,7 @@ export function useAgentPreferences() {
       toast.error('Error al guardar preferencias');
       console.error('[useAgentPreferences] Error updating:', err);
     }
-  };
+  }, [user, fetchPreferences]);
 
   useEffect(() => {
     fetchPreferences();
