@@ -73,7 +73,7 @@ function StudioProjectHeader({
 }: any) {
   return (
     <header 
-      className="shrink-0 h-[64px] border-b border-black/[0.04] bg-white/20 backdrop-blur-xl px-4 flex items-center justify-between z-30 sticky top-0"
+      className="shrink-0 h-[64px] border-b border-white/[0.08] bg-white/40 backdrop-blur-3xl px-4 flex items-center justify-between z-30 sticky top-0 aether-iridescent"
       role="banner"
     >
       <div className="flex items-center gap-3 overflow-hidden">
@@ -84,44 +84,60 @@ function StudioProjectHeader({
           <ChevronLeft className="h-4 w-4" />
         </button>
         <div className="flex flex-col min-w-0">
-          <h2 className="text-[10px] font-black text-zinc-900 truncate tracking-widest uppercase mb-0.5">{name}</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-[10px] font-black text-zinc-900 truncate tracking-[0.2em] uppercase">{name}</h2>
+            {isSaving && (
+              <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-md bg-zinc-100 text-[8px] font-bold text-zinc-400 animate-pulse">
+                <div className="w-1 h-1 rounded-full bg-zinc-300" />
+                SALVANDO
+              </div>
+            )}
+          </div>
           
           {/* Autonomous Heartbeat */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-0.5">
             {agentPhase !== 'idle' ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center -space-x-1">
-                   <div className={cn("w-1.5 h-1.5 rounded-full transition-all duration-500", activeSpecialist === 'architect' ? "bg-primary animate-pulse" : "bg-zinc-200")} />
-                   <div className={cn("w-1.5 h-1.5 rounded-full transition-all duration-500", activeSpecialist === 'engineer' ? "bg-blue-500 animate-pulse" : "bg-zinc-200")} />
-                   <div className={cn("w-1.5 h-1.5 rounded-full transition-all duration-500", activeSpecialist === 'designer' ? "bg-rose-500 animate-pulse" : "bg-zinc-200")} />
+                <div className="flex items-center -space-x-1.5">
+                   <div className={cn("w-1.5 h-1.5 rounded-full border border-white transition-all duration-500", activeSpecialist === 'architect' ? "bg-primary animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.4)]" : "bg-zinc-200")} />
+                   <div className={cn("w-1.5 h-1.5 rounded-full border border-white transition-all duration-500", activeSpecialist === 'engineer' ? "bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.4)]" : "bg-zinc-200")} />
+                   <div className={cn("w-1.5 h-1.5 rounded-full border border-white transition-all duration-500", activeSpecialist === 'designer' ? "bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(236,72,153,0.4)]" : "bg-zinc-200")} />
                 </div>
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary animate-pulse">
-                  Genesis {activeSpecialist.toUpperCase()} Mode
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary animate-pulse flex items-center gap-1.5">
+                  GENESIS {activeSpecialist.toUpperCase()}
+                  <span className="h-0.5 w-4 bg-primary/20 rounded-full overflow-hidden">
+                    <motion.div 
+                      animate={{ x: [-16, 16] }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                      className="h-full w-4 bg-primary"
+                    />
+                  </span>
                 </span>
               </div>
             ) : (
               <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-600/60">System Ready</span>
+                <div className="w-2 h-0.5 bg-emerald-500/30 rounded-full" />
+                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-600/50">Core Optimized</span>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         <button 
           onClick={onToggleArtifacts} 
-          className="h-10 w-10 rounded-2xl flex items-center justify-center text-zinc-400 hover:bg-black/[0.04] hover:text-primary transition-all relative group"
+          className="h-10 px-3 rounded-2xl flex items-center gap-2 text-zinc-400 hover:bg-black/[0.04] hover:text-primary transition-all relative group"
         >
           <Activity className="h-4 w-4" />
+          <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Engine</span>
           <AnimatePresence>
             {activeSpecialist !== 'none' && (
               <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 exit={{ scale: 0 }}
-                className="absolute top-2.5 right-2.5 h-2 w-2 bg-primary rounded-full ring-2 ring-white" 
+                className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full ring-2 ring-white border border-white" 
               />
             )}
           </AnimatePresence>

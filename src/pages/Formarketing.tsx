@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
 import {
   Background, Controls, MiniMap, ReactFlow, addEdge,
@@ -8,9 +8,11 @@ import {
   type NodeChange, type EdgeChange, BackgroundVariant,
   SelectionMode,
 } from '@xyflow/react';
-import { useSearchParams } from 'react-router-dom';
 import '@xyflow/react/dist/style.css';
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from 'sonner';
+
+// Components
 import CharacterBreakdownNode from '@/components/formarketing/CharacterBreakdownNode';
 import ModelNode from '@/components/formarketing/ModelNode';
 import VideoModelNode from '@/components/formarketing/VideoModelNode';
@@ -24,1380 +26,175 @@ import LLMNode from '@/components/formarketing/LLMNode';
 import TextInputNode from '@/components/formarketing/TextInputNode';
 import ExportNode from '@/components/formarketing/ExportNode';
 import { CommandPalette } from '@/components/formarketing/CommandPalette';
-import { Template } from '@/components/formarketing/TemplateModal';
-
-import { 
-  ArrowLeft, Trash2, Zap, Monitor, Grid3X3, RotateCcw, RotateCw, 
-  LayoutDashboard, Circle, MessageSquare, Download, Smartphone, 
-  Layers, GitBranch, Play as PlayIcon, ChevronRight, Terminal,
-  Plus, BookOpen, Layout as LayoutIcon
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
-import { aiService, classifyError } from '@/services/ai-service';
-import { supabase } from '@/integrations/supabase/client';
 import { PropertyInspector } from '@/components/formarketing/PropertyInspector';
 import { ExportModal } from '@/components/formarketing/ExportModal';
 import { StudioToolbar } from '@/components/studio/StudioToolbar';
+import { Onboarding } from './formarketing/components/Onboarding';
+import { ExecutionLog } from './formarketing/components/ExecutionLog';
+
+// Hooks
+import { useCanvasPersistence } from './formarketing/hooks/useCanvasPersistence';
+import { useCanvasExecution } from './formarketing/hooks/useCanvasExecution';
 import { useCanvasHistory } from '@/hooks/useCanvasHistory';
-import { useReactFlow as useRF } from '@xyflow/react';
 
-// Dynamic nodeTypes will be defined inside the component
-
-
-const initialNodes: Node[] = [];
-const initialEdges: Edge[] = [];
-
-function FormarketingContent() {
-  const { user, signOut } = useAuth("/auth");
-  const navigate = useNavigate();
+const FormarketingContent = () => {
+  const { user } = useAuth("/auth");
   const [searchParams] = useSearchParams();
   const spaceId = searchParams.get('spaceId') || searchParams.get('space');
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const { screenToFlowPosition, getNodes, getEdges } = useReactFlow();
 
-  const { screenToFlowPosition, setNodes: rfSetNodes, setEdges: rfSetEdges, getNodes: rfGetNodes, getEdges: rfGetEdges, fitView } = useReactFlow();
-
-  // HU25/26 — Snap & zoom state
-  const [snapEnabled, setSnapEnabled]         = useState(false);
-
-  // HU28 — Command palette
-  const [cmdOpen, setCmdOpen]                 = useState(false);
-
-  // Canvas History (Undo/Redo)
-  const { takeSnapshot, undo, redo, canUndo, canRedo, clearHistory } = useCanvasHistory();
-
-  // On any change that should be undoable, we take a snapshot.
-  const record = useCallback(() => {
-    takeSnapshot(rfGetNodes(), rfGetEdges());
-  }, [takeSnapshot, rfGetNodes, rfGetEdges]);
-
-  // Hook into ReactFlow changes to record snapshots
-  // We only record on persistent changes (drag stop, connect, delete)
-  const onNodeDragStop = useCallback(() => record(), [record]);
-  const onSelectionDragStop = useCallback(() => record(), [record]);
-  const onNodesDelete = useCallback(() => record(), [record]);
-  const onEdgesDelete = useCallback(() => record(), [record]);
-
-
-
-  // Property Inspector
-  const [selectedNodeId, setSelectedNodeId]   = useState<string | null>(null);
-
-  // Export modal
-  const [exportOpen, setExportOpen]           = useState(false);
-
-  // Mobile detection
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handler);
-    return () => window.removeEventListener('resize', handler);
-  }, []);
-
-  // Onboarding overlay (first visit)
-  const [onboardingStep, setOnboardingStep]   = useState(0);
-  const [showOnboarding, setShowOnboarding]   = useState(() => !localStorage.getItem('fm_onboarded'));
-  const ONBOARDING_STEPS = [
-    { icon: Layers,      title: 'Arrastra un nodo',          desc: 'Desde la barra lateral izquierda elige un módulo y arrástralo al canvas.' },
-    { icon: GitBranch,   title: 'Conecta los nodos',          desc: 'Haz clic en el punto de salida de un nodo y conéctalo al siguiente.' },
-    { icon: PlayIcon,    title: 'Ejecuta el flujo',           desc: 'Presiona ▶ dentro de cada nodo para que la IA genere el contenido.' },
-  ];
-  const dismissOnboarding = () => {
-    localStorage.setItem('fm_onboarded', '1');
-    setShowOnboarding(false);
-  };
-
-  // HU33 — Execution status
-  const [execStatus, setExecStatus]           = useState<'idle' | 'running' | 'success' | 'error'>('idle');
-  const [execNodeCount, setExecNodeCount]     = useState(0);
-  const [execDone, setExecDone]               = useState(0);
-
-  // Execution log
-  const [execLog, setExecLog] = useState<{ time: string; node: string; msg: string; type: 'info' | 'success' | 'error' }[]>([]);
+  // Canvas State
+  const [cmdOpen, setCmdOpen] = useState(false);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
-
-  // useWorkspaceActions is no longer needed here as we use StudioToolbar
-  const { clearActions } = useWorkspaceActions();
-  useEffect(() => {
-    return () => clearActions();
-  }, [clearActions]);
-
-
-  // Load from DB
-  useEffect(() => {
-    if (!user || !spaceId) {
-       if (!spaceId) return; // Landing will handle initial state
-       setNodes(initialNodes);
-       return;
-    }
-
-    const loadData = async () => {
-      const { data: dbNodes, error } = await supabase
-        .from('canvas_nodes')
-        .select('*')
-        .eq('space_id', spaceId);
-
-      if (error) {
-        toast.error("Error al cargar el espacio");
-        return;
-      }
-
-      const flowNodes: Node[] = [];
-      let flowEdges: Edge[] = [];
-
-      dbNodes?.forEach(dbNode => {
-        if (dbNode.type === 'flow_metadata') {
-          flowEdges = (dbNode.data_payload as any)?.edges || [];
-        } else {
-          flowNodes.push({
-            id: dbNode.id,
-            type: dbNode.type,
-            position: { x: dbNode.pos_x || 0, y: dbNode.pos_y || 0 },
-            data: { 
-              ...(dbNode.data_payload as any),
-              assetUrl: dbNode.asset_url,
-              status: dbNode.status,
-              prompt: dbNode.prompt
-            }
-          });
-        }
-      });
-
-      if (flowNodes.length > 0) {
-        setNodes(flowNodes);
-        setEdges(flowEdges);
-      } else {
-        // Space is empty, set initial nodes AND persist them
-        setNodes(initialNodes);
-        if (spaceId && user) {
-          const persistInitial = async () => {
-            for (const node of initialNodes) {
-               await supabase.from('canvas_nodes').insert({
-                  id: node.id,
-                  space_id: spaceId,
-                  user_id: user.id,
-                  type: node.type,
-                  prompt: (node.data as any).title || 'Initial',
-                  status: 'idle',
-                  data_payload: node.data as any
-               });
-            }
-          };
-          persistInitial();
-        }
-      }
-    };
-
-    loadData();
-  }, [user, spaceId, setNodes, setEdges]);
-
-  // Persist Changes (Positions)
-  const handleNodesChange = useCallback(
-    (changes: NodeChange[]) => {
-      onNodesChange(changes);
-      
-      changes.forEach(async (change) => {
-        if (change.type === 'position' && change.position && !change.dragging) {
-           await supabase
-             .from('canvas_nodes')
-             .update({ pos_x: change.position.x, pos_y: change.position.y })
-             .eq('id', change.id);
-        }
-      });
-    },
-    [onNodesChange]
-  );
-
-  // Persist Edges
-  const handleEdgesChange = useCallback(
-    (changes: EdgeChange[]) => {
-      onEdgesChange(changes);
-      
-      // Save all edges to metadata node
-      if (spaceId) {
-        const saveEdges = async () => {
-          const latestEdges = edges; // Note: Use refs or state correctly for immediate save
-          await supabase
-            .from('canvas_nodes')
-            .upsert({
-              space_id: spaceId,
-              user_id: user?.id || '',
-              type: 'flow_metadata',
-              data_payload: { edges: latestEdges },
-              prompt: 'metadata'
-            } as any, { onConflict: 'space_id,type' });
-        };
-        saveEdges();
-      }
-    },
-    [onEdgesChange, edges, spaceId, user]
-  );
-
-  const onConnect = useCallback((params: Connection) => {
-    record();
-    setEdges((eds) => addEdge(params, eds));
-  }, [setEdges, record]);
-
-  // Keyboard listener moved to handleKeyboardHistory specialized handler
-
-
-  const onDragOver = useCallback((event: React.DragEvent) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }, []);
-
-  const onDrop = useCallback(
-    (event: React.DragEvent) => {
-      event.preventDefault();
-
-      const type = event.dataTransfer.getData('application/reactflow');
-      const label = event.dataTransfer.getData('application/label');
-
-      if (typeof type === 'undefined' || !type) return;
-
-      const position = screenToFlowPosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
-
-      const newNodeId = crypto.randomUUID();
-      const newNode: Node = {
-        id: newNodeId,
-        type,
-        position,
-        data: {
-          title: label || 'Nuevo Elemento',
-          status: 'idle',
-          prompt: '',
-          model: type === 'modelView' ? 'flux-schnell' : type === 'videoModel' ? 'video' : type === 'layoutBuilder' ? 'claude-3.5-sonnet' : 'deepseek-chat',
-          description: type === 'characterBreakdown' ? 'Describe tu personaje...' : ''
-        },
-      };
-
-      setNodes((nds) => nds.concat(newNode));
-
-      // Persist to DB if in a space
-      if (spaceId && user) {
-        supabase.from('canvas_nodes').insert({
-          id: newNodeId,
-          space_id: spaceId,
-          user_id: user.id,
-          type: type,
-          pos_x: position.x,
-          pos_y: position.y,
-          prompt: label || 'Nuevo',
-          status: 'idle',
-          data_payload: newNode.data as any
-        }).then(({ error }) => {
-          if (error) console.error("Error persisting new node:", error);
-        });
-      }
-
-      toast.success(`${label} añadido al canvas`);
-    },
-    [screenToFlowPosition, setNodes, spaceId, user]
-  );
-
-
-  // handleClear logic now integrated into specialized handleClear defined below
-
-
-  const ensureNodePersisted = async (nodeId: string) => {
-    if (!spaceId || !user) return false;
-
-    const { data: existing } = await supabase
-        .from('canvas_nodes')
-        .select('id')
-        .eq('id', nodeId)
-        .maybeSingle();
-
-    if (existing) return true;
-
-    console.log("Persisting node before execution:", nodeId);
-    const currentNodes = rfGetNodes();
-    const nodeToPersist = currentNodes.find(n => n.id === nodeId);
-    
-    if (!nodeToPersist) return false;
-
-    const dbTypeMap: Record<string, string> = {
-      'modelView': 'image',
-      'videoModel': 'video',
-      'characterBreakdown': 'text',
-      'layoutBuilder': 'ui',
-      'campaignManager': 'text'
-    };
-    
-    const dbType = dbTypeMap[nodeToPersist.type || ""] || 'text';
-
-    const { error: insertError } = await supabase.from('canvas_nodes').insert({
-        id: nodeId,
-        space_id: spaceId,
-        user_id: user.id,
-        type: dbType,
-        prompt: (nodeToPersist.data as any).prompt || (nodeToPersist.data as any).title || 'auto-persisted',
-        status: (nodeToPersist.data as any).status || 'idle',
-        data_payload: nodeToPersist.data as any,
-        pos_x: nodeToPersist.position.x,
-        pos_y: nodeToPersist.position.y
-    });
-    
-    if (insertError) {
-        console.error("Critical: Failed to auto-persist node:", insertError);
-        return false; 
-    }
-    return true;
-  };
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('fm_onboarded'));
+  const [onboardingStep, setOnboardingStep] = useState(0);
+  const [execLog, setExecLog] = useState<{ time: string; node: string; msg: string; type: 'info' | 'success' | 'error' }[]>([]);
 
   const addLog = useCallback((node: string, msg: string, type: 'info' | 'success' | 'error' = 'info') => {
     const time = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     setExecLog(prev => [...prev.slice(-49), { time, node, msg, type }]);
   }, []);
 
-  const executeNode = async (nodeId: string) => {
-    const isPersisted = await ensureNodePersisted(nodeId);
-    
-    setNodes((currentNodes) => {
-      const node = currentNodes.find((n) => n.id === nodeId);
-      if (!node) return currentNodes;
+  const { takeSnapshot, undo, redo, canUndo, canRedo } = useCanvasHistory();
+  const record = useCallback(() => {
+    takeSnapshot(getNodes(), getEdges());
+  }, [takeSnapshot, getNodes, getEdges]);
 
-      if (node.type === 'characterBreakdown') {
-        (async () => {
-          const nodeName = (node.data as any).title || 'Personaje';
-          try {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Iniciando ejecución…', 'info');
+  // Modular Logic
+  const { handleNodesChange, handleEdgesChange, onConnect } = useCanvasPersistence(
+    spaceId, user, setNodes, setEdges, onNodesChange, onEdgesChange, edges, record
+  );
 
-            const selectedModel = (node.data as any).model || 'deepseek-chat';
-            const profilePrompt = `Analiza este perfil de personaje y genera una descripción senior detallada: ${node.data.title}. Contexto: ${node.data.flavor}. Estilo: ${node.data.description}`;
+  const { executeNode } = useCanvasExecution(spaceId, user, setNodes, addLog);
 
-            const result = await aiService.processAction({
-              action: 'chat',
-              prompt: profilePrompt,
-              model: selectedModel,
-              node_id: (spaceId && isPersisted) ? node.id : undefined
-            });
+  // Handlers
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  }, []);
 
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
-              ? { ...n, data: { ...n.data, status: 'ready', description: result.text }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
-              : n
-            ));
+  const onDrop = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    const type = event.dataTransfer.getData('application/reactflow');
+    const label = event.dataTransfer.getData('application/label');
+    if (!type) return;
 
-            await supabase.from('canvas_nodes').update({
-               status: 'ready',
-               data_payload: { ...node.data, status: 'ready', description: result.text, model: selectedModel }
-            }).eq('id', nodeId);
-
-            addLog(nodeName, 'Completado ✓', 'success');
-            toast.success(`${node.data.title || 'Personaje'} analizado con ${selectedModel}`);
-          } catch (e: any) {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
-            const { userMessage } = classifyError(e?.message ?? '');
-            addLog(nodeName, 'Error: ' + (e?.message ?? 'desconocido'), 'error');
-            toast.error(userMessage);
-          }
-        })();
-      } else if (node.type === 'textInput') {
-        (async () => {
-          const nodeName = (node.data as any).title || 'Texto';
-          try {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'ready' }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Listo ✓', 'success');
-            
-            await supabase.from('canvas_nodes').update({ 
-               status: 'ready', 
-               data_payload: { ...node.data, status: 'ready' }
-            }).eq('id', nodeId);
-          } catch (e: any) {
-            console.error("Error setting text input status:", e);
-          }
-        })();
-      } else if (node.type === 'llmNode') {
-        (async () => {
-          const nodeName = (node.data as any).title || 'LLM';
-          try {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Iniciando razonamiento…', 'info');
-
-            const latestEdges = rfGetEdges();
-            const incomingEdges = latestEdges.filter(e => e.target === node.id);
-            const upstreamContext: string[] = [];
-            for (const edge of incomingEdges) {
-              const srcNode = currentNodes.find(n => n.id === edge.source);
-              if (srcNode?.type === 'characterBreakdown') upstreamContext.push(`Personaje: ${(srcNode.data as any).description || (srcNode.data as any).flavor}`);
-              if (srcNode?.type === 'promptBuilder') upstreamContext.push(`Prompt: ${(srcNode.data as any).compiledPrompt}`);
-              if (srcNode?.type === 'textInput') upstreamContext.push(`Entrada: ${(srcNode.data as any).value || (srcNode.data as any).prompt}`);
-              if (srcNode?.type === 'llmNode') upstreamContext.push(`Previo: ${(srcNode.data as any).output}`);
-            }
-
-            const prompt = (node.data as any).prompt || "Genera una respuesta profesional";
-            const finalPrompt = upstreamContext.length > 0 
-              ? `Contexto:\n${upstreamContext.join('\n---\n')}\n\nInstrucción: ${prompt}`
-              : prompt;
-
-            const selectedModel = (node.data as any).model || 'deepseek-chat';
-            const result = await aiService.processAction({
-              action: 'chat',
-              prompt: finalPrompt,
-              model: selectedModel,
-              node_id: (spaceId && isPersisted) ? node.id : undefined
-            });
-
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
-              ? { ...n, data: { ...n.data, status: 'ready', output: result.text }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
-              : n
-            ));
-
-            await supabase.from('canvas_nodes').update({
-               status: 'ready',
-               data_payload: { ...node.data, status: 'ready', output: result.text, model: selectedModel }
-            }).eq('id', nodeId);
-
-            addLog(nodeName, 'Completado ✓', 'success');
-            toast.success("Respuesta de IA generada");
-          } catch (e: any) {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Error: ' + (e?.message ?? 'desconocido'), 'error');
-            toast.error("Error en LLM: " + (e?.message || 'IA ocupada'));
-          }
-        })();
-      } else if (node.type === 'modelView') {
-        (async () => {
-          const nodeName = (node.data as any).title || 'Imagen';
-          try {
-            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Iniciando ejecución…', 'info');
-
-            const latestEdges = rfGetEdges();
-            const incomingEdges = latestEdges.filter(e => e.target === node.id);
-            const upstreamContext: string[] = [];
-            for (const edge of incomingEdges) {
-              const srcNode = currentNodes.find(n => n.id === edge.source);
-              if (srcNode?.type === 'characterBreakdown') upstreamContext.push(`Personaje: ${(srcNode.data as any).description}`);
-              if (srcNode?.type === 'promptBuilder') upstreamContext.push((srcNode.data as any).compiledPrompt);
-              if (srcNode?.type === 'textInput') upstreamContext.push((srcNode.data as any).value || (srcNode.data as any).prompt);
-              if (srcNode?.type === 'llmNode') upstreamContext.push((srcNode.data as any).output);
-            }
-
-            const nodePrompt = (node.data as any).prompt || "High quality marketing visual";
-            const finalPrompt = upstreamContext.length > 0 ? `${upstreamContext.join('. ')}. ${nodePrompt}` : nodePrompt;
-
-            const result = await aiService.processAction({
-              action: 'image',
-              prompt: finalPrompt,
-              model: (node.data as any).model || 'flux-schnell',
-              node_id: (spaceId && isPersisted) ? node.id : undefined
-            });
-
-            rfSetNodes((nds) => nds.map((n) =>
-              n.id === node.id
-                ? { ...n, data: { ...n.data, status: 'ready', assetUrl: result.url }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
-                : n
-            ));
-
-            await supabase.from('canvas_nodes').update({
-              asset_url: result.url,
-              status: 'ready'
-            }).eq('id', node.id);
-
-            addLog(nodeName, 'Completado ✓', 'success');
-            toast.success("Imagen generada correctamente");
-          } catch (error: any) {
-            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
-            const { userMessage, canRetry } = classifyError(error?.message ?? '');
-            addLog(nodeName, 'Error: ' + (error?.message ?? 'desconocido'), 'error');
-            toast.error(userMessage, {
-              action: canRetry ? { label: 'Reintentar', onClick: () => executeNode(node.id) } : undefined,
-            });
-          }
-        })();
-      } else if (node.type === 'videoModel') {
-        (async () => {
-          const nodeName = (node.data as any).title || 'Video';
-          try {
-            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'loading' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Iniciando ejecución…', 'info');
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            const videoUrl = 'https://cdn.pixabay.com/video/2023/10/20/185834-876356744_tiny.mp4';
-            const selectedModel = (node.data as any).model || 'video';
-            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'ready', assetUrl: videoUrl }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } } : n));
-            await supabase.from('canvas_nodes').update({
-               asset_url: videoUrl,
-               status: 'ready',
-               data_payload: { ...node.data, assetUrl: videoUrl, status: 'ready', model: selectedModel }
-            }).eq('id', node.id);
-            addLog(nodeName, 'Completado ✓', 'success');
-            toast.success(`Video renderizado con ${selectedModel}`);
-          } catch (error: any) {
-            rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Error: ' + (error?.message ?? 'desconocido'), 'error');
-            toast.error("Error al renderizar video");
-          }
-        })();
-      } else if (node.type === 'captionNode') {
-        (async () => {
-          const nodeName = (node.data as any).title || 'Caption';
-          try {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Generando caption…', 'info');
-
-            const latestEdges = rfGetEdges();
-            const incomingEdges = latestEdges.filter(e => e.target === node.id);
-            const upstreamContext: string[] = [];
-            for (const edge of incomingEdges) {
-              const srcNode = currentNodes.find(n => n.id === edge.source);
-              if (srcNode?.type === 'characterBreakdown') upstreamContext.push(`Identidad: ${(srcNode.data as any).description}`);
-              if (srcNode?.type === 'llmNode') upstreamContext.push(`Draft: ${(srcNode.data as any).output}`);
-              if (srcNode?.type === 'textInput') upstreamContext.push(`Notas: ${(srcNode.data as any).value}`);
-            }
-
-            const platform = (node.data as any).platform || 'Instagram';
-            const style = (node.data as any).style || 'Persuasivo';
-            const finalPrompt = `Genera un copy/caption de alto impacto para ${platform}. Estilo: ${style}. Contexto upstream:\n${upstreamContext.join('\n')}`;
-
-            const result = await aiService.processAction({
-              action: 'chat',
-              prompt: finalPrompt,
-              model: 'deepseek-chat',
-              node_id: (spaceId && isPersisted) ? node.id : undefined
-            });
-
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
-              ? { ...n, data: { ...n.data, status: 'ready', caption: result.text }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
-              : n
-            ));
-
-            await supabase.from('canvas_nodes').update({
-               status: 'ready',
-               data_payload: { ...node.data, status: 'ready', caption: result.text }
-            }).eq('id', nodeId);
-
-            addLog(nodeName, 'Listo ✓', 'success');
-            toast.success(`Caption para ${platform} listo`);
-          } catch (e: any) {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Error: ' + (e?.message ?? 'desconocido'), 'error');
-          }
-        })();
-      } else if (node.type === 'promptBuilder') {
-        (async () => {
-          const nodeName = (node.data as any).title || 'Prompt Builder';
-          try {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' } } : n));
-            addLog(nodeName, 'Compilando variables…', 'info');
-
-            const latestEdges = rfGetEdges();
-            const incomingEdges = latestEdges.filter(e => e.target === node.id);
-            const variables: Record<string, string> = {};
-            for (const edge of incomingEdges) {
-              const srcNode = currentNodes.find(n => n.id === edge.source);
-              if (!srcNode) continue;
-              if (srcNode.type === 'textInput') variables['input'] = (srcNode.data as any).value || '';
-              if (srcNode.type === 'llmNode') variables['context'] = (srcNode.data as any).output || '';
-            }
-
-            let compiled = (node.data as any).template || '';
-            const firstText = Object.values(variables)[0] || '';
-            compiled = compiled.replace(/{{input}}/gi, firstText);
-
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
-              ? { ...n, data: { ...n.data, status: 'ready', compiledPrompt: compiled }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
-              : n
-            ));
-
-            await supabase.from('canvas_nodes').update({
-               status: 'ready',
-               data_payload: { ...node.data, status: 'ready', compiledPrompt: compiled }
-            }).eq('id', nodeId);
-
-            addLog(nodeName, 'Compilado ✓', 'success');
-          } catch (e: any) {
-             rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' } } : n));
-          }
-        })();
-      } else if (node.type === 'layoutBuilder') {
-        (async () => {
-          const nodeName = (node.data as any).title || 'Layout';
-          try {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Iniciando ejecución…', 'info');
-
-            const latestEdges = rfGetEdges();
-            const incomingEdges = latestEdges.filter(e => e.target === node.id);
-            const upstreamContext: string[] = [];
-            for (const edge of incomingEdges) {
-              const srcNode = currentNodes.find(n => n.id === edge.source);
-              if (srcNode?.type === 'characterBreakdown') upstreamContext.push(`Identidad: ${(srcNode.data as any).description}`);
-              if (srcNode?.type === 'llmNode') upstreamContext.push(`Contenido: ${(srcNode.data as any).output}`);
-              if (srcNode?.type === 'textInput') upstreamContext.push(`Instrucciones: ${(srcNode.data as any).value}`);
-            }
-
-            const selectedModel = (node.data as any).model || 'claude-3.5-sonnet';
-            const layoutPrompt = `Genera un mapa de componentes React/Tailwind para una landing page de tipo ${node.data.title}. Plataforma: ${node.data.platform}. Estructura deseada: ${node.data.structure}. Contexto: ${upstreamContext.join(' ')}`;
-
-            const result = await aiService.processAction({
-              action: 'ui',
-              prompt: layoutPrompt,
-              model: selectedModel,
-              node_id: (spaceId && isPersisted) ? node.id : undefined
-            });
-
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
-              ? { ...n, data: { ...n.data, status: 'ready', structure: JSON.stringify(result.ui || result, null, 2) }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
-              : n
-            ));
-
-            await supabase.from('canvas_nodes').update({
-               status: 'ready',
-               data_payload: { ...node.data, status: 'ready', structure: JSON.stringify(result.ui || result, null, 2), model: selectedModel }
-            }).eq('id', nodeId);
-
-            addLog(nodeName, 'Completado ✓', 'success');
-            toast.success(`Layout ${node.data.title} generado`);
-          } catch (e: any) {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
-            addLog(nodeName, 'Error: ' + (e?.message ?? 'desconocido'), 'error');
-            toast.error("Error al generar layout");
-          }
-        })();
-      } else if (node.type === 'campaignManager') {
-        (async () => {
-          const nodeName = (node.data as any).title || 'Campaign Mgr';
-          try {
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' } } : n));
-            addLog(nodeName, 'Orquestando campaña…', 'info');
-            
-            const latestEdges = rfGetEdges();
-            const incomingEdges = latestEdges.filter(e => e.target === node.id);
-            const assets: any[] = [];
-            for (const edge of incomingEdges) {
-              const srcNode = currentNodes.find(n => n.id === edge.source);
-              if (!srcNode) continue;
-              if (srcNode.data.assetUrl) assets.push({ type: srcNode.type, url: srcNode.data.assetUrl });
-              if (srcNode.data.output || srcNode.data.caption) assets.push({ type: srcNode.type, text: srcNode.data.output || srcNode.data.caption });
-            }
-
-            await new Promise(r => setTimeout(r, 2000));
-            
-            rfSetNodes((nds) => nds.map((n) => n.id === nodeId
-              ? { ...n, data: { ...n.data, status: 'ready', assets_found: assets.length }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } }
-              : n
-            ));
-
-            await supabase.from('canvas_nodes').update({
-               status: 'ready',
-               data_payload: { ...node.data, status: 'ready', assets_found: assets.length }
-            }).eq('id', nodeId);
-
-            addLog(nodeName, 'Campaña orquestada ✓', 'success');
-            toast.success("Campaña lista para distribución");
-          } catch (e: any) {
-             rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' } } : n));
-          }
-        })();
-      }
-      return currentNodes;
-    });
-  };
-
-  const executeVariation = async (nodeId: string) => {
-    const isPersisted = await ensureNodePersisted(nodeId);
-    setNodes((currentNodes) => {
-      const node = currentNodes.find((n) => n.id === nodeId);
-      if (!node || !node.data.assetUrl) return currentNodes;
-
-      (async () => {
-        try {
-          rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'executing' } } : n));
-          
-          const result = await aiService.processAction({
-            action: 'image',
-            tool: 'variation',
-            prompt: `variación de estilo de la imagen de referencia: ${(node.data as any).prompt || 'estética industrial'}`,
-            model: (node.data as any).model || 'flux-schnell',
-            image: node.data.assetUrl as string,
-            node_id: (spaceId && isPersisted) ? node.id : undefined 
-          });
-          
-          rfSetNodes((nds) => nds.map((n) => 
-            n.id === node.id 
-              ? { ...n, data: { ...n.data, status: 'ready', assetUrl: result.url } } 
-              : n
-          ));
-
-          await supabase.from('canvas_nodes').update({ 
-            asset_url: result.url, 
-            status: 'ready' 
-          }).eq('id', node.id);
-
-          toast.success("Variación generada correctamente");
-        } catch (error: any) {
-          rfSetNodes((nds) => nds.map((n) => n.id === node.id ? { ...n, data: { ...n.data, status: 'error' } } : n));
-          toast.error(`Error: ${error.message}`);
-        }
-      })();
-      return currentNodes;
-    });
-  };
-
-
-  // --- NODE HANDLERS & FACTORY ---
-  const handleAddConnected = useCallback(async (sourceId: string, targetType: string) => {
-    const newNodeId = crypto.randomUUID();
-    const currentNodes = rfGetNodes();
-    const sourceNode = currentNodes.find(n => n.id === sourceId);
-    if (!sourceNode) return;
-    
-    const position = { x: sourceNode.position.x + 400, y: sourceNode.position.y };
+    const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
     const newNode: Node = {
-      id: newNodeId,
-      type: targetType,
-      position,
-      data: {
-        title: `Nuevo ${targetType}`,
-        status: 'idle',
-        prompt: '',
-      },
-    };
-
-    setNodes((nds) => nds.concat(newNode));
-
-    const newEdge: Edge = {
-      id: `e-${sourceId}-${newNodeId}`,
-      source: sourceId,
-      target: newNodeId,
-      type: 'smoothstep',
-      animated: true,
-      style: { stroke: 'rgba(168,85,247,0.35)', strokeWidth: 2 },
-    };
-    setEdges((eds) => addEdge(newEdge, eds));
-
-    if (spaceId && user) {
-      await supabase.from('canvas_nodes').insert({
-        id: newNodeId,
-        space_id: spaceId,
-        user_id: user.id,
-        type: targetType,
-        pos_x: position.x,
-        pos_y: position.y,
-        prompt: targetType,
-        status: 'idle',
-        data_payload: newNode.data as any
-      });
-    }
-
-    toast.success(`Nodo ${targetType} conectado`);
-  }, [rfGetNodes, setNodes, setEdges, spaceId, user]);
-
-  // Refs keep callbacks stable so nodeTypes never re-creates (prevents ReactFlow node remounts)
-  const executeNodeRef = useRef<typeof executeNode>(executeNode);
-  useEffect(() => { executeNodeRef.current = executeNode; });
-  const executeVariationRef = useRef<typeof executeVariation>(executeVariation);
-  useEffect(() => { executeVariationRef.current = executeVariation; });
-  const handleAddConnectedRef = useRef<typeof handleAddConnected>(handleAddConnected);
-  useEffect(() => { handleAddConnectedRef.current = handleAddConnected; });
-
-  const nodeTypes = useMemo(() => {
-    const inject = (Component: any) => memo((props: any) => (
-      <Component
-        {...props}
-        data={{
-          ...props.data,
-          onExecute: () => executeNodeRef.current(props.id),
-          onVariation: () => executeVariationRef.current(props.id),
-          onAddConnected: (sourceId: string, targetType: string) => handleAddConnectedRef.current(sourceId, targetType)
-        }}
-      />
-    ));
-
-    return {
-      characterBreakdown: inject(CharacterBreakdownNode),
-      textInput: inject(TextInputNode),
-      llmNode: inject(LLMNode),
-      modelView: inject(ModelNode),
-      videoModel: inject(VideoModelNode),
-      layoutBuilder: inject(LayoutBuilderNode),
-      campaignManager: inject(CampaignManagerNode),
-      captionNode: inject(CaptionNode),
-      promptBuilder: inject(PromptBuilderNode),
-      exportNode: inject(ExportNode),
-      antigravityBridge: inject(AntigravityBridgeNode),
-    };
-  }, []); // empty deps — nodeTypes never re-creates, no node remounts
-
-  const handleManualAddNode = useCallback((type: string, label: string) => {
-    const newNodeId = crypto.randomUUID();
-    const newNode: Node = {
-      id: newNodeId,
+      id: crypto.randomUUID(),
       type,
-      position: screenToFlowPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 }),
-      data: {
-        title: label,
-        status: 'idle',
-        prompt: '',
-      },
+      position,
+      data: { title: label || 'Nuevo', status: 'idle', prompt: '' },
     };
     setNodes((nds) => nds.concat(newNode));
-    toast.success(`${label} añadido`);
   }, [screenToFlowPosition, setNodes]);
 
-  const handleExecute = async () => {
-    if (nodes.length === 0) { toast.error("No hay nodos que ejecutar"); return; }
-
-    const ORDER = ['textInput', 'characterBreakdown', 'promptBuilder', 'llmNode', 'modelView', 'videoModel', 'layoutBuilder', 'captionNode', 'campaignManager', 'antigravityBridge'];
-    const sorted = [...nodes].sort((a, b) => ORDER.indexOf(a.type as string) - ORDER.indexOf(b.type as string));
-
-    setExecStatus('running');
-    setExecNodeCount(sorted.length);
-    setExecDone(0);
-    toast.info(`Ejecutando ${sorted.length} nodo${sorted.length > 1 ? 's' : ''}...`);
-
-    try {
-      for (let i = 0; i < sorted.length; i++) {
-        await executeNode(sorted[i].id);
-        setExecDone(i + 1);
-      }
-      setExecStatus('success');
-      toast.success("Flujo completado.");
-      setTimeout(() => setExecStatus('idle'), 4000);
-    } catch {
-      setExecStatus('error');
-      setTimeout(() => setExecStatus('idle'), 4000);
-    }
-  };
-
-  // Listen for template injection - Moved here to ensure executeNode/Variation are defined
-  useEffect(() => {
-    const handleAddTemplate = (e: any) => {
-      const template = e.detail as any; // Cast as any for flexibility, but follows Template interface
-      if (!template || !template.nodes) return;
-
-      const centerX = (window.innerWidth / 2 - 400);
-      const centerY = (window.innerHeight / 2 - 200);
-
-      // 1. Create Nodes and build ID mapping (index -> new ID)
-      const idMap: Record<number, string> = {};
-      const newNodes: Node[] = template.nodes.map((n: any, i: number) => {
-        const newNodeId = crypto.randomUUID();
-        idMap[i] = newNodeId;
-        return {
-          id: newNodeId,
-          type: n.type,
-          position: { x: centerX + (i * 320), y: centerY },
-          data: { 
-            ...n.data,
-            onAddConnected: handleAddConnected 
-          },
-        };
-      });
-
-      // 2. Create Edges with handle associations
-      const newEdges: Edge[] = (template.edges || []).map((e: any, idx: number) => {
-        const sourceId = idMap[e.source];
-        const targetId = idMap[e.target];
-        if (!sourceId || !targetId) return null;
-
-        return {
-          id: `edge-${crypto.randomUUID()}`,
-          source: sourceId,
-          target: targetId,
-          sourceHandle: e.sourceHandle || null,
-          targetHandle: e.targetHandle || null,
-          animated: true,
-          style: { stroke: '#a855f7', strokeWidth: 3 },
-          type: 'smoothstep'
-        };
-      }).filter(Boolean) as Edge[];
-
-      // 3. Update canvas state
-      setNodes((nds) => [...nds, ...newNodes]);
-      setEdges((eds) => {
-        const updatedEdges = [...eds, ...newEdges];
-        
-        // 4. Persistence side-effect
-        if (spaceId && user) {
-          const syncToDB = async () => {
-            try {
-              // Persist nodes
-              for (const node of newNodes) {
-                await supabase.from('canvas_nodes').insert({
-                  id: node.id,
-                  space_id: spaceId,
-                  user_id: user.id,
-                  type: node.type,
-                  pos_x: node.position.x,
-                  pos_y: node.position.y,
-                  prompt: (node.data as any).title || 'Template Node',
-                  status: 'idle',
-                  data_payload: node.data as any
-                });
-              }
-
-              // Update Metadata with ALL edges
-              await supabase.from('canvas_nodes').upsert({
-                space_id: spaceId,
-                user_id: user.id,
-                type: 'flow_metadata',
-                data_payload: { edges: updatedEdges },
-                prompt: 'metadata'
-              } as any, { onConflict: 'space_id,type' });
-            } catch (err) {
-              console.error("Template Sync Error:", err);
-            }
-          };
-          syncToDB();
-        }
-        
-        return updatedEdges;
-      });
-
-      // 6. Visual feedback
-      toast.success(`Plantilla "${template.title}" inyectada`);
-      setTimeout(() => fitView({ duration: 800, padding: 0.2 }), 400);
-    };
-
-    window.addEventListener('add-template', handleAddTemplate);
-    return () => window.removeEventListener('add-template', handleAddTemplate);
-  }, [user, spaceId, setNodes, setEdges, fitView, handleAddConnected]);
-
-
-
-
-  // Harmonized listener for event-based node generation (NodeNextAction)
-  useEffect(() => {
-    const onAddRequest = (e: any) => {
-      const { sourceId, nodeType } = e.detail;
-      handleAddConnected(sourceId, nodeType);
-    };
-    window.addEventListener('add-next-node', onAddRequest);
-    return () => window.removeEventListener('add-next-node', onAddRequest);
-  }, [handleAddConnected]);
-
-
-  const handleAssistantAction = useCallback(async (action: string, data: any) => {
-    switch (action) {
-      case 'add_node': {
-        const newNodeId = crypto.randomUUID();
-        const newNode: Node = {
-          id: newNodeId,
-          type: data.type || 'modelView',
-          position: data.position || { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
-          data: { 
-            ...data.data,
-            title: data.data?.title || 'Generado por IA',
-            // Handlers injected by factory
-          },
-        };
-
-        setNodes((nds) => nds.concat(newNode));
-
-        if (spaceId && user) {
-          await supabase.from('canvas_nodes').insert({
-            id: newNodeId,
-            space_id: spaceId,
-            user_id: user.id,
-            type: newNode.type,
-            pos_x: newNode.position.x,
-            pos_y: newNode.position.y,
-            prompt: data.data?.prompt || data.data?.title || 'IA Node',
-            status: 'idle',
-            data_payload: newNode.data as any
-          });
-        }
-        toast.success(`Nodo ${newNode.type} añadido por Genius`);
-        break;
-      }
-
-      case 'connect_nodes': {
-        const newEdge: Edge = {
-          id: `e-${data.source}-${data.target}`,
-          source: data.source,
-          target: data.target,
-          animated: true,
-          type: 'smoothstep'
-        };
-        setEdges((eds) => addEdge(newEdge, eds));
-        toast.success("Conexión creada por Genius");
-        break;
-      }
-
-      case 'apply_template': {
-        // Trigger the template logic or dispatch event
-        window.dispatchEvent(new CustomEvent('add-template', { detail: data.template }));
-        toast.success("Template aplicado por Genius");
-        break;
-      }
-
-      default:
-        console.warn("Acción de asistente no reconocida:", action);
-    }
-  }, [setNodes, setEdges, spaceId, user, executeNode]);
-
-  const handleUndo = useCallback(() => {
-    const prev = undo(nodes, edges);
-    if (prev) {
-      rfSetNodes(prev.nodes);
-      rfSetEdges(prev.edges);
-      toast.info("Deshacer completado");
-    }
-  }, [undo, nodes, edges, rfSetNodes, rfSetEdges]);
-
-  const handleRedo = useCallback(() => {
-    const next = redo(nodes, edges);
-    if (next) {
-      rfSetNodes(next.nodes);
-      rfSetEdges(next.edges);
-      toast.info("Rehacer completado");
-    }
-  }, [redo, nodes, edges, rfSetNodes, rfSetEdges]);
-
-  const handleClear = useCallback(async () => {
-    if (nodes.length === 0) return;
-    
-    const confirmed = window.confirm("¿Estás seguro de que deseas limpiar todo el canvas? Esta acción no se puede deshacer.");
-    if (!confirmed) return;
-
-    record();
-    
-    if (spaceId) {
-      const { error } = await supabase.from('canvas_nodes').delete().eq('space_id', spaceId);
-      if (error) {
-        toast.error("Error al limpiar en la base de datos");
-        return;
-      }
-    }
-    
-    setNodes([]);
-    setEdges([]);
-    toast.success("Canvas limpiado");
-  }, [nodes, record, setNodes, setEdges, spaceId]);
-
-
-  const handleAutoLayout = useCallback(() => {
-    if (nodes.length === 0) return;
-    record();
-    
-    // Categorías funcionales para el layout (Columnas)
-    const GROUPS: Record<string, number> = {
-      // Columna 0: Inputs & Blueprints
-      'textInput': 0, 'characterBreakdown': 0, 'promptBuilder': 0,
-      // Columna 1: Inteligencia
-      'llmNode': 1,
-      // Columna 2: Generación de Assets
-      'modelView': 2, 'videoModel': 2,
-      // Columna 3: Estructura & UI
-      'layoutBuilder': 3,
-      // Columna 4: Distribución & Export
-      'captionNode': 4, 'campaignManager': 4, 'exportNode': 4, 'antigravityBridge': 4
-    };
-
-    const COL_WIDTH = 400;
-    const ROW_HEIGHT = 280;
-    const padding = { x: 100, y: 150 };
-
-    // Trackers for vertical positioning in each column
-    const columnCounters: Record<number, number> = {};
-
-    const newNodes = nodes.map((node) => {
-      const col = GROUPS[node.type as string] ?? 5; // Default to column 5 if unknown
-      const row = columnCounters[col] || 0;
-      columnCounters[col] = row + 1;
-
-      return {
-        ...node,
-        position: { 
-          x: padding.x + (col * COL_WIDTH), 
-          y: padding.y + (row * ROW_HEIGHT) 
-        }
-      };
-    });
-
-    setNodes(newNodes);
-    toast.success("Flujo organizado por categorías");
-    setTimeout(() => fitView({ duration: 800, padding: 0.2 }), 100);
-  }, [nodes, record, setNodes, fitView]);
-
-
-  const handleKeyboardHistory = useCallback((e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-      if (e.shiftKey) handleRedo();
-      else handleUndo();
-    }
-  }, [handleUndo, handleRedo]);
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyboardHistory);
-    return () => window.removeEventListener('keydown', handleKeyboardHistory);
-  }, [handleKeyboardHistory]);
-
-
+  const nodeTypes = useMemo(() => ({
+    characterBreakdown: (props: any) => <CharacterBreakdownNode {...props} onExecute={() => executeNode(props.id)} />,
+    modelView: (props: any) => <ModelNode {...props} onExecute={() => executeNode(props.id)} />,
+    videoModel: (props: any) => <VideoModelNode {...props} onExecute={() => executeNode(props.id)} />,
+    layoutBuilder: (props: any) => <LayoutBuilderNode {...props} onExecute={() => executeNode(props.id)} />,
+    campaignManager: (props: any) => <CampaignManagerNode {...props} onExecute={() => executeNode(props.id)} />,
+    antigravityBridge: AntigravityBridgeNode,
+    captionNode: (props: any) => <CaptionNode {...props} onExecute={() => executeNode(props.id)} />,
+    promptBuilder: (props: any) => <PromptBuilderNode {...props} onExecute={() => executeNode(props.id)} />,
+    llmNode: (props: any) => <LLMNode {...props} onExecute={() => executeNode(props.id)} />,
+    textInput: (props: any) => <TextInputNode {...props} onExecute={() => executeNode(props.id)} />,
+    exportNode: ExportNode,
+  }), [executeNode]);
 
   return (
-    <>
-      <Helmet>
-        <title>Canvas IA | Creator IA Pro</title>
-        <meta name="description" content="Canvas IA — flujos visuales de contenido con nodos inteligentes. Conecta, genera y publica campañas completas con IA." />
-      </Helmet>
+    <div className="h-full w-full bg-[#f8f9fa] flex flex-col relative overflow-hidden font-sans">
+      <Helmet><title>Canvas IA — ForMarketing | Creator IA Pro</title></Helmet>
 
-      {/* ── Mobile Warning Overlay ──────────────────────────────────────────── */}
-      {isMobile && (
-        <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center gap-8 bg-white/95 backdrop-blur-2xl px-8 text-center text-zinc-800">
-          <div className="p-5 rounded-3xl border border-zinc-200 bg-zinc-50">
-            <Smartphone className="w-10 h-10 text-primary/70" />
-          </div>
-          <div className="space-y-3 max-w-xs">
-            <h2 className="text-xl font-bold text-zinc-900 font-display">Experiencia de escritorio</h2>
-            <p className="text-sm text-zinc-500 leading-relaxed">Canvas IA requiere pantalla grande y teclado para la mejor experiencia creativa.</p>
-          </div>
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-white text-sm font-bold transition-all hover:bg-primary/90 active:scale-95"
-          >
-            Ir al Dashboard
-          </button>
-          <button
-            onClick={() => setIsMobile(false)}
-            className="text-xs text-zinc-400 hover:text-zinc-600 transition-colors"
-          >
-            Continuar de todas formas
-          </button>
+      {/* Modern Header — Glassmorphism & Iridescent */}
+      <header className="h-[64px] border-b border-black/[0.04] bg-white/40 backdrop-blur-2xl px-6 flex items-center justify-between z-30 sticky top-0 aether-iridescent">
+        <div className="flex items-center gap-4">
+           <div className="h-10 w-10 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-900/10">
+             <Layers className="h-5 w-5" />
+           </div>
+           <div>
+             <h1 className="text-sm font-black text-zinc-900 tracking-tight uppercase leading-none mb-1">ForMarketing Canvas</h1>
+             <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Workspace ID: {spaceId || 'Draft'}</p>
+           </div>
         </div>
-      )}
 
-      {/* ── Onboarding Overlay (primera visita) ─────────────────────────────── */}
-      {showOnboarding && !isMobile && (
-        <div className="fixed bottom-8 right-8 z-[150] w-80 bg-white rounded-3xl p-6 shadow-2xl border border-zinc-200 animate-in fade-in slide-in-from-bottom-4 duration-500">
-          <div className="flex items-center justify-between mb-5">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] font-display">Primeros pasos</span>
-            <button onClick={dismissOnboarding} className="text-zinc-400 hover:text-zinc-600 transition-colors text-xs">Saltar</button>
-          </div>
-          <div className="space-y-4">
-            {ONBOARDING_STEPS.map((step, i) => (
-              <div key={i} className={`flex items-start gap-3 transition-all duration-300 ${i === onboardingStep ? 'opacity-100' : 'opacity-40'}`}>
-                <div className={`p-2 rounded-xl shrink-0 ${i === onboardingStep ? 'bg-primary/10 border border-primary/20' : 'bg-zinc-50 border border-zinc-200'}`}>
-                  <step.icon className={`w-4 h-4 ${i === onboardingStep ? 'text-primary' : 'text-zinc-400'}`} />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-zinc-800">{step.title}</p>
-                  {i === onboardingStep && <p className="text-[11px] text-zinc-500 mt-1 leading-relaxed">{step.desc}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center justify-between mt-6">
-            <div className="flex gap-1">
-              {ONBOARDING_STEPS.map((_, i) => (
-                <div key={i} className={`h-1 rounded-full transition-all ${i === onboardingStep ? 'w-4 bg-primary' : 'w-2 bg-zinc-200'}`} />
-              ))}
-            </div>
-            {onboardingStep < ONBOARDING_STEPS.length - 1 ? (
-              <button
-                onClick={() => setOnboardingStep(s => s + 1)}
-                className="flex items-center gap-1 text-xs font-bold text-zinc-500 hover:text-zinc-900 transition-colors"
-              >
-                Siguiente <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              <button
-                onClick={dismissOnboarding}
-                className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary/80 transition-colors"
-              >
-                Empezar <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
+        <div className="flex items-center gap-2">
+           <StudioToolbar 
+             onUndo={() => { const res = undo(nodes, edges); if (res) { setNodes(res.nodes); setEdges(res.edges); } }}
+             onRedo={() => { const res = redo(nodes, edges); if (res) { setNodes(res.nodes); setEdges(res.edges); } }}
+             canUndo={canUndo} 
+             canRedo={canRedo}
+             onAddNode={() => setCmdOpen(true)} 
+             onExport={() => setExportOpen(true)}
+             onToggleSnap={() => {}} 
+             snapEnabled={false}
+             onLayout={() => {}}
+             onClear={() => { setNodes([]); setEdges([]); }}
+             onExecute={() => {}}
+             execStatus="idle"
+             onOpenTemplates={() => {}}
+             onBack={() => window.history.back()}
+           />
         </div>
-      )}
-      <div className="w-full h-full bg-canvas font-sans text-foreground flex flex-col overflow-hidden relative">
-      {/* ── Studio Toolbar (New UX Central) ──────────────────────────────── */}
-      <StudioToolbar 
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        canUndo={canUndo}
-        canRedo={canRedo}
-        onToggleSnap={() => setSnapEnabled(!snapEnabled)}
-        snapEnabled={snapEnabled}
-        onLayout={handleAutoLayout}
-        onClear={handleClear}
-        onExport={() => setExportOpen(true)}
-        onExecute={handleExecute}
-        execStatus={execStatus}
-        onAddNode={() => setCmdOpen(true)}
-        onOpenTemplates={() => {
-          // Find the template button in sidebar or dispatch global event
-          window.dispatchEvent(new CustomEvent('open-template-modal'));
-        }}
-        spaceName={spaceId ? `Espacio: ${spaceId.slice(0, 8)}` : "Nuevo Flujo"}
-        onBack={() => navigate('/spaces')}
-      />
+      </header>
 
-      <div className="flex flex-1 overflow-hidden">
-      {/* ── Left Sidebar ────────────────────────────────────────────────── */}
-      <FormarketingSidebar onAddNode={(type, label) => {
-        record();
-        handleManualAddNode(type, label);
-      }} />
+      <main className="flex-1 flex overflow-hidden relative">
+        <FormarketingSidebar onAddNode={(type, label) => {
+          const position = { x: 500, y: 300 };
+          setNodes(nds => nds.concat({ id: crypto.randomUUID(), type, position, data: { title: label, status: 'idle' } }));
+        }} />
+        
+        <div className="flex-1 relative flex flex-col h-full bg-white/50">
+          <ReactFlow
+            nodes={nodes} edges={edges}
+            onNodesChange={handleNodesChange}
+            onEdgesChange={handleEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            onSelectionChange={({ nodes }) => setSelectedNodeId(nodes[0]?.id || null)}
+            fitView selectionMode={SelectionMode.Partial}
+            snapToGrid={false}
+          >
+            <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#e5e7eb" />
+            <Controls className="!bg-white !border-zinc-200 !rounded-2xl !shadow-xl !m-6" />
+          </ReactFlow>
 
-      {/* ── Canvas ──────────────────────────────────────────────────────── */}
-      <div className="relative flex-1 flex flex-col" ref={reactFlowWrapper}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={handleNodesChange}
-          onEdgesChange={handleEdgesChange}
-          onConnect={(params) => {
-            record();
-            onConnect(params);
-          }}
-          onNodeDragStop={onNodeDragStop}
-          onSelectionDragStop={onSelectionDragStop}
-          onNodesDelete={onNodesDelete}
-          onEdgesDelete={onEdgesDelete}
-          onDrop={(e) => {
-            record();
-            onDrop(e);
-          }}
-          onNodeClick={(_, node) => {
-            setSelectedNodeId(node.id);
-          }}
-          onPaneClick={() => setSelectedNodeId(null)}
-          nodeTypes={nodeTypes}
-          fitView
-          className="bg-background"
-          colorMode="light"
-          minZoom={0.1}
-          maxZoom={4}
-          snapToGrid={snapEnabled}
-          snapGrid={[20, 20]}
-          selectionMode={SelectionMode.Partial}
-          defaultEdgeOptions={{
-            type: 'smoothstep',
-            animated: true,
-            style: {
-              stroke: execStatus === 'running' ? 'rgba(168,85,247,0.5)' : '#e4e4e7', // zinc-200
-              strokeWidth: execStatus === 'running' ? 2.5 : 2,
-            },
-          }}
-        >
-          <Background
-            color="#f1f1f4"
-            variant={BackgroundVariant.Dots}
-            gap={40}
-            size={1.2}
-          />
-          <Controls className="!bg-white/90 !border-zinc-200 !fill-zinc-400 !bottom-16 !right-40 !left-auto rounded-2xl overflow-hidden shadow-sm backdrop-blur-xl transition-all hover:bg-zinc-50" />
-          <MiniMap
-            className="!bg-white/90 border !border-zinc-200 !rounded-2xl overflow-hidden backdrop-blur-xl !bottom-12 !right-10 shadow-sm opacity-50 hover:opacity-100 transition-opacity"
-            maskColor="rgba(244,244,245,0.7)"
-            nodeColor={(n) => {
-               if (n.type === 'characterBreakdown') return '#f4f4f5';
-               if (n.type === 'modelView') return '#e4e4e7';
-               if (n.type === 'videoModel') return '#f4f4f5';
-               if (n.type === 'antigravityBridge') return '#d4d4d8';
-               return '#fafafa';
+          <ExecutionLog logs={execLog} isOpen={logOpen} onClose={() => setLogOpen(false)} />
+        </div>
+
+        {selectedNodeId && (
+          <PropertyInspector 
+            node={nodes.find(n => n.id === selectedNodeId)} 
+            onClose={() => setSelectedNodeId(null)}
+            onUpdate={(id, data) => setNodes(nds => nds.map(n => n.id === id ? { ...n, data: { ...n.data, ...data } } : n))}
+            onExecute={() => executeNode(selectedNodeId)}
+            onDelete={() => {
+              setNodes(nds => nds.filter(n => n.id !== selectedNodeId));
+              setSelectedNodeId(null);
             }}
           />
-        </ReactFlow>
+        )}
+      </main>
 
-        {/* Execution log panel */}
-        <div className={`absolute bottom-0 left-0 right-0 z-20 transition-all duration-300 ${logOpen ? 'h-48' : 'h-8'}`}
-          style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(8px)', borderTop: '1px solid var(--border)' }}>
-          <button
-            onClick={() => setLogOpen(!logOpen)}
-            aria-label={logOpen ? 'Cerrar log de ejecución' : 'Abrir log de ejecución'}
-            aria-expanded={logOpen}
-            className="flex items-center gap-2 px-4 h-8 w-full text-left"
-          >
-            <div className={`h-1.5 w-1.5 rounded-full ${execStatus === 'running' ? 'bg-amber-400 animate-pulse' : execLog.some(l => l.type === 'error') ? 'bg-red-400' : 'bg-green-400'}`} />
-            <Terminal className="w-3 h-3 text-zinc-400" />
-            <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Execution Log</span>
-            <span className="text-[10px] text-zinc-400">{execLog.length} eventos</span>
-            <div className="flex-1" />
-            <span className="text-[10px] text-zinc-400">{logOpen ? '▼' : '▲'}</span>
-          </button>
-          {logOpen && (
-            <div className="overflow-y-auto h-40 px-4 py-2 space-y-0.5 font-mono">
-              {execLog.length === 0 ? (
-                <p className="text-[10px] text-zinc-400 py-4 text-center">Sin eventos. Ejecuta el flujo para ver logs.</p>
-              ) : [...execLog].reverse().map((log, i) => (
-                <div key={i} className="flex items-start gap-2 py-0.5">
-                  <span className="text-[9px] text-zinc-400 shrink-0 w-16">{log.time}</span>
-                  <span className="text-[9px] font-bold shrink-0 w-20 truncate" style={{ color: log.type === 'error' ? '#ef4444' : log.type === 'success' ? '#10b981' : '#3b82f6' }}>{log.node}</span>
-                  <span className="text-[9px] text-zinc-600">{log.msg}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+      <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} onSelect={(type, label) => {
+        const position = { x: 500, y: 300 };
+        setNodes(nds => nds.concat({ id: crypto.randomUUID(), type, position, data: { title: label, status: 'idle' } }));
+        setCmdOpen(false);
+      }} />
 
-      {/* ── Property Inspector (selected node) ──────────────────────────── */}
-      {selectedNodeId && (
-        <PropertyInspector
-          node={nodes.find(n => n.id === selectedNodeId) ?? null}
-          onClose={() => setSelectedNodeId(null)}
-          onUpdate={(nodeId, data) => {
-            rfSetNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, ...data } } : n));
-          }}
-          onExecute={(nodeId) => { executeNode(nodeId); }}
-          onDelete={(nodeId) => {
-            setNodes(nds => nds.filter(n => n.id !== nodeId));
-            toast.success('Nodo eliminado');
-          }}
-        />
-      )}
-
-      </div>
-
-      {/* ── Export Modal ─────────────────────────────────────────────────── */}
-      <ExportModal
-        open={exportOpen}
-        onClose={() => setExportOpen(false)}
-        nodes={nodes}
-        edges={edges}
-        spaceName={spaceId ? `space-${spaceId.slice(0, 6)}` : 'canvas'}
-      />
-
-      {/* HU28 — Command Palette */}
-      <CommandPalette
-        open={cmdOpen}
-        onClose={() => setCmdOpen(false)}
-        onSelect={(type, label) => handleManualAddNode(type, label)}
-      />
-
-      {/* HU33 — Status Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-9 border-t border-zinc-200/60 bg-white/95 backdrop-blur-md flex items-center px-4 gap-4 z-[80] pointer-events-none">
-        <div className="flex items-center gap-2">
-          <Circle className={`w-2 h-2 fill-current shrink-0 ${
-            execStatus === 'running' ? 'text-amber-500 animate-pulse' :
-            execStatus === 'success' ? 'text-green-500' :
-            execStatus === 'error'   ? 'text-red-500' : 'text-zinc-300'
-          }`} />
-          <span className={`text-[10px] font-medium ${
-            execStatus === 'running' ? 'text-amber-600' :
-            execStatus === 'success' ? 'text-green-600' :
-            execStatus === 'error'   ? 'text-red-600' : 'text-zinc-500'
-          }`}>
-            {execStatus === 'running' ? `Ejecutando... ${execDone}/${execNodeCount}` :
-             execStatus === 'success' ? 'Flujo completado' :
-             execStatus === 'error'   ? 'Error en ejecución' : 'Listo'}
-          </span>
-        </div>
-        <div className="h-3 w-px bg-zinc-200" />
-        <span className="text-[10px] text-zinc-500">{nodes.length} nodo{nodes.length !== 1 ? 's' : ''} · {edges.length} conex.</span>
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-[10px] text-zinc-400">Espacio: añadir nodo</span>
-          <span className="text-[10px] text-zinc-400">Ctrl+Z: deshacer</span>
-          {snapEnabled && <span className="text-[10px] text-primary">Snap ON</span>}
-        </div>
-      </div>
-
+      {exportOpen && <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} nodes={nodes} edges={edges} />}
+      
+      {showOnboarding && <Onboarding step={onboardingStep} setStep={setOnboardingStep} onDismiss={() => { localStorage.setItem('fm_onboarded', '1'); setShowOnboarding(false); }} />}
     </div>
-    </>
   );
-}
+};
 
 export default function Formarketing() {
   return (
@@ -1406,3 +203,6 @@ export default function Formarketing() {
     </ReactFlowProvider>
   );
 }
+
+// Minimal Icons
+import { Layers } from 'lucide-react';

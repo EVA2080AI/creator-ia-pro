@@ -174,11 +174,16 @@ export function ChatInput({
         <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
 
         <div className={cn(
-          "flex items-center gap-2 p-2 rounded-[32px] bg-white border shadow-[0_10px_50px_-10px_rgba(0,0,0,0.05)] transition-all duration-300",
+          "flex items-center gap-2 p-2 rounded-[32px] bg-white border shadow-[0_10px_50px_-10px_rgba(0,0,0,0.05)] transition-all duration-300 relative",
           isArchitectMode 
             ? "border-indigo-400/30 ring-4 ring-indigo-50 shadow-indigo-100/50 scale-[1.01]" 
-            : "border-black/[0.08] focus-within:ring-4 focus-within:ring-primary/5"
+            : "border-black/[0.1] focus-within:border-primary/20 focus-within:ring-4 focus-within:ring-primary/5",
+          isGenerating && "neural-pulse ring-4 ring-primary/10 border-primary/30"
         )}>
+          {/* Iridescent background for active state */}
+          {(isArchitectMode || isGenerating) && (
+            <div className="absolute inset-0 rounded-[32px] bg-gradient-to-r from-primary/5 via-violet-500/5 to-primary/5 animate-pulse pointer-events-none opacity-50" />
+          )}
           {/* Plus Menu */}
           <div className="relative">
             <button 

@@ -205,6 +205,53 @@
   .mask-radial-faded {
     mask-image: radial-gradient(circle at 50% 50%, black 0%, transparent 100%);
   }
+
+  /* ── Aether V9.0 — Ultra-Premium Neural Tokens ── */
+  .aether-glass {
+    background: rgba(255, 255, 255, 0.45);
+    backdrop-filter: blur(40px) saturate(2);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 
+      0 4px 24px -1px rgba(0, 0, 0, 0.05),
+      0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+  }
+
+  .aether-iridescent {
+    position: relative;
+    overflow: hidden;
+  }
+  .aether-iridescent::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      125deg,
+      transparent 0%,
+      rgba(168, 85, 247, 0.05) 30%,
+      rgba(59, 130, 246, 0.05) 50%,
+      rgba(236, 72, 153, 0.05) 70%,
+      transparent 100%
+    );
+    background-size: 200% 200%;
+    animation: aurora-mesh 12s linear infinite;
+    pointer-events: none;
+  }
+
+  .neural-pulse {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4);
+    animation: pulse-neural 3s infinite;
+  }
+
+  .text-aether-glow {
+    color: hsl(var(--foreground));
+    text-shadow: 0 0 30px hsla(var(--primary) / 0.3);
+  }
+
+  .aether-border-gradient {
+    border: 1px solid transparent;
+    background: linear-gradient(white, white) padding-box,
+                linear-gradient(125deg, #A855F7, #3B82F6, #EC4899) border-box;
+  }
 }
 
 /* ============================================
@@ -260,7 +307,18 @@
 @keyframes aurora-mesh {
   0%   { background-position: 0% 0%; }
   50%  { background-position: 100% 100%; }
-  100% { background-position: 100% 0%; }
+  100% { background-position: 0% 0%; }
+}
+@keyframes pulse-neural {
+  0% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(168, 85, 247, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+  }
 }
 
 /* ============================================
