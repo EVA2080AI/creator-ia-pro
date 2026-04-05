@@ -124,7 +124,8 @@ export function useStudioChatMessages({
     const newTasks: UIPlanTask[] = [];
 
     messages.forEach(m => {
-      const mermaidMatches = m.content.matchAll(/```mermaid\n?([\s\S]*?)```/g);
+      // Improved Mermaid Regex: Handle extra spaces, lowercase tags, and trailing content
+      const mermaidMatches = m.content.matchAll(/```[Mm]ermaid\s*([\s\S]*?)```/g);
       for (const match of mermaidMatches) {
         newArtifacts.push({
           id: crypto.randomUUID(),
@@ -134,7 +135,8 @@ export function useStudioChatMessages({
         });
       }
 
-      const taskMatches = Array.from(m.content.matchAll(/^\[( |x|X|\/)\] (.+)$/gm));
+      // Improved Task Regex: Handle more variations in task symbols
+      const taskMatches = Array.from(m.content.matchAll(/^\[( |x|X|\/|-)\] (.+)$/gm));
       for (const match of taskMatches) {
         const symbol = (match[1] as string).toLowerCase();
         newTasks.push({
@@ -144,6 +146,7 @@ export function useStudioChatMessages({
         });
       }
     });
+
 
     setArtifacts(newArtifacts);
     setTasks(newTasks);
