@@ -28,7 +28,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
-type NodeType = 'characterBreakdown' | 'modelView' | 'videoModel' | 'layoutBuilder' | 'campaignManager' | 'antigravityBridge';
+type NodeType = 'characterBreakdown' | 'modelView' | 'videoModel' | 'layoutBuilder' | 'campaignManager' | 'antigravityBridge' | 'llmNode' | 'textInput' | 'captionNode';
 
 interface TemplateNode {
   type: NodeType;

@@ -1,0 +1,36 @@
+export const MODELS = [
+  { id: 'google/gemini-2.0-flash-001',           label: 'Gemini 2.0 Flash',    badge: '🚀 Todos los planes', vision: true,  premium: false },
+  { id: 'deepseek/deepseek-chat',                label: 'DeepSeek V3',          badge: '💰 Todos los planes', vision: false, premium: false },
+  { id: 'anthropic/claude-3.5-sonnet',           label: 'Claude 3.5 Sonnet',   badge: '⚡ Solo Pymes',       vision: true,  premium: true  },
+  { id: 'anthropic/claude-3-5-sonnet-20241022',  label: 'Claude 3.5 Sonnet v2', badge: '🔥 Solo Pymes',       vision: true,  premium: true  },
+  { id: 'openai/gpt-4o',                         label: 'GPT-4o',               badge: '🧠 Solo Pymes',       vision: true,  premium: true  },
+  { id: 'deepseek/deepseek-r1',                  label: 'DeepSeek R1',          badge: '💡 Solo Pymes',       vision: false, premium: true  },
+  { id: 'mistralai/mistral-large',               label: 'Mistral Large',        badge: '🇪🇺 Solo Pymes',       vision: false, premium: true  },
+];
+
+export const CODE_VERBS = [
+  'crea','genera','construye','haz','diseña','implementa','desarrolla',
+  'build','create','make','generate','design','develop','write','code','programa',
+  'clona','replica','copia','clone','replicate'
+];
+
+export const CODE_NOUNS = [
+  'página','pagina','app','aplicación','aplicacion','dashboard','landing',
+  'formulario','componente','component','api','backend','frontend','website','sitio',
+  'portfolio','portafolio','calculator','calculadora','todo','ecommerce','blog','navbar',
+  'footer','hero','modal','sidebar','tabla','chart','gráfica','grafica',
+  'multi-page','multipágina','multipagina','prototipo','prototype','sitemap','rutas','routes'
+];
+
+export const GREETINGS = [
+  'hola', 'hi', 'hello', 'buenos dias', 'buenas tardes', 'buenas noches', 'saludos', 'hey', 'buenas'
+];
+
+export const FILE_MGMT_KEYWORDS = [
+  'mueve', 'renombra', 'pon', 'usa', 'set', 'move', 'rename', 'index', 'archivo', 'carpeta', 'folder', 
+  'crea el archivo', 'sustituye', 'pégalo', 'pegalo'
+];
+
+export const VISION_KEYWORDS = [
+  'foto', 'imagen', 'imágen', 'referencia', 'captura', 'screenshot', 'clona', 'replica', 'copia', 'clone', 'replicate'
+];
