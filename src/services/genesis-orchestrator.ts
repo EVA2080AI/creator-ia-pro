@@ -77,12 +77,15 @@ ${JSON.stringify(blueprint)}
 # FILE CONTEXT / PURPOSE:
 ${context}
 
-# CODING STANDARDS:
+# CODING STANDARDS (Genesis Synthesis V16.0):
 - Use Tailwind CSS with Aether V9.0 iridescent styles.
 - Use Framer Motion for premium micro-animations.
-- High-fidelity components only. No placeholders.
-- Real content (Copywriting) relevant to ${blueprint.niche}.
+- High-fidelity components only. No placeholders or empty divs.
+- SPEED OPTIMIZATION: If real content is not immediately critical for a component, use HIGH-FIDELITY MOCK DATA.
+- IMAGES: Use curated Unsplash URLs (e.g., from the niche: ${blueprint.niche}).
+- TEXTS: Use "Lorem Premium" or professional placeholders to maintain visual vibe.
 - No comments explaining what you did. Just the code.
+- Always include "export default" for main page/component files.
 
 # OUTPUT:
 Return ONLY the raw code for ${filePath}.`;

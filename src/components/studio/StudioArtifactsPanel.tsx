@@ -229,7 +229,14 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                       
                       <div className="relative z-10 w-full flex justify-center">
                         {artifact.type === 'mermaid' ? (
-                          <Mermaid chart={artifact.content} className="w-full max-w-full transform transition-transform group-hover/chart:scale-[1.02]" />
+                          artifact.content.length > 20 && (artifact.content.includes('graph') || artifact.content.includes('flowchart') || artifact.content.includes('---')) ? (
+                            <Mermaid chart={artifact.content} className="w-full max-w-full transform transition-transform group-hover/chart:scale-[1.02]" />
+                          ) : (
+                            <div className="flex flex-col items-center gap-3 text-zinc-300">
+                               <Activity className="w-8 h-8 opacity-20 animate-pulse" />
+                               <span className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Analizando Nodo...</span>
+                            </div>
+                          )
                         ) : (
                           <img src={artifact.content} alt={artifact.title} className="max-w-full h-auto rounded-xl shadow-lg" />
                         )}
