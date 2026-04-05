@@ -7,20 +7,79 @@ import {
   VISION_KEYWORDS 
 } from './constants';
 
+export function repairJson(text: string): string {
+  let json = text.trim();
+  const stack: string[] = [];
+  let isInString = false;
+  let isEscaped = false;
+
+  for (let i = 0; i < json.length; i++) {
+    const char = json[i];
+    if (isEscaped) {
+      isEscaped = false;
+      continue;
+    }
+    if (char === '\\') {
+      isEscaped = true;
+      continue;
+    }
+    if (char === '"') {
+      isInString = !isInString;
+      continue;
+    }
+    if (!isInString) {
+      if (char === '{' || char === '[') stack.push(char === '{' ? '}' : ']');
+      else if (char === '}' || char === ']') stack.pop();
+    }
+  }
+
+  if (isInString) json += '"';
+  while (stack.length > 0) {
+    json += stack.pop();
+  }
+  return json;
+}
+
 export function extractJson(text: string): any | null {
   const t = text.trim();
+  
+  const tryParse = (str: string) => {
+    try { return JSON.parse(str); } catch {
+      try { return JSON.parse(repairJson(str)); } catch { return null; }
+    }
+  };
+
   if (t.startsWith('{') && t.endsWith('}')) {
-    try { return JSON.parse(t); } catch { /* fallthrough */ }
+    const p = tryParse(t);
+    if (p) return p;
   }
+
   const mdJson = t.match(/```json\s*([\s\S]*?)```/);
-  if (mdJson) { try { return JSON.parse(mdJson[1].trim()); } catch { /* fallthrough */ } }
+  if (mdJson) {
+    const p = tryParse(mdJson[1].trim());
+    if (p) return p;
+  }
+
   const mdRaw = t.match(/```\s*([\s\S]*?)```/);
-  if (mdRaw) { const inner = mdRaw[1].trim(); if (inner.startsWith('{')) { try { return JSON.parse(inner); } catch {} } }
+  if (mdRaw) {
+    const inner = mdRaw[1].trim();
+    if (inner.startsWith('{')) {
+      const p = tryParse(inner);
+      if (p) return p;
+    }
+  }
+
   const first = t.indexOf('{');
   const last  = t.lastIndexOf('}');
-  if (first !== -1 && last > first) { try { return JSON.parse(t.slice(first, last + 1)); } catch {} }
+  if (first !== -1) {
+    const content = last > first ? t.slice(first, last + 1) : t.slice(first);
+    const p = tryParse(content);
+    if (p) return p;
+  }
+
   return null;
 }
+
 
 export function detectDeps(files: Record<string, StudioFile>): string[] {
   const SAFE = new Set([
@@ -102,42 +161,52 @@ export function detectIntent(prompt: string, hasContext?: boolean): IntentType {
 
 export function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
   const files: Record<string, StudioFile> = {};
-  try {
-    const jsonMatch = text.match(/\{[\s\n]*"files"[\s\n]*:[\s\n]*(\{[\s\S]*?\}[\s\n]*)\}/);
-    if (jsonMatch) {
-      const parsedFiles = JSON.parse(jsonMatch[1]);
-      Object.entries(parsedFiles).forEach(([path, content]) => {
-        if (typeof content === 'string') {
-          const lang = path.split('.').pop()?.toLowerCase() || 'tsx';
-          files[path] = { language: lang, content: content.trim() };
-        }
-      });
-      if (Object.keys(files).length > 0) return files;
-    }
-  } catch (e) { /* ignore */ }
-  const regex = /```(\w*)\n?([\s\S]*?)```/g;
+  
+  // 1. Try primary JSON extraction with repair capability
+  const extracted = extractJson(text);
+  if (extracted && extracted.files) {
+    Object.entries(extracted.files).forEach(([path, value]) => {
+      let content = '';
+      if (typeof value === 'string') content = value;
+      else if (value && typeof value === 'object' && (value as any).content) content = (value as any).content;
+      
+      if (content) {
+        const lang = path.split('.').pop()?.toLowerCase() || 'tsx';
+        files[path] = { language: lang, content: content.trim() };
+      }
+    });
+    if (Object.keys(files).length > 0) return files;
+  }
+
+  // 2. Fallback to Markdown blocks
+  const regex = /```(\w*)\s*(?:\/\/|#|--)\s*([\w./\-]+\.\w+)?\n([\s\S]*?)```/g;
   let m;
   while ((m = regex.exec(text)) !== null) {
     const lang = m[1].trim().toLowerCase();
-    const code = m[2].trim();
+    const explicitPath = m[2];
+    const code = m[3].trim();
     if (code.length < 5) continue; 
-    let filename = '';
-    const fileMatch = code.match(/\/\/\s*([\w./\-]+\.\w+)/);
-    if (fileMatch) {
-      filename = fileMatch[1].replace(/^src\//, ''); 
-    } else {
-      if (lang === 'html') filename = 'index.html';
-      else if (lang === 'css') filename = 'styles.css';
-      else if (code.includes('export default')) filename = 'App.tsx';
-      else continue; 
+
+    let filename = explicitPath || '';
+    if (!filename) {
+      const fileMatch = code.match(/\/\/\s*([\w./\-]+\.\w+)/);
+      if (fileMatch) {
+        filename = fileMatch[1].replace(/^src\//, ''); 
+      } else {
+        if (lang === 'html') filename = 'index.html';
+        else if (lang === 'css') filename = 'styles.css';
+        else if (code.includes('export default')) filename = 'App.tsx';
+        else continue; 
+      }
     }
-    let finalLang = lang;
-    if (filename.endsWith('.tsx')) finalLang = 'tsx';
+    
+    let finalLang = lang || (filename.split('.').pop()?.toLowerCase() || 'tsx');
     const isDeletion = code.includes('// DELETE');
     files[filename] = { language: finalLang, content: isDeletion ? '__genesis_delete__' : code };
   }
   return Object.keys(files).length > 0 ? files : null;
 }
+
 
 export function processRawResponse(rawText: string, prompt: string, isChatOnly: boolean) {
   if (!rawText) return null;

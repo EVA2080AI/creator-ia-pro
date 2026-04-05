@@ -95,7 +95,7 @@ export function useStudioChatAI({
       const mentionedFiles = mentionMatches.map(m => m[1]).filter(f => projectFiles[f]);
       
       let contextBlock = mentionedFiles.length > 0
-        ? '\n\n[ARCHIVOS MENCIONADOS]\n' + mentionedFiles.map(f => `// @${f}\n${projectFiles[f].content.slice(0, 4000)}`).join('\n\n')
+        ? '\n\n[ARCHIVOS MENCIONADOS]\n' + mentionedFiles.map(f => `// @${f}\n${projectFiles[f].content.slice(0, 10000)}`).join('\n\n')
         : '';
 
       // Smart Context: If no mentions, find high-relevance files based on intent
@@ -111,11 +111,11 @@ export function useStudioChatAI({
           importantFiles = fileKeys.filter(f => f.includes('sidebar') || f.includes('Navbar') || f.includes('App.tsx'));
         }
         
-        const finalSelection = [...new Set([...importantFiles, activeFile].filter(Boolean) as string[])].slice(0, 4);
+        const finalSelection = [...new Set([...importantFiles, activeFile].filter(Boolean) as string[])].slice(0, 6);
         
         if (finalSelection.length > 0) {
           contextBlock = `\n\n[CONTEXTO RELEVANTE]:\n` +
-            finalSelection.map(f => `// ${f}\n${projectFiles[f].content.slice(0, 3500)}`).join('\n\n');
+            finalSelection.map(f => `// ${f}\n${projectFiles[f].content.slice(0, 8000)}`).join('\n\n');
         } else {
           // Fallback to basic overview
           contextBlock = `\n\n[PROYECTO ACTIVO]:\nArchivos: ${fileKeys.join(', ')}\n${activeFile ? `\n[ARCHIVO ACTUALMENTE ABIERTO]: ${activeFile}\nCONTENIDO: ${projectFiles[activeFile]?.content || ''}\n` : ''}\n`;
@@ -144,7 +144,8 @@ export function useStudioChatAI({
       const complexTask = prompt.length > 500 || prompt.toLowerCase().includes('refactor') || prompt.toLowerCase().includes('arquitectura') || isArchitectRequest;
       const targetModel = (isChatModeActive && !options?.pendingUrl && !options?.pendingImage && !complexTask) 
         ? 'google/gemini-2.0-flash-001' 
-        : (selectedModel === 'google/gemini-2.0-flash-001' && complexTask ? 'google/gemini-pro-1.5' : selectedModel);
+        : (selectedModel === 'google/gemini-2.0-flash-001' && complexTask ? 'google/gemini-2.5-pro-preview-03-25' : selectedModel);
+
 
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
@@ -159,7 +160,8 @@ export function useStudioChatAI({
             messages,
             stream: true,
             temperature: isChatModeActive ? 0.7 : 0.2, // Slightly more creative in chat
-            max_tokens: isChatModeActive ? 4096 : 20000, // More tokens for complex code
+            max_tokens: isChatModeActive ? 8192 : 25000, // More tokens for complex code/architecture
+
           },
         }),
       });
