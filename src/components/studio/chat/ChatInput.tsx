@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Plus, Mic, ArrowUp, X, Globe, Link2, FileCode2, Paperclip, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import { ModelSelector } from './ModelSelector';
 
 interface ChatInputProps {
@@ -302,18 +303,28 @@ export function ChatInput({
           />
 
           <div className="flex items-center gap-1.5 pr-2">
-            <button 
-              onClick={onArchitectToggle} 
-              aria-label={isArchitectMode ? "Desactivar Modo Arquitecto" : "Activar Modo Arquitecto"}
-              className={cn(
-                "h-10 w-10 rounded-full flex items-center justify-center transition-all duration-300", 
-                isArchitectMode 
-                  ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 ring-4 ring-indigo-100" 
-                  : "text-zinc-300 hover:text-indigo-600 hover:bg-indigo-50"
-              )}
-            >
-              <Shield className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1 p-1 rounded-[20px] bg-zinc-50 border border-black/[0.05] shadow-inner mr-1">
+              <button 
+                type="button"
+                onClick={() => !isArchitectMode && onArchitectToggle()}
+                className={cn(
+                  "px-3 py-1.5 rounded-[15px] text-[10px] font-black uppercase tracking-widest transition-all",
+                  isArchitectMode ? "bg-white text-indigo-600 shadow-sm border border-black/[0.03]" : "text-zinc-400 hover:text-zinc-600"
+                )}
+              >
+                Plan
+              </button>
+              <button 
+                type="button"
+                onClick={() => isArchitectMode && onArchitectToggle()}
+                className={cn(
+                  "px-3 py-1.5 rounded-[15px] text-[10px] font-black uppercase tracking-widest transition-all",
+                  !isArchitectMode ? "bg-zinc-900 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-600"
+                )}
+              >
+                Build
+              </button>
+            </div>
             
             <button 
                onClick={toggleListening}

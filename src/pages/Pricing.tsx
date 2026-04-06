@@ -11,85 +11,67 @@ import React from "react";
 import {
   Sparkles, Check, Zap, Crown, Rocket, Loader2,
   Coins, Shield, Code2, Bolt, ArrowRight,
-  TrendingUp, Globe, Lock, Cpu, Star, MessageSquare
+  TrendingUp, Globe, Lock, Cpu, Star, MessageSquare,
+  HelpCircle, ChevronDown, ChevronUp, Layers,
+  Layout, MousePointer2, Database, Network
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-// ─── Plan definitions (Matching Stripe & User Request) ────────────────────────
 const PLANS = [
   {
     key: "free" as const,
-    name: "Free",
+    name: "Free tier",
     price: 0,
     priceLabel: "$0",
-    credits: 10,
-    creditsLabel: "10 créditos",
-    description: "Explora la magia de la IA sin compromisos.",
-    color: "#9CA3AF",
-    gradient: "from-gray-500/10 to-gray-500/5",
-    border: "border-gray-500/20",
+    credits: 30,
+    creditsLabel: "30 créditos/mes",
+    description: "Para exploradores y visionarios individuales.",
+    color: "#94A3B8",
+    gradient: "from-zinc-500/10 to-zinc-500/5",
+    border: "border-zinc-500/20",
     icon: Sparkles,
     badge: null,
     category: "ECO",
     features: [
-      { label: "10 créditos de bienvenida", highlight: true },
-      { label: "Modelos ECO (Llama 3, Gemini Flash)", highlight: false },
+      { label: "30 créditos de inteligencia", highlight: true },
       { label: "Genesis Studio básico", highlight: false },
+      { label: "Acceso a Modelos ECO", highlight: false },
+      { label: "Soporte comunitario", highlight: false },
     ],
   },
   {
-    key: "basico" as const,
-    name: "Básico",
-    price: 149900,
-    priceLabel: "$149.900",
-    credits: 1500,
-    creditsLabel: "1.500 créditos",
-    description: "Perfecto para proyectos individuales y pequeñas marcas.",
-    color: "#4ADE80",
-    gradient: "from-emerald-500/15 to-emerald-500/5",
-    border: "border-emerald-500/20",
-    glow: "rgba(74, 222, 128, 0.15)",
-    icon: Zap,
-    badge: null,
+    key: "pro" as const,
+    name: "Pro Architect",
+    price: 99000,
+    priceLabel: "$99.000",
+    credits: 150,
+    creditsLabel: "150 créditos/mes",
+    description: "Construcción profesional y dominios custom.",
+    color: "#6366F1",
+    gradient: "from-indigo-500/15 to-indigo-500/5",
+    border: "border-indigo-500/20",
+    glow: "rgba(99, 102, 241, 0.15)",
+    icon: Layout,
+    badge: "Más Popular",
     category: "PRO",
     features: [
-      { label: "1.500 créditos mensuales", highlight: true },
-      { label: "Acceso a modelos PRO", highlight: false },
-      { label: "Soporte por Email prioritario", highlight: false },
-      { label: "Genesis Studio completo", highlight: false },
+      { label: "150 créditos de inteligencia", highlight: true },
+      { label: "Dominios personalizados", highlight: true },
+      { label: "Priority Build Pipeline", highlight: true },
+      { label: "Edit Mode ilimitado", highlight: false },
+      { label: "Soporte Pro 24h", highlight: false },
     ],
   },
   {
-    key: "profesional" as const,
-    name: "Profesional",
-    price: 349900,
-    priceLabel: "$349.900",
-    credits: 4000,
-    creditsLabel: "4.000 créditos",
-    description: "Nuestra opción más popular para profesionales.",
-    color: "#A855F7",
-    gradient: "from-primary/20 to-primary/5",
-    border: "border-primary/30",
-    glow: "rgba(168, 85, 247, 0.2)",
-    icon: Rocket,
-    badge: "Más popular",
-    category: "PRO",
-    features: [
-      { label: "4.000 créditos mensuales", highlight: true },
-      { label: "Modelos Estándar y Rápidos", highlight: true },
-      { label: "Genesis Cloud deployments", highlight: true },
-      { label: "Soporte prioritario", highlight: false },
-    ],
-  },
-  {
-    key: "empresarial" as const,
-    name: "Empresarial",
-    price: 699900,
-    priceLabel: "$699.900",
-    credits: 10000,
-    creditsLabel: "10.000 créditos",
-    description: "Poder total sin límites para tu negocio.",
+    key: "business" as const,
+    name: "Business Swarm",
+    price: 199000,
+    priceLabel: "$199.000",
+    credits: 500,
+    creditsLabel: "500 créditos/mes",
+    description: "Soberanía total para equipos y startups.",
     color: "#F59E0B",
     gradient: "from-amber-500/20 to-amber-500/5",
     border: "border-amber-500/30",
@@ -98,12 +80,32 @@ const PLANS = [
     badge: "Acceso Total",
     category: "ULTRA",
     features: [
-      { label: "10.000 créditos mensuales", highlight: true },
-      { label: "Modelos ULTRA inclusive", highlight: true },
-      { label: "Multi-proyecto Studio", highlight: true },
-      { label: "Soporte 24/7 dedicado", highlight: true },
+      { label: "500 créditos de inteligencia", highlight: true },
+      { label: "Enterprise Security Opt-out", highlight: true },
+      { label: "Arquitectura Multi-Agente", highlight: true },
+      { label: "Soporte VIP dedicado", highlight: true },
+      { label: "Facturación corporativa", highlight: false },
     ],
   },
+];
+
+const FAQS = [
+  {
+    question: "¿Qué es un crédito y cómo se gasta?",
+    answer: "Los créditos son el motor de Génesis. Se consumen al enviar mensajes o realizar despliegues. El consumo depende de la complejidad de la tarea y el modelo de IA seleccionado (ECO, PRO o ULTRA)."
+  },
+  {
+    question: "¿Los créditos expiran?",
+    answer: "Los créditos incluidos en tu suscripción mensual se renuevan cada ciclo. Los 'Top-ups' o créditos de recarga única NO expiran nunca."
+  },
+  {
+    question: "¿Puedo cancelar mi plan en cualquier momento?",
+    answer: "Sí. No tenemos contratos de permanencia. Puedes cancelar desde Configuración de Workspace → Planes en cualquier momento."
+  },
+  {
+    question: "¿Qué sucede si me quedo sin créditos?",
+    answer: "Génesis entrará en modo lectura. Puedes realizar una 'Inyección de Emergencia' comprando un pack de créditos único para continuar construyendo de inmediato."
+  }
 ];
 
 const COMPARISON_DATA = [
@@ -222,12 +224,28 @@ export default function Pricing() {
               className="max-w-5xl mx-auto text-center"
             >
               <h1 className="text-6xl sm:text-8xl md:text-[8rem] font-black tracking-[-0.05em] uppercase font-display leading-[0.85] mb-8 text-zinc-900">
-                Escala tu<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-b from-primary to-purple-300">Impacto.</span>
+                Paga por la<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-b from-primary to-purple-300 italic">Inteligencia.</span>
               </h1>
-              <p className="max-w-lg mx-auto text-lg text-zinc-400 leading-relaxed font-medium">
-                Sin suscripciones forzadas. <span className="text-zinc-700">Créditos industriales</span> para creadores que exigen la mejor latencia y los modelos más potentes.
+              <p className="max-w-xl mx-auto text-lg text-zinc-400 leading-relaxed font-medium mb-12">
+                Infraestructura industrial para desarrolladores soberanos. Gestiona tu presupuesto con créditos de alta fidelidad respaldados por la seguridad de <span className="text-zinc-900 border-b-2 border-primary/20">Bold.co</span>.
               </p>
+
+              {/* Credit Bar Illustrative */}
+              <div className="max-w-md mx-auto p-4 rounded-[1.5rem] bg-white border border-zinc-100 shadow-xl mb-12">
+                <div className="flex justify-between items-end mb-2">
+                  <div className="text-left">
+                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Ejemplo de Uso</p>
+                    <p className="text-[12px] font-bold text-zinc-900">Créditos del Proyecto</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[14px] font-black text-primary italic">120 / 150</p>
+                  </div>
+                </div>
+                <div className="h-4 w-full bg-zinc-50 rounded-full border border-zinc-100 overflow-hidden p-1">
+                  <div className="h-full w-[80%] rounded-full bg-gradient-to-r from-primary via-indigo-400 to-primary animate-pulse" />
+                </div>
+              </div>
             </motion.div>
           </section>
 
@@ -505,6 +523,29 @@ export default function Pricing() {
                   </div>
                 </motion.div>
               ))}
+            </div>
+          </section>
+
+          {/* ── FAQ Section ───────────────────────────────────────────────── */}
+          <section className="px-6 mb-40">
+            <SectionHeader 
+              badge="FAQ" 
+              title={<>Preguntas <span className="text-primary italic">Frecuentes.</span></>}
+              subtitle="Todo lo que necesitas saber sobre el motor económico de Creator IA Pro."
+            />
+            <div className="max-w-3xl mx-auto">
+              <Accordion type="single" collapsible className="w-full space-y-4">
+                {FAQS.map((faq, i) => (
+                  <AccordionItem key={i} value={`item-${i}`} className="border border-zinc-100 rounded-3xl px-6 bg-white shadow-sm overflow-hidden transition-all hover:border-zinc-200">
+                    <AccordionTrigger className="text-xs font-black uppercase tracking-widest text-zinc-900 hover:no-underline py-6">
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-[13px] text-zinc-500 leading-relaxed pb-6">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
             </div>
           </section>
 

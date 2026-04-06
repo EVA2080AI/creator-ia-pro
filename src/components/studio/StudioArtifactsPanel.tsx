@@ -15,8 +15,10 @@ import {
   RefreshCw,
   Settings,
   Gamepad2,
-  Image as ImageIcon,
-  Copy
+  ImageIcon,
+  Copy,
+  BookOpen,
+  ArrowRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -55,7 +57,7 @@ interface StudioArtifactsPanelProps {
   isOpen: boolean;
   onClose: () => void;
   onFix?: () => void;
-  activeTab?: 'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents';
+  activeTab?: 'plan' | 'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents';
   agentPhase?: 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
   activeSpecialist?: 'ux' | 'frontend' | 'backend' | 'devops' | 'game' | 'architect' | 'engineer' | 'none';
   persona?: 'genesis' | 'antigravity';
@@ -74,7 +76,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
   activeSpecialist = 'none',
   persona = 'genesis'
 }) => {
-  const [activeTab, setActiveTab] = useState<'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'plan' | 'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents'>(initialTab);
   const [settingsAgent, setSettingsAgent] = useState<{ id: AgentSpecialist, name: string } | null>(null);
 
   if (!isOpen) return null;
@@ -108,7 +110,8 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
       {/* Tabs */}
       <div className="p-5 flex items-center gap-1.5 overflow-x-auto custom-scrollbar no-scrollbar-x shrink-0 relative z-10">
         {[
-          { id: 'progress', icon: Activity, label: 'Plan' },
+          { id: 'plan', icon: BookOpen, label: 'Plan Maestro' },
+          { id: 'progress', icon: Activity, label: 'Tareas' },
           { id: 'diagrams', icon: Layout, label: 'Arquitectura' },
           { id: 'agents', icon: Sparkles, label: 'Agentes' },
           { id: 'logs', icon: Zap, label: 'Logs' },
@@ -132,7 +135,49 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
-        {activeTab === 'progress' ? (
+        {activeTab === 'plan' ? (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 pb-20">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">master-plan.md</span>
+              <div className="px-2 py-1 rounded-md bg-indigo-50 border border-indigo-100 text-[9px] font-black text-indigo-600 uppercase tracking-widest">
+                Modo Arquitecto v19.4
+              </div>
+            </div>
+
+            <div className="p-8 rounded-[2.5rem] bg-white border border-zinc-100 shadow-sm relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-6 opacity-5">
+                <BookOpen className="w-40 h-40" />
+              </div>
+              <div className="relative z-10 prose prose-zinc prose-xs max-w-none">
+                <h2 className="text-[14px] font-black text-zinc-900 uppercase tracking-widest mb-4">Estrategia de Desarrollo</h2>
+                <div className="space-y-4 text-[12px] font-medium text-zinc-600 leading-relaxed">
+                  <p>Este plan ha sido diseñado para maximizar la escalabilidad y el rendimiento. A continuación, los pilares de la implementación:</p>
+                  <ul className="list-disc pl-4 space-y-2">
+                    <li><strong className="text-zinc-900">Núcleo Comercial:</strong> Infraestructura de créditos y planes SaaS.</li>
+                    <li><strong className="text-zinc-900">UX Premium:</strong> Interfaz autómata con micro-interacciones de estado.</li>
+                    <li><strong className="text-zinc-900">Robustez Backend:</strong> Esquemas de datos normalizados y políticas de seguridad RLS.</li>
+                  </ul>
+                  <p className="mt-8 p-4 rounded-2xl bg-zinc-50 border border-zinc-100 text-zinc-500 italic">
+                    "La arquitectura es la voluntad de una época traducida a espacio (o código)." — Mies van der Rohe (Adaptado)
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-10 pt-8 border-t border-black/5 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Listo para ejecución</span>
+                </div>
+                <button 
+                  onClick={() => setActiveTab('progress')}
+                  className="px-6 py-3 rounded-2xl bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary shadow-xl shadow-primary/20 transition-all flex items-center gap-2 group-hover:scale-105"
+                >
+                  Aprobar e Implementar <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : activeTab === 'progress' ? (
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Lista de Tareas (task.md)</span>

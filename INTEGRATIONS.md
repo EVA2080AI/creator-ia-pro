@@ -59,5 +59,36 @@ Pasa tus proyectos de Test a Live con validación de seguridad de un solo clic.
 
 ---
 
+---
+
+## ⚡ Manual de Prompting: El "Playbook" de Génesis (v19.5)
+
+Este manual define las estrategias de élite para obtener resultados excepcionales y consistentes. Utiliza estas tácticas para transformar ideas vagas en interfaces pulidas.
+
+### Fase 1: Sentar los Cimientos
+1.  **Planifica antes de pedir**: Define el Producto, el Usuario (Persona) y la Acción Clave (CTA). No construyas a ciegas.
+2.  **Mapa de Viaje Visual**: Piensa en transiciones (Héroe → Trust → Confianza → Acción). Cada sección debe tener un propósito.
+3.  **Diseño primero**: Establece el lenguaje visual (Minimal, Premium, Disruptivo) antes de la lógica. "No se llega al buen diseño pidiendo; se diseña desde el prompt".
+
+### Fase 2: Pensamiento Sistémico
+4.  **Prompts por Componente**: No pidas una página entera. Construye por bloques (Lego style). Un prompt por componente = máxima señal, mínimo ruido.
+5.  **Diseño con Contenido Real**: Evita el "Lorem Ipsum". El contenido real define los límites del diseño (espaciado, jerarquía).
+6.  **Vocabulario Atómico**: Habla en "átomos" (Botones, Cards, Modales, Badges). Genesis piensa en estructuras nativas.
+7.  **Palabras Clave (Buzzwords)**: Usa términos como `glassmorphism`, `cinematic`, `expressive` o `premium` para guiar la estética.
+
+### Fase 3: Construcción con Precisión
+8.  **Patrones de Layout**: Usa estructuras repetibles (Héroe → Cards → Footer). Crea tu propia librería de patrones.
+9.  **Visuales vía URL**: Incluye demos de producto o clips de Midjourney mediante URLs directas para realismo instantáneo.
+10. **Edición por Capas (Edit Button)**: Usa la función de edición para realizar ajustes quirúrgicos sin destruir lo que ya funciona. Trata las ediciones como "overrides" de diseño.
+
+### Fase 4: Iteración y Despliegue
+11. **Diseño Consciente de Cloud**: Anticipa la lógica de autenticación (Auth) y datos dinámicos. ¿Qué ve el usuario si está logueado? ¿Qué pasa si no hay datos?
+12. **Control de Versiones Humano**: No confíes solo en el autoguardado. Piensa en hitos. Duplica versiones antes de cambios críticos.
+
+> [!IMPORTANT]
+> **Preguntas Aclaratorias**: Siempre pide a Génesis que te haga preguntas antes de empezar un plan complejo. Especialmente en **Plan Mode**. De esta forma, Génesis llenará los vacíos antes de escribir código.
+
+---
+
 > [!TIP]
-> **Orquestación Automática**: Simplemente di a Génesis: *"Génesis, integra los pagos con Stripe para este ecommerce"* y él se encargará de activar el conector, crear las tablas de pedidos y desplegar el Edge Function de checkout.
+> **Sincronización de Esquema**: Cada vez que inicies una sesión, Génesis validará tu esquema de base de datos para asegurar que no haya cambios que rompan la aplicación actual.

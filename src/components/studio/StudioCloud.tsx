@@ -4,9 +4,10 @@ import {
   Cloud, Database, Users, HardDrive, Zap, Activity,
   CheckCircle, AlertCircle, Loader2, ExternalLink,
   Table, RefreshCw, ChevronRight, Plug, ShieldCheck, Mail, CreditCard, Mic,
-  Shield, Globe, Lock, BarChart3, History, Layers,
+  Shield, Globe, Lock, BarChart3, History, Layers, BookOpen, ShoppingBag,
 } from 'lucide-react';
 import { StudioUsageBar } from './StudioUsageBar';
+import { StudioBilling } from './StudioBilling';
 
 export interface SupabaseConfig {
   url: string;
@@ -19,10 +20,12 @@ interface StudioCloudProps {
   onConfigChange: (config: SupabaseConfig | null) => void;
 }
 
-type CloudSection = 'overview' | 'database' | 'users' | 'storage' | 'functions' | 'connectors' | 'secrets' | 'security' | 'analytics' | 'audit';
+type CloudSection = 'overview' | 'database' | 'users' | 'storage' | 'functions' | 'connectors' | 'secrets' | 'security' | 'analytics' | 'audit' | 'knowledge' | 'billing';
 
 const NAV: { id: CloudSection; label: string; icon: React.ElementType }[] = [
   { id: 'overview',   label: 'Overview',       icon: Activity  },
+  { id: 'knowledge',  label: 'Knowledge',      icon: BookOpen  },
+  { id: 'billing',    label: 'Planes & Créditos', icon: CreditCard },
   { id: 'database',   label: 'Database',        icon: Database  },
   { id: 'users',      label: 'Users',           icon: Users     },
   { id: 'analytics',  label: 'Analytics',       icon: BarChart3 },
@@ -592,6 +595,55 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
             </div>
           </div>
         )}
+        {/* ── KNOWLEDGE CORE ────────────────────────────────────────────────── */}
+        {section === 'knowledge' && isConnected && (
+          <div className="p-4 space-y-4">
+            <div className="p-3 rounded-2xl bg-emerald-400/5 border border-emerald-400/10">
+              <div className="flex items-center gap-2 mb-1.5 ">
+                <ShieldCheck className="h-3 w-3 text-emerald-400" />
+                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Guía de Excelencia</span>
+              </div>
+              <p className="text-[10px] text-white/40 leading-relaxed">
+                Usa <strong>Guardrails</strong> (ej: "No toques X") y <strong>Aislamiento de Nichos</strong> para evitar errores. 
+                Génesis usará este conocimiento como su "PRD" maestro durante cada turno de construcción.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.25em] mb-1">Knowledge Core</h3>
+              <p className="text-[10px] text-white/20">Definiciones persistentes del producto (PRD)</p>
+            </div>
+
+            <div className="space-y-3">
+              {[
+                { label: 'Visión del Producto (PRD)', icon: Globe, placeholder: 'Describe el objetivo principal...' },
+                { label: 'User Journeys & Personas', icon: Users,  placeholder: 'Admin, Cliente, Inversor...' },
+                { label: 'Sistema de Diseño',      icon: Layers, placeholder: 'Tipografía, colores, estilo visual...' },
+              ].map(k => (
+                <div key={k.label} className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <k.icon className="h-3 w-3 text-white/20" />
+                    <label className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{k.label}</label>
+                  </div>
+                  <textarea 
+                    placeholder={k.placeholder}
+                    className="w-full h-24 text-[11px] text-white/70 bg-white/[0.02] border border-white/[0.05] rounded-xl p-3 outline-none focus:border-white/20 transition-all resize-none no-scrollbar placeholder:text-white/5"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <button className="w-full py-2.5 rounded-xl bg-white/5 text-white/40 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all border border-white/5">
+              Sincronizar Conocimiento
+            </button>
+          </div>
+        )}
+
+        {/* ── BILLING & CREDITS ─────────────────────────────────────────────── */}
+        {section === 'billing' && isConnected && (
+          <StudioBilling />
+        )}
+
       </div>
     </div>
   );
