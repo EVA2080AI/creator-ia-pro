@@ -19,6 +19,7 @@ export interface ModelOption {
   id: string;
   label: string;
   badge: string;
+  description?: string;
   vision: boolean;
   premium: boolean;
 }

@@ -3,8 +3,10 @@ import { SupabaseProvisioning } from './SupabaseProvisioning';
 import {
   Cloud, Database, Users, HardDrive, Zap, Activity,
   CheckCircle, AlertCircle, Loader2, ExternalLink,
-  Table, RefreshCw, ChevronRight,
+  Table, RefreshCw, ChevronRight, Plug, ShieldCheck, Mail, CreditCard, Mic,
+  Shield, Globe, Lock,
 } from 'lucide-react';
+import { StudioUsageBar } from './StudioUsageBar';
 
 export interface SupabaseConfig {
   url: string;
@@ -17,7 +19,7 @@ interface StudioCloudProps {
   onConfigChange: (config: SupabaseConfig | null) => void;
 }
 
-type CloudSection = 'overview' | 'database' | 'users' | 'storage' | 'functions';
+type CloudSection = 'overview' | 'database' | 'users' | 'storage' | 'functions' | 'connectors' | 'secrets' | 'security';
 
 const NAV: { id: CloudSection; label: string; icon: React.ElementType }[] = [
   { id: 'overview',   label: 'Overview',       icon: Activity  },
@@ -25,6 +27,9 @@ const NAV: { id: CloudSection; label: string; icon: React.ElementType }[] = [
   { id: 'users',      label: 'Users',           icon: Users     },
   { id: 'storage',    label: 'Storage',         icon: HardDrive },
   { id: 'functions',  label: 'Edge Functions',  icon: Zap       },
+  { id: 'connectors', label: 'Conectores',      icon: Plug      },
+  { id: 'secrets',    label: 'Secretos',         icon: ShieldCheck },
+  { id: 'security',   label: 'Seguridad',        icon: Shield    },
 ];
 
 export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudProps) {
@@ -245,7 +250,17 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                   </div>
                 )}
 
-                {/* Stats */}
+                {/* Usage Bar (Industrial v19) */}
+                <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                  <StudioUsageBar items={[
+                    { id: 'db',      label: 'DB',       percentage: 45, color: '#8AB4F8' },
+                    { id: 'compute', label: 'Compute',  percentage: 28, color: '#f472b6' },
+                    { id: 'storage', label: 'Storage',  percentage: 15, color: '#a78bfa' },
+                    { id: 'net',     label: 'Network',  percentage: 12, color: '#34d399' },
+                  ]} totalLabel="Balance Cloud" totalValue="$25.00 Incluidos" />
+                </div>
+
+                {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { label: 'Tablas API',   value: tables.length, icon: Database, color: '#8AB4F8' },
@@ -323,21 +338,38 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
 
         {/* ── USERS ─────────────────────────────────────────────────────── */}
         {section === 'users' && isConnected && (
-          <div className="p-4 space-y-3">
-            <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.25em]">Auth · Users</h3>
-            <div className="flex flex-col items-center gap-4 py-8 text-center">
+          <div className="p-4 space-y-4">
+            <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.25em]">Auth · Usuarios</h3>
+            
+            <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-google-color/10 flex items-center justify-center border border-white/10">
+                  <Globe className="h-4 w-4 text-white/60" />
+                </div>
+                <div>
+                  <div className="text-[11px] font-bold text-white/80">Sign-in with Google</div>
+                  <div className="text-[10px] text-white/20 italic">Managed OAuth Client</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <div className="h-1 w-1 rounded-full bg-emerald-400" />
+                <span className="text-[9px] font-bold text-emerald-400 uppercase">Activo</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col items-center gap-4 py-4 text-center">
               <div className="h-12 w-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(138,180,248,0.08)', border: '1px solid rgba(138,180,248,0.15)' }}>
                 <Users className="h-5 w-5 text-[#8AB4F8]/50" />
               </div>
               <p className="text-[11px] text-white/25 max-w-[160px] leading-relaxed">
-                Gestiona los usuarios de tu app desde el dashboard de Supabase
+                Gestiona los correos y permisos de tus usuarios directamente
               </p>
               {dashboardBase && (
                 <a href={`${dashboardBase}/auth/users`} target="_blank" rel="noopener noreferrer"
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[11px] text-white/60 hover:text-white transition-colors"
                   style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
                   <ExternalLink className="h-3 w-3" />
-                  Ver Users en Supabase
+                  Ver en Supabase
                 </a>
               )}
             </div>
@@ -386,6 +418,107 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                   Ver Functions
                 </a>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* ── CONNECTORS ─────────────────────────────────────────────────── */}
+        {section === 'connectors' && isConnected && (
+          <div className="p-4 space-y-4">
+            <div>
+              <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.25em] mb-1">Conectores de Terceros</h3>
+              <p className="text-[10px] text-white/20">Añade capacidades industriales a tu aplicación</p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-2">
+              {[
+                { id: 'stripe', label: 'Stripe', icon: CreditCard, color: '#6366f1', desc: 'Pagos y suscripciones' },
+                { id: 'resend', label: 'Resend', icon: Mail,       color: '#ffffff', desc: 'Emails transaccionales' },
+                { id: 'eleven', label: 'ElevenLabs', icon: Mic,    color: '#34d399', desc: 'Voz e IA de audio' },
+              ].map(c => (
+                <div key={c.id} className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${c.color}15`, border: `1px solid ${c.color}25` }}>
+                    <c.icon className="h-4 w-4" style={{ color: c.color }} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-[12px] font-bold text-white/80">{c.label}</div>
+                    <div className="text-[10px] text-white/25">{c.desc}</div>
+                  </div>
+                  <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold text-white/40 hover:text-white hover:bg-white/10 transition-all">
+                    Conectar
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── SECRETS ────────────────────────────────────────────────────── */}
+        {section === 'secrets' && isConnected && (
+          <div className="p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.25em] mb-1">Secretos (Env Vars)</h3>
+                <p className="text-[10px] text-white/20">Variables seguras para tus Edge Functions</p>
+              </div>
+              <button className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-black text-emerald-400">
+                + Añadir
+              </button>
+            </div>
+
+            <div className="space-y-1">
+              {[
+                { key: 'STRIPE_SECRET_KEY', value: '••••••••••••••••' },
+                { key: 'RESEND_API_KEY',    value: '••••••••••••••••' },
+              ].map(s => (
+                <div key={s.key} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] border border-white/5 font-mono">
+                  <span className="text-[11px] text-white/50">{s.key}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] text-white/20">{s.value}</span>
+                    <button className="text-[9px] text-white/10 hover:text-red-400 transition-colors">Eliminar</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* ── SECURITY ────────────────────────────────────────────────────── */}
+        {section === 'security' && isConnected && (
+          <div className="p-4 space-y-4">
+            <div>
+              <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.25em] mb-1">Auditoría & Pentesting</h3>
+              <p className="text-[10px] text-white/20">Protección industrial automatizada por IA</p>
+            </div>
+
+            <div className="p-4 rounded-3xl bg-white/[0.03] border border-white/[0.08] relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Shield className="h-24 w-24" />
+              </div>
+              
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-[9px] font-black text-amber-500 uppercase">Agentic Pentest</div>
+                  <span className="text-[11px] font-bold text-white/80">Aikido Integration</span>
+                </div>
+
+                <p className="text-[11px] text-white/30 leading-relaxed max-w-[280px]">
+                  Ejecuta simulaciones de ataque reales para identificar vulnerabilidades como SQL Injection, XSS y Broken Auth.
+                </p>
+
+                <div className="flex gap-2">
+                  <button className="flex-1 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black text-white/60 hover:text-white transition-all">
+                    Launch Pentest
+                  </button>
+                  <button className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black text-white/40">
+                    Sync Findings
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-3">
+              <Lock className="h-4 w-4 text-emerald-500/50" />
+              <span className="text-[10px] text-emerald-400/70 font-medium">Todos los secrets están encriptados con AES-256 en Genesis Cloud.</span>
             </div>
           </div>
         )}

@@ -30,18 +30,25 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
             <p className="px-4 pt-3 pb-2 text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em]">IA Engine</p>
             {MODELS.map(m => (
               <button key={m.id} onClick={() => { onSelect(m.id); setIsOpen(false); }}
-                className={`w-full flex items-center justify-between px-4 py-3 text-left transition-all hover:bg-zinc-50 ${
+                className={`w-full flex flex-col gap-0.5 px-4 py-3 text-left transition-all hover:bg-zinc-50 ${
                   selectedModel === m.id ? 'bg-primary/5 text-zinc-900 font-bold' : 'text-zinc-500'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  {m.premium && <Lock className="h-2.5 w-2.5 text-amber-500 shrink-0" />}
-                  <span className="text-[12px]">{m.label}</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {m.premium && <Lock className="h-2.5 w-2.5 text-amber-500 shrink-0" />}
+                    <span className="text-[12px]">{m.label}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {m.vision && <span className="text-[9px] text-emerald-500">👁</span>}
+                    <span className={`text-[9px] font-bold uppercase tracking-widest ${m.premium ? 'text-amber-600' : 'text-emerald-600'}`}>{m.badge.split(' ')[0]}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  {m.vision && <span className="text-[9px] text-emerald-500">👁</span>}
-                  <span className={`text-[9px] font-bold uppercase tracking-widest ${m.premium ? 'text-amber-600' : 'text-emerald-600'}`}>{m.badge.split(' ')[0]}</span>
-                </div>
+                {m.description && (
+                  <p className="text-[10px] text-zinc-400 font-medium leading-tight">
+                    {m.description}
+                  </p>
+                )}
               </button>
             ))}
           </div>
