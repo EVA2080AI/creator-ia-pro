@@ -122,6 +122,9 @@ export function useStudioChatAI({
         const pLower = prompt.toLowerCase();
         let importantFiles = [];
         
+        // Always include foundational files if they exist
+        const foundation = fileKeys.filter(f => f === 'package.json' || f.includes('types') || f.endsWith('.d.ts'));
+        
         if (pLower.includes('db') || pLower.includes('base de datos') || pLower.includes('supabase')) {
           importantFiles = fileKeys.filter(f => f.includes('sql') || f.includes('service') || f.includes('integration'));
         } else if (pLower.includes('ui') || pLower.includes('estética') || pLower.includes('diseño') || pLower.includes('css')) {
@@ -130,7 +133,7 @@ export function useStudioChatAI({
           importantFiles = fileKeys.filter(f => f.includes('sidebar') || f.includes('Navbar') || f.includes('App.tsx'));
         }
         
-        const finalSelection = [...new Set([...importantFiles, activeFile].filter(Boolean) as string[])].slice(0, 6);
+        const finalSelection = [...new Set([...foundation, ...importantFiles, activeFile].filter(Boolean) as string[])].slice(0, 10);
         
         if (finalSelection.length > 0) {
           contextBlock = `\n\n[CONTEXTO RELEVANTE]:\n` +
@@ -180,11 +183,22 @@ export function useStudioChatAI({
         setIsGenerating(false);
         onGeneratingChange?.(false);
         
+        const finalFiles: Record<string, StudioFile> = {};
+        result.files.forEach((content, path) => {
+          finalFiles[path] = { 
+            language: path.split('.').pop()?.toLowerCase() || 'tsx', 
+            content 
+          };
+        });
+
         return {
-          text: `🚀 **¡Proyecto V16.0 Finalizado!**\n\nHe orquestado la arquitectura completa de "${prompt.slice(0, 30)}..." siguiendo el protocolo **Swarm Autonomy**. \n\n- **Archivos generados**: ${result.fileCount}\n- **Estilo**: Aether V9.0 Iridescent\n- **Estado**: Listo para despliegue.\n\n[Descargar Proyecto ZIP](#download-zip)`,
-          blob: result.blob,
-          files: result.files,
-          isChatOnly: true
+          explanation: `🚀 **¡Proyecto V16.0 Finalizado!**\n\nHe orquestado la arquitectura completa de **${result.projectType.toUpperCase()}** siguiendo el protocolo **Swarm Autonomy**. \n\n- **Archivos generados**: ${result.fileCount}\n- **Estado**: Workspace actualizado y listo.\n\nPuedes ver los archivos en el panel lateral y probar el preview ahora mismo.`,
+          files: finalFiles,
+          isChatOnly: false,
+          stack: [],
+          deps: [],
+          suggestions: [],
+          blob: result.blob
         };
       }
 

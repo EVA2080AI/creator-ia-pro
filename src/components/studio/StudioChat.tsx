@@ -287,8 +287,8 @@ export function StudioChat(props: StudioChatProps) {
 
       let assistantMsg: Message;
 
-      if (shouldPlan && result.isChatOnly && !result.blob) {
-        assistantMsg = { id: crypto.randomUUID(), role: 'assistant', content: result.explanation, timestamp: new Date(), type: 'plan', planStatus: 'pending', originalPrompt: text };
+      if ((shouldPlan || isArchitectMode) && result.isChatOnly && !result.blob) {
+        assistantMsg = { id: crypto.randomUUID(), role: 'assistant', content: result.explanation || result.text, timestamp: new Date(), type: 'plan', planStatus: 'pending', originalPrompt: text };
       } else if (result.isChatOnly) {
         const content = result.text || result.explanation;
         const chatFiles = extractChatCodeFiles(content);
@@ -349,6 +349,21 @@ export function StudioChat(props: StudioChatProps) {
     if (error === lastAutoFixError.current) return;
     if (autoFixCountRef.current >= 3) return;
 
+    // Helper to find the first existing file mentioned in the error string
+    const extractErrorFile = (err: string) => {
+      // Regex matches common file paths: src/App.tsx, ./components/Header.tsx, main.tsx
+      const pathRegex = /(?:src\/|[\w.-]+\/)*[\w.-]+\.(?:tsx?|jsx?|css|html|json)/gi;
+      const matches = [...err.matchAll(pathRegex)];
+      for (const m of matches) {
+        const path = m[0].replace(/^\/|^\.\//, ''); // Clean leading / or ./
+        if (props.projectFiles[path]) return path;
+        // Try without src/ if not found
+        const noSrc = path.replace(/^src\//, '');
+        if (props.projectFiles[noSrc]) return noSrc;
+      }
+      return null;
+    };
+
     const timer = setTimeout(async () => {
       lastAutoFixError.current = error;
       autoFixCountRef.current += 1;
@@ -357,24 +372,31 @@ export function StudioChat(props: StudioChatProps) {
       // Auto-trigger artifacts panel to show the "Fixing" state
       props.onToggleArtifacts?.();
       
-      addLog(`🤖 PROTOCOLO FIX #${autoFixCountRef.current}/3: Analizando error...`, "info");
+      const probFile = extractErrorFile(error);
+      addLog(`🤖 PROTOCOLO FIX #${autoFixCountRef.current}/3: ${probFile ? `Analizando ${probFile}...` : 'Analizando error...'}`, "info");
       
       // Enriched Fix Prompt
       let fixPrompt = `[AUTO-FIX] Error detectado en el preview:
 \`\`\`
 ${error}
 \`\`\`
-Por favor, analiza el código generado recientemente y el archivo activo (${props.activeFile || 'N/A'}) para corregir esta regresión. Prioriza la integridad de tipos y dependencias.`;
+
+POR FAVOR, corrige este error analizando el estado actual de los archivos críticos:
+${probFile ? `- Archivo detectado como origen: @${probFile}` : ''}
+- Archivo activo: @${props.activeFile || 'App.tsx'}
+- Punto de entrada: @App.tsx
+
+Analiza si hay imports rotos, typos o variables no definidas. Devuelve el JSON con las correcciones necesarias.`;
 
       if (error.toLowerCase().includes('could not find module') || error.toLowerCase().includes('cannot find module')) {
-        fixPrompt += `\n\nIMPORTANTE: El error indica que falta un módulo o archivo local. REVISA todos los imports (especialmente en App.tsx) y ASEGÚRATE de crear cualquier archivo (hooks, components, utils) que esté siendo referenciado y no exista en la estructura actual.`;
+        fixPrompt += `\n\nIMPORTANTE: El error indica que falta un módulo o archivo local. REVISA los imports en @App.tsx y ASEGÚRATE de crear cualquier archivo que falte.`;
       }
 
       await handleSend(fixPrompt);
       setIsAutoFixing(false);
     }, 2500); // Slightly longer delay to let the UI stabilize
     return () => clearTimeout(timer);
-  }, [props.runtimeError, props.previewError, isGenerating, user, handleSend, addLog, props.activeFile]);
+  }, [props.runtimeError, props.previewError, isGenerating, user, handleSend, addLog, props.activeFile, props.projectFiles]);
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
   const onAttachUrl = async (url: string) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
@@ -120,11 +120,44 @@ export function useStudioProjects() {
     return project;
   }, [user]);
 
+  const [previousFiles, setPreviousFiles] = useState<Record<string, StudioFile> | null>(null);
+
+  // ─── AUTO-SAVE Logic ───────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!activeProject || !user) return;
+    
+    // Silence internal ref for comparison to avoid save loop
+    const currentFilesStr = JSON.stringify(activeProject.files);
+
+    const timer = setTimeout(async () => {
+      try {
+        const { error } = await supabase
+          .from('studio_projects')
+          .update({ files: activeProject.files as any, updated_at: new Date().toISOString() })
+          .eq('id', activeProject.id);
+
+        if (!error) {
+          console.log(`💾 Genesis Auto-save: ${activeProject.name}`);
+        }
+      } catch (err) {
+        console.error('Auto-save failed:', err);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [activeProject?.files, activeProject?.id, user?.id]);
+
   const updateProjectFiles = useCallback(async (projectId: string, files: Record<string, StudioFile>) => {
     if (Object.keys(files).length > 100) {
       toast.error('Límite de 100 archivos por proyecto');
       return;
     }
+
+    // Save previous state for undo (Q-7)
+    if (activeProject?.id === projectId) {
+      setPreviousFiles(activeProject.files);
+    }
+
     const { error } = await supabase
       .from('studio_projects')
       .update({ files: files as any, updated_at: new Date().toISOString() })
@@ -135,7 +168,7 @@ export function useStudioProjects() {
     const updater = (p: StudioProject) => p.id === projectId ? { ...p, files, updated_at: new Date().toISOString() } : p;
     setProjects((prev) => prev.map(updater));
     setActiveProject((prev) => prev?.id === projectId ? updater(prev) : prev);
-  }, []);
+  }, [activeProject]);
 
   const renameProject = useCallback(async (projectId: string, name: string) => {
     const { error } = await supabase
@@ -181,9 +214,21 @@ export function useStudioProjects() {
     return newProject;
   }, [user]);
 
+  const rollbackFiles = useCallback(async () => {
+    if (!activeProject || !previousFiles) {
+      toast.error('No hay nada que deshacer');
+      return;
+    }
+    const filesToRestore = { ...previousFiles };
+    await updateProjectFiles(activeProject.id, filesToRestore);
+    setPreviousFiles(null);
+    toast.success('Cambios revertidos');
+  }, [activeProject, previousFiles, updateProjectFiles]);
+
   return { 
     projects, activeProject, setActiveProject, loading, 
     createProject, updateProjectFiles, renameProject, 
-    deleteProject, duplicateProject, refetch: fetchProjects 
+    deleteProject, duplicateProject, rollbackFiles, canUndo: !!previousFiles,
+    refetch: fetchProjects 
   };
 }

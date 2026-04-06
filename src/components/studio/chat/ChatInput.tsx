@@ -52,11 +52,50 @@ export function ChatInput({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(e.target.value);
     const ta = e.target;
     ta.style.height = 'auto';
     ta.style.height = Math.min(ta.scrollHeight, 350) + 'px';
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+       recognitionRef.current?.stop();
+       setIsListening(false);
+       return;
+    }
+
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Tu navegador no soporta dictado por voz.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onresult = (event: any) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          transcript += event.results[i][0].transcript;
+        }
+      }
+      if (transcript) {
+        setInput(input + (input.endsWith(' ') || !input ? '' : ' ') + transcript);
+      }
+    };
+
+    recognition.start();
+    recognitionRef.current = recognition;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -66,6 +105,28 @@ export function ChatInput({
         onSend();
       }
     }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Q-8: Validation logic
+    const allowedExtensions = ['.txt', '.js', '.ts', '.tsx', '.css', '.html', '.json', '.md', '.sql'];
+    const extension = file.name.slice((file.name.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
+    
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(`"${file.name}" es demasiado grande (máx 2MB)`);
+      return;
+    }
+
+    if (extension && !allowedExtensions.includes(`.${extension}`)) {
+      toast.error('Tipo de archivo no permitido para análisis.');
+      return;
+    }
+
+    onAttachFile(file);
+    e.target.value = '';
   };
 
   return (
@@ -255,8 +316,12 @@ export function ChatInput({
             </button>
             
             <button 
-               aria-label="Dictado por voz"
-               className="h-10 w-10 rounded-full flex items-center justify-center text-zinc-300 hover:text-zinc-900 hover:bg-zinc-50 transition-all active:scale-90"
+               onClick={toggleListening}
+               aria-label={isListening ? "Detener dictado" : "Dictado por voz"}
+               className={cn(
+                 "h-10 w-10 rounded-full flex items-center justify-center transition-all active:scale-90",
+                 isListening ? "bg-rose-50 text-rose-600 animate-pulse ring-4 ring-rose-100" : "text-zinc-300 hover:text-zinc-900 hover:bg-zinc-50"
+               )}
             >
               <Mic className="h-4 w-4" />
             </button>
@@ -289,7 +354,8 @@ export function ChatInput({
         ref={fileInputRef} 
         type="file" 
         className="hidden" 
-        onChange={e => { const f = e.target.files?.[0]; if (f) onAttachFile(f); e.target.value = ''; }} 
+        accept=".txt,.js,.ts,.tsx,.css,.html,.json,.md,.sql"
+        onChange={handleFileChange} 
         aria-hidden="true"
       />
     </footer>
