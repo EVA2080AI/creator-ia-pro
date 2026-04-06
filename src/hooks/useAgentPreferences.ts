@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-import { AgentSpecialist, AgentPreference } from '@/components/studio/chat/types';
+import type { AgentSpecialist, AgentPreference } from '@/components/studio/chat/types';
+export type { AgentSpecialist, AgentPreference };
 
 export function useAgentPreferences() {
   const { user } = useAuth();

@@ -1,50 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { 
-  Palette, 
-  Type, 
-  Layout, 
-  Box, 
-  Shield, 
-  Zap, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Info, 
-  ExternalLink,
-  Github,
-  Figma,
-  Layers,
-  Sparkles,
-  MousePointer2,
-  MessageSquare,
-  Send,
-  Bot,
-  User,
-  Settings,
-  CreditCard,
-  Users,
-  Bell,
-  Monitor,
-  Code,
-  Command,
-  Search,
-  ChevronRight,
-  MoreHorizontal,
-  Copy,
-  Check,
-  Plus,
-  ArrowRight,
-  Eye,
-  Trash2,
-  ArrowUpRight,
-  GitBranch,
-  Package,
-  Database
+  Palette, Type, Layout, Box, Shield, Zap, CheckCircle2, AlertTriangle, 
+  Info, ExternalLink, Github, Figma, Layers, Sparkles, MousePointer2, 
+  MessageSquare, Send, Bot, User, Settings, CreditCard, Users, Bell, 
+  Monitor, Code, Command, Search, ChevronRight, MoreHorizontal, Copy, 
+  Check, Plus, ArrowRight, Eye, Trash2, ArrowUpRight, GitBranch, 
+  Package, Database, Crown, Brain, LayoutDashboard, BrainCircuit
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-const DesignSystem = () => {
+export default function DesignSystem() {
   const [activeSection, setActiveSection] = useState('colors');
 
   const sections = [
@@ -73,7 +40,6 @@ const DesignSystem = () => {
     { name: 'Zinc 100', hex: '#F4F4F5', text: 'zinc-900', desc: 'Lighter backgrounds and separators.' },
   ];
 
-  // Helper for scrolling
   const scrollTo = (id: string) => {
     setActiveSection(id);
     const el = document.getElementById(id);
@@ -86,10 +52,10 @@ const DesignSystem = () => {
         <title>Aether V8.0 | Design System</title>
       </Helmet>
 
-      {/* ════════════════════ SIDEBAR NAV ════════════════════ */}
+      {/* SIDEBAR NAV */}
       <aside className="w-72 bg-zinc-50 border-r border-zinc-200 sticky top-0 h-screen hidden lg:flex flex-col p-8">
         <div className="flex items-center gap-3 mb-12">
-          <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+          <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
             <Zap className="h-6 w-6" />
           </div>
           <div className="flex flex-col">
@@ -106,30 +72,30 @@ const DesignSystem = () => {
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all",
                 activeSection === id 
-                  ? "bg-white text-primary shadow-sm border border-zinc-200" 
+                  ? "bg-white text-blue-600 shadow-sm border border-zinc-200" 
                   : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100"
               )}
             >
-              <Icon className={cn("h-4 w-4", activeSection === id ? "text-primary" : "text-zinc-400")} />
+              <Icon className={cn("h-4 w-4", activeSection === id ? "text-blue-600" : "text-zinc-400")} />
               {label}
             </button>
           ))}
         </nav>
 
         <div className="mt-auto pt-8 border-t border-zinc-200">
-          <div className="p-4 rounded-2xl bg-primary/5 border border-primary/20">
-            <div className="flex items-center gap-2 mb-2 text-primary">
+          <div className="p-4 rounded-2xl bg-blue-600/5 border border-blue-600/20">
+            <div className="flex items-center gap-2 mb-2 text-blue-600">
               <Shield className="h-4 w-4" />
               <span className="text-[10px] font-black uppercase tracking-wider">Enterprise Ready</span>
             </div>
             <p className="text-[11px] text-zinc-500 leading-relaxed font-medium">
-              Aether está diseñado para aplicaciones de clase mundial con enfoque en IA.
+              Aether es un sistema de diseño de alto nivel con enfoque en IA.
             </p>
           </div>
         </div>
       </aside>
 
-      {/* ════════════════════ MAIN CONTENT ════════════════════ */}
+      {/* MAIN CONTENT */}
       <main className="flex-1 min-w-0 bg-white">
         
         {/* Hero Section */}
@@ -992,14 +958,3 @@ const DesignSystem = () => {
   );
 };
 
-// Internal icon import mock if needed
-const Brain = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .52 8.23 4.326 4.326 0 0 0 8.003 0 4 4 0 0 0 .52-8.23 4 4 0 0 0-2.526-5.77A3 3 0 0 0 12 5Z" />
-    <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.52 8.23 4.326 4.326 0 0 1-8.003 0 4 4 0 0 1-.52-8.23 4 4 0 0 1 2.526-5.77A3 3 0 0 1 12 5Z" />
-    <path d="M12 13v8" />
-    <path d="M9 17h6" />
-  </svg>
-);
-
-export default DesignSystem;
