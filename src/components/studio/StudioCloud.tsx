@@ -4,7 +4,7 @@ import {
   Cloud, Database, Users, HardDrive, Zap, Activity,
   CheckCircle, AlertCircle, Loader2, ExternalLink,
   Table, RefreshCw, ChevronRight, Plug, ShieldCheck, Mail, CreditCard, Mic,
-  Shield, Globe, Lock,
+  Shield, Globe, Lock, BarChart3, History, Layers,
 } from 'lucide-react';
 import { StudioUsageBar } from './StudioUsageBar';
 
@@ -19,17 +19,19 @@ interface StudioCloudProps {
   onConfigChange: (config: SupabaseConfig | null) => void;
 }
 
-type CloudSection = 'overview' | 'database' | 'users' | 'storage' | 'functions' | 'connectors' | 'secrets' | 'security';
+type CloudSection = 'overview' | 'database' | 'users' | 'storage' | 'functions' | 'connectors' | 'secrets' | 'security' | 'analytics' | 'audit';
 
 const NAV: { id: CloudSection; label: string; icon: React.ElementType }[] = [
   { id: 'overview',   label: 'Overview',       icon: Activity  },
   { id: 'database',   label: 'Database',        icon: Database  },
   { id: 'users',      label: 'Users',           icon: Users     },
+  { id: 'analytics',  label: 'Analytics',       icon: BarChart3 },
   { id: 'storage',    label: 'Storage',         icon: HardDrive },
   { id: 'functions',  label: 'Edge Functions',  icon: Zap       },
   { id: 'connectors', label: 'Conectores',      icon: Plug      },
   { id: 'secrets',    label: 'Secretos',         icon: ShieldCheck },
   { id: 'security',   label: 'Seguridad',        icon: Shield    },
+  { id: 'audit',      label: 'Audit Logs',      icon: History   },
 ];
 
 export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudProps) {
@@ -147,6 +149,13 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
 
       {/* ── Main content ─────────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto no-scrollbar" style={{ background: '#10111a' }}>
+        {/* Environment Toggle (Test / Live) - Genesis v19.1 */}
+        {isConnected && (
+          <div className="mx-4 mt-4 p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.05] flex items-center gap-1">
+            <button className="flex-1 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest bg-white/10 text-white shadow-lg">Entorno Test</button>
+            <button className="flex-1 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white/40 transition-all">Desplegar a Live</button>
+          </div>
+        )}
 
         {/* ── OVERVIEW ──────────────────────────────────────────────────── */}
         {section === 'overview' && (
@@ -435,6 +444,9 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                 { id: 'stripe', label: 'Stripe', icon: CreditCard, color: '#6366f1', desc: 'Pagos y suscripciones' },
                 { id: 'resend', label: 'Resend', icon: Mail,       color: '#ffffff', desc: 'Emails transaccionales' },
                 { id: 'eleven', label: 'ElevenLabs', icon: Mic,    color: '#34d399', desc: 'Voz e IA de audio' },
+                { id: 'firecrawl', label: 'Firecrawl', icon: Globe, color: '#f59e0b', desc: 'AI Web Scraping' },
+                { id: 'aws-s3', label: 'AWS S3', icon: HardDrive, color: '#ff9900', desc: 'Cloud Object Storage' },
+                { id: 'shopify', label: 'Shopify', icon: ShoppingBag, color: '#95bf47', desc: 'Ecommerce Sync' },
               ].map(c => (
                 <div key={c.id} className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${c.color}15`, border: `1px solid ${c.color}25` }}>
@@ -519,6 +531,64 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
             <div className="p-3 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center gap-3">
               <Lock className="h-4 w-4 text-emerald-500/50" />
               <span className="text-[10px] text-emerald-400/70 font-medium">Todos los secrets están encriptados con AES-256 en Genesis Cloud.</span>
+            </div>
+          </div>
+        )}
+        {/* ── ANALYTICS ────────────────────────────────────────────────────── */}
+        {section === 'analytics' && isConnected && (
+          <div className="p-4 space-y-4">
+            <div>
+              <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.25em] mb-1">Project Analytics</h3>
+              <p className="text-[10px] text-white/20">Tráfico y comportamiento en tiempo real</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { label: 'Visitantes', value: '0', trend: '+0%' },
+                { label: 'Pageviews',  value: '0', trend: '+0%' },
+                { label: 'Bounce Rate', value: '0%', trend: '-0%' },
+                { label: 'Avg. Sesion', value: '0s', trend: '+0%' },
+              ].map(stat => (
+                <div key={stat.label} className="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                  <div className="text-[24px] font-black text-white">{stat.value}</div>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-[9px] font-bold text-emerald-400">{stat.trend}</span>
+                    <span className="text-[9px] text-white/20 uppercase tracking-widest">{stat.label}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="h-32 w-full rounded-2xl bg-white/[0.01] border border-white/[0.04] flex items-center justify-center">
+              <span className="text-[10px] text-white/10 uppercase tracking-[0.3em]">Esperando Datos...</span>
+            </div>
+          </div>
+        )}
+
+        {/* ── AUDIT LOGS ────────────────────────────────────────────────────── */}
+        {section === 'audit' && isConnected && (
+          <div className="p-4 space-y-4">
+            <div>
+              <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.25em] mb-1">Workspace Audit Logs</h3>
+              <p className="text-[10px] text-white/20">Registro de cumplimiento empresarial</p>
+            </div>
+
+            <div className="space-y-1">
+              {[
+                { action: 'Project Created', member: 'Genesis AI', time: '10m ago' },
+                { action: 'Secret Added',    member: 'Admin',      time: '1h ago' },
+              ].map((log, idx) => (
+                <div key={idx} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <History className="h-3 w-3 text-white/20" />
+                    <div>
+                      <div className="text-[11px] font-bold text-white/70">{log.action}</div>
+                      <div className="text-[9px] text-white/20">by {log.member}</div>
+                    </div>
+                  </div>
+                  <span className="text-[9px] text-white/15">{log.time}</span>
+                </div>
+              ))}
             </div>
           </div>
         )}

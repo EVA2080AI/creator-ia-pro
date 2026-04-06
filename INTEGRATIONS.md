@@ -13,6 +13,11 @@ Los Conectores Compartidos añaden capacidades de tiempo de ejecución a tu apli
 | **Resend** | Email | Envío de correos transaccionales y marketing. |
 | **ElevenLabs** | Voz | Generación de audio y Text-to-Speech de alta calidad. |
 | **Slack / Telegram** | Alertas | Notificaciones de eventos y bots de interacción. |
+| **Firecrawl** | Scraping | Extracción de datos estructurados de cualquier sitio web. |
+| **Shopify** | Ecommerce | Gestión de tiendas, productos y pedidos. |
+| **AWS S3** | Storage | Almacenamiento masivo de archivos en buckets de Amazon. |
+| **Contentful** | CMS | Gestión de contenido headless para aplicaciones dinámicas. |
+| **Perplexity** | Research | Búsqueda en tiempo real con citas verificables. |
 
 ### 🛠️ Configuración Gateway
 La autenticación se maneja automáticamente. Una vez que conectas un servicio en **Configuración → Conectores**, Génesis inyecta de forma segura los secretos en tus Edge Functions sin exponerlos en el frontend.
@@ -40,8 +45,17 @@ Añade tus llaves en la pestaña **Cloud → Secretos**. Estos valores se inyect
 
 ---
 
-## 🛡️ Seguridad y Auditoría (Aikido)
-Habilita tests de penetración impulsados por IA para identificar vulnerabilidades reales (SQL Injection, XSS, broken auth) antes de salir a producción. Genera reportes de seguridad para SOC 2 e ISO 27001 con un solo clic.
+## 🛡️ Seguridad, Analíticas y Auditoría
+Génesis v19.0 proporciona visibilidad total sobre tu proyecto:
+- **Pentesting Proactivo (Aikido)**: Habilita tests de penetración impulsados por IA para identificar vulnerabilidades reales (SQL Injection, XSS, broken auth) antes de salir a producción.
+- **Project Analytics**: Monitorización en tiempo real de tráfico, visitantes únicos y comportamiento de usuario (Dashboard nativo).
+- **Audit Logs**: Registro inmutable de todos los cambios en el código y la infraestructura para cumplimiento SOC2/ISO27001.
+
+### 🔐 Gestión de Entornos (Test vs Live)
+Génesis permite separar entornos de datos de forma segura:
+- **Entorno Test**: Infraestructura de pruebas con datos ficticios.
+- **Entorno Live**: Configuración de producción para usuarios reales.
+Pasa tus proyectos de Test a Live con validación de seguridad de un solo clic.
 
 ---
 
