@@ -4,9 +4,11 @@ import { toast } from 'sonner';
 import type { Message } from '@/components/studio/chat/types';
 import type { UIArtifact, UIPlanTask, UILog } from '@/components/studio/StudioArtifactsPanel';
 
+import type { User } from '@supabase/supabase-js';
+
 interface UseStudioChatMessagesProps {
   projectId: string | null;
-  user: any;
+  user: User | null;
   setArtifacts: (a: UIArtifact[]) => void;
   setTasks: (t: UIPlanTask[]) => void;
   setLogs: (l: (prev: UILog[]) => UILog[]) => void;
@@ -21,7 +23,7 @@ export function useStudioChatMessages({
 }: UseStudioChatMessagesProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
-  const [convHistory, setConvHistory] = useState<{ role: 'user' | 'assistant'; content: string }[]>([]);
+  const [convHistory, setConvHistory] = useState<Message[]>([]);
   
   const initialLoadRef = useRef(false);
 
@@ -101,7 +103,7 @@ export function useStudioChatMessages({
         timestamp: new Date(m.created_at)
       }));
       setMessages(mapped);
-      setConvHistory(mapped.map(m => ({ role: m.role, content: m.content })).slice(-16));
+      setConvHistory(mapped.slice(-16));
     } else {
       setMessages([{
         id: 'welcome',

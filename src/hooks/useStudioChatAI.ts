@@ -15,13 +15,21 @@ import {
 } from '@/prompts';
 import { MODELS } from '@/components/studio/chat/constants';
 
-export type AgentPhase = 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
-export type AgentSpecialist = 'ux' | 'frontend' | 'backend' | 'devops' | 'game' | 'architect' | 'engineer' | 'none';
+import { 
+  AgentPhase, 
+  AgentSpecialist, 
+  CodeGenResult, 
+  DeepBuildResult,
+  Message,
+  AgentPreference
+} from '@/components/studio/chat/types';
+
+export type { AgentPhase, AgentSpecialist };
 
 interface UseStudioChatAIProps {
   projectFiles: Record<string, StudioFile>;
   selectedModel: string;
-  convHistory: any[];
+  convHistory: Message[];
   persona: 'genesis' | 'antigravity';
   isArchitectMode: boolean;
   activeFile?: string | null;
@@ -29,23 +37,6 @@ interface UseStudioChatAIProps {
   onPhaseChange?: (phase: AgentPhase, specialist?: AgentSpecialist) => void;
   onStreamCharsChange?: (chars: number, preview: string) => void;
   onGeneratingChange?: (v: boolean) => void;
-}
-
-export interface CodeGenResult {
-  files: Record<string, StudioFile>;
-  explanation: string;
-  stack: string[];
-  deps: string[];
-  suggestions: string[];
-  isChatOnly?: boolean;
-  blob?: Blob;
-}
-
-export interface DeepBuildResult {
-  text: string;
-  blob: Blob;
-  files: Map<string, string>;
-  isChatOnly: true; // DeepBuild is handled as chat-only for UI purposes
 }
 
 export function useStudioChatAI({
@@ -85,7 +76,7 @@ export function useStudioChatAI({
 
   const generateCode = useCallback(async (
     prompt: string,
-    options?: { pendingImage?: string | null; pendingUrl?: string | null; preferences?: any[] }
+    options?: { pendingImage?: string | null; pendingUrl?: string | null; preferences?: AgentPreference[] }
   ): Promise<CodeGenResult | DeepBuildResult | null> => {
     setIsGenerating(true);
     onGeneratingChange?.(true);

@@ -13,6 +13,7 @@ import {
   Star, Shield, Users, ChevronRight, Sparkles, Wand2
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { LandingHeader } from "@/components/layout/LandingHeader";
 import {
   motion,
   useInView,
@@ -298,9 +299,10 @@ export default function Index() {
         <meta name="description" content="Genera apps React completas con Genesis IDE y crea imágenes, logos y textos con Studio. Todo con IA. Desde $69.000 COP/mes." />
       </Helmet>
 
-      <div className="min-h-screen bg-background text-foreground selection:bg-primary/15 font-sans overflow-x-hidden">
+      <div className="min-h-screen bg-white text-foreground selection:bg-primary/20 font-sans overflow-x-hidden relative">
+        <LandingHeader />
 
-        <main>
+        <main className="pt-20 md:pt-32">
 
           {/* ── Hero ─────────────────────────────────────────────────────── */}
           <section ref={heroRef} className="relative flex flex-col items-center text-center px-6 pt-24 pb-20 overflow-hidden">
@@ -379,20 +381,23 @@ export default function Index() {
                 initial="hidden"
                 animate="show"
                 custom={0.1}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-50 border border-zinc-200 text-[11px] font-bold text-zinc-400 uppercase tracking-[0.3em] mb-8"
+                className="inline-flex items-center gap-3 px-5 py-2.5 rounded-2xl bg-white border border-zinc-200 text-[11px] font-black text-zinc-400 uppercase tracking-[0.4em] mb-10 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.1)] italic"
               >
-                <motion.span
-                  animate={{ rotate: [0, 15, -10, 0] }}
-                  transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
-                >
-                  <Code2 className="h-3 w-3 text-primary" />
-                </motion.span>
-                Genesis IDE · Studio · Canvas IA
+                <div className="relative">
+                  <motion.div
+                    animate={{ rotate: [0, 15, -10, 0], scale: [1, 1.2, 0.9, 1] }}
+                    transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+                  >
+                    <Code2 className="h-4 w-4 text-primary" />
+                  </motion.div>
+                  <div className="absolute inset-0 bg-primary/20 blur-lg animate-pulse" />
+                </div>
+                Genesis IDE · Studio 4.0 · Ultra V21.0
               </motion.div>
 
               {/* Headline — word-by-word stagger */}
               <motion.h1
-                className="text-[clamp(2.5rem,8vw,5.5rem)] font-black leading-[0.9] tracking-tight text-zinc-900 max-w-4xl mb-6"
+                className="text-[clamp(2.8rem,9vw,6.5rem)] font-black leading-[0.88] tracking-tighter text-zinc-900 max-w-5xl mb-8 italic"
               >
                 <motion.span
                   variants={fadeUp}
@@ -401,7 +406,7 @@ export default function Index() {
                   custom={0.2}
                   className="block"
                 >
-                  Construye apps.
+                  ENGINEERING.
                 </motion.span>
                 <motion.span
                   variants={fadeUp}
@@ -410,16 +415,17 @@ export default function Index() {
                   custom={0.35}
                   className="block text-transparent bg-clip-text"
                   style={{
-                    backgroundImage: "linear-gradient(135deg, #a855f7 0%, #7c3aed 40%, #a855f7 80%, #c084fc 100%)",
+                    backgroundImage: "linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #a855f7 100%)",
                     backgroundSize: "200% 200%",
                   }}
                 >
                   <motion.span
                     animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
                     transition={{ repeat: Infinity, duration: 5, ease: "linear" }}
+                    className="pb-2"
                     style={{ display: "inline-block" }}
                   >
-                    Crea contenido.
+                    SOVEREIGNTY.
                   </motion.span>
                 </motion.span>
                 <motion.span
@@ -429,7 +435,7 @@ export default function Index() {
                   custom={0.5}
                   className="block"
                 >
-                  Todo con IA.
+                  AUTO_SYNTHESIS.
                 </motion.span>
               </motion.h1>
 

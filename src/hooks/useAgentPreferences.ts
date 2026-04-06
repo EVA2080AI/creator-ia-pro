@@ -3,13 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-export type AgentSpecialist = 'ux' | 'frontend' | 'backend' | 'devops' | 'game';
-
-export interface AgentPreference {
-  agent_id: AgentSpecialist;
-  instructions: string;
-  settings: any;
-}
+import { AgentSpecialist, AgentPreference } from '@/components/studio/chat/types';
 
 export function useAgentPreferences() {
   const { user } = useAuth();
@@ -20,7 +14,7 @@ export function useAgentPreferences() {
     if (!user) return;
     try {
       setLoading(true);
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('agent_preferences')
         .select('agent_id, instructions, settings')
         .eq('user_id', user.id);

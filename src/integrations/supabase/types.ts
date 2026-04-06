@@ -387,6 +387,33 @@ export type Database = {
         }
         Relationships: []
       }
+      agent_preferences: {
+        Row: {
+          id: string
+          user_id: string
+          agent_id: string
+          instructions: string
+          settings: Json
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          agent_id: string
+          instructions: string
+          settings?: Json
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          agent_id?: string
+          instructions?: string
+          settings?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

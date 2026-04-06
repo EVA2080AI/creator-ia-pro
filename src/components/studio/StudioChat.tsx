@@ -66,12 +66,28 @@ interface StudioChatProps {
   onPhaseChange?: (phase: AgentPhase, specialist?: AgentSpecialist) => void;
 }
 
-// ─── Header Component (Internal) ───────────────────────────────────────────────
+interface StudioProjectHeaderProps {
+  name: string;
+  isSaving?: boolean;
+  onShare?: () => void;
+  onPublish?: () => void;
+  onBack?: () => void;
+  onToggleArtifacts?: () => void;
+  agentPhase: AgentPhase;
+  activeSpecialist: AgentSpecialist;
+}
+
 function StudioProjectHeader({ 
-  name = 'Proyecto Sin Nombre', isSaving, onShare, onPublish, onBack, onToggleArtifacts,
-  agentPhase, activeSpecialist
-}: any) {
-  const isSovereign = true; // For future toggles
+  name = 'Proyecto Sin Nombre', 
+  isSaving, 
+  onShare, 
+  onPublish, 
+  onBack, 
+  onToggleArtifacts,
+  agentPhase, 
+  activeSpecialist
+}: StudioProjectHeaderProps) {
+  const isSovereign = true; 
 
   return (
     <header 
