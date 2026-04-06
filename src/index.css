@@ -87,6 +87,15 @@
     --g-mesh-3: 330 81% 60%;           /* Terciario (Pink) */
     --g-mesh-4: 158 82% 47%;           /* Cuaternario (Emerald) */
 
+    /* ── Ultra Sovereign v21.0 (PRO) ────────── */
+    --sov-bg:          240 10% 4%;        /* #0A0A0C */
+    --sov-card:        240 10% 6%;
+    --sov-accent:      271 91% 65%;
+    --sov-glass:       rgba(10, 10, 12, 0.85);
+    --sov-border:      rgba(255, 255, 255, 0.08);
+    --sov-irid-1:      rgba(168, 85, 247, 0.15);
+    --sov-irid-2:      rgba(59, 130, 246, 0.15);
+
     /* ── Solicitud Usuario Genesis Fondo Mesh ────────── */
     --color-g-fondo-base: #FCFCFC;
     --color-g-primario: rgba(168, 85, 247, 0.15); /* Purple light */
@@ -94,6 +103,51 @@
     --color-g-terciario: rgba(236, 72, 153, 0.15); /* Pink light */
     --color-g-cuaternario: rgba(16, 185, 129, 0.15); /* Emerald light */
   }
+}
+
+@layer utilities {
+  .aether-sov-glass {
+    @apply backdrop-blur-[40px] saturate-[1.8] bg-[rgba(var(--sov-bg-rgb),0.85)] border border-[var(--sov-border)];
+  }
+  .blueprint-grid {
+    background-image: 
+      linear-gradient(var(--sov-border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--sov-border) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  .neural-mesh {
+    background-image: 
+      radial-gradient(circle at 2px 2px, rgba(168, 85, 247, 0.15) 1px, transparent 0),
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 24px 24px, 48px 48px, 48px 48px;
+    mask-image: radial-gradient(circle at center, black, transparent 90%);
+  }
+  .scanline-overlay {
+    background: linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 100%
+    );
+    background-size: 100% 4px;
+    animation: scanline 8s linear infinite;
+    pointer-events: none;
+  }
+  .sov-card-glow {
+    box-shadow: 0 0 40px -10px hsla(var(--primary) / 0.15);
+    border: 1px solid hsla(var(--primary) / 0.1);
+  }
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+@keyframes iris-glow {
+  0%, 100% { opacity: 0.3; filter: blur(20px); }
+  50% { opacity: 0.6; filter: blur(40px); }
 }
 
 @layer base {
@@ -208,12 +262,23 @@
 
   /* ── Aether V9.0 — Ultra-Premium Neural Tokens ── */
   .aether-glass {
-    background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(40px) saturate(2);
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(50px) saturate(2.5);
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow: 
-      0 4px 24px -1px rgba(0, 0, 0, 0.05),
-      0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+      0 8px 32px -4px rgba(0, 0, 0, 0.04),
+      0 0 0 1px rgba(255, 255, 255, 0.4) inset,
+      0 0 20px -5px rgba(168, 85, 247, 0.1);
+  }
+
+  .aether-glass-dark {
+    background: rgba(10, 10, 12, 0.82);
+    backdrop-filter: blur(60px) saturate(2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 12px 40px -8px rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+      0 0 30px -10px rgba(168, 85, 247, 0.2);
   }
 
   .aether-iridescent {
@@ -223,18 +288,20 @@
   .aether-iridescent::after {
     content: "";
     position: absolute;
-    inset: 0;
+    inset: -50%;
     background: linear-gradient(
       125deg,
       transparent 0%,
-      rgba(168, 85, 247, 0.05) 30%,
-      rgba(59, 130, 246, 0.05) 50%,
-      rgba(236, 72, 153, 0.05) 70%,
+      rgba(168, 85, 247, 0.08) 25%,
+      rgba(59, 130, 246, 0.08) 50%,
+      rgba(236, 72, 153, 0.08) 75%,
       transparent 100%
     );
     background-size: 200% 200%;
-    animation: aurora-mesh 12s linear infinite;
+    animation: aurora-mesh 15s linear infinite;
     pointer-events: none;
+    filter: blur(60px);
+    z-index: 0;
   }
 
   .neural-pulse {

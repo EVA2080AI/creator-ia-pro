@@ -133,115 +133,126 @@ export function ChatInput({
 
   return (
     <footer 
-      className="shrink-0 p-6 border-t border-black/[0.04] bg-white/40 backdrop-blur-3xl saturate-[1.5] relative z-40 panorama-transition"
+      className={cn(
+        "shrink-0 p-12 border-t transition-all duration-1000 relative z-40 panorama-transition pb-14",
+        "bg-[#08080A]/95 border-white/5 backdrop-blur-[80px] saturate-[2.2]"
+      )}
       role="contentinfo"
     >
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-40" />
+      <div className="absolute inset-0 scanline-overlay opacity-[0.015] pointer-events-none" />
       
       {/* ── Mode Selector: Industrial Sovereign ── */}
-      <div className="max-w-4xl mx-auto mb-6 flex items-center justify-between px-2">
-         <div className="flex bg-black/[0.03] p-1 rounded-2xl border border-black/[0.05] relative overflow-hidden group shadow-inner">
+      <div className="max-w-5xl mx-auto mb-10 flex items-center justify-between px-4">
+         <div className="flex bg-white/5 p-2 rounded-[2.5rem] border border-white/10 relative overflow-hidden group shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] backdrop-blur-3xl">
             <button 
               onClick={() => !isArchitectMode && onArchitectToggle()}
               className={cn(
-                "relative z-10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2.5",
-                isArchitectMode ? "text-white" : "text-zinc-400 hover:text-zinc-600"
+                "relative z-10 px-12 py-5 rounded-[1.8rem] text-[11px] font-black uppercase tracking-[0.4em] transition-all duration-1000 flex items-center gap-5 italic",
+                isArchitectMode ? "text-white" : "text-zinc-500 hover:text-zinc-300"
               )}
             >
               {isArchitectMode && (
-                <motion.div layoutId="mode-bg" className="absolute inset-0 bg-zinc-900 rounded-xl shadow-xl z-[-1]" />
+                <motion.div 
+                  layoutId="mode-bg-sov" 
+                  className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-indigo-900 to-primary/30 rounded-[1.8rem] shadow-[0_0_40px_rgba(79,70,229,0.5)] z-[-1] aether-iridescent" 
+                  transition={{ type: "spring", bounce: 0.1, duration: 0.8 }}
+                />
               )}
-              <Shield className={cn("w-3.5 h-3.5", isArchitectMode ? "text-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" : "text-zinc-400")} />
-              Plan_Architect
+              <Shield className={cn("w-5 h-5 transition-all duration-700", isArchitectMode ? "text-white animate-pulse" : "text-zinc-600")} />
+              ARCHITECT_STRATEGY
             </button>
             <button 
               onClick={() => isArchitectMode && onArchitectToggle()}
               className={cn(
-                "relative z-10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2.5",
-                !isArchitectMode ? "text-white" : "text-zinc-400 hover:text-zinc-600"
+                "relative z-10 px-12 py-5 rounded-[1.8rem] text-[11px] font-black uppercase tracking-[0.4em] transition-all duration-1000 flex items-center gap-5 italic",
+                !isArchitectMode ? "text-white" : "text-zinc-500 hover:text-zinc-300"
               )}
             >
               {!isArchitectMode && (
-                <motion.div layoutId="mode-bg" className="absolute inset-0 bg-primary rounded-xl shadow-lg shadow-primary/20 z-[-1]" />
+                <motion.div 
+                  layoutId="mode-bg-sov" 
+                  className="absolute inset-0 bg-gradient-to-br from-primary via-purple-900 to-indigo-900 rounded-[1.8rem] shadow-[0_0_40px_rgba(168,85,247,0.5)] z-[-1] aether-iridescent" 
+                  transition={{ type: "spring", bounce: 0.1, duration: 0.8 }}
+                />
               )}
-              <ArrowUp className={cn("w-3.5 h-3.5", !isArchitectMode ? "text-white" : "text-zinc-400")} />
-              Agent_Build
+              <ArrowUp className={cn("w-5 h-5 transition-all duration-700", !isArchitectMode ? "text-white animate-pulse" : "text-zinc-600")} />
+              ENGINE_CONSTRUCT
             </button>
          </div>
 
-         <div className="hidden lg:flex items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/50 border border-black/[0.03] shadow-sm">
-               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest italic leading-none">Sync_Stable</span>
+         <div className="hidden lg:flex items-center gap-8">
+            <div className="flex items-center gap-4 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 shadow-2xl backdrop-blur-xl">
+               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
+               <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic leading-none">NEURAL_SYNC_ACTIVE</span>
             </div>
             <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
          </div>
       </div>
 
       {/* ── Attachment Previews ── */}
-      <div className="max-w-4xl mx-auto w-full space-y-2 mb-4 px-2">
+      <div className="max-w-5xl mx-auto w-full space-y-4 mb-8 px-4">
         {pendingImage && (
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-bottom-2 overflow-hidden relative group" role="status">
-            <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
-            <img src={pendingImage} alt="Referencia visual adjunta" className="h-10 w-10 rounded-xl object-cover shadow-2xl border border-white/20" />
-            <div className="flex-1 min-w-0">
-               <span className="text-[10px] font-black text-primary uppercase tracking-widest block mb-0.5">IMAGE_ATTACHED</span>
-               <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider truncate block">Reference acquired for context injection</span>
+          <div className="flex items-center gap-5 px-6 py-5 rounded-[2rem] bg-white/5 border border-white/10 animate-in fade-in slide-in-from-bottom-5 overflow-hidden relative group shadow-2xl backdrop-blur-2xl" role="status">
+             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
+            <img src={pendingImage} alt="Referencia visual adjunta" className="h-16 w-16 rounded-2xl object-cover shadow-2xl border border-white/20 relative z-10 hover:scale-110 transition-transform duration-700" />
+            <div className="flex-1 min-w-0 relative z-10">
+               <span className="text-[11px] font-black text-primary uppercase tracking-[0.3em] block mb-1.5 italic">IMAGE_RECON_INITIALIZED</span>
+               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest truncate block italic opacity-60">Visual matrix acquired for cross-neural mapping</span>
             </div>
             <button 
               onClick={onRemoveImage} 
-              aria-label="Quitar imagen"
-              className="p-2 rounded-xl text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90 border border-transparent hover:border-rose-100"
+              className="p-4 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all active:scale-90 border border-transparent hover:border-white/10 relative z-10"
             >
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5" />
             </button>
           </div>
         )}
 
         {pendingUrl && (
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-blue-500/5 border border-blue-500/10 animate-in fade-in slide-in-from-bottom-2 relative overflow-hidden" role="status">
-             <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
-             <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                <Globe className="h-5 w-5" />
+          <div className="flex items-center gap-5 px-6 py-5 rounded-[2rem] bg-white/5 border border-white/10 animate-in fade-in slide-in-from-bottom-5 relative overflow-hidden shadow-2xl backdrop-blur-2xl" role="status">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
+             <div className="h-16 w-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 relative z-10 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
+                <Globe className="h-8 w-8 animate-pulse" />
              </div>
-             <div className="flex-1 min-w-0 font-mono">
-                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-0.5">CONTENT_SCRAPED</span>
-                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider truncate block">
+             <div className="flex-1 min-w-0 font-mono relative z-10">
+                <span className="text-[11px] font-black text-blue-400 uppercase tracking-[0.3em] block mb-1.5 italic">NETWORK_URI_LINKED</span>
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest truncate block italic opacity-60">
                    {(() => {try { return JSON.parse(pendingUrl).url; } catch(e) { return pendingUrl; }})()}
                 </span>
              </div>
              <button 
               onClick={onRemoveUrl} 
-              className="p-2 rounded-xl text-zinc-400 hover:text-rose-500 transition-all"
+              className="p-4 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all relative z-10"
              >
-               <X className="h-4 w-4" />
+               <X className="h-5 w-5" />
              </button>
           </div>
         )}
 
         {pendingContext && (
-          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-primary/[0.03] border border-primary/20 animate-in fade-in slide-in-from-bottom-2 relative overflow-hidden" role="status">
-             <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
-             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <FileCode2 className="h-5 w-5" />
+          <div className="flex items-center gap-5 px-6 py-5 rounded-[2rem] bg-white/5 border border-white/10 animate-in fade-in slide-in-from-bottom-5 relative overflow-hidden shadow-2xl backdrop-blur-2xl" role="status">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
+             <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary relative z-10 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)]">
+                <FileCode2 className="h-8 w-8" />
              </div>
-             <div className="flex-1 min-w-0">
-                <span className="text-[10px] font-black text-primary uppercase tracking-widest block mb-0.5">CONTEXT_ACQUIRED</span>
-                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider truncate block">{pendingContext.name}</span>
+             <div className="flex-1 min-w-0 relative z-10">
+                <span className="text-[11px] font-black text-primary uppercase tracking-[0.3em] block mb-1.5 italic">CONTEXT_PAYLOAD_MAPPED</span>
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest truncate block italic opacity-60">{pendingContext.name}</span>
              </div>
              <button 
               onClick={onRemoveContext} 
-              className="p-2 rounded-xl text-zinc-400 hover:text-rose-500 transition-all"
+              className="p-4 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all relative z-10"
              >
-               <X className="h-4 w-4" />
+               <X className="h-5 w-5" />
              </button>
           </div>
         )}
 
         {activeFile && (
-          <div className="px-4 py-2 rounded-xl bg-zinc-900 text-white w-fit shadow-2xl flex items-center gap-3 border border-white/10" role="status">
-             <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]" />
-             <span className="text-[10px] font-black uppercase tracking-widest italic">
+          <div className="px-6 py-3 rounded-2xl bg-zinc-900 border border-white/10 text-white w-fit shadow-2xl flex items-center gap-5 animate-in fade-in zoom-in duration-700" role="status">
+             <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_15px_rgba(var(--primary-rgb),1)]" />
+             <span className="text-[11px] font-black uppercase tracking-[0.3em] italic">
                ACTIVE_SCOPE: {activeFile.split('/').pop()}
              </span>
           </div>
@@ -250,9 +261,9 @@ export function ChatInput({
 
       {/* ── URL Input Bar (Industrial) ── */}
       {showUrlInput && (
-        <div className="max-w-4xl mx-auto w-full mb-4 flex items-center gap-3 px-2 animate-in slide-in-from-bottom-4 duration-500">
-           <div className="flex-1 flex items-center gap-4 px-5 py-4 rounded-[1.5rem] bg-white border border-primary/30 shadow-2xl transition-all focus-within:ring-8 focus-within:ring-primary/5 aether-iridescent">
-              <Link2 className="h-5 w-5 text-primary" />
+        <div className="max-w-5xl mx-auto w-full mb-6 flex items-center gap-4 px-4 animate-in slide-in-from-bottom-6 duration-700">
+           <div className="flex-1 flex items-center gap-5 px-8 py-5 rounded-[2rem] bg-white border-2 border-primary/40 shadow-[0_30px_60px_-15px_rgba(var(--primary-rgb),0.2)] transition-all focus-within:ring-[15px] focus-within:ring-primary/10 aether-iridescent">
+              <Link2 className="h-6 w-6 text-primary" />
               <input 
                 autoFocus type="url" value={urlInput} 
                 onChange={e => setUrlInput(e.target.value)}
@@ -260,106 +271,110 @@ export function ChatInput({
                   if (e.key === 'Enter') { e.preventDefault(); onAttachUrl(urlInput); setShowUrlInput(false); setUrlInput(''); }
                   if (e.key === 'Escape') setShowUrlInput(false);
                 }}
-                placeholder="Pega la URL de un sistema para ingeniería inversa..."
-                className="flex-1 bg-transparent text-sm font-black italic outline-none placeholder:text-zinc-300 uppercase tracking-tight"
+                placeholder="Pega la URL para ingeniería inversa..."
+                className="flex-1 bg-transparent text-[15px] font-black italic outline-none placeholder:text-zinc-300 uppercase tracking-tight text-zinc-900"
                 aria-label="URL del sitio a clonar"
               />
            </div>
            <button 
               onClick={() => { onAttachUrl(urlInput); setShowUrlInput(false); setUrlInput(''); }} 
               disabled={isScraping || !urlInput.trim()}
-              className="h-14 px-8 bg-zinc-900 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl hover:brightness-125 active:scale-95 transition-all disabled:opacity-50 border border-white/10"
+              className="h-16 px-10 bg-zinc-950 text-white rounded-[2rem] text-[12px] font-black uppercase tracking-[0.3em] shadow-2xl hover:brightness-125 active:scale-95 transition-all disabled:opacity-50 border border-white/10 italic"
             >
-             {isScraping ? 'SCRAPING...' : 'VINCULAR_URI'}
+              {isScraping ? 'MAPPING...' : 'ORCHESTRATE_URI'}
            </button>
            <button 
               onClick={() => setShowUrlInput(false)} 
-              className="h-14 w-14 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-all border border-black/5 rounded-[1.5rem] bg-white hover:shadow-xl"
+              className="h-16 w-16 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-all border border-black/5 rounded-[2rem] bg-white hover:shadow-2xl"
             >
-             <X className="h-5 w-5" />
+             <X className="h-6 w-6" />
            </button>
         </div>
       )}
 
       {/* ── Main Input Container (Command Console Selector) ── */}
-      <div className="max-w-4xl mx-auto w-full relative group">
-        <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
-
+      <div className="max-w-5xl mx-auto w-full relative group px-4">
         <div className={cn(
-          "flex items-center gap-2 p-2 rounded-[32px] bg-white border shadow-[0_10px_50px_-10px_rgba(0,0,0,0.05)] transition-all duration-300 relative",
+          "flex items-center gap-5 p-5 rounded-[4rem] transition-all duration-1000 relative shadow-[0_50px_100px_-30px_rgba(0,0,0,0.7)] panorama-transition",
+          "bg-white border-2 border-white/10 focus-within:ring-[25px] focus-within:ring-primary/5",
           isArchitectMode 
-            ? "border-indigo-400/30 ring-4 ring-indigo-50 shadow-indigo-100/50 scale-[1.01]" 
-            : "border-black/[0.1] focus-within:border-primary/20 focus-within:ring-4 focus-within:ring-primary/5",
-          isGenerating && "neural-pulse ring-4 ring-primary/10 border-primary/30"
+            ? "border-indigo-500/50 ring-15 ring-indigo-500/10 bg-white" 
+            : "border-white/30 focus-within:border-primary/60",
+          isGenerating && "ring-20 ring-primary/20 animate-pulse border-primary/70"
         )}>
+          <div className="absolute inset-x-12 -top-px h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity" />
           {/* Iridescent background for active state */}
           {(isArchitectMode || isGenerating) && (
-            <div className="absolute inset-0 rounded-[32px] bg-gradient-to-r from-primary/5 via-violet-500/5 to-primary/5 animate-pulse pointer-events-none opacity-50" />
+            <div className="absolute inset-0 rounded-[4rem] bg-gradient-to-r from-primary/5 via-violet-500/10 to-primary/5 animate-pulse pointer-events-none opacity-80" />
           )}
           {/* Plus Menu */}
           <div className="relative">
             <button 
               onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)} 
-              aria-label="Menú de adjuntos"
-              aria-expanded={isPlusMenuOpen}
               className={cn(
-                "h-11 w-11 rounded-full flex items-center justify-center transition-all duration-300", 
-                isPlusMenuOpen ? "bg-zinc-900 text-white" : "text-zinc-400 hover:bg-zinc-50 hover:scale-105 active:scale-90"
+                "h-14 w-14 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 border border-transparent shadow-xl relative z-20 overflow-hidden group/plus", 
+                isPlusMenuOpen ? "bg-zinc-950 text-primary border-primary/40 rotate-45" : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-200"
               )}
             >
-              <Plus className={cn("h-5 w-5 transition-transform duration-300", isPlusMenuOpen && "rotate-45")} />
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/plus:opacity-100 transition-opacity" />
+              <Plus className="h-6 w-6 relative z-10" />
             </button>
 
-            {isPlusMenuOpen && (
-              <>
-                <div className="fixed inset-0 z-40" onClick={() => setIsPlusMenuOpen(false)} />
-                <div className="absolute left-0 bottom-full mb-4 w-60 rounded-[24px] bg-white border border-black/[0.06] shadow-[0_20px_50px_rgba(0,0,0,0.15)] z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
-                  <header className="px-4 py-3 bg-zinc-50 border-b border-black/[0.04]">
-                     <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Contexto & Recursos</span>
-                  </header>
-                  <button 
-                    onClick={() => { setIsPlusMenuOpen(false); fileInputRef.current?.click(); }} 
-                    className="w-full flex items-center gap-3.5 px-4 py-4 text-left hover:bg-zinc-50 transition-colors group"
+            <AnimatePresence>
+              {isPlusMenuOpen && (
+                <>
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" onClick={() => setIsPlusMenuOpen(false)} />
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9, y: 10, filter: 'blur(10px)' }}
+                    animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                    exit={{ opacity: 0, scale: 0.9, y: 10, filter: 'blur(10px)' }}
+                    className="absolute left-0 bottom-full mb-6 w-72 rounded-[2.5rem] bg-white border-2 border-black/[0.08] shadow-[0_30px_70px_rgba(0,0,0,0.3)] z-50 overflow-hidden"
                   >
-                    <div className="h-8 w-8 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-400 group-hover:text-primary group-hover:bg-primary/5 transition-all">
-                      <Paperclip className="h-4 w-4" />
-                    </div>
-                    <span className="text-[13px] font-bold text-zinc-600 group-hover:text-zinc-900">Adjuntar Archivo</span>
-                  </button>
-                  <button 
-                    onClick={() => { setIsPlusMenuOpen(false); setShowUrlInput(true); }} 
-                    className="w-full flex items-center gap-3.5 px-4 py-4 text-left hover:bg-zinc-50 transition-colors group"
-                  >
-                    <div className="h-8 w-8 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-400 group-hover:text-emerald-500 group-hover:bg-emerald-50 transition-all">
-                      <Globe className="h-4 w-4" />
-                    </div>
-                    <span className="text-[13px] font-bold text-zinc-600 group-hover:text-zinc-900">Clonar URL</span>
-                  </button>
-                </div>
-              </>
-            )}
+                    <header className="px-6 py-4 bg-zinc-50 border-b border-black/[0.04]">
+                       <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 italic">SYSTEM_PAYLOADS</span>
+                    </header>
+                    <button 
+                      onClick={() => { setIsPlusMenuOpen(false); fileInputRef.current?.click(); }} 
+                      className="w-full flex items-center gap-5 px-6 py-5 text-left hover:bg-zinc-50 transition-all group"
+                    >
+                      <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-400 group-hover:text-primary group-hover:bg-primary/10 group-hover:shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)] transition-all">
+                        <Paperclip className="h-5 w-5" />
+                      </div>
+                      <span className="text-[14px] font-black text-zinc-600 group-hover:text-zinc-950 uppercase tracking-tight italic">Attach_Resource</span>
+                    </button>
+                    <button 
+                      onClick={() => { setIsPlusMenuOpen(false); setShowUrlInput(true); }} 
+                      className="w-full flex items-center gap-5 px-6 py-5 text-left hover:bg-zinc-50 transition-all group"
+                    >
+                      <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-400 group-hover:text-blue-500 group-hover:bg-blue-50 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] transition-all">
+                        <Globe className="h-5 w-5" />
+                      </div>
+                      <span className="text-[14px] font-black text-zinc-600 group-hover:text-zinc-950 uppercase tracking-tight italic">Reverse_Engineer_URI</span>
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
 
           <textarea
             ref={inputRef}
-            id="genesis-chat-input"
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
-            placeholder={isArchitectMode ? "Describe el flujo o funcionalidad que quieres arquitectar..." : "Pregunta cualquier cosa o describe qué quieres construir..."}
-            className="flex-1 bg-transparent px-3 py-3.5 text-[14px] font-medium text-zinc-800 outline-none resize-none min-h-[48px] max-h-[350px] placeholder:text-zinc-400 leading-relaxed"
+            placeholder={isArchitectMode ? "Defina la lógica de arquitectura o el flujo sistémico..." : "Ingrese directivas de construcción o consultas técnicas..."}
+            className="flex-1 bg-transparent px-2 py-4 text-[17px] font-semibold text-zinc-900 outline-none resize-none min-h-[56px] max-h-[450px] placeholder:text-zinc-300 leading-relaxed selection:bg-primary/20 custom-scrollbar"
             disabled={isGenerating}
-            aria-label="Mensaje para Génesis"
           />
 
-          <div className="flex items-center gap-1.5 pr-2">
-            <div className="flex items-center gap-1 p-1 rounded-[20px] bg-zinc-50 border border-black/[0.05] shadow-inner mr-1">
+          <div className="flex items-center gap-2 pr-4">
+            <div className="flex items-center gap-1.5 p-1.5 rounded-[2rem] bg-zinc-50 border border-black/[0.06] shadow-inner mr-3 backdrop-blur-xl">
               <button 
                 type="button"
                 onClick={() => !isArchitectMode && onArchitectToggle()}
                 className={cn(
-                  "px-3 py-1.5 rounded-[15px] text-[10px] font-black uppercase tracking-widest transition-all",
-                  isArchitectMode ? "bg-white text-indigo-600 shadow-sm border border-black/[0.03]" : "text-zinc-400 hover:text-zinc-600"
+                  "px-4 py-2 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.25em] transition-all duration-700 italic",
+                  isArchitectMode ? "bg-white text-indigo-600 shadow-xl border border-black/[0.04]" : "text-zinc-400 hover:text-zinc-600"
                 )}
               >
                 Plan
@@ -368,8 +383,8 @@ export function ChatInput({
                 type="button"
                 onClick={() => isArchitectMode && onArchitectToggle()}
                 className={cn(
-                  "px-3 py-1.5 rounded-[15px] text-[10px] font-black uppercase tracking-widest transition-all",
-                  !isArchitectMode ? "bg-zinc-900 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-600"
+                  "px-4 py-2 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.25em] transition-all duration-700 italic",
+                  !isArchitectMode ? "bg-zinc-950 text-white shadow-xl" : "text-zinc-400 hover:text-zinc-600"
                 )}
               >
                 Build
@@ -378,39 +393,41 @@ export function ChatInput({
             
             <button 
                onClick={toggleListening}
-               aria-label={isListening ? "Detener dictado" : "Dictado por voz"}
                className={cn(
-                 "h-10 w-10 rounded-full flex items-center justify-center transition-all active:scale-90",
-                 isListening ? "bg-rose-50 text-rose-600 animate-pulse ring-4 ring-rose-100" : "text-zinc-300 hover:text-zinc-900 hover:bg-zinc-50"
+                 "h-12 w-12 rounded-full flex items-center justify-center transition-all active:scale-90 border border-transparent shadow-sm hover:shadow-md",
+                 isListening ? "bg-rose-50 text-rose-600 animate-pulse ring-8 ring-rose-100 border-rose-200" : "text-zinc-300 hover:text-zinc-900 hover:bg-zinc-50 hover:border-zinc-200"
                )}
             >
-              <Mic className="h-4 w-4" />
+              <Mic className="h-5 w-5" />
             </button>
             
-            <div className="w-px h-5 bg-black/[0.06] mx-1" />
+            <div className="w-px h-6 bg-black/[0.08] mx-2" />
 
             {isGenerating ? (
               <button 
                 onClick={onStop} 
-                aria-label="Detener generación"
-                className="h-10 w-10 rounded-full flex items-center justify-center bg-rose-50 text-rose-600 shadow-sm hover:bg-rose-100 transition-all active:scale-95"
+                className="h-14 w-14 rounded-[1.5rem] flex items-center justify-center bg-rose-500 text-white shadow-[0_15px_40px_rgba(244,63,94,0.5)] hover:brightness-110 hover:scale-105 transition-all active:scale-95 group/stop"
               >
-                <div className="h-3 w-3 bg-rose-600 animate-pulse rounded-sm" />
+                <X className="h-6 w-6 group-hover/stop:rotate-90 transition-transform" />
               </button>
             ) : (
               <button 
                 onClick={() => onSend()} 
                 disabled={!input.trim() && !pendingImage && !pendingUrl && !pendingContext} 
-                aria-label="Enviar mensaje"
-                className="h-10 w-10 rounded-full flex items-center justify-center bg-zinc-900 text-white shadow-xl shadow-zinc-200 hover:bg-black transition-all active:scale-90 disabled:opacity-30 disabled:grayscale disabled:scale-100"
+                className={cn(
+                  "h-14 w-14 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 shadow-2xl relative overflow-hidden group/send",
+                  isArchitectMode 
+                    ? "bg-indigo-600 text-primary hover:bg-indigo-700 shadow-indigo-300/40" 
+                    : "bg-zinc-950 text-white hover:bg-black"
+                )}
               >
-                <ArrowUp className="h-5 w-5" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover/send:opacity-100 transition-opacity" />
+                <ArrowUp className="h-6 w-6 relative z-10 group-hover/send:-translate-y-1 transition-transform shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
               </button>
             )}
           </div>
         </div>
       </div>
-
       <input 
         ref={fileInputRef} 
         type="file" 
