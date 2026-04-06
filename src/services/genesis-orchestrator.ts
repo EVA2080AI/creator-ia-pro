@@ -50,7 +50,7 @@ ${prompt}
     const res = await aiService.processAction({
       action: "chat",
       prompt: architectPrompt,
-      model: "claude-3.5-sonnet" // Senior Architect choice
+      model: "gemini-3.1-pro-high" // Gemini 2.5 Pro — available to more tiers, 3 credits
     });
 
     try {
@@ -93,7 +93,7 @@ Return ONLY the raw code for ${filePath}.`;
     const res = await aiService.processAction({
       action: "chat",
       prompt: synthesisPrompt,
-      model: "gpt-oss-120b" // Power Synthesis choice
+      model: "gemini-3-flash" // Fast synthesis — 1 credit, runs many files efficiently
     });
 
     return res.text.replace(/```[a-z]*/g, "").replace(/```/g, "").trim();

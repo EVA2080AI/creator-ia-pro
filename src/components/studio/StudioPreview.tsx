@@ -376,7 +376,19 @@ export function StudioPreview({
   const [refreshKey, setRefreshKey] = useState(0);
   const [zoom, setZoom]             = useState(100);
   const [isBridgeReady, setIsBridgeReady] = useState(false);
+  // G-5 FIX: compositeKey only changes when generation finishes (not on every streaming delta)
+  // This prevents Sandpack from destroying/recreating the iframe on every character of the stream
+  const [sandpackKey, setSandpackKey] = useState(0);
+  const prevFilesRef = useRef<Record<string, StudioFile>>({});
   const figmaTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Update sandpackKey only when isGenerating transitions from true→false (generation complete)
+  useEffect(() => {
+    if (!isGenerating && prevFilesRef.current !== files) {
+      prevFilesRef.current = files;
+      setSandpackKey(k => k + 1);
+    }
+  }, [isGenerating, files]);
 
   const isVanillaHtml = useMemo(() => {
     return Object.values(files).some(f => f.language === 'html' || f.language === 'javascript') && 
@@ -429,7 +441,7 @@ export function StudioPreview({
             className="flex-shrink-0 flex flex-col"
           >
             <SandpackProvider
-              key={JSON.stringify(sandpackFiles)}
+              key={sandpackKey}
               template="react-ts"
               files={sandpackFiles!}
               customSetup={{

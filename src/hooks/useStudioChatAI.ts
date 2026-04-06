@@ -165,8 +165,9 @@ export function useStudioChatAI({
         ? 'google/gemini-2.0-flash-001' 
         : (selectedModel === 'google/gemini-2.0-flash-001' && complexTask ? 'google/gemini-2.5-pro-preview-03-25' : selectedModel);
 
-      // ─── DEEP BUILD MODE (Genesis V16.0) ───
-      const isDeepBuildIntent = isArchitectRequest && (prompt.toLowerCase().includes('crea') || prompt.toLowerCase().includes('build') || prompt.toLowerCase().includes('proyecto'));
+      // DeepBuild: activate for ANY architect+genesis request
+      // Removed the over-restrictive keyword list that excluded many valid creation prompts
+      const isDeepBuildIntent = isArchitectRequest && persona === 'genesis';
       
       if (isDeepBuildIntent && persona === 'genesis') {
         onPhaseChange?.('architecting', 'architect');
@@ -213,8 +214,9 @@ export function useStudioChatAI({
       const decoder = new TextDecoder();
       let accumulated = '';
       let buffer = '';
+      let isDone = false;
 
-      while (true) {
+      outerLoop: while (!isDone) {
         const { done, value } = await reader.read();
         if (done) break;
         buffer += decoder.decode(value, { stream: true });
@@ -224,7 +226,7 @@ export function useStudioChatAI({
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
           const payload = line.slice(6).trim();
-          if (payload === '[DONE]') break;
+          if (payload === '[DONE]') { isDone = true; break outerLoop; } // Exits both loops cleanly
           try {
             const parsed = JSON.parse(payload);
             const delta = parsed?.choices?.[0]?.delta?.content;
@@ -235,19 +237,21 @@ export function useStudioChatAI({
               setGenPhase('streaming');
               streamBufferRef.current = accumulated;
               
-              // Specialist detection
+              // Specialist detection from stream markers
               if (accumulated.includes('[UX_ENGINE]') || accumulated.includes('🧭 UX')) { setGenSpecialist('ux'); onPhaseChange?.('generating', 'ux'); }
               else if (accumulated.includes('[FRONTEND_DEV]') || accumulated.includes('🎨 UI')) { setGenSpecialist('frontend'); onPhaseChange?.('generating', 'frontend'); }
               else if (accumulated.includes('[BACKEND_DEV]') || accumulated.includes('⚙️ BE')) { setGenSpecialist('backend'); onPhaseChange?.('generating', 'backend'); }
               else if (accumulated.includes('[ARCHITECT]') || accumulated.includes('🏗️ ESTRATEGA')) { setGenSpecialist('architect'); onPhaseChange?.('generating', 'architect'); }
               else if (accumulated.includes('[ENGINEER]') || accumulated.includes('🧠 GENESIS')) { setGenSpecialist('engineer'); onPhaseChange?.('generating', 'engineer'); }
-
             }
           } catch {}
         }
       }
 
-      const finalResult = processRawResponse(accumulated, prompt, isChatModeActive || isArchitectRequest);
+      // G-1 FIX: Pass only isChatModeActive (not || isArchitectRequest)
+      // Previously, Architect Mode was treated as chat-only, preventing file writes.
+      // Now, if the AI returns JSON files in Architect response, they will be parsed correctly.
+      const finalResult = processRawResponse(accumulated, prompt, isChatModeActive);
       return finalResult;
 
     } catch (e: any) {
