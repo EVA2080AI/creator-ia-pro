@@ -25,7 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Mermaid } from './Mermaid';
 import { AgentSettingsModal } from './AgentSettingsModal';
-import { type AgentSpecialist } from '@/hooks/useAgentPreferences';
+import { type AgentSpecialist, type AgentPhase } from './chat/types';
 import { StudioTerminal } from './StudioTerminal';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 
@@ -59,8 +59,8 @@ interface StudioArtifactsPanelProps {
   onClose: () => void;
   onFix?: () => void;
   activeTab?: 'plan' | 'progress' | 'intelligence' | 'diagrams' | 'logs' | 'terminal' | 'agents';
-  agentPhase?: 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
-  activeSpecialist?: 'ux' | 'frontend' | 'backend' | 'devops' | 'game' | 'architect' | 'engineer' | 'none';
+  agentPhase?: AgentPhase;
+  activeSpecialist?: AgentSpecialist;
   persona?: 'genesis' | 'antigravity';
 }
 

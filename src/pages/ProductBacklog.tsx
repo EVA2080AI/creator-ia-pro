@@ -29,8 +29,8 @@ interface Feature {
 const features: Feature[] = [
   // AUTH & USERS
   { name: "Registro email/contraseña", module: "Auth", status: "done", completion: 100, team: "Full-Stack", priority: "P0", notes: "Funcional con confirmación email" },
-  { name: "Login con Google OAuth", module: "Auth", status: "done", completion: 100, team: "Full-Stack", priority: "P0", notes: "Via Lovable Cloud Auth" },
-  { name: "Login con Apple OAuth", module: "Auth", status: "done", completion: 100, team: "Full-Stack", priority: "P1", notes: "Via Lovable Cloud Auth" },
+  { name: "Login con Google OAuth", module: "Auth", status: "done", completion: 100, team: "Full-Stack", priority: "P0", notes: "Via Genesis Cloud Auth" },
+  { name: "Login con Apple OAuth", module: "Auth", status: "done", completion: 100, team: "Full-Stack", priority: "P1", notes: "Via Genesis Cloud Auth" },
   { name: "Recuperar contraseña", module: "Auth", status: "done", completion: 100, team: "Full-Stack", priority: "P0", notes: "Email con link de reset" },
   { name: "Perfil de usuario", module: "Auth", status: "partial", completion: 60, team: "Frontend", priority: "P1", notes: "Falta edición de avatar y nombre desde UI" },
   { name: "Roles (admin/user/mod)", module: "Auth", status: "done", completion: 100, team: "Backend", priority: "P0", notes: "user_roles con has_role() SECURITY DEFINER" },

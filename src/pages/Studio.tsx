@@ -1,55 +1,45 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
+
+// Hooks & Auth
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
-import { useStudioProjects, StudioFile } from '@/hooks/useStudioProjects';
-import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
-import { StudioChat, type AgentPhase, type AgentSpecialist } from '@/components/studio/StudioChat';
+import { useStudioProjects, type StudioFile } from '@/hooks/useStudioProjects';
+
+// UI Components
+import { StudioChat } from '@/components/studio/StudioChat';
 import { StudioArtifactsPanel, type UIPlanTask, type UIArtifact, type UILog } from '@/components/studio/StudioArtifactsPanel';
 import { StudioPreview } from '@/components/studio/StudioPreview';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
-import { StudioDeploy } from '@/components/studio/StudioDeploy';
-import { StudioAITools } from '@/components/studio/StudioAITools';
-import { StudioFloatingToolbar } from '@/components/studio/StudioFloatingToolbar';
-import { StudioCloud, SupabaseConfig } from '@/components/studio/StudioCloud';
+import { StudioCloud, type SupabaseConfig } from '@/components/studio/StudioCloud';
 import { StudioAnalytics } from '@/components/studio/StudioAnalytics';
 import { StudioNexus } from '@/components/studio/Nexus/StudioNexus';
-import { StudioTopbar, ViewMode, DeviceMode } from '@/components/studio/StudioTopbar';
-import { 
-  Loader2, FolderOpen, Code2, Plus, Sparkles, ChevronRight, Layout,
-  Monitor, Tablet, Smartphone, Eye, Code, Share2, Globe, Save
-} from 'lucide-react';
-import { toast } from 'sonner';
+import { StudioFloatingToolbar } from '@/components/studio/StudioFloatingToolbar';
+import { type ViewMode, type DeviceMode } from '@/components/studio/StudioTopbar';
+import { type AgentPhase, type AgentSpecialist } from '@/components/studio/chat/types';
+
+// Lucide Icons & Utils
+import { Loader2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-/**
- * Studio — Integrated IDE Workspace (Lovable Architecture)
- * - Topbar: High-fidelity Project navigation & View toggles
- * - Sidebar: Genesis AI Chat
- * - Main: Content workspace (Preview, Code, Files, Cloud or Analytics)
- */
 export default function Studio() {
   const { user } = useAuth('/auth');
-  const { profile } = useProfile(user?.id);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get('project');
 
-  const { clearActions } = useWorkspaceActions();
-
-  // --- Studio State ---
   const { 
     projects, 
     activeProject, 
     setActiveProject, 
     loading: loadingProjects, 
-    updateProjectFiles,
-    createProject
+    updateProjectFiles, 
+    createProject 
   } = useStudioProjects();
 
+  // ── Operational State ──
   const [viewMode, setViewMode] = useState<ViewMode>('preview');
   const [deviceMode, setDeviceMode] = useState<DeviceMode>('desktop');
   const [activeFile, setActiveFile] = useState<string | null>(null);
@@ -60,9 +50,8 @@ export default function Studio() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [runtimeError, setRuntimeError] = useState<string | null>(null);
-  const [showDeployModal, setShowDeployModal] = useState(false);
 
-  // --- Engineering State (Lifted from StudioChat) ---
+  // ── Engineering Core State ──
   const [artifacts, setArtifacts] = useState<UIArtifact[]>([]);
   const [tasks, setTasks] = useState<UIPlanTask[]>([]);
   const [logs, setLogs] = useState<UILog[]>([]);
@@ -72,16 +61,14 @@ export default function Studio() {
 
   const activeTasks = useMemo(() => tasks, [tasks]);
 
-  // --- Project Initialization ---
+  // Handle Project Selection & Basic Routing
   useEffect(() => {
     if (loadingProjects) return;
-
     if (projectId) {
       const project = projects.find(p => p.id === projectId);
       if (project) {
         setActiveProject(project);
       } else {
-        toast.error('Proyecto no encontrado');
         navigate('/studio');
       }
     } else {
@@ -89,7 +76,7 @@ export default function Studio() {
     }
   }, [projectId, projects, loadingProjects, setActiveProject, navigate]);
 
-  // Set default active file when project changes
+  // Auto-Select First File
   useEffect(() => {
     if (activeProject && !activeFile) {
       const files = Object.keys(activeProject.files);
@@ -98,79 +85,34 @@ export default function Studio() {
     }
   }, [activeProject, activeFile]);
 
-  // --- Auto-Migrator (Nuclear Fix v14.6) ---
-  // Silently upgrades legacy CRA projects to the new Vite-Native architecture
+  // Project Health check: Ensure boilerplate files exist
   useEffect(() => {
     if (!activeProject) return;
-
     const files = activeProject.files;
-    const hasRootIndex = !!files['index.html'];
-    const hasPackageJson = !!files['package.json'];
-    const hasViteConfig = !!files['vite.config.ts'];
+    const hasHtml = !!files['index.html'];
+    const hasPkg = !!files['package.json'];
+    const hasVite = !!files['vite.config.ts'];
 
-    // Nuclear enforcement: missing ANY of these files triggers immediate injection
-    if (!hasRootIndex || !hasPackageJson || !hasViteConfig) {
-      console.log('Genesis: Legacy project detected. Migrating to Vite-Native...');
-      
-      const upgradedFiles = { ...files };
-
-      // Ensure root index.html exists
-      if (!hasRootIndex) {
-        upgradedFiles['index.html'] = {
-          language: 'html',
-          content: `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Genesis Project</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>`
+    if (!hasHtml || !hasPkg || !hasVite) {
+      const u = { ...files };
+      if (!hasHtml) {
+        // Safe string construction to avoid parser conflicts
+        const h = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\" /><title>Genesis Project</title></head><body><div id=\"root\"></div><script type=\"module\" src=\"/src/main.tsx\"></script></body></html>";
+        u['index.html'] = { language: 'html', content: h };
+      }
+      if (!hasPkg) {
+        u['package.json'] = { language: 'json', content: JSON.stringify({ name: "project", type: "module", scripts: { dev: "vite" } }, null, 2) };
+      }
+      if (!hasVite) {
+        u['vite.config.ts'] = { 
+          language: 'typescript', 
+          content: "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({ plugins: [react()] });" 
         };
       }
-
-      // Ensure package.json exists
-      if (!hasPackageJson) {
-        upgradedFiles['package.json'] = {
-          language: 'json',
-          content: JSON.stringify({
-            name: "genesis-project",
-            private: true,
-            type: "module",
-            scripts: { "dev": "vite", "build": "vite build" }
-          }, null, 2)
-        };
-      }
-
-      // Ensure vite.config.ts exists
-      if (!hasViteConfig) {
-        upgradedFiles['vite.config.ts'] = {
-          language: 'typescript',
-          content: "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\nexport default defineConfig({ plugins: [react()] });"
-        };
-      }
-
-      // Ensure src/main.tsx exists if it's a React project
-      if (!files['src/main.tsx']) {
-        upgradedFiles['src/main.tsx'] = {
-          language: 'tsx',
-          content: "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from '../App';\nimport '../index.css';\nReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);"
-        };
-      }
-
-      updateProjectFiles(activeProject.id, upgradedFiles);
-      // Only toast on manual project load to avoid spamming during generation
-      if (!isGenerating) {
-        toast.info('Sincronizando arquitectura maestra...');
-      }
+      updateProjectFiles(activeProject.id, u);
     }
-  }, [activeProject, updateProjectFiles]); // Removed isGenerating from deps to ensure foundation
+  }, [activeProject, updateProjectFiles]);
 
-  // --- Handlers ---
   const handleFilesChange = async (newFiles: Record<string, StudioFile>) => {
     if (!activeProject) return;
     setIsSaving(true);
@@ -184,437 +126,231 @@ export default function Studio() {
     setViewMode('preview');
   };
 
-  const handleShare = () => {
-    if (!activeProject) return;
-    const url = window.location.href;
-    navigator.clipboard.writeText(url);
-    toast.success('Enlace de colaboración copiado');
-  };
-
-  const handleCreateNew = async () => {
-    const project = await createProject('Nuevo Proyecto');
-    if (project) {
-      navigate(`/studio?project=${project.id}`);
+  const renderWorkspace = () => {
+    if (!activeProject) return null;
+    switch (viewMode) {
+      case 'preview':
+        return (
+          <div className="h-full w-full flex items-center justify-center p-4">
+            <div className={cn(
+              "h-full w-full bg-white shadow-2xl rounded-3xl overflow-hidden transition-all duration-700", 
+              deviceMode === 'mobile' ? "max-w-[375px]" : deviceMode === 'tablet' ? "max-w-[768px]" : "max-w-full"
+            )}>
+              <StudioPreview 
+                files={activeProject.files} 
+                isGenerating={isGenerating} 
+                streamChars={streamChars} 
+                streamPreview={streamPreview}
+                deviceMode={deviceMode}
+                onDeviceModeChange={(m) => setDeviceMode(m)}
+                viewMode="preview"
+                onToggleViewMode={(m) => setViewMode(m)}
+                isSidebarCollapsed={isSidebarCollapsed}
+                onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                isFullscreen={isFullscreen}
+                onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+                onShare={() => {}}
+                onError={(err) => setRuntimeError(err)}
+              />
+            </div>
+          </div>
+        );
+      case 'code':
+        return (
+          <div className="flex h-full w-full bg-[#080808]">
+            <div className="w-64 shrink-0 border-r border-white/5 bg-black/20">
+              <StudioFileTree 
+                files={activeProject.files} 
+                selectedFile={activeFile || ''} 
+                onSelect={(f) => setActiveFile(f)} 
+              />
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <StudioCodeEditor 
+                selectedFile={activeFile || ''} 
+                projectFiles={activeProject.files} 
+                onFilesChange={handleFilesChange}
+                isGenerating={isGenerating}
+                streamPreview={streamPreview}
+              />
+            </div>
+          </div>
+        );
+      case 'artifacts':
+        return (
+          <div className="h-full w-full bg-[#0F0F12]">
+            <StudioArtifactsPanel 
+              isOpen={true} 
+              onClose={() => setViewMode('preview')} 
+              artifacts={artifacts} 
+              tasks={activeTasks}
+              logs={logs}
+              files={activeProject.files}
+              agentPhase={agentPhase}
+              activeSpecialist={activeSpecialist}
+              persona="genesis"
+              onFix={() => {}}
+            />
+          </div>
+        );
+      case 'cloud':
+        return <StudioCloud projectId={activeProject.id} config={cloudConfig} onConfigChange={setCloudConfig} />;
+      case 'analytics':
+        return <StudioAnalytics projectId={activeProject.id} />;
+      case 'nexus':
+        return <StudioNexus currentProject={activeProject} allProjects={projects} />;
+      default:
+        return (
+          <div className="h-full w-full flex items-center justify-center bg-[#080808]">
+            <span className="text-zinc-500 text-[10px] uppercase font-black tracking-[0.4em]">Sincronizando Nucleo...</span>
+          </div>
+        );
     }
   };
 
   if (loadingProjects) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-background gap-4">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="text-white/40 text-sm font-medium animate-pulse">Iniciando Genesis Studio...</p>
+      <div className="h-screen w-full flex items-center justify-center bg-black">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
       </div>
     );
   }
 
-  // --- Welcome Screen / Empty State ---
+  // ── Project Selector Screen ──
   if (!activeProject) {
     return (
-      <div className="h-full w-full bg-[#020202] overflow-hidden flex flex-col relative selection:bg-primary/30 font-sans">
-        {/* --- Cinematic Background (Mesh Grid + Light Orbs) --- */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute top-[-25%] left-[-15%] w-[80%] h-[90%] bg-primary/10 rounded-full blur-[200px] opacity-30 animate-pulse" />
-          <div className="absolute bottom-[0%] right-[-5%] w-[70%] h-[80%] bg-purple-500/5 rounded-full blur-[180px] opacity-20" />
-          <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
-          <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-        </div>
-
-        {/* --- Elite Header --- */}
-        <header className="h-[72px] px-10 flex items-center justify-between border-b border-white/[0.03] bg-black/40 backdrop-blur-3xl relative z-50">
-          <div className="flex items-center gap-4">
-            <div className="group flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-purple-500/20 border border-white/10 shadow-[0_0_30px_rgba(var(--primary-rgb),0.2)] transition-transform hover:rotate-12 duration-500">
-              <Sparkles className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
+      <div className="h-screen w-full bg-black overflow-hidden flex flex-col relative aether-iridescent">
+        <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
+        <header className="h-[72px] px-12 flex items-center justify-between border-b border-white/[0.03] bg-black/40 backdrop-blur-3xl z-50">
+          <div className="flex items-center gap-6">
+            <div className="h-11 w-11 flex items-center justify-center rounded-2xl bg-primary/20 border border-primary/20 shadow-2xl shadow-primary/10">
+              <Sparkles className="h-5 w-5 text-primary" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[12px] font-black text-white tracking-[0.5em] uppercase leading-none mb-1">Genesis IA</span>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                <span className="text-[8px] font-bold text-zinc-500 tracking-widest uppercase leading-none">Deep Reasoning Enabled</span>
+            <div>
+              <span className="text-[14px] font-black text-white tracking-[0.5em] uppercase italic">GENESIS://STUDIO_OS</span>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Sovereign_System_v21.4</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-10">
+            <button onClick={() => navigate('/dashboard')} className="text-[10px] font-black text-zinc-500 hover:text-white uppercase tracking-widest transition-colors">Dashboard</button>
+            <button onClick={() => navigate('/docs')} className="text-[10px] font-black text-zinc-500 hover:text-white uppercase tracking-widest transition-colors">Protocol_Docs</button>
             <button 
-              onClick={() => navigate('/dashboard')} 
-              className="text-[10px] font-black text-zinc-500 hover:text-white transition-all uppercase tracking-[0.3em]"
+              onClick={() => createProject('Genesis_Project')} 
+              className="px-8 py-3 rounded-2xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-2xl"
             >
-              Dashboard
-            </button>
-            <button
-              onClick={handleCreateNew}
-              className="px-6 py-2.5 rounded-xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl"
-            >
-              Lanzar Studio
+              Lanzar Nuevo Nucleo
             </button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto px-10 relative z-10 custom-scrollbar scroll-smooth">
-          <div className="max-w-7xl mx-auto flex flex-col pt-28 pb-40">
-            {/* --- Hero Intro (Aether V9.0) --- */}
-            <div className="relative mb-24">
-              <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px]" />
-              
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="relative z-10 max-w-4xl text-left"
-              >
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-primary mb-8 backdrop-blur-md">
-                   <Sparkles className="h-3.5 w-3.5" />
-                   <span className="text-[10px] font-black uppercase tracking-widest italic">Aether Engine v9.0 Industrial</span>
-                </div>
-                
-                <h1 className="text-7xl md:text-8xl font-black text-white tracking-tighter mb-8 leading-[0.85] uppercase italic">
-                  Soberanía<br />
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-400 to-primary animate-gradient font-display">Industrial.</span>
-                </h1>
-                
-                <p className="text-xl text-zinc-500 max-w-2xl leading-relaxed font-medium mb-12">
-                  La interfaz de orquestación autónoma definitiva. Diseña, construye y despliega con la precisión de una IA de grado aeroespacial.
-                </p>
-
-                <div className="flex flex-wrap gap-4">
-                   <button 
-                    onClick={handleCreateNew}
-                    className="group px-10 py-5 rounded-[2rem] bg-white text-black font-black uppercase text-sm tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
-                   >
-                     <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-500" />
-                     Lanzar Nuevo Sistema
-                   </button>
-                   <button className="px-10 py-5 rounded-[2rem] bg-white/5 border border-white/10 text-white font-black uppercase text-sm tracking-widest hover:bg-white/10 transition-all">
-                     Explorar Nexus
-                   </button>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* --- Bento Gallery --- */}
-            <div className="space-y-10">
-              <div className="flex items-center justify-between border-b border-white/[0.03] pb-6">
-                <div className="flex items-center gap-3">
-                  <FolderOpen className="w-5 h-5 text-zinc-500" />
-                  <h2 className="text-[11px] font-black text-zinc-500 uppercase tracking-[0.6em]">Proyectos Recientes</h2>
-                </div>
-                <div className="flex gap-2">
-                  <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Favoritos</div>
-                  <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary uppercase tracking-widest">Ver Todos</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projects.slice(0, 6).map((p, idx) => (
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.4 + (idx * 0.05) }}
-                    key={p.id}
-                    onClick={() => navigate(`/studio?project=${p.id}`)}
-                    className="group relative flex flex-col gap-6 p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] hover:border-primary/30 transition-all text-left shadow-2xl backdrop-blur-sm overflow-hidden"
-                  >
-                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors" />
-                    
-                    <div className="flex items-center justify-between relative z-10">
-                      <div className="w-14 h-14 rounded-2xl bg-zinc-900/50 border border-white/5 group-hover:border-primary/20 flex items-center justify-center transition-all duration-700 group-hover:rotate-[15deg]">
-                        <Code2 className="w-6 h-6 text-zinc-500 group-hover:text-primary transition-colors" />
-                      </div>
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1">
-                        <ChevronRight className="w-4 h-4 text-white" />
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col gap-2 relative z-10">
-                      <div className="flex items-center gap-2 mb-1">
-                         <span className="text-[9px] font-black text-primary/60 uppercase tracking-widest">Deep AI 1A</span>
-                         <span className="text-zinc-800 tracking-widest">•</span>
-                         <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">React v18</span>
-                      </div>
-                      <h3 className="text-2xl font-black text-white group-hover:text-primary transition-colors truncate tracking-tighter">{p.name}</h3>
-                      <div className="flex items-center gap-2 mt-4">
-                        <div className="flex -space-x-2">
-                           <div className="w-6 h-6 rounded-full bg-blue-500/20 border border-white/10 flex items-center justify-center"><Layout className="w-3 h-3 text-blue-400" /></div>
-                           <div className="w-6 h-6 rounded-full bg-purple-500/20 border border-white/10 flex items-center justify-center"><Sparkles className="w-3 h-3 text-purple-400" /></div>
-                        </div>
-                        <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest ml-2">Editado recientemente</p>
-                      </div>
-                    </div>
-                  </motion.button>
-                ))}
-
-                {/* --- Add New Card --- */}
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.7 }}
-                  onClick={handleCreateNew}
-                  className="flex flex-col items-center justify-center gap-6 p-8 rounded-[2.5rem] border-2 border-dashed border-white/5 hover:border-primary/40 hover:bg-primary/[0.02] transition-all group min-h-[240px]"
-                >
-                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                    <Plus className="w-8 h-8 text-zinc-600 group-hover:text-primary group-hover:rotate-90 transition-all duration-500" />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="text-lg font-black text-white uppercase tracking-tighter">Nuevo Proyecto</h3>
-                    <p className="text-[10px] text-zinc-600 font-bold uppercase tracking-[0.2em] mt-1">Empieza desde cero</p>
-                  </div>
-                </motion.button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <main className="flex-1 flex flex-col items-center justify-center px-12 text-center relative z-10">
+          <motion.h1 
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-[12rem] font-black text-white uppercase italic tracking-tighter leading-none mb-12 drop-shadow-[0_20px_40px_rgba(255,255,255,0.05)]"
+          >
+            GENESIS
+          </motion.h1>
+          <p className="text-zinc-500 max-w-2xl mb-16 uppercase font-black tracking-[0.4em] italic text-[11px] leading-relaxed">
+            Orquestacion de Ingeniería de Grado Industrial.<br/>
+            Soberanía de Código y Arquitectura Autónoma de Alta Fidelidad.
+          </p>
+          <button 
+            onClick={() => createProject('Industrial_Core')}
+            className="px-20 py-8 rounded-[3rem] bg-white text-black font-black uppercase text-xs tracking-[0.4em] italic hover:scale-[1.05] active:scale-95 transition-all shadow-2xl overflow-hidden group relative"
+          >
+            <span className="relative z-10">INICIAR_SISTEMA_OPERATIVO</span>
+            <div className="absolute inset-0 bg-primary/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500" />
+          </button>
+        </main>
       </div>
     );
   }
 
+  // ── Main UI Surface ──
   return (
-    <div className="flex flex-col h-screen bg-[#FCFCFC] overflow-hidden text-foreground selection:bg-primary/20 font-sans">
-      <Helmet><title>Studio | Creator IA Pro</title></Helmet>
+    <div className="flex flex-col h-screen bg-[#FDFDFD] overflow-hidden font-sans selection:bg-primary selection:bg-opacity-20">
+      <Helmet><title>Studio | Genesis IA</title></Helmet>
 
-      {/* --- Immersive View Controls (Génesis Floating Toolbar) --- */}
-      <StudioFloatingToolbar 
-        projectName={activeProject.name}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        deviceMode={deviceMode}
-        onDeviceModeChange={setDeviceMode}
-        onShare={handleShare}
-        onGithubSync={() => toast.info('Sincronización con GitHub iniciada')}
-        onPublish={() => setShowDeployModal(true)}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-      />
-
-      <div className="flex flex-1 overflow-hidden">
-        {/* ── Left Sidebar: Chat (Genesis Command Center) ── */}
-        <div 
-          className={cn(
-            "shrink-0 z-30 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] relative",
-            isSidebarCollapsed ? "w-0 opacity-0 -translate-x-full" : "w-[400px] md:w-[440px] opacity-100 translate-x-0"
-          )}
-        >
-          {/* Aether Glass V9.0 Layer */}
-          <div className="absolute inset-4 bg-white/40 backdrop-blur-3xl border border-white/40 rounded-[2.5rem] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.1)] z-0 overflow-hidden aether-iridescent">
-             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-indigo-400 to-primary opacity-50" />
-          </div>
-          
-          <div className="relative h-full flex flex-col z-10 p-4">
-            <div className="flex-1 bg-transparent rounded-[2rem] overflow-hidden flex flex-col">
-              <StudioChat 
-                projectId={activeProject.id} 
-                projectFiles={activeProject.files}
-                projectName={activeProject.name}
-                isSaving={isSaving}
-                activeFile={activeFile}
-                onCodeGenerated={handleCodeGenerated}
-                onGeneratingChange={setIsGenerating}
-                // Lifted State
-                artifacts={artifacts}
-                setArtifacts={setArtifacts}
-                tasks={activeTasks}
-                setTasks={setTasks}
-                logs={logs}
-                setLogs={setLogs}
-                // --- v16.0 Interconnect ---
-                runtimeError={runtimeError}
-                onClearError={() => setRuntimeError(null)}
-                onPhaseChange={(phase, specialist) => {
-                  setAgentPhase(phase);
-                  setActiveSpecialist(specialist);
-                }}
-                onStreamCharsChange={(chars, preview) => {
-                  setStreamChars(chars);
-                  setStreamPreview(preview);
-                }}
-                onShare={handleShare}
-                onPublish={() => setShowDeployModal(true)}
-                onBack={() => navigate('/studio')}
-                onToggleArtifacts={() => setViewMode('artifacts')}
-                onSelectFile={(f) => {
-                  setActiveFile(f);
-                  setViewMode('code');
-                }}
-              />
-            </div>
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Engineering Intelligence Terminal (Sidebar) */}
+        <div className={cn(
+          "shrink-0 z-30 transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] relative",
+          isSidebarCollapsed ? "w-0 opacity-0 -translate-x-12" : "w-[460px] opacity-100 translate-x-0"
+        )}>
+          <div className="h-full p-5 flex flex-col">
+             <div className="flex-1 bg-white border border-black border-opacity-5 shadow-2xl rounded-[3rem] overflow-hidden relative aether-glass">
+                <StudioChat 
+                   projectId={activeProject.id} 
+                   projectFiles={activeProject.files}
+                   projectName={activeProject.name}
+                   isSaving={isSaving}
+                   activeFile={activeFile}
+                   onCodeGenerated={handleCodeGenerated}
+                   onGeneratingChange={setIsGenerating}
+                   artifacts={artifacts}
+                   setArtifacts={setArtifacts}
+                   tasks={tasks}
+                   setTasks={setTasks}
+                   logs={logs}
+                   setLogs={setLogs}
+                   runtimeError={runtimeError}
+                   onClearError={() => setRuntimeError(null)}
+                   onPhaseChange={(phase, specialist) => {
+                     setAgentPhase(phase);
+                     if (specialist) setActiveSpecialist(specialist);
+                   }}
+                   onStreamCharsChange={(chars, preview) => {
+                     setStreamChars(chars);
+                     setStreamPreview(preview);
+                   }}
+                   onShare={() => {}}
+                   onBack={() => navigate('/dashboard')}
+                   onToggleArtifacts={() => setViewMode('artifacts')}
+                   onSelectFile={(f) => {
+                     setActiveFile(f);
+                     setViewMode('code');
+                   }}
+                />
+             </div>
           </div>
         </div>
 
-        {/* ── Main Workspace: Immersive Stage (Floating OS Style) ── */}
-        <div className={cn(
-          "flex-1 overflow-hidden bg-[#FAFAFA] relative z-0 panorama-transition",
-          !isSidebarCollapsed ? "p-4 pl-0" : "p-4"
-        )}>
-          {/* Mesh Gradient Backdrop */}
-          <div className="absolute inset-0 bg-zinc-50 z-[-1] overflow-hidden rounded-[2.5rem] border border-black/[0.03]">
-             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,_#F0F0F0_0%,_transparent_100%)]" />
-             <div className="absolute -bottom-1/2 -right-1/4 w-full h-full bg-primary/5 rounded-full blur-[120px] animate-pulse" />
-          </div>
-          
-          <div className="relative h-full w-full rounded-[2rem] overflow-hidden border border-black/[0.03] bg-white shadow-2xl">
+        {/* Global Workspace Surface */}
+        <div className="flex-1 p-5 pl-0 relative">
+          <div className="h-full w-full rounded-[3rem] border border-black border-opacity-5 bg-[#F7F7F9] overflow-hidden relative shadow-inner">
             <AnimatePresence mode="wait">
-              <motion.div
-              key={viewMode}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="h-full w-full"
-            >
-              {viewMode === 'preview' ? (
-                <div className="h-full w-full flex flex-col items-center justify-center">
-                  <div className={cn(
-                    "h-full w-full transition-all duration-500 ease-in-out flex items-center justify-center",
-                    deviceMode === 'mobile' ? "max-w-[375px]" : deviceMode === 'tablet' ? "max-w-[768px]" : "max-w-full"
-                  )}>
-                    <StudioPreview 
-                      files={activeProject.files} 
-                      isGenerating={isGenerating}
-                      streamChars={streamChars}
-                      streamPreview={streamPreview}
-                      deviceMode={deviceMode as any}
-                      onDeviceModeChange={setDeviceMode as any}
-                      viewMode="preview"
-                      onToggleViewMode={(m) => setViewMode(m as any)}
-                      isSidebarCollapsed={isSidebarCollapsed}
-                      onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                      isFullscreen={isFullscreen}
-                      onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
-                      onShare={handleShare}
-                      onError={setRuntimeError}
-                    />
-                  </div>
-                </div>
-              ) : viewMode === 'code' ? (
-                <motion.div 
-                  key="code"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex h-full w-full bg-[#080808]"
-                >
-                  <div className="w-64 shrink-0 border-r border-white/5 bg-black/20 backdrop-blur-sm">
-                    <StudioFileTree 
-                      files={activeProject.files} 
-                      selectedFile={activeFile || ''} 
-                      onSelect={setActiveFile} 
-                    />
-                  </div>
-                  <div className="flex-1 overflow-hidden">
-                    <StudioCodeEditor 
-                      selectedFile={activeFile || ''}
-                      projectFiles={activeProject.files}
-                      onFilesChange={handleFilesChange}
-                      isGenerating={isGenerating}
-                      streamPreview={streamPreview}
-                    />
-                  </div>
-                </motion.div>
-              ) : viewMode === 'artifacts' ? (
-                <motion.div 
-                  key="artifacts"
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.98 }}
-                  transition={{ duration: 0.3 }}
-                  className="h-full w-full bg-[#080808]"
-                >
-                  <StudioArtifactsPanel 
-                    isOpen={true}
-                    onClose={() => setViewMode('preview')}
-                    artifacts={artifacts} 
-                    tasks={activeTasks} 
-                    logs={logs}
-                    files={activeProject.files}
-                    agentPhase={agentPhase}
-                    activeSpecialist={activeSpecialist}
-                    persona="genesis"
-                    onFix={() => {
-                       window.dispatchEvent(new CustomEvent('GENESIS_LOG', { 
-                         detail: { message: 'Iniciando reparación manual...', type: 'info', source: 'UI' } 
-                       }));
-                    }}
-                  />
-                </motion.div>
-              ) : viewMode === 'files' ? (
-                <div className="h-full w-full bg-[#080808] flex border-t border-white/5">
-                   <div className="w-full max-w-xs border-r border-white/5 bg-black/20 backdrop-blur-sm">
-                      <StudioFileTree 
-                        files={activeProject.files} 
-                        selectedFile={activeFile || ''} 
-                        onSelect={setActiveFile} 
-                      />
-                   </div>
-                   <div className="flex-1 flex items-center justify-center bg-background">
-                      <div className="text-center space-y-4">
-                         <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center mx-auto border border-white/10">
-                            <FolderOpen className="w-8 h-8 text-zinc-500" />
-                         </div>
-                         <h3 className="text-white font-black uppercase tracking-widest text-xs">Gestor de Archivos</h3>
-                         <p className="text-zinc-500 text-[10px] uppercase tracking-wider">Selecciona un archivo para editar su contenido.</p>
-                      </div>
-                   </div>
-                </div>
-              ) : viewMode === 'cloud' ? (
-                <StudioCloud 
-                  projectId={activeProject.id} 
-                  config={cloudConfig} 
-                  onConfigChange={setCloudConfig} 
-                />
-              ) : viewMode === 'analytics' ? (
-                <StudioAnalytics projectId={activeProject.id} />
-              ) : viewMode === 'nexus' ? (
-                <StudioNexus 
-                  currentProject={activeProject} 
-                  allProjects={projects} 
-                />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center bg-[#080808]">
-                  <div className="text-center space-y-4">
-                    <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto border border-primary/20">
-                      <Sparkles className="w-8 h-8 text-primary animate-pulse" />
-                    </div>
-                    <h3 className="text-white font-black uppercase tracking-widest text-xs">Módulo en Desarrollo</h3>
-                    <p className="text-zinc-500 text-[10px] uppercase tracking-wider">Genesis está preparando esta vista para ti.</p>
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
+              <motion.div 
+                key={viewMode}
+                initial={{ opacity: 0, scale: 0.98, filter: 'blur(10px)' }}
+                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, scale: 1.02, filter: 'blur(10px)' }}
+                transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+                className="h-full w-full"
+              >
+                {renderWorkspace()}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Industrial Control Overlays */}
+            <StudioFloatingToolbar 
+              projectName={activeProject.name}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              deviceMode={deviceMode}
+              onDeviceModeChange={setDeviceMode}
+              isSaving={isSaving}
+              onShare={() => {}}
+              onBack={() => navigate('/dashboard')}
+              isSidebarCollapsed={isSidebarCollapsed}
+              onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            />
           </div>
         </div>
       </div>
-
-      {/* --- Modals --- */}
-      <AnimatePresence>
-        {showDeployModal && activeProject && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl"
-            onClick={() => setShowDeployModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-xl"
-            >
-              <StudioDeploy 
-                onClose={() => setShowDeployModal(false)}
-                files={activeProject.files}
-                projectName={activeProject.name}
-                onLog={(message, type) => {
-                  window.dispatchEvent(new CustomEvent('GENESIS_LOG', { 
-                    detail: { message, type, source: 'Deployer' } 
-                  }));
-                }}
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

@@ -35,7 +35,7 @@ export interface UseStudioActionsReturn {
   goToPricing: () => void;
   goToAdmin: () => void;
 
-  // Credit Purchase (Lovable-style)
+  // Credit Purchase (Genesis Architect)
   purchasePlan: (planId: string) => Promise<void>;
   purchasingPlan: boolean;
 

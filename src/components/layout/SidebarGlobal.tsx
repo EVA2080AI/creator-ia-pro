@@ -1,14 +1,13 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   LayoutTemplate, Brain, FolderOpen, Image, Download,
-  ChevronDown, Coins, LogOut, User, Shield,
-  Wand2, Hash, Megaphone, PenLine, Zap,
-  Settings, History, CreditCard, Monitor, Sparkles,
-  PanelLeftClose, PanelLeftOpen, Terminal, List, Code2,
-  Home, LayoutGrid, ShieldCheck, Activity, Bot, ChevronUp,
-  Users2, Palette
+  Coins, LogOut, User, Shield,
+  Zap, Settings, CreditCard, Sparkles,
+  PanelLeftClose, PanelLeftOpen, List, Code2,
+  Home, LayoutGrid, ShieldCheck, Activity, Bot,
+  Users2, Palette, type LucideIcon
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -20,7 +19,7 @@ import { useSidebarV2 } from '@/hooks/useSidebarV2';
 import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
 import { toast } from 'sonner';
 
-// ── Tier Hierarchy ──────────────────────────────────────────────────────────
+/** ─── Tier Hierarchy ────────────────────────────────────────────────────────── */
 const TIER_LEVELS: Record<string, number> = {
   'free': 0,
   'starter': 1,
@@ -38,8 +37,16 @@ const TIER_CONFIG: Record<string, { label: string, color: string, bg: string }> 
   'admin':   { label: 'ADMIN',   color: 'text-red-500',     bg: 'bg-red-50/80' },
 };
 
-// ── Navigation structure ──────────────────────────────────────────────────────
-const NAV_MAIN = [
+interface NavItemDef {
+  path: string;
+  label: string;
+  icon: LucideIcon;
+  minTier: string;
+  tab?: string;
+}
+
+/** ─── Navigation structure ────────────────────────────────────────────────────── */
+const NAV_MAIN: NavItemDef[] = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
   { path: '/chat',         label: 'Genesis IA',    icon: Brain,          minTier: 'starter' },
   { path: '/code',         label: 'Editor',        icon: Code2,          minTier: 'starter' },
@@ -50,9 +57,7 @@ const NAV_MAIN = [
   { path: '/antigravity',  label: 'Antigravity',   icon: Bot,            minTier: 'pymes' },
 ];
 
-const NAV_SOCIAL: typeof NAV_MAIN = [];
-
-const NAV_SYSTEM = [
+const NAV_SYSTEM: NavItemDef[] = [
   { path: '/admin',          label: 'Panel Control',    icon: ShieldCheck, minTier: 'admin' },
   { path: '/admin',          label: 'Usuarios',         icon: Users2,      minTier: 'admin', tab: 'usuarios' },
   { path: '/design-system',  label: 'Sistema de Diseño', icon: Palette,   minTier: 'admin' },
@@ -72,21 +77,16 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const { user, signOut } = useAuth();
   const { profile } = useProfile(user?.id);
   const { isAdmin } = useAdmin(user?.id);
-  const { globalExpanded, toggleGlobal, setGlobalExpanded } = useSidebarV2();
+  const { globalExpanded, toggleGlobal } = useSidebarV2();
   const { groups, workspaceTitle } = useWorkspaceActions();
-
-  // Acordión Menu State
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
 
   const userTier = profile?.subscription_tier?.toLowerCase() ?? 'free';
   const userTierLevel = TIER_LEVELS[userTier] || 0;
 
   const isActive = (path?: string) => {
     if (!path) return false;
-    // Compare only pathnames, ignoring query strings
     const cleanPath = path.split('?')[0];
-    return location.pathname === cleanPath ||
-      (cleanPath !== '/dashboard' && location.pathname.startsWith(cleanPath));
+    return location.pathname === cleanPath || (cleanPath !== '/dashboard' && location.pathname.startsWith(cleanPath));
   };
 
   const handleNav = (path: string, minTier = 'free', label = '', tab?: string) => {
@@ -95,12 +95,8 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
       navigate('/auth');
       return;
     }
-
     const requiredLevel = TIER_LEVELS[minTier] || 0;
-    
-    // Bypass tier check for Admins
     const canAccess = isAdmin || userTierLevel >= requiredLevel;
-
     if (!canAccess) {
       toast.error('Acceso Restringido', {
         description: `"${label}" requiere el plan ${minTier.toUpperCase()} o superior.`,
@@ -121,10 +117,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
 
   return (
     <motion.aside
-      animate={{ 
-        width: isMobile ? 240 : W,
-        x: 0 
-      }}
+      animate={{ width: isMobile ? 240 : W, x: 0 }}
       initial={{ x: isMobile ? 0 : -W }}
       transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
       className={cn(
@@ -134,45 +127,26 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
       style={{ width: isMobile ? 240 : W }}
       aria-label="Navegación principal"
     >
-      {/* ── Header ── */}
       <div className="flex h-[56px] items-center gap-3 px-3 border-b border-zinc-100 shrink-0 uppercase tracking-tighter">
         <AnimatePresence mode="wait">
           {(globalExpanded || isMobile) ? (
-            <motion.div
-              key="expanded"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="flex-1 min-w-0"
-            >
+            <motion.div key="expanded" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 min-w-0">
               <Logo size="sm" showText onClick={() => navigate('/dashboard')} />
             </motion.div>
           ) : (
-            <motion.div
-              key="collapsed"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
+            <motion.div key="collapsed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
               <Logo size="sm" showText={false} onClick={() => navigate('/dashboard')} />
             </motion.div>
           )}
         </AnimatePresence>
         {!isMobile && (
-          <button
-            onClick={toggleGlobal}
-            aria-label={globalExpanded ? 'Colapsar menú' : 'Expandir menú'}
-            className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all shrink-0"
-          >
+          <button onClick={toggleGlobal} className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all shrink-0">
             {globalExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
           </button>
         )}
       </div>
 
       <nav className="flex-1 overflow-y-auto py-4 no-scrollbar">
-        {/* 1. PRINCIPAL */}
         <div className="px-2 space-y-0.5 mb-6">
           {(globalExpanded || isMobile) && (
             <div className="px-3 py-1.5 mb-1">
@@ -186,7 +160,6 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
               label={item.label}
               icon={item.icon}
               active={isActive(item.path)}
-              aria-current={isActive(item.path) ? 'page' : undefined}
               expanded={globalExpanded || isMobile}
               minTier={item.minTier}
               onClick={() => handleNav(item.path, item.minTier, item.label)} 
@@ -194,8 +167,6 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           ))}
         </div>
 
-
-        {/* 3. SISTEMA (Admin Only) */}
         {isAdmin && (
           <div className="px-2 space-y-0.5 mb-6">
             {(globalExpanded || isMobile) && (
@@ -215,13 +186,12 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
                 active={isActive(item.path)} 
                 expanded={globalExpanded || isMobile}
                 minTier={item.minTier}
-                onClick={() => handleNav(item.path, item.minTier, item.label, (item as any).tab)} 
+                onClick={() => handleNav(item.path, item.minTier, item.label, item.tab)} 
               />
             ))}
           </div>
         )}
 
-        {/* Workspace Contextual Actions */}
         {groups.length > 0 && (
           <div className="mt-8 mb-4 px-2 space-y-4 animate-in fade-in slide-in-from-left-4 duration-500">
             {(globalExpanded || isMobile) && (
@@ -242,17 +212,12 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
                       className={cn(
                         'group w-full flex items-center rounded-xl transition-all duration-150 text-[12px] font-bold outline-none',
                         (globalExpanded || isMobile) ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
-                        action.active
-                          ? 'bg-zinc-900 text-white shadow-lg'
-                          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100',
+                        action.active ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100',
                         action.variant === 'primary' && !action.active && 'bg-primary/5 text-primary border border-primary/20',
                         action.disabled && 'opacity-20 cursor-not-allowed'
                       )}
                     >
-                      <action.icon className={cn(
-                        'shrink-0 w-4 h-4',
-                        action.active ? 'text-white' : (action.variant === 'primary' ? 'text-primary' : 'text-zinc-400')
-                      )} />
+                      <action.icon className={cn('shrink-0 w-4 h-4', action.active ? 'text-white' : (action.variant === 'primary' ? 'text-primary' : 'text-zinc-400'))} />
                       {(globalExpanded || isMobile) && <span className="truncate flex-1 text-left">{action.label}</span>}
                     </button>
                   ))}
@@ -262,7 +227,6 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           </div>
         )}
 
-        {/* Credits bar */}
         {(globalExpanded || isMobile) && profile && (
           <div className="mx-4 mt-6 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/60 shadow-sm overflow-hidden relative group">
             <div className="flex items-center justify-between mb-3 relative z-10">
@@ -270,70 +234,42 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
             </div>
             <div className="flex items-center gap-2 relative z-10">
                <Coins className="w-4 h-4 text-primary shrink-0" />
-               <span className="text-[16px] font-black text-zinc-900 tabular-nums">
-                 {profile.credits_balance?.toLocaleString() ?? '0'}
-               </span>
+               <span className="text-[16px] font-black text-zinc-900 tabular-nums">{profile.credits_balance?.toLocaleString() ?? '0'}</span>
             </div>
-            <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-full -mr-8 -mt-8 transition-transform group-hover:scale-150" />
           </div>
         )}
       </nav>
 
-      {/* ── Footer ── */}
       <div className="shrink-0 border-t border-zinc-100 p-2 space-y-1 bg-white/50 backdrop-blur-md">
         {NAV_BOTTOM.map((item) => (
           <button
             key={item.path}
             onClick={() => handleNav(item.path)}
-            className={cn(
-              'group w-full flex items-center rounded-xl transition-all duration-150 text-[12px] font-medium text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50',
-              (globalExpanded || isMobile) ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center'
-            )}
+            className={cn('group w-full flex items-center rounded-xl transition-all duration-150 text-[12px] font-medium text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50', (globalExpanded || isMobile) ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center')}
           >
             <item.icon className="shrink-0 w-4 h-4" />
             {(globalExpanded || isMobile) && <span className="truncate flex-1 text-left">{item.label}</span>}
           </button>
         ))}
 
-        <div className={cn(
-          'flex items-center gap-2 px-2 py-2 rounded-xl mt-2 transition-all',
-          (globalExpanded || isMobile) ? 'bg-zinc-50 border border-zinc-100 shadow-inner' : 'justify-center'
-        )}>
+        <div className={cn('flex items-center gap-2 px-2 py-2 rounded-xl mt-2 transition-all', (globalExpanded || isMobile) ? 'bg-zinc-50 border border-zinc-100 shadow-inner' : 'justify-center')}>
           {user ? (
             <>
               <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-white border border-zinc-200 shadow-sm">
-                {profile?.avatar_url
-                  ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-                  : <User className="w-4 h-4 text-zinc-300" />}
+                {profile?.avatar_url ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" /> : <User className="w-4 h-4 text-zinc-300" />}
               </div>
               {(globalExpanded || isMobile) && (
                 <div className="flex-1 min-w-0 pr-1">
-                  <p className="text-[11px] font-black text-zinc-900 truncate leading-tight">
-                    {profile?.display_name || user.email?.split('@')[0]}
-                  </p>
-                  <p className="text-[9px] font-bold text-zinc-400 truncate uppercase tracking-widest">
-                    {profile?.subscription_tier || 'Free'}
-                  </p>
+                  <p className="text-[11px] font-black text-zinc-900 truncate leading-tight">{profile?.display_name || user.email?.split('@')[0]}</p>
+                  <p className="text-[9px] font-bold text-zinc-400 truncate uppercase tracking-widest">{profile?.subscription_tier || 'Free'}</p>
                 </div>
               )}
               {(globalExpanded || isMobile) && (
-                <button
-                  onClick={handleSignOut}
-                  className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"
-                  title="Cerrar sesión"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
+                <button onClick={handleSignOut} className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"><LogOut className="w-4 h-4" /></button>
               )}
             </>
           ) : (
-             <button
-              onClick={() => navigate('/auth')}
-              className={cn(
-                'flex items-center gap-2 text-zinc-500 hover:text-zinc-900 px-3 py-2 w-full',
-                !(globalExpanded || isMobile) && 'justify-center'
-              )}
-            >
+             <button onClick={() => navigate('/auth')} className={cn('flex items-center gap-2 text-zinc-500 hover:text-zinc-900 px-3 py-2 w-full', !(globalExpanded || isMobile) && 'justify-center')}>
               <User className="w-4 h-4" />
               {(globalExpanded || isMobile) && <span className="text-xs font-bold font-black">LOGIN</span>}
             </button>
@@ -344,50 +280,31 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   );
 }
 
-// ── NavItem Subcomponent ──
 function NavItem({ 
-  path, label, icon: Icon, active, expanded, onClick, className, minTier = 'free' 
+  label, icon: Icon, active, expanded, onClick, className, minTier = 'free' 
 }: { 
-  path: string, label: string, icon: any, active: boolean, expanded: boolean, 
+  path: string, label: string, icon: LucideIcon, active: boolean, expanded: boolean, 
   onClick: () => void, className?: string, minTier?: string
 }) {
   const config = TIER_CONFIG[minTier.toLowerCase()];
-
   return (
     <button
       onClick={onClick}
       className={cn(
         'group w-full flex items-center rounded-xl transition-all duration-200 text-[12.5px] font-medium outline-none',
         expanded ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
-        active
-          ? 'bg-primary/10 text-primary border border-primary/20 font-black shadow-sm'
-          : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent',
+        active ? 'bg-primary/10 text-primary border border-primary/20 font-black shadow-sm' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent',
         className
       )}
     >
-      <Icon className={cn(
-        'shrink-0 transition-all duration-200',
-        expanded ? 'w-4 h-4' : 'w-5 h-5',
-        active ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-700 group-hover:scale-110'
-      )} />
+      <Icon className={cn('shrink-0 transition-all duration-200', expanded ? 'w-4 h-4' : 'w-5 h-5', active ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-700 group-hover:scale-110')} />
       {expanded && (
         <span className="truncate flex-1 text-left flex items-center justify-between gap-2">
           {label}
           {config && (
-            <span className={cn(
-              "text-[9px] font-bold px-2.5 py-0.5 rounded-full tracking-wide shrink-0 shadow-sm",
-              config.bg, config.color
-            )}>
-              {config.label}
-            </span>
+            <span className={cn("text-[9px] font-bold px-2.5 py-0.5 rounded-full tracking-wide shrink-0 shadow-sm", config.bg, config.color)}>{config.label}</span>
           )}
         </span>
-      )}
-      {expanded && active && !config && (
-        <motion.div 
-          layoutId="active-nav-glow" 
-          className="w-1.5 h-1.5 rounded-full bg-primary ml-2"
-        />
       )}
     </button>
   );

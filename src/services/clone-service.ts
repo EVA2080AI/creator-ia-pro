@@ -67,7 +67,7 @@ function extractSitemap(html: string, baseUrl: string): string[] {
     const base = new URL(baseUrl);
     
     while ((match = hrefRegex.exec(html)) !== null) {
-      let href = match[1];
+      const href = match[1];
       if (href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) continue;
       
       try {

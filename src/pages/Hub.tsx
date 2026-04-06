@@ -297,11 +297,11 @@ const TEMPLATES = [
     id: "ui-dashboard",
     category: "UI/UX",
     title: "Analytics Dashboard",
-    desc: "UI de dashboard con gráficos, KPIs y sidebar de navegación. Código Tailwind + React compatible con Lovable.",
+    desc: "UI de dashboard con gráficos, KPIs y sidebar de navegación. Código Tailwind + React compatible con Genesis Architecture.",
     icon: Globe,
     color: "#2563eb", // Royal Blue
     nodes: 5,
-    tags: ["Dashboard", "Admin", "Lovable"],
+    tags: ["Dashboard", "Admin", "Genesis"],
     preset: []
   },
 ];

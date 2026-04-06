@@ -1,16 +1,32 @@
-import { useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { aiService, classifyError } from "@/services/ai-service";
+import { aiService } from "@/services/ai-service";
 import { toast } from "sonner";
-import { Node, Edge, useReactFlow } from "@xyflow/react";
+import { Node, useReactFlow } from "@xyflow/react";
+
+interface CanvasNodeData {
+  title?: string;
+  flavor?: string;
+  description?: string;
+  prompt?: string;
+  model?: string;
+  status?: string;
+  output?: string;
+  caption?: string;
+  assetUrl?: string;
+  [key: string]: any;
+}
+
+interface UserProfile {
+  id: string;
+}
 
 export function useCanvasExecution(
   spaceId: string | null,
-  user: any,
-  setNodes: any,
+  user: UserProfile | null,
+  _setNodes: (nodes: Node<CanvasNodeData>[]) => void, // Kept for signature compatibility if needed
   addLog: (node: string, msg: string, type?: 'info' | 'success' | 'error') => void
 ) {
-  const { getNodes, getEdges, setNodes: rfSetNodes } = useReactFlow();
+  const { getNodes, getEdges, setNodes: rfSetNodes } = useReactFlow<Node<CanvasNodeData>>();
 
   const ensureNodePersisted = async (nodeId: string) => {
     if (!spaceId || !user) return false;
@@ -29,10 +45,10 @@ export function useCanvasExecution(
         id: nodeId,
         space_id: spaceId,
         user_id: user.id,
-        type: nodeToPersist.type,
-        prompt: (nodeToPersist.data as any).prompt || (nodeToPersist.data as any).title || 'auto-persisted',
-        status: (nodeToPersist.data as any).status || 'idle',
-        data_payload: nodeToPersist.data as any,
+        type: nodeToPersist.type || 'default',
+        prompt: nodeToPersist.data.prompt || nodeToPersist.data.title || 'auto-persisted',
+        status: nodeToPersist.data.status || 'idle',
+        data_payload: nodeToPersist.data,
         pos_x: nodeToPersist.position.x,
         pos_y: nodeToPersist.position.y
     });
@@ -46,9 +62,9 @@ export function useCanvasExecution(
     const node = currentNodes.find((n) => n.id === nodeId);
     if (!node) return;
 
-    const nodeName = (node.data as any).title || node.type;
+    const nodeName = node.data.title || node.type || 'Unknown Node';
     rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
-    addLog(nodeName!, 'Iniciando ejecución…', 'info');
+    addLog(nodeName, 'Iniciando ejecución…', 'info');
 
     try {
       let resultText = '';
@@ -58,40 +74,40 @@ export function useCanvasExecution(
         const res = await aiService.processAction({
           action: 'chat',
           prompt: `Analiza este perfil: ${node.data.title}. Contexto: ${node.data.flavor}. Estilo: ${node.data.description}`,
-          model: (node.data as any).model || 'deepseek-chat',
+          model: node.data.model || 'deepseek-chat',
           node_id: (spaceId && isPersisted) ? node.id : undefined
         });
-        resultText = res.text;
+        resultText = res.text || '';
       } else if (node.type === 'llmNode' || node.type === 'captionNode') {
         const latestEdges = getEdges();
         const incomingEdges = latestEdges.filter(e => e.target === node.id);
         const upstreamContext = incomingEdges.map(edge => {
           const src = currentNodes.find(n => n.id === edge.source);
-          return (src?.data as any).output || (src?.data as any).description || (src?.data as any).caption || '';
+          if (!src) return '';
+          return src.data.output || src.data.description || src.data.caption || '';
         }).join('\n---\n');
 
-        const prompt = (node.data as any).prompt || (node.type === 'captionNode' ? 'Genera un caption' : 'Analiza');
+        const prompt = node.data.prompt || (node.type === 'captionNode' ? 'Genera un caption' : 'Analiza');
         const finalPrompt = `Contexto:\n${upstreamContext}\n\nInstrucción: ${prompt}`;
         const res = await aiService.processAction({
           action: 'chat',
           prompt: finalPrompt,
-          model: (node.data as any).model || 'deepseek-chat',
+          model: node.data.model || 'deepseek-chat',
           node_id: (spaceId && isPersisted) ? node.id : undefined
         });
-        resultText = res.text;
+        resultText = res.text || '';
       } else if (node.type === 'modelView' || node.type === 'videoModel') {
         const action = node.type === 'modelView' ? 'image' : 'video';
         const res = await aiService.processAction({
           action,
-          prompt: (node.data as any).prompt || "Premium marketing visual",
-          model: (node.data as any).model || (action === 'image' ? 'flux-schnell' : 'video'),
+          prompt: node.data.prompt || "Premium marketing visual",
+          model: node.data.model || (action === 'image' ? 'flux-schnell' : 'video'),
           node_id: (spaceId && isPersisted) ? node.id : undefined
         });
-        assetUrl = res.url;
+        assetUrl = res.url || '';
       }
 
-      // Update State & DB
-      const updatePayload: any = { status: 'ready' };
+      const updatePayload: Partial<CanvasNodeData> = { status: 'ready' };
       if (resultText) {
         if (node.type === 'llmNode') updatePayload.output = resultText;
         else if (node.type === 'captionNode') updatePayload.caption = resultText;
@@ -105,14 +121,14 @@ export function useCanvasExecution(
         await supabase.from('canvas_nodes').update({ 
           status: 'ready', 
           asset_url: assetUrl || undefined,
-          data_payload: { ...(node.data as any), ...updatePayload }
-        }).eq('id', nodeId);
+          data_payload: { ...node.data, ...updatePayload }
+        } as any).eq('id', nodeId);
       }
 
-      addLog(nodeName!, 'Completado ✓', 'success');
+      addLog(nodeName, 'Completado ✓', 'success');
     } catch (e: any) {
       rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
-      addLog(nodeName!, 'Error: ' + e.message, 'error');
+      addLog(nodeName, 'Error: ' + e.message, 'error');
       toast.error(e.message);
     }
   };

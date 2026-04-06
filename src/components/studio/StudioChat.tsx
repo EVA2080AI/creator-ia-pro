@@ -92,16 +92,16 @@ function StudioProjectHeader({
   return (
     <header 
       className={cn(
-        "shrink-0 h-20 border-b transition-all duration-700 px-6 flex items-center justify-between z-30 sticky top-0",
-        "bg-[#0A0A0C]/80 border-white/5 backdrop-blur-[40px] saturate-[1.8]"
+        "shrink-0 h-16 md:h-20 border-b transition-all duration-700 px-4 md:px-6 flex items-center justify-between z-30 sticky top-0",
+        "bg-white/70 border-zinc-100 backdrop-blur-[40px] saturate-[1.8]"
       )}
       role="banner"
     >
-      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-50" />
+      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/10 to-transparent opacity-50" />
       <div className="flex items-center gap-5 overflow-hidden">
         <button 
           onClick={onBack} 
-          className="h-10 w-10 rounded-xl flex items-center justify-center text-zinc-500 hover:bg-white/5 hover:text-white transition-all active:scale-90 border border-white/10 group"
+          className="h-10 w-10 rounded-xl flex items-center justify-center text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950 transition-all active:scale-90 border border-zinc-200 group"
         >
           <ChevronLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
         </button>
@@ -109,7 +109,7 @@ function StudioProjectHeader({
           <div className="flex items-center gap-3">
              <div className="flex items-center gap-1.5">
                <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)] animate-pulse" />
-               <h2 className="text-[13px] font-black text-white truncate tracking-tighter uppercase italic">{name}</h2>
+               <h2 className="text-[12px] md:text-[13px] font-black text-zinc-900 truncate tracking-tighter uppercase italic">{name}</h2>
              </div>
              {isSaving && (
                <div className="flex items-center gap-2 px-2 py-0.5 rounded bg-primary/10 border border-primary/20 animate-pulse">
@@ -132,21 +132,21 @@ function StudioProjectHeader({
                      />
                    ))}
                 </div>
-                <div className="flex items-center gap-2 px-2 py-0.5 rounded-lg bg-white/5 border border-white/5">
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400 italic">
+                <div className="flex items-center gap-2 px-2 py-0.5 rounded-lg bg-zinc-100 border border-zinc-100">
+                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600 italic">
                      GENESIS_{activeSpecialist?.toUpperCase() || 'CORE'}
                    </span>
                 </div>
-                <span className="text-[8px] font-bold text-zinc-600 tracking-tighter uppercase">HEARTBEAT: 432Hz</span>
+                <span className="text-[8px] font-bold text-zinc-400 tracking-tighter uppercase hidden sm:inline">HEARTBEAT: 432Hz</span>
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/10">
+                <div className="flex items-center gap-2 px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-100">
                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-500/70 italic">SYSTEM_IDLE</span>
+                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600/80 italic">SYSTEM_IDLE</span>
                 </div>
-                <div className="h-3 w-[1px] bg-white/10 mx-1" />
-                <span className="text-[8px] font-bold text-zinc-600 tracking-tighter uppercase">LINK_SYNC: 24ms</span>
+                <div className="h-3 w-[1px] bg-zinc-200 mx-1 hidden sm:block" />
+                <span className="text-[8px] font-bold text-zinc-400 tracking-tighter uppercase hidden sm:inline">LINK_SYNC: 24ms</span>
               </div>
             )}
           </div>
@@ -156,11 +156,11 @@ function StudioProjectHeader({
       <div className="flex items-center gap-3">
         <button 
           onClick={onToggleArtifacts} 
-          className="h-11 px-5 rounded-2xl border border-white/10 bg-white/5 flex items-center gap-3 text-zinc-400 hover:bg-white/10 hover:text-white transition-all relative group shadow-2xl overflow-hidden"
+          className="h-10 md:h-11 px-3 md:px-5 rounded-2xl border border-zinc-200 bg-white flex items-center gap-2 md:gap-3 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950 transition-all relative group shadow-sm overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="relative z-10 flex items-center gap-2.5">
-            <Activity className={cn("h-4 w-4", agentPhase !== 'idle' ? "text-primary animate-pulse" : "text-zinc-500")} />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="relative z-10 flex items-center gap-2 md:gap-2.5">
+            <Activity className={cn("h-4 w-4", agentPhase !== 'idle' ? "text-primary animate-pulse" : "text-zinc-400")} />
             <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden sm:inline italic">Console</span>
           </div>
         </button>
@@ -302,10 +302,9 @@ export function StudioChat(props: StudioChatProps) {
 
     try {
       addLog(`Iniciando ciclo: ${intent}...`);
-      await aiService.spendCredits(cost, intent, selectedModel, null);
       
       const result = await generateCode(text, { pendingImage, pendingUrl, preferences }) as any;
-      if (!result) { addLog("Error en el motor.", "error"); await aiService.refundCredits(cost); return; }
+      if (!result) { addLog("Error en el motor.", "error"); return; }
 
       let assistantMsg: Message;
 
@@ -459,7 +458,7 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve el JSON c
 
   return (
     <aside 
-      className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-[#08080A] selection:bg-primary/30 overflow-hidden"
+      className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-white selection:bg-primary/20 overflow-hidden"
       aria-label="Panel de Chat Génesis"
     >
       {/* Structural Neural Overlays */}
@@ -501,12 +500,12 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve el JSON c
         ))}
 
         {genPhase === 'thinking' && (
-          <div className="flex flex-col items-start gap-5 mb-10 pl-2 animate-in fade-in slide-in-from-left-4 duration-700">
-             <div className="flex items-center gap-4 py-4 px-8 rounded-[2rem] bg-white text-zinc-900 border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] transition-all relative overflow-hidden group">
-                <div className="absolute inset-0 scanline-overlay opacity-5 group-hover:opacity-10 transition-opacity" />
-                <div className="relative z-10 flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-2xl bg-zinc-950 flex items-center justify-center relative overflow-hidden shadow-2xl">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-transparent" />
+          <div className="flex flex-col items-start gap-4 mb-8 pl-1 animate-in fade-in slide-in-from-left-4 duration-700">
+             <div className="flex items-center gap-4 py-4 px-6 rounded-[2rem] bg-white text-zinc-900 border border-zinc-100 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.08)] transition-all relative overflow-hidden group">
+                <div className="absolute inset-0 scanline-overlay opacity-[0.02] group-hover:opacity-[0.04] transition-opacity" />
+                <div className="relative z-10 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-2xl bg-zinc-50 flex items-center justify-center relative overflow-hidden ring-1 ring-zinc-100">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
                     <Loader2 className="h-5 w-5 text-primary animate-spin relative z-10" />
                   </div>
                   <div className="flex flex-col">
@@ -533,10 +532,10 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve el JSON c
 
         {(genPhase === 'streaming' || genPhase === 'done') && streamingContent && (
           <div className="flex flex-col items-start gap-5 mb-10 group/stream">
-            <div className="aether-glass border border-white/10 px-10 py-10 rounded-[4rem] rounded-tl-none shadow-[0_40px_100px_-20px_rgba(0,0,0,0.3)] min-w-[280px] relative overflow-hidden">
-              <div className="absolute inset-0 scanline-overlay opacity-[0.02] pointer-events-none" />
-              <div className="absolute inset-0 neural-mesh opacity-[0.03] pointer-events-none" />
-              <div className="prose prose-sm max-w-none font-medium prose-zinc prose-p:text-zinc-800 prose-headings:text-zinc-950 relative z-10" dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent) }} />
+            <div className="aether-glass border border-zinc-100 px-6 md:px-10 py-6 md:py-10 rounded-[2.5rem] md:rounded-[4rem] rounded-tl-none shadow-[0_20px_60px_-20px_rgba(0,0,0,0.05)] min-w-[240px] md:min-w-[280px] relative overflow-hidden">
+              <div className="absolute inset-0 scanline-overlay opacity-[0.01] pointer-events-none" />
+              <div className="absolute inset-0 neural-mesh opacity-[0.02] pointer-events-none" />
+              <div className="prose prose-sm max-w-none font-medium prose-zinc prose-p:text-zinc-700 prose-headings:text-zinc-950 relative z-10" dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent) }} />
               {genPhase === 'streaming' && <span className="inline-block h-4 w-1.5 ml-2 align-baseline rounded-full animate-pulse bg-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.8)]" />}
             </div>
             {isGenerating && currentGenIntent === 'codegen' && (

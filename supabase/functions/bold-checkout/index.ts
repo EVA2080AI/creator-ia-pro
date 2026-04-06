@@ -13,7 +13,24 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { amount, packId, userId, buyerEmail, description } = await req.json();
+    const { packId, userId, buyerEmail, description } = await req.json();
+
+    // ─── Server-Side Price Verification (Expert-Level Security) ───
+    const PRICE_MAP: Record<string, number> = {
+      // Monthly Plans
+      'basico':      149900,
+      'profesional': 349900,
+      'empresarial': 699900,
+      // Refill Packs
+      'pack_200':     25000,
+      'pack_1000':    90000,
+      'pack_2000':   150000,
+    };
+
+    const validatedAmount = PRICE_MAP[packId];
+    if (!validatedAmount) {
+      throw new Error(`Identificador de pack inválido: ${packId}`);
+    }
 
     const BOLD_API_KEY = Deno.env.get("BOLD_API_KEY");
     
@@ -23,11 +40,11 @@ serve(async (req) => {
 
     const payload = {
       amount_type: "CLOSE",
-      total_amount: amount,
+      total_amount: validatedAmount, // Use validated amount
       currency: "COP",
-      description: description || "Créditos en Creator IA Pro",
+      description: description || `Carga de Inteligencia Genesis: ${packId}`,
       payer_email: buyerEmail, 
-      callback_url: `${Deno.env.get("SUPABASE_URL") || "https://creator-ia.com"}/pricing?status=payment_returned`
+      callback_url: `${Deno.env.get("SUPABASE_URL") || "https://creator-ia.com"}/pricing?status=payment_returned&pack=${packId}`
     };
 
     const boldApiUrl = "https://integrations.api.bold.co/online/link/v1";

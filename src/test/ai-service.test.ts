@@ -49,6 +49,7 @@ function makeSupabaseMocks(opts: {
     }),
     maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
     update: vi.fn().mockReturnThis(),
+    upsert: vi.fn().mockReturnThis(),
   }));
 
   mockedSupabase.rpc.mockImplementation((fn: string) => {
@@ -96,16 +97,14 @@ describe("aiService — Image Generation", () => {
   it("returns a URL when OpenRouter proxy succeeds (url field)", async () => {
     makeSupabaseMocks();
     (supabase.functions.invoke as any).mockResolvedValue({
-      data: {
-        data: [{ url: "https://cdn.openrouter.ai/image.png" }],
-      },
+      data: { url: "https://cdn.openrouter.ai/image.png" },
       error: null,
     });
 
     const result = await aiService.processAction({
       action: "image",
       prompt: "paisaje urbano cyberpunk",
-      model: "nano-banana-2",
+      model: "flux-schnell",
     });
 
     expect(result.url).toBe("https://cdn.openrouter.ai/image.png");
@@ -332,7 +331,7 @@ describe("aiService — Model Routing", () => {
   });
 
   it("routes chat actions to handleTextGen (not image)", async () => {
-    makeSupabaseMocks();
+    makeSupabaseMocks({ tier: "pymes" }); // Premium model requires pymes tier
     (supabase.functions.invoke as any).mockResolvedValue({
       data: { choices: [{ message: { content: "texto respuesta" } }] },
       error: null,

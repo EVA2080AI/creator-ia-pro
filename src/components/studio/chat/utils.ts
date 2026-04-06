@@ -200,7 +200,7 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
       }
     }
     
-    let finalLang = lang || (filename.split('.').pop()?.toLowerCase() || 'tsx');
+    const finalLang = lang || (filename.split('.').pop()?.toLowerCase() || 'tsx');
     const isDeletion = code.includes('// DELETE');
     files[filename] = { language: finalLang, content: isDeletion ? '__genesis_delete__' : code };
   }

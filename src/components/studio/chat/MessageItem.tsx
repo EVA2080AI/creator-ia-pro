@@ -36,20 +36,15 @@ export function MessageItem({
     >
       {isUser ? (
         <>
-          <div className="bg-zinc-950 text-white px-10 py-6 rounded-[3.5rem] rounded-tr-none text-[15px] font-medium shadow-[0_30px_60px_-10px_rgba(0,0,0,0.5)] max-w-[85%] leading-relaxed border border-white/10 relative overflow-hidden group/user">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-40" />
-            <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2 group-hover/user:bg-primary/25 transition-all duration-1000" />
-            <div className="absolute top-6 right-8 flex gap-1.5 opacity-30">
-               <div className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_white]" />
-               <div className="w-1.5 h-1.5 rounded-full bg-white/40" />
-            </div>
+          <div className="chat-bubble-user text-white px-5 md:px-10 py-4 md:py-6 rounded-2xl md:rounded-[3.5rem] rounded-tr-none text-[14px] md:text-[15px] font-medium max-w-[90%] md:max-w-[85%] leading-relaxed relative overflow-hidden group/user">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-40" />
             
             {msg.imagePreview && (
-              <div className="rounded-[2rem] overflow-hidden mb-6 border border-white/20 shadow-2xl relative z-10 bg-black/60 p-1.5 backdrop-blur-xl">
-                <img src={msg.imagePreview} alt="Referencia visual adjunta" className="max-h-80 w-auto object-contain rounded-[1.5rem]" />
+              <div className="rounded-xl md:rounded-[2rem] overflow-hidden mb-4 md:mb-6 border border-white/20 shadow-xl relative z-10 bg-black/20 p-1 backdrop-blur-md">
+                <img src={msg.imagePreview} alt="Referencia visual adjunta" className="max-h-60 md:max-h-80 w-auto object-contain rounded-lg md:rounded-[1.5rem]" />
               </div>
             )}
-            <span className="whitespace-pre-wrap relative z-10 tracking-tight selection:bg-primary/40 font-medium">{msg.content}</span>
+            <span className="whitespace-pre-wrap relative z-10 tracking-tight selection:bg-white/20 font-medium">{msg.content}</span>
           </div>
           <div className="flex items-center gap-4 pr-6 mt-2 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-2 group-hover:translate-y-0">
             <div className="flex items-center gap-2">
@@ -63,10 +58,10 @@ export function MessageItem({
         </>
       ) : (
         <div className="w-full max-w-[98%]">
-          <header className="flex items-center gap-6 mb-6 pl-4">
-            <div className="h-14 w-14 rounded-[1.5rem] bg-zinc-950 border border-white/10 flex items-center justify-center text-primary shadow-2xl transition-all duration-700 group-hover:scale-110 group-hover:rotate-6 relative overflow-hidden sov-card-glow">
-               <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-transparent to-transparent opacity-60" />
-               <Sparkles className="h-6 w-6 fill-primary/30 relative z-10" />
+          <header className="flex items-center gap-3 md:gap-6 mb-4 md:mb-6 pl-2 md:pl-4">
+            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-[1.5rem] bg-white border border-zinc-100 flex items-center justify-center text-primary shadow-sm transition-all duration-700 group-hover:scale-110 relative overflow-hidden">
+               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-60" />
+               <Sparkles className="h-5 w-5 md:h-6 md:w-6 fill-primary/10 relative z-10" />
             </div>
             <div className="flex flex-col justify-center">
               <div className="flex items-center gap-3 mb-1.5">
@@ -87,33 +82,31 @@ export function MessageItem({
           </header>
 
           <section className={cn(
-            "px-14 py-14 rounded-[4.5rem] rounded-tl-none transition-all duration-1000 relative group/msg border overflow-hidden shadow-[0_40px_100px_-20px_rgba(0,0,0,0.25)]",
+            "px-6 md:px-14 py-6 md:py-14 rounded-[2rem] md:rounded-[4.5rem] rounded-tl-none transition-all duration-1000 relative group/msg border overflow-hidden shadow-sm",
             msg.type === 'plan' 
-              ? "bg-[#0A0A0C] text-white border-white/10 aether-glass-dark" 
-              : "aether-glass"
+              ? "bg-zinc-50 border-zinc-200" 
+              : "bg-white border-zinc-100"
           )}>
-            {/* Iridescent Aura */}
+            {/* Soft Aura */}
             {!isUser && (
-              <div className="absolute -top-32 -right-32 w-80 h-80 bg-primary/20 rounded-full blur-[140px] pointer-events-none animate-pulse opacity-40" />
+              <div className="absolute -top-16 md:-top-32 -right-16 md:-right-32 w-48 md:w-80 h-48 md:h-80 bg-primary/5 rounded-full blur-[60px] md:blur-[140px] pointer-events-none opacity-40" />
             )}
             
             {/* Neural Pattern Overlays */}
             <div className="absolute inset-0 pointer-events-none opacity-[0.04] neural-mesh select-none" aria-hidden="true" />
             <div className="absolute inset-0 scanline-overlay opacity-[0.02] pointer-events-none" />
             
-            {/* Plan Header (Industrial Style) */}
+            {/* Plan Header (Lumina Style) */}
             {msg.type === 'plan' && (
-              <div className="flex items-center gap-6 mb-12 pb-10 border-b border-white/10 relative z-10">
-                <div className="h-16 w-16 rounded-[2.2rem] bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl relative group/blueprint overflow-hidden">
-                  <div className="absolute inset-0 blueprint-grid opacity-30 group-hover/blueprint:opacity-50 transition-opacity" />
-                  <Shield className="h-7 w-7 text-primary relative z-10" />
-                  <div className="absolute -inset-2 bg-primary/30 rounded-full blur-2xl animate-pulse" />
+              <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-8 md:mb-12 pb-6 md:pb-10 border-b border-zinc-200 relative z-10">
+                <div className="h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-[2.2rem] bg-white border border-zinc-200 flex items-center justify-center shadow-sm relative group/blueprint overflow-hidden">
+                  <div className="absolute inset-0 bg-grid-canvas opacity-10" />
+                  <Shield className="h-5 w-5 md:h-7 md:w-7 text-primary relative z-10" />
                 </div>
                 <div>
-                  <span className="text-xl font-black uppercase tracking-tighter text-white italic block mb-1">BLUEPRINT_MASTER_ORCHESTRATION</span>
-                  <div className="flex items-center gap-3">
-                     <span className="px-2.5 py-1 rounded bg-primary/10 border border-primary/20 text-[9px] font-black text-primary uppercase tracking-[0.4em] animate-pulse italic">PHASE_ALPHA_INIT</span>
-                     <div className="h-1 w-32 rounded-full bg-white/5 overflow-hidden"><div className="h-full bg-gradient-to-r from-primary/60 to-blue-500/60 w-1/3 animate-shimmer" /></div>
+                  <span className="text-lg md:text-xl font-black uppercase tracking-tighter text-zinc-900 italic block mb-1">PLAN_DE_ARQUITECTURA</span>
+                  <div className="flex items-center gap-2 md:gap-3">
+                     <span className="px-2 py-0.5 rounded bg-primary/5 border border-primary/10 text-[8px] md:text-[9px] font-black text-primary uppercase tracking-[0.2em] italic">PHASE_ALPHA</span>
                   </div>
                 </div>
                 
@@ -135,8 +128,8 @@ export function MessageItem({
             )}
 
             <div className={cn(
-              "prose prose-sm max-w-none relative z-10 font-medium selection:bg-primary/30 transition-colors duration-700 leading-relaxed",
-              msg.type === 'plan' ? "prose-invert prose-p:text-zinc-300 prose-headings:text-white" : "prose-zinc text-zinc-800"
+              "prose prose-sm max-w-none relative z-10 font-medium selection:bg-primary/10 transition-colors duration-700 leading-relaxed",
+              msg.type === 'plan' ? "prose-zinc prose-p:text-zinc-600 prose-headings:text-zinc-900" : "prose-zinc text-zinc-700 md:text-zinc-800"
             )}
               dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} 
             />
@@ -165,7 +158,7 @@ export function MessageItem({
 
             {/* Project Download Artifact (Genesis V16.0) */}
             {msg.blob && (
-              <div className="mt-12 pt-10 border-t border-black/[0.06]">
+              <div className="mt-8 md:mt-12 pt-6 md:pt-10 border-t border-zinc-100">
                 <button
                   onClick={() => {
                     const url = URL.createObjectURL(msg.blob!);
@@ -177,13 +170,13 @@ export function MessageItem({
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                   }}
-                  className="w-full flex items-center justify-center gap-5 px-8 py-6 rounded-[2rem] bg-zinc-950 text-white text-[12px] font-black uppercase tracking-[0.3em] hover:bg-black hover:shadow-2xl hover:shadow-black/40 transition-all active:scale-[0.98] group/download italic border border-white/5 shadow-2xl"
+                  className="w-full flex items-center justify-center gap-4 px-6 md:px-8 py-4 md:py-6 rounded-xl md:rounded-[2rem] bg-zinc-900 text-white text-[11px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] hover:bg-black transition-all active:scale-[0.98] group/download italic shadow-lg shadow-zinc-200"
                 >
-                  <Download className="w-5 h-5 group-hover/download:translate-y-1 transition-transform text-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
+                  <Download className="w-5 h-5 group-hover/download:translate-y-1 transition-transform text-white/80" />
                   DESCARGAR_ZIP_COMPLETO
                 </button>
                 <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.4em] text-center mt-5 opacity-40 italic">
-                  SWARM_ENGINE_V21.0_CONSOLIDATION
+                  GENESIS_CONSOLIDATION_V21.0
                 </p>
               </div>
             )}
@@ -216,15 +209,14 @@ export function MessageItem({
             </div>
           </section>
 
-          {/* Assistant suggestions */}
           {msg.suggestions && msg.suggestions.length > 0 && (
-            <nav className="mt-8 flex flex-wrap gap-3 pl-6" aria-label="Sugerencias de continuación">
+            <nav className="mt-4 md:mt-8 flex flex-wrap gap-2 md:gap-3 pl-2 md:pl-6" aria-label="Sugerencias de continuación">
               {msg.suggestions.map((s, i) => (
                 <button 
                   key={i} 
                   onClick={() => onSuggestionClick(s)}
-                  className="px-8 py-4 rounded-[2rem] border-2 border-black/[0.04] bg-white text-[12px] font-black text-zinc-500 hover:border-primary/50 hover:text-primary hover:shadow-[0_15px_35px_rgba(var(--primary-rgb),0.1)] transition-all animate-in fade-in slide-in-from-bottom-4 duration-700 active:scale-95 italic tracking-tighter"
-                  style={{ animationDelay: `${i * 150}ms` }}
+                  className="px-4 md:px-8 py-2 md:py-4 rounded-xl md:rounded-[2rem] border border-zinc-100 bg-white text-[11px] md:text-[12px] font-black text-zinc-500 hover:border-primary/30 hover:text-primary hover:shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2 duration-700 active:scale-95 italic tracking-tighter"
+                  style={{ animationDelay: `${i * 100}ms` }}
                 >
                   {s}
                 </button>

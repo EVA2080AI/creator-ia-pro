@@ -134,57 +134,57 @@ export function ChatInput({
   return (
     <footer 
       className={cn(
-        "shrink-0 p-12 border-t transition-all duration-1000 relative z-40 panorama-transition pb-14",
-        "bg-[#08080A]/95 border-white/5 backdrop-blur-[80px] saturate-[2.2]"
+        "shrink-0 p-4 md:p-8 border-t transition-all duration-1000 relative z-40 pb-6 md:pb-10",
+        "bg-white/80 border-zinc-100 backdrop-blur-[40px] saturate-[1.8]"
       )}
       role="contentinfo"
     >
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-40" />
-      <div className="absolute inset-0 scanline-overlay opacity-[0.015] pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-30" />
+      <div className="absolute inset-0 scanline-overlay opacity-[0.01] pointer-events-none" />
       
       {/* ── Mode Selector: Industrial Sovereign ── */}
-      <div className="max-w-5xl mx-auto mb-10 flex items-center justify-between px-4">
-         <div className="flex bg-white/5 p-2 rounded-[2.5rem] border border-white/10 relative overflow-hidden group shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] backdrop-blur-3xl">
+      <div className="max-w-5xl mx-auto mb-4 md:mb-6 flex flex-col md:flex-row items-center justify-between gap-4 px-2">
+         <div className="flex bg-zinc-50 p-1 rounded-2xl border border-zinc-200 relative overflow-hidden group shadow-sm backdrop-blur-3xl w-full md:w-auto">
             <button 
               onClick={() => !isArchitectMode && onArchitectToggle()}
               className={cn(
-                "relative z-10 px-12 py-5 rounded-[1.8rem] text-[11px] font-black uppercase tracking-[0.4em] transition-all duration-1000 flex items-center gap-5 italic",
-                isArchitectMode ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                "relative z-10 flex-1 md:flex-none px-4 md:px-8 py-2 md:py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 flex items-center justify-center gap-2 italic",
+                isArchitectMode ? "text-white" : "text-zinc-500 hover:text-zinc-900"
               )}
             >
               {isArchitectMode && (
                 <motion.div 
                   layoutId="mode-bg-sov" 
-                  className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-indigo-900 to-primary/30 rounded-[1.8rem] shadow-[0_0_40px_rgba(79,70,229,0.5)] z-[-1] aether-iridescent" 
-                  transition={{ type: "spring", bounce: 0.1, duration: 0.8 }}
+                  className="absolute inset-0 bg-primary/90 rounded-xl shadow-lg z-[-1]" 
+                  transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
                 />
               )}
-              <Shield className={cn("w-5 h-5 transition-all duration-700", isArchitectMode ? "text-white animate-pulse" : "text-zinc-600")} />
-              ARCHITECT_STRATEGY
+              <Shield className={cn("w-3.5 h-3.5", isArchitectMode ? "text-white" : "text-zinc-400")} />
+              PLAN
             </button>
             <button 
               onClick={() => isArchitectMode && onArchitectToggle()}
               className={cn(
-                "relative z-10 px-12 py-5 rounded-[1.8rem] text-[11px] font-black uppercase tracking-[0.4em] transition-all duration-1000 flex items-center gap-5 italic",
-                !isArchitectMode ? "text-white" : "text-zinc-500 hover:text-zinc-300"
+                "relative z-10 flex-1 md:flex-none px-4 md:px-8 py-2 md:py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 flex items-center justify-center gap-2 italic",
+                !isArchitectMode ? "text-white" : "text-zinc-500 hover:text-zinc-900"
               )}
             >
               {!isArchitectMode && (
                 <motion.div 
                   layoutId="mode-bg-sov" 
-                  className="absolute inset-0 bg-gradient-to-br from-primary via-purple-900 to-indigo-900 rounded-[1.8rem] shadow-[0_0_40px_rgba(168,85,247,0.5)] z-[-1] aether-iridescent" 
-                  transition={{ type: "spring", bounce: 0.1, duration: 0.8 }}
+                  className="absolute inset-0 bg-zinc-950 rounded-xl shadow-lg z-[-1]" 
+                  transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
                 />
               )}
-              <ArrowUp className={cn("w-5 h-5 transition-all duration-700", !isArchitectMode ? "text-white animate-pulse" : "text-zinc-600")} />
-              ENGINE_CONSTRUCT
+              <ArrowUp className={cn("w-3.5 h-3.5", !isArchitectMode ? "text-white" : "text-zinc-400")} />
+              BUILD
             </button>
          </div>
 
-         <div className="hidden lg:flex items-center gap-8">
-            <div className="flex items-center gap-4 px-6 py-3 rounded-2xl bg-white/5 border border-white/10 shadow-2xl backdrop-blur-xl">
-               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_12px_rgba(16,185,129,0.8)]" />
-               <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic leading-none">NEURAL_SYNC_ACTIVE</span>
+         <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto justify-between md:justify-end">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-200">
+               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+               <span className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] italic leading-none hidden xs:inline">NEURAL_LINK</span>
             </div>
             <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
          </div>
@@ -293,14 +293,12 @@ export function ChatInput({
       )}
 
       {/* ── Main Input Container (Command Console Selector) ── */}
-      <div className="max-w-5xl mx-auto w-full relative group px-4">
+      <div className="max-w-5xl mx-auto w-full relative group px-2">
         <div className={cn(
-          "flex items-center gap-5 p-5 rounded-[4rem] transition-all duration-1000 relative shadow-[0_50px_100px_-30px_rgba(0,0,0,0.7)] panorama-transition",
-          "bg-white border-2 border-white/10 focus-within:ring-[25px] focus-within:ring-primary/5",
-          isArchitectMode 
-            ? "border-indigo-500/50 ring-15 ring-indigo-500/10 bg-white" 
-            : "border-white/30 focus-within:border-primary/60",
-          isGenerating && "ring-20 ring-primary/20 animate-pulse border-primary/70"
+          "flex items-center gap-2 md:gap-4 p-2 md:p-3 rounded-[1.5rem] md:rounded-[3rem] transition-all duration-700 relative shadow-sm",
+          "bg-white border border-zinc-200 focus-within:ring-8 focus-within:ring-primary/5 focus-within:border-primary/30",
+          isArchitectMode && "ring-8 ring-primary/5 border-primary/30",
+          isGenerating && "animate-pulse border-primary/50"
         )}>
           <div className="absolute inset-x-12 -top-px h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity" />
           {/* Iridescent background for active state */}
@@ -308,16 +306,15 @@ export function ChatInput({
             <div className="absolute inset-0 rounded-[4rem] bg-gradient-to-r from-primary/5 via-violet-500/10 to-primary/5 animate-pulse pointer-events-none opacity-80" />
           )}
           {/* Plus Menu */}
-          <div className="relative">
+          <div className="relative shrink-0">
             <button 
               onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)} 
               className={cn(
-                "h-14 w-14 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 border border-transparent shadow-xl relative z-20 overflow-hidden group/plus", 
-                isPlusMenuOpen ? "bg-zinc-950 text-primary border-primary/40 rotate-45" : "text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 hover:border-zinc-200"
+                "h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center transition-all duration-500 border border-transparent shadow-sm relative z-20 overflow-hidden group/plus", 
+                isPlusMenuOpen ? "bg-zinc-900 text-white rotate-45" : "text-zinc-500 bg-zinc-50 hover:bg-zinc-100 hover:text-zinc-950"
               )}
             >
-              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover/plus:opacity-100 transition-opacity" />
-              <Plus className="h-6 w-6 relative z-10" />
+              <Plus className="h-5 w-5 relative z-10" />
             </button>
 
             <AnimatePresence>
@@ -367,62 +364,38 @@ export function ChatInput({
             disabled={isGenerating}
           />
 
-          <div className="flex items-center gap-2 pr-4">
-            <div className="flex items-center gap-1.5 p-1.5 rounded-[2rem] bg-zinc-50 border border-black/[0.06] shadow-inner mr-3 backdrop-blur-xl">
-              <button 
-                type="button"
-                onClick={() => !isArchitectMode && onArchitectToggle()}
-                className={cn(
-                  "px-4 py-2 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.25em] transition-all duration-700 italic",
-                  isArchitectMode ? "bg-white text-indigo-600 shadow-xl border border-black/[0.04]" : "text-zinc-400 hover:text-zinc-600"
-                )}
-              >
-                Plan
-              </button>
-              <button 
-                type="button"
-                onClick={() => isArchitectMode && onArchitectToggle()}
-                className={cn(
-                  "px-4 py-2 rounded-[1.5rem] text-[10px] font-black uppercase tracking-[0.25em] transition-all duration-700 italic",
-                  !isArchitectMode ? "bg-zinc-950 text-white shadow-xl" : "text-zinc-400 hover:text-zinc-600"
-                )}
-              >
-                Build
-              </button>
-            </div>
-            
+          <div className="flex items-center gap-1.5 md:gap-2 pr-2 md:pr-3">
             <button 
                onClick={toggleListening}
                className={cn(
-                 "h-12 w-12 rounded-full flex items-center justify-center transition-all active:scale-90 border border-transparent shadow-sm hover:shadow-md",
-                 isListening ? "bg-rose-50 text-rose-600 animate-pulse ring-8 ring-rose-100 border-rose-200" : "text-zinc-300 hover:text-zinc-900 hover:bg-zinc-50 hover:border-zinc-200"
+                 "h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center transition-all active:scale-90 border border-transparent",
+                 isListening ? "bg-rose-50 text-rose-600 animate-pulse ring-4 ring-rose-100 border-rose-200" : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50"
                )}
             >
               <Mic className="h-5 w-5" />
             </button>
             
-            <div className="w-px h-6 bg-black/[0.08] mx-2" />
+            <div className="w-px h-5 bg-zinc-200 mx-1 md:mx-2 hidden xs:block" />
 
             {isGenerating ? (
               <button 
                 onClick={onStop} 
-                className="h-14 w-14 rounded-[1.5rem] flex items-center justify-center bg-rose-500 text-white shadow-[0_15px_40px_rgba(244,63,94,0.5)] hover:brightness-110 hover:scale-105 transition-all active:scale-95 group/stop"
+                className="h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center bg-rose-500 text-white shadow-lg shadow-rose-200 hover:brightness-110 transition-all active:scale-95 group/stop"
               >
-                <X className="h-6 w-6 group-hover/stop:rotate-90 transition-transform" />
+                <X className="h-5 w-5 group-hover/stop:rotate-90 transition-transform" />
               </button>
             ) : (
               <button 
                 onClick={() => onSend()} 
                 disabled={!input.trim() && !pendingImage && !pendingUrl && !pendingContext} 
                 className={cn(
-                  "h-14 w-14 rounded-[1.5rem] flex items-center justify-center transition-all duration-700 shadow-2xl relative overflow-hidden group/send",
+                  "h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center transition-all duration-500 shadow-lg relative overflow-hidden group/send",
                   isArchitectMode 
-                    ? "bg-indigo-600 text-primary hover:bg-indigo-700 shadow-indigo-300/40" 
-                    : "bg-zinc-950 text-white hover:bg-black"
+                    ? "bg-primary text-white hover:brightness-110 shadow-primary/20" 
+                    : "bg-zinc-900 text-white hover:bg-zinc-950 shadow-zinc-200"
                 )}
               >
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/20 to-transparent opacity-0 group-hover/send:opacity-100 transition-opacity" />
-                <ArrowUp className="h-6 w-6 relative z-10 group-hover/send:-translate-y-1 transition-transform shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+                <ArrowUp className="h-5 w-5 relative z-10 group-hover/send:-translate-y-0.5 transition-transform" />
               </button>
             )}
           </div>

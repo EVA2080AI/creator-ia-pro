@@ -3,12 +3,6 @@ import { CREDIT_PACKS } from "@/lib/credit-packs";
 
 /**
  * Billing Service — Credit-Based Economy (Industrial V4.0)
- *
- * Integrated with Bold.co for Colombian payments.
- *   1. User selects a credit plan or pack.
- *   2. Bold Checkout generates a link via Edge Function.
- *   3. Webhook confirms payment → credits added via RPC.
- *   4. All movements logged in `public.transactions`.
  */
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -26,7 +20,7 @@ export interface CreditPlan {
 export interface Invoice {
   id: string;
   user_id: string;
-  bold_payment_id?: string; // Replaces stripe_invoice_id
+  bold_payment_id?: string; 
   amount: number;
   credits_awarded: number;
   status: 'paid' | 'pending' | 'failed';
@@ -42,61 +36,56 @@ export interface Transaction {
   created_at: string;
 }
 
-// ─── Credit Plans (Synchronized with Pricing.tsx & User Request) ───────────
+// ─── Credit Plans (Synchronized with Pricing.tsx) ───────────────────────────
 export const CREDIT_PLANS: CreditPlan[] = [
   {
     id: 'basico',
-    name: 'Básico',
+    name: 'Aether Protocol',
     price_id: 'basico',
-    credits_amount: 1500,
+    credits_amount: 1000,
     price_display: '$149.900',
-    description: 'Perfecto para proyectos individuales y pequeñas marcas.',
+    description: 'Cimiente industrial para arquitectos individuales.',
   },
   {
     id: 'profesional',
-    name: 'Profesional',
+    name: 'Nodal Architect',
     price_id: 'profesional',
-    credits_amount: 4000,
+    credits_amount: 3000,
     price_display: '$349.900',
-    description: 'La opción ideal para creadores de contenido profesionales.',
+    description: 'Orquestación de alta fidelidad y dominios soberanos.',
     popular: true,
   },
   {
     id: 'empresarial',
-    name: 'Empresarial',
+    name: 'Sovereign Swarm',
     price_id: 'empresarial',
-    credits_amount: 10000,
+    credits_amount: 8000,
     price_display: '$699.900',
-    description: 'Poder total para agencias y empresas en crecimiento.',
+    description: 'Soberanía total para flotas de ingeniería autónoma.',
   },
 ];
 
 // ─── Bold Service ──────────────────────────────────────────────────────────
 export const boldService = {
-  /**
-   * Initiate a Checkout flow to buy credits with Bold.co
-   */
   async purchaseCredits(packOrPlanId: string) {
-    // Look in credit packs first, then plans
     const item = CREDIT_PACKS.find(p => p.id === packOrPlanId) || 
                  CREDIT_PLANS.find(p => p.id === packOrPlanId);
     
     if (!item) throw new Error("Producto no encontrado");
 
-    // Extract numerical COP integer from price string
     const rawPrice = (item as any).price_display || (item as any).price || "0";
     const amountStr = rawPrice.replace(/[^0-9]/g, "");
     const amount = parseInt(amountStr, 10);
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Usuario no autenticado");
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData.user) throw new Error("Usuario no autenticado");
 
-    const { data, error } = await supabase.functions.invoke("bold-checkout", {
+    const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string }>("bold-checkout", {
       body: { 
         amount, 
         packId: item.id,
-        userId: user.id,
-        buyerEmail: user.email,
+        userId: authData.user.id,
+        buyerEmail: authData.user.email,
         description: `Creator IA Pro: ${item.name}`
       },
     });
@@ -107,7 +96,6 @@ export const boldService = {
     }
 
     if (data.error) throw new Error(data.error);
-
     if (data.url) {
       window.location.href = data.url;
     } else {
@@ -119,27 +107,21 @@ export const boldService = {
 // ─── Credit Operations (via Supabase RPCs) ──────────────────────────────────
 
 export const creditService = {
-  /**
-   * Get the current user's credit balance.
-   */
   async getBalance(): Promise<number> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return 0;
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData.user) return 0;
 
     const { data } = await supabase
       .from("profiles")
       .select("credits_balance")
-      .eq("user_id", user.id)
+      .eq("user_id", authData.user.id)
       .single();
 
     return data?.credits_balance ?? 0;
   },
 
-  /**
-   * Spend credits for an action.
-   */
   async spend(amount: number, action: string, model: string, nodeId?: string | null) {
-    const { error } = await (supabase.rpc as any)("spend_credits", {
+    const { error } = await (supabase as any).rpc("spend_credits", {
       _amount: amount,
       _action: action,
       _model: model,
@@ -148,27 +130,21 @@ export const creditService = {
     if (error) throw new Error(error.message || "No se pudieron deducir los créditos");
   },
 
-  /**
-   * Refund credits after a failed operation.
-   */
   async refund(amount: number, userId: string) {
-    await (supabase.rpc as any)("refund_credits", {
+    await (supabase as any).rpc("refund_credits", {
       _amount: amount,
       _user_id: userId,
     });
   },
 
-  /**
-   * Get recent transactions for the current user.
-   */
   async getTransactions(limit = 20): Promise<Transaction[]> {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData.user) return [];
 
     const { data, error } = await supabase
       .from("transactions")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", authData.user.id)
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -183,11 +159,8 @@ export const creditService = {
 // ─── Admin Service ──────────────────────────────────────────────────────────
 
 export const adminService = {
-  /**
-   * Admin: Add credits to a user.
-   */
   async addCredits(targetUserId: string, amount: number, reason?: string) {
-    const { data, error } = await (supabase.rpc as any)("admin_add_credits", {
+    const { data, error } = await (supabase as any).rpc("admin_add_credits", {
       _target_user_id: targetUserId,
       _amount: amount,
       _reason: reason || 'Admin grant',
@@ -196,11 +169,8 @@ export const adminService = {
     return data;
   },
 
-  /**
-   * Admin: Deduct credits from a user.
-   */
   async deductCredits(targetUserId: string, amount: number, reason?: string) {
-    const { data, error } = await (supabase.rpc as any)("admin_deduct_credits", {
+    const { data, error } = await (supabase as any).rpc("admin_deduct_credits", {
       _target_user_id: targetUserId,
       _amount: amount,
       _reason: reason || 'Admin deduction',
@@ -209,11 +179,8 @@ export const adminService = {
     return data;
   },
 
-  /**
-   * Admin: Refund credits to a user.
-   */
   async refundCredits(targetUserId: string, amount: number, reason?: string) {
-    const { data, error } = await (supabase.rpc as any)("admin_refund_credits", {
+    const { data, error } = await (supabase as any).rpc("admin_refund_credits", {
       _target_user_id: targetUserId,
       _amount: amount,
       _reason: reason || 'Admin refund',
@@ -222,9 +189,6 @@ export const adminService = {
     return data;
   },
 
-  /**
-   * Admin: List all plans in the database.
-   */
   async listPlans(): Promise<CreditPlan[]> {
     const { data, error } = await (supabase as any)
       .from("plans")
@@ -234,12 +198,9 @@ export const adminService = {
     if (error || !data || data.length === 0) {
       return CREDIT_PLANS;
     }
-    return data as CreditPlan[];
+    return (data as any) as CreditPlan[];
   },
 
-  /**
-   * Admin: Save platform settings (e.g., Bold API keys).
-   */
   async saveSettings(settings: Record<string, string>) {
     const { data, error } = await supabase.functions.invoke("admin-save-settings", {
       body: settings,

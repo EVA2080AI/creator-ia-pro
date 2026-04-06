@@ -10,6 +10,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/layout/AppLayout";
+import Docs from "./pages/Docs";
 
 // Redirect /canvas → /studio-flow preserving query params
 const CanvasRedirect = () => {
@@ -47,7 +48,8 @@ const Downloads    = lazy(() => import("./pages/Downloads"));
 const ToolLanding  = lazy(() => import("./pages/ToolLanding"));
 const ProductBacklog = lazy(() => import("./pages/ProductBacklog"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const NotFound     = lazy(() => import("./pages/NotFound"));
+const Documentation  = lazy(() => import("./pages/Documentation"));
+const NotFound      = lazy(() => import("./pages/NotFound"));
 
 // Auth — rendered inside AppLayout
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
@@ -109,6 +111,8 @@ const App = () => {
                   <Route path="/product-backlog"      element={<ProductBacklog />} />
                   <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
                   <Route path="/reset-password"       element={<ResetPassword />} />
+                  <Route path="/documentation"        element={<Documentation />} />
+                  <Route path="/docs"                 element={<Docs />} />
 
                   {/* ── Redirects ── */}
                   <Route path="/canvas"  element={<CanvasRedirect />} />

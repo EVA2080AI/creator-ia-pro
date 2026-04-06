@@ -21,13 +21,13 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 const PLANS = [
   {
-    key: "free" as const,
-    name: "Free tier",
-    price: 0,
-    priceLabel: "$0",
-    credits: 30,
-    creditsLabel: "30 créditos/mes",
-    description: "Para exploradores y visionarios individuales.",
+    key: "basico" as const,
+    name: "Aether Protocol",
+    price: 149900,
+    priceLabel: "$149.900",
+    credits: 1000,
+    creditsLabel: "1.000 Neural Cycles/mes",
+    description: "Cimiente industrial para arquitectos individuales.",
     color: "#94A3B8",
     gradient: "from-zinc-500/10 to-zinc-500/5",
     border: "border-zinc-500/20",
@@ -35,20 +35,20 @@ const PLANS = [
     badge: null,
     category: "ECO",
     features: [
-      { label: "30 créditos de inteligencia", highlight: true },
-      { label: "Genesis Studio básico", highlight: false },
-      { label: "Acceso a Modelos ECO", highlight: false },
-      { label: "Soporte comunitario", highlight: false },
+      { label: "1.000 Neural Cycles de Inteligencia", highlight: true },
+      { label: "Sovereign Engineering IDE", highlight: true },
+      { label: "Acceso a Modelos ECO Unlimit", highlight: false },
+      { label: "Soporte Técnico de Relay", highlight: false },
     ],
   },
   {
-    key: "pro" as const,
-    name: "Pro Architect",
-    price: 99000,
-    priceLabel: "$99.000",
-    credits: 150,
-    creditsLabel: "150 créditos/mes",
-    description: "Construcción profesional y dominios custom.",
+    key: "profesional" as const,
+    name: "Nodal Architect",
+    price: 349900,
+    priceLabel: "$349.900",
+    credits: 3000,
+    creditsLabel: "3.000 Neural Cycles/mes",
+    description: "Orquestación de alta fidelidad y dominios soberanos.",
     color: "#6366F1",
     gradient: "from-indigo-500/15 to-indigo-500/5",
     border: "border-indigo-500/20",
@@ -57,21 +57,21 @@ const PLANS = [
     badge: "Más Popular",
     category: "PRO",
     features: [
-      { label: "150 créditos de inteligencia", highlight: true },
-      { label: "Dominios personalizados", highlight: true },
-      { label: "Priority Build Pipeline", highlight: true },
-      { label: "Edit Mode ilimitado", highlight: false },
-      { label: "Soporte Pro 24h", highlight: false },
+      { label: "3.000 Neural Cycles de Inteligencia", highlight: true },
+      { label: "Protocolos de Síntesis PRO", highlight: true },
+      { label: "Priority Build Pipeline v21.0", highlight: true },
+      { label: "Arquitectura Multi-Agente Base", highlight: false },
+      { label: "Engineering Lead Support", highlight: false },
     ],
   },
   {
-    key: "business" as const,
-    name: "Business Swarm",
-    price: 199000,
-    priceLabel: "$199.000",
-    credits: 500,
-    creditsLabel: "500 créditos/mes",
-    description: "Soberanía total para equipos y startups.",
+    key: "empresarial" as const,
+    name: "Sovereign Swarm",
+    price: 699900,
+    priceLabel: "$699.900",
+    credits: 8000,
+    creditsLabel: "8.000 Neural Cycles/mes",
+    description: "Soberanía total para flotas de ingeniería autónoma.",
     color: "#F59E0B",
     gradient: "from-amber-500/20 to-amber-500/5",
     border: "border-amber-500/30",
@@ -80,58 +80,58 @@ const PLANS = [
     badge: "Acceso Total",
     category: "ULTRA",
     features: [
-      { label: "500 créditos de inteligencia", highlight: true },
-      { label: "Enterprise Security Opt-out", highlight: true },
-      { label: "Arquitectura Multi-Agente", highlight: true },
-      { label: "Soporte VIP dedicado", highlight: true },
-      { label: "Facturación corporativa", highlight: false },
+      { label: "8.000 Neural Cycles Mensuales", highlight: true },
+      { label: "DeepBuild v21.0 Orchestra", highlight: true },
+      { label: "Soberanía de Datos Enterprise", highlight: true },
+      { label: "Soporte de Relay Prioritario 24/7", highlight: true },
+      { label: "Facturación Industrial Directa", highlight: false },
     ],
   },
 ];
 
 const FAQS = [
   {
-    question: "¿Qué es un crédito y cómo se gasta?",
-    answer: "Los créditos son el motor de Génesis. Se consumen al enviar mensajes o realizar despliegues. El consumo depende de la complejidad de la tarea y el modelo de IA seleccionado (ECO, PRO o ULTRA)."
+    question: "¿Qué es un Neural Cycle y cómo se cuantifica?",
+    answer: "Los Neural Cycles son la unidad de cómputo soberano en Génesis. Se consumen basados en la densidad lógica de la tarea y el modelo de IA seleccionado (ECO, PRO o ULTRA). Un ciclo equivale a una interacción de orquestación estándar."
   },
   {
-    question: "¿Los créditos expiran?",
-    answer: "Los créditos incluidos en tu suscripción mensual se renuevan cada ciclo. Los 'Top-ups' o créditos de recarga única NO expiran nunca."
+    question: "¿Existe latencia en la renovación de unidades?",
+    answer: "Los ciclos integrados en tu protocolo mensual se sitúan en el ledger al inicio de cada ciclo. Las 'Inyecciones de Emergencia' (Top-ups) se acreditan de manera instantánea y no tienen fecha de caducidad."
   },
   {
-    question: "¿Puedo cancelar mi plan en cualquier momento?",
-    answer: "Sí. No tenemos contratos de permanencia. Puedes cancelar desde Configuración de Workspace → Planes en cualquier momento."
+    question: "¿Cómo se gestiona el abandono del protocolo?",
+    answer: "La soberanía absoluta significa que no hay contratos. Puedes degradar o suspender tu instancia desde 'Settings' en cualquier momento sin penalizaciones."
   },
   {
-    question: "¿Qué sucede si me quedo sin créditos?",
-    answer: "Génesis entrará en modo lectura. Puedes realizar una 'Inyección de Emergencia' comprando un pack de créditos único para continuar construyendo de inmediato."
+    question: "¿Qué sucede al agotar el saldo de ciclos?",
+    answer: "El sistema entrará en 'Read-Only Mode' para preservar la integridad de tu código. Puedes reanudar la síntesis mediante una recarga inmediata via Bold.co."
   }
 ];
 
 const COMPARISON_DATA = [
-  { feature: "Costo por Token", creator: "Optimización Dinámica", others: "Tarifas Fijas Altas" },
-  { feature: "Model Switching", creator: "Instantáneo (Any-Model)", others: "Bloqueo de Proveedor" },
-  { feature: "IDE Studio", creator: "Incluido en Planes", others: "Costo Extra ($20+)" },
-  { feature: "Soporte Latam", creator: "Bold Local / COP", others: "Tarjetas Int. / USD" },
+  { feature: "Costo de Inferencia", creator: "Optimización por Protocolo", others: "Margen de Revendedor Fijo" },
+  { feature: "Flexibilidad de Modelos", creator: "Hot-Swap (Aether v9.0)", others: "Lock-in de Proveedor" },
+  { feature: "IDE Studio Industrial", creator: "Soberano (Incluido)", others: "Suscripción Add-on" },
+  { feature: "Soberanía Financiera", creator: "Bold Local (Latam Focus)", others: "Gateway Internatl. (USD)" },
 ];
 
 const TESTIMONIALS = [
   {
     name: "Carlos Rivera",
-    role: "Nómada Digital",
-    content: "La facilidad de pagar en COP con Bold y tener acceso a Claude 3.5 Sonnet cambió mi flujo de trabajo por completo.",
+    role: "Architect @ LogicFlow",
+    content: "La integración con Bold en COP es un cambio de juego para desarrolladores en Latam. Puedo escalar mi infraestructura de IA sin fricción bancaria.",
     avatar: "https://i.pravatar.cc/150?u=carlos",
   },
   {
     name: "Elena Gómez",
-    role: "Founder @ TechNova",
-    content: "El modo ULTRA es una bestia. BuilderAI genera interfaces complejas en segundos. Es como tener 10 seniors en uno.",
+    role: "CTO @ TechNova",
+    content: "El modo ULTRA es el estándar de oro. Génesis no solo genera código; sintetiza arquitecturas complejas que están listas para producción en segundos.",
     avatar: "https://i.pravatar.cc/150?u=elena",
   },
   {
     name: "Mario Duarte",
-    role: "Creador de Contenido",
-    content: "Los créditos top-up que no expiran son clave. Compro lo que necesito y sé que siempre estarán ahí.",
+    role: "Sovereign Engineer",
+    content: "Los ciclos de inyección sin vencimiento me permiten gestionar mi presupuesto con precisión quirúrgica. Es la herramienta definitiva de soberanía.",
     avatar: "https://i.pravatar.cc/150?u=mario",
   },
 ];

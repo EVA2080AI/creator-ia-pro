@@ -189,7 +189,7 @@ const Dashboard = () => {
   ] : [];
 
   const aiApps = [
-    { icon: Zap,        label: "Genesis IDE",   desc: "BuilderAI · Lovable", path: "/chat"         },
+    { icon: Zap,        label: "Genesis IDE",   desc: "BuilderAI · Neural Engine", path: "/chat"         },
     { icon: Megaphone,  label: "Canvas IA",     desc: "Lienzo creativo",     path: "/formarketing" },
     { icon: PenTool,    label: "Studio",        desc: "Herramientas creativas",path: "/studio"     },
     { icon: MessageSquare, label: "Chat IA",   desc: "Copy & texto",        path: "/chat"          },

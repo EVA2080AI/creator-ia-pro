@@ -2,7 +2,7 @@ import DOMPurify from 'dompurify';
 import { cn } from '@/lib/utils';
 
 export function renderMarkdown(text: string): string {
-  let raw = text
+  const raw = text
     // Thinking blocks
     .replace(/(?:<thinking>|\[thinking\]|thinking\n)([\s\S]*?)(?:<\/thinking>|\[\/thinking\]|(?=\s*\n\w+:\s*)|$)/gi, (_m, content) => 
       `<details class="thinking-block group my-8 rounded-[2rem] border border-zinc-200/50 bg-zinc-50/20 backdrop-blur-xl overflow-hidden transition-all duration-700 hover:border-primary/30 hover:shadow-2xl">

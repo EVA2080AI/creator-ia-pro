@@ -1,6 +1,6 @@
 /**
  * Genesis — AI Code Builder
- * Lovable-like IDE: describe → generate → preview → push to GitHub
+ * Genesis IDE: describe → generate → preview → push to GitHub
  */
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
