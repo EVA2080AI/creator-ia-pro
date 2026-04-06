@@ -36,70 +36,72 @@ export function MessageItem({
     >
       {isUser ? (
         <>
-          <div className="bg-primary text-primary-foreground px-7 py-5 rounded-[2.5rem] rounded-tr-none text-[13px] font-semibold shadow-[0_20px_50px_-12px_rgba(var(--primary-rgb),0.3)] max-w-[85%] leading-relaxed">
+          <div className="bg-primary/95 text-primary-foreground px-8 py-5 rounded-[2.5rem] rounded-tr-none text-sm font-bold shadow-2xl max-w-[85%] leading-relaxed aether-iridescent relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             {msg.imagePreview && (
-              <div className="rounded-2xl overflow-hidden mb-4 border border-white/20 shadow-xl">
+              <div className="rounded-2xl overflow-hidden mb-4 border border-white/20 shadow-xl relative z-10">
                 <img src={msg.imagePreview} alt="Referencia visual adjunta" className="max-h-64 w-auto object-contain" />
               </div>
             )}
-            <span className="whitespace-pre-wrap">{msg.content}</span>
+            <span className="whitespace-pre-wrap relative z-10">{msg.content}</span>
           </div>
-          <time className="text-[9px] text-zinc-400 font-bold uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity pr-4 mt-1">
-            {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          <time className="text-[9px] text-zinc-400 font-black uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-opacity pr-4 mt-1 italic">
+            TX_LOG: {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </time>
         </>
       ) : (
         <div className="w-full max-w-[98%]">
-          <header className="flex items-center gap-3.5 mb-4 pl-2">
-            <div className="h-10 w-10 rounded-2xl bg-white border border-black/[0.06] flex items-center justify-center text-primary shadow-[0_8px_20px_-6px_rgba(0,0,0,0.1)] transition-transform group-hover:scale-105 group-hover:rotate-3">
+          <header className="flex items-center gap-4 mb-4 pl-2">
+            <div className="h-11 w-11 rounded-[1.25rem] bg-white border border-black/[0.04] flex items-center justify-center text-primary shadow-xl transition-all group-hover:scale-105 group-hover:rotate-3 aether-iridescent">
               <Sparkles className="h-5 w-5 fill-primary/10" />
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-[11px] font-black uppercase text-zinc-900 tracking-[0.2em] leading-none mb-1 font-display">
-                {persona === 'antigravity' ? 'Antigravity Core' : 'Genesis Engine'}
+              <span className="text-xs font-black uppercase text-zinc-900 tracking-tight leading-none mb-1 italic">
+                {persona === 'antigravity' ? 'ANTIGRAVITY_CORE' : 'GENESIS_ENGINE'}
               </span>
               <div className="flex items-center gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
-                 <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest leading-none">Protocolo Lumina v2.0</span>
+                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" />
+                 <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest leading-none">AETHER_SOVEREIGN_V9.0</span>
               </div>
             </div>
           </header>
 
           <section className={cn(
-            "px-9 py-8 rounded-[2.5rem] rounded-tl-none shadow-[0_20px_50px_rgba(0,0,0,0.03)] transition-all duration-700 relative group/msg border overflow-hidden",
+            "px-10 py-10 rounded-[2.5rem] rounded-tl-none transition-all duration-700 relative group/msg border overflow-hidden",
             msg.type === 'plan' 
-              ? "bg-indigo-50/40 border-indigo-200/40" 
-              : "bg-white/90 border-black/[0.04] backdrop-blur-[40px] saturate-[1.2]"
+              ? "bg-zinc-900 text-white border-white/10 shadow-2xl" 
+              : "bg-white/40 border-black/[0.04] backdrop-blur-3xl saturate-[1.5] shadow-xl"
           )}>
-            {/* Background design for plans */}
+            {/* Blueprint Grid for Plans */}
             {msg.type === 'plan' && (
-              <div className="absolute inset-0 pointer-events-none opacity-[0.03] select-none" style={{ backgroundImage: 'radial-gradient(var(--primary) 1px, transparent 1px)', backgroundSize: '20px 20px' }} aria-hidden="true" />
+              <div className="absolute inset-0 pointer-events-none opacity-[0.05] select-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '30px 30px' }} aria-hidden="true" />
             )}
 
-            {/* Plan Header */}
+            {/* Plan Header (Industrial Style) */}
             {msg.type === 'plan' && (
-              <div className="flex items-center gap-4 mb-8 pb-6 border-b border-indigo-100/50 relative z-10">
-                <div className="h-10 w-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-[0_10px_20px_-5px_rgba(79,70,229,0.3)]">
-                  <Shield className="h-5 w-5 text-white" />
+              <div className="flex items-center gap-5 mb-10 pb-8 border-b border-white/10 relative z-10">
+                <div className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl relative">
+                  <Shield className="h-6 w-6 text-primary" />
+                  <div className="absolute -inset-1 bg-primary/20 rounded-2xl blur-lg animate-pulse" />
                 </div>
                 <div>
-                  <span className="text-[12px] font-black uppercase tracking-[0.3em] text-indigo-700 font-display">Génesis Arquitecto</span>
+                  <span className="text-sm font-black uppercase tracking-tighter text-white italic">Plan Maestro de Ingeniería Atómica</span>
                   <div className="flex items-center gap-2 mt-1">
-                     <span className="text-[9px] font-bold text-indigo-400/80 uppercase tracking-widest leading-none">Plan de Ingeniería Atómica</span>
+                     <span className="text-[9px] font-black text-primary uppercase tracking-[0.3em] leading-none animate-pulse">STRATEGIC_PHASE_01</span>
                   </div>
                 </div>
                 
                 <div className="ml-auto">
                   {msg.planStatus === 'pending' && (
-                    <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200/50" role="status">
-                       <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                       <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest">Esperando</span>
+                    <div className="flex items-center gap-3 px-5 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500" role="status">
+                       <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                       <span className="text-[10px] font-black uppercase tracking-widest italic">Awaiting_Approve</span>
                     </div>
                   )}
                   {msg.planStatus === 'approved' && (
-                    <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/50" role="status">
-                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                       <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Ejecutando</span>
+                    <div className="flex items-center gap-3 px-5 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500" role="status">
+                       <CheckCircle2 className="w-4 h-4" />
+                       <span className="text-[10px] font-black uppercase tracking-widest italic">Exec_Orquestation</span>
                     </div>
                   )}
                 </div>
@@ -107,29 +109,29 @@ export function MessageItem({
             )}
 
             <div className={cn(
-              "prose prose-zinc prose-sm max-w-none relative z-10 font-medium selection:bg-primary/10",
-              msg.type === 'plan' ? "text-indigo-950/80 prose-indigo" : "text-zinc-600"
+              "prose prose-sm max-w-none relative z-10 font-medium selection:bg-primary/20 transition-colors duration-500",
+              msg.type === 'plan' ? "prose-invert prose-p:text-zinc-300 prose-headings:text-white" : "prose-zinc text-zinc-700"
             )}
               dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} 
             />
 
-            {/* Action buttons for pending plans */}
+            {/* Action navigation for industrial plans */}
             {msg.type === 'plan' && msg.planStatus === 'pending' && (
-              <nav className="flex items-center gap-3 mt-8 pt-6 border-t border-indigo-100/50 relative z-10" aria-label="Acciones de plan">
+              <nav className="flex items-center gap-4 mt-12 pt-8 border-t border-white/10 relative z-10" aria-label="Acciones de plan">
                 <button
                   onClick={onApprovePlan}
                   aria-label="Aprobar y comenzar construcción"
-                  className="flex items-center gap-3 px-8 py-3.5 rounded-2xl bg-indigo-600 text-white text-[11px] font-black uppercase tracking-widest hover:bg-indigo-700 hover:shadow-xl hover:shadow-indigo-200/50 transition-all active:scale-95"
+                  className="flex items-center gap-4 px-10 py-5 rounded-[2rem] bg-white text-black text-xs font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-2xl group"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
-                  Comenzar Construcción
+                  <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  Lanzar Construcción Atómica
                 </button>
                 <button 
                   onClick={onRejectPlan}
                   aria-label="Rechazar y revisar prompt"
-                  className="px-6 py-3.5 rounded-2xl bg-white border border-zinc-200 text-zinc-500 text-[11px] font-black uppercase tracking-widest hover:bg-zinc-50 hover:text-zinc-900 transition-all active:scale-95"
+                  className="px-8 py-5 rounded-[2rem] bg-white/5 border border-white/10 text-zinc-400 text-xs font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all active:scale-95 border-dashed"
                 >
-                  Revisar Prompt
+                  Revisar Parámetros
                 </button>
               </nav>
             )}

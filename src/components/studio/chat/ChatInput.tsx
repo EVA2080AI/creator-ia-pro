@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Mic, ArrowUp, X, Globe, Link2, FileCode2, Paperclip, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -132,76 +133,126 @@ export function ChatInput({
 
   return (
     <footer 
-      className="shrink-0 p-4 border-t border-black/[0.06] bg-white/[0.85] backdrop-blur-[40px] saturate-[1.2]"
+      className="shrink-0 p-6 border-t border-black/[0.04] bg-white/40 backdrop-blur-3xl saturate-[1.5] relative z-40 panorama-transition"
       role="contentinfo"
     >
+      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+      
+      {/* ── Mode Selector: Industrial Sovereign ── */}
+      <div className="max-w-4xl mx-auto mb-6 flex items-center justify-between px-2">
+         <div className="flex bg-black/[0.03] p-1 rounded-2xl border border-black/[0.05] relative overflow-hidden group shadow-inner">
+            <button 
+              onClick={() => !isArchitectMode && onArchitectToggle()}
+              className={cn(
+                "relative z-10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2.5",
+                isArchitectMode ? "text-white" : "text-zinc-400 hover:text-zinc-600"
+              )}
+            >
+              {isArchitectMode && (
+                <motion.div layoutId="mode-bg" className="absolute inset-0 bg-zinc-900 rounded-xl shadow-xl z-[-1]" />
+              )}
+              <Shield className={cn("w-3.5 h-3.5", isArchitectMode ? "text-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" : "text-zinc-400")} />
+              Plan_Architect
+            </button>
+            <button 
+              onClick={() => isArchitectMode && onArchitectToggle()}
+              className={cn(
+                "relative z-10 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2.5",
+                !isArchitectMode ? "text-white" : "text-zinc-400 hover:text-zinc-600"
+              )}
+            >
+              {!isArchitectMode && (
+                <motion.div layoutId="mode-bg" className="absolute inset-0 bg-primary rounded-xl shadow-lg shadow-primary/20 z-[-1]" />
+              )}
+              <ArrowUp className={cn("w-3.5 h-3.5", !isArchitectMode ? "text-white" : "text-zinc-400")} />
+              Agent_Build
+            </button>
+         </div>
+
+         <div className="hidden lg:flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/50 border border-black/[0.03] shadow-sm">
+               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+               <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest italic leading-none">Sync_Stable</span>
+            </div>
+            <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
+         </div>
+      </div>
+
       {/* ── Attachment Previews ── */}
-      <div className="max-w-4xl mx-auto w-full space-y-2 mb-3 px-2">
+      <div className="max-w-4xl mx-auto w-full space-y-2 mb-4 px-2">
         {pendingImage && (
-          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-2xl bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-bottom-1" role="status">
-            <img src={pendingImage} alt="Vista previa adjunta" className="h-9 w-9 rounded-xl object-cover shadow-sm" />
-            <span className="text-[11px] font-bold text-zinc-500 flex-1 truncate">Imagen procesada lista</span>
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-primary/5 border border-primary/10 animate-in fade-in slide-in-from-bottom-2 overflow-hidden relative group" role="status">
+            <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+            <img src={pendingImage} alt="Referencia visual adjunta" className="h-10 w-10 rounded-xl object-cover shadow-2xl border border-white/20" />
+            <div className="flex-1 min-w-0">
+               <span className="text-[10px] font-black text-primary uppercase tracking-widest block mb-0.5">IMAGE_ATTACHED</span>
+               <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider truncate block">Reference acquired for context injection</span>
+            </div>
             <button 
               onClick={onRemoveImage} 
               aria-label="Quitar imagen"
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90"
+              className="p-2 rounded-xl text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90 border border-transparent hover:border-rose-100"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" />
             </button>
           </div>
         )}
 
         {pendingUrl && (
-          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-2xl bg-emerald-50/60 border border-emerald-200/50 animate-in fade-in slide-in-from-bottom-1" role="status">
-            <div className="h-8 w-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm shadow-emerald-200/20">
-              <Globe className="h-4 w-4" />
-            </div>
-            <span className="text-[11px] font-bold text-emerald-700 flex-1 truncate font-mono">
-              {(() => {try { return JSON.parse(pendingUrl).url; } catch(e) { return pendingUrl; }})()}
-            </span>
-            <button 
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-blue-500/5 border border-blue-500/10 animate-in fade-in slide-in-from-bottom-2 relative overflow-hidden" role="status">
+             <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+             <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                <Globe className="h-5 w-5" />
+             </div>
+             <div className="flex-1 min-w-0 font-mono">
+                <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-0.5">CONTENT_SCRAPED</span>
+                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider truncate block">
+                   {(() => {try { return JSON.parse(pendingUrl).url; } catch(e) { return pendingUrl; }})()}
+                </span>
+             </div>
+             <button 
               onClick={onRemoveUrl} 
-              aria-label="Quitar URL"
-              className="p-1.5 rounded-lg text-emerald-400 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
+              className="p-2 rounded-xl text-zinc-400 hover:text-rose-500 transition-all"
+             >
+               <X className="h-4 w-4" />
+             </button>
           </div>
         )}
 
         {pendingContext && (
-          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-2xl bg-primary/[0.03] border border-primary/20 animate-in fade-in slide-in-from-bottom-1" role="status">
-            <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-sm shadow-primary/20">
-              <FileCode2 className="h-4 w-4" />
-            </div>
-            <span className="text-[10px] font-black text-primary uppercase tracking-[0.15em] flex-1 truncate">
-               Contexto: {pendingContext.name}
-            </span>
-            <button 
+          <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-primary/[0.03] border border-primary/20 animate-in fade-in slide-in-from-bottom-2 relative overflow-hidden" role="status">
+             <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+             <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <FileCode2 className="h-5 w-5" />
+             </div>
+             <div className="flex-1 min-w-0">
+                <span className="text-[10px] font-black text-primary uppercase tracking-widest block mb-0.5">CONTEXT_ACQUIRED</span>
+                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider truncate block">{pendingContext.name}</span>
+             </div>
+             <button 
               onClick={onRemoveContext} 
-              aria-label="Quitar contexto"
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-all active:scale-90"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
+              className="p-2 rounded-xl text-zinc-400 hover:text-rose-500 transition-all"
+             >
+               <X className="h-4 w-4" />
+             </button>
           </div>
         )}
 
         {activeFile && (
-          <div className="px-3.5 py-1.5 rounded-xl bg-zinc-900 text-white w-fit shadow-lg shadow-zinc-200" role="status">
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              Editando: {activeFile.split('/').pop()}
-            </span>
+          <div className="px-4 py-2 rounded-xl bg-zinc-900 text-white w-fit shadow-2xl flex items-center gap-3 border border-white/10" role="status">
+             <div className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]" />
+             <span className="text-[10px] font-black uppercase tracking-widest italic">
+               ACTIVE_SCOPE: {activeFile.split('/').pop()}
+             </span>
           </div>
         )}
       </div>
 
-      {/* ── URL Input Bar ── */}
+      {/* ── URL Input Bar (Industrial) ── */}
       {showUrlInput && (
-        <div className="max-w-4xl mx-auto w-full mb-3 flex items-center gap-2 px-2 animate-in slide-in-from-bottom-2 duration-300">
-           <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-primary/30 shadow-[0_10px_30px_-10px_rgba(var(--primary-rgb),0.1)] transition-all focus-within:ring-2 focus-within:ring-primary/10">
-              <Link2 className="h-4 w-4 text-primary/50" />
+        <div className="max-w-4xl mx-auto w-full mb-4 flex items-center gap-3 px-2 animate-in slide-in-from-bottom-4 duration-500">
+           <div className="flex-1 flex items-center gap-4 px-5 py-4 rounded-[1.5rem] bg-white border border-primary/30 shadow-2xl transition-all focus-within:ring-8 focus-within:ring-primary/5 aether-iridescent">
+              <Link2 className="h-5 w-5 text-primary" />
               <input 
                 autoFocus type="url" value={urlInput} 
                 onChange={e => setUrlInput(e.target.value)}
@@ -209,30 +260,29 @@ export function ChatInput({
                   if (e.key === 'Enter') { e.preventDefault(); onAttachUrl(urlInput); setShowUrlInput(false); setUrlInput(''); }
                   if (e.key === 'Escape') setShowUrlInput(false);
                 }}
-                placeholder="Pega la URL de un sitio que quieras clonar..."
-                className="flex-1 bg-transparent text-[13px] font-medium outline-none placeholder:text-zinc-400"
+                placeholder="Pega la URL de un sistema para ingeniería inversa..."
+                className="flex-1 bg-transparent text-sm font-black italic outline-none placeholder:text-zinc-300 uppercase tracking-tight"
                 aria-label="URL del sitio a clonar"
               />
            </div>
            <button 
               onClick={() => { onAttachUrl(urlInput); setShowUrlInput(false); setUrlInput(''); }} 
               disabled={isScraping || !urlInput.trim()}
-              className="h-11 px-5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
+              className="h-14 px-8 bg-zinc-900 text-white rounded-[1.5rem] text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl hover:brightness-125 active:scale-95 transition-all disabled:opacity-50 border border-white/10"
             >
-             {isScraping ? 'Scraping...' : 'Adjuntar'}
+             {isScraping ? 'SCRAPING...' : 'VINCULAR_URI'}
            </button>
            <button 
               onClick={() => setShowUrlInput(false)} 
-              aria-label="Cancelar"
-              className="h-11 w-11 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-colors"
+              className="h-14 w-14 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-all border border-black/5 rounded-[1.5rem] bg-white hover:shadow-xl"
             >
              <X className="h-5 w-5" />
            </button>
         </div>
       )}
 
-      {/* ── Main Input Container ── */}
-      <div className="max-w-4xl mx-auto w-full relative">
+      {/* ── Main Input Container (Command Console Selector) ── */}
+      <div className="max-w-4xl mx-auto w-full relative group">
         <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
 
         <div className={cn(

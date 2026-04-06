@@ -251,59 +251,41 @@ export default function Studio() {
 
         <div className="flex-1 overflow-y-auto px-10 relative z-10 custom-scrollbar scroll-smooth">
           <div className="max-w-7xl mx-auto flex flex-col pt-28 pb-40">
-            {/* --- Quantum Compositor --- */}
-            <div className="flex flex-col items-center text-center mb-32 max-w-4xl mx-auto">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 mb-10 shadow-2xl backdrop-blur-md"
-              >
-                <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]" />
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.4em]">Engine Status: High-Fidelity Prototype Mode</span>
-              </motion.div>
+            {/* --- Hero Intro (Aether V9.0) --- */}
+            <div className="relative mb-24">
+              <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px]" />
               
-              <motion.h1 
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1, duration: 0.8 }}
-                className="text-6xl md:text-8xl font-black text-white tracking-tighter mb-10 max-w-4xl leading-[0.85]"
-              >
-                ¿Listo para construir el <span className="italic text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-purple-500">futuro?</span>
-              </motion.h1>
-
-              {/* Futuristic Prompt Unit */}
               <motion.div 
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
-                className="w-full max-w-3xl group"
+                className="relative z-10 max-w-4xl text-left"
               >
-                <div className="relative p-1 rounded-[2.5rem] bg-gradient-to-r from-white/10 via-white/5 to-white/10 shadow-2xl transition-all group-hover:shadow-primary/20 group-hover:scale-[1.01]">
-                  <div className="absolute inset-0 bg-primary/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity rounded-[2.5rem]" />
-                  <div className="relative flex flex-col gap-4 p-5 md:p-8 rounded-[2.4rem] bg-[#080808]/80 backdrop-blur-3xl border border-white/5">
-                    <div className="flex items-start gap-5">
-                       <div className="mt-1 w-12 h-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                          <Plus className="w-6 h-6 text-primary" />
-                       </div>
-                       <textarea 
-                          placeholder="Describe tu visión... (ej: Plataforma de e-commerce de lujo con visuales dorados)"
-                          className="flex-1 bg-transparent border-none focus:ring-0 text-xl font-medium text-white placeholder:text-zinc-700 resize-none h-32 custom-scrollbar"
-                          disabled
-                       />
-                    </div>
-                    <div className="flex items-center justify-between border-t border-white/5 pt-5">
-                       <div className="flex items-center gap-4">
-                          <button className="p-2.5 rounded-xl hover:bg-white/5 transition-colors text-zinc-500 hover:text-white"><Smartphone className="w-4 h-4" /></button>
-                          <button className="p-2.5 rounded-xl hover:bg-white/5 transition-colors text-zinc-500 hover:text-white"><Globe className="w-4 h-4" /></button>
-                       </div>
-                       <button 
-                        onClick={handleCreateNew}
-                        className="px-8 py-3.5 rounded-2xl bg-white text-black font-black uppercase text-xs tracking-widest shadow-xl hover:scale-105 active:scale-95 transition-all"
-                       >
-                          Lanzar Genesis
-                       </button>
-                    </div>
-                  </div>
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-primary mb-8 backdrop-blur-md">
+                   <Sparkles className="h-3.5 w-3.5" />
+                   <span className="text-[10px] font-black uppercase tracking-widest italic">Aether Engine v9.0 Industrial</span>
+                </div>
+                
+                <h1 className="text-7xl md:text-8xl font-black text-white tracking-tighter mb-8 leading-[0.85] uppercase italic">
+                  Soberanía<br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-400 to-primary animate-gradient font-display">Industrial.</span>
+                </h1>
+                
+                <p className="text-xl text-zinc-500 max-w-2xl leading-relaxed font-medium mb-12">
+                  La interfaz de orquestación autónoma definitiva. Diseña, construye y despliega con la precisión de una IA de grado aeroespacial.
+                </p>
+
+                <div className="flex flex-wrap gap-4">
+                   <button 
+                    onClick={handleCreateNew}
+                    className="group px-10 py-5 rounded-[2rem] bg-white text-black font-black uppercase text-sm tracking-widest shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3"
+                   >
+                     <Plus className="h-5 w-5 group-hover:rotate-90 transition-transform duration-500" />
+                     Lanzar Nuevo Sistema
+                   </button>
+                   <button className="px-10 py-5 rounded-[2rem] bg-white/5 border border-white/10 text-white font-black uppercase text-sm tracking-widest hover:bg-white/10 transition-all">
+                     Explorar Nexus
+                   </button>
                 </div>
               </motion.div>
             </div>
@@ -403,62 +385,73 @@ export default function Studio() {
       />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* ── Left Sidebar: Chat (Genesis) ── */}
+        {/* ── Left Sidebar: Chat (Genesis Command Center) ── */}
         <div 
           className={cn(
-            "shrink-0 z-30 transition-all duration-500 ease-in-out relative",
-            isSidebarCollapsed ? "w-0 opacity-0 -translate-x-full" : "w-[380px] md:w-[420px] opacity-100 translate-x-0"
+            "shrink-0 z-30 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] relative",
+            isSidebarCollapsed ? "w-0 opacity-0 -translate-x-full" : "w-[400px] md:w-[440px] opacity-100 translate-x-0"
           )}
         >
-          {/* Glass Overlay for the sidebar area */}
-          <div className="absolute inset-0 bg-white/40 backdrop-blur-3xl border-r border-black/[0.03] shadow-2xl z-0" />
+          {/* Aether Glass V9.0 Layer */}
+          <div className="absolute inset-4 bg-white/40 backdrop-blur-3xl border border-white/40 rounded-[2.5rem] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.1)] z-0 overflow-hidden aether-iridescent">
+             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-indigo-400 to-primary opacity-50" />
+          </div>
           
-          <div className="relative h-full flex flex-col z-10">
-            <StudioChat 
-              projectId={activeProject.id} 
-              projectFiles={activeProject.files}
-              projectName={activeProject.name}
-              isSaving={isSaving}
-              activeFile={activeFile}
-              onCodeGenerated={handleCodeGenerated}
-              onGeneratingChange={setIsGenerating}
-              // Lifted State
-              artifacts={artifacts}
-              setArtifacts={setArtifacts}
-              tasks={activeTasks}
-              setTasks={setTasks}
-              logs={logs}
-              setLogs={setLogs}
-              // --- v16.0 Interconnect ---
-              runtimeError={runtimeError}
-              onClearError={() => setRuntimeError(null)}
-              onPhaseChange={(phase, specialist) => {
-                setAgentPhase(phase);
-                setActiveSpecialist(specialist);
-              }}
-              onStreamCharsChange={(chars, preview) => {
-                setStreamChars(chars);
-                setStreamPreview(preview);
-              }}
-              onShare={handleShare}
-              onPublish={() => setShowDeployModal(true)}
-              onBack={() => navigate('/studio')}
-              onToggleArtifacts={() => setViewMode('artifacts')}
-              onSelectFile={(f) => {
-                setActiveFile(f);
-                setViewMode('code');
-              }}
-            />
+          <div className="relative h-full flex flex-col z-10 p-4">
+            <div className="flex-1 bg-transparent rounded-[2rem] overflow-hidden flex flex-col">
+              <StudioChat 
+                projectId={activeProject.id} 
+                projectFiles={activeProject.files}
+                projectName={activeProject.name}
+                isSaving={isSaving}
+                activeFile={activeFile}
+                onCodeGenerated={handleCodeGenerated}
+                onGeneratingChange={setIsGenerating}
+                // Lifted State
+                artifacts={artifacts}
+                setArtifacts={setArtifacts}
+                tasks={activeTasks}
+                setTasks={setTasks}
+                logs={logs}
+                setLogs={setLogs}
+                // --- v16.0 Interconnect ---
+                runtimeError={runtimeError}
+                onClearError={() => setRuntimeError(null)}
+                onPhaseChange={(phase, specialist) => {
+                  setAgentPhase(phase);
+                  setActiveSpecialist(specialist);
+                }}
+                onStreamCharsChange={(chars, preview) => {
+                  setStreamChars(chars);
+                  setStreamPreview(preview);
+                }}
+                onShare={handleShare}
+                onPublish={() => setShowDeployModal(true)}
+                onBack={() => navigate('/studio')}
+                onToggleArtifacts={() => setViewMode('artifacts')}
+                onSelectFile={(f) => {
+                  setActiveFile(f);
+                  setViewMode('code');
+                }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* ── Main Workspace: Immersive Stage ────────────────── */}
-        <div className="flex-1 overflow-hidden bg-[#FAFAFA] relative z-0">
-          {/* Subtle global gradient backdrop for preview */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_#F0F0F0_0%,_transparent_100%)] pointer-events-none" />
+        {/* ── Main Workspace: Immersive Stage (Floating OS Style) ── */}
+        <div className={cn(
+          "flex-1 overflow-hidden bg-[#FAFAFA] relative z-0 panorama-transition",
+          !isSidebarCollapsed ? "p-4 pl-0" : "p-4"
+        )}>
+          {/* Mesh Gradient Backdrop */}
+          <div className="absolute inset-0 bg-zinc-50 z-[-1] overflow-hidden rounded-[2.5rem] border border-black/[0.03]">
+             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_0%,_#F0F0F0_0%,_transparent_100%)]" />
+             <div className="absolute -bottom-1/2 -right-1/4 w-full h-full bg-primary/5 rounded-full blur-[120px] animate-pulse" />
+          </div>
           
-          <AnimatePresence mode="wait">
-            <motion.div
+          <div className="relative h-full w-full rounded-[2rem] overflow-hidden border border-black/[0.03] bg-white shadow-2xl">
+            <AnimatePresence mode="wait">
+              <motion.div
               key={viewMode}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -587,6 +580,7 @@ export default function Studio() {
               )}
             </motion.div>
           </AnimatePresence>
+          </div>
         </div>
       </div>
 

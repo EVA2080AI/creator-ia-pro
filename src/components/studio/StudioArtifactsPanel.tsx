@@ -18,7 +18,8 @@ import {
   ImageIcon,
   Copy,
   BookOpen,
-  ArrowRight
+  ArrowRight,
+  Globe
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -57,7 +58,7 @@ interface StudioArtifactsPanelProps {
   isOpen: boolean;
   onClose: () => void;
   onFix?: () => void;
-  activeTab?: 'plan' | 'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents';
+  activeTab?: 'plan' | 'progress' | 'intelligence' | 'diagrams' | 'logs' | 'terminal' | 'agents';
   agentPhase?: 'idle' | 'thinking' | 'generating' | 'architecting' | 'fixing';
   activeSpecialist?: 'ux' | 'frontend' | 'backend' | 'devops' | 'game' | 'architect' | 'engineer' | 'none';
   persona?: 'genesis' | 'antigravity';
@@ -76,58 +77,59 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
   activeSpecialist = 'none',
   persona = 'genesis'
 }) => {
-  const [activeTab, setActiveTab] = useState<'plan' | 'progress' | 'diagrams' | 'logs' | 'terminal' | 'agents'>(initialTab);
+  const [activeTab, setActiveTab] = useState<'plan' | 'progress' | 'intelligence' | 'diagrams' | 'logs' | 'terminal' | 'agents'>(initialTab);
   const [settingsAgent, setSettingsAgent] = useState<{ id: AgentSpecialist, name: string } | null>(null);
 
   if (!isOpen) return null;
 
   return (
-    <div className="h-full w-full bg-white/70 backdrop-blur-3xl border-l border-black/5 flex flex-col animate-in fade-in slide-in-from-right-4 duration-700 overflow-hidden relative">
-      <div className="absolute inset-0 bg-grid-black opacity-[0.02] pointer-events-none" />
+    <div className="h-full w-full bg-white/40 backdrop-blur-3xl border-l border-black/[0.04] flex flex-col animate-in fade-in slide-in-from-right-8 duration-1000 overflow-hidden relative selection:bg-primary/20">
+      <div className="absolute inset-0 bg-grid-black opacity-[0.03] pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
       
-      {/* Header */}
-      <div className="h-16 flex items-center justify-between px-8 border-b border-black/5 bg-white/40 shrink-0 relative z-10">
-        <div className="flex items-center gap-4">
-          <div className="h-9 w-9 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center text-primary shadow-sm">
-            <Sparkles className="w-4.5 h-4.5" />
+      {/* Header: Neural Command Center */}
+      <div className="h-[72px] flex items-center justify-between px-8 border-b border-black/[0.04] bg-white/40 backdrop-blur-3xl shrink-0 relative z-20 aether-iridescent">
+        <div className="flex items-center gap-5">
+          <div className="h-11 w-11 rounded-[1.25rem] bg-white border border-black/[0.04] flex items-center justify-center text-primary shadow-xl group transition-all hover:scale-105 hover:rotate-3">
+            <Activity className="w-5 h-5 group-hover:scale-110 transition-transform" />
           </div>
           <div>
-            <h3 className="text-[11px] font-black text-zinc-900 tracking-[0.2em] leading-none mb-1 uppercase">Centro de Inteligencia</h3>
+            <h3 className="text-xs font-black text-zinc-900 tracking-tighter leading-none mb-1 uppercase italic">NEURAL_COMMAND_CENTER</h3>
             <div className="flex items-center gap-2">
-               <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
-               <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-zinc-400">Deep IA Protocol V18</span>
+               <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" />
+               <span className="text-[8px] font-black uppercase tracking-[0.3em] text-zinc-400">AETHER_SOVEREIGN_V9.0</span>
             </div>
           </div>
         </div>
         <button 
           onClick={onClose}
-          className="h-8 w-8 rounded-xl flex items-center justify-center text-zinc-400 hover:bg-black/5 hover:text-zinc-600 transition-all border border-transparent hover:border-black/5"
+          className="h-10 w-10 rounded-2xl flex items-center justify-center text-zinc-400 hover:bg-black/[0.04] hover:text-zinc-900 transition-all border border-transparent hover:border-black/5 active:scale-90"
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </button>
       </div>
 
-      {/* Tabs */}
-      <div className="p-5 flex items-center gap-1.5 overflow-x-auto custom-scrollbar no-scrollbar-x shrink-0 relative z-10">
+      {/* Tabs: Industrial Interface */}
+      <div className="p-6 flex items-center gap-2 overflow-x-auto custom-scrollbar no-scrollbar-x shrink-0 relative z-20 bg-white/10 backdrop-blur-xl">
         {[
-          { id: 'plan', icon: BookOpen, label: 'Plan Maestro' },
-          { id: 'progress', icon: Activity, label: 'Tareas' },
-          { id: 'diagrams', icon: Layout, label: 'Arquitectura' },
-          { id: 'agents', icon: Sparkles, label: 'Agentes' },
-          { id: 'logs', icon: Zap, label: 'Logs' },
-          { id: 'terminal', icon: TerminalIcon, label: 'Shell' }
+          { id: 'plan', icon: BookOpen, label: 'Master_Plan' },
+          { id: 'progress', icon: Activity, label: 'Process_Queue' },
+          { id: 'intelligence', icon: Sparkles, label: 'Knowledge_Core' },
+          { id: 'diagrams', icon: Layout, label: 'Architecture' },
+          { id: 'logs', icon: Zap, label: 'Telemetry' },
+          { id: 'terminal', icon: TerminalIcon, label: 'Shell_Console' }
         ].map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
             className={cn(
-              "flex-1 h-10 min-w-[90px] rounded-2xl flex items-center justify-center gap-2 transition-all font-black text-[9px] uppercase tracking-widest px-4 border",
+              "flex-1 h-11 min-w-[100px] rounded-[1.25rem] flex items-center justify-center gap-3 transition-all font-black text-[10px] uppercase tracking-widest px-4 border",
               activeTab === tab.id 
-                ? "bg-zinc-900 text-white border-zinc-900 shadow-lg shadow-zinc-200" 
-                : "bg-white text-zinc-500 border-zinc-100 hover:bg-zinc-50 hover:text-zinc-900"
+                ? "bg-zinc-900 text-white border-zinc-900 shadow-2xl scale-[1.02] italic" 
+                : "bg-white/50 text-zinc-500 border-black/[0.04] hover:bg-white hover:text-zinc-900 hover:shadow-lg"
             )}
           >
-            <tab.icon className="w-3.5 h-3.5" />
+            <tab.icon className={cn("w-4 h-4", activeTab === tab.id ? "text-primary shadow-sm" : "")} />
             {tab.label}
           </button>
         ))}
@@ -136,104 +138,307 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar">
         {activeTab === 'plan' ? (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300 pb-20">
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 selection:bg-primary/30">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest italic">master-plan.md</span>
-              <div className="px-2 py-1 rounded-md bg-indigo-50 border border-indigo-100 text-[9px] font-black text-indigo-600 uppercase tracking-widest">
-                Modo Arquitecto v19.4
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic">ROOT://MASTER_PLAN.MD</span>
+              <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-black text-primary uppercase tracking-widest animate-pulse">
+                ARCHITECT_MODE_V9.0
               </div>
             </div>
 
-            <div className="p-8 rounded-[2.5rem] bg-white border border-zinc-100 shadow-sm relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-6 opacity-5">
-                <BookOpen className="w-40 h-40" />
+            <div className="p-10 rounded-[2.5rem] bg-zinc-900 border border-white/10 shadow-2xl relative overflow-hidden group/plan aether-iridescent">
+              {/* Blueprint Grid Overlay */}
+              <div className="absolute inset-0 pointer-events-none opacity-[0.05] select-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} aria-hidden="true" />
+              
+              <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 transition-transform group-hover/plan:rotate-0 duration-700">
+                <BookOpen className="w-48 h-48 text-white" />
               </div>
-              <div className="relative z-10 prose prose-zinc prose-xs max-w-none">
-                <h2 className="text-[14px] font-black text-zinc-900 uppercase tracking-widest mb-4">Estrategia de Desarrollo</h2>
-                <div className="space-y-4 text-[12px] font-medium text-zinc-600 leading-relaxed">
-                  <p>Este plan ha sido diseñado para maximizar la escalabilidad y el rendimiento. A continuación, los pilares de la implementación:</p>
-                  <ul className="list-disc pl-4 space-y-2">
-                    <li><strong className="text-zinc-900">Núcleo Comercial:</strong> Infraestructura de créditos y planes SaaS.</li>
-                    <li><strong className="text-zinc-900">UX Premium:</strong> Interfaz autómata con micro-interacciones de estado.</li>
-                    <li><strong className="text-zinc-900">Robustez Backend:</strong> Esquemas de datos normalizados y políticas de seguridad RLS.</li>
+
+              <div className="relative z-20 prose prose-invert prose-sm max-w-none">
+                <h2 className="text-lg font-black text-white uppercase tracking-tighter mb-6 flex items-center gap-3 italic">
+                   ESTRATEGIA_LOGICA_DE_DESARROLLO
+                   <div className="h-[1px] flex-1 bg-gradient-to-r from-primary/50 to-transparent" />
+                </h2>
+                <div className="space-y-6 text-sm font-medium text-zinc-400 leading-relaxed">
+                  <p>Protocolo de ingeniería optimizado para escalabilidad industrial y rendimiento atómico. Arquitectura soberana en curso:</p>
+                  <ul className="space-y-4">
+                    <li className="flex items-start gap-3">
+                       <span className="text-primary font-black mt-0.5">01/</span>
+                       <span><strong className="text-white italic uppercase tracking-widest text-[11px]">Neural_Core:</strong> Infraestructura de orquestación autónoma y gestión de estado cognitivo.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                       <span className="text-primary font-black mt-0.5">02/</span>
+                       <span><strong className="text-white italic uppercase tracking-widest text-[11px]">Industrial_UI:</strong> Interfaz Aether V9.0 con micro-interacciones de estado y glassmorphism profundo.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                       <span className="text-primary font-black mt-0.5">03/</span>
+                       <span><strong className="text-white italic uppercase tracking-widest text-[11px]">Engine_Hardening:</strong> Políticas de seguridad RLS proyectadas y normalización de esquemas en tiempo real.</span>
+                    </li>
                   </ul>
-                  <p className="mt-8 p-4 rounded-2xl bg-zinc-50 border border-zinc-100 text-zinc-500 italic">
-                    "La arquitectura es la voluntad de una época traducida a espacio (o código)." — Mies van der Rohe (Adaptado)
-                  </p>
+                  <div className="mt-10 p-6 rounded-2xl bg-white/5 border border-white/10 text-zinc-500 italic text-[11px] font-bold tracking-tight">
+                    "TECHNICAL_LOG: La arquitectura es la voluntad de una época traducida a código soberano." — GENESIS_V20.0
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-10 pt-8 border-t border-black/5 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Listo para ejecución</span>
+              <div className="mt-12 pt-8 border-t border-white/5 flex items-center justify-between relative z-20">
+                <div className="flex items-center gap-3">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic">Ready_For_Exec</span>
                 </div>
                 <button 
                   onClick={() => setActiveTab('progress')}
-                  className="px-6 py-3 rounded-2xl bg-zinc-900 text-white text-[10px] font-black uppercase tracking-widest hover:bg-primary shadow-xl shadow-primary/20 transition-all flex items-center gap-2 group-hover:scale-105"
+                  className="px-10 py-5 rounded-[2rem] bg-white text-black text-[11px] font-black uppercase tracking-widest hover:scale-[1.05] active:scale-95 transition-all shadow-2xl flex items-center gap-3 group"
                 >
-                  Aprobar e Implementar <ArrowRight className="w-3.5 h-3.5" />
+                  EJECUTAR_ORQUESTACION <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
             </div>
           </div>
         ) : activeTab === 'progress' ? (
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Lista de Tareas (task.md)</span>
-              <Badge variant="outline" className="text-[9px] border-emerald-500/20 text-emerald-600 bg-emerald-50/50">
-                Live Analysis
-              </Badge>
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20">
+            <div className="flex items-center justify-between px-2">
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic">PROCESS_QUEUE_TELEMETRY</span>
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20">
+                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping" />
+                 <span className="text-[9px] font-black text-primary uppercase tracking-widest">Live_Sync</span>
+              </div>
             </div>
+
+            {/* Industrial Process Monitor Dashboard */}
+            {tasks.length > 0 && (
+              <div className="p-8 rounded-[2.5rem] bg-zinc-900 border border-white/10 shadow-2xl relative overflow-hidden group/monitor selection:text-white/80">
+                 <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                 
+                 <div className="relative z-10 grid grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                       <div className="flex items-center gap-3">
+                          <Activity className="w-4 h-4 text-primary animate-pulse" />
+                          <span className="text-[10px] font-black text-white uppercase tracking-widest italic">NEURAL_LOAD</span>
+                       </div>
+                       <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+                          <div 
+                            className="h-full bg-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)] transition-all duration-1000 ease-out italic text-[8px] flex items-center justify-center font-black text-white"
+                            style={{ width: `${(tasks.filter(t => t.status === 'completed').length / tasks.length) * 100}%` }}
+                          />
+                       </div>
+                       <div className="flex justify-between items-end">
+                          <span className="text-[24px] font-black text-white tracking-tighter leading-none">
+                            {Math.round((tasks.filter(t => t.status === 'completed').length / tasks.length) * 100)}<span className="text-primary text-xs ml-1">%</span>
+                          </span>
+                          <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest italic">SYNCHRONIZED</span>
+                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col justify-between">
+                          <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">ACTIVE_QUEUE</span>
+                          <span className="text-lg font-black text-white tracking-tighter">{tasks.length}</span>
+                       </div>
+                       <div className="p-4 rounded-2xl bg-white/5 border border-white/5 flex flex-col justify-between">
+                          <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">COMPLETED</span>
+                          <span className="text-lg font-black text-emerald-400 tracking-tighter">{tasks.filter(t => t.status === 'completed').length}</span>
+                       </div>
+                    </div>
+                 </div>
+
+                 <div className="mt-8 flex items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <div className="w-8 h-8 rounded-xl bg-primary/20 flex items-center justify-center animate-pulse">
+                       <Sparkles className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                       <p className="text-[10px] font-black text-white uppercase tracking-widest italic leading-none mb-1">CURRENT_DIRECTIVE</p>
+                       <p className="text-[9px] font-medium text-zinc-400 truncate max-w-[200px]">
+                          {tasks.find(t => t.status === 'in-progress')?.text || 'WAITING_FOR_SEQUENCE_INIT'}
+                       </p>
+                    </div>
+                 </div>
+              </div>
+            )}
             
-            <div className="space-y-2">
+            <div className="space-y-3">
               {tasks.length > 0 ? tasks.map((task) => (
                 <div 
                   key={task.id}
                   className={cn(
-                    "p-5 rounded-[2rem] border transition-all duration-500 flex items-start gap-4 relative overflow-hidden",
+                    "p-6 rounded-[2rem] border transition-all duration-700 flex items-start gap-5 relative overflow-hidden group/task",
                     task.status === 'completed' 
-                      ? "bg-emerald-50/20 border-emerald-100 opacity-60" 
+                      ? "bg-emerald-50/10 border-emerald-500/20 opacity-50 grayscale hover:grayscale-0" 
                       : task.status === 'in-progress'
-                        ? "bg-primary/5 border-primary/20 shadow-sm"
-                        : "bg-white border-zinc-100 shadow-sm"
+                        ? "bg-white border-primary/30 shadow-2xl scale-[1.02] aether-iridescent"
+                        : "bg-white/40 border-black/[0.04] backdrop-blur-xl shadow-sm hover:shadow-xl hover:border-black/10"
                   )}
                 >
-                  <div className="mt-1">
+                  <div className="mt-1 shrink-0 relative">
                     {task.status === 'completed' ? (
-                      <div className="h-5 w-5 rounded-full bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-100">
-                        <CheckCircle2 className="h-3 w-3 text-white" />
+                      <div className="h-6 w-6 rounded-xl bg-emerald-500 flex items-center justify-center shadow-xl shadow-emerald-500/20">
+                        <CheckCircle2 className="h-4 w-4 text-white" />
                       </div>
                     ) : task.status === 'in-progress' ? (
                       <div className="relative">
-                         <div className="absolute inset-0 bg-primary/20 blur-md rounded-full animate-pulse" />
-                         <Loader2 className="h-5 w-5 text-primary animate-spin relative" />
+                         <div className="absolute -inset-2 bg-primary/30 blur-xl rounded-full animate-pulse" />
+                         <div className="h-6 w-6 rounded-xl bg-primary flex items-center justify-center text-white shadow-xl relative z-10">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                         </div>
                       </div>
                     ) : (
-                      <Circle className="h-5 w-5 text-zinc-100" />
+                      <div className="h-6 w-6 rounded-xl bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-300">
+                         <div className="w-2 h-2 rounded-full bg-zinc-200" />
+                      </div>
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 py-0.5">
                     <p className={cn(
-                      "text-[12px] font-bold leading-relaxed tracking-tight",
-                      task.status === 'completed' ? "text-emerald-800/60 line-through decoration-emerald-200" : "text-zinc-700"
+                      "text-[13px] font-bold leading-relaxed tracking-tight transition-colors duration-500",
+                      task.status === 'completed' ? "text-emerald-900/40 line-through italic" : "text-zinc-900"
                     )}>
                       {task.text}
                     </p>
+                    <div className="flex items-center gap-3 mt-2">
+                       <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400 italic">Phase_{task.status.toUpperCase()}</span>
+                       {task.status === 'in-progress' && (
+                         <div className="flex gap-0.5">
+                            {[1, 2, 3].map(i => <div key={i} className="h-2 w-0.5 bg-primary animate-height" style={{ animationDelay: `${i * 0.1}s` }} />)}
+                         </div>
+                       )}
+                    </div>
                   </div>
                   {task.status === 'in-progress' && (
-                    <Zap className="h-4 w-4 text-primary animate-pulse shrink-0" />
+                    <Zap className="h-5 w-5 text-primary animate-pulse shrink-0 drop-shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" />
                   )}
                 </div>
               )) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="h-12 w-12 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-300 mb-4">
-                    <Activity className="w-5 h-5" />
+                <div className="flex flex-col items-center justify-center py-20 text-center bg-white/20 rounded-[3rem] border border-dashed border-black/5">
+                  <div className="h-20 w-20 rounded-[2.5rem] bg-white border border-black/5 flex items-center justify-center text-zinc-200 mb-6 shadow-sm">
+                    <Activity className="w-10 h-10 animate-pulse" />
                   </div>
-                  <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Sin plan activo</p>
-                  <p className="text-[10px] text-zinc-500 mt-2 max-w-[200px]">Solicita a Genesis que inicie un plan para ver el progreso aquí.</p>
+                  <p className="text-xs font-black text-zinc-400 uppercase tracking-[0.3em] mb-2 italic">EMPTY_SESSION_BUFFER</p>
+                  <p className="text-[10px] text-zinc-500 font-medium max-w-[240px] leading-relaxed">No se han detectado orquestaciones activas. Solicita un plan a Génesis para iniciar el proceso.</p>
                 </div>
               )}
+            </div>
+          </div>
+        ) : activeTab === 'intelligence' ? (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-20 selection:bg-primary/20">
+            <div className="flex items-center justify-between px-2 mb-2">
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] italic">SYSTEM_INTELLIGENCE_CORE</span>
+              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+                 <Sparkles className="w-3 h-3 text-indigo-400" />
+                 <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest italic">AETHER_KNOWLEDGE_V9.0</span>
+              </div>
+            </div>
+
+            {/* Knowledge Sections: Industrial Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               {[
+                 {
+                   id: 'integrations',
+                   title: 'SYSTEM_INTEGRATIONS',
+                   desc: 'Conecta Genesis a herramientas externas, servidores MCP y APIs globales.',
+                   details: [
+                     { label: 'SHARED_CONNECTORS', val: 'Supabase, Vercel, Resend, Netlify' },
+                     { label: 'MCP_COLLECTIVE', val: 'Contexto local mediante servidores personales.' },
+                     { label: 'SECURE_API_BRIDGE', val: 'Integración universal con cualquier servicio REST/GraphQL.' }
+                   ],
+                   icon: Globe,
+                   color: 'text-blue-500'
+                 },
+                 {
+                   id: 'best-practices',
+                   title: 'ENGINEERING_BEST_PRACTICES',
+                   desc: 'Protocolos optimizados para generación de código industrial de alta fidelidad.',
+                   details: [
+                     { label: 'PLAN_BEFORE_ACT', val: 'Siempre solicita un plan antes de la ejecución técnica.' },
+                     { label: 'ATOMIC_COMPONENTS', val: 'Construcción modular por componentes enfocados.' },
+                     { label: 'REAL_ASSETS', val: 'Uso de contenido real y metadatos premium.' }
+                   ],
+                   icon: Zap,
+                   color: 'text-amber-500'
+                 },
+                 {
+                   id: 'plan-mode',
+                   title: 'ARCHITECT_MODE_V9.0',
+                   desc: 'Modo de orquestación estratégica para decisiones antes del código.',
+                   details: [
+                     { label: 'BRAINSTORMING', val: 'Exploración de enfoques sin alterar el código.' },
+                     { label: 'CREDIT_EFFICIENCY', val: 'Consumo optimizado: 1 crédito por mensaje estratégico.' },
+                     { label: 'SOVEREIGN_BLUEPRINTS', val: 'Aprobación obligatoria para cambios críticos.' }
+                   ],
+                   icon: Layout,
+                   color: 'text-indigo-500'
+                 },
+                 {
+                   id: 'prompting',
+                   title: 'PROMPTING_HEURISTICS',
+                   desc: 'Técnicas avanzadas para maximizar la calidad visual y lógica.',
+                   details: [
+                     { label: 'DESIGN_BUZZWORDS', val: 'Glassmorphism, Industrial, Sovereign, High-Density.' },
+                     { label: 'ITERATIVE_EVOLUTION', val: 'Refinamiento constante basado en feedback de Sandpack.' },
+                     { label: 'CONTEXT_DENSITY', val: 'Provee detalles exhaustivos para resultados premium.' }
+                   ],
+                   icon: Sparkles,
+                   color: 'text-primary'
+                 }
+               ].map(section => (
+                 <div 
+                   key={section.id}
+                   className="p-8 rounded-[2.5rem] bg-white border border-black/[0.04] shadow-xl hover:shadow-2xl transition-all duration-500 group/section relative overflow-hidden aether-iridescent"
+                 >
+                    <div className="absolute top-0 right-0 p-6 opacity-[0.03] group-hover/section:scale-110 transition-transform duration-700">
+                       <section.icon className="w-32 h-32" />
+                    </div>
+                    <div className="relative z-10 flex flex-col h-full">
+                       <div className="flex items-center gap-4 mb-6">
+                          <div className={cn("h-11 w-11 rounded-2xl bg-black/[0.02] border border-black/[0.04] flex items-center justify-center transition-all group-hover/section:scale-105", section.color)}>
+                             <section.icon className="w-5 h-5" />
+                          </div>
+                          <h4 className="text-xs font-black text-zinc-900 uppercase tracking-tighter italic">{section.title}</h4>
+                       </div>
+                       <p className="text-[11px] text-zinc-500 font-medium leading-relaxed mb-8 flex-1">{section.desc}</p>
+                       <div className="space-y-4">
+                          {section.details.map((detail, idx) => (
+                             <div key={idx} className="flex flex-col gap-1">
+                                <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{detail.label}</span>
+                                <span className="text-[10px] font-bold text-zinc-800">{detail.val}</span>
+                             </div>
+                          ))}
+                       </div>
+                    </div>
+                 </div>
+               ))}
+            </div>
+
+            {/* Special Plans & Credits section */}
+            <div className="mt-12 p-10 rounded-[3rem] bg-zinc-900 border border-white/10 shadow-2xl relative overflow-hidden selection:text-white/80">
+               <div className="absolute inset-0 pointer-events-none opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+               
+               <div className="relative z-20 flex flex-col md:flex-row gap-12 items-center">
+                  <div className="flex-1 space-y-6">
+                     <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-primary/20 border border-primary/30">
+                        <Zap className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] italic">COMMERCIAL_TIER_SOVEREIGN</span>
+                     </div>
+                     <h3 className="text-2xl font-black text-white uppercase tracking-tighter leading-none italic">PLANES_Y_CREDITOS</h3>
+                     <p className="text-[13px] text-zinc-400 font-medium leading-relaxed">Escala tu producción de software con Genesis. Créditos consumibles por mensaje para máxima flexibilidad.</p>
+                     
+                     <div className="grid grid-cols-2 gap-6 pt-4">
+                        <div className="space-y-1">
+                           <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">FREE_TIER</span>
+                           <p className="text-sm font-black text-white italic">LIMITADO_EXPLORACION</p>
+                        </div>
+                        <div className="space-y-1">
+                           <span className="text-[8px] font-black text-primary uppercase tracking-widest">PRO_TIER</span>
+                           <p className="text-sm font-black text-white italic">500-1000_CREDITOS/MES</p>
+                        </div>
+                     </div>
+                  </div>
+
+                  <div className="shrink-0">
+                     <button className="px-12 py-6 rounded-[2.5rem] bg-white text-black text-xs font-black uppercase tracking-[0.3em] hover:scale-105 active:scale-95 transition-all shadow-2xl italic">
+                        UPGRADE_SYSTEM
+                     </button>
+                  </div>
+               </div>
             </div>
           </div>
         ) : activeTab === 'diagrams' ? (

@@ -73,51 +73,50 @@ function StudioProjectHeader({
 }: any) {
   return (
     <header 
-      className="shrink-0 h-[64px] border-b border-white/[0.08] bg-white/40 backdrop-blur-3xl px-4 flex items-center justify-between z-30 sticky top-0 aether-iridescent"
+      className="shrink-0 h-[72px] border-b border-black/[0.04] bg-white/40 backdrop-blur-3xl px-6 flex items-center justify-between z-30 sticky top-0 aether-iridescent"
       role="banner"
     >
-      <div className="flex items-center gap-3 overflow-hidden">
+      <div className="flex items-center gap-4 overflow-hidden">
         <button 
           onClick={onBack} 
-          className="h-10 w-10 rounded-2xl flex items-center justify-center text-zinc-400 hover:bg-black/[0.04] hover:text-zinc-900 transition-all active:scale-95"
+          className="h-10 w-10 rounded-2xl flex items-center justify-center text-zinc-400 hover:bg-black/[0.04] hover:text-zinc-900 transition-all active:scale-95 border border-white/50 bg-white/10"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-2">
-            <h2 className="text-[10px] font-black text-zinc-900 truncate tracking-[0.2em] uppercase">{name}</h2>
+            <h2 className="text-xs font-black text-zinc-900 truncate tracking-tight uppercase italic">{name}</h2>
             {isSaving && (
-              <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-md bg-zinc-100 text-[8px] font-bold text-zinc-400 animate-pulse">
-                <div className="w-1 h-1 rounded-full bg-zinc-300" />
-                SALVANDO
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 text-[8px] font-black text-primary animate-pulse border border-primary/20">
+                SAVING_SYNC
               </div>
             )}
           </div>
           
-          {/* Autonomous Heartbeat */}
-          <div className="flex items-center gap-2 mt-0.5">
+          <div className="flex items-center gap-3 mt-1">
             {agentPhase !== 'idle' ? (
               <div className="flex items-center gap-2">
-                <div className="flex items-center -space-x-1.5">
-                   <div className={cn("w-1.5 h-1.5 rounded-full border border-white transition-all duration-500", activeSpecialist === 'architect' ? "bg-primary animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.4)]" : "bg-zinc-200")} />
-                   <div className={cn("w-1.5 h-1.5 rounded-full border border-white transition-all duration-500", activeSpecialist === 'engineer' ? "bg-blue-500 animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.4)]" : "bg-zinc-200")} />
-                   <div className={cn("w-1.5 h-1.5 rounded-full border border-white transition-all duration-500", activeSpecialist === 'designer' ? "bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(236,72,153,0.4)]" : "bg-zinc-200")} />
+                <div className="flex items-center gap-1">
+                   {[1, 2, 3].map((i) => (
+                     <div key={i} className={cn(
+                       "w-1 h-3 rounded-full transition-all duration-300",
+                       activeSpecialist !== 'none' ? "bg-primary animate-height" : "bg-zinc-200"
+                     )} style={{ animationDelay: `${i * 0.1}s` }} />
+                   ))}
                 </div>
-                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary animate-pulse flex items-center gap-1.5">
-                  GENESIS {activeSpecialist.toUpperCase()}
-                  <span className="h-0.5 w-4 bg-primary/20 rounded-full overflow-hidden">
-                    <motion.div 
-                      animate={{ x: [-16, 16] }}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                      className="h-full w-4 bg-primary"
-                    />
-                  </span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-primary italic">
+                  GENESIS_{activeSpecialist?.toUpperCase() || 'CORE'}
                 </span>
+                <span className="text-[8px] font-bold text-zinc-400 opacity-50 ml-2 tracking-tighter">FREQ: 432Hz</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-0.5 bg-emerald-500/30 rounded-full" />
-                <span className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-600/50">Core Optimized</span>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600/70">NEURAL_IDLE</span>
+                </div>
+                <div className="h-3 w-[1px] bg-zinc-200 mx-1" />
+                <span className="text-[8px] font-bold text-zinc-400 opacity-50 tracking-tighter uppercase">Latency: 24ms</span>
               </div>
             )}
           </div>
@@ -127,20 +126,15 @@ function StudioProjectHeader({
       <div className="flex items-center gap-2">
         <button 
           onClick={onToggleArtifacts} 
-          className="h-10 px-3 rounded-2xl flex items-center gap-2 text-zinc-400 hover:bg-black/[0.04] hover:text-primary transition-all relative group"
+          className="h-11 px-4 rounded-[1.25rem] border border-white/50 bg-white/10 flex items-center gap-2.5 text-zinc-600 hover:bg-black/[0.04] hover:text-primary transition-all relative group shadow-sm"
         >
-          <Activity className="h-4 w-4" />
-          <span className="text-[9px] font-black uppercase tracking-widest hidden sm:inline">Engine</span>
-          <AnimatePresence>
+          <div className="relative">
+            <Activity className="h-4 w-4" />
             {activeSpecialist !== 'none' && (
-              <motion.div 
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full ring-2 ring-white border border-white" 
-              />
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full border-2 border-white animate-ping" />
             )}
-          </AnimatePresence>
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline italic">Console</span>
         </button>
       </div>
     </header>
