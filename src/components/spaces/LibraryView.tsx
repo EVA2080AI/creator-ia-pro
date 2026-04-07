@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
   Search, Loader2, Heart, Download, Trash2,
-  Star, Plus, Link, Layers, Sparkles, Copy, Ghost
+  Star, Plus, Link, Layers, Sparkles, Copy, Ghost, FileText, Maximize2
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter,
@@ -15,6 +15,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { DocumentEditor } from "@/components/studio/DocumentEditor";
 
 interface SavedAsset {
   id: string;
@@ -25,6 +26,7 @@ interface SavedAsset {
   tags: string[];
   created_at: string;
   space_id?: string | null;
+  content?: string | null;
 }
 
 interface Space { id: string; name: string; }
@@ -44,6 +46,8 @@ export const LibraryView = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [editingAsset, setEditingAsset] = useState<SavedAsset | null>(null);
+  const [savingDoc, setSavingDoc] = useState(false);
 
   const PAGE_SIZE = 24;
 
@@ -123,10 +127,25 @@ export const LibraryView = () => {
 
   const handleCopyUrl = async (asset: SavedAsset) => {
     try {
-      await navigator.clipboard.writeText(asset.asset_url);
+      await navigator.clipboard.writeText(asset.asset_url || "");
       toast.success("URL copiada al portapapeles");
     } catch {
       toast.error("No se pudo copiar la URL");
+    }
+  };
+
+  const handleSaveDocument = async (content: string) => {
+    if (!editingAsset) return;
+    setSavingDoc(true);
+    try {
+      const { error } = await supabase.from("saved_assets").update({ content }).eq("id", editingAsset.id);
+      if (error) throw error;
+      setAssets((prev) => prev.map((a) => (a.id === editingAsset.id ? { ...a, content } : a)));
+      toast.success("Documento guardado");
+    } catch (err: any) {
+      toast.error(err.message || "Error al guardar el documento");
+    } finally {
+      setSavingDoc(false);
     }
   };
 
@@ -204,33 +223,50 @@ export const LibraryView = () => {
               key={asset.id}
               className="group relative overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm transition-all hover:border-primary/30 hover:-translate-y-1.5 hover:shadow-md duration-300"
             >
-              <div className="aspect-square relative overflow-hidden">
-                <img
-                  src={asset.asset_url}
-                  alt={asset.prompt || "Asset"}
-                  className="h-full w-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="aspect-square relative overflow-hidden bg-zinc-50 border-b border-zinc-100 flex items-center justify-center p-6">
+                {asset.type === "document" ? (
+                  <div className="w-full h-full bg-white rounded-xl shadow-sm border border-zinc-200 p-4 overflow-hidden relative">
+                    <div className="text-[10px] text-zinc-400 font-mono leading-relaxed line-clamp-6 opacity-70">
+                      {asset.content ? asset.content.replace(/<[^>]*>?/gm, '') : "Documento vacío"}
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent" />
+                    <FileText className="absolute bottom-4 right-4 h-6 w-6 text-zinc-200" />
+                  </div>
+                ) : (
+                  <img
+                    src={asset.asset_url}
+                    alt={asset.prompt || "Asset"}
+                    className="h-full w-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               </div>
 
               <div className="absolute inset-0 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
-                <div className="flex justify-end gap-1.5">
-                  {[
-                    { icon: Heart,     onClick: () => toggleFav(asset.id, asset.is_favorite), active: asset.is_favorite, activeClass: "text-rose-400 fill-rose-400", label: asset.is_favorite ? "Quitar de favoritos" : "Agregar a favoritos" },
-                    { icon: Copy,      onClick: () => handleCopyUrl(asset),                   active: false,             activeClass: "",                            label: "Copiar URL" },
-                    { icon: Download,  onClick: () => window.open(asset.asset_url, "_blank"),  active: false,             activeClass: "",                            label: "Descargar activo" },
-                    { icon: Trash2,    onClick: () => setDeleteTargetId(asset.id),             active: false,             activeClass: "hover:text-rose-400",         label: "Eliminar activo" },
-                  ].map((btn, i) => (
-                    <button
-                      key={i}
-                      aria-label={btn.label}
-                      onClick={btn.onClick}
-                      className={`h-8 w-8 rounded-xl bg-white/90 backdrop-blur-xl border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-all ${btn.activeClass}`}
-                    >
-                      <btn.icon className={`h-3.5 w-3.5 ${btn.active ? "fill-current" : ""}`} aria-hidden="true" />
+                <div className="flex justify-end gap-1.5 z-10">
+                  <button onClick={() => toggleFav(asset.id, asset.is_favorite)} className={`h-8 w-8 rounded-xl bg-white/90 backdrop-blur-xl border border-zinc-200 flex items-center justify-center transition-all ${asset.is_favorite ? 'text-rose-400 fill-rose-400' : 'text-zinc-500 hover:text-zinc-900'}`}>
+                    <Heart className={`h-3.5 w-3.5 ${asset.is_favorite ? "fill-current" : ""}`} />
+                  </button>
+                  
+                  {asset.type === "document" ? (
+                    <button onClick={() => setEditingAsset(asset)} className="h-8 w-8 rounded-xl bg-white/90 backdrop-blur-xl border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-primary transition-all">
+                      <Maximize2 className="h-3.5 w-3.5" />
                     </button>
-                  ))}
+                  ) : (
+                    <>
+                      <button onClick={() => handleCopyUrl(asset)} className="h-8 w-8 rounded-xl bg-white/90 backdrop-blur-xl border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-all">
+                        <Copy className="h-3.5 w-3.5" />
+                      </button>
+                      <button onClick={() => window.open(asset.asset_url, "_blank")} className="h-8 w-8 rounded-xl bg-white/90 backdrop-blur-xl border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-all">
+                        <Download className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
+
+                  <button onClick={() => setDeleteTargetId(asset.id)} className="h-8 w-8 rounded-xl bg-white/90 backdrop-blur-xl border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-rose-400 transition-all">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
                 </div>
 
                 <div className="space-y-2">
@@ -351,6 +387,27 @@ export const LibraryView = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Document Editor Fullscreen Modal */}
+      {editingAsset && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-8 animate-in fade-in duration-200">
+          <div className="w-full max-w-6xl h-full shadow-2xl animate-in zoom-in-95 duration-200">
+            <DocumentEditor
+              initialContent={editingAsset.content || ""}
+              title={
+                editingAsset.prompt 
+                  ? editingAsset.prompt.length > 50 
+                    ? editingAsset.prompt.substring(0, 50) + "..." 
+                    : editingAsset.prompt 
+                  : "Documento Nuevo"
+              }
+              onSave={handleSaveDocument}
+              onClose={() => setEditingAsset(null)}
+              isSaving={savingDoc}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

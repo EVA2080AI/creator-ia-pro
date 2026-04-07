@@ -321,14 +321,25 @@ const Tools = () => {
   }, [user, currentTool, imagePreview, textPrompt, profile, requiredCredits, category, activeTool, activeModel, navigate, refreshProfile]);
 
   const handleSaveToAssets = async () => {
-    if (!resultImage || !user) return;
+    if ((!resultImage && !resultText) || !user) return;
     setSavingAsset(true);
     try {
-      const { error } = await supabase.from("saved_assets").insert({
-        user_id: user.id, type: "image", asset_url: resultImage,
+      const isDoc = !!resultText;
+      const type = isDoc ? "document" : "image";
+      const payload: any = {
+        user_id: user.id, 
+        type, 
         prompt: `${currentTool.name} — ${textPrompt.slice(0, 40) || "generado"}`,
         tags: [activeTool, "ai-generated"],
-      } as any);
+      };
+
+      if (isDoc) {
+        payload.content = resultText;
+      } else {
+        payload.asset_url = resultImage;
+      }
+
+      const { error } = await supabase.from("saved_assets").insert(payload);
       if (error) throw error;
       setSavedAsset(true);
       toast.success("Guardado en Mis Activos");
@@ -413,11 +424,20 @@ const Tools = () => {
           {!streaming && resultText && (
             <div className="flex gap-2 shrink-0">
               <button onClick={() => { navigator.clipboard.writeText(resultText); toast.success("Texto copiado"); }}
-                className="flex-1 h-11 rounded-xl bg-primary text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-[0.98] transition-all">
+                className="flex-[2] h-11 rounded-xl bg-primary text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-[0.98] transition-all">
                 <Copy className="h-4 w-4" /> Copiar texto
               </button>
+              <button 
+                onClick={handleSaveToAssets} disabled={savingAsset || savedAsset}
+                className={cn("flex-1 h-11 px-4 rounded-xl border text-sm font-semibold flex items-center justify-center gap-2 transition-all",
+                  savedAsset ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                             : "border-zinc-200 bg-zinc-50 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100")}
+              >
+                {savingAsset ? <Loader2 className="h-4 w-4 animate-spin" /> : savedAsset ? <CheckCircle2 className="h-4 w-4" /> : <BookmarkPlus className="h-4 w-4" />}
+                {savedAsset ? "Guardado" : "Guardar"}
+              </button>
               <button onClick={() => { setResultText(""); setSavedAsset(false); }}
-                className="h-11 w-11 rounded-xl border border-zinc-200 text-zinc-500 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
+                className="h-11 w-11 shrink-0 rounded-xl border border-zinc-200 text-zinc-500 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
                 <X className="h-4 w-4" />
               </button>
             </div>
