@@ -62,7 +62,7 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
                     key={m.id} 
                     onClick={() => { onSelect(m.id); setIsOpen(false); }}
                     className={cn(
-                      "w-full flex flex-col gap-1.5 px-4 py-3 text-left transition-all rounded-xl border group/item relative overflow-hidden",
+                      "w-full px-4 py-2.5 text-left transition-all rounded-xl border group/item relative overflow-hidden",
                       selectedModel === m.id 
                         ? "bg-primary/[0.04] border-primary/20 text-zinc-900" 
                         : "text-zinc-600 border-transparent hover:bg-zinc-50 hover:text-zinc-900"
@@ -87,11 +87,6 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
                         </span>
                       </div>
                     </div>
-                    {m.description && (
-                      <p className={cn("text-[11px] font-medium leading-relaxed pl-4 transition-colors", selectedModel === m.id ? "text-primary/70" : "text-zinc-400 group-hover/item:text-zinc-500")}>
-                        {m.description}
-                      </p>
-                    )}
                   </button>
                 ))}
               </div>
