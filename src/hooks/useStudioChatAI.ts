@@ -249,7 +249,7 @@ export function useStudioChatAI({
               else if (accumulated.includes('[ARCHITECT]') || accumulated.includes('🏗️ ESTRATEGA')) { setGenSpecialist('architect'); onPhaseChange?.('generating', 'architect'); }
               else if (accumulated.includes('[ENGINEER]') || accumulated.includes('🧠 GENESIS')) { setGenSpecialist('engineer'); onPhaseChange?.('generating', 'engineer'); }
             }
-          } catch {}
+          } catch { /* malformed SSE chunk — skip silently */ }
         }
       }
 

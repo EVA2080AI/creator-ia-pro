@@ -43,9 +43,10 @@ export interface Message {
 export interface CodeGenResult {
   files: Record<string, StudioFile>;
   explanation: string;
-  stack: string[];
-  deps: string[];
-  suggestions: string[];
+  stack?: string[];
+  tech_stack?: string[];
+  deps?: string[];
+  suggestions?: string[];
   isChatOnly?: boolean;
   blob?: Blob;
 }

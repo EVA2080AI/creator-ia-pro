@@ -245,6 +245,8 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           <button
             key={item.path}
             onClick={() => handleNav(item.path)}
+            title={!(globalExpanded || isMobile) ? item.label : undefined}
+            aria-label={item.label}
             className={cn('group w-full flex items-center rounded-xl transition-all duration-150 text-[12px] font-medium text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50', (globalExpanded || isMobile) ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center')}
           >
             <item.icon className="shrink-0 w-4 h-4" />
@@ -265,7 +267,10 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
                 </div>
               )}
               {(globalExpanded || isMobile) && (
-                <button onClick={handleSignOut} className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"><LogOut className="w-4 h-4" /></button>
+                <button onClick={handleSignOut} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"><LogOut className="w-4 h-4" /></button>
+              )}
+              {!(globalExpanded || isMobile) && (
+                <button onClick={handleSignOut} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"><LogOut className="w-4 h-4" /></button>
               )}
             </>
           ) : (
@@ -290,8 +295,10 @@ function NavItem({
   return (
     <button
       onClick={onClick}
+      title={!expanded ? label : undefined}
+      aria-label={label}
       className={cn(
-        'group w-full flex items-center rounded-xl transition-all duration-200 text-[12.5px] font-medium outline-none',
+        'group w-full flex items-center rounded-xl transition-all duration-200 text-[12.5px] font-medium outline-none relative',
         expanded ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
         active ? 'bg-primary/10 text-primary border border-primary/20 font-black shadow-sm' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent',
         className

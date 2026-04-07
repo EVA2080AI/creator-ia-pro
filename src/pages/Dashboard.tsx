@@ -109,7 +109,7 @@ const Dashboard = () => {
         setSpaces(combined);
 
         if (profile?.condominio_id) {
-          // @ts-ignore - RPC not yet in generated types
+          // @ts-expect-error - RPC not yet in generated types
           const { data: statsData } = await supabase.rpc("get_condominio_stats", { _condominio_id: profile.condominio_id });
           if (statsData) setCondominioStats(statsData as unknown as CondominioStats);
         }

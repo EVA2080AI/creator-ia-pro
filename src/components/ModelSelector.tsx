@@ -1,4 +1,4 @@
-import { Check, ChevronsUpDown, Sparkles, Zap, Image as ImageIcon, Cpu } from "lucide-react";
+import { Check, ChevronsUpDown, Zap, Image as ImageIcon, Cpu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,11 +36,13 @@ export const AVAILABLE_MODELS: AIModel[] = [
   { id: "claude-3.5-sonnet",   name: "Claude Sonnet 4.6",    provider: "Anthropic",   tokenCost: 4,  badge: "Thinking",      description: "Código avanzado y análisis de Anthropic.",         type: "text" },
   { id: "claude-3-opus",       name: "Claude Opus 4.6",      provider: "Anthropic",   tokenCost: 5,  badge: "Genius",        description: "El modelo más capaz de Anthropic.",                type: "text" },
   { id: "gpt-oss-120b",        name: "Llama 4 Maverick",     provider: "OpenSource",  tokenCost: 2,  badge: "Open Source",   description: "Modelo open source de alto rendimiento.",          type: "text" },
-  // ─── IMAGEN — FLUX y SDXL vía OpenRouter ─────────────────────────────────────
-  { id: "flux-schnell",        name: "FLUX Schnell",         provider: "OpenRouter",  tokenCost: 2,  badge: "Recomendado",   description: "FLUX.1 Schnell — rápido, 4 pasos, 1024×1024.",    type: "image" },
-  { id: "flux-pro",            name: "FLUX Pro",             provider: "OpenRouter",  tokenCost: 4,  badge: "Alta calidad",  description: "FLUX.1 Pro — máxima fidelidad y detalle.",         type: "image" },
-  { id: "flux-pro-1.1",        name: "FLUX Pro 1.1",         provider: "OpenRouter",  tokenCost: 4,  badge: "Más nuevo",     description: "FLUX.1.1 Pro — última versión, superior calidad.", type: "image" },
-  { id: "sdxl",                name: "SDXL",                 provider: "OpenRouter",  tokenCost: 2,  badge: "Alternativo",   description: "Stable Diffusion XL — versátil y creativo.",       type: "image" },
+  // ─── IMAGEN — Mejores motores de generación ───────────────────────────────────
+  { id: "flux-schnell",        name: "FLUX Schnell",         provider: "OpenRouter",  tokenCost: 2,  badge: "Rápido",        description: "FLUX.1 Schnell — 4 pasos, ultra veloz, 1024×1024.", type: "image" },
+  { id: "flux-pro-1.1",        name: "FLUX Pro 1.1",         provider: "OpenRouter",  tokenCost: 4,  badge: "Recomendado",   description: "FLUX 1.1 Pro — máxima fidelidad y prompt follow.", type: "image" },
+  { id: "flux-pro",            name: "FLUX Pro",             provider: "OpenRouter",  tokenCost: 4,  badge: "Alta calidad",  description: "FLUX.1 Pro — fotorrealismo y detalle supremo.",    type: "image" },
+  { id: "flux-realism",        name: "FLUX Realism",         provider: "OpenRouter",  tokenCost: 3,  badge: "Fotorrealista", description: "FLUX Realism LoRA — fotos hiper realistas.",       type: "image" },
+  { id: "ideogram-v2",         name: "Ideogram v2",          provider: "OpenRouter",  tokenCost: 4,  badge: "Texto + Arte",  description: "El mejor para logos, texto y diseño gráfico.",     type: "image" },
+  { id: "sdxl",                name: "SDXL",                 provider: "OpenRouter",  tokenCost: 2,  badge: "Versátil",      description: "Stable Diffusion XL — versátil y creativo.",       type: "image" },
 ];
 
 interface ModelSelectorProps {
@@ -64,6 +66,14 @@ export function ModelSelector({ selectedModelId, onModelChange, filterType }: Mo
   const imageModels = visibleModels.filter((m) => m.type === "image");
   const textModels  = visibleModels.filter((m) => m.type !== "image");
 
+  const providerColor: Record<string, string> = {
+    Google:      "bg-blue-500",
+    Anthropic:   "bg-amber-500",
+    DeepSeek:    "bg-cyan-500",
+    OpenSource:  "bg-violet-500",
+    OpenRouter:  "bg-emerald-500",
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -71,20 +81,18 @@ export function ModelSelector({ selectedModelId, onModelChange, filterType }: Mo
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between bg-card border border-border hover:border-border/80 hover:bg-muted/50 transition-colors border-white/5 hover:border-white/10 h-14 rounded-xl px-4 transition-all duration-300 shadow-inner group"
+          className="w-full justify-between bg-zinc-50 border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100 h-11 rounded-xl px-3 transition-all duration-200 shadow-sm group"
         >
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="p-1.5 rounded-lg bg-white/5 border border-white/5 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all shrink-0">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-            </div>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className={`w-2 h-2 rounded-full shrink-0 ${providerColor[selectedModel.provider] ?? 'bg-zinc-400'}`} />
             <div className="flex flex-col items-start min-w-0">
-              <span className="text-[13px] font-semibold text-white truncate">{selectedModel.name}</span>
-              <span className="text-[10px] text-white/60 mt-0.5">
-                {selectedModel.tokenCost} crédito{selectedModel.tokenCost > 1 ? "s" : ""}
+              <span className="text-[13px] font-bold text-zinc-900 truncate leading-none">{selectedModel.name}</span>
+              <span className="text-[10px] text-zinc-500 mt-0.5 leading-none">
+                {selectedModel.tokenCost} crédito{selectedModel.tokenCost > 1 ? "s" : ""} · {selectedModel.provider}
               </span>
             </div>
           </div>
-          <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 text-white/60 group-hover:text-white/60 transition-colors" />
+          <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
         </Button>
       </PopoverTrigger>
 

@@ -255,7 +255,7 @@ export function StudioChat(props: StudioChatProps) {
       const data = await res.json();
       const name = (data?.choices?.[0]?.message?.content ?? '').trim().replace(/^["']|["']$/g, '');
       if (name) props.onAutoName(name);
-    } catch {}
+    } catch { /* auto-naming is non-critical, silently fail */ }
   }, [props.onAutoName]);
 
   // ─── ACTION: Send message ────────────────────────────────────────────────

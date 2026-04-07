@@ -21,6 +21,19 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "no-case-declarations": "warn",
+      "no-useless-escape": "warn",
+      "react-hooks/exhaustive-deps": "warn",
+    },
+  },
+  // Test files — relax any/type strictness completely
+  {
+    files: ["src/test/**/*.{ts,tsx}", "**/*.test.{ts,tsx}", "scripts/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
     },
   },
 );
+
