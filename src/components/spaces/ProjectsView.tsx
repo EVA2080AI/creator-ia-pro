@@ -33,7 +33,7 @@ interface UnifiedProject {
   created_at: string;
   updated_at: string;
   type: 'flow' | 'code';
-  settings?: { brand_context?: string; primary_color?: string; theme?: string };
+  settings?: any;
 }
 
 export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => {

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { motion, useInView } from "framer-motion";
@@ -127,7 +127,7 @@ export const HubView = () => {
                 transition={{ duration: 0.55, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
                 className="text-4xl md:text-6xl font-bold tracking-tight font-display"
               >
-                Proyectos & <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Plantillas</span>
+                Proyectos &amp; <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-400">Plantillas</span>
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0, y: 12 }}
@@ -135,7 +135,7 @@ export const HubView = () => {
                 transition={{ duration: 0.45, delay: 0.2 }}
                 className="text-sm text-zinc-400 font-medium"
               >
-                {TEMPLATES.length} plantillas profesionales — 1 clic para abrir en el Studio.
+                {TEMPLATES.length} plantillas profesionales &mdash; 1 clic para abrir en el Studio.
               </motion.p>
             </div>
             <motion.div
