@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Mic, ArrowUp, X, Globe, Link2, FileCode2, Paperclip, Shield } from 'lucide-react';
+import { Plus, Mic, ArrowUp, X, Globe, Link2, FileCode2, Paperclip, Shield, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { ModelSelector } from './ModelSelector';
@@ -53,7 +53,6 @@ export function ChatInput({
   const [urlInput, setUrlInput] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
 
@@ -61,340 +60,368 @@ export function ChatInput({
     setInput(e.target.value);
     const ta = e.target;
     ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 350) + 'px';
+    ta.style.height = Math.min(ta.scrollHeight, 280) + 'px';
   };
 
   const toggleListening = () => {
     if (isListening) {
-       recognitionRef.current?.stop();
-       setIsListening(false);
-       return;
-    }
-
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      alert("Tu navegador no soporta dictado por voz.");
+      recognitionRef.current?.stop();
+      setIsListening(false);
       return;
     }
-
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) { alert("Tu navegador no soporta dictado por voz."); return; }
     const recognition = new SpeechRecognition();
     recognition.lang = 'es-ES';
     recognition.continuous = true;
     recognition.interimResults = true;
-
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
     recognition.onresult = (event: any) => {
       let transcript = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          transcript += event.results[i][0].transcript;
-        }
+        if (event.results[i].isFinal) transcript += event.results[i][0].transcript;
       }
-      if (transcript) {
-        setInput(input + (input.endsWith(' ') || !input ? '' : ' ') + transcript);
-      }
+      if (transcript) setInput(input + (input.endsWith(' ') || !input ? '' : ' ') + transcript);
     };
-
     recognition.start();
     recognitionRef.current = recognition;
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) { 
-      e.preventDefault(); 
-      if (input.trim() || pendingImage || pendingUrl || pendingContext) {
-        onSend();
-      }
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (input.trim() || pendingImage || pendingUrl || pendingContext) onSend();
     }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Q-8: Validation logic
     const allowedExtensions = ['.txt', '.js', '.ts', '.tsx', '.css', '.html', '.json', '.md', '.sql'];
     const extension = file.name.slice((file.name.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
-    
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error(`"${file.name}" es demasiado grande (máx 2MB)`);
-      return;
-    }
-
-    if (extension && !allowedExtensions.includes(`.${extension}`)) {
-      toast.error('Tipo de archivo no permitido para análisis.');
-      return;
-    }
-
+    if (file.size > 2 * 1024 * 1024) { toast.error(`"${file.name}" es demasiado grande (máx 2MB)`); return; }
+    if (extension && !allowedExtensions.includes(`.${extension}`)) { toast.error('Tipo de archivo no permitido.'); return; }
     onAttachFile(file);
     e.target.value = '';
   };
 
+  const hasContent = !!(input.trim() || pendingImage || pendingUrl || pendingContext);
+
   return (
-    <footer 
-      className={cn(
-        "shrink-0 p-4 md:p-8 border-t transition-all duration-1000 relative z-40 pb-6 md:pb-10",
-        "bg-white/80 border-zinc-100 backdrop-blur-[40px] saturate-[1.8]"
-      )}
+    <footer
+      className="shrink-0 relative z-40"
+      style={{
+        background: 'linear-gradient(to top, white 85%, rgba(255,255,255,0))',
+        paddingTop: '8px',
+        paddingBottom: '16px',
+        paddingLeft: '16px',
+        paddingRight: '16px',
+      }}
       role="contentinfo"
     >
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-30" />
-      <div className="absolute inset-0 scanline-overlay opacity-[0.01] pointer-events-none" />
-      
-      {/* ── Mode Selector: Industrial Sovereign ── */}
-      <div className="max-w-5xl mx-auto mb-4 md:mb-6 flex flex-col md:flex-row items-center justify-between gap-4 px-2">
-         <div className="flex bg-zinc-50 p-1 rounded-2xl border border-zinc-200 relative overflow-hidden group shadow-sm backdrop-blur-3xl w-full md:w-auto">
-            <button 
-              onClick={() => !isArchitectMode && onArchitectToggle()}
-              className={cn(
-                "relative z-10 flex-1 md:flex-none px-4 md:px-8 py-2 md:py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 flex items-center justify-center gap-2 italic",
-                isArchitectMode ? "text-white" : "text-zinc-500 hover:text-zinc-900"
-              )}
-            >
-              {isArchitectMode && (
-                <motion.div 
-                  layoutId="mode-bg-sov" 
-                  className="absolute inset-0 bg-primary/90 rounded-xl shadow-lg z-[-1]" 
-                  transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
-                />
-              )}
-              <Shield className={cn("w-3.5 h-3.5", isArchitectMode ? "text-white" : "text-zinc-400")} />
-              PLAN
-            </button>
-            <button 
-              onClick={() => isArchitectMode && onArchitectToggle()}
-              className={cn(
-                "relative z-10 flex-1 md:flex-none px-4 md:px-8 py-2 md:py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-700 flex items-center justify-center gap-2 italic",
-                !isArchitectMode ? "text-white" : "text-zinc-500 hover:text-zinc-900"
-              )}
-            >
-              {!isArchitectMode && (
-                <motion.div 
-                  layoutId="mode-bg-sov" 
-                  className="absolute inset-0 bg-zinc-950 rounded-xl shadow-lg z-[-1]" 
-                  transition={{ type: "spring", bounce: 0.1, duration: 0.6 }}
-                />
-              )}
-              <ArrowUp className={cn("w-3.5 h-3.5", !isArchitectMode ? "text-white" : "text-zinc-400")} />
-              BUILD
-            </button>
-         </div>
+      {/* Subtle top separator */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent" />
 
-         <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto justify-between md:justify-end">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-50 border border-zinc-200">
-               <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-               <span className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] italic leading-none hidden xs:inline">NEURAL_LINK</span>
-            </div>
-            <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
-         </div>
-      </div>
-
-      {/* ── Attachment Previews ── */}
-      <div className="max-w-5xl mx-auto w-full space-y-4 mb-8 px-4">
-        {pendingImage && (
-          <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 animate-in fade-in slide-in-from-bottom-3 duration-300" role="status">
-            <img src={pendingImage} alt="Imagen adjunta" className="h-12 w-12 rounded-xl object-cover border border-zinc-200 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold text-zinc-900 leading-none mb-1">Imagen adjunta</p>
-              <p className="text-[10px] text-zinc-400 font-medium truncate">Referencia visual para el contexto</p>
-            </div>
-            <button onClick={onRemoveImage} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200 transition-all">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+      {/* ── Attachment Previews (compact pills) ── */}
+      <AnimatePresence>
+        {(pendingImage || pendingUrl || pendingContext || activeFile) && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            className="max-w-4xl mx-auto w-full flex flex-wrap gap-2 mb-3 px-1"
+          >
+            {pendingImage && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 border border-zinc-200 animate-in fade-in duration-200">
+                <img src={pendingImage} alt="" className="h-5 w-5 rounded object-cover" />
+                <span className="text-[11px] font-semibold text-zinc-600">Imagen</span>
+                <button onClick={onRemoveImage} className="text-zinc-400 hover:text-zinc-700 transition-colors ml-0.5">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            {pendingUrl && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 animate-in fade-in duration-200">
+                <Globe className="h-3.5 w-3.5 text-blue-500" />
+                <span className="text-[11px] font-semibold text-blue-600 max-w-[140px] truncate">
+                  {(() => { try { return JSON.parse(pendingUrl).url; } catch { return pendingUrl; } })()}
+                </span>
+                <button onClick={onRemoveUrl} className="text-blue-400 hover:text-blue-700 transition-colors ml-0.5">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            {pendingContext && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-50 border border-violet-200 animate-in fade-in duration-200">
+                <FileCode2 className="h-3.5 w-3.5 text-violet-500" />
+                <span className="text-[11px] font-semibold text-violet-600 max-w-[140px] truncate">{pendingContext.name}</span>
+                <button onClick={onRemoveContext} className="text-violet-400 hover:text-violet-700 transition-colors ml-0.5">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )}
+            {activeFile && (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 animate-in fade-in duration-200">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[11px] font-semibold text-emerald-600 max-w-[120px] truncate">{activeFile.split('/').pop()}</span>
+              </div>
+            )}
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {pendingUrl && (
-          <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 animate-in fade-in slide-in-from-bottom-3 duration-300" role="status">
-            <div className="h-10 w-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-500 shrink-0">
-              <Globe className="h-4.5 w-4.5" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold text-zinc-900 leading-none mb-1">URL adjunta</p>
-              <p className="text-[10px] text-zinc-400 font-medium truncate">
-                {(() => { try { return JSON.parse(pendingUrl).url; } catch { return pendingUrl; } })()}
-              </p>
-            </div>
-            <button onClick={onRemoveUrl} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200 transition-all">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-
-        {pendingContext && (
-          <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 animate-in fade-in slide-in-from-bottom-3 duration-300" role="status">
-            <div className="h-10 w-10 rounded-xl bg-primary/8 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-              <FileCode2 className="h-4 w-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold text-zinc-900 leading-none mb-1">Contexto adjunto</p>
-              <p className="text-[10px] text-zinc-400 font-medium truncate">{pendingContext.name}</p>
-            </div>
-            <button onClick={onRemoveContext} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200 transition-all">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-
-        {activeFile && (
-          <div className="px-3 py-2 rounded-xl bg-primary/5 border border-primary/20 text-primary w-fit flex items-center gap-2 animate-in fade-in zoom-in duration-300" role="status">
-             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-             <span className="text-[11px] font-bold tracking-wide">
-               {activeFile.split('/').pop()}
-             </span>
-          </div>
-        )}
-      </div>
-
-      {/* ── URL Input Bar (Industrial) ── */}
-      {showUrlInput && (
-        <div className="max-w-5xl mx-auto w-full mb-6 flex items-center gap-4 px-4 animate-in slide-in-from-bottom-6 duration-700">
-       <div className="flex-1 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-white border-2 border-primary/30 shadow-sm focus-within:ring-4 focus-within:ring-primary/10 transition-all">
-              <Link2 className="h-4.5 w-4.5 text-primary shrink-0" />
-              <input 
-                autoFocus type="url" value={urlInput} 
+      {/* ── URL Input Bar ── */}
+      <AnimatePresence>
+        {showUrlInput && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            className="max-w-4xl mx-auto w-full mb-3 flex items-center gap-2 px-1"
+          >
+            <div className="flex-1 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white border-2 border-primary/40 shadow-sm focus-within:ring-4 focus-within:ring-primary/10 transition-all">
+              <Link2 className="h-4 w-4 text-primary shrink-0" />
+              <input
+                autoFocus type="url" value={urlInput}
                 onChange={e => setUrlInput(e.target.value)}
                 onKeyDown={e => {
                   if (e.key === 'Enter') { e.preventDefault(); onAttachUrl(urlInput); setShowUrlInput(false); setUrlInput(''); }
                   if (e.key === 'Escape') setShowUrlInput(false);
                 }}
                 placeholder="Pega la URL a analizar..."
-                className="flex-1 bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-300 text-zinc-900"
+                className="flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-zinc-300 text-zinc-900"
                 aria-label="URL del sitio a adjuntar"
               />
-           </div>
-           <button 
-              onClick={() => { onAttachUrl(urlInput); setShowUrlInput(false); setUrlInput(''); }} 
+            </div>
+            <button
+              onClick={() => { onAttachUrl(urlInput); setShowUrlInput(false); setUrlInput(''); }}
               disabled={isScraping || !urlInput.trim()}
-              className="h-11 px-5 bg-zinc-900 text-white rounded-2xl text-[12px] font-bold tracking-wide shadow-sm hover:bg-black active:scale-95 transition-all disabled:opacity-50"
+              className="h-10 px-4 bg-zinc-900 text-white rounded-2xl text-xs font-bold shadow-sm hover:bg-black active:scale-95 transition-all disabled:opacity-50"
             >
               {isScraping ? 'Analizando...' : 'Adjuntar'}
-           </button>
-           <button 
-              onClick={() => setShowUrlInput(false)} 
-              className="h-11 w-11 flex items-center justify-center text-zinc-400 hover:text-zinc-700 transition-all border border-zinc-200 rounded-2xl bg-white hover:bg-zinc-50"
+            </button>
+            <button
+              onClick={() => setShowUrlInput(false)}
+              className="h-10 w-10 flex items-center justify-center text-zinc-400 hover:text-zinc-700 transition-all border border-zinc-200 rounded-2xl bg-white hover:bg-zinc-50"
             >
-             <X className="h-4 w-4" />
-           </button>
-        </div>
-      )}
+              <X className="h-4 w-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* ── Main Input Container (Command Console Selector) ── */}
-      <div className="max-w-5xl mx-auto w-full relative group px-2">
-        <div className={cn(
-          "flex items-center gap-2 md:gap-4 p-2 md:p-3 rounded-[1.5rem] md:rounded-[3rem] transition-all duration-700 relative shadow-sm",
-          "bg-white border border-zinc-200 focus-within:ring-8 focus-within:ring-primary/5 focus-within:border-primary/30",
-          isArchitectMode && "ring-8 ring-primary/5 border-primary/30",
-          isGenerating && "animate-pulse border-primary/50"
-        )}>
-          <div className="absolute inset-x-12 -top-px h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent opacity-0 group-focus-within:opacity-100 transition-opacity" />
-          {/* Iridescent background for active state */}
-          {(isArchitectMode || isGenerating) && (
-            <div className="absolute inset-0 rounded-[4rem] bg-gradient-to-r from-primary/5 via-violet-500/10 to-primary/5 animate-pulse pointer-events-none opacity-80" />
+      {/* ── Main Input Card ── */}
+      <div className="max-w-4xl mx-auto w-full relative">
+        <motion.div
+          animate={{
+            boxShadow: isGenerating
+              ? '0 0 0 2px rgba(var(--primary-rgb), 0.3), 0 8px 32px rgba(0,0,0,0.08)'
+              : isArchitectMode
+              ? '0 0 0 2px rgba(var(--primary-rgb), 0.15), 0 4px 20px rgba(0,0,0,0.06)'
+              : '0 2px 12px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.06)',
+          }}
+          transition={{ duration: 0.3 }}
+          className={cn(
+            "rounded-2xl bg-white overflow-hidden transition-colors duration-300",
+            isArchitectMode ? "border border-primary/20" : "border border-zinc-200"
           )}
-          {/* Plus Menu */}
-          <div className="relative shrink-0">
-            <button 
-              onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)} 
-              className={cn(
-                "h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center transition-all duration-500 border border-transparent shadow-sm relative z-20 overflow-hidden group/plus", 
-                isPlusMenuOpen ? "bg-zinc-900 text-white rotate-45" : "text-zinc-500 bg-zinc-50 hover:bg-zinc-100 hover:text-zinc-950"
-              )}
-            >
-              <Plus className="h-5 w-5 relative z-10" />
-            </button>
+        >
+          {/* Generating progress bar */}
+          <AnimatePresence>
+            {isGenerating && (
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                exit={{ opacity: 0 }}
+                className="h-0.5 w-full origin-left bg-gradient-to-r from-primary via-violet-500 to-primary"
+                style={{ backgroundSize: '200% 100%' }}
+              />
+            )}
+          </AnimatePresence>
 
-            <AnimatePresence>
-              {isPlusMenuOpen && (
-                <>
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm" onClick={() => setIsPlusMenuOpen(false)} />
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.9, y: 10, filter: 'blur(10px)' }}
-                    animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
-                    exit={{ opacity: 0, scale: 0.9, y: 10, filter: 'blur(10px)' }}
-                    className="absolute left-0 bottom-full mb-6 w-72 rounded-[2.5rem] bg-white border-2 border-black/[0.08] shadow-[0_30px_70px_rgba(0,0,0,0.3)] z-50 overflow-hidden"
-                  >
-                    <header className="px-6 py-4 bg-zinc-50 border-b border-black/[0.04]">
-                       <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-400 italic">SYSTEM_PAYLOADS</span>
-                    </header>
-                    <button 
-                      onClick={() => { setIsPlusMenuOpen(false); fileInputRef.current?.click(); }} 
-                      className="w-full flex items-center gap-5 px-6 py-5 text-left hover:bg-zinc-50 transition-all group"
-                    >
-                      <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-400 group-hover:text-primary group-hover:bg-primary/10 group-hover:shadow-[0_0_15px_rgba(var(--primary-rgb),0.2)] transition-all">
-                        <Paperclip className="h-5 w-5" />
-                      </div>
-                      <span className="text-[14px] font-black text-zinc-600 group-hover:text-zinc-950 uppercase tracking-tight italic">Attach_Resource</span>
-                    </button>
-                    <button 
-                      onClick={() => { setIsPlusMenuOpen(false); setShowUrlInput(true); }} 
-                      className="w-full flex items-center gap-5 px-6 py-5 text-left hover:bg-zinc-50 transition-all group"
-                    >
-                      <div className="h-10 w-10 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-400 group-hover:text-blue-500 group-hover:bg-blue-50 group-hover:shadow-[0_0_15px_rgba(59,130,246,0.2)] transition-all">
-                        <Globe className="h-5 w-5" />
-                      </div>
-                      <span className="text-[14px] font-black text-zinc-600 group-hover:text-zinc-950 uppercase tracking-tight italic">Reverse_Engineer_URI</span>
-                    </button>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-          </div>
-
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder={isArchitectMode ? "Defina la lógica de arquitectura o el flujo sistémico..." : "Ingrese directivas de construcción o consultas técnicas..."}
-            className="flex-1 bg-transparent px-2 py-4 text-[17px] font-semibold text-zinc-900 outline-none resize-none min-h-[56px] max-h-[450px] placeholder:text-zinc-300 leading-relaxed selection:bg-primary/20 custom-scrollbar"
-            disabled={isGenerating}
-          />
-
-          <div className="flex items-center gap-1.5 md:gap-2 pr-2 md:pr-3">
-            <button 
-               onClick={toggleListening}
-               className={cn(
-                 "h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center transition-all active:scale-90 border border-transparent",
-                 isListening ? "bg-rose-50 text-rose-600 animate-pulse ring-4 ring-rose-100 border-rose-200" : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50"
-               )}
-            >
-              <Mic className="h-5 w-5" />
-            </button>
-            
-            <div className="w-px h-5 bg-zinc-200 mx-1 md:mx-2 hidden xs:block" />
-
-            {isGenerating ? (
-              <button 
-                onClick={onStop} 
-                className="h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center bg-rose-500 text-white shadow-lg shadow-rose-200 hover:brightness-110 transition-all active:scale-95 group/stop"
-              >
-                <X className="h-5 w-5 group-hover/stop:rotate-90 transition-transform" />
-              </button>
-            ) : (
-              <button 
-                onClick={() => onSend()} 
-                disabled={!input.trim() && !pendingImage && !pendingUrl && !pendingContext} 
+          {/* Textarea row */}
+          <div className="flex items-end gap-2 px-3 pt-3 pb-1">
+            {/* Plus / Attach button */}
+            <div className="relative shrink-0 self-end mb-1.5">
+              <button
+                onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
                 className={cn(
-                  "h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center transition-all duration-500 shadow-lg relative overflow-hidden group/send",
-                  isArchitectMode 
-                    ? "bg-primary text-white hover:brightness-110 shadow-primary/20" 
-                    : "bg-zinc-900 text-white hover:bg-zinc-950 shadow-zinc-200"
+                  "h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-300 border",
+                  isPlusMenuOpen
+                    ? "bg-zinc-900 text-white border-zinc-900 rotate-45"
+                    : "text-zinc-400 bg-zinc-50 border-zinc-200 hover:bg-zinc-100 hover:text-zinc-700 hover:border-zinc-300"
+                )}
+                aria-label="Adjuntar archivo o URL"
+              >
+                <Plus className="h-4 w-4" />
+              </button>
+
+              <AnimatePresence>
+                {isPlusMenuOpen && (
+                  <>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsPlusMenuOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.92, y: 8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.92, y: 8 }}
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.35 }}
+                      className="absolute left-0 bottom-full mb-3 w-64 rounded-2xl bg-white border border-zinc-200 shadow-xl z-50 overflow-hidden"
+                    >
+                      <div className="px-4 py-2.5 border-b border-zinc-100">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Adjuntar</span>
+                      </div>
+                      <button
+                        onClick={() => { setIsPlusMenuOpen(false); fileInputRef.current?.click(); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-50 transition-colors group"
+                      >
+                        <div className="h-8 w-8 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                          <Paperclip className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-[13px] font-semibold text-zinc-800">Archivo</p>
+                          <p className="text-[11px] text-zinc-400">txt, js, ts, css, json...</p>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => { setIsPlusMenuOpen(false); setShowUrlInput(true); }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-zinc-50 transition-colors group"
+                      >
+                        <div className="h-8 w-8 rounded-xl bg-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-blue-50 group-hover:text-blue-500 transition-colors">
+                          <Globe className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-[13px] font-semibold text-zinc-800">URL</p>
+                          <p className="text-[11px] text-zinc-400">Importar sitio web</p>
+                        </div>
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Textarea */}
+            <textarea
+              ref={inputRef}
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder={
+                isArchitectMode
+                  ? "Describe la arquitectura o flujo del sistema..."
+                  : "Ingresa tus directivas de construcción..."
+              }
+              className="flex-1 bg-transparent py-2 text-[15px] font-medium text-zinc-900 outline-none resize-none min-h-[44px] max-h-[280px] placeholder:text-zinc-400 leading-relaxed selection:bg-primary/20 custom-scrollbar"
+              disabled={isGenerating}
+              rows={1}
+            />
+
+            {/* Right action buttons */}
+            <div className="flex items-center gap-1.5 shrink-0 self-end mb-1.5">
+              {/* Mic */}
+              <button
+                onClick={toggleListening}
+                aria-label="Dictado por voz"
+                className={cn(
+                  "h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-300 border",
+                  isListening
+                    ? "bg-rose-50 text-rose-500 border-rose-200 animate-pulse ring-2 ring-rose-100"
+                    : "text-zinc-400 hover:text-zinc-700 border-transparent hover:bg-zinc-50 hover:border-zinc-200"
                 )}
               >
-                <ArrowUp className="h-5 w-5 relative z-10 group-hover/send:-translate-y-0.5 transition-transform" />
+                <Mic className="h-4 w-4" />
               </button>
-            )}
+
+              {/* Send / Stop */}
+              {isGenerating ? (
+                <button
+                  onClick={onStop}
+                  aria-label="Detener generación"
+                  className="h-9 w-9 rounded-xl flex items-center justify-center bg-rose-500 hover:bg-rose-600 text-white shadow-md shadow-rose-200 active:scale-95 transition-all"
+                >
+                  <Square className="h-3.5 w-3.5 fill-white" />
+                </button>
+              ) : (
+                <motion.button
+                  onClick={() => onSend()}
+                  disabled={!hasContent}
+                  whileTap={{ scale: 0.92 }}
+                  aria-label="Enviar mensaje"
+                  className={cn(
+                    "h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md relative overflow-hidden",
+                    hasContent
+                      ? isArchitectMode
+                        ? "bg-primary text-white shadow-primary/25 hover:brightness-110"
+                        : "bg-zinc-900 text-white shadow-zinc-300 hover:bg-zinc-700"
+                      : "bg-zinc-100 text-zinc-300 shadow-none cursor-not-allowed"
+                  )}
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </motion.button>
+              )}
+            </div>
           </div>
-        </div>
+
+          {/* Bottom toolbar row */}
+          <div className="flex items-center justify-between px-3 py-2 border-t border-zinc-100/80">
+            {/* Mode selector (PLAN / BUILD) */}
+            <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-xl">
+              <button
+                onClick={() => !isArchitectMode && onArchitectToggle()}
+                className={cn(
+                  "relative flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                  isArchitectMode
+                    ? "bg-white text-primary shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-600"
+                )}
+              >
+                <Shield className="h-3 w-3" />
+                PLAN
+              </button>
+              <button
+                onClick={() => isArchitectMode && onArchitectToggle()}
+                className={cn(
+                  "relative flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                  !isArchitectMode
+                    ? "bg-white text-zinc-900 shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-600"
+                )}
+              >
+                <ArrowUp className="h-3 w-3" />
+                BUILD
+              </button>
+            </div>
+
+            {/* Right: Neural status + Model selector */}
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
+                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">NEURAL_OK</span>
+              </div>
+              <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Hint */}
+        <p className="text-center text-[10px] text-zinc-400 mt-2 font-medium">
+          Enter para enviar · Shift+Enter para nueva línea
+        </p>
       </div>
-      <input 
-        ref={fileInputRef} 
-        type="file" 
-        className="hidden" 
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
         accept=".txt,.js,.ts,.tsx,.css,.html,.json,.md,.sql"
-        onChange={handleFileChange} 
+        onChange={handleFileChange}
         aria-hidden="true"
       />
     </footer>

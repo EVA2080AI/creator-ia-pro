@@ -1,5 +1,10 @@
-import { serve } from "std/http/server";
-import { createClient } from "supabase";
+// @ts-nocheck
+// ──────────────────────────────────────────────────────────────────────────────
+// Supabase Edge Function — Deno Runtime (NOT Node.js)
+// This file uses Deno-native imports. TypeScript errors from the Node engine
+// are expected and suppressed with @ts-nocheck. Deploy with: supabase deploy
+// ──────────────────────────────────────────────────────────────────────────────
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -60,7 +65,7 @@ async function verifySignature(body: string, signature: string | null, secret: s
 /**
  * Bold API Webhook (Event Receiver)
  */
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   
   try {
