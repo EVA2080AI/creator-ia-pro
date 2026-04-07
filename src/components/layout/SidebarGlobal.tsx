@@ -51,7 +51,6 @@ const NAV_MAIN: NavItemDef[] = [
   { path: '/chat',         label: 'Genesis IA',    icon: Brain,          minTier: 'starter' },
   { path: '/code',         label: 'Editor',        icon: Code2,          minTier: 'starter' },
   { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'creator' },
-  { path: '/hub',          label: 'Templates',     icon: Sparkles,       minTier: 'creator' },
   { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'creator' },
   { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     minTier: 'free' },
   { path: '/antigravity',  label: 'Antigravity',   icon: Bot,            minTier: 'pymes' },
