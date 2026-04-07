@@ -117,15 +117,15 @@ serve(async (req: Request) => {
 
       // 2. Map packId to credit amount
       const creditMap: Record<string, number> = {
-        "pack_200": 200,
+        // Recargas puntuales
+        "pack_200":  200,
         "pack_1000": 1000,
         "pack_2000": 2000,
-        "starter": 500,
-        "creator": 1200,
-        "pymes": 4000,
-        "pack_100": 100,
-        "pack_500": 500,
-        "pack_2500": 2500
+        // Planes mensuales (IDs actuales de Pricing.tsx)
+        "creador":    1000,
+        "pro":        3000,
+        "agencia":    8000,
+        "pyme":       20000,
       };
 
       const creditsToAdd = creditMap[packId] || 0;
@@ -146,7 +146,7 @@ serve(async (req: Request) => {
         }
 
         // 3.5. Update subscription tier if applicable
-        if (["starter", "creator", "pymes"].includes(packId)) {
+        if (["creador", "pro", "agencia", "pyme"].includes(packId)) {
           console.log(`[bold-webhook] Upgrading user ${tx.user_id} tier to: ${packId}`);
           await supabaseClient
             .from("profiles")

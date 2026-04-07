@@ -21,117 +21,163 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 const PLANS = [
   {
-    key: "basico" as const,
-    name: "Aether Protocol",
+    key: "creador" as const,
+    name: "Creador",
     price: 149900,
     priceLabel: "$149.900",
     credits: 1000,
-    creditsLabel: "1.000 Neural Cycles/mes",
-    description: "Cimiente industrial para arquitectos individuales.",
+    creditsLabel: "1.000 créditos al mes",
+    description: "Todo lo que necesitas para empezar a crear contenido con IA.",
     color: "#94A3B8",
     gradient: "from-zinc-500/10 to-zinc-500/5",
-    border: "border-zinc-500/20",
+    border: "border-zinc-200",
     icon: Sparkles,
     badge: null,
-    category: "ECO",
     features: [
-      { label: "1.000 Neural Cycles de Inteligencia", highlight: true },
-      { label: "Sovereign Engineering IDE", highlight: true },
-      { label: "Acceso a Modelos ECO Unlimit", highlight: false },
-      { label: "Soporte Técnico de Relay", highlight: false },
+      { label: "1.000 créditos mensuales", highlight: true },
+      { label: "Studio creativo con IA", highlight: true },
+      { label: "Acceso a modelos rápidos (ilimitado)", highlight: false },
+      { label: "Soporte por chat", highlight: false },
     ],
   },
   {
-    key: "profesional" as const,
-    name: "Nodal Architect",
+    key: "pro" as const,
+    name: "Pro",
     price: 349900,
     priceLabel: "$349.900",
     credits: 3000,
-    creditsLabel: "3.000 Neural Cycles/mes",
-    description: "Orquestación de alta fidelidad y dominios soberanos.",
+    creditsLabel: "3.000 créditos al mes",
+    description: "Para creadores que publican a diario y quieren más potencia.",
     color: "#6366F1",
     gradient: "from-indigo-500/15 to-indigo-500/5",
     border: "border-indigo-500/20",
     glow: "rgba(99, 102, 241, 0.15)",
     icon: Layout,
-    badge: "Más Popular",
-    category: "PRO",
+    badge: "Más popular",
     features: [
-      { label: "3.000 Neural Cycles de Inteligencia", highlight: true },
-      { label: "Protocolos de Síntesis PRO", highlight: true },
-      { label: "Priority Build Pipeline v21.0", highlight: true },
-      { label: "Arquitectura Multi-Agente Base", highlight: false },
-      { label: "Engineering Lead Support", highlight: false },
+      { label: "3.000 créditos mensuales", highlight: true },
+      { label: "Modelos premium de IA (GPT-4, Claude)", highlight: true },
+      { label: "Generación prioritaria (más rápido)", highlight: true },
+      { label: "Múltiples chats de IA simultáneos", highlight: false },
+      { label: "Soporte prioritario", highlight: false },
     ],
   },
   {
-    key: "empresarial" as const,
-    name: "Sovereign Swarm",
+    key: "agencia" as const,
+    name: "Agencia",
     price: 699900,
     priceLabel: "$699.900",
     credits: 8000,
-    creditsLabel: "8.000 Neural Cycles/mes",
-    description: "Soberanía total para flotas de ingeniería autónoma.",
+    creditsLabel: "8.000 créditos al mes",
+    description: "Ideal para agencias y equipos que crean contenido en escala.",
     color: "#F59E0B",
     gradient: "from-amber-500/20 to-amber-500/5",
     border: "border-amber-500/30",
     glow: "rgba(245, 158, 11, 0.25)",
     icon: Crown,
-    badge: "Acceso Total",
-    category: "ULTRA",
+    badge: "Acceso total",
     features: [
-      { label: "8.000 Neural Cycles Mensuales", highlight: true },
-      { label: "DeepBuild v21.0 Orchestra", highlight: true },
-      { label: "Soberanía de Datos Enterprise", highlight: true },
-      { label: "Soporte de Relay Prioritario 24/7", highlight: true },
-      { label: "Facturación Industrial Directa", highlight: false },
+      { label: "8.000 créditos mensuales", highlight: true },
+      { label: "Suite completa: texto, imágenes y código", highlight: true },
+      { label: "Acceso a todos los modelos de IA", highlight: true },
+      { label: "Soporte prioritario 24/7", highlight: true },
+      { label: "Facturación directa", highlight: false },
+    ],
+  },
+  {
+    key: "pyme" as const,
+    name: "Pyme",
+    price: 1499900,
+    priceLabel: "$1.499.900",
+    credits: 20000,
+    creditsLabel: "20.000 créditos al mes",
+    description: "Para negocios que necesitan IA a escala sin límites.",
+    color: "#10B981",
+    gradient: "from-emerald-500/20 to-emerald-500/5",
+    border: "border-emerald-500/30",
+    glow: "rgba(16, 185, 129, 0.2)",
+    icon: Rocket,
+    badge: "Para negocios",
+    features: [
+      { label: "20.000 créditos mensuales", highlight: true },
+      { label: "Todo lo del plan Agencia", highlight: true },
+      { label: "Usuarios adicionales del equipo", highlight: true },
+      { label: "Integraciones y API disponibles", highlight: true },
+      { label: "Gerente de cuenta dedicado", highlight: false },
+    ],
+  },
+  {
+    key: "empresarial" as const,
+    name: "Empresarial",
+    price: 0,
+    priceLabel: "A medida",
+    credits: 0,
+    creditsLabel: "Créditos personalizados",
+    description: "Solución personalizada para grandes organizaciones.",
+    color: "#A855F7",
+    gradient: "from-purple-500/10 to-purple-500/5",
+    border: "border-purple-500/20",
+    glow: "rgba(168, 85, 247, 0.15)",
+    icon: Network,
+    badge: null,
+    isContact: true,
+    features: [
+      { label: "Volumen de créditos a la medida", highlight: true },
+      { label: "Infraestructura dedicada", highlight: true },
+      { label: "SLA personalizado y soporte enterprise", highlight: true },
+      { label: "Integración con tus herramientas actuales", highlight: false },
+      { label: "Facturación corporativa y NIT", highlight: false },
     ],
   },
 ];
 
 const FAQS = [
   {
-    question: "¿Qué es un Neural Cycle y cómo se cuantifica?",
-    answer: "Los Neural Cycles son la unidad de cómputo soberano en Génesis. Se consumen basados en la densidad lógica de la tarea y el modelo de IA seleccionado (ECO, PRO o ULTRA). Un ciclo equivale a una interacción de orquestación estándar."
+    question: "¿Qué es un crédito y cómo se usa?",
+    answer: "Un crédito es la unidad de medida de Creator IA Pro. Cada vez que generas texto, imágenes o código, el sistema descuenta una cantidad según la tarea y el modelo que elijas. Los modelos más rápidos consumen menos; los más avanzados (como GPT-4 o Claude) consumen un poco más."
   },
   {
-    question: "¿Existe latencia en la renovación de unidades?",
-    answer: "Los ciclos integrados en tu protocolo mensual se sitúan en el ledger al inicio de cada ciclo. Las 'Inyecciones de Emergencia' (Top-ups) se acreditan de manera instantánea y no tienen fecha de caducidad."
+    question: "¿Cuándo se renuevan mis créditos?",
+    answer: "Los créditos de tu plan mensual se renuevan automáticamente al inicio de cada mes. Si compras una recarga adicional, esos créditos se acreditan de inmediato y no vencen nunca."
   },
   {
-    question: "¿Cómo se gestiona el abandono del protocolo?",
-    answer: "La soberanía absoluta significa que no hay contratos. Puedes degradar o suspender tu instancia desde 'Settings' en cualquier momento sin penalizaciones."
+    question: "¿Puedo cancelar cuando quiera?",
+    answer: "Sí, sin compromisos ni penalizaciones. Puedes cancelar o cambiar de plan desde Configuración en cualquier momento. No hay contratos mínimos."
   },
   {
-    question: "¿Qué sucede al agotar el saldo de ciclos?",
-    answer: "El sistema entrará en 'Read-Only Mode' para preservar la integridad de tu código. Puedes reanudar la síntesis mediante una recarga inmediata via Bold.co."
+    question: "¿Qué pasa si se me acaban los créditos?",
+    answer: "Tu cuenta entra en modo de sólo lectura para proteger tu trabajo. Puedes reactivarla comprando una recarga de créditos en cualquier momento, que se aplica al instante vía Bold.co."
+  },
+  {
+    question: "¿Cómo funciona el pago con Bold?",
+    answer: "Bold.co es la plataforma de pagos líder en Colombia. Puedes pagar con tarjeta débito, crédito o PSE en pesos colombianos (COP), sin necesidad de dólares ni cuentas internacionales."
   }
 ];
 
 const COMPARISON_DATA = [
-  { feature: "Costo de Inferencia", creator: "Optimización por Protocolo", others: "Margen de Revendedor Fijo" },
-  { feature: "Flexibilidad de Modelos", creator: "Hot-Swap (Aether v9.0)", others: "Lock-in de Proveedor" },
-  { feature: "IDE Studio Industrial", creator: "Soberano (Incluido)", others: "Suscripción Add-on" },
-  { feature: "Soberanía Financiera", creator: "Bold Local (Latam Focus)", others: "Gateway Internatl. (USD)" },
+  { feature: "Costo de uso", creator: "Pago por uso real", others: "Tarifa fija aunque no uses" },
+  { feature: "Modelos de IA", creator: "Cambia con 1 clic", others: "Bloqueado a un proveedor" },
+  { feature: "Studio creativo", creator: "Incluido", others: "Suscripción adicional" },
+  { feature: "Forma de pago", creator: "Bold en COP (local)", others: "Dólares + tarifa internacional" },
 ];
 
 const TESTIMONIALS = [
   {
     name: "Carlos Rivera",
-    role: "Architect @ LogicFlow",
-    content: "La integración con Bold en COP es un cambio de juego para desarrolladores en Latam. Puedo escalar mi infraestructura de IA sin fricción bancaria.",
+    role: "Creador de contenido digital",
+    content: "Pagar en COP con Bold fue un alivio total. Ya no necesito tarjeta en dólares para usar IA de calidad. Creo el doble de contenido en la mitad del tiempo.",
     avatar: "https://i.pravatar.cc/150?u=carlos",
   },
   {
     name: "Elena Gómez",
-    role: "CTO @ TechNova",
-    content: "El modo ULTRA es el estándar de oro. Génesis no solo genera código; sintetiza arquitecturas complejas que están listas para producción en segundos.",
+    role: "Diseñadora y directora creativa",
+    content: "El plan Pro vale cada peso. Genero piezas para mis clientes en minutos y los modelos de imagen son increíbles. Mis entregas mejoraron notablemente.",
     avatar: "https://i.pravatar.cc/150?u=elena",
   },
   {
     name: "Mario Duarte",
-    role: "Sovereign Engineer",
-    content: "Los ciclos de inyección sin vencimiento me permiten gestionar mi presupuesto con precisión quirúrgica. Es la herramienta definitiva de soberanía.",
+    role: "Fundador de agencia de marketing",
+    content: "Con el plan Agencia, todo mi equipo trabaja en el mismo Studio. Generamos campañas completas (textos + imágenes + estrategia) en horas, no días.",
     avatar: "https://i.pravatar.cc/150?u=mario",
   },
 ];
@@ -206,8 +252,8 @@ export default function Pricing() {
   return (
     <>
       <Helmet>
-        <title>Precios | Creator IA Pro</title>
-        <meta name="description" content="Esquema de créditos industriales. Paga por lo que usas con la seguridad de Bold.co." />
+        <title>Planes y Precios | Creator IA Pro</title>
+        <meta name="description" content="Crea contenido increíble con IA. Elige el plan ideal para ti y paga en pesos colombianos con Bold." />
       </Helmet>
 
       <div className="h-full bg-background selection:bg-primary/15 relative overflow-x-hidden">
@@ -224,11 +270,12 @@ export default function Pricing() {
               className="max-w-5xl mx-auto text-center"
             >
               <h1 className="text-6xl sm:text-8xl md:text-[8rem] font-black tracking-[-0.05em] uppercase font-display leading-[0.85] mb-8 text-zinc-900">
-                Paga por la<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-b from-primary to-purple-300 italic">Inteligencia.</span>
+                Crea más,<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-b from-primary to-purple-300 italic">paga menos.</span>
               </h1>
               <p className="max-w-xl mx-auto text-lg text-zinc-400 leading-relaxed font-medium mb-12">
-                Infraestructura industrial para desarrolladores soberanos. Gestiona tu presupuesto con créditos de alta fidelidad respaldados por la seguridad de <span className="text-zinc-900 border-b-2 border-primary/20">Bold.co</span>.
+                Crea contenido de calidad profesional con la IA más avanzada. Paga sólo lo que usas, cuando lo usas, en pesos colombianos con{" "}
+                <span className="text-zinc-900 border-b-2 border-primary/20">Bold.co</span>.
               </p>
 
               {/* Credit Bar Illustrative */}
@@ -249,33 +296,19 @@ export default function Pricing() {
             </motion.div>
           </section>
 
-          {/* ── Annual Toggle ──────────────────────────────────────────────── */}
-          <div className="flex items-center justify-center gap-6 mb-16">
-            <span className={cn("text-xs font-black uppercase tracking-widest transition-opacity", !annual ? "opacity-100" : "opacity-30")}>Mensual</span>
-            <button
-              onClick={() => setAnnual(!annual)}
-              className="relative w-14 h-7 rounded-full bg-zinc-100 border border-zinc-200 p-1 flex items-center transition-all"
-            >
-              <motion.div 
-                animate={{ x: annual ? 28 : 0 }}
-                className="w-5 h-5 rounded-full bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]" 
-              />
-            </button>
-            <span className={cn("text-xs font-black uppercase tracking-widest transition-opacity flex items-center gap-2", annual ? "opacity-100" : "opacity-30")}>
-              Anual 
-              <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] border border-emerald-500/30">
-                -20% OFF
-              </span>
-            </span>
+          {/* Annual badge — coming soon */}
+          <div className="flex items-center justify-center gap-4 mb-16">
+            <span className="text-xs font-black uppercase tracking-widest text-zinc-400">Facturación mensual</span>
+            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px] font-bold uppercase tracking-wide">Anual con descuento — Próximamente</span>
           </div>
 
-          {/* ── Plans Grid ─────────────────────────────────────────────────── */}
           <section className="px-6 mb-32">
-            <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="max-w-7xl mx-auto grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
               {PLANS.map((plan, idx) => {
                 const isPopular = plan.badge === "Más popular";
-                const displayPrice = annual ? Math.round(plan.price * 0.8) : plan.price;
+                const displayPrice = plan.price;
                 const Icon = plan.icon;
+                const isContact = 'isContact' in plan && plan.isContact;
                 
                 return (
                   <motion.div
@@ -283,84 +316,103 @@ export default function Pricing() {
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1 }}
-                    whileHover={{ y: -8 }}
+                    transition={{ delay: idx * 0.08 }}
+                    whileHover={{ y: -6 }}
                     className={cn(
-                      "relative group rounded-[2.5rem] border p-8 flex flex-col transition-all duration-500 overflow-hidden",
+                      "relative group rounded-[2rem] border p-6 flex flex-col transition-all duration-500 overflow-hidden",
                       isPopular 
-                        ? "bg-zinc-50 border-primary/40 shadow-[0_30px_100px_-20px_rgba(168,85,247,0.15)]" 
+                        ? "bg-zinc-50 border-primary/40 shadow-[0_20px_80px_-15px_rgba(168,85,247,0.15)]" 
+                        : isContact
+                        ? "bg-gradient-to-br from-primary/5 to-purple-500/5 border-primary/20"
                         : "bg-zinc-50 border-zinc-200"
                     )}
                   >
                     <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                      style={{ background: `radial-gradient(circle at top right, ${plan.glow || 'rgba(255,255,255,0.05)'}, transparent 70%)` }} />
+                      style={{ background: `radial-gradient(circle at top right, ${'glow' in plan ? plan.glow : 'rgba(255,255,255,0.05)'}, transparent 70%)` }} />
 
                     {plan.badge && (
-                      <div className="absolute top-4 right-6 px-3 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest">
+                      <div className="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-primary text-white text-[9px] font-black uppercase tracking-widest">
                         {plan.badge}
                       </div>
                     )}
 
-                    <div className="mb-8">
-                      <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center mb-6 border border-zinc-200 group-hover:border-zinc-300 transition-colors">
-                        <Icon className="h-6 w-6" style={{ color: plan.color }} />
+                    <div className="mb-6">
+                      <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center mb-5 border border-zinc-200 group-hover:border-zinc-300 transition-colors">
+                        <Icon className="h-5 w-5" style={{ color: plan.color }} />
                       </div>
-                      <h3 className="text-2xl font-black uppercase font-display mb-1">{plan.name}</h3>
+                      <h3 className="text-xl font-black uppercase font-display mb-1">{plan.name}</h3>
                       <p className="text-zinc-400 text-xs leading-relaxed">{plan.description}</p>
                     </div>
 
-                    <div className="py-10 relative overflow-hidden">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-4xl font-black font-display tracking-tighter">
-                          ${displayPrice.toLocaleString('es-CO')}
-                        </span>
-                        <span className="text-zinc-300 text-xs font-bold uppercase tracking-widest">COP</span>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2 py-1.5 px-3 rounded-xl bg-zinc-100 border border-zinc-200 w-fit">
-                        <Coins className="h-3.5 w-3.5 text-primary" />
-                        <span className="text-xs font-black" style={{ color: plan.color }}>{plan.creditsLabel}</span>
-                      </div>
+                    <div className="py-6 relative">
+                      {isContact ? (
+                        <div>
+                          <span className="text-3xl font-black font-display tracking-tighter">A medida</span>
+                          <p className="text-xs text-zinc-400 mt-1">Precio según tu volumen</p>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-3xl font-black font-display tracking-tighter">
+                              ${displayPrice.toLocaleString('es-CO')}
+                            </span>
+                            <span className="text-zinc-300 text-xs font-bold uppercase tracking-widest">COP/mes</span>
+                          </div>
+                          <div className="mt-2 flex items-center gap-2 py-1 px-2.5 rounded-lg bg-zinc-100 border border-zinc-200 w-fit">
+                            <Coins className="h-3 w-3 text-primary" />
+                            <span className="text-[11px] font-bold" style={{ color: plan.color }}>{plan.creditsLabel}</span>
+                          </div>
+                        </>
+                      )}
                     </div>
 
-                    <ul className="space-y-4 mb-10 flex-1">
+                    <ul className="space-y-3 mb-8 flex-1">
                       {plan.features.map(f => (
-                        <li key={f.label} className="flex gap-3 items-start">
-                          <Check className={cn("h-4 w-4 shrink-0 mt-0.5", f.highlight ? "text-primary" : "text-zinc-300")} />
-                          <span className={cn("text-xs leading-relaxed", f.highlight ? "text-zinc-700 font-bold" : "text-zinc-400")}>
+                        <li key={f.label} className="flex gap-2.5 items-start">
+                          <Check className={cn("h-3.5 w-3.5 shrink-0 mt-0.5", f.highlight ? "text-primary" : "text-zinc-300")} />
+                          <span className={cn("text-xs leading-relaxed", f.highlight ? "text-zinc-700 font-semibold" : "text-zinc-400")}>
                             {f.label}
                           </span>
                         </li>
                       ))}
                     </ul>
 
-                    <button
-                      onClick={() => handleBoldAction(plan.key)}
-                      disabled={loadingAction === plan.key}
-                      className={cn(
-                        "w-full py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all relative overflow-hidden group/btn",
-                        isPopular ? "bg-primary text-white" : "bg-zinc-100 text-zinc-900 border border-zinc-200 hover:bg-zinc-100"
-                      )}
-                    >
-                      {loadingAction === plan.key ? (
-                        <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                      ) : (
-                        <span className="flex items-center justify-center gap-2">
-                          Empezar Ahora <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                        </span>
-                      )}
-                    </button>
+                    {isContact ? (
+                      <a
+                        href="mailto:hola@creator-ia.com?subject=Plan Empresarial Creator IA Pro"
+                        className="w-full py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all bg-primary text-white hover:bg-primary/90 flex items-center justify-center gap-2"
+                      >
+                        Contactar representante <ArrowRight className="h-3.5 w-3.5" />
+                      </a>
+                    ) : (
+                      <button
+                        onClick={() => handleBoldAction(plan.key)}
+                        disabled={loadingAction === plan.key}
+                        className={cn(
+                          "w-full py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden group/btn",
+                          isPopular ? "bg-primary text-white hover:bg-primary/90" : "bg-zinc-100 text-zinc-900 border border-zinc-200 hover:bg-zinc-200"
+                        )}
+                      >
+                        {loadingAction === plan.key ? (
+                          <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                        ) : (
+                          <span className="flex items-center justify-center gap-2">
+                            Empezar ahora <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                          </span>
+                        )}
+                      </button>
+                    )}
                   </motion.div>
                 );
               })}
             </div>
           </section>
 
-          {/* ── Comparación con la Industria ───────────────────────────────── */}
           <section className="px-6 mb-40">
             <SectionHeader 
-              badge="Eficiencia Industrial" 
-              title={<>Ahorro <span className="text-primary">Real.</span></>}
-              subtitle="Nuestro modelo distribuido elimina los costos fijos de servidores, pasando el ahorro directamente a tu saldo."
+              badge="Por qué elegirnos" 
+              title={<>Ventajas <span className="text-primary">reales.</span></>}
+              subtitle="Diseñado para creadores latinoamericanos. Sin dólares, sin costos ocultos."
             />
             
             <div className="max-w-4xl mx-auto rounded-[3rem] bg-zinc-50 border border-zinc-200 p-4 sm:p-12 overflow-hidden relative">
@@ -394,7 +446,7 @@ export default function Pricing() {
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
               
               <Zap className="h-10 w-10 text-primary mx-auto mb-6" />
-              <h2 className="text-3xl font-black uppercase font-display mb-8">Calculadora de Consumo</h2>
+              <h2 className="text-3xl font-black uppercase font-display mb-8">¿Cuántos créditos necesito?</h2>
               
               <div className="mb-12">
                 <div className="flex justify-between items-center mb-6">
@@ -411,8 +463,8 @@ export default function Pricing() {
                   className="w-full h-1.5 bg-zinc-100 rounded-full appearance-none cursor-pointer accent-primary"
                 />
                 <div className="flex justify-between mt-4 text-[10px] font-bold text-zinc-300 uppercase tracking-widest">
-                  <span>Light (Básico)</span>
-                  <span>Industrial (Alto)</span>
+                  <span>Uso casual</span>
+                  <span>Uso profesional</span>
                 </div>
               </div>
 
@@ -420,17 +472,17 @@ export default function Pricing() {
                 <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200">
                   <Globe className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
                   <div className="text-lg font-black text-zinc-700">{(estimateSlider / 10).toFixed(0)}</div>
-                  <div className="text-[9px] font-black uppercase text-zinc-400">Tokens ECO</div>
+                  <div className="text-[9px] font-black uppercase text-zinc-400">Posts de texto</div>
                 </div>
                 <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200">
                   <Cpu className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
                   <div className="text-lg font-black text-zinc-700">{(estimateSlider / 100).toFixed(0)}</div>
-                  <div className="text-[9px] font-black uppercase text-zinc-400">Prompts ULTRA</div>
+                  <div className="text-[9px] font-black uppercase text-zinc-400">Imágenes generadas</div>
                 </div>
                 <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200 col-span-2 md:col-span-1">
                   <Code2 className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
                   <div className="text-lg font-black text-zinc-700">{(estimateSlider / 50).toFixed(0)}</div>
-                  <div className="text-[9px] font-black uppercase text-zinc-400">UI Screens</div>
+                  <div className="text-[9px] font-black uppercase text-zinc-400">Guiones de video</div>
                 </div>
               </div>
 
@@ -438,7 +490,7 @@ export default function Pricing() {
                 onClick={() => document.getElementById('credit-packs-section')?.scrollIntoView({ behavior: 'smooth' })}
                 className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary/90 hover:scale-105 transition-transform font-bold"
               >
-                Recargar Créditos Ahora <Bolt className="h-4 w-4 fill-current" />
+                Ver recargas de créditos <Bolt className="h-4 w-4 fill-current" />
               </button>
             </div>
           </section>
@@ -447,10 +499,10 @@ export default function Pricing() {
           {CREDIT_PACKS && CREDIT_PACKS.length > 0 && (
             <section id="credit-packs-section" className="px-6 mb-40">
               <SectionHeader 
-                badge="Recargas Top-up" 
-                title="Créditos Extra."
-                subtitle="Sin vencimiento. Úsalos cuando los necesites con la flexibilidad total de Bold.co."
-              />
+              badge="Recargas adicionales" 
+              title="Créditos extra."
+              subtitle="Sin vencimiento. Cómpralos cuando los necesites y úsalos a tu ritmo."
+            />
               <div className="max-w-5xl mx-auto grid sm:grid-cols-3 gap-6">
                 {CREDIT_PACKS.map((pack) => {
                   const isLoadingThis = loadingAction === pack.id;
@@ -496,9 +548,9 @@ export default function Pricing() {
           {/* ── Testimonios ────────────────────────────────────────────────── */}
           <section className="px-6 mb-40">
             <SectionHeader 
-              badge="Proof of Quality" 
+              badge="Lo dicen nuestros creadores" 
               title="Testimonios."
-              subtitle="Líderes de industria que han industrializado sus flujos creativos con Creator IA Pro."
+              subtitle="Personas reales que ya crean contenido increíble con Creator IA Pro."
             />
             <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
               {TESTIMONIALS.map((t, i) => (
@@ -530,8 +582,8 @@ export default function Pricing() {
           <section className="px-6 mb-40">
             <SectionHeader 
               badge="FAQ" 
-              title={<>Preguntas <span className="text-primary italic">Frecuentes.</span></>}
-              subtitle="Todo lo que necesitas saber sobre el motor económico de Creator IA Pro."
+              title={<>Preguntas <span className="text-primary italic">frecuentes.</span></>}
+              subtitle="Todo lo que necesitas saber antes de empezar."
             />
             <div className="max-w-3xl mx-auto">
               <Accordion type="single" collapsible className="w-full space-y-4">
@@ -549,13 +601,12 @@ export default function Pricing() {
             </div>
           </section>
 
-          {/* ── Trust Grid ─────────────────────────────────────────────────── */}
           <section className="px-6 max-w-5xl mx-auto mb-20 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: Shield, label: "Seguridad Bold" },
-              { icon: Lock, label: "AES-256 Encryption" },
-              { icon: TrendingUp, label: "99.9% Uptime" },
-              { icon: MessageSquare, label: "Soporte Latam" },
+              { icon: Shield, label: "Pago seguro con Bold" },
+              { icon: Lock, label: "Datos protegidos" },
+              { icon: TrendingUp, label: "99.9% disponibilidad" },
+              { icon: MessageSquare, label: "Soporte en español" },
             ].map(t => (
               <div key={t.label} className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-200 flex flex-col items-center gap-4 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all cursor-default group">
                 <t.icon className="h-6 w-6 group-hover:text-primary transition-colors" />

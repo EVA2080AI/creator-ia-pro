@@ -32,14 +32,15 @@ serve(async (req: Request) => {
 
     // ─── Server-Side Price Verification (Expert-Level Security) ───
     const PRICE_MAP: Record<string, number> = {
-      // Monthly Plans
-      'basico':      149900,
-      'profesional': 349900,
-      'empresarial': 699900,
-      // Refill Packs
-      'pack_200':     25000,
-      'pack_1000':    90000,
-      'pack_2000':   150000,
+      // Planes mensuales
+      'creador':     149900,
+      'pro':         349900,
+      'agencia':     699900,
+      'pyme':       1499900,
+      // Recargas puntuales
+      'pack_200':    25000,
+      'pack_1000':   90000,
+      'pack_2000':  150000,
     };
 
     const validatedAmount = PRICE_MAP[packId];
