@@ -121,20 +121,21 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
       initial={{ x: isMobile ? 0 : -W }}
       transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
       className={cn(
-        "relative z-20 h-screen flex flex-col bg-white shrink-0",
-        isMobile ? "w-full border-r-0" : "hidden md:flex border-r border-zinc-200/60 shadow-[10px_0_40px_-10px_rgba(0,0,0,0.03)] bg-white/95 backdrop-blur-xl"
+        "relative z-20 h-screen flex flex-col shrink-0 overflow-hidden",
+        isMobile ? "w-full bg-white border-r-0" : "hidden md:flex border-r border-zinc-100 bg-white/60 backdrop-blur-md shadow-[1px_0_20px_rgba(0,0,0,0.02)]"
       )}
       style={{ width: isMobile ? 240 : W }}
       aria-label="Navegación principal"
     >
-      <div className="flex h-[56px] items-center gap-3 px-3 border-b border-zinc-100 shrink-0 uppercase tracking-tighter">
+      <div className="flex h-[60px] items-center gap-3 px-3 shrink-0 uppercase tracking-tighter relative">
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-200/50 to-transparent" />
         <AnimatePresence mode="wait">
           {(globalExpanded || isMobile) ? (
-            <motion.div key="expanded" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 min-w-0">
+            <motion.div key="expanded" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 min-w-0 pl-1">
               <Logo size="sm" showText onClick={() => navigate('/dashboard')} />
             </motion.div>
           ) : (
-            <motion.div key="collapsed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+            <motion.div key="collapsed" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="w-full flex justify-center">
               <Logo size="sm" showText={false} onClick={() => navigate('/dashboard')} />
             </motion.div>
           )}
@@ -146,11 +147,13 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4 no-scrollbar">
-        <div className="px-2 space-y-0.5 mb-6">
+      <nav className="flex-1 overflow-y-auto pt-2 pb-6 no-scrollbar">
+        <div className="px-3 space-y-1 mb-6">
           {(globalExpanded || isMobile) && (
-            <div className="px-3 py-1.5 mb-1">
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-60">Principal</span>
+            <div className="pt-3 pb-1 mb-1 px-1">
+              <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-400">
+                Principal
+              </span>
             </div>
           )}
           {NAV_MAIN.map((item) => (
@@ -168,11 +171,11 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
         </div>
 
         {isAdmin && (
-          <div className="px-2 space-y-0.5 mb-6">
+          <div className="px-3 space-y-1 mb-6">
             {(globalExpanded || isMobile) && (
-              <div className="px-3 py-1.5 mb-1">
-                <span className="text-[10px] font-black text-red-500/60 uppercase tracking-[0.2em] flex items-center gap-2">
-                   <Shield className="w-2.5 h-2.5" />
+             <div className="pt-3 pb-1 mb-1 px-1">
+                <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-red-500/60">
+                   <Shield className="w-3 h-3" />
                    Sistema
                 </span>
               </div>
@@ -193,10 +196,10 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
         )}
 
         {groups.length > 0 && (
-          <div className="mt-8 mb-4 px-2 space-y-4 animate-in fade-in slide-in-from-left-4 duration-500">
+          <div className="mt-8 mb-4 px-3 space-y-4 animate-in fade-in slide-in-from-left-4 duration-500">
             {(globalExpanded || isMobile) && (
-              <div className="px-3 py-1.5">
-                <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
+              <div className="px-1 py-1.5">
+                <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10 shadow-[0_0_8px_rgba(168,85,247,0.1)]">
                   {workspaceTitle || 'Herramientas'}
                 </span>
               </div>
@@ -210,14 +213,14 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
                       onClick={action.onClick}
                       disabled={action.disabled}
                       className={cn(
-                        'group w-full flex items-center rounded-xl transition-all duration-150 text-[12px] font-bold outline-none',
+                        'group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold outline-none',
                         (globalExpanded || isMobile) ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
-                        action.active ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100',
+                        action.active ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-900',
                         action.variant === 'primary' && !action.active && 'bg-primary/5 text-primary border border-primary/20',
-                        action.disabled && 'opacity-20 cursor-not-allowed'
+                        action.disabled && 'opacity-30 cursor-not-allowed'
                       )}
                     >
-                      <action.icon className={cn('shrink-0 w-4 h-4', action.active ? 'text-white' : (action.variant === 'primary' ? 'text-primary' : 'text-zinc-400'))} />
+                      <action.icon className={cn('shrink-0 w-4 h-4', action.active ? 'text-white' : (action.variant === 'primary' ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-600'))} />
                       {(globalExpanded || isMobile) && <span className="truncate flex-1 text-left">{action.label}</span>}
                     </button>
                   ))}
@@ -228,49 +231,50 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
         )}
 
         {(globalExpanded || isMobile) && profile && (
-          <div className="mx-4 mt-6 p-4 rounded-2xl bg-zinc-50 border border-zinc-200/60 shadow-sm overflow-hidden relative group">
+          <div className="mx-4 mt-8 p-4 rounded-2xl bg-zinc-50/50 border border-zinc-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden relative group">
             <div className="flex items-center justify-between mb-3 relative z-10">
               <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Créditos</span>
             </div>
-            <div className="flex items-center gap-2 relative z-10">
-               <Coins className="w-4 h-4 text-primary shrink-0" />
-               <span className="text-[16px] font-black text-zinc-900 tabular-nums">{profile.credits_balance?.toLocaleString() ?? '0'}</span>
+            <div className="flex items-center gap-2 relative z-10 w-max bg-white/80 px-2 py-1 rounded-xl shadow-sm border border-zinc-100">
+               <Coins className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+               <span className="text-[13px] font-black text-zinc-800 tabular-nums">{profile.credits_balance?.toLocaleString() ?? '0'}</span>
             </div>
           </div>
         )}
       </nav>
 
-      <div className="shrink-0 border-t border-zinc-100 p-2 space-y-1 bg-white/50 backdrop-blur-md">
+      <div className="shrink-0 p-3 space-y-1 relative">
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-200/50 to-transparent" />
         {NAV_BOTTOM.map((item) => (
           <button
             key={item.path}
             onClick={() => handleNav(item.path)}
             title={!(globalExpanded || isMobile) ? item.label : undefined}
             aria-label={item.label}
-            className={cn('group w-full flex items-center rounded-xl transition-all duration-150 text-[12px] font-medium text-zinc-400 hover:text-zinc-700 hover:bg-zinc-50', (globalExpanded || isMobile) ? 'gap-3 px-3 py-2' : 'gap-0 px-0 py-2 justify-center')}
+            className={cn('group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold text-zinc-400 hover:text-zinc-800 hover:bg-zinc-50', (globalExpanded || isMobile) ? 'gap-3 px-4 py-2.5' : 'gap-0 px-0 py-2.5 justify-center')}
           >
-            <item.icon className="shrink-0 w-4 h-4" />
-            {(globalExpanded || isMobile) && <span className="truncate flex-1 text-left">{item.label}</span>}
+            <item.icon className="shrink-0 w-4 h-4 transition-transform group-hover:scale-105" />
+            {(globalExpanded || isMobile) && <span className="truncate flex-1 text-left leading-none mt-0.5">{item.label}</span>}
           </button>
         ))}
 
-        <div className={cn('flex items-center gap-2 px-2 py-2 rounded-xl mt-2 transition-all', (globalExpanded || isMobile) ? 'bg-zinc-50 border border-zinc-100 shadow-inner' : 'justify-center')}>
+        <div className={cn('flex items-center gap-2 rounded-2xl mt-3 transition-all cursor-pointer group hover:bg-zinc-50', (globalExpanded || isMobile) ? 'p-2' : 'p-2 justify-center')} onClick={() => navigate('/profile')}>
           {user ? (
             <>
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center overflow-hidden shrink-0 bg-white border border-zinc-200 shadow-sm">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-white border border-zinc-200 shadow-sm transition-transform group-hover:scale-95">
                 {profile?.avatar_url ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" /> : <User className="w-4 h-4 text-zinc-300" />}
               </div>
               {(globalExpanded || isMobile) && (
-                <div className="flex-1 min-w-0 pr-1">
-                  <p className="text-[11px] font-black text-zinc-900 truncate leading-tight">{profile?.display_name || user.email?.split('@')[0]}</p>
-                  <p className="text-[9px] font-bold text-zinc-400 truncate uppercase tracking-widest">{profile?.subscription_tier || 'Free'}</p>
+                <div className="flex-1 min-w-0 px-1">
+                  <p className="text-[12px] font-black text-zinc-900 truncate leading-none transition-colors">{profile?.display_name || user.email?.split('@')[0]}</p>
+                  <p className="text-[9px] font-bold text-zinc-400 truncate uppercase tracking-widest mt-1.5">{profile?.subscription_tier || 'Free'}</p>
                 </div>
               )}
               {(globalExpanded || isMobile) && (
-                <button onClick={handleSignOut} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"><LogOut className="w-4 h-4" /></button>
+                <button onClick={(e) => { e.stopPropagation(); handleSignOut(); }} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-2 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50/80 transition-all"><LogOut className="w-4 h-4" /></button>
               )}
               {!(globalExpanded || isMobile) && (
-                <button onClick={handleSignOut} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all"><LogOut className="w-4 h-4" /></button>
+                 <button onClick={(e) => { e.stopPropagation(); handleSignOut(); }} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-2 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50/80 transition-all absolute -top-10 right-2 shadow-sm bg-white border border-zinc-100 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"><LogOut className="w-4 h-4" /></button>
               )}
             </>
           ) : (
@@ -298,20 +302,23 @@ function NavItem({
       title={!expanded ? label : undefined}
       aria-label={label}
       className={cn(
-        'group w-full flex items-center rounded-xl transition-all duration-200 text-[12.5px] font-medium outline-none relative',
+        'group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold outline-none relative overflow-hidden',
         expanded ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
-        active ? 'bg-primary/10 text-primary border border-primary/20 font-black shadow-sm' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 border border-transparent',
+        active ? 'bg-primary/5 text-primary border border-primary/10 shadow-[0_4px_20px_-4px_rgba(168,85,247,0.1)]' : 'bg-transparent text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50/80 border border-transparent',
         className
       )}
     >
-      <Icon className={cn('shrink-0 transition-all duration-200', expanded ? 'w-4 h-4' : 'w-5 h-5', active ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-700 group-hover:scale-110')} />
+      <Icon className={cn('shrink-0 transition-transform duration-300', expanded ? 'w-4 h-4' : 'w-5 h-5', active ? 'text-primary scale-105' : 'text-zinc-400 group-hover:scale-105 group-hover:text-zinc-600')} />
       {expanded && (
-        <span className="truncate flex-1 text-left flex items-center justify-between gap-2">
+        <span className="truncate flex-1 text-left flex items-center justify-between gap-2 mt-0.5 leading-none">
           {label}
           {config && (
-            <span className={cn("text-[9px] font-bold px-2.5 py-0.5 rounded-full tracking-wide shrink-0 shadow-sm", config.bg, config.color)}>{config.label}</span>
+            <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-[6px] tracking-widest shrink-0 shadow-[0_1px_4px_rgba(0,0,0,0.04)] leading-none border border-black/5", config.bg, config.color)}>{config.label}</span>
           )}
         </span>
+      )}
+      {active && expanded && (
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-gradient-to-b from-primary to-blue-500 shadow-[2px_0_8px_rgba(168,85,247,0.5)]" />
       )}
     </button>
   );
