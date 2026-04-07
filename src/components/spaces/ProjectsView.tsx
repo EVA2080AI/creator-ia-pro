@@ -213,15 +213,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
 
   return (
     <>
-      <div className="mb-12 animate-in fade-in slide-in-from-top-4 duration-1000">
-        <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.3em] font-display mb-3 block">Hub Central</span>
-        <h1 className="text-6xl font-black text-zinc-900 tracking-tighter leading-none font-display">
-          Mis <span className="bg-gradient-to-r from-primary via-violet-500 to-indigo-600 bg-clip-text text-transparent italic leading-[1.2]">Proyectos</span>
-        </h1>
-        <p className="text-zinc-500 font-medium text-lg mt-6 max-w-2xl leading-relaxed">
-          El punto de encuentro para todos tus flujos creativos, repositorios de código y biblioteca de activos digitales.
-        </p>
-      </div>
+
 
       <div className="flex flex-col md:flex-row items-center gap-4 mb-10 p-1.5 bg-zinc-100/50 backdrop-blur-xl border border-zinc-200/60 rounded-[2rem] shadow-inner animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
         <div className="relative flex-1 group">
