@@ -14,7 +14,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { TemplateModal, Template } from './TemplateModal';
+import { TemplateModal } from './TemplateModal';
+import { type Template } from '@/lib/templates';
 
 interface NodeDef {
   label: string;

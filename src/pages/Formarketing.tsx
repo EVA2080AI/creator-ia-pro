@@ -1,9 +1,10 @@
 import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
+import { Layers } from 'lucide-react';
 import {
   Background, Controls, MiniMap, ReactFlow, addEdge,
-  Connection, Edge, Node, ReactFlowProvider,
+  Connection, Edge, Node, NodeProps, ReactFlowProvider,
   useNodesState, useEdgesState, useReactFlow,
   type NodeChange, type EdgeChange, BackgroundVariant,
   SelectionMode,
@@ -94,16 +95,16 @@ const FormarketingContent = () => {
   }, [screenToFlowPosition, setNodes]);
 
   const nodeTypes = useMemo(() => ({
-    characterBreakdown: (props: any) => <CharacterBreakdownNode {...props} onExecute={() => executeNode(props.id)} />,
-    modelView: (props: any) => <ModelNode {...props} onExecute={() => executeNode(props.id)} />,
-    videoModel: (props: any) => <VideoModelNode {...props} onExecute={() => executeNode(props.id)} />,
-    layoutBuilder: (props: any) => <LayoutBuilderNode {...props} onExecute={() => executeNode(props.id)} />,
-    campaignManager: (props: any) => <CampaignManagerNode {...props} onExecute={() => executeNode(props.id)} />,
+    characterBreakdown: (props: NodeProps) => <CharacterBreakdownNode {...props} onExecute={() => executeNode(props.id)} />,
+    modelView: (props: NodeProps) => <ModelNode {...props} onExecute={() => executeNode(props.id)} />,
+    videoModel: (props: NodeProps) => <VideoModelNode {...props} onExecute={() => executeNode(props.id)} />,
+    layoutBuilder: (props: NodeProps) => <LayoutBuilderNode {...props} onExecute={() => executeNode(props.id)} />,
+    campaignManager: (props: NodeProps) => <CampaignManagerNode {...props} onExecute={() => executeNode(props.id)} />,
     antigravityBridge: AntigravityBridgeNode,
-    captionNode: (props: any) => <CaptionNode {...props} onExecute={() => executeNode(props.id)} />,
-    promptBuilder: (props: any) => <PromptBuilderNode {...props} onExecute={() => executeNode(props.id)} />,
-    llmNode: (props: any) => <LLMNode {...props} onExecute={() => executeNode(props.id)} />,
-    textInput: (props: any) => <TextInputNode {...props} onExecute={() => executeNode(props.id)} />,
+    captionNode: (props: NodeProps) => <CaptionNode {...props} onExecute={() => executeNode(props.id)} />,
+    promptBuilder: (props: NodeProps) => <PromptBuilderNode {...props} onExecute={() => executeNode(props.id)} />,
+    llmNode: (props: NodeProps) => <LLMNode {...props} onExecute={() => executeNode(props.id)} />,
+    textInput: (props: NodeProps) => <TextInputNode {...props} onExecute={() => executeNode(props.id)} />,
     exportNode: ExportNode,
   }), [executeNode]);
 
@@ -203,6 +204,3 @@ export default function Formarketing() {
     </ReactFlowProvider>
   );
 }
-
-// Minimal Icons
-import { Layers } from 'lucide-react';
