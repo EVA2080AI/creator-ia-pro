@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
+import React, { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
 import { Layers } from 'lucide-react';
@@ -12,6 +12,8 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { type Template } from '@/lib/templates';
 
 // Components
 import CharacterBreakdownNode from '@/components/formarketing/CharacterBreakdownNode';
@@ -37,6 +39,72 @@ import { ExecutionLog } from './formarketing/components/ExecutionLog';
 import { useCanvasPersistence } from './formarketing/hooks/useCanvasPersistence';
 import { useCanvasExecution } from './formarketing/hooks/useCanvasExecution';
 import { useCanvasHistory } from '@/hooks/useCanvasHistory';
+
+// --- Types ---
+interface NodeContext {
+  executeNode?: (id: string) => void;
+}
+
+interface NodeDataWithContext extends Record<string, unknown> {
+  _context?: NodeContext;
+}
+
+// --- Node Wrappers to satisfy IDE parser ---
+// Using Memoized function components for maximum performance and IDE stability
+const CharacterBreakdownNodeWrapper = memo((props: NodeProps) => {
+  const context = (props.data as NodeDataWithContext)._context;
+  return <CharacterBreakdownNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+});
+
+const ModelNodeWrapper = memo((props: NodeProps) => {
+  const context = (props.data as NodeDataWithContext)._context;
+  return <ModelNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+});
+
+const VideoModelNodeWrapper = memo((props: NodeProps) => {
+  const context = (props.data as NodeDataWithContext)._context;
+  return <VideoModelNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+});
+
+const LayoutBuilderNodeWrapper = memo((props: NodeProps) => {
+  const context = (props.data as NodeDataWithContext)._context;
+  return <LayoutBuilderNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+});
+
+const CampaignManagerNodeWrapper = memo((props: NodeProps) => {
+  const context = (props.data as NodeDataWithContext)._context;
+  return <CampaignManagerNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+});
+
+const CaptionNodeWrapper = memo((props: NodeProps) => {
+  const context = (props.data as NodeDataWithContext)._context;
+  return <CaptionNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+});
+
+const PromptBuilderNodeWrapper = memo((props: NodeProps) => {
+  const context = (props.data as NodeDataWithContext)._context;
+  return <PromptBuilderNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+});
+
+const LLMNodeWrapper = memo((props: NodeProps) => {
+  const context = (props.data as NodeDataWithContext)._context;
+  return <LLMNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+});
+
+const TextInputNodeWrapper = memo((props: NodeProps) => {
+  const context = (props.data as NodeDataWithContext)._context;
+  return <TextInputNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+});
+
+CharacterBreakdownNodeWrapper.displayName = 'CharacterBreakdownNodeWrapper';
+ModelNodeWrapper.displayName = 'ModelNodeWrapper';
+VideoModelNodeWrapper.displayName = 'VideoModelNodeWrapper';
+LayoutBuilderNodeWrapper.displayName = 'LayoutBuilderNodeWrapper';
+CampaignManagerNodeWrapper.displayName = 'CampaignManagerNodeWrapper';
+CaptionNodeWrapper.displayName = 'CaptionNodeWrapper';
+PromptBuilderNodeWrapper.displayName = 'PromptBuilderNodeWrapper';
+LLMNodeWrapper.displayName = 'LLMNodeWrapper';
+TextInputNodeWrapper.displayName = 'TextInputNodeWrapper';
 
 const FormarketingContent = () => {
   const { user } = useAuth("/auth");
@@ -71,6 +139,84 @@ const FormarketingContent = () => {
   );
 
   const { executeNode } = useCanvasExecution(spaceId, user, setNodes, addLog);
+  
+  // Inject execution context into node data updates
+  useEffect(() => {
+    setNodes(nds => nds.map(n => ({
+      ...n,
+      data: { ...n.data, _context: { executeNode } }
+    })));
+  }, [executeNode, setNodes]);
+
+  // Template Listener
+  useEffect(() => {
+    const handleAddTemplate = async (event: Event) => {
+      const e = event as CustomEvent<Template>;
+      const template = e.detail;
+      if (!template) return;
+      
+      record(); // Snapshot for undo
+      addLog('Sistema', `Aplicando plantilla: ${template.title}...`, 'info');
+      
+      const newNodes: Node[] = [];
+      const idMap: Record<number, string> = {};
+      
+      // Transform Nodes
+      template.nodes.forEach((tNode, idx) => {
+        const id = crypto.randomUUID();
+        idMap[idx] = id;
+        newNodes.push({
+          id,
+          type: tNode.type,
+          position: { x: 400 + (idx * 300), y: 300 },
+          data: { 
+            ...tNode.data, 
+            status: 'idle',
+            title: tNode.data.title || tNode.type,
+            _context: { executeNode } // Immediate injection for new nodes
+          }
+        });
+      });
+      
+      // Transform Edges
+      const newEdges: Edge[] = (template.edges || []).map(tEdge => ({
+        id: crypto.randomUUID(),
+        source: idMap[tEdge.source],
+        target: idMap[tEdge.target],
+        sourceHandle: tEdge.sourceHandle,
+        targetHandle: tEdge.targetHandle
+      }));
+      
+      setNodes(nds => [...nds, ...newNodes]);
+      setEdges(eds => [...eds, ...newEdges]);
+      
+      // Persist to DB
+      if (spaceId && user) {
+        const dbNodes = newNodes.map(n => ({
+          id: n.id,
+          space_id: spaceId,
+          user_id: user.id,
+          type: n.type,
+          prompt: (n.data as any).prompt || (n.data as any).title || '',
+          status: 'idle',
+          data_payload: n.data,
+          pos_x: n.position.x,
+          pos_y: n.position.y
+        }));
+        
+        const { error } = await supabase.from('canvas_nodes').insert(dbNodes as any);
+        if (error) {
+          console.error("Error persisting template nodes:", error);
+          toast.error("Error al persistir la plantilla en la base de datos");
+        } else {
+          addLog('Sistema', `Plantilla '${template.title}' lista.`, 'success');
+        }
+      }
+    };
+    
+    window.addEventListener('add-template', handleAddTemplate);
+    return () => window.removeEventListener('add-template', handleAddTemplate);
+  }, [spaceId, user, setNodes, setEdges, record, addLog, executeNode]);
 
   // Handlers
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -89,30 +235,29 @@ const FormarketingContent = () => {
       id: crypto.randomUUID(),
       type,
       position,
-      data: { title: label || 'Nuevo', status: 'idle', prompt: '' },
+      data: { title: label || 'Nuevo', status: 'idle', prompt: '', _context: { executeNode } },
     };
     setNodes((nds) => nds.concat(newNode));
-  }, [screenToFlowPosition, setNodes]);
+  }, [screenToFlowPosition, setNodes, executeNode]);
 
   const nodeTypes = useMemo(() => ({
-    characterBreakdown: (props: NodeProps) => <CharacterBreakdownNode {...props} onExecute={() => executeNode(props.id)} />,
-    modelView: (props: NodeProps) => <ModelNode {...props} onExecute={() => executeNode(props.id)} />,
-    videoModel: (props: NodeProps) => <VideoModelNode {...props} onExecute={() => executeNode(props.id)} />,
-    layoutBuilder: (props: NodeProps) => <LayoutBuilderNode {...props} onExecute={() => executeNode(props.id)} />,
-    campaignManager: (props: NodeProps) => <CampaignManagerNode {...props} onExecute={() => executeNode(props.id)} />,
+    characterBreakdown: CharacterBreakdownNodeWrapper,
+    modelView: ModelNodeWrapper,
+    videoModel: VideoModelNodeWrapper,
+    layoutBuilder: LayoutBuilderNodeWrapper,
+    campaignManager: CampaignManagerNodeWrapper,
     antigravityBridge: AntigravityBridgeNode,
-    captionNode: (props: NodeProps) => <CaptionNode {...props} onExecute={() => executeNode(props.id)} />,
-    promptBuilder: (props: NodeProps) => <PromptBuilderNode {...props} onExecute={() => executeNode(props.id)} />,
-    llmNode: (props: NodeProps) => <LLMNode {...props} onExecute={() => executeNode(props.id)} />,
-    textInput: (props: NodeProps) => <TextInputNode {...props} onExecute={() => executeNode(props.id)} />,
+    captionNode: CaptionNodeWrapper,
+    promptBuilder: PromptBuilderNodeWrapper,
+    llmNode: LLMNodeWrapper,
+    textInput: TextInputNodeWrapper,
     exportNode: ExportNode,
-  }), [executeNode]);
+  }), []);
 
   return (
     <div className="h-full w-full bg-[#f8f9fa] flex flex-col relative overflow-hidden font-sans">
       <Helmet><title>Canvas IA — ForMarketing | Creator IA Pro</title></Helmet>
 
-      {/* Modern Header — Glassmorphism & Iridescent */}
       <header className="h-[64px] border-b border-black/[0.04] bg-white/40 backdrop-blur-2xl px-6 flex items-center justify-between z-30 sticky top-0 aether-iridescent">
         <div className="flex items-center gap-4">
            <div className="h-10 w-10 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-900/10">
@@ -147,7 +292,12 @@ const FormarketingContent = () => {
       <main className="flex-1 flex overflow-hidden relative">
         <FormarketingSidebar onAddNode={(type, label) => {
           const position = { x: 500, y: 300 };
-          setNodes(nds => nds.concat({ id: crypto.randomUUID(), type, position, data: { title: label, status: 'idle' } }));
+          setNodes(nds => nds.concat({ 
+            id: crypto.randomUUID(), 
+            type, 
+            position, 
+            data: { title: label, status: 'idle', _context: { executeNode } } 
+          }));
         }} />
         
         <div className="flex-1 relative flex flex-col h-full bg-white/50">
@@ -186,7 +336,12 @@ const FormarketingContent = () => {
 
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} onSelect={(type, label) => {
         const position = { x: 500, y: 300 };
-        setNodes(nds => nds.concat({ id: crypto.randomUUID(), type, position, data: { title: label, status: 'idle' } }));
+        setNodes(nds => nds.concat({ 
+          id: crypto.randomUUID(), 
+          type, 
+          position, 
+          data: { title: label, status: 'idle', _context: { executeNode } } 
+        }));
         setCmdOpen(false);
       }} />
 
