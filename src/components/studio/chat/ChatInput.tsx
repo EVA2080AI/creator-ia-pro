@@ -241,9 +241,9 @@ export function ChatInput({
           </AnimatePresence>
 
           {/* Textarea row */}
-          <div className="flex items-end gap-2 px-3 pt-3 pb-1">
+          <div className="flex items-end gap-3 px-4 pt-4 pb-3">
             {/* Plus / Attach button */}
-            <div className="relative shrink-0 self-end mb-1.5">
+            <div className="relative shrink-0 self-end mb-1">
               <button
                 onClick={() => setIsPlusMenuOpen(!isPlusMenuOpen)}
                 className={cn(
@@ -318,13 +318,13 @@ export function ChatInput({
                   ? "Describe la arquitectura o flujo del sistema..."
                   : "Ingresa tus directivas de construcción..."
               }
-              className="flex-1 bg-transparent py-2 text-[15px] font-medium text-zinc-900 outline-none resize-none min-h-[44px] max-h-[280px] placeholder:text-zinc-400 leading-relaxed selection:bg-primary/20 custom-scrollbar"
+              className="flex-1 bg-transparent py-2 text-[15px] font-medium text-zinc-900 outline-none resize-none min-h-[44px] max-h-[280px] placeholder:text-zinc-400/80 leading-relaxed selection:bg-primary/20 custom-scrollbar block mb-0.5"
               disabled={isGenerating}
               rows={1}
             />
 
             {/* Right action buttons */}
-            <div className="flex items-center gap-1.5 shrink-0 self-end mb-1.5">
+            <div className="flex items-center gap-1.5 shrink-0 self-end mb-1">
               {/* Mic */}
               <button
                 onClick={toggleListening}
@@ -370,41 +370,37 @@ export function ChatInput({
           </div>
 
           {/* Bottom toolbar row */}
-          <div className="flex items-center justify-between px-3 py-2 border-t border-zinc-100/80">
+          <div className="flex items-center justify-between px-3 py-1.5 border-t border-zinc-100/80">
             {/* Mode selector (PLAN / BUILD) */}
-            <div className="flex items-center gap-1 bg-zinc-100 p-0.5 rounded-xl">
+            <div className="flex items-center p-0.5 bg-zinc-100/80 rounded-[10px]">
               <button
                 onClick={() => !isArchitectMode && onArchitectToggle()}
                 className={cn(
-                  "relative flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                  "relative flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all duration-300",
                   isArchitectMode
                     ? "bg-white text-primary shadow-sm"
                     : "text-zinc-400 hover:text-zinc-600"
                 )}
               >
-                <Shield className="h-3 w-3" />
+                <Shield className={cn("h-3 w-3", isArchitectMode ? "text-primary" : "text-zinc-400")} />
                 PLAN
               </button>
               <button
                 onClick={() => isArchitectMode && onArchitectToggle()}
                 className={cn(
-                  "relative flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+                  "relative flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all duration-300",
                   !isArchitectMode
                     ? "bg-white text-zinc-900 shadow-sm"
                     : "text-zinc-400 hover:text-zinc-600"
                 )}
               >
-                <ArrowUp className="h-3 w-3" />
+                <ArrowUp className={cn("h-3 w-3", !isArchitectMode ? "text-zinc-900" : "text-zinc-400")} />
                 BUILD
               </button>
             </div>
 
-            {/* Right: Neural status + Model selector */}
-            <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
-                <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">NEURAL_OK</span>
-              </div>
+            {/* Right: Model selector */}
+            <div className="flex items-center pr-1">
               <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
             </div>
           </div>

@@ -19,15 +19,18 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2.5 px-4 py-2 rounded-xl transition-all duration-300 border border-zinc-200 group relative overflow-hidden bg-white hover:bg-zinc-50 shadow-sm",
-          isOpen && "ring-2 ring-primary/20 border-primary"
+          "flex items-center gap-2 px-3 py-1.5 rounded-xl transition-all duration-300 border border-transparent group relative overflow-hidden bg-transparent hover:bg-white hover:border-zinc-200 hover:shadow-[0_2px_10px_rgba(0,0,0,0.02)]",
+          isOpen && "bg-white border-zinc-200 shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
         )}
       >
-        <Sparkles className={cn("h-3.5 w-3.5 transition-colors", isOpen ? "text-primary" : "text-zinc-500 group-hover:text-primary")} />
-        <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors", isOpen ? "text-primary" : "text-zinc-600")}>
+        <Sparkles className={cn("h-3.5 w-3.5 transition-colors shrink-0", isOpen ? "text-primary flex-none" : "text-zinc-400 group-hover:text-primary flex-none")} />
+        <span className={cn(
+          "text-[10px] font-extrabold uppercase tracking-widest whitespace-nowrap leading-none mt-0.5",
+          isOpen ? "text-zinc-900" : "text-zinc-500 group-hover:text-zinc-800"
+        )}>
           {currentModel.label}
         </span>
-        <ChevronDown className={cn("h-3 w-3 transition-transform duration-500", isOpen ? "rotate-180 text-primary" : "text-zinc-400")} />
+        <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform duration-300", isOpen ? "rotate-180 text-primary" : "text-zinc-400")} />
       </button>
 
       <AnimatePresence>
