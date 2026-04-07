@@ -64,12 +64,12 @@ export const LibraryView = () => {
     const from = currentPage * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
     try {
-      let q = (supabase.from("saved_assets") as any).select("*").eq("user_id", user.id).order("created_at", { ascending: false }).range(from, to);
+      let q = supabase.from("saved_assets").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).range(from, to);
       if (selectedSpace === "none") q = q.is("space_id", null);
       else if (selectedSpace !== "all") q = q.eq("space_id", selectedSpace);
       const r = await q;
       if (r.error) throw r.error;
-      const newData = (r.data as any) || [];
+      const newData = r.data || [];
       setAssets(prev => reset || currentPage === 0 ? newData : [...prev, ...newData]);
       setHasMore(newData.length === PAGE_SIZE);
       if (reset) setPage(0);
@@ -102,7 +102,7 @@ export const LibraryView = () => {
       }).select().single();
       if (error) throw error;
       toast.success("Recurso importado exitosamente");
-      setAssets([data as any, ...assets]);
+      setAssets([data as unknown as SavedAsset, ...assets]);
       setIsImportOpen(false);
       setImportUrl("");
     } catch (err: any) {
@@ -138,7 +138,7 @@ export const LibraryView = () => {
     if (!editingAsset) return;
     setSavingDoc(true);
     try {
-      const { error } = await (supabase.from("saved_assets") as any).update({ content }).eq("id", editingAsset.id);
+      const { error } = await supabase.from("saved_assets").update({ content }).eq("id", editingAsset.id);
       if (error) throw error;
       setAssets((prev) => prev.map((a) => (a.id === editingAsset.id ? { ...a, content } : a)));
       toast.success("Documento guardado");

@@ -42,6 +42,7 @@ export const HubView = () => {
       // Seed canvas nodes from preset
       if (template.nodes.length > 0) {
         const nodeRows = template.nodes.map((node: any, i: number) => ({
+          id: crypto.randomUUID(),
           user_id: user.id,
           space_id: space.id,
           type: node.type || "modelView",
@@ -53,32 +54,31 @@ export const HubView = () => {
           prompt: "",
         }));
 
-        const { data: insertedNodes, error: nodesError } = await supabase
+        const { error: nodesError } = await supabase
           .from("canvas_nodes")
-          .insert(nodeRows)
-          .select("id");
+          .insert(nodeRows);
 
         if (nodesError) throw nodesError;
 
-        // Reconstruir los edges a partir del mapping original de la plantilla
-        if (insertedNodes && insertedNodes.length > 0) {
-          const edges = (template.edges || []).map((edgeInfo, idx) => {
-            const srcNode = insertedNodes[edgeInfo.source];
-            const targetNode = insertedNodes[edgeInfo.target];
-            if (!srcNode || !targetNode) return null;
-            
-            return {
-              id: `e-${srcNode.id}-${targetNode.id}-${idx}`,
-              source: srcNode.id,
-              target: targetNode.id,
-              sourceHandle: edgeInfo.sourceHandle || 'any-out',
-              targetHandle: edgeInfo.targetHandle || 'any-in',
-              type: 'smoothstep',
-              animated: true,
-              style: { stroke: '#a855f7', strokeWidth: 2 },
-            };
-          }).filter(Boolean);
+        // Reconstruir los edges usando los IDs generados localmente
+        const edges = (template.edges || []).map((edgeInfo, idx) => {
+          const srcNode = nodeRows[edgeInfo.source];
+          const targetNode = nodeRows[edgeInfo.target];
+          if (!srcNode || !targetNode) return null;
+          
+          return {
+            id: `e-${srcNode.id}-${targetNode.id}-${idx}`,
+            source: srcNode.id,
+            target: targetNode.id,
+            sourceHandle: edgeInfo.sourceHandle || 'any-out',
+            targetHandle: edgeInfo.targetHandle || 'any-in',
+            type: 'smoothstep',
+            animated: true,
+            style: { stroke: '#a855f7', strokeWidth: 2 },
+          };
+        }).filter(Boolean);
 
+        if (edges.length > 0) {
           // Save edges as flow_metadata row
           // Important: use upsert to avoid duplicates and match the unique index
           await supabase.from("canvas_nodes").upsert({
