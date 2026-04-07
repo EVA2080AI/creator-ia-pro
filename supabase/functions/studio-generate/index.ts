@@ -1,4 +1,4 @@
-import { serve } from "std/http/server";
+// Deno Edge Function — types provided by supabase/functions/tsconfig.json
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -41,7 +41,7 @@ function checkRateLimit(userId: string): boolean {
   return true;
 }
 
-serve(async (req: Request) => {
+Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   // ── Auth check — require valid JWT ─────────────────────────────────────────
@@ -165,3 +165,5 @@ ${filesContext || "(Proyecto vacío — crea desde cero)"}
     );
   }
 });
+
+export {};

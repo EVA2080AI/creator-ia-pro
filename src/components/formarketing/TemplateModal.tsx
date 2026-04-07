@@ -30,6 +30,13 @@ import { Input } from "@/components/ui/input";
 
 import { type Template, CATEGORIES, TEMPLATES } from "@/lib/templates";
 
+interface TemplateModalProps {
+  trigger?: React.ReactNode;
+  onSelect: (template: Template) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
 export function TemplateModal({ trigger, onSelect, open: externalOpen, onOpenChange }: TemplateModalProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = externalOpen !== undefined ? externalOpen : internalOpen;

@@ -1,3 +1,4 @@
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Terminal, Activity, ChevronRight, CheckCircle2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -11,6 +12,7 @@ interface LogEntry {
 
 export function ExecutionLog({ logs, isOpen, onClose }: { logs: LogEntry[]; isOpen: boolean; onClose: () => void }) {
   return (
+    <>
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -82,5 +84,6 @@ export function ExecutionLog({ logs, isOpen, onClose }: { logs: LogEntry[]; isOp
         </motion.div>
       )}
     </AnimatePresence>
+    </>
   );
 }

@@ -138,7 +138,7 @@ export const LibraryView = () => {
     if (!editingAsset) return;
     setSavingDoc(true);
     try {
-      const { error } = await supabase.from("saved_assets").update({ content }).eq("id", editingAsset.id);
+      const { error } = await (supabase.from("saved_assets") as any).update({ content }).eq("id", editingAsset.id);
       if (error) throw error;
       setAssets((prev) => prev.map((a) => (a.id === editingAsset.id ? { ...a, content } : a)));
       toast.success("Documento guardado");
