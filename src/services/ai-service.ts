@@ -27,6 +27,8 @@ export interface AIActionParams {
   tool?: string;
   node_id?: string;
   persona?: "antigravity" | "genesis";
+  width?: number;
+  height?: number;
   onProgress?: (step: string, pct: number) => void;
 }
 
@@ -217,7 +219,7 @@ export const aiService = {
         if (!image) throw new Error(`La herramienta "${tool}" requiere una imagen de origen.`);
         result = await this.handleMediaProxy(tool, image);
       } else if (action === "image" || IMAGE_MODEL_IDS.has(model) || tool === "generate" || tool === "logo") {
-        result = await this.handleImageGen(prompt, model, tool);
+        result = await this.handleImageGen(prompt, model, tool, undefined, params.width, params.height);
       } else if (action === "video") {
         result = await this.handleVideoGen(prompt);
       } else {
@@ -289,16 +291,18 @@ export const aiService = {
     return { text };
   },
 
-  async handleImageGen(prompt: string, model: string, tool?: string, imageUrl?: string): Promise<AIResponse> {
+  async handleImageGen(prompt: string, model: string, tool?: string, imageUrl?: string, width?: number, height?: number): Promise<AIResponse> {
     let finalPrompt = prompt;
     if (tool === "logo") {
-      finalPrompt = `${prompt}, professional logo design, clean vector style, minimalist, white background, brand identity`;
+      finalPrompt = `${prompt}, professional logo design, clean vector style, minimalist, white background, brand identity, masterpiece, crisp lines`;
+    } else if (tool === "generate") {
+      finalPrompt = `${prompt}, masterpiece, best quality, highly detailed, high resolution, photorealistic, 8k, cinematic lighting`;
     } else if (tool === "variation" || tool === "style" || tool === "product") {
-      finalPrompt = prompt || `Apply ${tool} transformation to this image`;
+      finalPrompt = prompt || `Apply ${tool} transformation to this image, masterpiece, best quality`;
     }
 
     const orModel = IMAGE_MODEL_MAP[model] ?? "black-forest-labs/flux-schnell";
-    const body: Record<string, unknown> = { prompt: finalPrompt, model: orModel, width: 1024, height: 1024 };
+    const body: Record<string, unknown> = { prompt: finalPrompt, model: orModel, width: width || 1024, height: height || 1024 };
     if (imageUrl) body.image_url = imageUrl;
 
     const data = await this.callProxy("openrouter-image", "", body);

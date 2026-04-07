@@ -14,302 +14,8 @@ import {
 } from "lucide-react";
 
 // ─── Template Definitions ────────────────────────────────────────────────────
-const TEMPLATE_CATEGORIES = [
-  "Todos", "Ads", "Landing", "Social", "SEO", "Email", "UI/UX"
-];
-
-const TEMPLATES = [
-  // --- ADS ---
-  {
-    id: "meta-ad-single",
-    category: "Ads",
-    title: "Meta Ads — Imagen Única",
-    desc: "Campaña de imagen única optimizada para Facebook e Instagram. Incluye nodo de copy principal, imagen IA y CTA.",
-    icon: Megaphone,
-    color: "#2563eb", // Royal Blue
-    nodes: 3,
-    tags: ["Facebook", "Instagram", "Imagen"],
-    preset: [
-      { type: "textInput", data: { title: "Briefing del Anuncio", value: "Escribe aquí el producto, audiencia y propuesta de valor..." } },
-      { type: "modelView", data: { title: "Imagen IA", prompt: "Anuncio publicitario profesional para Meta Ads", model: "flux-pro", ratio: "1:1" } },
-      { type: "campaignManager", data: { title: "Meta Ads Deploy", platforms: { instagram: "pending", facebook: "pending" } } },
-    ]
-  },
-  {
-    id: "google-ads",
-    category: "Ads",
-    title: "Google Ads — Responsive",
-    desc: "Anuncio de búsqueda con múltiples titulares y descripciones generados con IA para máximo Quality Score.",
-    icon: Search,
-    color: "#00c2ff",
-    nodes: 3,
-    tags: ["Google", "Search", "Copy"],
-    preset: [
-      { type: "textInput", data: { title: "Producto / Servicio", value: "" } },
-      { type: "llmNode", data: { title: "Copy Titulares", systemPrompt: "Genera 3 titulares y 2 descripciones para un anuncio Google Ads Responsive. Máximo 30 caracteres por titular y 90 por descripción. Solo devuelve el texto estructurado.", model: "anthropic/claude-sonnet-4-5" } },
-      { type: "captionNode", data: { title: "CTA Final", network: "instagram", tone: "Urgente ⚡" } },
-    ]
-  },
-  {
-    id: "tiktok-ugc",
-    category: "Ads",
-    title: "TikTok UGC Creator",
-    desc: "Flujo completo para crear un video estilo UGC: guion, voiceover y dirección creativa para TikTok Ads.",
-    icon: Video,
-    color: "#6366f1", // Indigo
-    nodes: 3,
-    tags: ["TikTok", "UGC", "Video"],
-    preset: [
-      { type: "textInput", data: { title: "Producto TikTok", value: "" } },
-      { type: "llmNode", data: { title: "Guión UGC", systemPrompt: "Escribe un guión UGC viral para TikTok de 30 segundos. Hook potente en los primeros 3 segundos, desarrollo y CTA. Tono casual y auténtico.", model: "anthropic/claude-sonnet-4-5" } },
-      { type: "videoModel", data: { title: "Video TikTok", selectedDuration: "10s" } },
-    ]
-  },
-  {
-    id: "carousel-meta",
-    category: "Ads",
-    title: "Meta Ads — Carrusel",
-    desc: "5 tarjetas de carrusel con imágenes generadas por IA y copy persuasivo para Meta Business Suite.",
-    icon: LayoutGrid,
-    color: "#3b82f6", // Blue-500
-    nodes: 4,
-    tags: ["Facebook", "Carrusel", "E-commerce"],
-    preset: [
-      { type: "textInput", data: { title: "Producto E-commerce", value: "" } },
-      { type: "llmNode", data: { title: "Copy Carrusel", systemPrompt: "Genera 5 cards de carrusel para Meta Ads. Para cada card: título (máx 40 chars), descripción (máx 125 chars) y CTA. Formato: Card 1: | Card 2: etc.", model: "anthropic/claude-sonnet-4-5" } },
-      { type: "modelView", data: { title: "Imagen Producto 1", model: "flux-pro", ratio: "1:1" } },
-      { type: "campaignManager", data: { title: "Meta Business Deploy", platforms: { facebook: "pending", instagram: "pending" } } },
-    ]
-  },
-  // --- LANDING ---
-  {
-    id: "landing-saas",
-    category: "Landing",
-    title: "Landing SaaS — Hero + Features",
-    desc: "Landing page completa para producto SaaS: hero, propuesta de valor, features, testimonios y CTA final.",
-    icon: Layout,
-    color: "#0ea5e9", // Sky-500
-    nodes: 3,
-    tags: ["SaaS", "Web", "Conversión"],
-    preset: [
-      { type: "textInput", data: { title: "Producto SaaS", value: "Describe tu producto SaaS: nombre, qué hace, para quién es y cuál es la propuesta de valor principal..." } },
-      { type: "llmNode", data: { title: "Copy Landing", systemPrompt: "Genera el copy completo de una landing page SaaS con: H1 impactante, subtítulo, 3 features con descripción, sección de testimonios (inventados pero creíbles) y CTA final. Tono profesional y orientado a conversión.", model: "anthropic/claude-sonnet-4-5" } },
-      { type: "modelView", data: { title: "Hero Image", prompt: "Modern SaaS product dashboard screenshot, clean UI, purple gradient, professional", model: "flux-pro", ratio: "16:9" } },
-    ]
-  },
-  {
-    id: "landing-product",
-    category: "Landing",
-    title: "Product Launch — E-commerce",
-    desc: "Página de lanzamiento de producto con contador regresivo, galería de imágenes generadas y pricing grid.",
-    icon: ShoppingBag,
-    color: "#8b5cf6", // Violet-500
-    nodes: 3,
-    tags: ["E-commerce", "Lanzamiento", "Producto"],
-    preset: [
-      { type: "textInput", data: { title: "Datos del Producto", value: "Nombre del producto, precio, características principales, audiencia objetivo..." } },
-      { type: "llmNode", data: { title: "Copy Lanzamiento", systemPrompt: "Escribe copy para el lanzamiento de un producto: título poderoso, urgencia, beneficios top 3, garantía y CTA de compra. Formato optimizado para conversión.", model: "anthropic/claude-sonnet-4-5" } },
-      { type: "modelView", data: { title: "Foto Producto", model: "flux-pro-1.1", ratio: "4:5" } },
-    ]
-  },
-  {
-    id: "landing-webinar",
-    category: "Landing",
-    title: "Webinar / Evento Landing",
-    desc: "Registro de evento o webinar con sección de speakers, agenda y formulario de inscripción.",
-    icon: Camera,
-    color: "#6d28d9", // Violet-700
-    nodes: 3,
-    tags: ["Evento", "Webinar", "Registro"],
-    preset: [
-      { type: "textInput", data: { title: "Datos del Evento", value: "Nombre del webinar, fecha, tema, speakers y propuesta de valor para los asistentes..." } },
-      { type: "llmNode", data: { title: "Copy Evento", systemPrompt: "Genera el copy para una landing de webinar: título atractivo, subtítulo que genere urgencia, agenda del evento (5 puntos), bio del speaker y CTA de registro gratuito.", model: "anthropic/claude-sonnet-4-5" } },
-      { type: "modelView", data: { title: "Banner Evento", model: "flux-pro", ratio: "16:9" } },
-    ]
-  },
-  // --- SOCIAL ---
-  {
-    id: "instagram-reel",
-    category: "Social",
-    title: "Instagram Reel Pack",
-    desc: "Pack de 3 Reels: guion, texto en pantalla y hashtags estratégicos para máximo alcance orgánico.",
-    icon: Camera,
-    color: "#4f46e5", // Indigo-600
-    nodes: 3,
-    tags: ["Instagram", "Reels", "Orgánico"],
-    preset: [
-      { type: "textInput", data: { title: "Tema del Reel", value: "" } },
-      { type: "llmNode", data: { title: "Guión Reel", systemPrompt: "Crea el guión de un Reel de Instagram de 30-60 segundos. Incluye: hook (primeros 3 seg), desarrollo en 3 puntos, texto en pantalla por escena y CTA final. Tono dinámico y viral.", model: "anthropic/claude-sonnet-4-5" } },
-      { type: "captionNode", data: { title: "Caption + Hashtags", network: "instagram", tone: "Viral 🔥" } },
-    ]
-  },
-  {
-    id: "linkedin-post",
-    category: "Social",
-    title: "LinkedIn Thought Leadership",
-    desc: "Post de autoridad para LinkedIn: hook, narrativa, datos e imagen profesional generada con IA.",
-    icon: BookOpen,
-    color: "#00c2ff",
-    nodes: 3,
-    tags: ["LinkedIn", "B2B", "Autoridad"],
-    preset: [
-      { type: "textInput", data: { title: "Tema LinkedIn", value: "" } },
-      { type: "captionNode", data: { title: "Post LinkedIn", network: "linkedin", tone: "Profesional 💼" } },
-      { type: "modelView", data: { title: "Imagen Profesional", model: "flux-pro", ratio: "1:1" } },
-    ]
-  },
-  {
-    id: "twitter-thread",
-    category: "Social",
-    title: "X / Twitter Thread Viral",
-    desc: "Hilo de 10 tweets con estructura viral: gancho, desarrollo y CTA final. Optimizado para engagement.",
-    icon: Hash,
-    color: "#1d4ed8", // Blue-700
-    nodes: 2,
-    tags: ["Twitter/X", "Thread", "Viral"],
-    preset: [
-      { type: "textInput", data: { title: "Tema del Thread", value: "" } },
-      { type: "captionNode", data: { title: "Thread X/Twitter", network: "twitter", tone: "Viral 🔥" } },
-    ]
-  },
-  {
-    id: "social-kit-full",
-    category: "Social",
-    title: "Social Media Kit Completo",
-    desc: "Contenido unificado para 4 plataformas: Instagram, LinkedIn, X y TikTok desde un solo prompt.",
-    icon: Sparkles,
-    color: "#7c3aed", // Violet-600
-    nodes: 4,
-    tags: ["Multi-platform", "Kit", "Eficiencia"],
-    preset: [
-      { type: "textInput", data: { title: "Brief de Marca", value: "Describe tu marca, tono de voz, producto o servicio y el mensaje clave de esta semana..." } },
-      { type: "captionNode", data: { title: "Post Instagram", network: "instagram", tone: "Viral 🔥" } },
-      { type: "captionNode", data: { title: "Post LinkedIn", network: "linkedin", tone: "Profesional 💼" } },
-      { type: "captionNode", data: { title: "Tweet X", network: "twitter", tone: "Casual 😊" } },
-    ]
-  },
-  // --- SEO ---
-  {
-    id: "blog-seo",
-    category: "SEO",
-    title: "Blog Post SEO — 1500 palabras",
-    desc: "Artículo de blog optimizado: keyword research, outline, redacción y meta-descripción en un flujo.",
-    icon: FileText,
-    color: "#475569", // Slate-600
-    nodes: 3,
-    tags: ["Blog", "Contenido", "Keywords"],
-    preset: [
-      { type: "textInput", data: { title: "Keyword Principal", value: "" } },
-      { type: "llmNode", data: { title: "Artículo SEO", systemPrompt: "Escribe un artículo SEO de 1500 palabras con: H1 optimizado, introducción con gancho, 4-5 secciones H2, conclusión y meta-descripción de 160 caracteres. Incluye la keyword principal de forma natural en títulos y primer párrafo.", model: "anthropic/claude-sonnet-4-5" } },
-      { type: "modelView", data: { title: "Imagen Featured", model: "flux-schnell", ratio: "16:9" } },
-    ]
-  },
-  {
-    id: "product-description",
-    category: "SEO",
-    title: "Descripciones de Producto",
-    desc: "Generación en batch de descripciones SEO para catálogos e-commerce usando variables dinámicas.",
-    icon: ShoppingBag,
-    color: "#ffb800",
-    nodes: 2,
-    tags: ["E-commerce", "Producto", "Batch"],
-    preset: [
-      { type: "textInput", data: { title: "Datos del Producto", value: "Nombre, categoría, características técnicas, material, tallas/colores disponibles..." } },
-      { type: "llmNode", data: { title: "Descripción SEO", systemPrompt: "Escribe una descripción de producto para e-commerce: párrafo principal (150 palabras), bullets de características (5 puntos), ficha técnica y meta-description de 160 chars. Optimizado para SEO y conversión.", model: "anthropic/claude-sonnet-4-5" } },
-    ]
-  },
-  {
-    id: "keyword-cluster",
-    category: "SEO",
-    title: "Keyword Cluster & Content Map",
-    desc: "Análisis de clusters de palabras clave y mapa de contenidos para una estrategia SEO de 3 meses.",
-    icon: BarChart2,
-    color: "#00c2ff",
-    nodes: 2,
-    tags: ["Estrategia", "Keywords", "Mapa"],
-    preset: [
-      { type: "textInput", data: { title: "Nicho / Industria", value: "" } },
-      { type: "llmNode", data: { title: "Keyword Clusters", systemPrompt: "Genera un mapa de clusters de keywords para una estrategia SEO de 3 meses. Incluye: 5 clusters temáticos, 5 keywords por cluster (con intención de búsqueda), prioridad (alta/media/baja) y tipo de contenido recomendado. Formato de tabla.", model: "anthropic/claude-sonnet-4-5" } },
-    ]
-  },
-  // --- EMAIL ---
-  {
-    id: "email-welcome",
-    category: "Email",
-    title: "Secuencia de Bienvenida",
-    desc: "Flujo de 5 emails de onboarding: bienvenida, propuesta de valor, caso de éxito, objeción y conversión.",
-    icon: Mail,
-    color: "#bd00ff",
-    nodes: 3,
-    tags: ["Email", "Onboarding", "Nurturing"],
-    preset: [
-      { type: "textInput", data: { title: "Datos del Negocio", value: "Nombre de la marca, producto/servicio, perfil del cliente ideal y objetivo de la secuencia..." } },
-      { type: "llmNode", data: { title: "Secuencia 5 Emails", systemPrompt: "Escribe una secuencia de bienvenida de 5 emails para nurturing: Email 1 (Bienvenida y promesa), Email 2 (El problema que resuelves), Email 3 (Caso de éxito/social proof), Email 4 (Objeción principal + respuesta), Email 5 (CTA de conversión con urgencia). Incluye subject line y preview text para cada uno.", model: "anthropic/claude-sonnet-4-5" } },
-      { type: "captionNode", data: { title: "Subject Lines Test A/B", network: "instagram", tone: "Urgente ⚡" } },
-    ]
-  },
-  {
-    id: "email-flash-sale",
-    category: "Email",
-    title: "Flash Sale — Email Campaign",
-    desc: "Campaña de urgencia de 3 correos: anuncio, recordatorio y último aviso con subject lines optimizados.",
-    icon: Zap,
-    color: "#ff0071",
-    nodes: 4,
-    tags: ["Email", "Oferta", "Urgencia"],
-    preset: []
-  },
-  // --- UI/UX ---
-  {
-    id: "ui-mobile-app",
-    category: "UI/UX",
-    title: "Mobile App — 3 Pantallas",
-    desc: "Diseño de flujo para app móvil: Onboarding, Dashboard principal y Pantalla de perfil de usuario.",
-    icon: Smartphone,
-    color: "#00c2ff",
-    nodes: 4,
-    tags: ["Mobile", "App", "Figma"],
-    preset: []
-  },
-  {
-    id: "ui-landing-wireframe",
-    category: "UI/UX",
-    title: "Landing Page Wireframe",
-    desc: "Wireframe detallado de landing: secciones, componentes, paleta de color y typografía. Exportable a Figma.",
-    icon: PenTool,
-    color: "#00e5a0",
-    nodes: 3,
-    tags: ["Web", "Wireframe", "Figma"],
-    preset: []
-  },
-  {
-    id: "ui-design-system",
-    category: "UI/UX",
-    title: "Design System Mini",
-    desc: "Sistema de diseño básico: colores, tipografía, botones y componentes core en JSON exportable.",
-    icon: Palette,
-    color: "#ffb800",
-    nodes: 3,
-    tags: ["Design System", "Tokens", "Export"],
-    preset: []
-  },
-  {
-    id: "ui-dashboard",
-    category: "UI/UX",
-    title: "Analytics Dashboard",
-    desc: "UI de dashboard con gráficos, KPIs y sidebar de navegación. Código Tailwind + React compatible con Genesis Architecture.",
-    icon: Globe,
-    color: "#2563eb", // Royal Blue
-    nodes: 5,
-    tags: ["Dashboard", "Admin", "Genesis"],
-    preset: []
-  },
-];
-
-// Last 5 templates in the array are marked "Nuevo"
+import { type Template, CATEGORIES as TEMPLATE_CATEGORIES, TEMPLATES } from "@/lib/templates";
 const NEW_TEMPLATE_IDS = new Set(TEMPLATES.slice(-5).map(t => t.id));
-
-// ─── Component ───────────────────────────────────────────────────────────────
 const Hub = () => {
   const { user, signOut } = useAuth("/auth");
   const { profile } = useProfile(user?.id);
@@ -320,7 +26,7 @@ const Hub = () => {
   const filtered = TEMPLATES.filter(t => {
     const matchCat = category === "Todos" || t.category === category;
     const matchSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                        t.desc.toLowerCase().includes(searchQuery.toLowerCase());
+                        t.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchSearch;
   });
 
@@ -329,13 +35,13 @@ const Hub = () => {
     try {
       const { data: space, error } = await supabase
         .from("spaces")
-        .insert({ user_id: user.id, name: template.title, description: template.desc })
+        .insert({ user_id: user.id, name: template.title, description: template.description })
         .select().single();
       if (error) throw error;
 
       // Seed canvas nodes from preset
-      if (template.preset.length > 0) {
-        const nodeRows = template.preset.map((node: any, i: number) => ({
+      if (template.nodes.length > 0) {
+        const nodeRows = template.nodes.map((node: any, i: number) => ({
           user_id: user.id,
           space_id: space.id,
           type: node.type || "modelView",
@@ -354,18 +60,24 @@ const Hub = () => {
 
         if (nodesError) throw nodesError;
 
-        // Create sequential edges: node[0]→node[1]→node[2]→...
+        // Reconstruir los edges a partir del mapping original de la plantilla, no de forma secuencial rígida
         if (insertedNodes && insertedNodes.length > 1) {
-          const edges = insertedNodes.slice(0, -1).map((src, i) => ({
-            id: `e-${src.id}-${insertedNodes[i + 1].id}`,
-            source: src.id,
-            target: insertedNodes[i + 1].id,
-            sourceHandle: "text-out",
-            targetHandle: "text-in",
-            type: "smoothstep",
-            animated: true,
-            style: { stroke: "#a855f7", strokeWidth: 2 },
-          }));
+          const edges = (template.edges || []).map((edgeInfo, idx) => {
+            const srcNode = insertedNodes[edgeInfo.source];
+            const targetNode = insertedNodes[edgeInfo.target];
+            if (!srcNode || !targetNode) return null;
+            
+            return {
+              id: `e-${srcNode.id}-${targetNode.id}-${idx}`,
+              source: srcNode.id,
+              target: targetNode.id,
+              sourceHandle: edgeInfo.sourceHandle || 'any-out',
+              targetHandle: edgeInfo.targetHandle || 'any-in',
+              type: 'smoothstep',
+              animated: true,
+              style: { stroke: '#a855f7', strokeWidth: 2 },
+            };
+          }).filter(Boolean);
 
           // Save edges as flow_metadata row
           await supabase.from("canvas_nodes").insert({
@@ -559,7 +271,7 @@ const Hub = () => {
                 {/* Content */}
                 <div className="flex-1 space-y-2">
                   <h3 className="text-sm font-bold text-zinc-900 leading-tight font-display tracking-tight">{template.title}</h3>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed truncate-2">{template.desc}</p>
+                  <p className="text-[11px] text-zinc-400 leading-relaxed truncate-2">{template.description}</p>
                 </div>
 
                 {/* Tags */}
@@ -573,7 +285,7 @@ const Hub = () => {
 
                 {/* Footer — Tailwind UI divider + action pattern */}
                 <div className="flex items-center justify-between pt-3 border-t border-zinc-200">
-                  <span className="text-[10px] text-zinc-400 font-bold font-display uppercase tracking-widest">{template.nodes} nodos</span>
+                  <span className="text-[10px] text-zinc-400 font-bold font-display uppercase tracking-widest">{template.nodes?.length || 0} nodos</span>
                   <button
                     onClick={() => handleUseTemplate(template)}
                     aria-label={`Usar plantilla: ${template.title}`}

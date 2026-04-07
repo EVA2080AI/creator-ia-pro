@@ -216,6 +216,7 @@ const Tools = () => {
   const switchTool = (tool: Tool) => {
     if (tool.disabled) return;
     setActiveTool(tool.id);
+    setCategory(tool.category);
     setResultImage(null);
     setResultText("");
     setImagePreview(null);
@@ -305,6 +306,7 @@ const Tools = () => {
       const data = await aiService.processAction({
         action: "image", tool: activeTool, prompt: textPrompt,
         model: activeModel, image: imagePreview || undefined,
+        width: Math.floor(aspectRatio.w), height: Math.floor(aspectRatio.h)
       });
       if (data?.url) {
         setResultImage(data.url);
