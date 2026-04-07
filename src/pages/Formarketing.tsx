@@ -50,50 +50,51 @@ interface NodeDataWithContext extends Record<string, unknown> {
 }
 
 // --- Node Wrappers to satisfy IDE parser ---
-// Using Memoized function components for maximum performance and IDE stability
+// Pass only { id, data } to child nodes — they don't accept full NodeProps.
+// onExecute is extracted from the injected _context in data.
 const CharacterBreakdownNodeWrapper = memo((props: NodeProps) => {
-  const context = (props.data as NodeDataWithContext)._context;
-  return <CharacterBreakdownNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+  const data = props.data as NodeDataWithContext;
+  return <CharacterBreakdownNode id={props.id} data={data as any} />;
 });
 
 const ModelNodeWrapper = memo((props: NodeProps) => {
-  const context = (props.data as NodeDataWithContext)._context;
-  return <ModelNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+  const data = props.data as NodeDataWithContext;
+  return <ModelNode id={props.id} data={data as any} />;
 });
 
 const VideoModelNodeWrapper = memo((props: NodeProps) => {
-  const context = (props.data as NodeDataWithContext)._context;
-  return <VideoModelNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+  const data = props.data as NodeDataWithContext;
+  return <VideoModelNode id={props.id} data={data as any} />;
 });
 
 const LayoutBuilderNodeWrapper = memo((props: NodeProps) => {
-  const context = (props.data as NodeDataWithContext)._context;
-  return <LayoutBuilderNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+  const data = props.data as NodeDataWithContext;
+  return <LayoutBuilderNode id={props.id} data={data as any} />;
 });
 
 const CampaignManagerNodeWrapper = memo((props: NodeProps) => {
-  const context = (props.data as NodeDataWithContext)._context;
-  return <CampaignManagerNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+  const data = props.data as NodeDataWithContext;
+  return <CampaignManagerNode id={props.id} data={data as any} />;
 });
 
 const CaptionNodeWrapper = memo((props: NodeProps) => {
-  const context = (props.data as NodeDataWithContext)._context;
-  return <CaptionNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+  const data = props.data as NodeDataWithContext;
+  return <CaptionNode id={props.id} data={data as any} />;
 });
 
 const PromptBuilderNodeWrapper = memo((props: NodeProps) => {
-  const context = (props.data as NodeDataWithContext)._context;
-  return <PromptBuilderNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+  const data = props.data as NodeDataWithContext;
+  return <PromptBuilderNode id={props.id} data={data as any} />;
 });
 
 const LLMNodeWrapper = memo((props: NodeProps) => {
-  const context = (props.data as NodeDataWithContext)._context;
-  return <LLMNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+  const data = props.data as NodeDataWithContext;
+  return <LLMNode id={props.id} data={data as any} />;
 });
 
 const TextInputNodeWrapper = memo((props: NodeProps) => {
-  const context = (props.data as NodeDataWithContext)._context;
-  return <TextInputNode {...props} onExecute={() => context?.executeNode?.(props.id)} />;
+  const data = props.data as NodeDataWithContext;
+  return <TextInputNode id={props.id} data={data as any} />;
 });
 
 CharacterBreakdownNodeWrapper.displayName = 'CharacterBreakdownNodeWrapper';
