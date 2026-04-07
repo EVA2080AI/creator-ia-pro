@@ -11,6 +11,11 @@ interface SupabaseProvisioningProps {
   onCancel: () => void;
 }
 
+interface SupabaseApiKey {
+  name: string;
+  api_key: string;
+}
+
 export function SupabaseProvisioning({ onProvisioned, onCancel }: SupabaseProvisioningProps) {
   const [pat, setPat] = useState(localStorage.getItem('supabase_pat') || '');
   const [orgs, setOrgs] = useState<Organization[]>([]);
@@ -41,8 +46,9 @@ export function SupabaseProvisioning({ onProvisioned, onCancel }: SupabaseProvis
       if (data.length > 0) setSelectedOrg(data[0].id);
       localStorage.setItem('supabase_pat', pat);
       setStep('org');
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar organizaciones');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al cargar organizaciones';
+      setError(msg);
       setStep('pat');
     }
   };
@@ -74,8 +80,9 @@ export function SupabaseProvisioning({ onProvisioned, onCancel }: SupabaseProvis
       setStep('polling');
       pollProjectReady(project.ref);
       
-    } catch (err: any) {
-      setError(err.message || 'Error al provisionar');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error al provisionar';
+      setError(msg);
       setStep('org');
     }
   };
@@ -105,8 +112,8 @@ export function SupabaseProvisioning({ onProvisioned, onCancel }: SupabaseProvis
       const res = await fetch(`https://api.supabase.com/v1/projects/${ref}/api-keys`, {
         headers: { 'Authorization': `Bearer ${pat}` }
       });
-      const data = await res.json();
-      const anonKeyObj = data.find((k: any) => k.name === 'anon');
+      const data = await res.json() as SupabaseApiKey[];
+      const anonKeyObj = data.find((k) => k.name === 'anon');
       
       if (anonKeyObj) {
         setStep('done');
@@ -119,8 +126,9 @@ export function SupabaseProvisioning({ onProvisioned, onCancel }: SupabaseProvis
       } else {
         throw new Error('No se encontró clave anon');
       }
-    } catch (err: any) {
-      setError(err.message || 'Error obteniendo claves API');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Error obteniendo claves API';
+      setError(msg);
       setStep('org');
     }
   };

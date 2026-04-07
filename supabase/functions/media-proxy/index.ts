@@ -69,7 +69,7 @@ serve(async (req) => {
 
     let modelSlug = "";
     let modelVersion = "";
-    let input: any = {};
+    let input: Record<string, string | number | boolean | undefined> = {};
 
     // Mapeo industrial a modelos de Replicate
     switch (tool) {
@@ -170,9 +170,10 @@ serve(async (req) => {
       status: 200,
     });
 
-  } catch (error: any) {
-    console.error("Media Proxy Failed:", error.message);
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error) {
+    const err = error as Error;
+    console.error("Media Proxy Failed:", err.message);
+    return new Response(JSON.stringify({ error: err.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });

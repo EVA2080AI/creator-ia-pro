@@ -11,8 +11,9 @@ RETURNS INTEGER AS $$
 DECLARE
   _new_balance INTEGER;
 BEGIN
-  IF NOT has_role(auth.uid(), 'admin') THEN
-    RAISE EXCEPTION 'Not authorized';
+  -- Allow if calling user is an admin OR if the caller is the service_role (e.g. from an Edge Function)
+  IF NOT has_role(auth.uid(), 'admin') AND (SELECT current_setting('role')) <> 'service_role' THEN
+    RAISE EXCEPTION 'Not authorized' USING ERRCODE = '42501';
   END IF;
   IF _amount <= 0 THEN
     RAISE EXCEPTION 'Amount must be positive';
@@ -40,8 +41,9 @@ RETURNS INTEGER AS $$
 DECLARE
   _new_balance INTEGER;
 BEGIN
-  IF NOT has_role(auth.uid(), 'admin') THEN
-    RAISE EXCEPTION 'Not authorized';
+  -- Allow if calling user is an admin OR if the caller is the service_role
+  IF NOT has_role(auth.uid(), 'admin') AND (SELECT current_setting('role')) <> 'service_role' THEN
+    RAISE EXCEPTION 'Not authorized' USING ERRCODE = '42501';
   END IF;
   IF _amount <= 0 THEN
     RAISE EXCEPTION 'Amount must be positive';
@@ -69,8 +71,9 @@ RETURNS INTEGER AS $$
 DECLARE
   _new_balance INTEGER;
 BEGIN
-  IF NOT has_role(auth.uid(), 'admin') THEN
-    RAISE EXCEPTION 'Not authorized';
+  -- Allow if calling user is an admin OR if the caller is the service_role
+  IF NOT has_role(auth.uid(), 'admin') AND (SELECT current_setting('role')) <> 'service_role' THEN
+    RAISE EXCEPTION 'Not authorized' USING ERRCODE = '42501';
   END IF;
 
   UPDATE profiles

@@ -23,7 +23,7 @@ interface Tool {
   id: ToolId;
   name: string;
   desc: string;
-  icon: any;
+  icon: React.ElementType;
   credits: number;
   category: "image" | "text";
   needsUpload: boolean;
@@ -100,8 +100,9 @@ export function StudioAITools() {
         if (data?.url) setResultImage(data.url);
       }
       await refreshProfile();
-    } catch (err: any) {
-      toast.error(err.message || "Error al procesar");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al procesar";
+      toast.error(msg);
     } finally {
       setIsProcessing(false);
     }

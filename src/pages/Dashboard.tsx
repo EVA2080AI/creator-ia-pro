@@ -26,13 +26,39 @@ import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer
 } from 'recharts';
 
+// ─── Phase 2 Hardening: Explicit Interfaces ──────────────────────────────────
+interface DashboardProject {
+  id: string;
+  name: string;
+  description: string | null;
+  updated_at: string;
+  created_at: string;
+  type: 'flow' | 'code';
+  thumbnail_url: string | null;
+  user_id: string;
+  files?: any;
+}
+interface TransactionRecord {
+  amount: number;
+  type: string;
+  description: string;
+  created_at: string;
+}
+
+interface CondominioStats {
+  total_unidades: number;
+  unidades_al_dia: number;
+  recaudo_mes: number;
+  cartera_mora: number;
+}
+
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth("/auth");
   const { profile, refreshProfile } = useProfile(user?.id);
   const { subscription, checkSubscription } = useSubscription(user?.id);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [spaces, setSpaces] = useState<any[]>([]);
+  const [spaces, setSpaces] = useState<DashboardProject[]>([]);
   const [isCreatingSpace, setIsCreatingSpace] = useState(false);
   const [newSpaceName, setNewSpaceName] = useState("");
   const [newSpaceDesc, setNewSpaceDesc] = useState("");
@@ -41,8 +67,8 @@ const Dashboard = () => {
   const [spacesCount, setSpacesCount] = useState(0);
   const [usageData, setUsageData] = useState<{ name: string; credits: number }[]>([]);
   const [toolData, setToolData] = useState<{ name: string; value: number; color: string }[]>([]);
-  const [condominioStats, setCondominioStats] = useState<{ total_unidades: number; unidades_al_dia: number; recaudo_mes: number; cartera_mora: number } | null>(null);
-  const [openingProject, setOpeningProject] = useState<any | null>(null);
+  const [condominioStats, setCondominioStats] = useState<CondominioStats | null>(null);
+  const [openingProject, setOpeningProject] = useState<DashboardProject | null>(null);
   const { duplicateProject, deleteProject: deleteStudioProject } = useStudioProjects();
 
   useEffect(() => {
@@ -73,19 +99,19 @@ const Dashboard = () => {
             .not("type", "in", '("subscription_reload","credit_purchase")'),
         ]);
         
-        const combined = [
+        const combined = ([
           ...(spacesData.data || []).map(s => ({ ...s, type: 'flow' })),
           ...(codeRes.data || []).map(c => ({ ...c, type: 'code' }))
-        ].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 8);
+        ] as DashboardProject[]).sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()).slice(0, 8);
 
         setAssetsCount(assetsCountData.count || 0);
         setSpacesCount(spacesCountData.count || 0);
         setSpaces(combined);
 
         if (profile?.condominio_id) {
-          // @ts-ignore
+          // @ts-ignore - RPC not yet in generated types
           const { data: statsData } = await supabase.rpc("get_condominio_stats", { _condominio_id: profile.condominio_id });
-          if (statsData) setCondominioStats(statsData as any);
+          if (statsData) setCondominioStats(statsData as unknown as CondominioStats);
         }
 
         const DAY_LABELS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -95,7 +121,7 @@ const Dashboard = () => {
           dayMap[d.toDateString()] = { name: DAY_LABELS[d.getDay()], credits: 0 };
         }
         let visual = 0, copy = 0, system = 0;
-        (txnsData.data || []).forEach((tx: any) => {
+        (txnsData.data || []).forEach((tx: TransactionRecord) => {
           const key = new Date(tx.created_at).toDateString();
           if (dayMap[key]) dayMap[key].credits += Math.abs(tx.amount || 0);
           const desc = (tx.description || "").toLowerCase();
@@ -136,12 +162,12 @@ const Dashboard = () => {
     navigate(`/formarketing?spaceId=${data.id}`);
   };
 
-  const handleDuplicate = async (e: React.MouseEvent, project: any) => {
+  const handleDuplicate = async (e: React.MouseEvent, project: DashboardProject) => {
     e.stopPropagation();
     if (project.type === 'code') {
-      const newProj = await duplicateProject(project);
+      const newProj = await duplicateProject(project as any);
       if (newProj) {
-        setSpaces(prev => [ { ...newProj, type: 'code' }, ...prev ]);
+        setSpaces(prev => [ { ...newProj, type: 'code', thumbnail_url: null } as DashboardProject, ...prev ]);
       }
     } else {
       // Duplicate Space (Canvas IA)
@@ -159,7 +185,7 @@ const Dashboard = () => {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, project: any) => {
+  const handleDelete = async (e: React.MouseEvent, project: DashboardProject) => {
     e.stopPropagation();
     if (!window.confirm(`¿Estás seguro de eliminar "${project.name}"?`)) return;
 

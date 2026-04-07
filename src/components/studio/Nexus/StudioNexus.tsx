@@ -12,6 +12,7 @@ import {
   Trash2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { type StudioProject } from "@/hooks/useStudioProjects";
 import { 
   Dialog,
   DialogContent,
@@ -24,8 +25,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 interface StudioNexusProps {
-  currentProject: any;
-  allProjects: any[];
+  currentProject: StudioProject;
+  allProjects: StudioProject[];
 }
 
 export function StudioNexus({ currentProject, allProjects }: StudioNexusProps) {

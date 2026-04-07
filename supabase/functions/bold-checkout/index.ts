@@ -6,6 +6,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface BoldCheckoutRequest {
+  packId: string;
+  userId: string;
+  buyerEmail: string;
+  description?: string;
+}
+
+interface BoldApiResponse {
+  payload?: {
+    payment_link?: string;
+    url?: string;
+  };
+  message?: string;
+}
+
 /**
  * Bold API Checkout Link Generator
  */
@@ -13,7 +28,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { packId, userId, buyerEmail, description } = await req.json();
+    const { packId, userId, buyerEmail, description }: BoldCheckoutRequest = await req.json();
 
     // ─── Server-Side Price Verification (Expert-Level Security) ───
     const PRICE_MAP: Record<string, number> = {
@@ -57,7 +72,7 @@ serve(async (req) => {
       body: JSON.stringify(payload)
     });
 
-    const data = await response.json();
+    const data: BoldApiResponse = await response.json();
 
     if (!response.ok) {
       throw new Error(data.message || "Error al en Bold");
@@ -89,8 +104,9 @@ serve(async (req) => {
     return new Response(JSON.stringify({ url, linkId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error) {
+    const err = error as Error;
+    return new Response(JSON.stringify({ error: err.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
     });

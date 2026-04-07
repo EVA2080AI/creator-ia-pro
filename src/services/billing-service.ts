@@ -1,5 +1,17 @@
 import { supabase } from "@/integrations/supabase/client";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
+import type { PostgrestResponse } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+
+export type CreditPack = (typeof CREDIT_PACKS)[number];
+
+// ─── Custom Types for Missing RPCs ──────────────────────────────────────────
+type SupabaseCustom = {
+  rpc: <T = any>(name: string, args: Record<string, any>) => Promise<PostgrestResponse<T>>;
+  from: (table: string) => any; // Allow temporary access to non-generated tables
+} & typeof supabase;
+
+const sb = (supabase as unknown) as SupabaseCustom;
 
 /**
  * Billing Service — Credit-Based Economy (Industrial V4.0)
@@ -68,12 +80,12 @@ export const CREDIT_PLANS: CreditPlan[] = [
 // ─── Bold Service ──────────────────────────────────────────────────────────
 export const boldService = {
   async purchaseCredits(packOrPlanId: string) {
-    const item = CREDIT_PACKS.find(p => p.id === packOrPlanId) || 
-                 CREDIT_PLANS.find(p => p.id === packOrPlanId);
+    const item = (CREDIT_PACKS.find(p => p.id === packOrPlanId) || 
+                  CREDIT_PLANS.find(p => p.id === packOrPlanId)) as CreditPack | CreditPlan | undefined;
     
     if (!item) throw new Error("Producto no encontrado");
 
-    const rawPrice = (item as any).price_display || (item as any).price || "0";
+    const rawPrice = 'price_display' in item ? item.price_display : (item as CreditPack).price || "0";
     const amountStr = rawPrice.replace(/[^0-9]/g, "");
     const amount = parseInt(amountStr, 10);
 
@@ -180,7 +192,7 @@ export const adminService = {
   },
 
   async refundCredits(targetUserId: string, amount: number, reason?: string) {
-    const { data, error } = await (supabase as any).rpc("admin_refund_credits", {
+    const { data, error } = await sb.rpc("admin_refund_credits", {
       _target_user_id: targetUserId,
       _amount: amount,
       _reason: reason || 'Admin refund',
@@ -190,15 +202,20 @@ export const adminService = {
   },
 
   async listPlans(): Promise<CreditPlan[]> {
-    const { data, error } = await (supabase as any)
-      .from("plans")
-      .select("*")
-      .order("credits_amount", { ascending: true });
+    try {
+      const { data, error } = await sb
+        .from("plans")
+        .select("*")
+        .order("credits_amount", { ascending: true });
 
-    if (error || !data || data.length === 0) {
+      if (error || !data || (data as any[]).length === 0) {
+        return CREDIT_PLANS;
+      }
+      return data as unknown as CreditPlan[];
+    } catch (e) {
+      console.warn("[Billing] Plans table not available, using defaults.");
       return CREDIT_PLANS;
     }
-    return (data as any) as CreditPlan[];
   },
 
   async saveSettings(settings: Record<string, string>) {

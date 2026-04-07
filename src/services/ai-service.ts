@@ -1,5 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { PostgrestResponse } from "@supabase/supabase-js";
+
+// ─── Custom Types for Missing RPCs ──────────────────────────────────────────
+type SupabaseCustom = {
+  rpc: <T = any>(name: string, args: Record<string, any>) => Promise<PostgrestResponse<T>>;
+} & typeof supabase;
+
+const sb = supabase as unknown as SupabaseCustom;
 
 // ─── TYPES & INTERFACES ───────────────────────────────────────────────────────
 
@@ -26,8 +34,8 @@ export interface AIResponse {
   text?: string;
   url?: string;
   model?: string;
-  ui?: any; // Dynamic UI structure from AI
-  [key: string]: any;
+  ui?: Record<string, any>; // Dynamic UI structure from AI
+  [key: string]: string | number | boolean | Record<string, any> | undefined;
 }
 
 interface ProfileData {
@@ -155,7 +163,7 @@ export const aiService = {
       const { data: authData } = await supabase.auth.getUser();
       if (!authData.user) throw new Error("Acceso no autorizado");
 
-      const { data: profile } = await (supabase as any)
+      const { data: profile } = await sb
         .from("profiles")
         .select("subscription_tier, credits_balance")
         .eq("user_id", authData.user.id)
@@ -191,7 +199,7 @@ export const aiService = {
         }
       }
 
-      const { error: rpcError } = await (supabase as any).rpc("spend_credits", {
+      const { error: rpcError } = await sb.rpc("spend_credits", {
         _amount: cost,
         _action: action || tool || "ai-gen",
         _model: model || tool || "unknown",
@@ -230,15 +238,16 @@ export const aiService = {
 
       return result;
 
-    } catch (err: any) {
-      console.error("[Genesis Neural] Error:", err.message);
+    } catch (err) {
+      const error = err as Error;
+      console.error("[Genesis Neural] Error:", error.message);
       try {
         const { data: authData } = await supabase.auth.getUser();
         if (authData.user) {
-          await (supabase as any).rpc("refund_credits", { _amount: cost, _user_id: authData.user.id });
+          await sb.rpc("refund_credits", { _amount: cost, _user_id: authData.user.id });
         }
       } catch { /* silent */ }
-      throw new Error(err.message || "Fallo en la síntesis neural. Intenta de nuevo.");
+      throw new Error(error.message || "Fallo en la síntesis neural. Intenta de nuevo.");
     }
   },
 

@@ -5,6 +5,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+interface ProjectFile {
+  language: string;
+  content: string;
+}
+
 /** Extract user_id from Supabase JWT */
 function extractUserIdFromJwt(authHeader: string | null): string | null {
   try {
@@ -63,7 +68,10 @@ serve(async (req) => {
     if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is not configured");
 
     const filesContext = Object.entries(currentFiles || {})
-      .map(([name, f]: [string, any]) => '--- ' + name + ' ---\n' + f.content)
+      .map(([name, f]) => {
+        const file = f as ProjectFile;
+        return '--- ' + name + ' ---\n' + file.content;
+      })
       .join('\n\n');
 
     const systemPrompt = `Eres BuilderAI, un agente de desarrollo web experto integrado en Creator IA Pro. Creas aplicaciones React completas y funcionales.
@@ -148,10 +156,11 @@ ${filesContext || "(Proyecto vacío — crea desde cero)"}
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
-  } catch (e) {
-    console.error("studio-generate error:", e);
+  } catch (error) {
+    const err = error as Error;
+    console.error("studio-generate error:", err.message);
     return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : "Error desconocido" }),
+      JSON.stringify({ error: err.message || "Error desconocido" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

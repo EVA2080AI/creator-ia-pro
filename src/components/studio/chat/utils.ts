@@ -40,7 +40,16 @@ export function repairJson(text: string): string {
   return json;
 }
 
-export function extractJson(text: string): any | null {
+// ─── Phase 2 Hardening: AI Response Interface ──────────────────────────────
+export interface GenesisResponse {
+  files?: Record<string, string | { content: string; language?: string; deleted?: boolean }>;
+  explanation?: string;
+  tech_stack?: string[];
+  primary_colors?: string[];
+  ux_principles?: string[];
+}
+
+export function extractJson(text: string): GenesisResponse | null {
   const t = text.trim();
   
   const tryParse = (str: string) => {
@@ -168,7 +177,7 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
     Object.entries(extracted.files).forEach(([path, value]) => {
       let content = '';
       if (typeof value === 'string') content = value;
-      else if (value && typeof value === 'object' && (value as any).content) content = (value as any).content;
+      else if (value && typeof value === 'object' && value.content) content = value.content;
       
       if (content) {
         const lang = path.split('.').pop()?.toLowerCase() || 'tsx';
@@ -212,20 +221,23 @@ export function processRawResponse(rawText: string, prompt: string, isChatOnly: 
   if (!rawText) return null;
   if (isChatOnly) return { files: {} as Record<string, StudioFile>, explanation: rawText, stack: [], deps: [], suggestions: [], isChatOnly: true };
   const extracted = extractJson(rawText);
-  if (!extracted) return { files: {} as Record<string, StudioFile>, explanation: rawText, stack: [], deps: [], suggestions: [], isChatOnly: true };
+  if (!extracted) return { files: {} as Record<string, StudioFile>, explanation: rawText, tech_stack: [], deps: [], suggestions: [], isChatOnly: true };
   const normalizedFiles: Record<string, StudioFile> = {};
   if (extracted.files) {
     for (const [filename, value] of Object.entries(extracted.files)) {
       if (typeof value === 'string') {
         const lang = filename.endsWith('.css') ? 'css' : filename.endsWith('.json') ? 'json' : 'tsx';
         normalizedFiles[filename] = { language: lang, content: value };
-      } else if (value && typeof value === 'object' && (value as any).content) {
-        normalizedFiles[filename] = value as StudioFile;
+      } else if (value && typeof value === 'object' && value.content) {
+        normalizedFiles[filename] = { 
+          language: value.language || (filename.endsWith('.css') ? 'css' : 'tsx'), 
+          content: value.content 
+        };
       }
     }
   }
-  const stack = extracted.tech_stack ?? [];
+  const stack = extracted.tech_stack || [];
   const deps  = detectDeps(normalizedFiles);
   const suggestions = buildSuggestions(stack, prompt);
-  return { files: normalizedFiles, explanation: extracted.explanation || '', stack, deps, suggestions };
+  return { files: normalizedFiles, explanation: extracted.explanation || '', tech_stack: stack, deps, suggestions };
 }

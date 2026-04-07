@@ -6,19 +6,33 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-bold-signature",
 };
 
+interface Transaction {
+  id: string;
+  user_id: string;
+  type: string;
+  amount: number;
+  description: string;
+}
+
 /**
- * Bold.co Webhook Signature Verification
- * @param body Raw request body as text
- * @param signature Value of x-bold-signature header
- * @param secret Webhook secret from Bold dashboard
+ * Bold.co Webhook Signature Verification (Binary-safe)
  */
 async function verifySignature(body: string, signature: string | null, secret: string | undefined): Promise<boolean> {
   if (!signature || !secret) return false;
   
   // Bold-co payload for HMAC is the Base64 of the raw body
-  const base64Body = btoa(body);
-  
+  // Re-encoding string to UTF-8 then to Base64 to ensure binary compatibility
   const encoder = new TextEncoder();
+  const bodyData = encoder.encode(body);
+  
+  // Convert Uint8Array to binary string for btoa safely
+  let binary = "";
+  const len = bodyData.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bodyData[i]);
+  }
+  const base64Body = btoa(binary);
+  
   const keyData = encoder.encode(secret);
   const messageData = encoder.encode(base64Body);
 
@@ -34,7 +48,13 @@ async function verifySignature(body: string, signature: string | null, secret: s
   const hashArray = Array.from(new Uint8Array(signatureBuffer));
   const hexSignature = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
-  return hexSignature === signature;
+  // Constant-time comparison to prevent timing attacks
+  if (hexSignature.length !== signature.length) return false;
+  let result = 0;
+  for (let i = 0; i < hexSignature.length; i++) {
+    result |= hexSignature.charCodeAt(i) ^ signature.charCodeAt(i);
+  }
+  return result === 0;
 }
 
 /**
@@ -48,26 +68,25 @@ serve(async (req) => {
     const body = await req.text();
     const webhookSecret = Deno.env.get("BOLD_WEBHOOK_SECRET");
 
-    // Verify security (skip if secret is missing to avoid blocking in dev, but log warning)
+    // Verify security
     if (webhookSecret) {
       const isValid = await verifySignature(body, signature, webhookSecret);
       if (!isValid) {
         console.error("[bold-webhook] Invalid signature attempt");
-        return new Response("Invalid signature", { status: 401 });
+        return new Response("Unauthorized", { status: 401 });
       }
     } else {
-      console.warn("[bold-webhook] BOLD_WEBHOOK_SECRET not set. Skipping verification.");
+      console.warn("[bold-webhook] BOLD_WEBHOOK_SECRET not set. Verification skipped.");
     }
 
     const payload = JSON.parse(body);
-    console.log("Bold Webhook Received:", payload);
+    console.log("[bold-webhook] Received payload:", JSON.stringify(payload, null, 2));
 
-    // Reference ID to find the transaction
     const linkId = payload?.data?.reference || payload?.reference || payload?.payment_link_id;
     const status = payload?.data?.status || payload?.status;
 
     if (!linkId) {
-      return new Response("Missing Link ID in payload", { status: 400 });
+      return new Response("Missing Reference ID", { status: 400 });
     }
 
     if (status === "APPROVED" || status === "PAID") {
@@ -76,58 +95,67 @@ serve(async (req) => {
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
       );
 
-      // 1. Find the pending transaction
+      // 1. Find the pending transaction with EXACT matching
       const { data: txList, error: txError } = await supabaseClient
         .from("transactions")
         .select("*")
         .eq("type", "bold_pending")
-        .like("description", `%${linkId}%`);
+        .ilike("description", `%${linkId}%`);
         
       if (txError || !txList || txList.length === 0) {
-        console.error("Link no encontrado en base de datos:", linkId);
-        return new Response("No pending tx matching link", { status: 404 });
+        console.error("[bold-webhook] No matching pending transaction for:", linkId);
+        return new Response("Transaction not found", { status: 404 });
       }
 
-      const tx = txList[0];
-      const packId = tx.description.split("|")[0];
-
-      // 2. Map packId to credit amount (including Plans and Packs)
-      let creditsToAdd = 0;
-      switch (packId) {
-        // One-time Packs (from credit-packs.ts)
-        case "pack_200":  creditsToAdd = 200;  break;
-        case "pack_1000": creditsToAdd = 1000; break;
-        case "pack_2000": creditsToAdd = 2000; break;
-        // Subscription-style Plans (from pricing page)
-        case "starter":   creditsToAdd = 500;  break;
-        case "creator":   creditsToAdd = 1200; break;
-        case "pymes":     creditsToAdd = 4000; break;
-        // Legacy handles
-        case "pack_100":  creditsToAdd = 100;  break;
-        case "pack_500":  creditsToAdd = 500;  break;
-        case "pack_2500": creditsToAdd = 2500; break;
-        default: break;
+      // Filter exact matches to avoid partial string collisions
+      const tx = (txList as Transaction[]).find((t: Transaction) => t.description.includes(linkId));
+      if (!tx) {
+        return new Response("Transaction match failed", { status: 404 });
       }
+
+      const packId = tx.description.split("|")[0]?.trim();
+
+      // 2. Map packId to credit amount
+      const creditMap: Record<string, number> = {
+        "pack_200": 200,
+        "pack_1000": 1000,
+        "pack_2000": 2000,
+        "starter": 500,
+        "creator": 1200,
+        "pymes": 4000,
+        "pack_100": 100,
+        "pack_500": 500,
+        "pack_2500": 2500
+      };
+
+      const creditsToAdd = creditMap[packId] || 0;
 
       if (creditsToAdd > 0) {
-        // 3. Award credits via Atomic RPC
+        console.log(`[bold-webhook] Processing ${creditsToAdd} credits for user ${tx.user_id}`);
+        
+        // 3. Award credits via Atomic RPC (now supports service_role)
         const { error: rpcError } = await supabaseClient.rpc("admin_add_credits", {
           _target_user_id: tx.user_id,
           _amount: creditsToAdd,
           _reason: `Bold Payment: ${packId} (${linkId})`
         });
 
-        if (rpcError) throw rpcError;
+        if (rpcError) {
+          console.error("[bold-webhook] RPC Error:", rpcError);
+          throw new Error("Failed to award credits");
+        }
 
-        // 3.5. If it is a subscription plan, update the profile's subscription_tier
+        // 3.5. Update subscription tier if applicable
         if (["starter", "creator", "pymes"].includes(packId)) {
-          console.log(`Upgrading user ${tx.user_id} to plan: ${packId}`);
+          console.log(`[bold-webhook] Upgrading user ${tx.user_id} tier to: ${packId}`);
           await supabaseClient
             .from("profiles")
-            .update({ subscription_tier: packId, updated_at: new Date().toISOString() })
+            .update({ 
+              subscription_tier: packId, 
+              updated_at: new Date().toISOString() 
+            })
             .eq("user_id", tx.user_id);
             
-          // Add a trackable transaction for the tier upgrade itself
           await supabaseClient.from("transactions").insert({
             user_id: tx.user_id,
             type: "subscription_change",
@@ -136,17 +164,24 @@ serve(async (req) => {
           });
         }
 
-        // 4. Confirm transaction
+        // 4. Confirm transaction status
         await supabaseClient
           .from("transactions")
           .update({ type: "bold_approved", amount: creditsToAdd })
           .eq("id", tx.id);
+          
+        console.log(`[bold-webhook] Success: Credits added and transaction verified.`);
       }
     }
 
-    return new Response(JSON.stringify({ received: true }), { status: 200, headers: corsHeaders });
-  } catch (err: any) {
-    console.error("Webhook Error:", err.message);
-    return new Response(err.message, { status: 500, headers: corsHeaders });
+    return new Response(JSON.stringify({ success: true }), { 
+      status: 200, 
+      headers: { ...corsHeaders, "Content-Type": "application/json" } 
+    });
+  } catch (err) {
+    const error = err as Error;
+    console.error("[bold-webhook] Fatal Error:", error.message);
+    return new Response("Internal Processing Error", { status: 500, headers: corsHeaders });
   }
 });
+

@@ -17,8 +17,8 @@ export interface Transaction {
   created_at: string;
 }
 
-export const TIERS: Record<string, { label: string; color: string; icon: any }> = {
-  free:      { label: "Free",       color: "#6B7280", icon: "Zap" }, // Icon replaced by string for simplicity in transport, better to pass components or use a map
+export const TIERS: Record<string, { label: string; color: string; icon: string }> = {
+  free:      { label: "Free",       color: "#6B7280", icon: "Zap" },
   starter:   { label: "Starter",    color: "#4ADE80", icon: "Zap" },
   creator:   { label: "Creator",    color: "#A855F7", icon: "Rocket" },
   pymes:     { label: "Pymes",      color: "#F59E0B", icon: "Crown" },

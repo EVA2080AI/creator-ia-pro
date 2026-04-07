@@ -3,6 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Shield, Search, Loader2, CheckCircle, Plus } from "lucide-react";
 import { AdminUser } from "../types";
+import type { PostgrestResponse } from "@supabase/supabase-js";
+
+// ─── Custom Types for Missing RPCs ──────────────────────────────────────────
+interface SupabaseCustom {
+  rpc(name: string, args: Record<string, any>): Promise<PostgrestResponse<any>>;
+}
 
 const ROLES_CONFIG: Record<string, { label: string; color: string; desc: string }> = {
   admin:     { label: 'Admin',     color: '#EF4444', desc: 'Acceso total al panel de control' },
@@ -21,10 +27,12 @@ export function RolesTab({ users, currentUserEmail }: {
   const fetchAllRoles = useCallback(async () => {
     setLoadingRoles(true);
     const result: Record<string, string[]> = {};
+    const sb = (supabase as unknown) as SupabaseCustom;
+    
     await Promise.all(
       users.map(async (u) => {
-        const { data } = await (supabase.rpc as any)('admin_get_user_roles', { _target_user_id: u.user_id });
-        result[u.user_id] = (data || []).map((r: any) => r.role);
+        const { data } = await sb.rpc('admin_get_user_roles', { _target_user_id: u.user_id });
+        result[u.user_id] = (data || []).map((r: { role: string }) => r.role);
       })
     );
     setUserRoles(result);
@@ -36,11 +44,14 @@ export function RolesTab({ users, currentUserEmail }: {
   const handleToggleRole = async (userId: string, role: string, currentlyHas: boolean) => {
     const key = `${userId}-${role}`;
     setRoleActionLoading(key);
-    const { error } = await (supabase.rpc as any)('admin_set_role', {
+    const sb = (supabase as unknown) as SupabaseCustom;
+    
+    const { error } = await sb.rpc('admin_set_role', {
       _target_user_id: userId,
       _role: role,
       _grant: !currentlyHas,
     });
+    
     if (error) toast.error(error.message);
     else {
       toast.success(`Rol "${role}" ${!currentlyHas ? 'asignado' : 'removido'}`);
@@ -56,7 +67,6 @@ export function RolesTab({ users, currentUserEmail }: {
 
   return (
     <div className="space-y-4">
-      {/* Legend */}
       <div className="flex flex-wrap gap-3">
         {Object.entries(ROLES_CONFIG).map(([key, cfg]) => (
           <div key={key} className="flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold"
@@ -67,7 +77,6 @@ export function RolesTab({ users, currentUserEmail }: {
         ))}
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 pointer-events-none" />
         <input
@@ -111,8 +120,8 @@ export function RolesTab({ users, currentUserEmail }: {
                   </div>
                   {Object.entries(ROLES_CONFIG).map(([roleKey, cfg]) => {
                     const hasRole = roles.includes(roleKey);
-                    const key = `${u.user_id}-${roleKey}`;
-                    const busy = roleActionLoading === key;
+                    const k = `${u.user_id}-${roleKey}`;
+                    const busy = roleActionLoading === k;
                     const cantRevoke = roleKey === 'admin' && isCurrentUser;
                     return (
                       <button key={roleKey} disabled={busy || cantRevoke}
