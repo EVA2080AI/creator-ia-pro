@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FolderOpen, Image as ImageIcon, Plus, LayoutTemplate, Code2, Sparkles, Wand2 } from "lucide-react";
 import { ProjectsView } from "@/components/spaces/ProjectsView";
 import { LibraryView } from "@/components/spaces/LibraryView";
+import { HubView } from "@/components/spaces/HubView";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -14,7 +15,7 @@ import {
 const Spaces = () => {
   const { loading: authLoading } = useAuth("/auth");
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'projects' | 'library'>('projects');
+  const [activeTab, setActiveTab] = useState<'projects' | 'library' | 'hub'>('projects');
 
   if (authLoading) {
     return (
@@ -28,6 +29,7 @@ const Spaces = () => {
   const TABS = [
     { id: 'projects', label: 'Tus Proyectos', icon: FolderOpen, desc: 'Flujos y Código' },
     { id: 'library', label: 'Mi Biblioteca', icon: ImageIcon,  desc: 'Imágenes y Activos' },
+    { id: 'hub', label: 'Hub Plantillas', icon: LayoutTemplate, desc: 'Explorar' },
   ] as const;
 
   return (
@@ -75,14 +77,13 @@ const Spaces = () => {
                   Flujo desde IA
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-zinc-100 my-1 mx-2" />
-                <DropdownMenuItem asChild className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-zinc-50 focus:bg-primary/10 focus:text-primary transition-all font-display text-zinc-600 mb-0.5">
-                  <a href="https://creator-ia.com/hub" target="_blank" rel="noreferrer">
-                    <Sparkles className="h-4 w-4 mr-3 opacity-60 text-primary" /> 
-                    Hub de Plantillas
-                  </a>
+                <DropdownMenuItem className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-zinc-50 focus:bg-primary/10 focus:text-primary transition-all font-display text-zinc-600 mb-0.5"
+                  onClick={() => setActiveTab('hub')}>
+                  <Sparkles className="h-4 w-4 mr-3 opacity-60 text-primary" /> 
+                  Hub de Plantillas
                 </DropdownMenuItem>
                 <DropdownMenuItem className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-zinc-50 focus:bg-primary/10 focus:text-primary transition-all font-display text-zinc-600 mb-0.5"
-                  onClick={() => navigate('/hub')}>
+                  onClick={() => navigate('/studio-flow')}>
                   <LayoutTemplate className="h-4 w-4 mr-3 opacity-60" /> 
                   Flujo en Blanco
                 </DropdownMenuItem>
@@ -122,9 +123,11 @@ const Spaces = () => {
         {/* Content Area */}
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           {activeTab === 'projects' ? (
-            <ProjectsView onOpenCreate={() => navigate('/hub')} />
-          ) : (
+            <ProjectsView onOpenCreate={() => setActiveTab('hub')} />
+          ) : activeTab === 'library' ? (
             <LibraryView />
+          ) : (
+            <HubView />
           )}
         </div>
 

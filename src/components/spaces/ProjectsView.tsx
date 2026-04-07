@@ -320,11 +320,11 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
           
           {!search && (
             <div className="flex items-center gap-3">
-              <a href="https://creator-ia.com/hub" target="_blank" rel="noreferrer" className="flex items-center gap-2 px-4 py-2 border border-primary/30 rounded-xl bg-primary/5 hover:bg-primary/10 text-xs font-bold text-primary transition-all font-display shadow-sm">
+              <button onClick={onOpenCreate} className="flex items-center gap-2 px-4 py-2 border border-primary/30 rounded-xl bg-primary/5 hover:bg-primary/10 text-xs font-bold text-primary transition-all font-display shadow-sm">
                 <LayoutTemplate className="h-3.5 w-3.5" /> Explorar Hub (Plantillas)
-              </a>
-              <button onClick={onOpenCreate} className="flex items-center gap-2 px-4 py-2 border border-zinc-200 rounded-xl bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-700 transition-all font-display shadow-sm">
-                <Plus className="h-3.5 w-3.5" /> Crear Proyecto
+              </button>
+              <button onClick={() => navigate('/studio-flow')} className="flex items-center gap-2 px-4 py-2 border border-zinc-200 rounded-xl bg-white hover:bg-zinc-50 text-xs font-bold text-zinc-700 transition-all font-display shadow-sm">
+                <Plus className="h-3.5 w-3.5" /> Lienzo en Blanco
               </button>
             </div>
           )}

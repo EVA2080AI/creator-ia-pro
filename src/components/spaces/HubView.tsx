@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+
 import { motion, useInView } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -16,7 +16,7 @@ import {
 // ─── Template Definitions ────────────────────────────────────────────────────
 import { type Template, CATEGORIES as TEMPLATE_CATEGORIES, TEMPLATES } from "@/lib/templates";
 const NEW_TEMPLATE_IDS = new Set(TEMPLATES.slice(-5).map(t => t.id));
-const Hub = () => {
+export const HubView = () => {
   const { user, signOut } = useAuth("/auth");
   const { profile } = useProfile(user?.id);
   const navigate = useNavigate();
@@ -102,11 +102,7 @@ const Hub = () => {
   };
 
   return (
-    <>
-      <Helmet><title>Hub de Plantillas | Creator IA Pro</title></Helmet>
-
-      <div className="mx-auto max-w-[1440px] px-8 py-10 pt-6 font-sans">
-        <div className="max-w-[1440px] mx-auto px-8 pb-12">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
 
           {/* Header */}
           <div className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-8">
@@ -312,10 +308,6 @@ const Hub = () => {
           <p className="text-center text-[10px] text-zinc-400 mt-12 font-bold uppercase tracking-[0.3em] font-display">
             {TEMPLATES.length} plantillas disponibles · Más con cada actualización
           </p>
-        </div>
-      </div>
-    </>
+    </div>
   );
 };
-
-export default Hub;

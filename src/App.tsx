@@ -58,7 +58,6 @@ const Tools        = lazy(() => import("./pages/Tools"));
 const Admin        = lazy(() => import("./pages/Admin"));
 const Formarketing = lazy(() => import("./pages/Formarketing"));
 const Profile      = lazy(() => import("./pages/Profile"));
-const Hub          = lazy(() => import("./pages/Hub"));
 const Antigravity  = lazy(() => import("./pages/Antigravity"));
 const Chat         = lazy(() => import("./pages/Chat"));
 const ShareScreen  = lazy(() => import("./pages/ShareScreen"));
@@ -130,7 +129,7 @@ const App = () => {
                     <Route path="/studio-flow"  element={<Formarketing />} />
                     <Route path="/formarketing" element={<Navigate to="/studio-flow" replace />} />
                     <Route path="/profile"      element={<Profile />} />
-                    <Route path="/hub"          element={<Hub />} />
+                    <Route path="/hub"          element={<Navigate to="/spaces" replace />} />
                     <Route path="/antigravity"  element={<Antigravity />} />
                     <Route path="/chat"         element={<Chat />} />
                     <Route path="/sharescreen"  element={<ShareScreen />} />
