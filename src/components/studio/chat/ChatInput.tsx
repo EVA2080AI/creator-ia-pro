@@ -223,7 +223,7 @@ export function ChatInput({
           }}
           transition={{ duration: 0.3 }}
           className={cn(
-            "rounded-2xl bg-white overflow-hidden transition-colors duration-300",
+            "rounded-2xl bg-white relative z-20 outline-none transition-colors duration-300",
             isArchitectMode ? "border border-primary/20" : "border border-zinc-200"
           )}
         >
@@ -234,7 +234,7 @@ export function ChatInput({
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 exit={{ opacity: 0 }}
-                className="h-0.5 w-full origin-left bg-gradient-to-r from-primary via-violet-500 to-primary"
+                className="h-0.5 w-full origin-left bg-gradient-to-r from-primary via-violet-500 to-primary rounded-t-2xl absolute top-0 left-0"
                 style={{ backgroundSize: '200% 100%' }}
               />
             )}

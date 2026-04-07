@@ -19,13 +19,15 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex items-center gap-2.5 px-4 py-2 rounded-xl transition-all duration-500 border group",
-          "bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20 shadow-2xl"
+          "flex items-center gap-2.5 px-4 py-2 rounded-xl transition-all duration-300 border border-zinc-200 group relative overflow-hidden bg-white hover:bg-zinc-50 shadow-sm",
+          isOpen && "ring-2 ring-primary/20 border-primary"
         )}
       >
         <Sparkles className={cn("h-3.5 w-3.5 transition-colors", isOpen ? "text-primary" : "text-zinc-500 group-hover:text-primary")} />
-        <span className="text-[10px] font-black uppercase tracking-widest italic">{currentModel.label}</span>
-        <ChevronDown className={cn("h-3 w-3 transition-transform duration-500", isOpen ? "rotate-180 text-primary" : "text-zinc-600")} />
+        <span className={cn("text-[10px] font-black uppercase tracking-widest transition-colors", isOpen ? "text-primary" : "text-zinc-600")}>
+          {currentModel.label}
+        </span>
+        <ChevronDown className={cn("h-3 w-3 transition-transform duration-500", isOpen ? "rotate-180 text-primary" : "text-zinc-400")} />
       </button>
 
       <AnimatePresence>
@@ -42,10 +44,13 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute left-0 bottom-full mb-4 w-80 rounded-2xl overflow-hidden z-50 bg-[#0A0A0C] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-3xl"
+              className="absolute right-0 bottom-full mb-3 w-[22rem] max-w-[calc(100vw-2rem)] rounded-2xl overflow-hidden z-[100] bg-white border border-zinc-200 shadow-[0_20px_60px_rgba(0,0,0,0.12)]"
             >
-              <div className="px-5 py-4 bg-white/5 border-b border-white/5">
-                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">IA_NEURAL_ENGINE_V21.0</span>
+              <div className="px-5 py-4 bg-zinc-50/80 border-b border-zinc-100 backdrop-blur-xl">
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] relative flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]" />
+                  IA_NEURAL_ENGINE_V21.0
+                </span>
               </div>
               
               <div className="p-2 space-y-1">
@@ -54,17 +59,17 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
                     key={m.id} 
                     onClick={() => { onSelect(m.id); setIsOpen(false); }}
                     className={cn(
-                      "w-full flex flex-col gap-1.5 px-4 py-3 text-left transition-all rounded-xl border group/item",
+                      "w-full flex flex-col gap-1.5 px-4 py-3 text-left transition-all rounded-xl border group/item relative overflow-hidden",
                       selectedModel === m.id 
-                        ? "bg-primary/10 border-primary/20 text-white font-bold" 
-                        : "text-zinc-500 border-transparent hover:bg-white/5 hover:text-zinc-200"
+                        ? "bg-primary/[0.04] border-primary/20 text-zinc-900" 
+                        : "text-zinc-600 border-transparent hover:bg-zinc-50 hover:text-zinc-900"
                     )}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={cn(
-                          "w-1.5 h-1.5 rounded-full",
-                          selectedModel === m.id ? "bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),1)] animate-pulse" : "bg-zinc-700"
+                          "w-1.5 h-1.5 rounded-full transition-colors",
+                          selectedModel === m.id ? "bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)] animate-pulse" : "bg-zinc-300"
                         )} />
                         <span className="text-[12px] font-black uppercase tracking-tight">{m.label}</span>
                         {m.premium && <Lock className="h-2.5 w-2.5 text-amber-500/80" />}
@@ -80,7 +85,7 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
                       </div>
                     </div>
                     {m.description && (
-                      <p className="text-[10px] text-zinc-500 font-medium leading-tight pl-4 group-hover/item:text-zinc-400">
+                      <p className={cn("text-[11px] font-medium leading-relaxed pl-4 transition-colors", selectedModel === m.id ? "text-primary/70" : "text-zinc-400 group-hover/item:text-zinc-500")}>
                         {m.description}
                       </p>
                     )}
