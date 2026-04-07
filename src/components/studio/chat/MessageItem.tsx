@@ -1,4 +1,4 @@
-import { Sparkles, Shield, CheckCircle2, Copy, Check, RotateCcw, Download } from 'lucide-react';
+import { Sparkles, Shield, CheckCircle2, Copy, Check, RotateCcw, Download, Cpu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { renderMarkdown } from './renderer';
 import type { Message } from './types';
@@ -27,138 +27,131 @@ export function MessageItem({
   const isUser = msg.role === 'user';
 
   return (
-    <article 
+    <article
       className={cn(
-        "group animate-in fade-up duration-700 panorama-transition",
-        isUser ? "flex flex-col items-end gap-3 mb-8" : "flex flex-col items-start gap-6 mb-12"
+        "group animate-in fade-in duration-500 slide-in-from-bottom-2",
+        isUser
+          ? "flex flex-col items-end gap-2 mb-6"
+          : "flex flex-col items-start gap-4 mb-8"
       )}
       aria-label={isUser ? "Tu mensaje" : `Mensaje de ${persona === 'antigravity' ? 'Antigravity' : 'Génesis'}`}
     >
+      {/* ── USER BUBBLE ── */}
       {isUser ? (
         <>
-          <div className="chat-bubble-user text-white px-5 md:px-10 py-4 md:py-6 rounded-2xl md:rounded-[3.5rem] rounded-tr-none text-[14px] md:text-[15px] font-medium max-w-[90%] md:max-w-[85%] leading-relaxed relative overflow-hidden group/user">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-40" />
-            
-            {msg.imagePreview && (
-              <div className="rounded-xl md:rounded-[2rem] overflow-hidden mb-4 md:mb-6 border border-white/20 shadow-xl relative z-10 bg-black/20 p-1 backdrop-blur-md">
-                <img src={msg.imagePreview} alt="Referencia visual adjunta" className="max-h-60 md:max-h-80 w-auto object-contain rounded-lg md:rounded-[1.5rem]" />
-              </div>
-            )}
-            <span className="whitespace-pre-wrap relative z-10 tracking-tight selection:bg-white/20 font-medium">{msg.content}</span>
-          </div>
-          <div className="flex items-center gap-4 pr-6 mt-2 opacity-0 group-hover:opacity-100 transition-all duration-700 translate-y-2 group-hover:translate-y-0">
-            <div className="flex items-center gap-2">
-               <div className="w-1 h-1 rounded-full bg-primary animate-pulse" />
-               <span className="text-[8px] font-black text-primary uppercase tracking-[0.4em] italic">SYNC_OK</span>
+          {/* Image preview */}
+          {msg.imagePreview && (
+            <div className="rounded-2xl overflow-hidden border border-white/20 shadow-lg max-w-[85%]">
+              <img
+                src={msg.imagePreview}
+                alt="Referencia visual adjunta"
+                className="max-h-60 w-auto object-contain"
+              />
             </div>
-            <time className="text-[9px] text-zinc-500 font-bold uppercase tracking-[0.2em] italic opacity-60">
-              {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-            </time>
+          )}
+          <div className="chat-bubble-user text-white px-5 py-3.5 rounded-2xl rounded-tr-sm text-[14px] font-medium max-w-[88%] leading-relaxed shadow-lg shadow-primary/20">
+            <span className="whitespace-pre-wrap tracking-tight">{msg.content}</span>
           </div>
+          <time className="text-[10px] text-zinc-400 font-medium mr-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </time>
         </>
       ) : (
-        <div className="w-full max-w-[98%]">
-          <header className="flex items-center gap-3 md:gap-6 mb-4 md:mb-6 pl-2 md:pl-4">
-            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-[1.5rem] bg-white border border-zinc-100 flex items-center justify-center text-primary shadow-sm transition-all duration-700 group-hover:scale-110 relative overflow-hidden">
-               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-60" />
-               <Sparkles className="h-5 w-5 md:h-6 md:w-6 fill-primary/10 relative z-10" />
+        /* ── AI BUBBLE ── */
+        <div className="w-full max-w-[97%]">
+          {/* Agent header */}
+          <header className="flex items-center gap-2.5 mb-3 pl-1">
+            <div className="h-7 w-7 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
             </div>
-            <div className="flex flex-col justify-center">
-              <div className="flex items-center gap-3 mb-1.5">
-                <span className="text-[12px] font-black uppercase text-zinc-900 tracking-tighter italic">
-                  {persona === 'antigravity' ? 'ANTIGRAVITY_CORE' : 'GENESIS_ENGINE'}
+            <div className="flex items-center gap-2">
+              <span className="text-[12px] font-bold text-zinc-900 tracking-tight">
+                {persona === 'antigravity' ? 'Antigravity AI' : 'Génesis AI'}
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-primary/8 border border-primary/15 text-[9px] font-bold text-primary uppercase tracking-wider">
+                V21
+              </span>
+              {msg.type === 'code' && (
+                <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-[9px] font-bold text-emerald-600 uppercase tracking-wider">
+                  <Cpu className="h-2.5 w-2.5" />
+                  Código
                 </span>
-                <span className="px-2 py-0.5 rounded-lg bg-zinc-950 text-[8px] font-black text-primary uppercase tracking-[0.3em] border border-primary/30 shadow-lg">AGENT_V21.0</span>
-              </div>
-              <div className="flex items-center gap-3">
-                 <div className="flex items-end gap-0.5 h-3 items-center opacity-40">
-                   {[1, 2, 3].map((i) => (
-                     <div key={i} className="w-0.5 h-full bg-primary rounded-full animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />
-                   ))}
-                 </div>
-                 <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] leading-none italic">AETHER_NEURAL_LINK</span>
-              </div>
+              )}
             </div>
           </header>
 
-          <section className={cn(
-            "px-6 md:px-14 py-6 md:py-14 rounded-[2rem] md:rounded-[4.5rem] rounded-tl-none transition-all duration-1000 relative group/msg border overflow-hidden shadow-sm",
-            msg.type === 'plan' 
-              ? "bg-zinc-50 border-zinc-200" 
-              : "bg-white border-zinc-100"
-          )}>
-            {/* Soft Aura */}
-            {!isUser && (
-              <div className="absolute -top-16 md:-top-32 -right-16 md:-right-32 w-48 md:w-80 h-48 md:h-80 bg-primary/5 rounded-full blur-[60px] md:blur-[140px] pointer-events-none opacity-40" />
+          {/* Message body */}
+          <section
+            className={cn(
+              "relative rounded-2xl rounded-tl-sm border overflow-hidden transition-all duration-300 group/msg",
+              msg.type === 'plan'
+                ? "bg-zinc-50 border-zinc-200 p-5 md:p-7"
+                : "bg-white border-zinc-100 shadow-sm p-5 md:p-7"
             )}
-            
-            {/* Neural Pattern Overlays */}
-            <div className="absolute inset-0 pointer-events-none opacity-[0.04] neural-mesh select-none" aria-hidden="true" />
-            <div className="absolute inset-0 scanline-overlay opacity-[0.02] pointer-events-none" />
-            
-            {/* Plan Header (Lumina Style) */}
+          >
+            {/* Subtle purple glow only on hover */}
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/4 rounded-full blur-[80px] pointer-events-none opacity-0 group-hover/msg:opacity-100 transition-opacity duration-700" />
+
+            {/* ── Plan header ─────────────────────────── */}
             {msg.type === 'plan' && (
-              <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6 mb-8 md:mb-12 pb-6 md:pb-10 border-b border-zinc-200 relative z-10">
-                <div className="h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-[2.2rem] bg-white border border-zinc-200 flex items-center justify-center shadow-sm relative group/blueprint overflow-hidden">
-                  <div className="absolute inset-0 bg-grid-canvas opacity-10" />
-                  <Shield className="h-5 w-5 md:h-7 md:w-7 text-primary relative z-10" />
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6 pb-5 border-b border-zinc-200">
+                <div className="h-10 w-10 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center shadow-sm shrink-0">
+                  <Shield className="h-5 w-5 text-primary" />
                 </div>
-                <div>
-                  <span className="text-lg md:text-xl font-black uppercase tracking-tighter text-zinc-900 italic block mb-1">PLAN_DE_ARQUITECTURA</span>
-                  <div className="flex items-center gap-2 md:gap-3">
-                     <span className="px-2 py-0.5 rounded bg-primary/5 border border-primary/10 text-[8px] md:text-[9px] font-black text-primary uppercase tracking-[0.2em] italic">PHASE_ALPHA</span>
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[13px] font-bold text-zinc-900 tracking-tight">Plan de Arquitectura</p>
+                  <p className="text-[11px] text-zinc-400 font-medium mt-0.5">Fase Alpha · Pendiente de aprobación</p>
                 </div>
-                
-                <div className="ml-auto">
+                <div className="ml-auto shrink-0">
                   {msg.planStatus === 'pending' && (
-                    <div className="flex items-center gap-4 px-8 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.1)]" role="status">
-                       <div className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
-                       <span className="text-[11px] font-black uppercase tracking-[0.3em] italic">AWAITING_APPROVAL</span>
-                    </div>
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-[10px] font-bold text-amber-600 uppercase tracking-wide">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      Esperando
+                    </span>
                   )}
                   {msg.planStatus === 'approved' && (
-                    <div className="flex items-center gap-4 px-8 py-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.1)]" role="status">
-                       <CheckCircle2 className="w-5 h-5 animate-bounce" />
-                       <span className="text-[11px] font-black uppercase tracking-[0.3em] italic">EXECUTING_LOGIC</span>
-                    </div>
+                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-600 uppercase tracking-wide">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Ejecutando
+                    </span>
                   )}
                 </div>
               </div>
             )}
 
-            <div className={cn(
-              "prose prose-sm max-w-none relative z-10 font-medium selection:bg-primary/10 transition-colors duration-700 leading-relaxed",
-              msg.type === 'plan' ? "prose-zinc prose-p:text-zinc-600 prose-headings:text-zinc-900" : "prose-zinc text-zinc-700 md:text-zinc-800"
-            )}
-              dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }} 
+            {/* ── Content ─────────────────────────────── */}
+            <div
+              className={cn(
+                "result-prose relative z-10 leading-relaxed",
+                msg.type === 'plan' ? "" : "text-zinc-700"
+              )}
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
             />
 
-            {/* Action navigation for industrial plans */}
+            {/* ── Plan Actions ────────────────────────── */}
             {msg.type === 'plan' && msg.planStatus === 'pending' && (
-              <nav className="flex items-center gap-6 mt-16 pt-10 border-t border-white/10 relative z-10" aria-label="Acciones de plan">
+              <div className="flex items-center gap-3 mt-6 pt-5 border-t border-zinc-200">
                 <button
                   onClick={onApprovePlan}
                   aria-label="Aprobar y comenzar construcción"
-                  className="flex-1 flex items-center justify-center gap-5 px-12 py-6 rounded-[2.5rem] bg-white text-black text-[13px] font-black uppercase tracking-[0.25em] hover:scale-[1.02] active:scale-95 transition-all shadow-[0_20px_50px_rgba(255,255,255,0.15)] group relative overflow-hidden italic"
+                  className="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-900 text-white text-[12px] font-bold tracking-wide hover:bg-black transition-all active:scale-[0.98] shadow-sm"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <CheckCircle2 className="w-6 h-6 group-hover:scale-110 transition-transform text-primary" />
-                  LANZAR_CONSTRUCCIÓN_ATÓMICA
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  Construir ahora
                 </button>
-                <button 
+                <button
                   onClick={onRejectPlan}
-                  aria-label="Rechazar y revisar prompt"
-                  className="px-10 py-6 rounded-[2.5rem] bg-white/5 border border-white/10 text-zinc-400 text-[11px] font-black uppercase tracking-[0.2em] hover:bg-white/10 hover:text-white transition-all active:scale-95 border-dashed italic"
+                  aria-label="Rechazar y revisar"
+                  className="px-5 py-2.5 rounded-xl border border-zinc-200 bg-white text-zinc-500 text-[12px] font-bold hover:border-zinc-300 hover:text-zinc-700 transition-all active:scale-[0.98]"
                 >
-                  REVISAR_PARÁMETROS
+                  Revisar
                 </button>
-              </nav>
+              </div>
             )}
 
-            {/* Project Download Artifact (Genesis V16.0) */}
+            {/* ── Download artifact ───────────────────── */}
             {msg.blob && (
-              <div className="mt-8 md:mt-12 pt-6 md:pt-10 border-t border-zinc-100">
+              <div className="mt-5 pt-5 border-t border-zinc-100">
                 <button
                   onClick={() => {
                     const url = URL.createObjectURL(msg.blob!);
@@ -170,53 +163,62 @@ export function MessageItem({
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                   }}
-                  className="w-full flex items-center justify-center gap-4 px-6 md:px-8 py-4 md:py-6 rounded-xl md:rounded-[2rem] bg-zinc-900 text-white text-[11px] md:text-[12px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] hover:bg-black transition-all active:scale-[0.98] group/download italic shadow-lg shadow-zinc-200"
+                  className="w-full flex items-center justify-center gap-3 px-5 py-3 rounded-xl bg-zinc-900 text-white text-[12px] font-bold hover:bg-black transition-all active:scale-[0.98] group/dl"
                 >
-                  <Download className="w-5 h-5 group-hover/download:translate-y-1 transition-transform text-white/80" />
-                  DESCARGAR_ZIP_COMPLETO
+                  <Download className="w-4 h-4 group-hover/dl:translate-y-0.5 transition-transform" />
+                  Descargar proyecto (.zip)
                 </button>
-                <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-[0.4em] text-center mt-5 opacity-40 italic">
-                  GENESIS_CONSOLIDATION_V21.0
-                </p>
               </div>
             )}
 
-            {/* Tech stack badges */}
+            {/* ── Tech stack badges ───────────────────── */}
             {msg.stack && msg.stack.length > 0 && (
-              <footer className="flex flex-wrap gap-3 mt-10 pt-10 border-t border-black/[0.04]" aria-label="Tecnologías utilizadas">
+              <footer className="flex flex-wrap gap-2 mt-5 pt-5 border-t border-zinc-100" aria-label="Tecnologías utilizadas">
                 {msg.stack.map(s => (
-                  <span key={s} className="px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] bg-zinc-100/50 text-zinc-600 border border-black/[0.04] transition-all hover:bg-primary/10 hover:border-primary/20 hover:text-primary italic">
+                  <span
+                    key={s}
+                    className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-zinc-50 text-zinc-500 border border-zinc-200 hover:bg-primary/5 hover:border-primary/20 hover:text-primary transition-all cursor-default"
+                  >
                     {s}
                   </span>
                 ))}
               </footer>
             )}
 
-            {/* Quick Actions */}
-            <div className="absolute top-8 right-8 flex items-center gap-2 opacity-0 group-hover/msg:opacity-100 transition-all translate-y-2 group-hover/msg:translate-y-0">
-              <button 
+            {/* ── Quick actions (hover) ───────────────── */}
+            <div className="absolute top-4 right-4 flex items-center gap-1.5 opacity-0 group-hover/msg:opacity-100 transition-all -translate-y-1 group-hover/msg:translate-y-0">
+              <button
                 onClick={() => onCopy(msg.content, msg.id)}
-                className="p-3.5 rounded-2xl bg-white border border-black/[0.06] text-zinc-400 hover:text-primary hover:bg-white hover:shadow-2xl transition-all shadow-sm active:scale-90"
+                className="p-2 rounded-lg bg-white border border-zinc-200 text-zinc-400 hover:text-primary hover:border-primary/30 transition-all shadow-xs active:scale-90"
+                aria-label="Copiar mensaje"
               >
-                {copiedId === msg.id ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                {copiedId === msg.id
+                  ? <Check className="h-3.5 w-3.5 text-emerald-500" />
+                  : <Copy className="h-3.5 w-3.5" />
+                }
               </button>
-              <button 
+              <button
                 onClick={onRetry}
-                className="p-3.5 rounded-2xl bg-white border border-black/[0.06] text-zinc-400 hover:text-primary hover:bg-white hover:shadow-2xl transition-all shadow-sm active:scale-90"
+                className="p-2 rounded-lg bg-white border border-zinc-200 text-zinc-400 hover:text-primary hover:border-primary/30 transition-all shadow-xs active:scale-90"
+                aria-label="Reintentar"
               >
-                <RotateCcw className="h-4 w-4" />
+                <RotateCcw className="h-3.5 w-3.5" />
               </button>
             </div>
           </section>
 
+          {/* ── Suggestion chips ────────────────────── */}
           {msg.suggestions && msg.suggestions.length > 0 && (
-            <nav className="mt-4 md:mt-8 flex flex-wrap gap-2 md:gap-3 pl-2 md:pl-6" aria-label="Sugerencias de continuación">
+            <nav
+              className="mt-3 flex flex-wrap gap-2 pl-1"
+              aria-label="Sugerencias de continuación"
+            >
               {msg.suggestions.map((s, i) => (
-                <button 
-                  key={i} 
+                <button
+                  key={i}
                   onClick={() => onSuggestionClick(s)}
-                  className="px-4 md:px-8 py-2 md:py-4 rounded-xl md:rounded-[2rem] border border-zinc-100 bg-white text-[11px] md:text-[12px] font-black text-zinc-500 hover:border-primary/30 hover:text-primary hover:shadow-sm transition-all animate-in fade-in slide-in-from-bottom-2 duration-700 active:scale-95 italic tracking-tighter"
-                  style={{ animationDelay: `${i * 100}ms` }}
+                  className="px-4 py-2 rounded-full border border-zinc-200 bg-white text-[11px] font-medium text-zinc-500 hover:border-primary/40 hover:text-primary hover:shadow-sm hover:shadow-primary/5 transition-all animate-in fade-in duration-500 active:scale-95"
+                  style={{ animationDelay: `${i * 80}ms` }}
                 >
                   {s}
                 </button>

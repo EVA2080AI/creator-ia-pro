@@ -193,67 +193,55 @@ export function ChatInput({
       {/* ── Attachment Previews ── */}
       <div className="max-w-5xl mx-auto w-full space-y-4 mb-8 px-4">
         {pendingImage && (
-          <div className="flex items-center gap-5 px-6 py-5 rounded-[2rem] bg-white/5 border border-white/10 animate-in fade-in slide-in-from-bottom-5 overflow-hidden relative group shadow-2xl backdrop-blur-2xl" role="status">
-             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
-            <img src={pendingImage} alt="Referencia visual adjunta" className="h-16 w-16 rounded-2xl object-cover shadow-2xl border border-white/20 relative z-10 hover:scale-110 transition-transform duration-700" />
-            <div className="flex-1 min-w-0 relative z-10">
-               <span className="text-[11px] font-black text-primary uppercase tracking-[0.3em] block mb-1.5 italic">IMAGE_RECON_INITIALIZED</span>
-               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest truncate block italic opacity-60">Visual matrix acquired for cross-neural mapping</span>
+          <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 animate-in fade-in slide-in-from-bottom-3 duration-300" role="status">
+            <img src={pendingImage} alt="Imagen adjunta" className="h-12 w-12 rounded-xl object-cover border border-zinc-200 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-bold text-zinc-900 leading-none mb-1">Imagen adjunta</p>
+              <p className="text-[10px] text-zinc-400 font-medium truncate">Referencia visual para el contexto</p>
             </div>
-            <button 
-              onClick={onRemoveImage} 
-              className="p-4 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all active:scale-90 border border-transparent hover:border-white/10 relative z-10"
-            >
-              <X className="h-5 w-5" />
+            <button onClick={onRemoveImage} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200 transition-all">
+              <X className="h-4 w-4" />
             </button>
           </div>
         )}
 
         {pendingUrl && (
-          <div className="flex items-center gap-5 px-6 py-5 rounded-[2rem] bg-white/5 border border-white/10 animate-in fade-in slide-in-from-bottom-5 relative overflow-hidden shadow-2xl backdrop-blur-2xl" role="status">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
-             <div className="h-16 w-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 relative z-10 shadow-[0_0_20px_rgba(59,130,246,0.2)]">
-                <Globe className="h-8 w-8 animate-pulse" />
-             </div>
-             <div className="flex-1 min-w-0 font-mono relative z-10">
-                <span className="text-[11px] font-black text-blue-400 uppercase tracking-[0.3em] block mb-1.5 italic">NETWORK_URI_LINKED</span>
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest truncate block italic opacity-60">
-                   {(() => {try { return JSON.parse(pendingUrl).url; } catch(e) { return pendingUrl; }})()}
-                </span>
-             </div>
-             <button 
-              onClick={onRemoveUrl} 
-              className="p-4 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all relative z-10"
-             >
-               <X className="h-5 w-5" />
-             </button>
+          <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 animate-in fade-in slide-in-from-bottom-3 duration-300" role="status">
+            <div className="h-10 w-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-500 shrink-0">
+              <Globe className="h-4.5 w-4.5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-bold text-zinc-900 leading-none mb-1">URL adjunta</p>
+              <p className="text-[10px] text-zinc-400 font-medium truncate">
+                {(() => { try { return JSON.parse(pendingUrl).url; } catch { return pendingUrl; } })()}
+              </p>
+            </div>
+            <button onClick={onRemoveUrl} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200 transition-all">
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
 
         {pendingContext && (
-          <div className="flex items-center gap-5 px-6 py-5 rounded-[2rem] bg-white/5 border border-white/10 animate-in fade-in slide-in-from-bottom-5 relative overflow-hidden shadow-2xl backdrop-blur-2xl" role="status">
-              <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
-             <div className="h-16 w-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary relative z-10 shadow-[0_0_20px_rgba(var(--primary-rgb),0.2)]">
-                <FileCode2 className="h-8 w-8" />
-             </div>
-             <div className="flex-1 min-w-0 relative z-10">
-                <span className="text-[11px] font-black text-primary uppercase tracking-[0.3em] block mb-1.5 italic">CONTEXT_PAYLOAD_MAPPED</span>
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest truncate block italic opacity-60">{pendingContext.name}</span>
-             </div>
-             <button 
-              onClick={onRemoveContext} 
-              className="p-4 rounded-2xl text-zinc-500 hover:text-white hover:bg-white/10 transition-all relative z-10"
-             >
-               <X className="h-5 w-5" />
-             </button>
+          <div className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-zinc-50 border border-zinc-200 animate-in fade-in slide-in-from-bottom-3 duration-300" role="status">
+            <div className="h-10 w-10 rounded-xl bg-primary/8 border border-primary/20 flex items-center justify-center text-primary shrink-0">
+              <FileCode2 className="h-4 w-4" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-bold text-zinc-900 leading-none mb-1">Contexto adjunto</p>
+              <p className="text-[10px] text-zinc-400 font-medium truncate">{pendingContext.name}</p>
+            </div>
+            <button onClick={onRemoveContext} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-200 transition-all">
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
 
         {activeFile && (
-          <div className="px-6 py-3 rounded-2xl bg-zinc-900 border border-white/10 text-white w-fit shadow-2xl flex items-center gap-5 animate-in fade-in zoom-in duration-700" role="status">
-             <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse shadow-[0_0_15px_rgba(var(--primary-rgb),1)]" />
-             <span className="text-[11px] font-black uppercase tracking-[0.3em] italic">
-               ACTIVE_SCOPE: {activeFile.split('/').pop()}
+          <div className="px-3 py-2 rounded-xl bg-primary/5 border border-primary/20 text-primary w-fit flex items-center gap-2 animate-in fade-in zoom-in duration-300" role="status">
+             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+             <span className="text-[11px] font-bold tracking-wide">
+               {activeFile.split('/').pop()}
              </span>
           </div>
         )}
@@ -262,8 +250,8 @@ export function ChatInput({
       {/* ── URL Input Bar (Industrial) ── */}
       {showUrlInput && (
         <div className="max-w-5xl mx-auto w-full mb-6 flex items-center gap-4 px-4 animate-in slide-in-from-bottom-6 duration-700">
-           <div className="flex-1 flex items-center gap-5 px-8 py-5 rounded-[2rem] bg-white border-2 border-primary/40 shadow-[0_30px_60px_-15px_rgba(var(--primary-rgb),0.2)] transition-all focus-within:ring-[15px] focus-within:ring-primary/10 aether-iridescent">
-              <Link2 className="h-6 w-6 text-primary" />
+       <div className="flex-1 flex items-center gap-3 px-5 py-3.5 rounded-2xl bg-white border-2 border-primary/30 shadow-sm focus-within:ring-4 focus-within:ring-primary/10 transition-all">
+              <Link2 className="h-4.5 w-4.5 text-primary shrink-0" />
               <input 
                 autoFocus type="url" value={urlInput} 
                 onChange={e => setUrlInput(e.target.value)}
@@ -271,23 +259,23 @@ export function ChatInput({
                   if (e.key === 'Enter') { e.preventDefault(); onAttachUrl(urlInput); setShowUrlInput(false); setUrlInput(''); }
                   if (e.key === 'Escape') setShowUrlInput(false);
                 }}
-                placeholder="Pega la URL para ingeniería inversa..."
-                className="flex-1 bg-transparent text-[15px] font-black italic outline-none placeholder:text-zinc-300 uppercase tracking-tight text-zinc-900"
-                aria-label="URL del sitio a clonar"
+                placeholder="Pega la URL a analizar..."
+                className="flex-1 bg-transparent text-[14px] font-medium outline-none placeholder:text-zinc-300 text-zinc-900"
+                aria-label="URL del sitio a adjuntar"
               />
            </div>
            <button 
               onClick={() => { onAttachUrl(urlInput); setShowUrlInput(false); setUrlInput(''); }} 
               disabled={isScraping || !urlInput.trim()}
-              className="h-16 px-10 bg-zinc-950 text-white rounded-[2rem] text-[12px] font-black uppercase tracking-[0.3em] shadow-2xl hover:brightness-125 active:scale-95 transition-all disabled:opacity-50 border border-white/10 italic"
+              className="h-11 px-5 bg-zinc-900 text-white rounded-2xl text-[12px] font-bold tracking-wide shadow-sm hover:bg-black active:scale-95 transition-all disabled:opacity-50"
             >
-              {isScraping ? 'MAPPING...' : 'ORCHESTRATE_URI'}
+              {isScraping ? 'Analizando...' : 'Adjuntar'}
            </button>
            <button 
               onClick={() => setShowUrlInput(false)} 
-              className="h-16 w-16 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-all border border-black/5 rounded-[2rem] bg-white hover:shadow-2xl"
+              className="h-11 w-11 flex items-center justify-center text-zinc-400 hover:text-zinc-700 transition-all border border-zinc-200 rounded-2xl bg-white hover:bg-zinc-50"
             >
-             <X className="h-6 w-6" />
+             <X className="h-4 w-4" />
            </button>
         </div>
       )}
