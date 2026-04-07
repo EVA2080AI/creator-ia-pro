@@ -22,18 +22,18 @@ import { toast } from 'sonner';
 /** ─── Tier Hierarchy ────────────────────────────────────────────────────────── */
 const TIER_LEVELS: Record<string, number> = {
   'free': 0,
-  'starter': 1,
-  'creator': 2,
-  'pymes': 3,
-  'agency': 4,
+  'creador': 1,
+  'pro': 2,
+  'agencia': 3,
+  'pyme': 4,
   'admin': 5
 };
 
 const TIER_CONFIG: Record<string, { label: string, color: string, bg: string }> = {
-  'starter': { label: 'STARTER', color: 'text-blue-500',    bg: 'bg-blue-50/80' },
-  'creator': { label: 'CREATOR', color: 'text-violet-500',  bg: 'bg-violet-50/80' },
-  'pymes':   { label: 'PYMES',   color: 'text-emerald-600', bg: 'bg-emerald-50/80' },
-  'agency':  { label: 'AGENCY',  color: 'text-amber-600',   bg: 'bg-amber-50/80' },
+  'creador': { label: 'CREADOR', color: 'text-blue-500',    bg: 'bg-blue-50/80' },
+  'pro':     { label: 'PRO',     color: 'text-violet-500',  bg: 'bg-violet-50/80' },
+  'agencia': { label: 'AGENCIA', color: 'text-amber-600',   bg: 'bg-amber-50/80' },
+  'pyme':    { label: 'PYME',    color: 'text-emerald-600', bg: 'bg-emerald-50/80' },
   'admin':   { label: 'ADMIN',   color: 'text-red-500',     bg: 'bg-red-50/80' },
 };
 
@@ -48,12 +48,12 @@ interface NavItemDef {
 /** ─── Navigation structure ────────────────────────────────────────────────────── */
 const NAV_MAIN: NavItemDef[] = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
-  { path: '/chat',         label: 'Genesis IA',    icon: Brain,          minTier: 'starter' },
-  { path: '/code',         label: 'Editor',        icon: Code2,          minTier: 'starter' },
-  { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'creator' },
-  { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'creator' },
+  { path: '/chat',         label: 'Genesis IA',    icon: Brain,          minTier: 'creador' },
+  { path: '/code',         label: 'Editor',        icon: Code2,          minTier: 'creador' },
+  { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'pro' },
+  { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'pro' },
   { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     minTier: 'free' },
-  { path: '/antigravity',  label: 'Antigravity',   icon: Bot,            minTier: 'pymes' },
+  { path: '/antigravity',  label: 'Antigravity',   icon: Bot,            minTier: 'pyme' },
 ];
 
 const NAV_SYSTEM: NavItemDef[] = [
