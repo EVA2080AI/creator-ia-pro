@@ -46,8 +46,8 @@ export const HubView = () => {
           space_id: space.id,
           type: node.type || "modelView",
           name: node.data?.title || `Nodo ${i + 1}`,
-          position_x: 100 + i * 340,
-          position_y: 220,
+          pos_x: 100 + i * 340,
+          pos_y: 220,
           status: "idle",
           data_payload: node.data || {},
           prompt: "",
@@ -60,8 +60,8 @@ export const HubView = () => {
 
         if (nodesError) throw nodesError;
 
-        // Reconstruir los edges a partir del mapping original de la plantilla, no de forma secuencial rígida
-        if (insertedNodes && insertedNodes.length > 1) {
+        // Reconstruir los edges a partir del mapping original de la plantilla
+        if (insertedNodes && insertedNodes.length > 0) {
           const edges = (template.edges || []).map((edgeInfo, idx) => {
             const srcNode = insertedNodes[edgeInfo.source];
             const targetNode = insertedNodes[edgeInfo.target];
@@ -80,17 +80,18 @@ export const HubView = () => {
           }).filter(Boolean);
 
           // Save edges as flow_metadata row
-          await supabase.from("canvas_nodes").insert({
+          // Important: use upsert to avoid duplicates and match the unique index
+          await supabase.from("canvas_nodes").upsert({
             user_id: user.id,
             space_id: space.id,
             type: "flow_metadata",
             name: "__flow_metadata__",
-            position_x: 0,
-            position_y: 0,
+            pos_x: 0,
+            pos_y: 0,
             status: "idle",
             data_payload: { edges } as any,
-            prompt: "",
-          });
+            prompt: "metadata",
+          }, { onConflict: 'space_id,type' });
         }
       }
 
