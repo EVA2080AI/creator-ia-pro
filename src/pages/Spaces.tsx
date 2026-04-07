@@ -74,6 +74,13 @@ const Spaces = () => {
                   <Wand2 className="h-4 w-4 mr-3 opacity-60" /> 
                   Flujo desde IA
                 </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-zinc-100 my-1 mx-2" />
+                <DropdownMenuItem asChild className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-zinc-50 focus:bg-primary/10 focus:text-primary transition-all font-display text-zinc-600 mb-0.5">
+                  <a href="https://creator-ia.com/hub" target="_blank" rel="noreferrer">
+                    <Sparkles className="h-4 w-4 mr-3 opacity-60 text-primary" /> 
+                    Hub de Plantillas
+                  </a>
+                </DropdownMenuItem>
                 <DropdownMenuItem className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-zinc-50 focus:bg-primary/10 focus:text-primary transition-all font-display text-zinc-600 mb-0.5"
                   onClick={() => navigate('/hub')}>
                   <LayoutTemplate className="h-4 w-4 mr-3 opacity-60" /> 
