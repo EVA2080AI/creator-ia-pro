@@ -60,11 +60,13 @@ serve(async (req: Request) => {
 
     const payload = {
       amount_type: "CLOSE",
-      total_amount: validatedAmount, // Use validated amount
-      currency: "COP",
-      description: description || `Carga de Inteligencia Genesis: ${packId}`,
-      payer_email: buyerEmail, 
-      callback_url: `${Deno.env.get("SUPABASE_URL") || "https://creator-ia.com"}/pricing?status=payment_returned&pack=${packId}`
+      amount: {
+        currency: "COP",
+        total_amount: validatedAmount,
+      },
+      description: description || `Creator IA Pro: ${packId}`,
+      payer_email: buyerEmail,
+      callback_url: `https://creator-ia.com/pricing?status=payment_returned&pack=${packId}`,
     };
 
     const boldApiUrl = "https://integrations.api.bold.co/online/link/v1";
@@ -72,9 +74,9 @@ serve(async (req: Request) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": BOLD_API_KEY
+        "Authorization": `x-api-key ${BOLD_API_KEY}`,
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     const data: BoldApiResponse = await response.json();
