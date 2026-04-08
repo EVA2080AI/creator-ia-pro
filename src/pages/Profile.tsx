@@ -18,7 +18,7 @@ const Profile = () => {
   const [saving, setSaving]                 = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [profile, setProfile]               = useState<any>(null);
-  const [displayName, setDisplayName]       = useState("");
+  const [fullName, setFullName]             = useState("");
   const [avatarUrl, setAvatarUrl]           = useState<string | null>(null);
   const [creditHistory, setCreditHistory]   = useState<any[]>([]);
 
@@ -31,7 +31,7 @@ const Profile = () => {
       ]);
       if (prof) {
         setProfile(prof);
-        setDisplayName(prof.display_name || "");
+        setFullName(prof.full_name || "");
         setAvatarUrl(prof.avatar_url || null);
       }
       if (history) setCreditHistory(history);
@@ -68,9 +68,9 @@ const Profile = () => {
   const handleSave = async () => {
     setSaving(true);
     const { error } = await supabase.from("profiles")
-      .update({ display_name: displayName } as any).eq("user_id", user?.id);
+      .update({ full_name: fullName } as any).eq("user_id", user?.id);
     if (error) toast.error("Error al guardar cambios");
-    else { toast.success("Perfil actualizado"); setProfile((p: any) => ({ ...p, display_name: displayName })); }
+    else { toast.success("Perfil actualizado"); setProfile((p: any) => ({ ...p, full_name: fullName })); }
     setSaving(false);
   };
 
@@ -133,7 +133,7 @@ const Profile = () => {
                   )}
                 </button>
                 <div>
-                  <p className="font-semibold text-zinc-900 text-base">{profile?.display_name || "Sin nombre"}</p>
+                  <p className="font-semibold text-zinc-900 text-base">{profile?.full_name || "Sin nombre"}</p>
                   <p className="text-sm text-zinc-400 mt-0.5">{user?.email}</p>
                   <button
                     onClick={() => avatarInputRef.current?.click()}
@@ -155,12 +155,12 @@ const Profile = () => {
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="display-name" className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Nombre para mostrar</label>
+                  <label htmlFor="full-name" className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Nombre completo</label>
                   <input
-                    id="display-name"
+                    id="full-name"
                     type="text"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     placeholder="Tu nombre..."
                     className="w-full px-4 py-3 rounded-xl bg-zinc-50/50 border border-zinc-200 focus:border-primary/40 focus:bg-white focus:outline-none text-sm text-zinc-900 placeholder:text-zinc-500 transition-all font-medium"
                   />

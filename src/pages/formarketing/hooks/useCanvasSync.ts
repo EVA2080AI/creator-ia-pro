@@ -34,12 +34,12 @@ export const useCanvasSync = (
           .eq('id', spaceId)
           .single();
 
-        const projectId = space?.settings?.genesis_project_id;
+        // Cast settings to expected object shape to resolve type error
+        const settings = space?.settings as { genesis_project_id?: string } | null;
+        const projectId = settings?.genesis_project_id;
         if (!projectId) return;
 
         // 3. Map Canvas to Blueprint
-        // We need the edges from the hidden flow_metadata node if they aren't passed directly
-        // But Formarketing normally has edges in state.
         const blueprint = genesisOrchestrator.mapCanvasNodesToBlueprint(nodes, edges);
         const blueprintStr = JSON.stringify(blueprint);
 

@@ -269,7 +269,7 @@ const ToolLanding = () => {
         setDemoUsed(Boolean(data?.demo_limit_reached));
         toast.success("¡Imagen real generada con IA!");
       } else {
-        throw new Error(data?.error || "No se pudo generar el resultado");
+        throw new Error(String(data?.error || "No se pudo generar el resultado"));
       }
     } catch (err: any) {
       const message = err?.message || "Error al procesar";

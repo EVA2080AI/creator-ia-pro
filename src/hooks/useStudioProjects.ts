@@ -225,10 +225,29 @@ export function useStudioProjects() {
     toast.success('Cambios revertidos');
   }, [activeProject, previousFiles, updateProjectFiles]);
 
+  const getProjectFiles = useCallback(async (projectId: string): Promise<Record<string, StudioFile> | null> => {
+    const { data, error } = await supabase
+      .from('studio_projects')
+      .select('files')
+      .eq('id', projectId)
+      .single();
+
+    if (error || !data) {
+      console.error('Error fetching project files:', error);
+      return null;
+    }
+
+    const files = typeof data.files === 'string' 
+      ? JSON.parse(data.files) 
+      : data.files;
+      
+    return files as Record<string, StudioFile>;
+  }, []);
+
   return { 
     projects, activeProject, setActiveProject, loading, 
     createProject, updateProjectFiles, renameProject, 
     deleteProject, duplicateProject, rollbackFiles, canUndo: !!previousFiles,
-    refetch: fetchProjects 
+    refetch: fetchProjects, getProjectFiles
   };
 }
