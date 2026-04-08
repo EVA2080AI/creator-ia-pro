@@ -125,11 +125,31 @@ export function buildSuggestions(stack: string[], prompt: string): string[] {
   return s.slice(0, 3);
 }
 
-export type IntentType = 'codegen' | 'chat' | 'fullstack';
+export type IntentType = 'codegen' | 'chat' | 'fullstack' | 'html-import';
+
+/** Detect if prompt contains raw HTML code */
+export function containsHtml(text: string): boolean {
+  const htmlPatterns = [
+    /<!DOCTYPE\s+html/i,
+    /<html[\s>]/i,
+    /<head[\s>]/i,
+    /<body[\s>]/i,
+    /<div[\s>][\s\S]{50,}/i,   // <div> with substantial content
+    /<section[\s>][\s\S]{50,}/i,
+    /<nav[\s>]/i,
+    /<header[\s>][\s\S]{30,}/i,
+    /<footer[\s>][\s\S]{30,}/i,
+  ];
+  const matchCount = htmlPatterns.filter(p => p.test(text)).length;
+  return matchCount >= 2; // At least 2 HTML patterns = likely HTML input
+}
 
 export function detectIntent(prompt: string, hasContext?: boolean): IntentType {
   const p = prompt.toLowerCase().trim();
-  
+
+  // HTML Import: detect raw HTML pasted in chat
+  if (containsHtml(prompt)) return 'html-import';
+
   // High-complexity "Creation" keywords for FULLSTACK intent
   const CREATION_KEYWORDS = [
     'crea un web', 'hazme una web', 'crea un proyecto', 'crea un saas', 'crea una app completa',

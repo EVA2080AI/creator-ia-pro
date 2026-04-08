@@ -92,11 +92,14 @@ export function useStudioChatAI({
 
     const intent = detectIntent(prompt);
     const prefContext = (options?.preferences || []).map(p => `[MEMORIA ${p.agent_id.toUpperCase()}]: ${p.instructions}`).join('\n');
-    
+
+    // HTML Import: detect raw HTML pasted in chat
+    const isHtmlImport = intent === 'html-import';
+
     // Auto-trigger Architect Mode for fullstack creation intents
     const isChatModeActive = intent === 'chat';
-    const isArchitectRequest = (isArchitectMode || intent === 'fullstack') && !isChatModeActive;
-    
+    const isArchitectRequest = (isArchitectMode || intent === 'fullstack') && !isChatModeActive && !isHtmlImport;
+
     setCurrentGenIntent(isChatModeActive ? 'chat' : 'codegen');
 
     try {
@@ -140,6 +143,12 @@ export function useStudioChatAI({
       let effectiveSystemPrompt = isArchitectRequest ? ARCHITECT_SYSTEM_PROMPT : (isChatModeActive ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM) : CODE_GEN_SYSTEM);
       let userContent: any = prompt + contextBlock;
 
+      // HTML Import: user pasted raw HTML in the chat
+      if (isHtmlImport) {
+        effectiveSystemPrompt = CLONE_SYSTEM_PROMPT;
+        userContent = `[HTML PROPORCIONADO POR EL USUARIO — Conviértelo a React + Tailwind]:\n\n${prompt}`;
+      }
+
       if (options?.pendingUrl) {
          const parsedClone = JSON.parse(options.pendingUrl);
          effectiveSystemPrompt = CLONE_SYSTEM_PROMPT + (parsedClone.content || '');
@@ -154,9 +163,9 @@ export function useStudioChatAI({
       ];
 
       // Logic to detect if we need a "PRO" model for complex tasks
-      const complexTask = prompt.length > 500 || prompt.toLowerCase().includes('refactor') || prompt.toLowerCase().includes('arquitectura') || isArchitectRequest;
-      const targetModel = (isChatModeActive && !options?.pendingUrl && !options?.pendingImage && !complexTask) 
-        ? 'google/gemini-2.0-flash-001' 
+      const complexTask = prompt.length > 500 || prompt.toLowerCase().includes('refactor') || prompt.toLowerCase().includes('arquitectura') || isArchitectRequest || isHtmlImport;
+      const targetModel = (isChatModeActive && !options?.pendingUrl && !options?.pendingImage && !complexTask)
+        ? 'google/gemini-2.0-flash-001'
         : (selectedModel === 'google/gemini-2.0-flash-001' && complexTask ? 'google/gemini-2.5-pro-preview-03-25' : selectedModel);
 
       // DeepBuild: activate for ANY architect+genesis request
