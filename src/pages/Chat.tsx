@@ -476,6 +476,38 @@ export default function Chat() {
     }
 
     setCreatingWithPrompt(true);
+
+    // ─── Direct HTML Open: if attached file is a complete HTML document, open it directly ───
+    if (pendingFile && pendingFile.name.endsWith('.html') && pendingFile.content.includes('<head') && pendingFile.content.includes('<body')) {
+      const htmlContent = pendingFile.content;
+      const projectName = pendingFile.name.replace(/\.html?$/, '').replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+
+      const files: Record<string, StudioFile> = {
+        'index.html': { language: 'html', content: htmlContent }
+      };
+      // Extract CSS
+      const styleMatch = htmlContent.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
+      if (styleMatch) {
+        const css = styleMatch.map(s => s.replace(/<\/?style[^>]*>/gi, '')).join('\n\n').trim();
+        if (css.length > 200) files['style.css'] = { language: 'css', content: css };
+      }
+      // Extract JS
+      const scriptMatch = htmlContent.match(/<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/gi);
+      if (scriptMatch) {
+        const js = scriptMatch.map(s => s.replace(/<\/?script[^>]*>/gi, '')).join('\n\n').trim();
+        if (js.length > 100) files['script.js'] = { language: 'javascript', content: js };
+      }
+
+      const project = await createProject(projectName);
+      if (project) {
+        await updateProjectFiles(project.id, files);
+        setActiveProject({ ...project, files });
+        setPendingFile(null);
+      }
+      setCreatingWithPrompt(false);
+      return;
+    }
+
     let finalPrompt = prompt;
     if (pendingFile) {
       finalPrompt = `[CONTRATO/CONTEXTO DE ARCHIVO: ${pendingFile.name}]\n\`\`\`\n${pendingFile.content}\n\`\`\`\n\n${prompt || "Analiza este archivo y construye un proyecto basado en él."}`;
@@ -485,7 +517,7 @@ export default function Chat() {
     const stopWords = ['crea', 'un', 'una', 'el', 'la', 'de', 'para', 'mi', 'con', 'construye'];
     const namingWords = p.split(/\s+/).filter(w => !stopWords.includes(w)).slice(0, 4);
     let projectName = namingWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-    
+
     if (!projectName || projectName.length < 3) {
       projectName = 'Nuevo Proyecto Genesis';
     } else if (projectName.length > 40) {
@@ -857,7 +889,7 @@ export default function Chat() {
       />
 
       {/* ── Main Content ── */}
-      <div className="flex-1 grid overflow-hidden relative" style={{ gridTemplateColumns: `${isChatOpen ? '380px' : '0px'} 1fr`, transition: 'grid-template-columns 350ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
+      <div className="flex-1 grid overflow-hidden relative" style={{ gridTemplateColumns: `${isChatOpen ? '440px' : '0px'} 1fr`, transition: 'grid-template-columns 350ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
         {/* Sidebar: Chat */}
         <div className="flex flex-col h-full border-r border-border/40 overflow-hidden" style={{ background: 'hsl(var(--card) / 0.3)', backdropFilter: 'blur(20px)' }}>
           <div className="flex-1 min-h-0">

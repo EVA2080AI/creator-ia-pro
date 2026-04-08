@@ -113,10 +113,7 @@ export function ChatInput({
       className="shrink-0 relative z-40"
       style={{
         background: 'linear-gradient(to top, white 85%, rgba(255,255,255,0))',
-        paddingTop: '8px',
-        paddingBottom: '16px',
-        paddingLeft: '16px',
-        paddingRight: '16px',
+        padding: '12px 20px 20px',
       }}
       role="contentinfo"
     >
