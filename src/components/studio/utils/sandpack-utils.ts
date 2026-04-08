@@ -1,4 +1,4 @@
-import { StudioFile } from '../../../types';
+import { type StudioFile } from '@/hooks/useStudioProjects';
 
 export interface SandpackFile {
   code: string;
@@ -113,10 +113,16 @@ export function toSandpackFiles(
 ): Record<string, SandpackFile> {
   const result: Record<string, SandpackFile> = {};
   
+  if (!files || typeof files !== 'object' || Array.isArray(files)) {
+     console.error("[toSandpackFiles] Invalid files object received:", files);
+     return {};
+  }
+  
   const ROOT_FILES = ['package.json', 'vite.config.js', 'vite.config.ts', 'tailwind.config.js', 'postcss.config.js', 'tsconfig.json', 'index.html', 'index.css'];
   let customPackageJson: any = null;
 
   Object.entries(files).forEach(([name, file]) => {
+    if (!file || typeof file !== 'object') return;
     let cleanName = name.replace(/^\//, '');
     let abs = '/' + cleanName;
 

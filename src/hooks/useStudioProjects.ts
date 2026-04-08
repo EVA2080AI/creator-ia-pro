@@ -61,6 +61,22 @@ const DEFAULT_FILES: Record<string, StudioFile> = {
   },
 };
 
+function normalizeFiles(files: any): Record<string, StudioFile> {
+  if (!files) return {};
+  if (typeof files === 'string') {
+    try {
+      return normalizeFiles(JSON.parse(files));
+    } catch (e) {
+      console.error("[useStudioProjects] Failed to parse files string:", e);
+      return {};
+    }
+  }
+  if (typeof files === 'object' && !Array.isArray(files)) {
+    return files as Record<string, StudioFile>;
+  }
+  return {};
+}
+
 export function useStudioProjects() {
   const { user } = useAuth(); // no redirect — Studio handles auth via AppHeader
   const [projects, setProjects] = useState<StudioProject[]>([]);
@@ -84,9 +100,7 @@ export function useStudioProjects() {
 
     const parsed = (data || []).map((p: any) => ({
       ...p,
-      files: typeof p.files === 'string'
-        ? (() => { try { return JSON.parse(p.files); } catch { return {}; } })()
-        : (p.files || {}),
+      files: normalizeFiles(p.files),
     })) as StudioProject[];
 
     setProjects(parsed);
@@ -113,11 +127,7 @@ export function useStudioProjects() {
 
     if (error) { toast.error('Error al crear proyecto'); return null; }
 
-    const parsedFiles = typeof data.files === 'string'
-      ? (() => { try { return JSON.parse(data.files); } catch { return {}; } })()
-      : (data.files || {});
-
-    const project = { ...data, files: parsedFiles } as StudioProject;
+    const project = { ...data, files: normalizeFiles(data.files) } as StudioProject;
     setProjects((prev) => [project, ...prev]);
     setActiveProject(project);
     toast.success('Proyecto creado');
@@ -169,7 +179,7 @@ export function useStudioProjects() {
 
     if (error) { console.error('Error saving files:', error); return; }
 
-    const updater = (p: StudioProject) => p.id === projectId ? { ...p, files, updated_at: new Date().toISOString() } : p;
+    const updater = (p: StudioProject) => p.id === projectId ? { ...p, files: normalizeFiles(files), updated_at: new Date().toISOString() } : p;
     setProjects((prev) => prev.map(updater));
     setActiveProject((prev) => prev?.id === projectId ? updater(prev) : prev);
   }, [activeProject]);
@@ -211,7 +221,7 @@ export function useStudioProjects() {
     const typedData = data as any;
     const newProject = { 
       ...typedData, 
-      files: typeof typedData.files === 'string' ? JSON.parse(typedData.files) : typedData.files 
+      files: normalizeFiles(typedData.files) 
     } as StudioProject;
     setProjects((prev) => [newProject, ...prev]);
     toast.success('Proyecto duplicado exitosamente');
@@ -241,11 +251,7 @@ export function useStudioProjects() {
       return null;
     }
 
-    const files = typeof data.files === 'string' 
-      ? JSON.parse(data.files) 
-      : data.files;
-      
-    return files as Record<string, StudioFile>;
+    return normalizeFiles(data.files);
   }, []);
 
   return { 

@@ -370,7 +370,23 @@ export default function Chat() {
   const [agentPhase, setAgentPhase] = useState<AgentPhase>('idle');
   const [activeSpecialist, setActiveSpecialist] = useState<AgentSpecialist>('none');
 
-  const projectFiles = activeProject?.files || {};
+  const projectFiles = useMemo(() => {
+    if (!activeProject?.files) return {};
+    if (typeof activeProject.files === 'string') {
+      try {
+        console.warn("[Chat] projectFiles was a string, parsing...");
+        return JSON.parse(activeProject.files);
+      } catch (e) {
+        console.error("[Chat] Failed to parse activeProject.files:", e);
+        return {};
+      }
+    }
+    return activeProject.files;
+  }, [activeProject?.files]);
+
+  useEffect(() => {
+    console.log("[Chat] Active Project Sync:", activeProject?.id, activeProject?.name);
+  }, [activeProject?.id]);
 
   useEffect(() => {
     if (activeProject) localStorage.setItem('genesis-last-project', activeProject.id);
