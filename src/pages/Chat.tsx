@@ -810,6 +810,30 @@ export default function Chat() {
 
   const credits = profile?.credits_balance ?? 0;
 
+  // Shared chat props to avoid duplication
+  const chatProps = {
+    projectId: activeProject.id,
+    projectFiles,
+    onCodeGenerated: handleCodeGenerated,
+    initialPrompt: pendingPrompt,
+    onGeneratingChange: setIsGenerating,
+    supabaseConfig,
+    previewError,
+    artifacts,
+    setArtifacts,
+    tasks,
+    setTasks,
+    logs,
+    setLogs,
+    onPhaseChange: (phase: AgentPhase, specialist?: AgentSpecialist) => {
+      setAgentPhase(phase);
+      setActiveSpecialist(specialist ?? 'none');
+    },
+    onInitialPromptUsed: () => setPendingPrompt(null),
+    onStreamCharsChange: (_chars: number, preview: string) => setStreamPreview(preview),
+    onToggleArtifacts: () => setPanelView('artifacts'),
+  };
+
   return (
     <IDEErrorBoundary onReset={() => setActiveProject(null)}>
     <div className="flex flex-col h-full overflow-hidden bg-background relative"
@@ -832,74 +856,56 @@ export default function Chat() {
         onPublish={() => setDeployOpen(!deployOpen)}
       />
 
-
       {/* ── Main Content ── */}
       <div className="flex-1 grid overflow-hidden relative" style={{ gridTemplateColumns: `${isChatOpen ? '380px' : '0px'} 1fr`, transition: 'grid-template-columns 350ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
         {/* Sidebar: Chat */}
         <div className="flex flex-col h-full border-r border-border/40 overflow-hidden" style={{ background: 'hsl(var(--card) / 0.3)', backdropFilter: 'blur(20px)' }}>
           <div className="flex-1 min-h-0">
-            <StudioChat 
-              projectId={activeProject.id} 
-              projectFiles={projectFiles} 
-              onCodeGenerated={handleCodeGenerated} 
-              initialPrompt={pendingPrompt} 
-              onGeneratingChange={setIsGenerating} 
-              supabaseConfig={supabaseConfig} 
-              previewError={previewError}
-              artifacts={artifacts}
-              setArtifacts={setArtifacts}
-              tasks={tasks}
-              setTasks={setTasks}
-              logs={logs}
-              setLogs={setLogs}
-              onPhaseChange={(phase, specialist) => {
-                setAgentPhase(phase);
-                setActiveSpecialist(specialist ?? 'none');
-              }}
-              onInitialPromptUsed={() => setPendingPrompt(null)}
-              onStreamCharsChange={(_chars, preview) => setStreamPreview(preview)}
-              onToggleArtifacts={() => setPanelView('artifacts')}
-            />
+            <IDEErrorBoundary onReset={() => setActiveProject(null)}>
+              <StudioChat {...chatProps} />
+            </IDEErrorBoundary>
           </div>
         </div>
 
         {/* Canvas */}
         <div className="flex flex-col min-w-0 h-full overflow-hidden relative">
-          {panelView === 'files' && (
-            <div className="w-full h-full flex items-center justify-center p-8 bg-background/50">
-              <div className="w-full max-w-2xl h-[80vh] bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-2xl">
-                <div className="px-6 py-4 border-b border-border flex justify-between items-center"><h3 className="text-sm font-bold flex items-center gap-2"><FolderOpen className="h-4 w-4 text-primary" /> Explorer</h3><button onClick={() => handleAddFile('new.tsx')} className="text-[11px] font-bold text-primary">+ New</button></div>
-                <div className="flex-1 overflow-y-auto p-4 custom-scrollbar"><StudioFileTree files={projectFiles} selectedFile={selectedFile} onSelect={f => { setSelectedFile(f); setPanelView('code'); }} onAddFile={handleAddFile} onDeleteFile={handleDeleteFile} /></div>
-              </div>
-            </div>
-          )}
-          {(panelView === 'code' || panelView === 'split') && <div className={`flex flex-col overflow-hidden ${panelView === 'split' ? 'w-[45%] border-r border-border/40' : 'flex-1'}`}><StudioCodeEditor selectedFile={selectedFile} projectFiles={projectFiles} onFilesChange={handleFilesChange} isGenerating={isGenerating} streamPreview={streamPreview} /></div>}
-          {(panelView === 'preview' || panelView === 'split') && <div className="flex flex-col overflow-hidden flex-1"><StudioPreview files={projectFiles} deviceMode={deviceMode} onDeviceModeChange={setDeviceMode} isGenerating={isGenerating} supabaseConfig={supabaseConfig} onError={setPreviewError} viewMode="preview" onToggleViewMode={(mode) => setPanelView(mode)} isSidebarCollapsed={!isChatOpen} onToggleSidebar={() => setIsChatOpen(!isChatOpen)} isFullscreen={false} onToggleFullscreen={() => {}} /></div>}
-          {panelView === 'history' && (
-            <div className="w-full h-full flex items-center justify-center p-8 bg-background/50">
-              <div className="w-full max-w-2xl h-[80vh] bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-2xl">
-                <div className="px-6 py-4 border-b border-border"><h3 className="text-sm font-bold flex items-center gap-2"><History className="h-4 w-4 text-muted-foreground" /> Snapshots</h3></div>
-                <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-                  {snapshots.length === 0 ? <p className="text-center text-muted-foreground py-20 uppercase tracking-widest text-[10px]">No snapshots</p> : snapshots.map((s, i) => <div key={s.id} className="p-4 rounded-xl bg-zinc-50 border border-border flex justify-between items-center"><div className="flex items-center gap-4"><div className="h-10 w-10 flex items-center justify-center bg-muted/20 border border-border rounded-lg">{i}</div><div><p className="text-[13px] font-bold text-zinc-900">{s.label}</p><p className="text-[11px] text-zinc-500">{Object.keys(s.files).length} files</p></div></div><button onClick={() => { if (activeProject) { updateProjectFiles(activeProject.id, s.files); setPanelView('preview'); } }} className="text-[11px] font-bold hover:text-primary transition-colors">Restore</button></div>)}
+          <IDEErrorBoundary onReset={() => setPanelView('preview')}>
+            {panelView === 'files' && (
+              <div className="w-full h-full flex items-center justify-center p-8 bg-background/50">
+                <div className="w-full max-w-2xl h-[80vh] bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+                  <div className="px-6 py-4 border-b border-border flex justify-between items-center"><h3 className="text-sm font-bold flex items-center gap-2"><FolderOpen className="h-4 w-4 text-primary" /> Explorer</h3><button onClick={() => handleAddFile('new.tsx')} className="text-[11px] font-bold text-primary">+ New</button></div>
+                  <div className="flex-1 overflow-y-auto p-4 custom-scrollbar"><StudioFileTree files={projectFiles} selectedFile={selectedFile} onSelect={f => { setSelectedFile(f); setPanelView('code'); }} onAddFile={handleAddFile} onDeleteFile={handleDeleteFile} /></div>
                 </div>
               </div>
-            </div>
-          )}
-          {panelView === 'artifacts' && (
-            <div className="flex-1 overflow-hidden">
-              <StudioArtifactsPanel 
-                isOpen={true} 
-                onClose={() => setPanelView('preview')} 
-                artifacts={artifacts} 
-                tasks={tasks} 
-                logs={logs} 
-                files={projectFiles}
-                agentPhase={agentPhase}
-                activeSpecialist={activeSpecialist}
-                persona="genesis"
-              />
-            </div>
-          )}
+            )}
+            {(panelView === 'code' || panelView === 'split') && <div className={`flex flex-col overflow-hidden ${panelView === 'split' ? 'w-[45%] border-r border-border/40' : 'flex-1'}`}><StudioCodeEditor selectedFile={selectedFile} projectFiles={projectFiles} onFilesChange={handleFilesChange} isGenerating={isGenerating} streamPreview={streamPreview} /></div>}
+            {(panelView === 'preview' || panelView === 'split') && <div className="flex flex-col overflow-hidden flex-1"><StudioPreview files={projectFiles} deviceMode={deviceMode} onDeviceModeChange={setDeviceMode} isGenerating={isGenerating} supabaseConfig={supabaseConfig} onError={setPreviewError} viewMode="preview" onToggleViewMode={(mode) => setPanelView(mode)} isSidebarCollapsed={!isChatOpen} onToggleSidebar={() => setIsChatOpen(!isChatOpen)} isFullscreen={false} onToggleFullscreen={() => {}} /></div>}
+            {panelView === 'history' && (
+              <div className="w-full h-full flex items-center justify-center p-8 bg-background/50">
+                <div className="w-full max-w-2xl h-[80vh] bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-2xl">
+                  <div className="px-6 py-4 border-b border-border"><h3 className="text-sm font-bold flex items-center gap-2"><History className="h-4 w-4 text-muted-foreground" /> Snapshots</h3></div>
+                  <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+                    {snapshots.length === 0 ? <p className="text-center text-muted-foreground py-20 uppercase tracking-widest text-[10px]">No snapshots</p> : snapshots.map((s, i) => <div key={s.id} className="p-4 rounded-xl bg-zinc-50 border border-border flex justify-between items-center"><div className="flex items-center gap-4"><div className="h-10 w-10 flex items-center justify-center bg-muted/20 border border-border rounded-lg">{i}</div><div><p className="text-[13px] font-bold text-zinc-900">{s.label}</p><p className="text-[11px] text-zinc-500">{Object.keys(s.files).length} files</p></div></div><button onClick={() => { if (activeProject) { updateProjectFiles(activeProject.id, s.files); setPanelView('preview'); } }} className="text-[11px] font-bold hover:text-primary transition-colors">Restore</button></div>)}
+                  </div>
+                </div>
+              </div>
+            )}
+            {panelView === 'artifacts' && (
+              <div className="flex-1 overflow-hidden">
+                <StudioArtifactsPanel
+                  isOpen={true}
+                  onClose={() => setPanelView('preview')}
+                  artifacts={artifacts}
+                  tasks={tasks}
+                  logs={logs}
+                  files={projectFiles}
+                  agentPhase={agentPhase}
+                  activeSpecialist={activeSpecialist}
+                  persona="genesis"
+                />
+              </div>
+            )}
+          </IDEErrorBoundary>
         </div>
       </div>
 
@@ -942,36 +948,16 @@ export default function Chat() {
       )}
 
       <CommandPalette open={cmdPaletteOpen} onClose={() => setCmdPaletteOpen(false)} files={projectFiles} projects={projects} onSelectFile={f => { setSelectedFile(f); setPanelView('code'); }} onSelectProject={setActiveProject} onAction={handleCmdAction} />
-      
+
       {/* Mobile FAB */}
       <div className="lg:hidden fixed bottom-6 right-6 z-[60]">
         <Sheet>
           <SheetTrigger asChild><button className="h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center border border-primary/20"><MessageSquare className="h-5 w-5" /></button></SheetTrigger>
           <SheetContent side="left" className="w-full p-0 border-r border-border bg-background">
-            <StudioChat 
-              projectId={activeProject.id} 
-              projectFiles={projectFiles} 
-              onCodeGenerated={handleCodeGenerated} 
-              initialPrompt={pendingPrompt} 
-              onGeneratingChange={setIsGenerating} 
-              supabaseConfig={supabaseConfig} 
-              previewError={previewError}
-              artifacts={artifacts}
-              setArtifacts={setArtifacts}
-              tasks={tasks}
-              setTasks={setTasks}
-              logs={logs}
-              setLogs={setLogs}
-              onPhaseChange={(phase, specialist) => {
-                setAgentPhase(phase);
-                setActiveSpecialist(specialist ?? 'none');
-              }}
-              onInitialPromptUsed={() => setPendingPrompt(null)}
-              onStreamCharsChange={(_chars, preview) => setStreamPreview(preview)}
-              onToggleArtifacts={() => setPanelView('artifacts')}
-            />
+            <IDEErrorBoundary onReset={() => setActiveProject(null)}>
+              <StudioChat {...chatProps} />
+            </IDEErrorBoundary>
           </SheetContent>
-
         </Sheet>
       </div>
     </div>
