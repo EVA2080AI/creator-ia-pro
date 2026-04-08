@@ -17,50 +17,48 @@ export function StudioViewToolbar({
   onToggleSidebar,
   onToggleViewMode,
 }: StudioViewToolbarProps) {
+  // Use explicit return to help the parser
   return (
-    <div 
-      className={cn(
-        "h-12 w-full shrink-0 flex items-center justify-between px-4 z-40 transition-all duration-300",
-        "bg-zinc-950/80 backdrop-blur-2xl border-b border-white/10 shadow-2xl"
-      )}
-    >
-      {/* ── Left: Sidebar Toggle ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
+    <div className={cn(
+      "h-14 w-full shrink-0 flex items-center justify-between px-6 z-40 bg-white border-t border-zinc-100 shadow-sm"
+    )}>
+      {/* Left side */}
+      <div className="flex items-center gap-4">
         <Button
           variant="ghost"
           size="icon"
           onClick={onToggleSidebar}
           className={cn(
-            "h-9 w-9 text-zinc-500 hover:text-white hover:bg-white/5 transition-all rounded-xl",
-            isSidebarCollapsed && "bg-white/10 text-white"
+            "h-10 w-10 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all rounded-2xl",
+            isSidebarCollapsed && "bg-zinc-100 text-zinc-900 shadow-inner"
           )}
         >
-          <PanelLeft className="h-4.5 w-4.5" />
+          <PanelLeft className="h-5 w-5" />
         </Button>
-        <div className="w-px h-4 bg-white/10 mx-1" />
-        <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] select-none">
-          Genesis Studio <span className="text-zinc-700 mx-1">/</span> <span className="text-white/60">V3.0</span>
+        <div className="w-[1px] h-5 bg-zinc-100 mx-1" />
+        <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.4em] select-none">
+          Génesis Studio <span className="text-zinc-200 mx-2">{'\u002F'}</span> <span className="text-primary font-black">v21.0</span>
         </span>
       </div>
 
-      {/* ── Right: Preview/Code Switcher ─────────────────────────────────────── */}
+      {/* Right side */}
       <div className="flex items-center gap-2">
         <ToggleGroup 
           type="single" 
           value={viewMode} 
-          onValueChange={(val) => val && onToggleViewMode(val as 'preview' | 'code')}
-          className="bg-black/40 p-1 rounded-xl border border-white/5 h-10 shadow-inner"
+          onValueChange={(val) => { if (val) onToggleViewMode(val as 'preview' | 'code'); }}
+          className="bg-zinc-50 p-1 rounded-2xl border border-zinc-100 h-11"
         >
           <ToggleGroupItem 
             value="preview" 
-            className="h-8 px-4 text-[11px] font-black gap-2 uppercase tracking-widest data-[state=on]:bg-white/10 data-[state=on]:text-white data-[state=on]:shadow-xl rounded-lg transition-all text-zinc-500"
+            className="h-9 px-5 text-[11px] font-bold gap-2 uppercase tracking-[0.2em] data-[state=on]:bg-white data-[state=on]:text-primary data-[state=on]:shadow-sm rounded-xl transition-all text-zinc-400"
           >
             <Monitor className="h-3.5 w-3.5" />
             Vista
           </ToggleGroupItem>
           <ToggleGroupItem 
             value="code" 
-            className="h-8 px-4 text-[11px] font-black gap-2 uppercase tracking-widest data-[state=on]:bg-white/10 data-[state=on]:text-white data-[state=on]:shadow-xl rounded-lg transition-all text-zinc-500"
+            className="h-9 px-5 text-[11px] font-bold gap-2 uppercase tracking-[0.2em] data-[state=on]:bg-white data-[state=on]:text-primary data-[state=on]:shadow-sm rounded-xl transition-all text-zinc-400"
           >
             <FileCode className="h-3.5 w-3.5" />
             Código
