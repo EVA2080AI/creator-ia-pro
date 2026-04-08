@@ -2,7 +2,7 @@
  * Genesis — AI Code Builder
  * Genesis IDE: describe → generate → preview → push to GitHub
  */
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, Component, type ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 import JSZip from 'jszip';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,7 @@ import {
   MoreHorizontal, Globe, BarChart2, Columns, Cloud,
   Map, ArrowUp, ArrowRight, Layers, X, ArrowLeft,
   PanelLeft, PanelLeftClose, Phone, RefreshCw, Database,
+  AlertTriangle,
 } from 'lucide-react';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
@@ -33,6 +34,31 @@ import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { generateProject, downloadBlob, type ProjectType, type ScaffoldOptions } from '@/services/scaffold-service';
 import { StudioDeploy } from '@/components/studio/StudioDeploy';
+
+// ─── IDE Error Boundary ──────────────────────────────────────────────────────
+class IDEErrorBoundary extends Component<{ children: ReactNode; onReset: () => void }, { hasError: boolean; error?: Error }> {
+  constructor(props: { children: ReactNode; onReset: () => void }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
+  componentDidCatch(error: Error, info: React.ErrorInfo) { console.error("[Genesis IDE] Render crash:", error, info); }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex h-full flex-col items-center justify-center bg-background px-6 text-center gap-4">
+          <AlertTriangle className="h-10 w-10 text-destructive" />
+          <h2 className="text-lg font-bold">Error en el IDE</h2>
+          <p className="text-sm text-muted-foreground max-w-md">{this.state.error?.message || 'Ocurrió un error al cargar el proyecto.'}</p>
+          <button onClick={() => { this.setState({ hasError: false }); this.props.onReset(); }} className="px-6 py-2 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
+            Volver a Genesis Home
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 type PanelView = 'code' | 'preview' | 'split' | 'files' | 'history' | 'sitemap' | 'artifacts';
@@ -785,6 +811,7 @@ export default function Chat() {
   const credits = profile?.credits_balance ?? 0;
 
   return (
+    <IDEErrorBoundary onReset={() => setActiveProject(null)}>
     <div className="flex flex-col h-full overflow-hidden bg-background relative"
       onDrop={handleWorkspaceDrop}
       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
@@ -948,5 +975,6 @@ export default function Chat() {
         </Sheet>
       </div>
     </div>
+    </IDEErrorBoundary>
   );
 }

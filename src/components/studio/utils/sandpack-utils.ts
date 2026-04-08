@@ -123,6 +123,7 @@ export function toSandpackFiles(
 
   Object.entries(files).forEach(([name, file]) => {
     if (!file || typeof file !== 'object') return;
+    if (typeof file.content !== 'string') return; // skip files with null/undefined content
     let cleanName = name.replace(/^\//, '');
     let abs = '/' + cleanName;
 

@@ -118,6 +118,20 @@
     box-shadow: 0 0 40px -10px hsla(var(--primary) / 0.15);
     border: 1px solid hsla(var(--primary) / 0.1);
   }
+  .neural-mesh {
+    background-image:
+      radial-gradient(circle at 2px 2px, rgba(var(--primary-rgb), 0.15) 1px, transparent 0),
+      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 24px 24px, 48px 48px, 48px 48px;
+    mask-image: radial-gradient(circle at center, black, transparent 90%);
+  }
+  .scanline-overlay {
+    background: linear-gradient(to bottom, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+    background-size: 100% 4px;
+    animation: scanline 8s linear infinite;
+    pointer-events: none;
+  }
   .genesis-panel-background {
     background:
       radial-gradient(ellipse 80% 60% at 20% 80%, var(--g-mesh-purple), transparent),
