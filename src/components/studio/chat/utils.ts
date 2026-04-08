@@ -200,7 +200,7 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
     if (!filename) {
       const fileMatch = code.match(/\/\/\s*([\w./\-]+\.\w+)/);
       if (fileMatch) {
-        filename = fileMatch[1].replace(/^src\//, ''); 
+        filename = fileMatch[1]; 
       } else {
         if (lang === 'html') filename = 'index.html';
         else if (lang === 'css') filename = 'styles.css';
