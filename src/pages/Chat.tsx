@@ -116,7 +116,7 @@ interface WelcomeScreenProps {
 }
 
 // Plan credit limits for bar calculation
-const PLAN_CREDITS: Record<string, number> = { free: 5, starter: 500, creator: 1200, pymes: 4000 };
+const PLAN_CREDITS: Record<string, number> = { free: 5, creador: 1000, pro: 3000, agencia: 8000, pyme: 20000, pymes: 20000 };
 
 function WelcomeScreen({ 
   onPrompt, onCreateProject, creating, projects, onSelectProject, onDeleteProject, 

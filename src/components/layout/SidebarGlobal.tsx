@@ -26,6 +26,7 @@ const TIER_LEVELS: Record<string, number> = {
   'pro': 2,
   'agencia': 3,
   'pyme': 4,
+  'pymes': 4,
   'admin': 5
 };
 
@@ -34,6 +35,7 @@ const TIER_CONFIG: Record<string, { label: string, color: string, bg: string }> 
   'pro':     { label: 'PRO',     color: 'text-violet-500',  bg: 'bg-violet-50/80' },
   'agencia': { label: 'AGENCIA', color: 'text-amber-600',   bg: 'bg-amber-50/80' },
   'pyme':    { label: 'PYME',    color: 'text-emerald-600', bg: 'bg-emerald-50/80' },
+  'pymes':   { label: 'PYMES',   color: 'text-emerald-600', bg: 'bg-emerald-50/80' },
   'admin':   { label: 'ADMIN',   color: 'text-red-500',     bg: 'bg-red-50/80' },
 };
 

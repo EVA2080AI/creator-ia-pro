@@ -59,9 +59,9 @@ const PRODUCTS = [
 ];
 
 const PLANS = [
-  { name: "Starter", price: "$69K", per: "/mes", credits: "500 créditos", color: "#4ADE80", features: ["Genesis IDE", "Studio completo", "Canvas IA", "Modelos ECO"] },
-  { name: "Creator", price: "$138K", per: "/mes", credits: "1.200 créditos", color: "#A855F7", popular: true, features: ["Todo Starter", "Claude 4.6", "GPT-4o", "Soporte prioritario"] },
-  { name: "Pymes",   price: "$345K", per: "/mes", credits: "4.000 créditos", color: "#F59E0B", features: ["Todo Creator", "Claude Opus 4.6", "Modelos ULTRA", "BuilderAI IDE"] },
+  { name: "Creador", price: "$149.900", per: "/mes", credits: "1.000 créditos", color: "#94A3B8", features: ["Genesis IDE", "Studio creativo", "Modelos ECO", "Soporte chat"] },
+  { name: "Pro",     price: "$349.900", per: "/mes", credits: "3.000 créditos", color: "#6366F1", popular: true, features: ["Todo Creador", "Modelos premium", "Generación prioritaria", "Soporte prioritario"] },
+  { name: "Agencia", price: "$699.900", per: "/mes", credits: "8.000 créditos", color: "#F59E0B", features: ["Todo Pro", "Todos los modelos", "Soporte 24/7", "Facturación directa"] },
 ];
 
 const TRUST = [

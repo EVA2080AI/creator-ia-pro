@@ -193,13 +193,14 @@ export const aiService = {
       const userTier = profile?.subscription_tier?.toLowerCase() || 'free';
       const orModel = TEXT_MODEL_MAP[model] || model;
       if (PREMIUM_MODELS.has(orModel) || PREMIUM_MODELS.has(model)) {
-        if (userTier !== 'pymes' && userTier !== 'agency' && userTier !== 'admin') {
+        const premiumTiers = ['pyme', 'pymes', 'agencia', 'agency', 'admin'];
+        if (!premiumTiers.includes(userTier)) {
           toast.error("Modelo bloqueado", {
-            description: "Los modelos de IA Premium y Thinking son exclusivos del plan Pymes.",
+            description: "Los modelos Premium son exclusivos del plan Agencia o superior.",
             action: { label: "Actualizar Plan", onClick: () => { window.location.href = '/pricing'; } },
             duration: 8000,
           });
-          throw new Error("Este modelo premium requiere el plan Pymes.");
+          throw new Error("Este modelo premium requiere el plan Agencia o superior.");
         }
       }
 

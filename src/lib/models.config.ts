@@ -3,7 +3,7 @@
 // ECO: 1x  |  PRO: 5x  |  ULTRA: 20x
 
 export type ModelCategory = 'ECO' | 'PRO' | 'ULTRA';
-export type PlanTier = 'free' | 'starter' | 'creator' | 'pymes';
+export type PlanTier = 'free' | 'creador' | 'pro' | 'agencia' | 'pyme' | 'pymes';
 
 export interface ModelDef {
   id: string;               // internal ID used in UI
@@ -32,7 +32,7 @@ export const CATEGORY_CONFIG: Record<ModelCategory, {
     color: '#8AB4F8',
     bgColor: 'rgba(138,180,248,0.1)',
     bolts: 1,
-    minTier: 'starter',
+    minTier: 'creador',
     description: 'Rápido y eficiente',
   },
   PRO: {
@@ -41,8 +41,8 @@ export const CATEGORY_CONFIG: Record<ModelCategory, {
     color: '#A855F7',
     bgColor: 'rgba(168,85,247,0.1)',
     bolts: 3,
-    minTier: 'creator',
-    description: 'Alta calidad · Requiere Creator',
+    minTier: 'pro',
+    description: 'Alta calidad · Requiere Pro',
   },
   ULTRA: {
     label: 'ULTRA',
@@ -50,17 +50,20 @@ export const CATEGORY_CONFIG: Record<ModelCategory, {
     color: '#F59E0B',
     bgColor: 'rgba(245,158,11,0.1)',
     bolts: 5,
-    minTier: 'pymes',
-    description: 'Máximo poder · Requiere Pymes',
+    minTier: 'pyme',
+    description: 'Máximo poder · Requiere Pyme',
   },
 };
 
-export const PLAN_TIER_ORDER: PlanTier[] = ['free', 'starter', 'creator', 'pymes'];
+export const PLAN_TIER_ORDER: PlanTier[] = ['free', 'creador', 'pro', 'agencia', 'pyme'];
 
 export function canAccessModel(userTier: string, modelCategory: ModelCategory): boolean {
   const tierOrder = PLAN_TIER_ORDER;
   const minTier = CATEGORY_CONFIG[modelCategory].minTier;
-  const userIdx = tierOrder.indexOf((userTier?.toLowerCase() as PlanTier) ?? 'free');
+  // Normalize tier aliases: pymes→pyme, starter→creador, creator→pro
+  const TIER_ALIASES: Record<string, PlanTier> = { pymes: 'pyme', starter: 'creador', creator: 'pro', agency: 'agencia' };
+  const normalized = TIER_ALIASES[userTier?.toLowerCase()] || (userTier?.toLowerCase() as PlanTier) || 'free';
+  const userIdx = tierOrder.indexOf(normalized);
   const minIdx = tierOrder.indexOf(minTier);
   return userIdx >= minIdx;
 }
