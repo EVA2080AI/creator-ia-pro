@@ -100,9 +100,8 @@ export const boldService = {
     const { data: authData } = await supabase.auth.getUser();
     if (!authData.user) throw new Error("Usuario no autenticado");
 
-    const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string }>("bold-checkout", {
-      body: { 
-        amount, 
+    const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string; linkId?: string }>("bold-checkout", {
+      body: {
         packId: item.id,
         userId: authData.user.id,
         buyerEmail: authData.user.email,
@@ -110,16 +109,25 @@ export const boldService = {
       },
     });
 
-    if (error || !data) {
+    if (error) {
       console.error("[Bold Checkout Error]", error);
-      throw new Error(error?.message || "Error al conectar con Bold API");
+      // Parse edge function error for user-friendly message
+      const msg = typeof error === 'object' && 'message' in error
+        ? (error as any).message
+        : String(error);
+      if (msg.includes('BOLD_API_KEY')) {
+        throw new Error("Pasarela de pagos no configurada. Contacta soporte.");
+      }
+      throw new Error(msg || "Error al conectar con Bold. Intenta de nuevo.");
     }
 
+    if (!data) throw new Error("Sin respuesta del servidor de pagos.");
     if (data.error) throw new Error(data.error);
+
     if (data.url) {
       window.location.href = data.url;
     } else {
-      throw new Error("Respuesta inválida de Bold API");
+      throw new Error("No se pudo generar el link de pago. Intenta de nuevo.");
     }
   },
 };

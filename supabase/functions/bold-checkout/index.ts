@@ -49,9 +49,13 @@ serve(async (req: Request) => {
     }
 
     const BOLD_API_KEY = Deno.env.get("BOLD_API_KEY");
-    
+
     if (!BOLD_API_KEY) {
-      throw new Error("Bold BOLD_API_KEY missing");
+      console.error("[bold-checkout] BOLD_API_KEY not set in Supabase secrets");
+      return new Response(JSON.stringify({ error: "Pasarela de pagos no configurada. Configura BOLD_API_KEY en Supabase > Edge Functions > Secrets." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200, // Return 200 with error in body so frontend can read it
+      });
     }
 
     const payload = {
