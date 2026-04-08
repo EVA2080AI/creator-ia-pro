@@ -389,7 +389,12 @@ export default function Chat() {
   }, [activeProject?.id]);
 
   useEffect(() => {
-    if (activeProject) localStorage.setItem('genesis-last-project', activeProject.id);
+    if (activeProject) {
+      console.log("[Genesis] Entering IDE for project:", activeProject.id, activeProject.name);
+      localStorage.setItem('genesis-last-project', activeProject.id);
+    } else {
+      console.log("[Genesis] Project cleared (returning to Home)");
+    }
   }, [activeProject?.id]);
 
   useEffect(() => {
@@ -786,9 +791,9 @@ export default function Chat() {
     >
       <Helmet><title>Genesis IA | Creator IA Pro</title></Helmet>
 
-      {/* ── Topbar (Replicated Premium Style) ── */}
+      {/* ── Topbar ── */}
       <StudioTopbar
-        projectName={activeProject.name}
+        projectName={activeProject?.name || 'Proyecto Sin Nombre'}
         viewMode={(panelView as any)}
         onViewModeChange={(mode) => setPanelView(mode as any)}
         deviceMode={deviceMode as any}
@@ -799,6 +804,7 @@ export default function Chat() {
         onGithubSync={() => setGithubOpen(true)}
         onPublish={() => setDeployOpen(!deployOpen)}
       />
+
 
       {/* ── Main Content ── */}
       <div className="flex-1 grid overflow-hidden relative" style={{ gridTemplateColumns: `${isChatOpen ? '380px' : '0px'} 1fr`, transition: 'grid-template-columns 350ms cubic-bezier(0.4, 0, 0.2, 1)' }}>

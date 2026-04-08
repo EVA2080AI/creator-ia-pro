@@ -83,8 +83,9 @@ export function useStudioProjects() {
   const [activeProject, setActiveProject] = useState<StudioProject | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProjects = useCallback(async () => {
+  const fetchProjects = useCallback(async (showLoading = false) => {
     if (!user) { setLoading(false); return; }
+    if (showLoading) setLoading(true);
     const { data, error } = await supabase
       .from('studio_projects')
       .select('*')
@@ -108,14 +109,12 @@ export function useStudioProjects() {
     // IMPORTANT: Fix to prevent skipping Genesis Home.
     // Only update activeProject if it already exists (syncing).
     // DO NOT auto-select the first one if null.
-    setActiveProject((curr) => {
-      if (curr) return parsed.find((p) => p.id === curr.id) ?? null;
-      return null;
-    });
     setLoading(false);
   }, [user]);
 
-  useEffect(() => { fetchProjects(); }, [fetchProjects]);
+  useEffect(() => { 
+    fetchProjects(true); // Initial load with spinner
+  }, [fetchProjects]);
 
   const createProject = useCallback(async (name = 'Nuevo Proyecto') => {
     if (!user) return null;
