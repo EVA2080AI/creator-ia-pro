@@ -113,12 +113,26 @@ export function toSandpackFiles(
 ): Record<string, SandpackFile> {
   const result: Record<string, SandpackFile> = {};
   
+  const ROOT_FILES = ['package.json', 'vite.config.js', 'vite.config.ts', 'tailwind.config.js', 'postcss.config.js', 'tsconfig.json', 'index.html', 'index.css'];
+  let customPackageJson: any = null;
+
   Object.entries(files).forEach(([name, file]) => {
-    let abs = name.startsWith('/') ? name : '/' + name;
+    let cleanName = name.replace(/^\//, '');
+    let abs = '/' + cleanName;
+
     if (isVanillaHtml) {
       result[abs] = { code: file.content };
     } else {
-      if (!abs.startsWith('/src/')) abs = '/src' + abs;
+      if (ROOT_FILES.includes(cleanName) || cleanName.startsWith('public/')) {
+        // Keep at root
+        if (cleanName === 'package.json') {
+          try {
+            customPackageJson = JSON.parse(file.content);
+          } catch(e) {}
+        }
+      } else {
+        if (!abs.startsWith('/src/')) abs = '/src' + abs;
+      }
       result[abs] = { code: file.content };
     }
   });
@@ -134,22 +148,38 @@ export function toSandpackFiles(
 
     if (pages.length > 1) {
       result['/src/App.tsx'] = { code: generateRouterWrapper(pages, files), active: true };
-    } else if (!result['/src/App.tsx']) {
-      const mainFile = Object.keys(files).find(n => n.endsWith('index.tsx') || n.endsWith('main.tsx')) || Object.keys(files)[0];
-      result['/src/App.tsx'] = { code: files[mainFile].content, active: true };
+    } else if (!result['/src/App.tsx'] && !result['/App.tsx'] && !result['/src/App.jsx']) {
+      const mainFile = Object.keys(files).find(n => n.endsWith('index.tsx') || n.endsWith('main.tsx') || n.endsWith('App.tsx') || n.endsWith('App.jsx'));
+      if (mainFile) {
+         result['/src/App.tsx'] = { code: files[mainFile].content, active: true };
+      }
     }
     
     result['/src/figma-bridge.js'] = { code: figmaBridgeCode };
+    
+    // Merge dependencies intelligently
+    const baseDependencies = {
+      'react': '^18.0.0', 'react-dom': '^18.0.0', 'lucide-react': '^0.468.0',
+      'clsx': '^2.0.0', 'tailwind-merge': '^2.0.0', 'framer-motion': '^11.0.0',
+      'react-router-dom': '^6.0.0', 'recharts': '^2.0.0', 'axios': '^1.0.0', 'zustand': '^4.0.0',
+      ...(supabaseConfig ? { '@supabase/supabase-js': '^2.0.0' } : {}),
+    };
+
+    const finalDeps = customPackageJson?.dependencies ? { ...baseDependencies, ...customPackageJson.dependencies } : baseDependencies;
+
     result['/package.json'] = {
       code: JSON.stringify({
-        name: 'genesis-studio-app',
-        dependencies: {
-          'react': '^18.0.0', 'react-dom': '^18.0.0', 'lucide-react': '^0.468.0',
-          'clsx': '^2.0.0', 'tailwind-merge': '^2.0.0', 'framer-motion': '^11.0.0',
-          'react-router-dom': '^6.0.0', 'recharts': '^2.0.0', 'axios': '^1.0.0', 'zustand': '^4.0.0',
-          ...(supabaseConfig ? { '@supabase/supabase-js': '^2.0.0' } : {}),
+        name: customPackageJson?.name || 'genesis-studio-app',
+        type: 'module',
+        dependencies: finalDeps,
+        devDependencies: customPackageJson?.devDependencies || {
+          "vite": "^5.0.0",
+          "tailwindcss": "^3.4.0",
+          "autoprefixer": "^10.4.0",
+          "postcss": "^8.4.0",
+          "@vitejs/plugin-react": "^4.2.0"
         }
-      })
+      }, null, 2)
     };
   }
 
