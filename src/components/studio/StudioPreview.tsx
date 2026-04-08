@@ -3,7 +3,7 @@ import {
   SandpackProvider,
   SandpackPreview,
   SandpackLayout,
-  useSandpackConsole,
+  useSandpack,
 } from '@codesandbox/sandpack-react';
 import {
   Zap, Bot
@@ -182,14 +182,16 @@ export function StudioPreview({
 }
 
 function SandpackErrorBridge({ onError }: { onError?: (error: string) => void }) {
-  const { logs } = useSandpackConsole();
-  
+  const { sandpack } = useSandpack();
+
   useEffect(() => {
-    const lastError = logs.find(log => log.method === 'error');
-    if (lastError && onError) {
-      onError(lastError.data.map(d => String(d)).join(' '));
+    if (!onError) return;
+    const status = sandpack?.status;
+    const error = sandpack?.error;
+    if (error?.message) {
+      onError(error.message);
     }
-  }, [logs, onError]);
+  }, [sandpack?.status, sandpack?.error, onError]);
 
   return null;
 }
