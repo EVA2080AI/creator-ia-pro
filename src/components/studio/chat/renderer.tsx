@@ -2,6 +2,7 @@ import DOMPurify from 'dompurify';
 import { cn } from '@/lib/utils';
 
 export function renderMarkdown(text: string): string {
+  if (!text) return '';
   const raw = text
     // Thinking blocks
     .replace(/(?:<thinking>|\[thinking\]|thinking\n)([\s\S]*?)(?:<\/thinking>|\[\/thinking\]|(?=\s*\n\w+:\s*)|$)/gi, (_m, content) => 

@@ -126,8 +126,9 @@ export function useStudioChatMessages({
     const newTasks: UIPlanTask[] = [];
 
     messages.forEach(m => {
+      const content = m.content || '';
       // Improved Mermaid Regex: Case-insensitive and handles extra spaces
-      const mermaidMatches = [...m.content.matchAll(/```[Mm]ermaid\s*([\s\S]*?)```/g)];
+      const mermaidMatches = [...content.matchAll(/```[Mm]ermaid\s*([\s\S]*?)```/g)];
       mermaidMatches.forEach((match, idx) => {
         newArtifacts.push({
           id: `${m.id}-mermaid-${idx}`,   // ← Stable ID based on message + index
@@ -139,7 +140,7 @@ export function useStudioChatMessages({
 
       // Sitemap Fallback
       if (newArtifacts.filter(a => a.type === 'mermaid').length === 0) {
-        const listSitemap = m.content.match(/\* \/(\w+)? \(.*\)/g);
+        const listSitemap = content.match(/\* \/(\w+)? \(.*\)/g);
         if (listSitemap && listSitemap.length > 2) {
            newArtifacts.push({
              id: `${m.id}-sitemap`,       // ← Stable ID
@@ -151,7 +152,7 @@ export function useStudioChatMessages({
       }
 
       // Improved Task Regex: Handle variations in symbols ([], [ ], [x], [/], [-])
-      const taskMatches = Array.from(m.content.matchAll(/^\[( |x|X|\/|-)\] (.+)$/gm));
+      const taskMatches = Array.from(content.matchAll(/^\[( |x|X|\/|-)\] (.+)$/gm));
       taskMatches.forEach((match, idx) => {
         const symbol = (match[1] as string).toLowerCase();
         newTasks.push({

@@ -113,7 +113,11 @@ export function useStudioProjects() {
 
     if (error) { toast.error('Error al crear proyecto'); return null; }
 
-    const project = { ...data, files: data.files as unknown as Record<string, StudioFile> } as StudioProject;
+    const parsedFiles = typeof data.files === 'string'
+      ? (() => { try { return JSON.parse(data.files); } catch { return {}; } })()
+      : (data.files || {});
+
+    const project = { ...data, files: parsedFiles } as StudioProject;
     setProjects((prev) => [project, ...prev]);
     setActiveProject(project);
     toast.success('Proyecto creado');
