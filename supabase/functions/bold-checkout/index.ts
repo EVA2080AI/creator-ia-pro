@@ -79,10 +79,19 @@ serve(async (req: Request) => {
       body: JSON.stringify(payload),
     });
 
-    const data: BoldApiResponse = await response.json();
+    const rawText = await response.text();
+    console.log(`[bold-checkout] Bold API status: ${response.status}, body: ${rawText}`);
+
+    let data: BoldApiResponse;
+    try {
+      data = JSON.parse(rawText);
+    } catch {
+      throw new Error(`Bold API returned invalid JSON (status ${response.status}): ${rawText.slice(0, 200)}`);
+    }
 
     if (!response.ok) {
-      throw new Error(data.message || "Error al en Bold");
+      const errDetail = (data as any)?.errors?.[0]?.detail || (data as any)?.message || rawText.slice(0, 200);
+      throw new Error(`Bold API error (${response.status}): ${errDetail}`);
     }
 
     const linkId = data.payload?.payment_link;
