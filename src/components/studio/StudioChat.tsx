@@ -364,11 +364,17 @@ export function StudioChat(props: StudioChatProps) {
 
   // ─── AUTO-FIX Logic ───────────────────────────────────────────────────────
   useEffect(() => {
-    // Corrected to use props.runtimeError instead of props.previewError
     const error = props.runtimeError || props.previewError;
     if (!error || isGenerating || !user) return;
     if (error === lastAutoFixError.current) return;
     if (autoFixCountRef.current >= 3) return;
+
+    // Skip auto-fix if the error is caused by raw JSON saved as code
+    // (happens when AI responds with JSON format instead of markdown blocks)
+    if (error.includes('"explanation"') || error.includes('"files"') || error.includes('"deps"')) {
+      console.warn('[AutoFix] Skipping — error caused by raw JSON in file, not a code bug');
+      return;
+    }
 
     // Helper to find the first existing file mentioned in the error string
     const extractErrorFile = (err: string) => {
@@ -407,7 +413,7 @@ ${probFile ? `- Archivo detectado como origen: @${probFile}` : ''}
 - Archivo activo: @${props.activeFile || 'App.tsx'}
 - Punto de entrada: @App.tsx
 
-Analiza si hay imports rotos, typos o variables no definidas. Devuelve el JSON con las correcciones necesarias.`;
+Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archivos corregidos como bloques markdown.`;
 
       if (error.toLowerCase().includes('could not find module') || error.toLowerCase().includes('cannot find module')) {
         fixPrompt += `\n\nIMPORTANTE: El error indica que falta un módulo o archivo local. REVISA los imports en @App.tsx y ASEGÚRATE de crear cualquier archivo que falte.`;

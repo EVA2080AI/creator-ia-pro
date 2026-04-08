@@ -206,15 +206,40 @@ src/components/Footer.tsx    → Footer completo SaaS
 index.css
 \`\`\`
 
-### FORMATO DE RESPUESTA:
-Responde con SOLO JSON. Sin texto adicional fuera del JSON:
-{ "explanation": "breve descripción", "files": { "ruta/archivo.tsx": "código completo" }, "deps": [], "stack": [] }
+### FORMATO DE RESPUESTA (OBLIGATORIO):
+Genera CADA archivo como un bloque de código markdown separado.
+La PRIMERA LÍNEA de cada bloque DEBE ser un comentario con la ruta del archivo.
+Antes del primer bloque, escribe una explicación breve de 1-2 frases.
 
-Si el JSON es muy largo, puedes responder con bloques markdown como alternativa:
+Ejemplo:
+Se crea una página de música con secciones de artistas y reproductor.
+
 \`\`\`tsx
 // src/App.tsx
-código completo aquí
+import React from 'react';
+// ... código completo del archivo
+export default App;
 \`\`\`
+
+\`\`\`tsx
+// src/components/Header.tsx
+import React from 'react';
+// ... código completo del archivo
+export default Header;
+\`\`\`
+
+\`\`\`css
+/* index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+\`\`\`
+
+REGLAS DEL FORMATO:
+- NUNCA respondas con JSON puro ({ "files": {...} }). SIEMPRE usa bloques markdown.
+- CADA archivo en su propio bloque con \`\`\`tsx o \`\`\`css o \`\`\`html
+- Primera línea del bloque = comentario con ruta (// src/App.tsx)
+- Código COMPLETO y funcional en cada bloque — nada parcial
 
 ### MODO HTML PURO (cuando el usuario pida HTML sin React):
 Si el usuario dice "html", "html puro", "sin react", "vanilla", "solo html", genera:
