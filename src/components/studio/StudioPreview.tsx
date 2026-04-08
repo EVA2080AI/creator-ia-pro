@@ -149,10 +149,10 @@ export function StudioPreview({
           >
             <SandpackProvider
               key={sandpackKey}
-              template="react-ts"
+              template={isVanillaHtml ? "static" : "react-ts"}
               files={sandpackFiles}
               theme="light"
-              options={{ externalResources: ['https://cdn.tailwindcss.com'] }}
+              options={{ externalResources: isVanillaHtml ? [] : ['https://cdn.tailwindcss.com'] }}
             >
               <SandpackLayout style={{ border: 'none', height: '100%' }}>
                 <SandpackPreview 

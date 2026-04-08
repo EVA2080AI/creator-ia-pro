@@ -100,6 +100,52 @@ export function useStudioChatAI({
     const isVanillaHtml = intent === 'vanilla-html';
     const isImageToCode = hasImage && (intent === 'codegen' || !prompt.trim());
 
+    // ─── DIRECT HTML OPEN: Complete HTML documents are opened as-is ──────
+    // If the user pastes a complete HTML document (has <!DOCTYPE or <html>),
+    // save it directly as project files without sending to AI.
+    if (isHtmlImport && (prompt.includes('<!DOCTYPE') || prompt.includes('<html'))) {
+      const isCompleteDoc = prompt.includes('<head') && prompt.includes('<body');
+      if (isCompleteDoc) {
+        // Extract inline <style> to separate CSS file
+        const styleMatch = prompt.match(/<style[^>]*>([\s\S]*?)<\/style>/gi);
+        const scriptMatch = prompt.match(/<script(?![^>]*src=)[^>]*>([\s\S]*?)<\/script>/gi);
+
+        const files: Record<string, StudioFile> = {
+          'index.html': { language: 'html', content: prompt }
+        };
+
+        // Optionally extract CSS for editing convenience
+        if (styleMatch && styleMatch.length > 0) {
+          const allCss = styleMatch.map(s => s.replace(/<\/?style[^>]*>/gi, '')).join('\n\n');
+          if (allCss.length > 200) {
+            files['style.css'] = { language: 'css', content: allCss.trim() };
+          }
+        }
+
+        // Optionally extract JS for editing convenience
+        if (scriptMatch && scriptMatch.length > 0) {
+          const allJs = scriptMatch.map(s => s.replace(/<\/?script[^>]*>/gi, '')).join('\n\n');
+          if (allJs.length > 100) {
+            files['script.js'] = { language: 'javascript', content: allJs.trim() };
+          }
+        }
+
+        setIsGenerating(false);
+        onGeneratingChange?.(false);
+        onPhaseChange?.('idle');
+        setGenPhase('idle');
+
+        return {
+          files,
+          explanation: `📄 **HTML abierto directamente** — ${Object.keys(files).length} archivo(s) importados.\n\nEl proyecto está listo para previsualizar. Puedes pedirme que modifique secciones, agregue funcionalidades, o mejore el diseño.`,
+          isChatOnly: false,
+          stack: ['HTML', 'CSS', 'JavaScript'],
+          deps: [],
+          suggestions: ['Agregar responsive design', 'Mejorar accesibilidad', 'Optimizar para SEO'],
+        };
+      }
+    }
+
     // Auto-trigger Architect Mode for fullstack creation intents
     const isChatModeActive = intent === 'chat';
     const isArchitectRequest = (isArchitectMode || intent === 'fullstack') && !isChatModeActive && !isHtmlImport && !isVanillaHtml;
