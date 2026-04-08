@@ -853,7 +853,7 @@ export default function Chat() {
               <div className="w-full max-w-2xl h-[80vh] bg-card border border-border rounded-2xl overflow-hidden flex flex-col shadow-2xl">
                 <div className="px-6 py-4 border-b border-border"><h3 className="text-sm font-bold flex items-center gap-2"><History className="h-4 w-4 text-muted-foreground" /> Snapshots</h3></div>
                 <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
-                  {snapshots.length === 0 ? <p className="text-center text-muted-foreground py-20 uppercase tracking-widest text-[10px]">No snapshots</p> : snapshots.map((s, i) => <div key={s.id} className="p-4 rounded-xl bg-zinc-50 border border-border flex justify-between items-center"><div className="flex items-center gap-4"><div className="h-10 w-10 flex items-center justify-center bg-muted/20 border border-border rounded-lg">{i}</div><div><p className="text-[13px] font-bold text-zinc-900">{s.label}</p><p className="text-[11px] text-zinc-500">{Object.keys(s.files).length} files</p></div></div><button onClick={() => { updateProjectFiles(activeProject.id, s.files); setPanelView('preview'); }} className="text-[11px] font-bold hover:text-primary transition-colors">Restore</button></div>)}
+                  {snapshots.length === 0 ? <p className="text-center text-muted-foreground py-20 uppercase tracking-widest text-[10px]">No snapshots</p> : snapshots.map((s, i) => <div key={s.id} className="p-4 rounded-xl bg-zinc-50 border border-border flex justify-between items-center"><div className="flex items-center gap-4"><div className="h-10 w-10 flex items-center justify-center bg-muted/20 border border-border rounded-lg">{i}</div><div><p className="text-[13px] font-bold text-zinc-900">{s.label}</p><p className="text-[11px] text-zinc-500">{Object.keys(s.files).length} files</p></div></div><button onClick={() => { if (activeProject) { updateProjectFiles(activeProject.id, s.files); setPanelView('preview'); } }} className="text-[11px] font-bold hover:text-primary transition-colors">Restore</button></div>)}
                 </div>
               </div>
             </div>
@@ -886,7 +886,7 @@ export default function Chat() {
               {[
                 { icon: Github, label: 'GitHub', action: () => { setDeployOpen(false); setGithubOpen(true); } },
                 { icon: UploadCloud, label: 'Vercel', action: () => { setDeployOpen(false); setVercelDeployOpen(true); } },
-                { icon: Download, label: 'ZIP', action: () => { setDeployOpen(false); exportZip(projectFiles, activeProject.name); } },
+                { icon: Download, label: 'ZIP', action: () => { setDeployOpen(false); if (activeProject) exportZip(projectFiles, activeProject.name); } },
               ].map(item => (
                 <button key={item.label} onClick={item.action} className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.05] transition-all text-muted-foreground hover:text-foreground text-[12px] font-bold">
                   <item.icon className="h-4 w-4" /> {item.label}
@@ -897,7 +897,7 @@ export default function Chat() {
         </>
       )}
 
-      {cloudOpen && (
+      {cloudOpen && activeProject && (
         <>
           <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md" onClick={() => setCloudOpen(false)} />
           <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[70] w-full max-w-4xl max-h-[85vh] bg-background border border-border rounded-[24px] shadow-2xl flex flex-col">
@@ -907,7 +907,7 @@ export default function Chat() {
         </>
       )}
 
-      {vercelDeployOpen && (
+      {vercelDeployOpen && activeProject && (
         <>
           <div className="fixed inset-0 z-[60] bg-black/80" onClick={() => setVercelDeployOpen(false)} />
           <div className="fixed inset-0 z-[70] flex items-center justify-center p-4"><StudioDeploy onClose={() => setVercelDeployOpen(false)} files={projectFiles} projectName={activeProject.name} /></div>

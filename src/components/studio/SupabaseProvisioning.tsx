@@ -136,7 +136,7 @@ export function SupabaseProvisioning({ onProvisioned, onCancel }: SupabaseProvis
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center gap-2 mb-2">
-        <Zap className="h-4 w-4 text-[#8AB4F8]" />
+        <Zap className="h-4 w-4 text-interactive" />
         <h2 className="text-[13px] font-bold text-white/90">Aprovisionamiento IA</h2>
       </div>
 
@@ -159,7 +159,7 @@ export function SupabaseProvisioning({ onProvisioned, onCancel }: SupabaseProvis
               value={pat}
               onChange={e => setPat(e.target.value)}
               placeholder="sbp_xxxxxxxxxxxxxxxxx"
-              className="w-full text-[12px] text-white placeholder:text-white/15 bg-white/[0.04] border border-white/[0.07] rounded-xl px-3 py-2 outline-none focus:border-[#8AB4F8]/50 transition-colors font-mono"
+              className="w-full text-[12px] text-white placeholder:text-white/15 bg-white/[0.04] border border-white/[0.07] rounded-xl px-3 py-2 outline-none focus:border-interactive/50 transition-colors font-mono"
             />
           </div>
           <div className="flex gap-2 mt-4">
@@ -176,7 +176,7 @@ export function SupabaseProvisioning({ onProvisioned, onCancel }: SupabaseProvis
             <select
               value={selectedOrg}
               onChange={e => setSelectedOrg(e.target.value)}
-              className="w-full text-[12px] text-white bg-white/[0.04] border border-white/[0.07] rounded-xl px-3 py-2 outline-none focus:border-[#8AB4F8]/50 transition-colors"
+              className="w-full text-[12px] text-white bg-white/[0.04] border border-white/[0.07] rounded-xl px-3 py-2 outline-none focus:border-interactive/50 transition-colors"
             >
               <option value="" disabled>Selecciona una organización</option>
               {orgs.map(o => (
@@ -189,7 +189,7 @@ export function SupabaseProvisioning({ onProvisioned, onCancel }: SupabaseProvis
             <input
               value={projectName}
               onChange={e => setProjectName(e.target.value)}
-              className="w-full text-[12px] text-white bg-white/[0.04] border border-white/[0.07] rounded-xl px-3 py-2 outline-none focus:border-[#8AB4F8]/50 transition-colors"
+              className="w-full text-[12px] text-white bg-white/[0.04] border border-white/[0.07] rounded-xl px-3 py-2 outline-none focus:border-interactive/50 transition-colors"
             />
           </div>
           <div>
@@ -200,21 +200,21 @@ export function SupabaseProvisioning({ onProvisioned, onCancel }: SupabaseProvis
           </div>
           <div className="flex gap-2 mt-4">
             <button onClick={onCancel} className="flex-1 py-2 rounded-xl text-[11px] font-semibold text-white/40 hover:bg-white/[0.04] transition-colors">Cancelar</button>
-            <button onClick={createProject} disabled={!selectedOrg || !projectName} className="flex-1 py-2 rounded-xl text-[11px] font-semibold text-[#8AB4F8] hover:text-white" style={{ background: 'rgba(138,180,248,0.15)' }}>Crear Base de Datos</button>
+            <button onClick={createProject} disabled={!selectedOrg || !projectName} className="flex-1 py-2 rounded-xl text-[11px] font-semibold text-interactive hover:text-white" style={{ background: 'rgba(var(--interactive-blue-rgb), 0.15)' }}>Crear Base de Datos</button>
           </div>
         </div>
       )}
 
       {(step === 'creating' || step === 'polling' || step === 'keys') && (
         <div className="flex flex-col items-center justify-center py-6 animate-in fade-in duration-300">
-          <Loader2 className="h-8 w-8 text-[#8AB4F8] mb-4 animate-spin" />
+          <Loader2 className="h-8 w-8 text-interactive mb-4 animate-spin" />
           <p className="text-[12px] font-semibold text-white/80">
             {step === 'creating' && 'Inicializando infraestructura...'}
             {step === 'polling' && 'Levantando la base de datos Postgres (puede tardar ~1-2 min)...'}
             {step === 'keys' && 'Extrayendo credenciales API...'}
           </p>
           <div className="mt-6 w-full max-w-[200px] h-1 bg-white/[0.05] rounded-full overflow-hidden">
-            <div className="h-full bg-[#8AB4F8] animate-pulse rounded-full" style={{ width: step === 'creating' ? '25%' : step === 'polling' ? '65%' : '90%', transition: 'width 1s ease' }} />
+            <div className="h-full bg-interactive animate-pulse rounded-full" style={{ width: step === 'creating' ? '25%' : step === 'polling' ? '65%' : '90%', transition: 'width 1s ease' }} />
           </div>
         </div>
       )}

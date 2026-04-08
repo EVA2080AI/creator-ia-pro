@@ -60,7 +60,7 @@ export default {
         'node-bg': 'hsl(var(--node-bg))',
         'node-border': 'hsl(var(--node-border))',
         'node-glow': 'hsl(var(--node-glow))',
-        // v2.0 semantic tokens
+        // Semantic tokens
         'surface-primary': 'hsl(var(--surface-primary))',
         'surface-secondary': 'hsl(var(--surface-secondary))',
         'text-primary': 'hsl(var(--text-primary))',
@@ -70,6 +70,17 @@ export default {
         'border-default': 'hsl(var(--border-default))',
         success: 'hsl(var(--success))',
         warning: 'hsl(var(--warning))',
+        // Interactive accent (studio #8AB4F8)
+        'interactive': 'hsl(var(--interactive-blue))',
+        // Genesis mesh colors
+        'g-mesh': {
+          1: 'hsl(var(--g-mesh-1))',
+          2: 'hsl(var(--g-mesh-2))',
+          3: 'hsl(var(--g-mesh-3))',
+          4: 'hsl(var(--g-mesh-4))',
+        },
+        // Studio dark surfaces
+        'sov-bg': 'hsl(var(--sov-bg))',
         gold: {
           DEFAULT: 'hsl(var(--gold))',
           foreground: 'hsl(var(--gold-foreground))',

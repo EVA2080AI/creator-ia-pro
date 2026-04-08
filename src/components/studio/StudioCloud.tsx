@@ -231,8 +231,8 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
 
                 <button
                   onClick={() => setIsProvisioning(true)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-semibold text-[#8AB4F8] hover:text-white transition-all active:scale-[0.98]"
-                  style={{ background: 'rgba(138,180,248,0.08)', border: '1px solid rgba(138,180,248,0.2)' }}>
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-semibold text-interactive hover:text-white transition-all active:scale-[0.98]"
+                  style={{ background: 'rgba(var(--interactive-blue-rgb),0.08)', border: '1px solid rgba(var(--interactive-blue-rgb),0.2)' }}>
                   <Zap className="h-3.5 w-3.5" /> Aprovisionar Base de Datos
                 </button>
 
@@ -265,7 +265,7 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                 {/* Usage Bar (Industrial v19) */}
                 <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
                   <StudioUsageBar items={[
-                    { id: 'db',      label: 'DB',       percentage: 45, color: '#8AB4F8' },
+                    { id: 'db',      label: 'DB',       percentage: 45, color: 'hsl(var(--interactive-blue))' },
                     { id: 'compute', label: 'Compute',  percentage: 28, color: '#f472b6' },
                     { id: 'storage', label: 'Storage',  percentage: 15, color: '#a78bfa' },
                     { id: 'net',     label: 'Network',  percentage: 12, color: '#34d399' },
@@ -275,7 +275,7 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { label: 'Tablas API',   value: tables.length, icon: Database, color: '#8AB4F8' },
+                    { label: 'Tablas API',   value: tables.length, icon: Database, color: 'hsl(var(--interactive-blue))' },
                     { label: 'Edge Fns',     value: '—',           icon: Zap,      color: '#f472b6' },
                   ].map(stat => (
                     <div key={stat.label} className="p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -286,7 +286,7 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                   ))}
                 </div>
 
-                <div className="px-3 py-2.5 rounded-xl text-[11px] leading-relaxed text-white/35" style={{ background: 'rgba(138,180,248,0.06)', border: '1px solid rgba(138,180,248,0.12)' }}>
+                <div className="px-3 py-2.5 rounded-xl text-[11px] leading-relaxed text-white/35" style={{ background: 'rgba(var(--interactive-blue-rgb),0.06)', border: '1px solid rgba(var(--interactive-blue-rgb),0.12)' }}>
                   ✓ Genesis incluirá el cliente de Supabase automáticamente en el código generado para este proyecto
                 </div>
 
@@ -317,7 +317,7 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                 </p>
                 {dashboardBase && (
                   <a href={`${dashboardBase}/database/tables`} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-[11px] text-[#8AB4F8] hover:underline">
+                    className="flex items-center gap-1.5 text-[11px] text-interactive hover:underline">
                     <ExternalLink className="h-3 w-3" />
                     Abrir Tables
                   </a>
@@ -329,7 +329,7 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                   <div key={t}
                     className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl cursor-default transition-all hover:bg-white/[0.03]"
                     style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <Table className="h-3.5 w-3.5 text-[#8AB4F8]/50 shrink-0" />
+                    <Table className="h-3.5 w-3.5 text-interactive/50 shrink-0" />
                     <span className="text-[12px] text-white/70 font-mono">{t}</span>
                     <ChevronRight className="h-3 w-3 text-white/15 ml-auto" />
                   </div>
@@ -370,8 +370,8 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
             </div>
 
             <div className="flex flex-col items-center gap-4 py-4 text-center">
-              <div className="h-12 w-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(138,180,248,0.08)', border: '1px solid rgba(138,180,248,0.15)' }}>
-                <Users className="h-5 w-5 text-[#8AB4F8]/50" />
+              <div className="h-12 w-12 rounded-2xl flex items-center justify-center" style={{ background: 'rgba(var(--interactive-blue-rgb),0.08)', border: '1px solid rgba(var(--interactive-blue-rgb),0.15)' }}>
+                <Users className="h-5 w-5 text-interactive/50" />
               </div>
               <p className="text-[11px] text-white/25 max-w-[160px] leading-relaxed">
                 Gestiona los correos y permisos de tus usuarios directamente

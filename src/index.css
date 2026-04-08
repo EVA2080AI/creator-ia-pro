@@ -16,7 +16,6 @@
     --foreground:      240 10% 6%;        /* #0E0E12 */
 
     --card:            0 0% 100%;
-    --card-hover:      240 5% 98%;
     --card-foreground: 240 10% 6%;
 
     --popover:         0 0% 100%;
@@ -25,6 +24,7 @@
     /* ── Brand ─────────────────────────────── */
     --primary:         271 91% 65%;       /* #A855F7 brand purple */
     --primary-foreground: 0 0% 100%;
+    --primary-rgb:     168, 85, 247;      /* RGB for rgba() usage */
 
     /* ── Surfaces ──────────────────────────── */
     --secondary:       240 5% 96%;        /* #F3F3F5 */
@@ -60,12 +60,10 @@
     --canvas-grid:      210 16% 87%;       /* #CBD5E1 dot color */
     --canvas:           210 20% 98%;
     --node-bg:          0 0% 100%;
-    --node-bg-light:    0 0% 100%;
     --node-border:      240 6% 88%;
-    --node-border-light: 210 14% 89%;
     --node-glow:        271 91% 65%;
 
-    /* ── v2.0 surface / text / border tokens ─ */
+    /* ── Surface / Text / Border tokens ────── */
     --surface-primary:   0 0% 100%;
     --surface-secondary: 240 5% 96%;
     --text-primary:      240 10% 6%;
@@ -87,56 +85,45 @@
     --g-mesh-3: 330 81% 60%;           /* Terciario (Pink) */
     --g-mesh-4: 158 82% 47%;           /* Cuaternario (Emerald) */
 
-    /* ── Ultra Sovereign v21.0 (PRO) ────────── */
+    /* ── Studio dark surfaces ─────────────── */
     --sov-bg:          240 10% 4%;        /* #0A0A0C */
-    --sov-card:        240 10% 6%;
-    --sov-accent:      271 91% 65%;
-    --sov-glass:       rgba(10, 10, 12, 0.85);
+    --sov-bg-rgb:      10, 10, 12;        /* RGB for rgba() usage */
     --sov-border:      rgba(255, 255, 255, 0.08);
-    --sov-irid-1:      rgba(168, 85, 247, 0.15);
-    --sov-irid-2:      rgba(59, 130, 246, 0.15);
 
-    /* ── Solicitud Usuario Genesis Fondo Mesh ────────── */
-    --color-g-fondo-base: #FCFCFC;
-    --color-g-primario: rgba(168, 85, 247, 0.15); /* Purple light */
-    --color-g-secundario: rgba(59, 130, 246, 0.15); /* Blue light */
-    --color-g-terciario: rgba(236, 72, 153, 0.15); /* Pink light */
-    --color-g-cuaternario: rgba(16, 185, 129, 0.15); /* Emerald light */
+    /* ── Genesis Background Mesh (light) ──── */
+    --g-mesh-purple:   rgba(168, 85, 247, 0.15);
+    --g-mesh-blue:     rgba(59, 130, 246, 0.15);
+    --g-mesh-pink:     rgba(236, 72, 153, 0.15);
+    --g-mesh-emerald:  rgba(16, 185, 129, 0.15);
+
+    /* ── Interactive accent (studio) ──────── */
+    --interactive-blue: 215 90% 76%;   /* #8AB4F8 */
+    --interactive-blue-rgb: 138, 180, 248;
   }
 }
 
 @layer utilities {
   .aether-sov-glass {
-    @apply backdrop-blur-[40px] saturate-[1.8] bg-[rgba(var(--sov-bg-rgb),0.85)] border border-[var(--sov-border)];
+    backdrop-filter: blur(40px) saturate(1.8);
+    background: rgba(var(--sov-bg-rgb), 0.85);
+    border: 1px solid var(--sov-border);
   }
   .blueprint-grid {
-    background-image: 
+    background-image:
       linear-gradient(var(--sov-border) 1px, transparent 1px),
       linear-gradient(90deg, var(--sov-border) 1px, transparent 1px);
     background-size: 30px 30px;
   }
-  .neural-mesh {
-    background-image: 
-      radial-gradient(circle at 2px 2px, rgba(168, 85, 247, 0.15) 1px, transparent 0),
-      linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-    background-size: 24px 24px, 48px 48px, 48px 48px;
-    mask-image: radial-gradient(circle at center, black, transparent 90%);
-  }
-  .scanline-overlay {
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(255, 255, 255, 0.05) 50%,
-      transparent 100%
-    );
-    background-size: 100% 4px;
-    animation: scanline 8s linear infinite;
-    pointer-events: none;
-  }
   .sov-card-glow {
     box-shadow: 0 0 40px -10px hsla(var(--primary) / 0.15);
     border: 1px solid hsla(var(--primary) / 0.1);
+  }
+  .genesis-panel-background {
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 80%, var(--g-mesh-purple), transparent),
+      radial-gradient(ellipse 60% 50% at 80% 20%, var(--g-mesh-blue), transparent),
+      radial-gradient(ellipse 50% 40% at 50% 50%, var(--g-mesh-pink), transparent),
+      hsl(var(--background));
   }
 }
 

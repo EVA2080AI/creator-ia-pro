@@ -187,10 +187,10 @@ export function CommandPalette({
                       onMouseEnter={() => setSelectedIdx(idx)}
                       className="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-all"
                       style={selectedIdx === idx
-                        ? { background: 'rgba(138,180,248,0.1)', color: 'white' }
+                        ? { background: 'rgba(var(--interactive-blue-rgb), 0.1)', color: 'white' }
                         : { color: 'rgba(255,255,255,0.6)' }}
                     >
-                      <item.icon className="h-4 w-4 shrink-0 text-[#8AB4F8]/60" />
+                      <item.icon className="h-4 w-4 shrink-0 text-interactive/60" />
                       <div className="flex-1 min-w-0">
                         <span className="text-[13px] font-medium">{item.label}</span>
                         {item.description && <span className="ml-2 text-[11px] text-white/25">{item.description}</span>}
@@ -213,7 +213,7 @@ export function CommandPalette({
                       onMouseEnter={() => setSelectedIdx(idx)}
                       className="w-full flex items-center gap-3 px-4 py-2 text-left transition-all"
                       style={selectedIdx === idx
-                        ? { background: 'rgba(138,180,248,0.1)', color: 'white' }
+                        ? { background: 'rgba(var(--interactive-blue-rgb), 0.1)', color: 'white' }
                         : { color: 'rgba(255,255,255,0.5)' }}
                     >
                       <item.icon className="h-3.5 w-3.5 shrink-0" />
@@ -237,10 +237,10 @@ export function CommandPalette({
                       onMouseEnter={() => setSelectedIdx(idx)}
                       className="w-full flex items-center gap-3 px-4 py-2 text-left transition-all"
                       style={selectedIdx === idx
-                        ? { background: 'rgba(138,180,248,0.1)', color: 'white' }
+                        ? { background: 'rgba(var(--interactive-blue-rgb), 0.1)', color: 'white' }
                         : { color: 'rgba(255,255,255,0.5)' }}
                     >
-                      <item.icon className="h-3.5 w-3.5 shrink-0 text-[#8AB4F8]/50" />
+                      <item.icon className="h-3.5 w-3.5 shrink-0 text-interactive/50" />
                       <span className="text-[12px] font-medium flex-1 truncate">{item.label}</span>
                       <span className="text-[10px] text-white/20">{item.description}</span>
                     </button>
