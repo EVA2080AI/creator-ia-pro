@@ -125,7 +125,7 @@ export function buildSuggestions(stack: string[], prompt: string): string[] {
   return s.slice(0, 3);
 }
 
-export type IntentType = 'codegen' | 'chat' | 'fullstack' | 'html-import';
+export type IntentType = 'codegen' | 'chat' | 'fullstack' | 'html-import' | 'vanilla-html';
 
 /** Detect if prompt contains raw HTML code */
 export function containsHtml(text: string): boolean {
@@ -134,14 +134,26 @@ export function containsHtml(text: string): boolean {
     /<html[\s>]/i,
     /<head[\s>]/i,
     /<body[\s>]/i,
-    /<div[\s>][\s\S]{50,}/i,   // <div> with substantial content
+    /<div[\s>][\s\S]{50,}/i,
     /<section[\s>][\s\S]{50,}/i,
     /<nav[\s>]/i,
     /<header[\s>][\s\S]{30,}/i,
     /<footer[\s>][\s\S]{30,}/i,
   ];
   const matchCount = htmlPatterns.filter(p => p.test(text)).length;
-  return matchCount >= 2; // At least 2 HTML patterns = likely HTML input
+  return matchCount >= 2;
+}
+
+/** Detect if user wants plain HTML without React */
+export function wantsVanillaHtml(text: string): boolean {
+  const p = text.toLowerCase();
+  const vanillaKeywords = [
+    'html puro', 'solo html', 'sin react', 'vanilla', 'html simple',
+    'plain html', 'static html', 'html css', 'html y css', 'sin framework',
+    'no react', 'html basico', 'html básico', 'pagina html', 'página html',
+    'html estatico', 'html estático', 'without react', 'pure html',
+  ];
+  return vanillaKeywords.some(k => p.includes(k));
 }
 
 export function detectIntent(prompt: string, hasContext?: boolean): IntentType {
@@ -149,6 +161,9 @@ export function detectIntent(prompt: string, hasContext?: boolean): IntentType {
 
   // HTML Import: detect raw HTML pasted in chat
   if (containsHtml(prompt)) return 'html-import';
+
+  // Vanilla HTML: user explicitly wants HTML without React
+  if (wantsVanillaHtml(prompt)) return 'vanilla-html';
 
   // High-complexity "Creation" keywords for FULLSTACK intent
   const CREATION_KEYWORDS = [

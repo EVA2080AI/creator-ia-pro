@@ -6,12 +6,13 @@ import { aiService } from '@/services/ai-service';
 import { genesisOrchestrator } from '@/services/genesis-orchestrator';
 import { generateAutonomousProject } from '@/services/scaffold-service';
 import { detectIntent, processRawResponse } from '@/components/studio/chat/utils';
-import { 
-  CODE_GEN_SYSTEM, 
-  GENESIS_CHAT_SYSTEM, 
-  ANTIGRAVITY_CHAT_SYSTEM, 
-  ARCHITECT_SYSTEM_PROMPT, 
-  CLONE_SYSTEM_PROMPT 
+import {
+  CODE_GEN_SYSTEM,
+  GENESIS_CHAT_SYSTEM,
+  ANTIGRAVITY_CHAT_SYSTEM,
+  ARCHITECT_SYSTEM_PROMPT,
+  CLONE_SYSTEM_PROMPT,
+  IMAGE_TO_CODE_SYSTEM
 } from '@/prompts';
 import { MODELS } from '@/components/studio/chat/constants';
 
@@ -90,15 +91,18 @@ export function useStudioChatAI({
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
-    const intent = detectIntent(prompt);
+    const hasImage = !!(options?.pendingImage);
+    const intent = hasImage && !prompt.trim() ? 'codegen' : detectIntent(prompt);
     const prefContext = (options?.preferences || []).map(p => `[MEMORIA ${p.agent_id.toUpperCase()}]: ${p.instructions}`).join('\n');
 
-    // HTML Import: detect raw HTML pasted in chat
+    // Special intents
     const isHtmlImport = intent === 'html-import';
+    const isVanillaHtml = intent === 'vanilla-html';
+    const isImageToCode = hasImage && (intent === 'codegen' || !prompt.trim());
 
     // Auto-trigger Architect Mode for fullstack creation intents
     const isChatModeActive = intent === 'chat';
-    const isArchitectRequest = (isArchitectMode || intent === 'fullstack') && !isChatModeActive && !isHtmlImport;
+    const isArchitectRequest = (isArchitectMode || intent === 'fullstack') && !isChatModeActive && !isHtmlImport && !isVanillaHtml;
 
     setCurrentGenIntent(isChatModeActive ? 'chat' : 'codegen');
 
@@ -143,10 +147,22 @@ export function useStudioChatAI({
       let effectiveSystemPrompt = isArchitectRequest ? ARCHITECT_SYSTEM_PROMPT : (isChatModeActive ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM) : CODE_GEN_SYSTEM);
       let userContent: any = prompt + contextBlock;
 
+      // Image-to-Code: user uploaded an image to replicate as code
+      if (isImageToCode) {
+        effectiveSystemPrompt = IMAGE_TO_CODE_SYSTEM;
+        userContent = prompt || 'Replica este diseño fielmente en código. Detecta si debe ser HTML puro o React según la complejidad.';
+      }
+
       // HTML Import: user pasted raw HTML in the chat
       if (isHtmlImport) {
         effectiveSystemPrompt = CLONE_SYSTEM_PROMPT;
-        userContent = `[HTML PROPORCIONADO POR EL USUARIO — Conviértelo a React + Tailwind]:\n\n${prompt}`;
+        userContent = `[HTML PROPORCIONADO POR EL USUARIO — Conviértelo a un proyecto web funcional. Si es simple, mantén HTML puro. Si es complejo, usa React]:\n\n${prompt}`;
+      }
+
+      // Vanilla HTML: user explicitly wants HTML without React
+      if (isVanillaHtml) {
+        effectiveSystemPrompt = CODE_GEN_SYSTEM;
+        userContent = `[MODO HTML PURO — Genera SOLO index.html + style.css + script.js. SIN React, SIN JSX, SIN imports. Usa Tailwind via CDN o CSS puro.]\n\n${prompt}`;
       }
 
       if (options?.pendingUrl) {
@@ -162,11 +178,18 @@ export function useStudioChatAI({
         { role: 'user', content: options?.pendingImage ? [{ type: 'image_url', image_url: { url: options.pendingImage } }, { type: 'text', text: userContent }] : userContent }
       ];
 
-      // Logic to detect if we need a "PRO" model for complex tasks
-      const complexTask = prompt.length > 500 || prompt.toLowerCase().includes('refactor') || prompt.toLowerCase().includes('arquitectura') || isArchitectRequest || isHtmlImport;
-      const targetModel = (isChatModeActive && !options?.pendingUrl && !options?.pendingImage && !complexTask)
-        ? 'google/gemini-2.0-flash-001'
-        : (selectedModel === 'google/gemini-2.0-flash-001' && complexTask ? 'google/gemini-2.5-pro-preview-03-25' : selectedModel);
+      // Logic to detect if we need a "PRO" model or a vision model
+      const complexTask = prompt.length > 500 || prompt.toLowerCase().includes('refactor') || prompt.toLowerCase().includes('arquitectura') || isArchitectRequest || isHtmlImport || isVanillaHtml;
+      // Force vision-capable model for image-to-code
+      const needsVision = isImageToCode || !!options?.pendingImage;
+      const visionModel = selectedModel === 'deepseek/deepseek-chat' || selectedModel === 'deepseek/deepseek-r1'
+        ? 'google/gemini-2.0-flash-001' // DeepSeek has no vision, fallback to Gemini
+        : selectedModel;
+      const targetModel = needsVision
+        ? visionModel
+        : (isChatModeActive && !options?.pendingUrl && !complexTask)
+          ? 'google/gemini-2.0-flash-001'
+          : (selectedModel === 'google/gemini-2.0-flash-001' && complexTask ? 'google/gemini-2.5-pro-preview-03-25' : selectedModel);
 
       // DeepBuild: activate for ANY architect+genesis request
       // Removed the over-restrictive keyword list that excluded many valid creation prompts
