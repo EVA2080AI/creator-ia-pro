@@ -63,15 +63,10 @@ export function extractJson(text: string): GenesisResponse | null {
     if (p) return p;
   }
 
-  const mdJson = t.match(/```json\s*([\s\S]*?)```/);
-  if (mdJson) {
-    const p = tryParse(mdJson[1].trim());
-    if (p) return p;
-  }
-
-  const mdRaw = t.match(/```\s*([\s\S]*?)```/);
-  if (mdRaw) {
-    const inner = mdRaw[1].trim();
+  // Match ```json, ```javascript, ```typescript, or bare ``` blocks containing JSON
+  const mdLang = t.match(/```(?:json|javascript|typescript|js|ts)?\s*\n?([\s\S]*?)```/);
+  if (mdLang) {
+    const inner = mdLang[1].trim();
     if (inner.startsWith('{')) {
       const p = tryParse(inner);
       if (p) return p;
@@ -224,24 +219,42 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
 export function processRawResponse(rawText: string, prompt: string, isChatOnly: boolean) {
   if (!rawText) return null;
   if (isChatOnly) return { files: {} as Record<string, StudioFile>, explanation: rawText, stack: [], deps: [], suggestions: [], isChatOnly: true };
+
+  // 1. Try structured JSON extraction first
   const extracted = extractJson(rawText);
-  if (!extracted) return { files: {} as Record<string, StudioFile>, explanation: rawText, tech_stack: [], deps: [], suggestions: [], isChatOnly: true };
-  const normalizedFiles: Record<string, StudioFile> = {};
-  if (extracted.files) {
+  if (extracted?.files && Object.keys(extracted.files).length > 0) {
+    const normalizedFiles: Record<string, StudioFile> = {};
     for (const [filename, value] of Object.entries(extracted.files)) {
       if (typeof value === 'string') {
         const lang = filename.endsWith('.css') ? 'css' : filename.endsWith('.json') ? 'json' : 'tsx';
         normalizedFiles[filename] = { language: lang, content: value };
       } else if (value && typeof value === 'object' && value.content) {
-        normalizedFiles[filename] = { 
-          language: value.language || (filename.endsWith('.css') ? 'css' : 'tsx'), 
-          content: value.content 
+        normalizedFiles[filename] = {
+          language: value.language || (filename.endsWith('.css') ? 'css' : 'tsx'),
+          content: value.content
         };
       }
     }
+    if (Object.keys(normalizedFiles).length > 0) {
+      const stack = extracted.tech_stack || [];
+      const deps  = detectDeps(normalizedFiles);
+      const suggestions = buildSuggestions(stack, prompt);
+      return { files: normalizedFiles, explanation: extracted.explanation || '', tech_stack: stack, deps, suggestions };
+    }
   }
-  const stack = extracted.tech_stack || [];
-  const deps  = detectDeps(normalizedFiles);
-  const suggestions = buildSuggestions(stack, prompt);
-  return { files: normalizedFiles, explanation: extracted.explanation || '', tech_stack: stack, deps, suggestions };
+
+  // 2. Fallback: extract code from markdown blocks (AI often returns ```tsx ... ``` instead of JSON)
+  const mdFiles = extractChatCodeFiles(rawText);
+  if (mdFiles && Object.keys(mdFiles).length > 0) {
+    const stack = ['React', 'Tailwind'];
+    const deps = detectDeps(mdFiles);
+    const suggestions = buildSuggestions(stack, prompt);
+    // Extract explanation text (everything before the first code block)
+    const firstBlock = rawText.indexOf('```');
+    const explanation = firstBlock > 0 ? rawText.slice(0, firstBlock).trim() : 'Código generado.';
+    return { files: mdFiles, explanation, tech_stack: stack, deps, suggestions };
+  }
+
+  // 3. No code found — treat as chat-only
+  return { files: {} as Record<string, StudioFile>, explanation: rawText, tech_stack: [], deps: [], suggestions: [], isChatOnly: true };
 }
