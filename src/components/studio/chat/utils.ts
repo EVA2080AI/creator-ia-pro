@@ -187,25 +187,29 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
     if (Object.keys(files).length > 0) return files;
   }
 
-  // 2. Fallback to Markdown blocks
-  const regex = /```(\w*)\s*(?:\/\/|#|--)\s*([\w./\-]+\.\w+)?\n([\s\S]*?)```/g;
+  // 2. Fallback to Markdown blocks (ROBUST VERSION)
+  // Simplified regex that doesn't mandate a comment on the first line
+  const regex = /```(\w*)\n([\s\S]*?)```/g;
   let m;
   while ((m = regex.exec(text)) !== null) {
     const lang = m[1].trim().toLowerCase();
-    const explicitPath = m[2];
-    const code = m[3].trim();
+    const code = m[2].trim();
     if (code.length < 5) continue; 
 
-    let filename = explicitPath || '';
-    if (!filename) {
-      const fileMatch = code.match(/\/\/\s*([\w./\-]+\.\w+)/);
-      if (fileMatch) {
-        filename = fileMatch[1]; 
+    // Search for a filename inside the block (first 3 lines)
+    let filename = '';
+    const fileMatch = code.match(/(?:\/\/|#|--)\s*([\w./\-]+\.\w+)/);
+    if (fileMatch) {
+      filename = fileMatch[1];
+    } else {
+      // Guess filename based on language and content
+      if (lang === 'html') filename = 'index.html';
+      else if (lang === 'css') filename = 'index.css';
+      else if (code.includes('export default') || code.includes('ReactDOM')) {
+        filename = (lang === 'typescript' || lang === 'ts' || lang === 'tsx') ? 'src/App.tsx' : 'src/App.jsx';
       } else {
-        if (lang === 'html') filename = 'index.html';
-        else if (lang === 'css') filename = 'styles.css';
-        else if (code.includes('export default')) filename = 'App.tsx';
-        else continue; 
+        // Default based on lang
+        filename = `src/component-${Object.keys(files).length}.${lang || 'tsx'}`;
       }
     }
     
