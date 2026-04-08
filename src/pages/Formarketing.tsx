@@ -28,6 +28,8 @@ import PromptBuilderNode from '@/components/formarketing/PromptBuilderNode';
 import LLMNode from '@/components/formarketing/LLMNode';
 import TextInputNode from '@/components/formarketing/TextInputNode';
 import ExportNode from '@/components/formarketing/ExportNode';
+import { BlueprintProjectNode } from '@/components/formarketing/BlueprintProjectNode';
+import { BlueprintPageNode } from '@/components/formarketing/BlueprintPageNode';
 import { CommandPalette } from '@/components/formarketing/CommandPalette';
 import { PropertyInspector } from '@/components/formarketing/PropertyInspector';
 import { ExportModal } from '@/components/formarketing/ExportModal';
@@ -39,6 +41,7 @@ import { ExecutionLog } from './formarketing/components/ExecutionLog';
 import { useCanvasPersistence } from './formarketing/hooks/useCanvasPersistence';
 import { useCanvasExecution } from './formarketing/hooks/useCanvasExecution';
 import { useCanvasHistory } from '@/hooks/useCanvasHistory';
+import { useCanvasSync } from './formarketing/hooks/useCanvasSync';
 
 // --- Types ---
 interface NodeContext {
@@ -107,6 +110,17 @@ PromptBuilderNodeWrapper.displayName = 'PromptBuilderNodeWrapper';
 LLMNodeWrapper.displayName = 'LLMNodeWrapper';
 TextInputNodeWrapper.displayName = 'TextInputNodeWrapper';
 
+// Blueprint node wrappers
+const BlueprintProjectNodeWrapper = memo((props: NodeProps) => {
+  return <BlueprintProjectNode id={props.id} data={props.data as any} />;
+});
+BlueprintProjectNodeWrapper.displayName = 'BlueprintProjectNodeWrapper';
+
+const BlueprintPageNodeWrapper = memo((props: NodeProps) => {
+  return <BlueprintPageNode id={props.id} data={props.data as any} />;
+});
+BlueprintPageNodeWrapper.displayName = 'BlueprintPageNodeWrapper';
+
 const FormarketingContent = () => {
   const { user } = useAuth("/auth");
   const [searchParams] = useSearchParams();
@@ -140,6 +154,9 @@ const FormarketingContent = () => {
   );
 
   const { executeNode } = useCanvasExecution(spaceId, user, setNodes, addLog);
+  
+  // Enable bi-directional Reverse Sync (Canvas -> Blueprint)
+  useCanvasSync(spaceId, user, nodes, edges);
   
   // Inject execution context into node data updates
   useEffect(() => {
@@ -253,6 +270,9 @@ const FormarketingContent = () => {
     llmNode: LLMNodeWrapper,
     textInput: TextInputNodeWrapper,
     exportNode: ExportNode,
+    // Blueprint Strategic Map nodes
+    blueprint_project: BlueprintProjectNodeWrapper,
+    blueprint_page: BlueprintPageNodeWrapper,
   }), []);
 
   return (

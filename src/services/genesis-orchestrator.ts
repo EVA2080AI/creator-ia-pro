@@ -98,6 +98,186 @@ Return ONLY the raw code for ${filePath}.`;
 
     return res.text.replace(/```[a-z]*/g, "").replace(/```/g, "").trim();
   }
+
+  /**
+   * Phase 3: Strategic Map — Convert Blueprint JSON → Canvas Nodes + Edges
+   * Returns nodes and edges ready to be persisted to `canvas_nodes` table.
+   */
+  mapBlueprintToCanvasNodes(
+    blueprint: ProjectBlueprint,
+    spaceId: string,
+    userId: string
+  ): {
+    nodes: Array<{
+      id: string;
+      space_id: string;
+      user_id: string;
+      type: string;
+      prompt: string;
+      status: string;
+      data_payload: Record<string, unknown>;
+      pos_x: number;
+      pos_y: number;
+    }>;
+    edges: Array<{ id: string; source: string; target: string; sourceHandle: string; targetHandle: string }>;
+  } {
+    const nodes: ReturnType<typeof this.mapBlueprintToCanvasNodes>['nodes'] = [];
+    const edges: ReturnType<typeof this.mapBlueprintToCanvasNodes>['edges'] = [];
+
+    // Root project node — centered at top
+    const rootId = crypto.randomUUID();
+    nodes.push({
+      id: rootId,
+      space_id: spaceId,
+      user_id: userId,
+      type: 'blueprint_project',
+      prompt: blueprint.projectName,
+      status: 'loading',
+      pos_x: 400,
+      pos_y: 60,
+      data_payload: {
+        projectName: blueprint.projectName,
+        description: blueprint.description,
+        niche: blueprint.niche,
+        colorPalette: blueprint.colorPalette,
+        techStack: blueprint.techStack,
+        status: 'ready',
+      },
+    });
+
+    // Page nodes — spread horizontally below the root
+    const pageCount = blueprint.pages.length;
+    const pageSpacing = 320;
+    const startX = 400 - ((pageCount - 1) * pageSpacing) / 2;
+
+    blueprint.pages.forEach((page, idx) => {
+      const pageId = crypto.randomUUID();
+      nodes.push({
+        id: pageId,
+        space_id: spaceId,
+        user_id: userId,
+        type: 'blueprint_page',
+        prompt: page.name,
+        status: 'loading',
+        pos_x: startX + idx * pageSpacing,
+        pos_y: 360,
+        data_payload: {
+          pageName: page.name,
+          slug: page.slug,
+          purpose: page.purpose,
+          components: page.components,
+          accentColor: blueprint.colorPalette?.primary || '#6366f1',
+          status: 'idle',
+          isShared: false,
+        },
+      });
+
+      edges.push({
+        id: crypto.randomUUID(),
+        source: rootId,
+        target: pageId,
+        sourceHandle: 'pages-out',
+        targetHandle: 'project-in',
+      });
+    });
+
+    // Shared component nodes — to the right of page nodes
+    blueprint.sharedComponents?.forEach((comp, idx) => {
+      const compId = crypto.randomUUID();
+      nodes.push({
+        id: compId,
+        space_id: spaceId,
+        user_id: userId,
+        type: 'blueprint_page',
+        prompt: comp.name,
+        status: 'loading',
+        pos_x: startX + pageCount * pageSpacing + 80,
+        pos_y: 200 + idx * 220,
+        data_payload: {
+          pageName: comp.name,
+          purpose: comp.role,
+          components: [],
+          accentColor: blueprint.colorPalette?.secondary || '#8b5cf6',
+          status: 'idle',
+          isShared: true,
+        },
+      });
+
+      edges.push({
+        id: crypto.randomUUID(),
+        source: rootId,
+        target: compId,
+        sourceHandle: 'shared-out',
+        targetHandle: 'project-in',
+      });
+    });
+
+    return { nodes, edges };
+  }
+
+  /**
+   * Phase 4: Reverse Sync — Convert Canvas Nodes + Edges → Blueprint JSON
+   */
+  mapCanvasNodesToBlueprint(nodes: any[], edges: any[]): ProjectBlueprint {
+    const projectNode = nodes.find(n => n.type === 'blueprint_project');
+    const pageNodes = nodes.filter(n => n.type === 'blueprint_page');
+
+    if (!projectNode) {
+      throw new Error("No se encontró el nodo raíz del proyecto en el Canvas.");
+    }
+
+    const data = projectNode.data || projectNode.data_payload || {};
+
+    const blueprint: ProjectBlueprint = {
+      projectName: data.projectName || projectNode.prompt || "Nuevo Proyecto",
+      description: data.description || "Generado desde Canvas",
+      niche: data.niche || "General",
+      colorPalette: data.colorPalette || { primary: "#6366f1", secondary: "#8b5cf6", accent: "#f43f5e", bg: "#09090b" },
+      techStack: data.techStack || { deps: ["lucide-react", "framer-motion"], framework: "vite-react-tailwind" },
+      pages: [],
+      sharedComponents: []
+    };
+
+    pageNodes.forEach(node => {
+      const pData = node.data || node.data_payload || {};
+      if (pData.isShared) {
+        blueprint.sharedComponents.push({
+          name: pData.pageName || node.prompt || "Componente",
+          role: pData.purpose || ""
+        });
+      } else {
+        blueprint.pages.push({
+          name: pData.pageName || node.prompt || "Página",
+          slug: pData.slug || (pData.pageName || node.prompt || "").toLowerCase().replace(/\s+/g, '-'),
+          purpose: pData.purpose || "",
+          components: pData.components || []
+        });
+      }
+    });
+
+    return blueprint;
+  }
+
+  /**
+   * Phase 5: Persistence — Apply Blueprint to Project Files
+   * Updates the `blueprint.json` within the project's file map.
+   */
+  async applyBlueprintToProjectFiles(
+    projectId: string,
+    blueprint: ProjectBlueprint,
+    currentFiles: Record<string, { content: string; language: string }>
+  ): Promise<Record<string, { content: string; language: string }>> {
+    const updatedFiles = { ...currentFiles };
+    
+    updatedFiles['blueprint.json'] = {
+      language: 'json',
+      content: JSON.stringify(blueprint, null, 2)
+    };
+
+    return updatedFiles;
+  }
 }
 
+
 export const genesisOrchestrator = GenesisOrchestrator.getInstance();
+
