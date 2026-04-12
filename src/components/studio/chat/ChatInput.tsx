@@ -312,10 +312,10 @@ export function ChatInput({
               onKeyDown={handleKeyDown}
               placeholder={
                 isArchitectMode
-                  ? "Describe la arquitectura o flujo del sistema..."
-                  : "Ingresa tus directivas de construcción..."
+                  ? "Describe la arquitectura a planificar..."
+                  : "Describe lo que quieres construir..."
               }
-              className="flex-1 bg-transparent py-2 text-[15px] font-medium text-zinc-900 outline-none resize-none min-h-[44px] max-h-[280px] placeholder:text-zinc-400/80 leading-relaxed selection:bg-primary/20 custom-scrollbar block mb-0.5"
+              className="flex-1 bg-transparent py-2.5 px-1 text-[14px] font-medium text-zinc-900 outline-none resize-none min-h-[44px] max-h-[280px] placeholder:text-zinc-400/80 leading-relaxed selection:bg-primary/20 custom-scrollbar block mb-0"
               disabled={isGenerating}
               rows={1}
             />
