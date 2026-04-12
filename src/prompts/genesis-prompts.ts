@@ -285,7 +285,7 @@ Puedes incluir múltiples bloques PATCH en una sola respuesta (uno por cambio).
 
 ### ⏩ AUTO-CONTINUE — Si tu respuesta fue cortada:
 
-Si recibes el mensaje `[AUTO-CONTINUE]`, significa que tu respuesta anterior fue truncada por límite de tokens.
+Si recibes el mensaje \`[AUTO-CONTINUE]\`, significa que tu respuesta anterior fue truncada por límite de tokens.
 **Continúa exactamente donde quedaste** — no repitas nada de lo ya escrito, solo continúa el código desde el punto de corte.
 `;
 
