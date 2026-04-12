@@ -100,22 +100,12 @@ function StudioProjectHeader({
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
+             {agentPhase !== 'idle' && (
+               <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
+             )}
              <h2 className="text-[12px] font-bold text-zinc-800 truncate tracking-tight">{name}</h2>
-             {isSaving && <RefreshCw className="w-3 h-3 text-primary animate-spin" />}
-          </div>
-          
-          <div className="flex items-center mt-0.5">
-            {agentPhase !== 'idle' ? (
-               <span className="text-[10px] font-medium text-primary flex items-center gap-1.5">
-                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                 Genesis {activeSpecialist ? `(${activeSpecialist})` : 'Thinking...'}
-               </span>
-            ) : (
-               <span className="text-[10px] font-medium text-zinc-400">Idle</span>
-            )}
-          </div>
+             {isSaving && <RefreshCw className="w-3 h-3 text-primary animate-spin shrink-0" />}
         </div>
       </div>
 
