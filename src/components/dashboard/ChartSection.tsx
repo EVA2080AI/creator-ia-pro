@@ -88,7 +88,7 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
               />
               <Area 
                 type="monotone" 
-                dataKey="value" 
+                dataKey="credits" 
                 stroke="#8b5cf6" 
                 strokeWidth={3} 
                 fillOpacity={1} 
