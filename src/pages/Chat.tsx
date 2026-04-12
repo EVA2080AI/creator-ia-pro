@@ -959,6 +959,12 @@ export default function Chat() {
     onPhaseChange: (phase: AgentPhase, specialist?: AgentSpecialist) => {
       setAgentPhase(phase);
       setActiveSpecialist(specialist ?? 'none');
+      // Force switch to preview mode when generation starts so user sees the cinematic overlay
+      if (phase === 'thinking' || phase === 'streaming') {
+        if (panelView !== 'preview' && panelView !== 'split') {
+           setPanelView('preview');
+        }
+      }
     },
     onInitialPromptUsed: () => setPendingPrompt(null),
     onStreamCharsChange: (_chars: number, preview: string) => setStreamPreview(preview),
