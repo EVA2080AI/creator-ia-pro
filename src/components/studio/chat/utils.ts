@@ -168,16 +168,19 @@ export function detectIntent(prompt: string, hasContext?: boolean): IntentType {
   // High-complexity "Creation" keywords for FULLSTACK intent
   const CREATION_KEYWORDS = [
     'crea un web', 'hazme una web', 'crea un proyecto', 'crea un saas', 'crea una app completa',
+    'creame una', 'hazme una', 'hasme una', 'has una', 'has un',
     'create a full mvp', 'create a saas', 'industrial project', 'sistema completo',
     'build a complete system', 'dashboard completo', 'diseña un', 'armar una plataforma',
     'genera el alma del producto', 'visión estratégica', 'arquitectura de', 'propuesta de landing',
-    'haz una pagina de', 'monta un sistema', 'create a website', 'make a landing'
+    'haz una pagina de', 'monta un sistema', 'create a website', 'make a landing', 'building a website'
   ];
 
   if (GREETINGS.includes(p) || p.length < 3) return 'chat';
   
   const isVisionRequest = p.includes('estrategia') || p.includes('arquitectura') || p.includes('pensamiento') || p.includes('planifica');
-  const isCreationRequest = CREATION_KEYWORDS.some(k => p.includes(k));
+  const isCreationRequest = CREATION_KEYWORDS.some(k => p.includes(k)) || 
+                           ((p.includes('web') || p.includes('landing') || p.includes('website') || p.includes('app') || p.includes('página') || p.includes('sitio')) && 
+                            (p.includes('crea') || p.includes('haz') || p.includes('has') || p.includes('genera') || p.includes('build') || p.includes('make')));
 
   if (isVisionRequest || isCreationRequest) return 'fullstack';
 
@@ -218,31 +221,42 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
   }
 
   // 2. Fallback to Markdown blocks (ROBUST VERSION)
-  // Simplified regex that doesn't mandate a comment on the first line
-  const regex = /```(\w*)\n([\s\S]*?)```/g;
+  const regex = /```(\w*)[\s\n]*([\s\S]*?)```/g;
   let m;
   while ((m = regex.exec(text)) !== null) {
     const lang = m[1].trim().toLowerCase();
     const code = m[2].trim();
     if (code.length < 5) continue; 
 
+    const blockStartPos = m.index;
+    const textBefore = text.slice(Math.max(0, blockStartPos - 100), blockStartPos);
+
     // Search for a filename inside the block (first 3 lines)
     let filename = '';
-    const fileMatch = code.match(/(?:\/\/|#|--)\s*([\w./\-]+\.\w+)/);
-    if (fileMatch) {
-      filename = fileMatch[1];
+    const fileMatchInside = code.match(/(?:\/\/|#|--)\s*([\w./\-]+\.\w+)/);
+    
+    if (fileMatchInside) {
+      filename = fileMatchInside[1];
     } else {
-      // Guess filename based on language and content
-      if (lang === 'html') filename = 'index.html';
-      else if (lang === 'css') filename = 'index.css';
-      else if (code.includes('export default') || code.includes('ReactDOM')) {
-        filename = (lang === 'typescript' || lang === 'ts' || lang === 'tsx') ? 'src/App.tsx' : 'src/App.jsx';
+      // Look for filename in the text BEFORE the block (e.g. "File: src/App.tsx")
+      const fileMatchBefore = textBefore.match(/(?:file|archivo|path|ruta|src|public|app|components|pages|styles)[:\s]*([\w./\-]+\.\w+)/i);
+      if (fileMatchBefore) {
+        filename = fileMatchBefore[1];
       } else {
-        // Default based on lang
-        filename = `src/component-${Object.keys(files).length}.${lang || 'tsx'}`;
+        // Guess filename based on language and content
+        if (lang === 'html') filename = 'index.html';
+        else if (lang === 'css') filename = 'index.css';
+        else if (code.includes('export default') || code.includes('ReactDOM')) {
+          filename = (lang === 'typescript' || lang === 'ts' || lang === 'tsx') ? 'src/App.tsx' : 'src/App.jsx';
+        } else {
+          filename = `src/component-${Object.keys(files).length}.${lang || 'tsx'}`;
+        }
       }
     }
     
+    // Clean up filename (sometimes it catches trailing dots/chars)
+    filename = filename.replace(/[:"']/g, '').trim();
+
     const finalLang = lang || (filename.split('.').pop()?.toLowerCase() || 'tsx');
     const isDeletion = code.includes('// DELETE');
     files[filename] = { language: finalLang, content: isDeletion ? '__genesis_delete__' : code };

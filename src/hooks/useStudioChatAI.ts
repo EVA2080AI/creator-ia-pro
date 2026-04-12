@@ -300,11 +300,13 @@ ${contentSnapshots}
          userContent = `[URL]: ${parsedClone.url}\n[PROMPT]: ${prompt}`;
       }
 
+      const freshStartNote = isArchitectRequest ? "\n\n[IMPORTANTE: El usuario solicita un nuevo proyecto o arquitectura. SI los archivos actuales en el snapshot son irrelevantes para esta nueva visión, IGNÓRALOS y empieza de cero con una arquitectura limpia. No intentes fusionar lógica incompatible.]" : "";
+      
       const historySlice = convHistory.slice(-12);
       const messages = [
         // Inject the project snapshot directly into the system prompt
         // so Genesis "sees" the full project architecture before generating
-        { role: 'system', content: effectiveSystemPrompt + (isChatModeActive ? '' : supabaseContext) + `\n\n${prefContext}` + (projectSnapshot ? `\n\n${projectSnapshot}` : '') },
+        { role: 'system', content: effectiveSystemPrompt + (isChatModeActive ? '' : supabaseContext) + `\n\n${prefContext}` + (projectSnapshot ? `\n\n${projectSnapshot}` : '') + freshStartNote },
         ...historySlice,
         { role: 'user', content: options?.pendingImage ? [{ type: 'image_url', image_url: { url: options.pendingImage } }, { type: 'text', text: userContent }] : userContent }
       ];
@@ -323,10 +325,10 @@ ${contentSnapshots}
           : (selectedModel === 'google/gemini-2.0-flash-001' && complexTask ? 'google/gemini-2.5-pro-preview-03-25' : selectedModel);
 
       // DeepBuild: activate for ANY architect+genesis request
-      // Removed the over-restrictive keyword list that excluded many valid creation prompts
-      const isDeepBuildIntent = isArchitectRequest && persona === 'genesis';
+      // Now allowed for Antigravity persona too as requested by user ("debe ser como tu")
+      const isDeepBuildIntent = isArchitectRequest && (persona === 'genesis' || persona === 'antigravity');
       
-      if (isDeepBuildIntent && persona === 'genesis') {
+      if (isDeepBuildIntent) {
         onPhaseChange?.('architecting', 'architect');
         setGenPhase('thinking');
         

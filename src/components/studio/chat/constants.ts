@@ -9,16 +9,16 @@ export const MODELS = [
 ];
 
 export const CODE_VERBS = [
-  'crea','genera','construye','haz','diseña','implementa','desarrolla',
+  'crea','genera','construye','haz','has','diseña','implementa','desarrolla','arma','quiero','necesito',
   'build','create','make','generate','design','develop','write','code','programa',
   'clona','replica','copia','clone','replicate'
 ];
 
 export const CODE_NOUNS = [
-  'página','pagina','app','aplicación','aplicacion','dashboard','landing',
-  'formulario','componente','component','api','backend','frontend','website','sitio',
+  'página','pagina','web','app','aplicación','aplicacion','dashboard','landing',
+  'formulario','componente','component','api','backend','frontend','website','sitio','site',
   'portfolio','portafolio','calculator','calculadora','todo','ecommerce','blog','navbar',
-  'footer','hero','modal','sidebar','tabla','chart','gráfica','grafica',
+  'footer','hero','modal','sidebar','tabla','chart','gráfica','grafica','system','sistema',
   'multi-page','multipágina','multipagina','prototipo','prototype','sitemap','rutas','routes'
 ];
 
