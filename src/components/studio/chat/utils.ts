@@ -157,7 +157,15 @@ export function wantsVanillaHtml(text: string): boolean {
 }
 
 export function detectIntent(prompt: string, hasContext?: boolean): IntentType {
-  const p = prompt.toLowerCase().trim();
+  let p = prompt.toLowerCase().trim();
+  
+  // Normalización de typos comunes (Fuzzy typos)
+  p = p.replace(/apagina/g, 'pagina')
+       .replace(/asuna/g, 'una')
+       .replace(/hasme/g, 'hazme')
+       .replace(/has un/g, 'haz un')
+       .replace(/has una/g, 'haz una')
+       .replace(/vender/g, 'ventas');
 
   // HTML Import: detect raw HTML pasted in chat
   if (containsHtml(prompt)) return 'html-import';
