@@ -28,10 +28,7 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const REDIRECT_URL =
-    window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
-      ? `${window.location.origin}/dashboard`
-      : "https://creator-ia.com/dashboard";
+  const REDIRECT_URL = `${window.location.origin}/dashboard`;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
