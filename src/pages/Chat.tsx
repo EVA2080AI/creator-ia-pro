@@ -4,6 +4,7 @@
  */
 import { useState, useCallback, useEffect, useMemo, useRef, Component, type ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { GENESIS_TEMPLATES, TEMPLATE_CATEGORIES, type TemplateCategory } from '@/data/genesis-templates';
 import JSZip from 'jszip';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -88,13 +89,10 @@ async function exportZip(files: Record<string, StudioFile>, projectName: string)
 }
 
 // ─── Starter prompts / Templates ────────────────────────────────────────────
+// Legacy quick prompts kept for backward compatibility in future quick-chips
 const STARTER_PROMPTS = [
   { label: 'Landing page',  emoji: '🚀', prompt: 'Crea una landing page moderna con hero section animado, sección de features con iconos, testimonios y footer. Diseño oscuro con gradientes morados.' },
-  { label: 'Dashboard',     emoji: '📊', prompt: 'Crea un dashboard con tarjetas de métricas, una tabla de datos con filtros, y un gráfico de barras CSS. Diseño dark minimalista.' },
   { label: 'Login / Auth',  emoji: '🔐', prompt: 'Crea un sistema de login y registro con formularios validados, estados de error, y diseño moderno con glassmorphism.' },
-  { label: 'E-commerce',    emoji: '🛍️', prompt: 'Crea una página de producto de e-commerce con galería de imágenes, selector de variantes, precio, y botón de compra. Diseño premium.' },
-  { label: 'Portfolio',     emoji: '🎨', prompt: 'Crea un portfolio personal con sección hero, proyectos en grid, habilidades con barras de progreso, y formulario de contacto.' },
-  { label: 'Kanban Board',  emoji: '📋', prompt: 'Crea un tablero Kanban con columnas (Por hacer, En progreso, Hecho), tarjetas con prioridad, y diseño drag-like.' },
 ];
 
 type WelcomeTab = 'projects' | 'recents' | 'templates';
@@ -127,6 +125,8 @@ function WelcomeScreen({
   const [input, setInput] = useState('');
   const [activeTab, setActiveTab] = useState<WelcomeTab>('projects');
   const [search, setSearch] = useState('');
+  const [templateCategory, setTemplateCategory] = useState<TemplateCategory | 'all'>('all');
+  const [templateSearch, setTemplateSearch] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
 
@@ -328,14 +328,113 @@ function WelcomeScreen({
                 </div>
               )}
               {activeTab === 'templates' && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {STARTER_PROMPTS.map(s => (
-                    <button key={s.label} onClick={() => handleSubmit(s.prompt)}
-                      className="flex items-center gap-4 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm">
-                      <span className="text-2xl">{s.emoji}</span>
-                      <p className="text-[13px] font-bold text-zinc-800">{s.label}</p>
-                    </button>
-                  ))}
+                <div className="space-y-4">
+                  {/* Template Search + Category Filter */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+                      <input
+                        value={templateSearch}
+                        onChange={e => setTemplateSearch(e.target.value)}
+                        placeholder="Buscar arquitectura..."
+                        className="w-full pl-9 pr-4 py-2 text-[12px] rounded-xl border border-zinc-200 bg-zinc-50 focus:outline-none focus:border-primary/40 font-medium text-zinc-700 placeholder:text-zinc-400"
+                      />
+                    </div>
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                      <button
+                        onClick={() => setTemplateCategory('all')}
+                        className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border ${
+                          templateCategory === 'all'
+                            ? 'bg-zinc-900 text-white border-zinc-900'
+                            : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
+                        }`}
+                      >
+                        Todos
+                      </button>
+                      {TEMPLATE_CATEGORIES.map(cat => (
+                        <button
+                          key={cat.id}
+                          onClick={() => setTemplateCategory(cat.id)}
+                          className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border ${
+                            templateCategory === cat.id
+                              ? 'bg-zinc-900 text-white border-zinc-900'
+                              : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
+                          }`}
+                        >
+                          <span>{cat.emoji}</span>
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Template Grid */}
+                  {(() => {
+                    const filtered = GENESIS_TEMPLATES.filter(t => {
+                      const matchCat = templateCategory === 'all' || t.category === templateCategory;
+                      const q = templateSearch.toLowerCase();
+                      const matchSearch = !q || t.label.toLowerCase().includes(q) || t.description.toLowerCase().includes(q) || t.tags.some(tag => tag.includes(q));
+                      return matchCat && matchSearch;
+                    });
+
+                    if (filtered.length === 0) return (
+                      <div className="flex flex-col items-center gap-3 py-8 text-center">
+                        <span className="text-3xl">🔍</span>
+                        <p className="text-[13px] text-zinc-400 font-medium">No se encontraron templates para tu búsqueda</p>
+                      </div>
+                    );
+
+                    return (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {filtered.map(t => {
+                          const cat = TEMPLATE_CATEGORIES.find(c => c.id === t.category);
+                          const complexityColors = {
+                            basic: 'bg-emerald-50 text-emerald-600',
+                            medium: 'bg-amber-50 text-amber-600',
+                            advanced: 'bg-red-50 text-red-600',
+                          };
+                          return (
+                            <button
+                              key={t.id}
+                              onClick={() => handleSubmit(t.prompt)}
+                              className="group flex flex-col gap-3 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 hover:shadow-md transition-all relative overflow-hidden"
+                            >
+                              {/* Category gradient strip */}
+                              <div className={`absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r ${cat?.color || 'from-zinc-300 to-zinc-400'} opacity-60 group-hover:opacity-100 transition-opacity`} />
+
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex items-center gap-2.5">
+                                  <span className="text-xl shrink-0">{t.emoji}</span>
+                                  <div>
+                                    <p className="text-[13px] font-bold text-zinc-900 leading-tight">{t.label}</p>
+                                    <span className="text-[10px] font-medium text-zinc-400">{cat?.emoji} {cat?.label}</span>
+                                  </div>
+                                </div>
+                                <span className={`shrink-0 text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-lg ${complexityColors[t.complexity]}`}>
+                                  {t.complexity === 'basic' ? 'Simple' : t.complexity === 'medium' ? 'Medio' : 'Avanzado'}
+                                </span>
+                              </div>
+
+                              <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">{t.description}</p>
+
+                              <div className="flex flex-wrap gap-1.5">
+                                {t.tags.slice(0, 3).map(tag => (
+                                  <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-500">
+                                    {tag}
+                                  </span>
+                                ))}
+                              </div>
+
+                              <div className="flex items-center gap-1.5 mt-auto pt-2 border-t border-zinc-100 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Sparkles className="h-3 w-3 text-primary" />
+                                <span className="text-[10px] font-black text-primary uppercase tracking-wider">Construir con Genesis →</span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
