@@ -51,12 +51,15 @@ export function StudioPreview({
   const [refreshKey, setRefreshKey] = useState(0);
   const [sandpackKey, setSandpackKey] = useState(0);
   const prevFilesRef = useRef<Record<string, StudioFile>>({});
+  const [compilationStatus, setCompilationStatus] = useState<'idle' | 'compiling' | 'success' | 'error'>('idle');
 
+  // When files change from generating or manual edits, reset status
   useEffect(() => {
     if (!isGenerating && JSON.stringify(prevFilesRef.current) !== JSON.stringify(files)) {
       prevFilesRef.current = files;
       setSandpackKey(k => k + 1);
       setRefreshKey(r => r + 1);
+      setCompilationStatus('compiling');
     }
   }, [isGenerating, files]);
 
@@ -154,14 +157,53 @@ export function StudioPreview({
               theme="light"
               options={{ externalResources: isVanillaHtml ? [] : ['https://cdn.tailwindcss.com'] }}
             >
-              <SandpackLayout style={{ border: 'none', height: '100%' }}>
-                <SandpackPreview 
-                  showOpenInCodeSandbox={false} 
-                  showRefreshButton={false} 
-                  style={{ height: '100%', background: '#FFFFFF' }} 
+              <div className="relative h-full w-full">
+                
+                {/* ── GHOST COMPILATION OVERLAY ── */}
+                {compilationStatus === 'error' && (
+                  <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-zinc-900/95 backdrop-blur-md">
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="flex flex-col items-center max-w-sm text-center"
+                    >
+                      <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6 border border-red-500/20">
+                        <Bot className="w-8 h-8 text-red-400 animate-pulse" />
+                      </div>
+                      <h3 className="text-xl font-bold text-white tracking-wide mb-2">Error de Compilación</h3>
+                      <p className="text-sm text-zinc-400 mb-8 leading-relaxed">
+                        Genesis Engine detectó un error en tiempo de ejecución. El protocolo de Auto-Fix automatizado está trabajando en una solución...
+                      </p>
+                      
+                      {/* Auto-fix progress bar */}
+                      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ x: '-100%' }}
+                          animate={{ x: '100%' }}
+                          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                          className="w-1/2 h-full bg-gradient-to-r from-transparent via-red-400 to-transparent"
+                        />
+                      </div>
+                      <div className="font-mono text-[10px] text-zinc-500 tracking-widest mt-4 uppercase">
+                        Ejecutando parche quirúrgico
+                      </div>
+                    </motion.div>
+                  </div>
+                )}
+
+                <SandpackLayout style={{ border: 'none', height: '100%' }}>
+                  <SandpackPreview 
+                    showOpenInCodeSandbox={false} 
+                    showRefreshButton={false} 
+                    showSandpackErrorOverlay={false} // WE HIDE THE NATIVE RED SCREEN
+                    style={{ height: '100%', background: '#FFFFFF' }} 
+                  />
+                </SandpackLayout>
+                <SandpackErrorBridge 
+                  onError={onError} 
+                  onStatusChange={setCompilationStatus} 
                 />
-              </SandpackLayout>
-              <SandpackErrorBridge onError={onError} />
+              </div>
             </SandpackProvider>
           </div>
         ) : (
@@ -181,17 +223,29 @@ export function StudioPreview({
   );
 }
 
-function SandpackErrorBridge({ onError }: { onError?: (error: string) => void }) {
+function SandpackErrorBridge({ 
+  onError,
+  onStatusChange 
+}: { 
+  onError?: (error: string) => void,
+  onStatusChange?: (status: 'compiling' | 'success' | 'error') => void 
+}) {
   const { sandpack } = useSandpack();
 
   useEffect(() => {
-    if (!onError) return;
     const status = sandpack?.status;
     const error = sandpack?.error;
-    if (error?.message) {
+    
+    if (status === 'idle' || status === 'running') {
+      onStatusChange?.(error ? 'error' : 'success');
+    } else {
+      onStatusChange?.('compiling');
+    }
+
+    if (error?.message && onError) {
       onError(error.message);
     }
-  }, [sandpack?.status, sandpack?.error, onError]);
+  }, [sandpack?.status, sandpack?.error, onError, onStatusChange]);
 
   return null;
 }
