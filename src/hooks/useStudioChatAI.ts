@@ -75,6 +75,87 @@ export function useStudioChatAI({
     setStreamingContent(null);
   }, [onGeneratingChange, onPhaseChange]);
 
+  // ─── PROJECT CONTEXT SNAPSHOT — makes Genesis "see" the full project ────────
+  // This is the key that bridges the gap between Genesis and Antigravity:
+  // Genesis now gets an intelligent structural + content snapshot of the project
+  // before generating anything, just like Antigravity reads files before editing.
+  const buildProjectSnapshot = useCallback((files: Record<string, StudioFile>, activeFile?: string | null): string => {
+    const fileKeys = Object.keys(files);
+    if (fileKeys.length === 0) return '';
+
+    // 1. Detect tech stack from package.json
+    let detectedStack = 'React + TypeScript + Tailwind CSS';
+    const pkg = files['package.json']?.content;
+    if (pkg) {
+      try {
+        const json = JSON.parse(pkg);
+        const deps = { ...json.dependencies, ...json.devDependencies };
+        const libs = Object.keys(deps).filter(d =>
+          ['react-router-dom', 'zustand', 'framer-motion', 'recharts', 'react-hook-form',
+           'zod', 'supabase', 'react-query', 'tanstack', 'three', 'phaser'].some(k => d.includes(k))
+        );
+        if (libs.length > 0) detectedStack += `\n- Librerías detectadas: ${libs.join(', ')}`;
+      } catch { /* ignore */ }
+    }
+
+    // 2. Build file tree grouped by folder
+    const grouped: Record<string, string[]> = {};
+    for (const f of fileKeys) {
+      const parts = f.split('/');
+      const folder = parts.length > 1 ? parts.slice(0, -1).join('/') : '(raíz)';
+      if (!grouped[folder]) grouped[folder] = [];
+      grouped[folder].push(parts[parts.length - 1]);
+    }
+    const fileTree = Object.entries(grouped)
+      .map(([folder, names]) => `  ${folder}/\n${names.map(n => `    └ ${n}`).join('\n')}`)
+      .join('\n');
+
+    // 3. Identify architecture type
+    const hasRouter = fileKeys.some(f => f.includes('App.tsx') && files[f]?.content.includes('Route'));
+    const hasSidebar = fileKeys.some(f => f.toLowerCase().includes('sidebar'));
+    const hasPages = fileKeys.some(f => f.startsWith('src/pages/'));
+    const hasContext = fileKeys.some(f => f.includes('context') || f.includes('Context'));
+    const archType = hasSidebar ? 'Dashboard / Web App' : hasPages ? 'Multi-página' : hasRouter ? 'SPA con Router' : 'Single Page';
+
+    // 4. Curated content snapshot: most important files (prioritizing App, components, types)
+    const PRIORITY_FILES = [
+      activeFile,
+      'src/App.tsx', 'src/main.tsx',
+      'src/components/Navbar.tsx', 'src/components/Sidebar.tsx',
+      'index.css',
+    ].filter(Boolean) as string[];
+
+    const toShow = [
+      ...PRIORITY_FILES.filter(f => files[f]),
+      ...fileKeys.filter(f => !PRIORITY_FILES.includes(f) && (f.includes('types') || f.includes('hooks'))),
+    ].slice(0, 6); // Max 6 files in snapshot to avoid overwhelming the context
+
+    const contentSnapshots = toShow
+      .map(f => `\n// ── ${f} ──\n${files[f].content.slice(0, 3000)}${files[f].content.length > 3000 ? '\n// ... (truncado)' : ''}`)
+      .join('\n');
+
+    return `
+=== GENESIS PROJECT CONTEXT SNAPSHOT ===
+Arquitectura: ${archType}
+Stack: ${detectedStack}
+Total archivos: ${fileKeys.length}
+Archivo activo: ${activeFile || 'ninguno'}
+
+Árbol de archivos:
+${fileTree}
+
+Secciones detectadas:
+${hasRouter ? '✓ Router (multi-página)' : ''}
+${hasSidebar ? '✓ Sidebar (dashboard)' : ''}
+${hasContext ? '✓ Context / Estado global' : ''}
+
+Contenido de archivos clave:
+${contentSnapshots}
+=== FIN SNAPSHOT ===
+`;
+  }, []);
+
+
   const generateCode = useCallback(async (
     prompt: string,
     options?: { pendingImage?: string | null; pendingUrl?: string | null; preferences?: AgentPreference[] }
@@ -161,14 +242,17 @@ export function useStudioChatAI({
         ? '\n\n[ARCHIVOS MENCIONADOS]\n' + mentionedFiles.map(f => `// @${f}\n${projectFiles[f].content.slice(0, 10000)}`).join('\n\n')
         : '';
 
-      // Smart Context: If no mentions, find high-relevance files based on intent
+      // ─── BUILD PROJECT CONTEXT SNAPSHOT ──────────────────────────
+      // When the project has files, always inject a rich structural snapshot.
+      // This gives Genesis the same "see the full codebase" advantage Antigravity has.
+      const projectSnapshot = fileKeys.length > 0 ? buildProjectSnapshot(projectFiles, activeFile) : '';
+
       if (fileKeys.length > 0 && !contextBlock) {
         const pLower = prompt.toLowerCase();
-        let importantFiles = [];
-        
-        // Always include foundational files if they exist
-        const foundation = fileKeys.filter(f => f === 'package.json' || f.includes('types') || f.endsWith('.d.ts'));
-        
+
+        // Find explicitly @mentioned files
+        let importantFiles: string[] = [];
+
         if (pLower.includes('db') || pLower.includes('base de datos') || pLower.includes('supabase')) {
           importantFiles = fileKeys.filter(f => f.includes('sql') || f.includes('service') || f.includes('integration'));
         } else if (pLower.includes('ui') || pLower.includes('estética') || pLower.includes('diseño') || pLower.includes('css')) {
@@ -176,17 +260,15 @@ export function useStudioChatAI({
         } else if (pLower.includes('nav') || pLower.includes('sidebar') || pLower.includes('route')) {
           importantFiles = fileKeys.filter(f => f.includes('sidebar') || f.includes('Navbar') || f.includes('App.tsx'));
         }
-        
-        const finalSelection = [...new Set([...foundation, ...importantFiles, activeFile].filter(Boolean) as string[])].slice(0, 10);
-        
+
+        // Include active file + important matches
+        const finalSelection = [...new Set([activeFile, ...importantFiles].filter(Boolean) as string[])].slice(0, 4);
         if (finalSelection.length > 0) {
-          contextBlock = `\n\n[CONTEXTO RELEVANTE]:\n` +
-            finalSelection.map(f => `// ${f}\n${projectFiles[f].content.slice(0, 8000)}`).join('\n\n');
-        } else {
-          // Fallback to basic overview
-          contextBlock = `\n\n[PROYECTO ACTIVO]:\nArchivos: ${fileKeys.join(', ')}\n${activeFile ? `\n[ARCHIVO ACTUALMENTE ABIERTO]: ${activeFile}\nCONTENIDO: ${projectFiles[activeFile]?.content || ''}\n` : ''}\n`;
+          contextBlock = `\n\n[ARCHIVOS RELEVANTES PARA ESTA TAREA]:\n` +
+            finalSelection.map(f => `// ${f}\n${projectFiles[f].content.slice(0, 6000)}`).join('\n\n');
         }
       }
+
 
       const supabaseContext = supabaseConfig ? `\n\nSUPABASE: URL: ${supabaseConfig.url} | Key: ${supabaseConfig.anonKey}. Usa window.supabaseClient.` : '';
       
@@ -217,9 +299,11 @@ export function useStudioChatAI({
          userContent = `[URL]: ${parsedClone.url}\n[PROMPT]: ${prompt}`;
       }
 
-      const historySlice = convHistory.slice(-12); // Slightly more history
+      const historySlice = convHistory.slice(-12);
       const messages = [
-        { role: 'system', content: effectiveSystemPrompt + (isChatModeActive ? '' : supabaseContext) + `\n\n${prefContext}` },
+        // Inject the project snapshot directly into the system prompt
+        // so Genesis "sees" the full project architecture before generating
+        { role: 'system', content: effectiveSystemPrompt + (isChatModeActive ? '' : supabaseContext) + `\n\n${prefContext}` + (projectSnapshot ? `\n\n${projectSnapshot}` : '') },
         ...historySlice,
         { role: 'user', content: options?.pendingImage ? [{ type: 'image_url', image_url: { url: options.pendingImage } }, { type: 'text', text: userContent }] : userContent }
       ];
