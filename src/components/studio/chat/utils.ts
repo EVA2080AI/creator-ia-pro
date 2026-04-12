@@ -251,6 +251,98 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
 }
 
 
+// ─── PUNTO 2: SURGICAL PATCH SYSTEM ──────────────────────────────────
+// Genesis can now output PATCH blocks: targeted line replacements instead of
+// full file rewrites — same as Antigravity's multi_replace_file_content tool.
+//
+// Format Genesis uses in its response:
+//   ```patch
+//   // src/components/Navbar.tsx
+//   FIND:
+//   const [open, setOpen] = useState(false);
+//   REPLACE:
+//   const [isOpen, setIsOpen] = useState(false);
+//   ```
+//
+// This lets Genesis fix a 1-line bug without regenerating a 300-line file.
+export function applyPatchToFiles(
+  patches: string,
+  existingFiles: Record<string, StudioFile>
+): Record<string, StudioFile> {
+  const result = { ...existingFiles };
+
+  // Parse all patch blocks: ```patch\n// filename\nFIND:\n...\nREPLACE:\n...\n```
+  const patchRegex = /```patch\n([\s\S]*?)```/g;
+  let m;
+  while ((m = patchRegex.exec(patches)) !== null) {
+    const block = m[1];
+
+    // Extract filename from first comment line
+    const fileMatch = block.match(/^\/\/\s*([\w./\-]+\.\w+)/);
+    if (!fileMatch) continue;
+    const filename = fileMatch[1];
+
+    // Extract FIND and REPLACE sections
+    const findMatch  = block.match(/FIND:\n([\s\S]*?)(?=REPLACE:|$)/);
+    const replMatch  = block.match(/REPLACE:\n([\s\S]*)$/);
+    if (!findMatch || !replMatch) continue;
+
+    const findText    = findMatch[1].trim();
+    const replaceText = replMatch[1].trim();
+
+    if (result[filename]) {
+      // Surgical replacement: find exact match and swap it
+      const currentContent = result[filename].content;
+      if (currentContent.includes(findText)) {
+        result[filename] = {
+          ...result[filename],
+          content: currentContent.replace(findText, replaceText)
+        };
+      }
+      // If not found, fall back gracefully (no-op this patch block)
+    } else if (replaceText && !findText) {
+      // Pure NEW FILE patch (FIND empty = create new)
+      const lang = filename.split('.').pop()?.toLowerCase() || 'tsx';
+      result[filename] = { language: lang, content: replaceText };
+    }
+  }
+  return result;
+}
+
+// ─── PUNTO 3: TRUNCATION DETECTION ─────────────────────────────────────
+// Detects when Genesis was cut off mid-generation so useStudioChatAI
+// can automatically request a continuation — mimicking Antigravity's
+// ability to work file-by-file without token pressure.
+export function isResponseTruncated(text: string): boolean {
+  const trimmed = text.trimEnd();
+  if (!trimmed) return false;
+
+  // Signs of truncation in code
+  const openBackticks  = (trimmed.match(/```/g) || []).length;
+  if (openBackticks % 2 !== 0) return true;           // unclosed code block
+
+  const lastLines = trimmed.split('\n').slice(-8).join('\n');
+
+  // Mid-function or mid-object cuts
+  if (/[{([,]\s*$/.test(lastLines)) return true;
+  if (/=>\s*$/.test(lastLines))      return true;
+  if (/\breturn\s*$/.test(lastLines)) return true;
+  if (/import .* from\s*$/.test(lastLines)) return true;
+
+  // Incomplete JSX tags
+  if (/<[A-Z][a-zA-Z]*[^/>]*$/.test(lastLines)) return true;
+
+  // Hardcoded truncation markers
+  if (/\.\.\.$/.test(trimmed) && !trimmed.includes('```')) return true;
+  if (/\/\/ (continúa|continues|truncated|TODO|rest of)/i.test(lastLines)) return true;
+
+  return false;
+}
+
+export function extractPatchBlocks(text: string): boolean {
+  return text.includes('```patch');
+}
+
 export function processRawResponse(rawText: string, prompt: string, isChatOnly: boolean) {
   if (!rawText) return null;
   if (isChatOnly) return { files: {} as Record<string, StudioFile>, explanation: rawText, stack: [], deps: [], suggestions: [], isChatOnly: true };

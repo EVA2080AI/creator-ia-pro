@@ -5,7 +5,8 @@ import type { StudioFile } from '@/hooks/useStudioProjects';
 import { aiService } from '@/services/ai-service';
 import { genesisOrchestrator } from '@/services/genesis-orchestrator';
 import { generateAutonomousProject } from '@/services/scaffold-service';
-import { detectIntent, processRawResponse } from '@/components/studio/chat/utils';
+import { detectIntent, processRawResponse, applyPatchToFiles, isResponseTruncated, extractPatchBlocks } from '@/components/studio/chat/utils';
+
 import {
   CODE_GEN_SYSTEM,
   GENESIS_CHAT_SYSTEM,
@@ -415,9 +416,71 @@ ${contentSnapshots}
         }
       }
 
+      // ─── PUNTO 3: TRUNCATION DETECTION + AUTO-CONTINUATION ───────────────
+      // If Genesis was cut off mid-code, automatically request continuation
+      // — mimicking Antigravity’s ability to work file-by-file without pressure.
+      if (isResponseTruncated(accumulated) && !signal.aborted) {
+        setGenPhase('streaming');
+        const continueMessages = [
+          { role: 'system', content: effectiveSystemPrompt },
+          ...historySlice,
+          { role: 'user', content: userContent },
+          { role: 'assistant', content: accumulated },
+          { role: 'user', content: '[AUTO-CONTINUE] La respuesta fue cortada. Continua exactamente desde donde quedaste, sin repetir nada de lo ya escrito. Completa los archivos faltantes.' }
+        ];
+
+        const conRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
+          method: 'POST',
+          signal,
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+          body: JSON.stringify({ provider: 'openrouter', path: 'chat/completions', body: { model: targetModel, messages: continueMessages, stream: true, temperature: 0.2, max_tokens: 20000 } })
+        });
+
+        if (conRes.ok) {
+          const conReader = conRes.body!.getReader();
+          let conBuffer = '';
+          let conDone = false;
+          outerContinue: while (!conDone) {
+            const { done, value } = await conReader.read();
+            if (done) break;
+            conBuffer += decoder.decode(value, { stream: true });
+            const lines = conBuffer.split('\n');
+            conBuffer = lines.pop() ?? '';
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const payload = line.slice(6).trim();
+              if (payload === '[DONE]') { conDone = true; break outerContinue; }
+              try {
+                const parsed = JSON.parse(payload);
+                const delta = parsed?.choices?.[0]?.delta?.content;
+                if (typeof delta === 'string') {
+                  accumulated += delta;
+                  setStreamChars(accumulated.length);
+                  onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
+                  streamBufferRef.current = accumulated;
+                }
+              } catch { /* skip */ }
+            }
+          }
+        }
+      }
+
+      // ─── PUNTO 2: SURGICAL PATCH DETECTION + MERGE ───────────────────────
+      // If Genesis used PATCH blocks, apply them surgically to existing files
+      // instead of full rewrites — same as Antigravity's replace_file_content.
+      if (extractPatchBlocks(accumulated) && fileKeys.length > 0) {
+        const patchedFiles = applyPatchToFiles(accumulated, projectFiles);
+        return {
+          files: patchedFiles,
+          explanation: accumulated.replace(/```patch[\s\S]*?```/g, '').trim() || 'Cambios aplicados quirurgicamente.',
+          isChatOnly: false,
+          stack: ['React', 'TypeScript'],
+          deps: [],
+          suggestions: []
+        };
+      }
+
       // G-1 FIX: Pass only isChatModeActive (not || isArchitectRequest)
-      // Previously, Architect Mode was treated as chat-only, preventing file writes.
-      // Now, if the AI returns JSON files in Architect response, they will be parsed correctly.
       const finalResult = processRawResponse(accumulated, prompt, isChatModeActive);
       return finalResult;
 
