@@ -122,8 +122,8 @@ export function MessageItem({
             {/* ── Content ─────────────────────────────── */}
             <div
               className={cn(
-                "result-prose relative z-10 leading-relaxed",
-                msg.type === 'plan' ? "" : "text-zinc-700"
+                "result-prose relative z-10 leading-relaxed text-[13px]",
+                msg.type === 'plan' ? "" : "text-zinc-600"
               )}
               dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
             />

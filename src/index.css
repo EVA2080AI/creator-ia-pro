@@ -344,12 +344,12 @@
    ============================================ */
 .result-prose {
   color: hsl(240 4% 35%);
-  font-size: 13.5px;
-  line-height: 1.7;
+  font-size: 12.5px;
+  line-height: 1.6;
 }
-.result-prose h1 { font-size: 18px; font-weight: 700; color: hsl(240 10% 6%); margin-top: 24px; margin-bottom: 8px; }
-.result-prose h2 { font-size: 15px; font-weight: 700; color: hsl(240 10% 6%); margin-top: 20px; margin-bottom: 6px; }
-.result-prose h3 { font-size: 13px; font-weight: 700; color: hsl(240 5% 20%); margin-top: 16px; margin-bottom: 4px; }
+.result-prose h1 { font-size: 16px; font-weight: 700; color: hsl(240 10% 6%); margin-top: 20px; margin-bottom: 8px; }
+.result-prose h2 { font-size: 14px; font-weight: 700; color: hsl(240 10% 6%); margin-top: 16px; margin-bottom: 6px; }
+.result-prose h3 { font-size: 12px; font-weight: 700; color: hsl(240 5% 20%); margin-top: 12px; margin-bottom: 4px; }
 .result-prose p  { margin-top: 0; margin-bottom: 10px; }
 .result-prose ul { margin: 10px 0; padding: 0; list-style: none; }
 .result-prose li { display: flex; gap: 8px; margin: 4px 0; }

@@ -91,78 +91,41 @@ function StudioProjectHeader({
 
   return (
     <header 
-      className={cn(
-        "shrink-0 h-16 md:h-20 border-b transition-all duration-700 px-4 md:px-6 flex items-center justify-between z-30 sticky top-0",
-        "bg-white/70 border-zinc-100 backdrop-blur-[40px] saturate-[1.8]"
-      )}
-      role="banner"
+      className="shrink-0 h-14 border-b px-4 flex items-center justify-between z-30 sticky top-0 bg-white/70 border-zinc-100 backdrop-blur-xl"
     >
-      <div className="absolute bottom-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/10 to-transparent opacity-50" />
-      <div className="flex items-center gap-5 overflow-hidden">
+      <div className="flex items-center gap-3 overflow-hidden">
         <button 
           onClick={onBack} 
-          className="h-10 w-10 rounded-xl flex items-center justify-center text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950 transition-all active:scale-90 border border-zinc-200 group"
+          className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-all border border-zinc-200/60"
         >
-          <ChevronLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+          <ChevronLeft className="h-4 w-4" />
         </button>
         <div className="flex flex-col min-w-0">
-          <div className="flex items-center gap-3">
-             <div className="flex items-center gap-1.5">
-               <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.8)] animate-pulse" />
-               <h2 className="text-[12px] md:text-[13px] font-black text-zinc-900 truncate tracking-tighter uppercase italic">{name}</h2>
-             </div>
-             {isSaving && (
-               <div className="flex items-center gap-2 px-2 py-0.5 rounded bg-primary/10 border border-primary/20 animate-pulse">
-                  <RefreshCw className="w-2.5 h-2.5 text-primary animate-spin" />
-                  <span className="text-[7px] font-black text-primary uppercase tracking-widest">SYNC_ACTIVE</span>
-               </div>
-             )}
+          <div className="flex items-center gap-2">
+             <h2 className="text-[12px] font-bold text-zinc-800 truncate tracking-tight">{name}</h2>
+             {isSaving && <RefreshCw className="w-3 h-3 text-primary animate-spin" />}
           </div>
           
-          <div className="flex items-center gap-4 mt-1.5">
+          <div className="flex items-center mt-0.5">
             {agentPhase !== 'idle' ? (
-              <div className="flex items-center gap-3">
-                <div className="flex items-end gap-0.5 h-3 items-center">
-                   {[1, 2, 3, 4].map((i) => (
-                     <motion.div 
-                       key={i} 
-                       animate={{ height: [4, 12, 6, 10, 4] }}
-                       transition={{ repeat: Infinity, duration: 0.6 + (i * 0.1), ease: "easeInOut" }}
-                       className="w-0.5 bg-primary/60 rounded-full"
-                     />
-                   ))}
-                </div>
-                <div className="flex items-center gap-2 px-2 py-0.5 rounded-lg bg-zinc-100 border border-zinc-100">
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600 italic">
-                     GENESIS_{activeSpecialist?.toUpperCase() || 'CORE'}
-                   </span>
-                </div>
-                <span className="text-[8px] font-bold text-zinc-400 tracking-tighter uppercase hidden sm:inline">HEARTBEAT: 432Hz</span>
-              </div>
+               <span className="text-[10px] font-medium text-primary flex items-center gap-1.5">
+                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                 Genesis {activeSpecialist ? `(${activeSpecialist})` : 'Thinking...'}
+               </span>
             ) : (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-100">
-                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600/80 italic">SYSTEM_IDLE</span>
-                </div>
-                <div className="h-3 w-[1px] bg-zinc-200 mx-1 hidden sm:block" />
-                <span className="text-[8px] font-bold text-zinc-400 tracking-tighter uppercase hidden sm:inline">LINK_SYNC: 24ms</span>
-              </div>
+               <span className="text-[10px] font-medium text-zinc-400">Idle</span>
             )}
           </div>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center">
         <button 
           onClick={onToggleArtifacts} 
-          className="h-10 md:h-11 px-3 md:px-5 rounded-2xl border border-zinc-200 bg-white flex items-center gap-2 md:gap-3 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-950 transition-all relative group shadow-sm overflow-hidden"
+          className="h-8 px-3 rounded-lg border border-zinc-200/60 bg-white flex items-center gap-1.5 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="relative z-10 flex items-center gap-2 md:gap-2.5">
-            <Activity className={cn("h-4 w-4", agentPhase !== 'idle' ? "text-primary animate-pulse" : "text-zinc-400")} />
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] hidden sm:inline italic">Console</span>
-          </div>
+          <Activity className={cn("h-3.5 w-3.5", agentPhase !== 'idle' ? "text-primary animate-pulse" : "text-zinc-400")} />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Console</span>
         </button>
       </div>
     </header>
