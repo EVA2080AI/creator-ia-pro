@@ -23,6 +23,8 @@ import { type AgentPhase, type AgentSpecialist } from '@/components/studio/chat/
 // Lucide Icons & Utils
 import { Loader2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { hardResetProject } from '@/hooks/useStudioProjects';
 
 export default function Studio() {
   const { user } = useAuth('/auth');
@@ -103,100 +105,10 @@ export default function Studio() {
     }
   }, [activeProject, activeFile]);
 
-  // Project Health check: Only inject boilerplate if the project is TOTALLY EMPTY
+  // Deleted auto-initialization of boilerplate files
   useEffect(() => {
-    if (!activeProject) return;
-    const files = activeProject.files;
-    const fileKeys = Object.keys(files);
-    
-    // Only auto-initialize if it's a brand new empty project
-    if (fileKeys.length === 0) {
-      const u: Record<string, StudioFile> = {};
-      
-      u['index.html'] = { 
-        language: 'html', 
-        content: `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Genesis Studio App</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>` 
-      };
-
-      u['package.json'] = { 
-        language: 'json', 
-        content: JSON.stringify({ 
-          name: "genesis-project", 
-          type: "module", 
-          dependencies: { 
-            "react": "^18.2.0", 
-            "react-dom": "^18.2.0",
-            "lucide-react": "latest",
-            "framer-motion": "latest",
-            "clsx": "latest",
-            "tailwind-merge": "latest"
-          } 
-        }, null, 2) 
-      };
-
-      u['vite.config.ts'] = { 
-        language: 'typescript', 
-        content: "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({ plugins: [react()] });" 
-      };
-
-      u['src/main.tsx'] = {
-        language: 'tsx',
-        content: `import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App';
-import './index.css';
-
-const rootElement = document.getElementById('root');
-if (rootElement) {
-  const root = createRoot(rootElement);
-  root.render(<App />);
-}`
-      };
-
-      u['src/index.css'] = {
-        language: 'css',
-        content: `@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-body { margin: 0; background: #FDFDFF; }`
-      };
-
-      u['src/App.tsx'] = {
-        language: 'tsx',
-        content: `import React from 'react';
-import { Sparkles } from 'lucide-react';
-
-export default function App() {
-  return (
-    <div className="min-h-screen bg-[#FDFDFF] flex flex-col items-center justify-center p-6 text-zinc-900 font-sans text-center">
-      <div className="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center mb-8 shadow-2xl">
-        <Sparkles className="text-white w-10 h-10" />
-      </div>
-      <h1 className="text-3xl font-black mb-3 text-zinc-900 uppercase tracking-tighter italic">Génesis Studio</h1>
-      <p className="text-zinc-400 text-sm max-w-xs">
-        Núcleo listo. Describe tu visión en el chat para comenzar la orquestación.
-      </p>
-    </div>
-  );
-}`
-      };
-      
-      updateProjectFiles(activeProject.id, u);
-    }
-  }, [activeProject, updateProjectFiles]);
+    // We maintain this observer empty to allow projects to start without files
+  }, [activeProject]);
 
   const handleFilesChange = async (newFiles: Record<string, StudioFile>) => {
     if (!activeProject) return;

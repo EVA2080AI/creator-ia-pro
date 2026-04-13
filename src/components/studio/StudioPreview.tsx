@@ -39,14 +39,19 @@ interface StudioPreviewProps {
 export function StudioPreview({
   files,
   deviceMode = 'desktop',
+  onDeviceModeChange,
   isGenerating = false,
   streamChars = 0,
+  streamPreview,
   supabaseConfig,
   onError,
   viewMode,
   onToggleViewMode,
   isSidebarCollapsed,
   onToggleSidebar,
+  isFullscreen,
+  onToggleFullscreen,
+  onShare,
 }: StudioPreviewProps) {
   const [refreshKey, setRefreshKey] = useState(0);
   const [sandpackKey, setSandpackKey] = useState(0);
