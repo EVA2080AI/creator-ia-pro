@@ -156,7 +156,7 @@ export function StudioPreview({
               height: deviceMode === 'desktop' ? '100%' : frameHeight[deviceMode],
               transformOrigin: 'top center',
             }}
-            className={\`\${deviceMode === 'desktop' ? 'h-full w-full' : 'my-8 rounded-3xl shadow-2xl shadow-black/5'} flex-shrink-0 flex flex-col overflow-hidden bg-white border border-zinc-200/60 z-10 relative\`}
+            className={`${deviceMode === 'desktop' ? 'h-full w-full' : 'my-8 rounded-3xl shadow-2xl shadow-black/5'} flex-shrink-0 flex flex-col overflow-hidden bg-white border border-zinc-200/60 z-10 relative`}
           >
             <SandpackProvider
               key={sandpackKey}
