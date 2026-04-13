@@ -38,6 +38,7 @@ interface UseStudioChatAIProps {
   isArchitectMode: boolean;
   activeFile?: string | null;
   supabaseConfig?: { url: string; anonKey: string } | null;
+  subscriptionTier?: 'free' | 'pro' | 'admin' | null;
   onPhaseChange?: (phase: AgentPhase, specialist?: AgentSpecialist) => void;
   onStreamCharsChange?: (chars: number, preview: string) => void;
   onGeneratingChange?: (v: boolean) => void;
@@ -51,6 +52,7 @@ export function useStudioChatAI({
   isArchitectMode,
   activeFile,
   supabaseConfig,
+  subscriptionTier = 'free',
   onPhaseChange,
   onStreamCharsChange,
   onGeneratingChange
@@ -61,6 +63,16 @@ export function useStudioChatAI({
   const [genPhase, setGenPhase] = useState<'idle' | 'thinking' | 'streaming' | 'done'>('idle');
   const [genSpecialist, setGenSpecialist] = useState<AgentSpecialist>('none');
   const [currentGenIntent, setCurrentGenIntent] = useState<'codegen' | 'chat' | null>(null);
+
+  // ─── TIER-BASED BUDGET LIMITS ──────────────────────────────────────────────
+  const isPro = subscriptionTier === 'pro' || subscriptionTier === 'admin';
+  const BUDGET = {
+    maxHistory: isPro ? 15 : 6,
+    maxSnapshotFiles: isPro ? 8 : 3,
+    maxSnapshotChars: isPro ? 4000 : 1500,
+    maxCodeTokens: isPro ? 16000 : 4000,
+    maxChatTokens: isPro ? 8000 : 2500,
+  };
   
   const abortControllerRef = useRef<AbortController | null>(null);
   const streamBufferRef = useRef('');
@@ -131,10 +143,10 @@ export function useStudioChatAI({
     const toShow = [
       ...PRIORITY_FILES.filter(f => files[f]),
       ...fileKeys.filter(f => !PRIORITY_FILES.includes(f) && (f.includes('types') || f.includes('hooks'))),
-    ].slice(0, 6); // Max 6 files in snapshot to avoid overwhelming the context
+    ].slice(0, BUDGET.maxSnapshotFiles); // Use tier-based snapshot limit
 
     const contentSnapshots = toShow
-      .map(f => `\n// ── ${f} ──\n${files[f].content.slice(0, 3000)}${files[f].content.length > 3000 ? '\n// ... (truncado)' : ''}`)
+      .map(f => `\n// ── ${f} ──\n${files[f].content.slice(0, BUDGET.maxSnapshotChars)}${files[f].content.length > BUDGET.maxSnapshotChars ? '\n// ... (truncado)' : ''}`)
       .join('\n');
 
     return `
@@ -320,7 +332,21 @@ ${contentSnapshots}
 
       const freshStartNote = isArchitectRequest ? "\n\n[IMPORTANTE: El usuario solicita un nuevo proyecto o arquitectura. SI los archivos actuales en el snapshot son irrelevantes para esta nueva visión, IGNÓRALOS y empieza de cero con una arquitectura limpia. No intentes fusionar lógica incompatible.]" : "";
       
-      const historySlice = convHistory.slice(-12);
+      // ─── OPTIMIZED HISTORY SLICE ───────────────────────────────────────────
+      // 1. Limit based on tier budget
+      // 2. Remove base64 images from history (keep only the text) to save massive tokens
+      const historySlice = convHistory.slice(-BUDGET.maxHistory).map(msg => {
+         if (Array.isArray(msg.content)) {
+            // If the message has an image (usually the very first one), we prune the image for future turns
+            // unless it's the very last user message (which is handled separately below)
+            return {
+               ...msg,
+               content: msg.content.filter(c => c.type === 'text').map(c => c.text).join('\n') || '[Imagen procesada]'
+            };
+         }
+         return msg;
+      });
+
       const messages = [
         // Inject the project snapshot directly into the system prompt
         // so Genesis "sees" the full project architecture before generating
@@ -390,7 +416,7 @@ ${contentSnapshots}
             messages,
             stream: true,
             temperature: isChatModeActive ? 0.7 : 0.2, // Slightly more creative in chat
-            max_tokens: isChatModeActive ? 8192 : 25000, // More tokens for complex code/architecture
+            max_tokens: isChatModeActive ? BUDGET.maxChatTokens : BUDGET.maxCodeTokens, // Tier-based token limits
 
           },
         }),
@@ -699,7 +725,17 @@ ${contentSnapshots}
           method: 'POST',
           signal,
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-          body: JSON.stringify({ provider: 'openrouter', path: 'chat/completions', body: { model: targetModel, messages: continueMessages, stream: true, temperature: 0.2, max_tokens: 20000 } })
+          body: JSON.stringify({ 
+            provider: 'openrouter', 
+            path: 'chat/completions', 
+            body: { 
+              model: targetModel, 
+              messages: continueMessages, 
+              stream: true, 
+              temperature: 0.2, 
+              max_tokens: BUDGET.maxCodeTokens // Use budget for continuation 
+            } 
+          })
         });
 
         if (conRes.ok) {

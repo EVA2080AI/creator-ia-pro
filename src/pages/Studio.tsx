@@ -58,6 +58,24 @@ export default function Studio() {
   const [agentPhase, setAgentPhase] = useState<AgentPhase>('idle');
   const [activeSpecialist, setActiveSpecialist] = useState<AgentSpecialist>('none');
   const [cloudConfig, setCloudConfig] = useState<SupabaseConfig | null>(null);
+  const [subscriptionTier, setSubscriptionTier] = useState<'free' | 'pro' | 'admin' | null>(null);
+
+  // Fetch user profile for subscription tier
+  useEffect(() => {
+    if (!user?.id) return;
+    const fetchTier = async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('subscription_tier')
+        .eq('id', user.id)
+        .single();
+      
+      if (!error && data) {
+         setSubscriptionTier(data.subscription_tier as any);
+      }
+    };
+    fetchTier();
+  }, [user?.id]);
 
   const activeTasks = useMemo(() => tasks, [tasks]);
 
@@ -425,6 +443,7 @@ export default function App() {
                    setLogs={setLogs}
                    runtimeError={runtimeError}
                    onClearError={() => setRuntimeError(null)}
+subscriptionTier={subscriptionTier}
                    onPhaseChange={(phase, specialist) => {
                      setAgentPhase(phase);
                      if (specialist) setActiveSpecialist(specialist);

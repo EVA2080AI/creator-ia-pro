@@ -65,6 +65,7 @@ interface StudioChatProps {
   onClearError?: () => void;
   onPhaseChange?: (phase: AgentPhase, specialist?: AgentSpecialist) => void;
   onHardReset?: () => void;
+  subscriptionTier?: 'free' | 'pro' | 'admin' | null;
 }
 
 interface StudioProjectHeaderProps {
@@ -209,6 +210,7 @@ export function StudioChat(props: StudioChatProps) {
     isArchitectMode,
     activeFile: props.activeFile,
     supabaseConfig: props.supabaseConfig,
+    subscriptionTier: props.subscriptionTier,
     onPhaseChange: props.onPhaseChange,
     onStreamCharsChange: props.onStreamCharsChange,
     onGeneratingChange: props.onGeneratingChange
