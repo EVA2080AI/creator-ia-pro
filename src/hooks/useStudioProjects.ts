@@ -18,48 +18,7 @@ export interface StudioProject {
   updated_at: string;
 }
 
-const DEFAULT_FILES: Record<string, StudioFile> = {
-  'index.html': {
-    language: 'html',
-    content: `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Genesis Project</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>`
-  },
-  'package.json': {
-    language: 'json',
-    content: JSON.stringify({
-      name: "genesis-project",
-      private: true,
-      type: "module",
-      scripts: { "dev": "vite", "build": "vite build" }
-    }, null, 2)
-  },
-  'vite.config.ts': {
-    language: 'typescript',
-    content: "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\nexport default defineConfig({ plugins: [react()] });"
-  },
-  'src/main.tsx': {
-    language: 'tsx',
-    content: "import React from 'react';\nimport ReactDOM from 'react-dom/client';\nimport App from './App';\nimport '../index.css';\nReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);"
-  },
-  'src/App.tsx': {
-    language: 'tsx',
-    content: "export default function App() {\n  return (\n    <div className=\"min-h-screen bg-zinc-950 text-white flex items-center justify-center font-sans\">\n      <div className=\"text-center space-y-4\">\n        <h1 className=\"text-4xl font-black tracking-tighter uppercase\">Genesis Engine</h1>\n        <p className=\"text-zinc-500 font-medium tracking-widest uppercase text-[10px]\">Architecture Verified • Vite v5.0</p>\n      </div>\n    </div>\n  );\n}"
-  },
-  'index.css': {
-    language: 'css',
-    content: `@tailwind base;\n@tailwind components;\n@tailwind utilities;`,
-  },
-};
+const DEFAULT_FILES: Record<string, StudioFile> = {};
 
 function normalizeFiles(files: any): Record<string, StudioFile> {
   if (!files) return {};
