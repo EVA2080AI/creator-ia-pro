@@ -258,16 +258,18 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
         if (lang === 'html' || lowerCode.includes('<!doctype')) filename = 'index.html';
         else if (lang === 'css' || (lowerCode.includes('{') && lowerCode.includes(':') && !isReact)) filename = 'src/index.css';
         else if (isReact) {
-          // If it's a React component and we don't have App.tsx yet, use it as main
+          // If we are in code-gen mode, we usually want App.tsx unless otherwise specified
           filename = 'src/App.tsx';
         } else {
-          filename = `src/component-${Object.keys(files).length}.${lang || 'tsx'}`;
+          filename = `src/generated-module-${Object.keys(files).length}.${lang || 'tsx'}`;
         }
       }
     }
     
-    // Clean up filename (sometimes it catches trailing dots/chars)
-    filename = filename.replace(/[:"']/g, '').trim();
+    // Clean up filename (remove accidental chars from AI output)
+    filename = filename.replace(/[:"'\s*]/g, '').replace(/\.$/, '').trim();
+    if (filename.startsWith('.')) filename = filename.slice(1);
+    if (filename.startsWith('/')) filename = filename.slice(1);
 
     const finalLang = lang || (filename.split('.').pop()?.toLowerCase() || 'tsx');
     const isDeletion = code.includes('// DELETE');

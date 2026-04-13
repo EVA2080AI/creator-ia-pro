@@ -132,20 +132,34 @@ export function useStudioChatAI({
     const hasContext = fileKeys.some(f => f.includes('context') || f.includes('Context'));
     const archType = hasSidebar ? 'Dashboard / Web App' : hasPages ? 'Multi-página' : hasRouter ? 'SPA con Router' : 'Single Page';
 
-    // 4. Curated content snapshot: most important files (prioritizing App, components, types)
-    const PRIORITY_FILES = [
-      activeFile,
-      'src/App.tsx', 'src/main.tsx',
-      'src/components/Navbar.tsx', 'src/components/Sidebar.tsx',
-      'index.css',
-    ].filter(Boolean) as string[];
+    // 4. Curated content snapshot: PRIORITIZE THE ACTIVE FILE AND RELATED CONTEXT
+    // We must ensure the AI sees the file it is actually working on.
+    const toShow = new Set<string>();
+    
+    // Always include active file if it exists
+    if (activeFile && files[activeFile]) toShow.add(activeFile);
+    
+    // Include App.tsx as it's the core orchestrator
+    if (files['src/App.tsx']) toShow.add('src/App.tsx');
 
-    const toShow = [
-      ...PRIORITY_FILES.filter(f => files[f]),
-      ...fileKeys.filter(f => !PRIORITY_FILES.includes(f) && (f.includes('types') || f.includes('hooks'))),
-    ].slice(0, BUDGET.maxSnapshotFiles); // Use tier-based snapshot limit
+    // Add priority structural files
+    ['src/main.tsx', 'index.html', 'package.json'].forEach(f => {
+      if (files[f] && toShow.size < BUDGET.maxSnapshotFiles) toShow.add(f);
+    });
 
-    const contentSnapshots = toShow
+    // Fill remaining slots with types, hooks or alphabetically
+    fileKeys.forEach(f => {
+      if (toShow.size < BUDGET.maxSnapshotFiles && (f.includes('types') || f.includes('hooks') || f.includes('service'))) {
+        toShow.add(f);
+      }
+    });
+
+    // Final fallback: just add files until budget is reached
+    fileKeys.forEach(f => {
+      if (toShow.size < BUDGET.maxSnapshotFiles) toShow.add(f);
+    });
+
+    const contentSnapshots = Array.from(toShow)
       .map(f => `\n// ── ${f} ──\n${files[f].content.slice(0, BUDGET.maxSnapshotChars)}${files[f].content.length > BUDGET.maxSnapshotChars ? '\n// ... (truncado)' : ''}`)
       .join('\n');
 
