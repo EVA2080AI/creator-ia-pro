@@ -159,6 +159,16 @@ export const aiService = {
     return data || {};
   },
 
+  async callSearch(query: string): Promise<any> {
+    const { data, error } = await supabase.functions.invoke<{ results: any[], error?: string }>("search-service", {
+      body: { query },
+    });
+
+    if (error) throw new Error(error.message);
+    if (data?.error) throw new Error(data.error);
+    return data?.results || [];
+  },
+
   async processAction(params: AIActionParams): Promise<AIResponse> {
     const { action, prompt, model, image, tool, node_id } = params;
     const cost = MODEL_COSTS[model] ?? MODEL_COSTS[tool ?? ""] ?? 2;

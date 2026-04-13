@@ -4,10 +4,11 @@ import {
   Cloud, Database, Users, HardDrive, Zap, Activity,
   CheckCircle, AlertCircle, Loader2, ExternalLink,
   Table, RefreshCw, ChevronRight, Plug, ShieldCheck, Mail, CreditCard, Mic,
-  Shield, Globe, Lock, BarChart3, History, Layers, BookOpen, ShoppingBag,
+  Shield, Globe, Lock, BarChart3, History, Layers, BookOpen, ShoppingBag, GitBranch, Github
 } from 'lucide-react';
 import { StudioUsageBar } from './StudioUsageBar';
 import { StudioBilling } from './StudioBilling';
+import { MCPServerManager } from './chat/MCPServerManager';
 
 export interface SupabaseConfig {
   url: string;
@@ -20,10 +21,11 @@ interface StudioCloudProps {
   onConfigChange: (config: SupabaseConfig | null) => void;
 }
 
-type CloudSection = 'overview' | 'database' | 'users' | 'storage' | 'functions' | 'connectors' | 'secrets' | 'security' | 'analytics' | 'audit' | 'knowledge' | 'billing';
+type CloudSection = 'overview' | 'github' | 'database' | 'users' | 'storage' | 'functions' | 'connectors' | 'secrets' | 'security' | 'analytics' | 'audit' | 'knowledge' | 'billing';
 
 const NAV: { id: CloudSection; label: string; icon: React.ElementType }[] = [
   { id: 'overview',   label: 'Overview',       icon: Activity  },
+  { id: 'github',     label: 'GitHub Sync',    icon: GitBranch },
   { id: 'knowledge',  label: 'Knowledge',      icon: BookOpen  },
   { id: 'billing',    label: 'Planes & Créditos', icon: CreditCard },
   { id: 'database',   label: 'Database',        icon: Database  },
@@ -45,6 +47,9 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
   const [tables,    setTables]    = useState<string[]>([]);
   const [errorMsg,  setErrorMsg]  = useState('');
   const [isProvisioning, setIsProvisioning] = useState(false);
+  
+  const [githubToken, setGithubToken] = useState(localStorage.getItem('STUDIO_GITHUB_PAT') || '');
+  const [githubRepo, setGithubRepo] = useState(localStorage.getItem('STUDIO_GITHUB_REPO') || '');
 
   const testConnection = useCallback(async (url: string, anonKey: string) => {
     setStatus('testing');
@@ -301,6 +306,58 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
           </div>
         )}
 
+        {/* ── GITHUB ─────────────────────────────────────────────────── */}
+        {section === 'github' && (
+          <div className="p-4 space-y-4">
+             <div>
+              <h2 className="text-[13px] font-bold text-white/80 mb-0.5">Sincronización con GitHub</h2>
+              <p className="text-[11px] text-white/30 leading-relaxed">
+                Permite a Génesis leer código existente, realizar commits y abrir Pull Requests de forma autónoma.
+              </p>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="text-[10px] font-bold text-white/25 uppercase tracking-widest block mb-1">Personal Access Token (PAT)</label>
+                <input
+                  type="password"
+                  value={githubToken}
+                  onChange={(e) => {
+                    setGithubToken(e.target.value);
+                    localStorage.setItem('STUDIO_GITHUB_PAT', e.target.value);
+                  }}
+                  placeholder="ghp_xxxxxxxxxxxx"
+                  className="w-full text-[12px] text-white placeholder:text-white/15 bg-white/[0.04] border border-white/[0.07] rounded-xl px-3 py-2 outline-none focus:border-white/20 transition-colors font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-white/25 uppercase tracking-widest block mb-1">Repositorio Destino (owner/repo)</label>
+                <input
+                  type="text"
+                  value={githubRepo}
+                  onChange={(e) => {
+                    setGithubRepo(e.target.value);
+                    localStorage.setItem('STUDIO_GITHUB_REPO', e.target.value);
+                  }}
+                  placeholder="tu_usuario/tu_repositorio"
+                  className="w-full text-[12px] text-white placeholder:text-white/15 bg-white/[0.04] border border-white/[0.07] rounded-xl px-3 py-2 outline-none focus:border-white/20 transition-colors font-mono"
+                />
+              </div>
+            </div>
+
+            <button
+               onClick={() => alert("Sincronización activa. Génesis ahora tiene acceso a este repositorio.")}
+               disabled={!githubToken || !githubRepo}
+               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[12px] font-semibold text-white transition-all disabled:opacity-40 active:scale-[0.98]"
+               style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)' }}>
+               <Github className="h-3.5 w-3.5" />
+               Activar Integración
+            </button>
+            <p className="text-[10px] text-white/20 text-center">Tus credenciales se guardan localmente en tu navegador.</p>
+          </div>
+        )}
+
         {/* ── DATABASE ─────────────────────────────────────────────────── */}
         {section === 'database' && isConnected && (
           <div className="p-4 space-y-3">
@@ -434,36 +491,38 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
           </div>
         )}
 
-        {/* ── CONNECTORS ─────────────────────────────────────────────────── */}
+        {/* ── CONNECTORS & MCP ─────────────────────────────────────────────────── */}
         {section === 'connectors' && isConnected && (
-          <div className="p-4 space-y-4">
-            <div>
+          <div className="p-4 space-y-8">
+            <MCPServerManager />
+            
+            <div className="pt-4 border-t border-white/[0.05]">
               <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.25em] mb-1">Conectores de Terceros</h3>
-              <p className="text-[10px] text-white/20">Añade capacidades industriales a tu aplicación</p>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2">
-              {[
-                { id: 'stripe', label: 'Stripe', icon: CreditCard, color: '#6366f1', desc: 'Pagos y suscripciones' },
-                { id: 'resend', label: 'Resend', icon: Mail,       color: '#ffffff', desc: 'Emails transaccionales' },
-                { id: 'eleven', label: 'ElevenLabs', icon: Mic,    color: '#34d399', desc: 'Voz e IA de audio' },
-                { id: 'firecrawl', label: 'Firecrawl', icon: Globe, color: '#f59e0b', desc: 'AI Web Scraping' },
-                { id: 'aws-s3', label: 'AWS S3', icon: HardDrive, color: '#ff9900', desc: 'Cloud Object Storage' },
-                { id: 'shopify', label: 'Shopify', icon: ShoppingBag, color: '#95bf47', desc: 'Ecommerce Sync' },
-              ].map(c => (
-                <div key={c.id} className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${c.color}15`, border: `1px solid ${c.color}25` }}>
-                    <c.icon className="h-4 w-4" style={{ color: c.color }} />
+              <p className="text-[10px] text-white/20 mb-4">Añade capacidades industriales a tu aplicación</p>
+              
+              <div className="grid grid-cols-1 gap-2">
+                {[
+                  { id: 'stripe', label: 'Stripe', icon: CreditCard, color: '#6366f1', desc: 'Pagos y suscripciones' },
+                  { id: 'resend', label: 'Resend', icon: Mail,       color: '#ffffff', desc: 'Emails transaccionales' },
+                  { id: 'eleven', label: 'ElevenLabs', icon: Mic,    color: '#34d399', desc: 'Voz e IA de audio' },
+                  { id: 'firecrawl', label: 'Firecrawl', icon: Globe, color: '#f59e0b', desc: 'AI Web Scraping' },
+                  { id: 'aws-s3', label: 'AWS S3', icon: HardDrive, color: '#ff9900', desc: 'Cloud Object Storage' },
+                  { id: 'shopify', label: 'Shopify', icon: ShoppingBag, color: '#95bf47', desc: 'Ecommerce Sync' },
+                ].map(c => (
+                  <div key={c.id} className="p-3 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${c.color}15`, border: `1px solid ${c.color}25` }}>
+                      <c.icon className="h-4 w-4" style={{ color: c.color }} />
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-[12px] font-bold text-white/80">{c.label}</div>
+                      <div className="text-[10px] text-white/25">{c.desc}</div>
+                    </div>
+                    <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold text-white/40 hover:text-white hover:bg-white/10 transition-all">
+                      Conectar
+                    </button>
                   </div>
-                  <div className="flex-1">
-                    <div className="text-[12px] font-bold text-white/80">{c.label}</div>
-                    <div className="text-[10px] text-white/25">{c.desc}</div>
-                  </div>
-                  <button className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-bold text-white/40 hover:text-white hover:bg-white/10 transition-all">
-                    Conectar
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         )}

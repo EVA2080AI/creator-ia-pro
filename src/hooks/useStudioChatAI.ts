@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 import { aiService } from '@/services/ai-service';
 import { genesisOrchestrator } from '@/services/genesis-orchestrator';
+import { GitHubService } from '@/services/github-service';
+import { mcpService } from '@/services/mcp-service';
 import { generateAutonomousProject } from '@/services/scaffold-service';
 import { detectIntent, processRawResponse, applyPatchToFiles, isResponseTruncated, extractPatchBlocks } from '@/components/studio/chat/utils';
 
@@ -273,7 +275,23 @@ ${contentSnapshots}
 
       const supabaseContext = supabaseConfig ? `\n\nSUPABASE: URL: ${supabaseConfig.url} | Key: ${supabaseConfig.anonKey}. Usa window.supabaseClient.` : '';
       
+      // MCP Context Enrichment
+      const mcpServers = mcpService.getServers().filter(s => s.status === 'connected' && s.tools && s.tools.length > 0);
+      let mcpContext = '';
+      if (mcpServers.length > 0) {
+         mcpContext = `\n\n### 🔌 HERRAMIENTAS MCP (Model Context Protocol) DISPONIBLES:\n`;
+         mcpContext += `Cuentas con las siguientes herramientas remotas. Para usarlas, responde EXACTAMENTE con una etiqueta <mcp> que contenga un JSON: \`<mcp>{"serverId": "ID", "tool": "nombre", "args": {}}</mcp>\`\n`;
+         mcpServers.forEach(server => {
+            mcpContext += `\nServidor: ${server.name} (ID: ${server.id})\nHerramientas:\n`;
+            server.tools!.forEach(tool => {
+               mcpContext += `- ${tool.name}: ${tool.description || ''} (Esquema: ${JSON.stringify(tool.inputSchema || tool.schema || {})})\n`;
+            });
+         });
+      }
+
       let effectiveSystemPrompt = isArchitectRequest ? ARCHITECT_SYSTEM_PROMPT : (isChatModeActive ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM) : CODE_GEN_SYSTEM);
+      effectiveSystemPrompt += mcpContext;
+      
       let userContent: any = prompt + contextBlock;
 
       // Image-to-Code: user uploaded an image to replicate as code
@@ -415,6 +433,241 @@ ${contentSnapshots}
               else if (accumulated.includes('[ENGINEER]') || accumulated.includes('🧠 GENESIS')) { setGenSpecialist('engineer'); onPhaseChange?.('generating', 'engineer'); }
             }
           } catch { /* malformed SSE chunk — skip silently */ }
+        }
+      }
+
+      // ─── PUNTO 2.5: SEARCH DETECTION & EXECUTION ───────────────
+      // If the AI requested a search, intercept it, perform the search, and auto-continue.
+      let searchMatch = accumulated.match(/<search>(.*?)<\/search>/);
+      if (searchMatch && !signal.aborted) {
+        const query = searchMatch[1];
+        setGenSpecialist('engineer');
+        onPhaseChange?.('generating', 'engineer');
+        
+        // Show indicator in UI
+        accumulated += `\n\n> 🔍 **Investigando en vivo:** "${query}"...\n\n`;
+        setStreamChars(accumulated.length);
+        onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
+
+        try {
+           const results = await aiService.callSearch(query);
+           const searchContext = `[SISTEMA - RESULTADOS DE TAVILY SEARCH PARA '${query}']: \n${JSON.stringify(results).slice(0, 4000)}\n\nUsa esta información para completar tu respuesta. No vuelvas a buscar lo mismo.`;
+           
+           const searchMessages = [
+             { role: 'system', content: effectiveSystemPrompt },
+             ...historySlice,
+             { role: 'user', content: userContent },
+             { role: 'assistant', content: accumulated },
+             { role: 'user', content: searchContext }
+           ];
+
+           const sRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
+             method: 'POST',
+             signal,
+             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+             body: JSON.stringify({ provider: 'openrouter', path: 'chat/completions', body: { model: targetModel, messages: searchMessages, stream: true, temperature: 0.3, max_tokens: 15000 } })
+           });
+
+           if (sRes.ok) {
+             const sReader = sRes.body!.getReader();
+             let sBuffer = '';
+             let sDone = false;
+             outerSearch: while (!sDone) {
+               const { done, value } = await sReader.read();
+               if (done) break;
+               sBuffer += decoder.decode(value, { stream: true });
+               const lines = sBuffer.split('\n');
+               sBuffer = lines.pop() ?? '';
+               for (const line of lines) {
+                 if (!line.startsWith('data: ')) continue;
+                 const payload = line.slice(6).trim();
+                 if (payload === '[DONE]') { sDone = true; break outerSearch; }
+                 try {
+                   const parsed = JSON.parse(payload);
+                   const delta = parsed?.choices?.[0]?.delta?.content;
+                   if (typeof delta === 'string') {
+                     accumulated += delta;
+                     setStreamChars(accumulated.length);
+                     onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
+                     streamBufferRef.current = accumulated;
+                   }
+                 } catch { /* skip */ }
+               }
+             }
+           }
+        } catch (searchErr) {
+           console.error("Search failed:", searchErr);
+           accumulated += `\n\n*(Error en la búsqueda: no se encontraron resultados)*\n\n`;
+        }
+      }
+
+      // ─── PUNTO 2.6: GITHUB DETECTION & EXECUTION ───────────────
+      let githubMatch = accumulated.match(/<github>(.*?)<\/github>/s);
+      if (githubMatch && !signal.aborted) {
+        setGenSpecialist('engineer');
+        onPhaseChange?.('generating', 'engineer');
+        
+        let operationResult = "";
+        let parsedOp: any = null;
+
+        try {
+          parsedOp = JSON.parse(githubMatch[1].trim());
+          accumulated += `\n\n> 🐙 **Ejecutando acción en GitHub:** \`${parsedOp.action}\` en \`${parsedOp.path}\`...\n\n`;
+          setStreamChars(accumulated.length);
+          onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
+
+          const token = localStorage.getItem('STUDIO_GITHUB_PAT');
+          const repoPath = localStorage.getItem('STUDIO_GITHUB_REPO');
+
+          if (!token || !repoPath) {
+             throw new Error("No hay token o repositorio configurado. Usa la pestaña Cloud > GitHub Sync.");
+          }
+
+          const gh = new GitHubService({ token });
+          const [owner, repo] = repoPath.split('/');
+
+          if (parsedOp.action === 'read_dir' || parsedOp.action === 'read_file') {
+             const data = await gh.getRepoContents(owner, repo, parsedOp.path);
+             operationResult = JSON.stringify(data);
+          } else if (parsedOp.action === 'commit') {
+             // For simplicity, we create without SHA unless it exists (which requires a prior read to get SHA).
+             // A true implementation needs to fetch the SHA first if the file exists.
+             try {
+                const existing = await gh.getRepoContents(owner, repo, parsedOp.path);
+                const sha = (existing as any)?.sha;
+                const data = await gh.writeFile(owner, repo, parsedOp.path, parsedOp.message || "Update via Genesis", parsedOp.content, "main", sha);
+                operationResult = "Commit exitoso: " + (data as any)?.commit?.html_url;
+             } catch (e: any) {
+                if (e.message.includes('404')) {
+                  const data = await gh.writeFile(owner, repo, parsedOp.path, parsedOp.message || "Create via Genesis", parsedOp.content, "main");
+                  operationResult = "Archivo creado: " + (data as any)?.commit?.html_url;
+                } else throw e;
+             }
+          }
+        } catch (ghErr: any) {
+           console.error("GitHub Action failed:", ghErr);
+           operationResult = `Error ejecutando acción de GitHub: ${ghErr.message}`;
+        }
+
+        try {
+           const ghContext = `[SISTEMA - RESULTADO DE GITHUB API]: \n${operationResult.slice(0, 5000)}\n\nUsa este resultado para continuar tu respuesta.`;
+           const ghMessages = [
+             { role: 'system', content: effectiveSystemPrompt },
+             ...historySlice,
+             { role: 'user', content: userContent },
+             { role: 'assistant', content: accumulated },
+             { role: 'user', content: ghContext }
+           ];
+
+           const sRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
+             method: 'POST',
+             signal,
+             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+             body: JSON.stringify({ provider: 'openrouter', path: 'chat/completions', body: { model: targetModel, messages: ghMessages, stream: true, temperature: 0.3, max_tokens: 15000 } })
+           });
+
+           if (sRes.ok) {
+             const sReader = sRes.body!.getReader();
+             let sBuffer = '';
+             let sDone = false;
+             outerGh: while (!sDone) {
+               const { done, value } = await sReader.read();
+               if (done) break;
+               sBuffer += decoder.decode(value, { stream: true });
+               const lines = sBuffer.split('\n');
+               sBuffer = lines.pop() ?? '';
+               for (const line of lines) {
+                 if (!line.startsWith('data: ')) continue;
+                 const payload = line.slice(6).trim();
+                 if (payload === '[DONE]') { sDone = true; break outerGh; }
+                 try {
+                   const parsed = JSON.parse(payload);
+                   const delta = parsed?.choices?.[0]?.delta?.content;
+                   if (typeof delta === 'string') {
+                     accumulated += delta;
+                     setStreamChars(accumulated.length);
+                     onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
+                     streamBufferRef.current = accumulated;
+                   }
+                 } catch { /* skip */ }
+               }
+             }
+           }
+        } catch (continuationErr) {
+           console.error("GH continuation failed:", continuationErr);
+           accumulated += `\n\n*(Error al continuar después de GitHub)*\n\n`;
+        }
+      }
+
+      // ─── PUNTO 2.7: MCP EXTENSION DETECTION ───────────────
+      let mcpMatch = accumulated.match(/<mcp>(.*?)<\/mcp>/s);
+      if (mcpMatch && !signal.aborted) {
+        setGenSpecialist('engineer');
+        onPhaseChange?.('generating', 'engineer');
+        
+        let mcpResult = "";
+        let parsedMcp: any = null;
+
+        try {
+          parsedMcp = JSON.parse(mcpMatch[1].trim());
+          accumulated += `\n\n> 🔌 **Llamando herramienta MCP remota:** \`${parsedMcp.tool}\`...\n\n`;
+          setStreamChars(accumulated.length);
+          onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
+
+          const res = await mcpService.callTool(parsedMcp.serverId, parsedMcp.tool, parsedMcp.args || {});
+          mcpResult = JSON.stringify(res);
+        } catch (mcpErr: any) {
+           console.error("MCP call failed:", mcpErr);
+           mcpResult = `Error MCP: ${mcpErr.message}`;
+        }
+
+        try {
+           const mcpCtx = `[SISTEMA - RESULTADO DE HERRAMIENTA MCP]: \n${mcpResult.slice(0, 5000)}\n\nUsa este resultado para continuar tu respuesta.`;
+           const mcpMsgs = [
+             { role: 'system', content: effectiveSystemPrompt },
+             ...historySlice,
+             { role: 'user', content: userContent },
+             { role: 'assistant', content: accumulated },
+             { role: 'user', content: mcpCtx }
+           ];
+
+           const sRes = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
+             method: 'POST',
+             signal,
+             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+             body: JSON.stringify({ provider: 'openrouter', path: 'chat/completions', body: { model: targetModel, messages: mcpMsgs, stream: true, temperature: 0.3, max_tokens: 15000 } })
+           });
+
+           if (sRes.ok) {
+             const sReader = sRes.body!.getReader();
+             let sBuffer = '';
+             let sDone = false;
+             while (!sDone) {
+               const { done, value } = await sReader.read();
+               if (done) break;
+               sBuffer += decoder.decode(value, { stream: true });
+               const lines = sBuffer.split('\n');
+               sBuffer = lines.pop() ?? '';
+               for (const line of lines) {
+                 if (!line.startsWith('data: ')) continue;
+                 const payload = line.slice(6).trim();
+                 if (payload === '[DONE]') { sDone = true; break; }
+                 try {
+                   const parsed = JSON.parse(payload);
+                   const delta = parsed?.choices?.[0]?.delta?.content;
+                   if (typeof delta === 'string') {
+                     accumulated += delta;
+                     setStreamChars(accumulated.length);
+                     onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
+                     streamBufferRef.current = accumulated;
+                   }
+                 } catch { /* skip */ }
+               }
+             }
+           }
+        } catch (continuationErr) {
+           console.error("MCP continuation failed:", continuationErr);
+           accumulated += `\n\n*(Error al continuar después de MCP)*\n\n`;
         }
       }
 
