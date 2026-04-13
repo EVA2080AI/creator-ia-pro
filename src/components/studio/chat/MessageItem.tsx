@@ -7,6 +7,21 @@ import { cn } from '@/lib/utils';
 import { renderMarkdown } from './renderer';
 import type { Message } from './types';
 
+/**
+ * Strips all triple-backtick code blocks from a message.
+ * Used for 'code' type messages so only the explanation prose is shown in chat.
+ * The actual code is already applied to the preview — no need to dump it in the conversation.
+ */
+function stripCodeBlocks(text: string): string {
+  // Remove fenced code blocks (```lang ... ```)
+  let stripped = text.replace(/```[\w]*\n?[\s\S]*?```/g, '').trim();
+  // Collapse multiple blank lines into one
+  stripped = stripped.replace(/\n{3,}/g, '\n\n');
+  return stripped || '✅ Archivos generados y aplicados al preview.';
+}
+
+
+
 interface MessageItemProps {
   msg: Message;
   persona: 'genesis' | 'antigravity';
@@ -194,7 +209,15 @@ export function MessageItem({
           {/* ── Content ─── */}
           <div
             className="result-prose relative z-10 leading-relaxed text-[13px] text-zinc-700"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(msg.content) }}
+            dangerouslySetInnerHTML={{ 
+              __html: renderMarkdown(
+                // For code-type messages, show only prose (strip raw code blocks)
+                // so the chat stays clean — the code is already in the preview.
+                msg.type === 'code'
+                  ? stripCodeBlocks(msg.content)
+                  : msg.content
+              ) 
+            }}
           />
 
           {/* ── Files accordion ─── */}
