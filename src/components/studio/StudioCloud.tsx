@@ -21,10 +21,11 @@ interface StudioCloudProps {
   onConfigChange: (config: SupabaseConfig | null) => void;
 }
 
-type CloudSection = 'overview' | 'github' | 'database' | 'users' | 'storage' | 'functions' | 'connectors' | 'secrets' | 'security' | 'analytics' | 'audit' | 'knowledge' | 'billing';
+type CloudSection = 'overview' | 'deployment' | 'github' | 'database' | 'users' | 'storage' | 'functions' | 'connectors' | 'secrets' | 'security' | 'analytics' | 'audit' | 'knowledge' | 'billing';
 
 const NAV: { id: CloudSection; label: string; icon: React.ElementType }[] = [
   { id: 'overview',   label: 'Overview',       icon: Activity  },
+  { id: 'deployment', label: 'Deployment',     icon: Globe     },
   { id: 'github',     label: 'GitHub Sync',    icon: GitBranch },
   { id: 'knowledge',  label: 'Knowledge',      icon: BookOpen  },
   { id: 'billing',    label: 'Planes & Créditos', icon: CreditCard },
@@ -303,6 +304,61 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                 </button>
               </>
             )}
+          </div>
+        )}
+
+        {/* ── DEPLOYMENT ─────────────────────────────────────────────────── */}
+        {section === 'deployment' && (
+          <div className="p-4 space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-[13px] font-bold text-white/80 mb-0.5">Deployment Pipeline</h2>
+                <p className="text-[11px] text-white/30 leading-relaxed">Publica tu orquestación en infraestructura global</p>
+              </div>
+              <div className="flex items-center gap-2 px-2 py-1 rounded-full bg-primary/10 border border-primary/20">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-[9px] font-black text-primary uppercase">Ready for Deploy</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              {[
+                { id: 'vercel', label: 'Vercel', desc: 'Deploy instantáneo a Edge Network', icon: Zap, color: '#ffffff', status: 'Inactivo' },
+                { id: 'netlify', label: 'Netlify', desc: 'Hosting estático optimizado', icon: Layers, color: '#32e6e2', status: 'Inactivo' },
+                { id: 'vps', label: 'Custom VPS (Docker)', desc: 'Control total de servidor', icon: HardDrive, color: '#9d9d9d', status: 'Premium Only' },
+              ].map(platform => (
+                <div key={platform.id} className="p-4 rounded-3xl bg-white/[0.03] border border-white/[0.06] hover:border-white/10 transition-all group">
+                   <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl flex items-center justify-center" style={{ background: `${platform.color}10`, border: `1px solid ${platform.color}15` }}>
+                        <platform.icon className="h-5 w-5" style={{ color: platform.color }} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="text-[14px] font-black text-white/90 uppercase tracking-tighter italic">{platform.label}</div>
+                        <div className="text-[11px] text-white/25">{platform.desc}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-[9px] font-bold text-white/10 uppercase mb-2">{platform.status}</div>
+                        <button className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 transition-all">
+                          Configurar
+                        </button>
+                      </div>
+                   </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-6 rounded-[2.5rem] bg-gradient-to-br from-primary/5 to-purple-500/5 border border-white/5 relative overflow-hidden">
+               <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+                  <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <Globe className="h-7 w-7 text-primary animate-spin-slow" />
+                  </div>
+                  <h3 className="text-lg font-black text-white italic uppercase tracking-tighter">One-Click Launch</h3>
+                  <p className="text-[11px] text-white/30 max-w-[240px]">Envía tu código directamente a un dominio .com en menos de 60 segundos.</p>
+                  <button className="w-full py-4 rounded-2xl bg-white text-black text-[11px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-2xl">
+                    Comenzar Despliegue Global
+                  </button>
+               </div>
+            </div>
           </div>
         )}
 

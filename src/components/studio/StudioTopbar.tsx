@@ -73,18 +73,25 @@ export function StudioTopbar({
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center gap-1.5">
-        <button onClick={onGithubSync} className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all" title="GitHub">
-          <Github className="w-4 h-4" />
-        </button>
-        <button onClick={onShare} className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all" title="Compartir">
-          <Share2 className="w-3.5 h-3.5" />
-        </button>
-        <button onClick={() => navigate('/pricing')} className="h-8 px-3 rounded-lg bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider hover:bg-primary/20 transition-all">
-          Pro
-        </button>
-        <button onClick={onPublish} className="h-8 px-4 rounded-lg bg-zinc-900 text-white text-[10px] font-bold uppercase tracking-wider hover:bg-black transition-all">
-          Publish
+      <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 bg-zinc-50 border border-zinc-100 rounded-xl p-0.5 mr-2">
+          <button onClick={onGithubSync} className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-all" title="GitHub">
+            <Github className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={onShare} className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-all" title="Compartir">
+            <Share2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <button 
+          onClick={onPublish} 
+          className="h-9 px-4 rounded-xl bg-zinc-900 text-white flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-95 group relative overflow-hidden shadow-xl"
+        >
+          {/* Subtle pulse for the "Live" vibe */}
+          <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse ring-2 ring-emerald-400/20" />
+          <span className="text-[10px] font-black uppercase tracking-[0.05em] italic">Push to Cloud</span>
+          
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
         </button>
       </div>
     </header>

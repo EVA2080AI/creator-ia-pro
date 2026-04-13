@@ -119,37 +119,63 @@ export function StudioPreview({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FAFAFA]/80 backdrop-blur-sm"
+              className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FAFAFA]/95 backdrop-blur-md overflow-hidden"
             >
+              {/* INDUSTRIAL SCANNING BEAM */}
+              <motion.div 
+                className="absolute inset-0 z-0 pointer-events-none"
+                initial={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(var(--primary-rgb), 0.1) 50%, transparent 100%)', y: '-100%' }}
+                animate={{ y: '100%' }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              />
+
               <motion.div 
                 initial={{ y: 20, opacity: 0, scale: 0.9 }}
                 animate={{ y: 0, opacity: 1, scale: 1 }}
                 exit={{ y: -20, opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.5, type: 'spring', bounce: 0.4 }}
-                className="relative z-10 flex flex-col items-center max-w-sm w-full bg-white p-8 rounded-3xl shadow-2xl border border-zinc-100"
+                className="relative z-10 flex flex-col items-center max-w-sm w-full bg-white p-10 rounded-[3rem] shadow-2xl border border-zinc-100"
               >
-                <div className="w-16 h-16 bg-zinc-900 rounded-2xl shadow-xl shadow-zinc-200 flex items-center justify-center mb-6">
-                  <Terminal className="w-8 h-8 text-white animate-pulse" />
+                <div className="w-20 h-20 bg-zinc-900 rounded-[1.75rem] shadow-2xl shadow-zinc-200 flex items-center justify-center mb-8 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-500/20 opacity-50 group-hover:opacity-100 transition-opacity" />
+                  <Terminal className="w-10 h-10 text-white relative z-10" />
                 </div>
-                <h2 className="text-xl font-bold tracking-tight text-zinc-900 mb-2">
-                  Construyendo Visión...
-                </h2>
-                <p className="text-sm text-zinc-500 mb-6 text-center leading-relaxed">
-                  Génesis Engine está ensamblando y orquestando la arquitectura solicitada.
-                </p>
-                <div className="w-full bg-zinc-100 h-1.5 rounded-full overflow-hidden">
-                   <motion.div 
-                     className="h-full bg-zinc-900"
-                     animate={{ width: ["0%", "100%"] }}
-                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                   />
+                
+                <div className="text-center space-y-1 mb-8">
+                  <h2 className="text-2xl font-black italic tracking-tighter text-zinc-900 uppercase">
+                    Architecting
+                  </h2>
+                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">
+                    Genesis v19.5 Engine
+                  </p>
                 </div>
-                {streamChars > 0 && (
-                  <div className="font-mono text-[10px] text-zinc-400 mt-4 uppercase tracking-wider font-semibold">
-                    {streamChars} Bytes Procesados
+
+                <div className="w-full space-y-4">
+                  <div className="w-full bg-zinc-100 h-2 rounded-full overflow-hidden p-0.5">
+                    <motion.div 
+                      className="h-full bg-zinc-900 rounded-full"
+                      animate={{ width: ["0%", "100%"] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
                   </div>
-                )}
+                  
+                  <div className="flex justify-between items-center px-1">
+                    <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest">Ensamblando Capas</span>
+                    {streamChars > 0 && (
+                      <span className="font-mono text-[10px] text-primary font-black">
+                        {streamChars.toLocaleString()} BYTES
+                      </span>
+                    )}
+                  </div>
+                </div>
               </motion.div>
+
+              {/* FLOATING TEXT DECORATION */}
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-20 flex gap-12">
+                {['SEQUENTIAL_BUILD', 'DATA_PERSISTENCE', 'MODEL_ORCHESTRATION'].map(t => (
+                  <span key={t} className="text-[8px] font-black tracking-[0.4em] text-zinc-400">{t}</span>
+                ))}
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
