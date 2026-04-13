@@ -6,7 +6,7 @@ import {
   useSandpack,
 } from '@codesandbox/sandpack-react';
 import {
-  Zap, Bot, AlertCircle, X, TerminalSquare, Loader2
+  Zap, Bot, AlertCircle, X, Terminal, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -119,7 +119,7 @@ export function StudioPreview({
                 className="relative z-10 flex flex-col items-center max-w-sm w-full bg-white p-8 rounded-3xl shadow-2xl border border-zinc-100"
               >
                 <div className="w-16 h-16 bg-zinc-900 rounded-2xl shadow-xl shadow-zinc-200 flex items-center justify-center mb-6">
-                  <TerminalSquare className="w-8 h-8 text-white animate-pulse" />
+                  <Terminal className="w-8 h-8 text-white animate-pulse" />
                 </div>
                 <h2 className="text-xl font-bold tracking-tight text-zinc-900 mb-2">
                   Construyendo Visión...
