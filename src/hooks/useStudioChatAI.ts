@@ -16,7 +16,8 @@ import {
   processFileOperations,
   wantsProjectReset,
   detectMissingDependencies,
-  extractDeleteCommands
+  extractDeleteCommands,
+  injectDependenciesIntoPackageJson
 } from '@/components/studio/chat/utils';
 
 import {
@@ -865,14 +866,17 @@ ${contentSnapshots}
           fileOps.newFiles.length > 0 ? `📄 Nuevos: ${fileOps.newFiles.join(', ')}` : ''
         ].filter(Boolean).join('\n');
 
+        // Autonomous dependency injection
+        const finalFiles = injectDependenciesIntoPackageJson(fileOps.files, detectedDeps);
+
         return {
-          files: fileOps.files,
+          files: finalFiles,
           explanation: opsSummary || accumulated.replace(/```[a-z]*[\s\S]*?```/g, '').trim() || 'Cambios aplicados.',
           isChatOnly: false,
           stack: ['React', 'TypeScript'],
           deps: detectedDeps,
           suggestions: detectedDeps.length > 0
-            ? [`Instalar dependencias: ${detectedDeps.join(', ')}`]
+            ? [`📦 Instaladas automáticamente: ${detectedDeps.join(', ')}`]
             : []
         };
       }
@@ -886,14 +890,17 @@ ${contentSnapshots}
         const mergedFiles = { ...projectFiles, ...finalResult.files };
         const detectedDeps = detectMissingDependencies(mergedFiles);
         
+        // Autonomous dependency injection
+        const finalFiles = injectDependenciesIntoPackageJson(mergedFiles, detectedDeps);
+        
         return {
           ...finalResult,
-          files: mergedFiles, // Return the full merged state
+          files: finalFiles, // Return the full merged state with auto-injected deps
           deps: detectedDeps,
           suggestions: detectedDeps.length > 0
             ? [
                 ...(finalResult.suggestions || []),
-                `📦 Instalar dependencias detectadas: ${detectedDeps.join(', ')}`
+                `📦 Instaladas automáticamente: ${detectedDeps.join(', ')}`
               ]
             : finalResult.suggestions
         };

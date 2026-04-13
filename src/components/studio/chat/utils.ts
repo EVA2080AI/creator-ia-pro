@@ -535,6 +535,13 @@ export function detectMissingDependencies(
     'zod': 'zod',
     'react-hook-form': 'react-hook-form',
     '@hookform/resolvers': '@hookform/resolvers',
+    'lucide': 'lucide-react',
+    'motion': 'framer-motion',
+    'chart.js': 'chart.js',
+    'react-chartjs-2': 'react-chartjs-2',
+    'canvas-confetti': 'canvas-confetti',
+    'react-confetti': 'react-confetti',
+    'lucide-react/dist/esm/icons': 'lucide-react'
   };
 
   for (const file of Object.values(files)) {
@@ -562,4 +569,58 @@ export function detectMissingDependencies(
   }
 
   return Array.from(deps);
+}
+
+/**
+ * Autonomously inject missing dependencies into package.json
+ */
+export function injectDependenciesIntoPackageJson(
+  files: Record<string, StudioFile>,
+  dependencies: string[]
+): Record<string, StudioFile> {
+  if (!dependencies || dependencies.length === 0) return files;
+
+  const result = { ...files };
+  
+  // Find or create package.json
+  const pkgFileKey = Object.keys(result).find(k => k.toLowerCase() === 'package.json') || 'package.json';
+  const pkgFile = result[pkgFileKey] || { language: 'json', content: '{}' };
+  
+  let pkgJson: any;
+  try {
+    pkgJson = JSON.parse(pkgFile.content);
+  } catch (e) {
+    pkgJson = {};
+  }
+
+  if (!pkgJson.dependencies) pkgJson.dependencies = {};
+  
+  const pkgVersions: Record<string, string> = {
+    'lucide-react': '^0.468.0',
+    'framer-motion': '^11.0.0',
+    'react-router-dom': '^6.0.0',
+    'recharts': '^2.0.0',
+    'zustand': '^4.0.0',
+    'axios': '^1.0.0',
+    'clsx': '^2.0.0',
+    'tailwind-merge': '^2.0.0'
+  };
+
+  let changed = false;
+  dependencies.forEach(dep => {
+    if (!pkgJson.dependencies[dep] && (!pkgJson.devDependencies || !pkgJson.devDependencies[dep])) {
+      pkgJson.dependencies[dep] = pkgVersions[dep] || 'latest';
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    result[pkgFileKey] = {
+      ...pkgFile,
+      language: 'json',
+      content: JSON.stringify(pkgJson, null, 2)
+    };
+  }
+
+  return result;
 }
