@@ -403,6 +403,7 @@ ${contentSnapshots}
       let accumulated = '';
       let buffer = '';
       let isDone = false;
+      let lastUpdateTime = 0;
 
       outerLoop: while (!isDone) {
         const { done, value } = await reader.read();
@@ -420,17 +421,23 @@ ${contentSnapshots}
             const delta = parsed?.choices?.[0]?.delta?.content;
             if (typeof delta === 'string') {
               accumulated += delta;
-              setStreamChars(accumulated.length);
-              onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
-              setGenPhase('streaming');
               streamBufferRef.current = accumulated;
               
-              // Specialist detection from stream markers
-              if (accumulated.includes('[UX_ENGINE]') || accumulated.includes('🧭 UX')) { setGenSpecialist('ux'); onPhaseChange?.('generating', 'ux'); }
-              else if (accumulated.includes('[FRONTEND_DEV]') || accumulated.includes('🎨 UI')) { setGenSpecialist('frontend'); onPhaseChange?.('generating', 'frontend'); }
-              else if (accumulated.includes('[BACKEND_DEV]') || accumulated.includes('⚙️ BE')) { setGenSpecialist('backend'); onPhaseChange?.('generating', 'backend'); }
-              else if (accumulated.includes('[ARCHITECT]') || accumulated.includes('🏗️ ESTRATEGA')) { setGenSpecialist('architect'); onPhaseChange?.('generating', 'architect'); }
-              else if (accumulated.includes('[ENGINEER]') || accumulated.includes('🧠 GENESIS')) { setGenSpecialist('engineer'); onPhaseChange?.('generating', 'engineer'); }
+              const now = Date.now();
+              if (!lastUpdateTime || now - lastUpdateTime > 50) {
+                 setStreamChars(accumulated.length);
+                 onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
+                 setGenPhase('streaming');
+                 lastUpdateTime = now;
+                 
+                 // Specialist detection from stream markers (check only recent tail)
+                 const tail = accumulated.slice(-200);
+                 if (tail.includes('[UX_ENGINE]') || tail.includes('🧭 UX')) { setGenSpecialist('ux'); onPhaseChange?.('generating', 'ux'); }
+                 else if (tail.includes('[FRONTEND_DEV]') || tail.includes('🎨 UI')) { setGenSpecialist('frontend'); onPhaseChange?.('generating', 'frontend'); }
+                 else if (tail.includes('[BACKEND_DEV]') || tail.includes('⚙️ BE')) { setGenSpecialist('backend'); onPhaseChange?.('generating', 'backend'); }
+                 else if (tail.includes('[ARCHITECT]') || tail.includes('🏗️ ESTRATEGA')) { setGenSpecialist('architect'); onPhaseChange?.('generating', 'architect'); }
+                 else if (tail.includes('[ENGINEER]') || tail.includes('🧠 GENESIS')) { setGenSpecialist('engineer'); onPhaseChange?.('generating', 'engineer'); }
+              }
             }
           } catch { /* malformed SSE chunk — skip silently */ }
         }
@@ -487,9 +494,13 @@ ${contentSnapshots}
                    const delta = parsed?.choices?.[0]?.delta?.content;
                    if (typeof delta === 'string') {
                      accumulated += delta;
-                     setStreamChars(accumulated.length);
-                     onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
                      streamBufferRef.current = accumulated;
+                     const now = Date.now();
+                     if (now - lastUpdateTime > 50) {
+                        setStreamChars(accumulated.length);
+                        onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
+                        lastUpdateTime = now;
+                     }
                    }
                  } catch { /* skip */ }
                }
@@ -710,9 +721,13 @@ ${contentSnapshots}
                 const delta = parsed?.choices?.[0]?.delta?.content;
                 if (typeof delta === 'string') {
                   accumulated += delta;
-                  setStreamChars(accumulated.length);
-                  onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
                   streamBufferRef.current = accumulated;
+                  const now = Date.now();
+                  if (now - lastUpdateTime > 50) {
+                     setStreamChars(accumulated.length);
+                     onStreamCharsChange?.(accumulated.length, accumulated.slice(-800));
+                     lastUpdateTime = now;
+                  }
                 }
               } catch { /* skip */ }
             }
