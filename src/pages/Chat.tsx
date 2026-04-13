@@ -270,109 +270,159 @@ function WelcomeScreen({
           </div>
         </div>
 
-        {/* Bottom Floating Panel */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center px-4 w-full h-[240px]">
-          <div className="w-full max-w-5xl rounded-t-[36px] overflow-hidden flex flex-col relative z-30" 
-            style={{ background: '#ffffff', borderTop: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 -20px 60px rgba(0,0,0,0.1)' }}>
+        {/* Bottom Floating Panel — Redesigned with Secondary Sidebar UX */}
+        <div className="absolute bottom-0 left-0 right-0 flex justify-center px-4 w-full h-[320px]">
+          <div className="w-full max-w-6xl rounded-t-[40px] overflow-hidden flex relative z-30" 
+            style={{ 
+              background: '#ffffff', 
+              borderTop: '1px solid rgba(0,0,0,0.06)', 
+              boxShadow: '0 -30px 80px rgba(0,0,0,0.12)' 
+            }}>
 
-            {/* Tabs Header */}
-            <div className="flex items-center justify-between px-12 pt-10 pb-4 shrink-0">
-              <div className="flex items-center gap-8">
-                {(['projects', 'recents', 'templates'] as WelcomeTab[]).map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className="text-[14px] font-bold transition-all relative pb-2 uppercase tracking-widest"
-                    style={activeTab === tab ? { color: 'hsl(var(--primary))' } : { color: 'hsl(var(--text-secondary))' }}
-                  >
-                    {tab === 'projects' ? 'Mis proyectos' : tab === 'recents' ? 'Recientes' : 'Plantillas'}
-                    {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary rounded-full shadow-[0_0_8px_hsl(var(--primary)/0.4)]" />}
-                  </button>
-                ))}
-              </div>
-              <button 
-                onClick={() => document.getElementById('welcome-folder-input')?.click()}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-xl border border-zinc-200 bg-white text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50 transition-all text-[11px] font-black uppercase tracking-widest shadow-sm hover:shadow-md"
-              >
-                <UploadCloud className="w-3.5 h-3.5 text-primary" />
-                Importar Carpeta
-              </button>
-            </div>
-
-            {/* Tab content area */}
-            <div className="px-12 py-4 flex-1 overflow-y-auto mb-4 custom-scrollbar">
-              {activeTab === 'projects' && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {filteredProjects.map(p => (
-                    <button key={p.id} onClick={() => onSelectProject(p)}
-                      className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm group relative">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-                        <Code2 className="h-4 w-4 text-primary" />
-                      </div>
-                      <p className="text-[13px] font-bold text-zinc-800 group-hover:text-zinc-900 truncate mt-1">{p.name}</p>
-                      <Trash2 
-                        className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all" 
-                        onClick={(e) => onDeleteProject(p.id, e)}
-                      />
-                    </button>
-                  ))}
-                  {filteredProjects.length === 0 && (
-                    <div className="col-span-full flex flex-col items-center gap-3 py-6">
-                      <span className="text-4xl">✨</span>
-                      <p className="text-[13px] text-zinc-500 text-center">Escribe un prompt arriba para crear tu primer proyecto</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              {activeTab === 'recents' && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {[...projects]
-                    .sort((a, b) => new Date(b.updated_at ?? b.created_at ?? 0).getTime() - new Date(a.updated_at ?? a.created_at ?? 0).getTime())
-                    .slice(0, 10)
-                    .map(p => (
-                      <button key={p.id} onClick={() => onSelectProject(p)}
-                        className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm group relative">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-                          <Clock className="h-4 w-4 text-primary" />
-                        </div>
-                        <p className="text-[13px] font-bold text-zinc-800 group-hover:text-zinc-900 truncate mt-1">{p.name}</p>
-                        <p className="text-[10px] text-zinc-500">
-                          {new Date(p.updated_at ?? p.created_at ?? Date.now()).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
-                        </p>
-                        <Trash2 
-                          className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all" 
-                          onClick={(e) => onDeleteProject(p.id, e)}
-                        />
-                      </button>
-                    ))
-                  }
-                  {projects.length === 0 && (
-                    <div className="col-span-full flex flex-col items-center gap-3 py-6">
-                      <span className="text-4xl">🕐</span>
-                      <p className="text-[13px] text-zinc-500">Tus proyectos recientes aparecerán aquí</p>
-                    </div>
-                  )}
-                </div>
-              )}
-              {activeTab === 'templates' && (
-                <div className="space-y-4">
-                  {/* Template Search + Category Filter */}
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
-                      <input
-                        value={templateSearch}
-                        onChange={e => setTemplateSearch(e.target.value)}
-                        placeholder="Buscar arquitectura..."
-                        className="w-full pl-9 pr-4 py-2 text-[12px] rounded-xl border border-zinc-200 bg-zinc-50 focus:outline-none focus:border-primary/40 font-medium text-zinc-700 placeholder:text-zinc-400"
-                      />
-                    </div>
-                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {/* Side Navigation Sidebar */}
+            <aside className="w-[200px] border-r border-zinc-100 bg-zinc-50/50 flex flex-col pt-10 px-4 shrink-0">
+               <div className="px-2 mb-6">
+                 <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-none">Navegación</h3>
+               </div>
+               
+               <nav className="space-y-1.5">
+                  {[
+                    { id: 'projects', label: 'Mis proyectos', icon: FolderOpen },
+                    { id: 'recents', label: 'Recientes', icon: Clock },
+                    { id: 'templates', label: 'Plantillas', icon: LayoutTemplate }
+                  ].map(tab => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+                    return (
                       <button
-                        onClick={() => setTemplateCategory('all')}
-                        className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border ${
-                          templateCategory === 'all'
-                            ? 'bg-zinc-900 text-white border-zinc-900'
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id as WelcomeTab)}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all relative group ${
+                          isActive ? 'bg-primary/10 text-primary shadow-sm' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-600'}`} />
+                        <span className="text-[12.5px] font-bold tracking-tight">{tab.label}</span>
+                        {isActive && (
+                          <motion.div 
+                            layoutId="nav-active" 
+                            className="absolute left-[-16px] w-[3px] h-5 bg-primary rounded-r-full" 
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
+               </nav>
+
+               <div className="mt-auto px-2 pb-6">
+                  <div className="bg-zinc-100/50 rounded-xl p-3 border border-zinc-200/50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      <p className="text-[9px] font-black text-zinc-500 tracking-wider uppercase">Genesis Pro</p>
+                    </div>
+                    <p className="text-[8.5px] text-zinc-400 leading-tight">IA Generadora Activa</p>
+                  </div>
+               </div>
+            </aside>
+
+            {/* Main Content Area */}
+            <main className="flex-1 flex flex-col min-w-0 bg-white">
+               {/* Action Header */}
+               <div className="flex items-center justify-between px-10 pt-10 pb-6 shrink-0">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-[18px] font-black text-zinc-900 tracking-tight leading-none">
+                      {activeTab === 'projects' ? 'Mis Proyectos' : activeTab === 'recents' ? 'Recientes' : 'Plantillas'}
+                    </h2>
+                    <div className="px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-500 text-[9px] font-black uppercase tracking-widest shrink-0">
+                      {activeTab === 'projects' ? filteredProjects.length : activeTab === 'recents' ? projects.length : GENESIS_TEMPLATES.length}
+                    </div>
+                  </div>
+                  
+                  <button 
+                    onClick={() => document.getElementById('welcome-folder-input')?.click()}
+                    className="flex items-center gap-2 px-4 h-9 rounded-2xl bg-zinc-900 text-white hover:bg-black transition-all text-[10px] font-black uppercase tracking-widest shadow-lg shadow-zinc-900/20 active:scale-95"
+                  >
+                    <UploadCloud className="w-3.5 h-3.5 text-primary" />
+                    Importar Proyecto
+                  </button>
+               </div>
+
+               {/* Tab content area */}
+               <div className="px-10 pb-10 flex-1 overflow-y-auto custom-scrollbar">
+                  {activeTab === 'projects' && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                      {filteredProjects.map(p => (
+                        <button key={p.id} onClick={() => onSelectProject(p)}
+                          className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm group relative">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
+                            <Code2 className="h-4 w-4 text-primary" />
+                          </div>
+                          <p className="text-[12px] font-bold text-zinc-700 group-hover:text-zinc-900 truncate mt-1">{p.name}</p>
+                          <Trash2 
+                            className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all" 
+                            onClick={(e) => onDeleteProject(p.id, e)}
+                          />
+                        </button>
+                      ))}
+                      {filteredProjects.length === 0 && (
+                        <div className="col-span-full flex flex-col items-center gap-3 py-10 opacity-40">
+                          <Plus className="h-8 w-8 text-zinc-300" />
+                          <p className="text-[12px] text-zinc-500 font-medium text-center">No hay proyectos que coincidan</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === 'recents' && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                      {[...projects]
+                        .sort((a, b) => new Date(b.updated_at ?? b.created_at ?? 0).getTime() - new Date(a.updated_at ?? a.created_at ?? 0).getTime())
+                        .slice(0, 10)
+                        .map(p => (
+                          <button key={p.id} onClick={() => onSelectProject(p)}
+                            className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm group relative">
+                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
+                              <Clock className="h-4 w-4 text-primary" />
+                            </div>
+                            <p className="text-[12px] font-bold text-zinc-700 group-hover:text-zinc-900 truncate mt-1">{p.name}</p>
+                            <p className="text-[10px] text-zinc-400 font-medium">
+                              {new Date(p.updated_at ?? p.created_at ?? Date.now()).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                            </p>
+                            <Trash2 
+                              className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all" 
+                              onClick={(e) => onDeleteProject(p.id, e)}
+                            />
+                          </button>
+                        ))
+                      }
+                      {projects.length === 0 && (
+                        <div className="col-span-full flex flex-col items-center gap-3 py-6">
+                          <span className="text-4xl">🕒</span>
+                          <p className="text-[13px] text-zinc-500">Tus proyectos recientes aparecerán aquí</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeTab === 'templates' && (
+                    <div className="space-y-4">
+                      {/* Template Search + Category Filter */}
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="relative flex-1">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+                          <input
+                            value={templateSearch}
+                            onChange={e => setTemplateSearch(e.target.value)}
+                            placeholder="Buscar arquitectura..."
+                            className="w-full pl-9 pr-4 py-2 text-[12px] rounded-xl border border-zinc-200 bg-zinc-50 focus:outline-none focus:border-primary/40 font-medium text-zinc-700 placeholder:text-zinc-400"
+                          />
+                        </div>
+                        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                          <button
+                            onClick={() => setTemplateCategory('all')}
+                            className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border ${
+                              templateCategory === 'all'
+                                ? 'bg-zinc-900 text-white border-zinc-900'
                             : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
                         }`}
                       >
