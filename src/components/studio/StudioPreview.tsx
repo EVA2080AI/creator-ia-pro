@@ -55,10 +55,18 @@ export function StudioPreview({
 
   // When files change from generating or manual edits, reset status
   useEffect(() => {
-    if (!isGenerating && JSON.stringify(prevFilesRef.current) !== JSON.stringify(files)) {
-      prevFilesRef.current = files;
-      setSandpackKey(k => k + 1);
-      setRefreshKey(r => r + 1);
+    if (!isGenerating) {
+      // Re-calculate hash to avoid unnecessary refreshes, but ensure we refresh on generation end
+      const currentFilesHash = JSON.stringify(files);
+      if (prevFilesRef.current !== currentFilesHash) {
+        prevFilesRef.current = currentFilesHash;
+        setSandpackKey(k => k + 1);
+        setRefreshKey(r => r + 1);
+        setCompilationStatus('compiling');
+      }
+    } else {
+      // While generating, we might want to keep status as compiling 
+      // but avoid constant sandpackKey resets to prevent flickering
       setCompilationStatus('compiling');
     }
   }, [isGenerating, files]);

@@ -156,7 +156,22 @@ export function toSandpackFiles(
     if (pages.length > 1) {
       result['/src/App.tsx'] = { code: generateRouterWrapper(pages, files), active: true };
     } else if (!result['/src/App.tsx'] && !result['/App.tsx'] && !result['/src/App.jsx']) {
-      const mainFile = Object.keys(files).find(n => n.endsWith('index.tsx') || n.endsWith('main.tsx') || n.endsWith('App.tsx') || n.endsWith('App.jsx'));
+      // Logic: Pick the first TSX/JSX file that looks like a main component, or the largest one.
+      const candidateFiles = Object.keys(files).filter(n => n.endsWith('.tsx') || n.endsWith('.jsx'));
+      
+      // Try specific names first
+      let mainFile = candidateFiles.find(n => 
+        n.toLowerCase().endsWith('app.tsx') || 
+        n.toLowerCase().endsWith('main.tsx') || 
+        n.toLowerCase().endsWith('index.tsx') ||
+        n.toLowerCase().endsWith('dashboard.tsx')
+      );
+      
+      // If not, just take the first component found or the largest one
+      if (!mainFile && candidateFiles.length > 0) {
+        mainFile = candidateFiles.sort((a,b) => (files[b].content?.length || 0) - (files[a].content?.length || 0))[0];
+      }
+
       if (mainFile) {
          result['/src/App.tsx'] = { code: files[mainFile].content, active: true };
       }
