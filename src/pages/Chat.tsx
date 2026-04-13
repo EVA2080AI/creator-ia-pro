@@ -4,6 +4,7 @@
  */
 import { useState, useCallback, useEffect, useMemo, useRef, Component, type ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { motion } from 'framer-motion';
 import { GENESIS_TEMPLATES, TEMPLATE_CATEGORIES, type TemplateCategory } from '@/data/genesis-templates';
 import JSZip from 'jszip';
 import { useNavigate } from 'react-router-dom';
@@ -513,8 +514,9 @@ function WelcomeScreen({
                     );
                   })()}
                 </div>
-              )}
-            </div>
+               </main>
+             </div>
+           </div>
           </div>
         </div>
       </div>
