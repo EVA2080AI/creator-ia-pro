@@ -211,9 +211,9 @@ export default function Dashboard() {
         {/* Quick Tools */}
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
-            { icon: Zap, label: "Genesis IDE", desc: "BuilderAI", path: "/chat" },
+            { icon: Zap, label: "Genesis IDE", desc: "BuilderAI", path: "/studio" },
             { icon: Megaphone, label: "Canvas IA", desc: "Lienzo", path: "/formarketing" },
-            { icon: PenTool, label: "Studio", desc: "Herramientas", path: "/studio" },
+            { icon: PenTool, label: "Studio", desc: "Herramientas", path: "/tools" },
             { icon: MessageSquare, label: "Chat IA", desc: "Copy", path: "/chat" },
             { icon: Hash, label: "Hub", desc: "Templates", path: "/hub" },
             { icon: FileText, label: "Espacios", desc: "Archivos", path: "/spaces" },
@@ -251,7 +251,7 @@ export default function Dashboard() {
                   onDuplicate={(e) => handleDuplicate(e, space)} 
                   onDelete={(e) => handleDelete(e, space)}
                   onClick={() => {
-                    if (space.type === 'code') setOpeningProject(space);
+                    if (space.type === 'code') navigate(`/studio?project=${space.id}`);
                     else navigate(`/formarketing?spaceId=${space.id}`);
                   }}
                 />
@@ -299,13 +299,13 @@ export default function Dashboard() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <button onClick={() => navigate(`/chat?project=${openingProject?.id}`)} className="flex flex-col items-center gap-3 p-6 border border-zinc-100 bg-zinc-50 rounded-2xl hover:border-primary hover:bg-white transition-all group">
+              <button onClick={() => navigate(`/studio?project=${openingProject?.id}`)} className="flex flex-col items-center gap-3 p-6 border border-zinc-100 bg-zinc-50 rounded-2xl hover:border-primary hover:bg-white transition-all group">
                 <Brain className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Genesis IA</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Genesis Studio</span>
               </button>
               <button onClick={() => navigate(`/code?project=${openingProject?.id}`)} className="flex flex-col items-center gap-3 p-6 border border-zinc-100 bg-zinc-50 rounded-2xl hover:border-emerald-500 hover:bg-white transition-all group">
                 <Code2 className="w-6 h-6 text-emerald-500 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Editor</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Editor Pro</span>
               </button>
             </div>
 

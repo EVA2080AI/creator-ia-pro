@@ -20,7 +20,17 @@ export interface StudioProject {
 
 const DEFAULT_FILES: Record<string, StudioFile> = {};
 
-function normalizeFiles(files: any): Record<string, StudioFile> {
+interface DBStudioProject {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  files: unknown;
+  created_at: string;
+  updated_at: string;
+}
+
+function normalizeFiles(files: unknown): Record<string, StudioFile> {
   if (!files) return {};
   if (typeof files === 'string') {
     try {
@@ -58,7 +68,7 @@ export function useStudioProjects() {
       return;
     }
 
-    const parsed = (data || []).map((p: any) => ({
+    const parsed = ((data as unknown as DBStudioProject[]) || []).map((p) => ({
       ...p,
       files: normalizeFiles(p.files),
     })) as StudioProject[];
@@ -79,7 +89,7 @@ export function useStudioProjects() {
     if (!user) return null;
     const { data, error } = await supabase
       .from('studio_projects')
-      .insert({ user_id: user.id, name, files: DEFAULT_FILES as any })
+      .insert({ user_id: user.id, name, files: DEFAULT_FILES })
       .select()
       .single();
 
@@ -98,14 +108,14 @@ export function useStudioProjects() {
   useEffect(() => {
     if (!activeProject || !user) return;
     
-    // Silence internal ref for comparison to avoid save loop
-    const currentFilesStr = JSON.stringify(activeProject.files);
-
     const timer = setTimeout(async () => {
       try {
         const { error } = await supabase
           .from('studio_projects')
-          .update({ files: activeProject.files as any, updated_at: new Date().toISOString() })
+          .update({ 
+            files: activeProject.files as unknown as Record<string, unknown>, 
+            updated_at: new Date().toISOString() 
+          })
           .eq('id', activeProject.id);
 
         if (!error) {
@@ -132,7 +142,10 @@ export function useStudioProjects() {
 
     const { error } = await supabase
       .from('studio_projects')
-      .update({ files: files as any, updated_at: new Date().toISOString() })
+      .update({ 
+        files: files as unknown as Record<string, unknown>, 
+        updated_at: new Date().toISOString() 
+      })
       .eq('id', projectId);
 
     if (error) { console.error('Error saving files:', error); return; }
@@ -154,7 +167,11 @@ export function useStudioProjects() {
   }, []);
 
   const deleteProject = useCallback(async (projectId: string) => {
-    const { error } = await supabase.from('studio_projects' as any).delete().eq('id', projectId);
+    const { error } = await supabase
+      .from('studio_projects')
+      .delete()
+      .eq('id', projectId);
+    
     if (error) { toast.error('Error al eliminar proyecto'); return; }
     setProjects((prev) => prev.filter((p) => p.id !== projectId));
     setActiveProject((prev) => prev?.id === projectId ? null : prev);
@@ -164,11 +181,11 @@ export function useStudioProjects() {
   const duplicateProject = useCallback(async (project: StudioProject) => {
     if (!user) return null;
     const { data, error } = await supabase
-      .from('studio_projects' as any)
+      .from('studio_projects')
       .insert({ 
         user_id: user.id, 
         name: `${project.name} (Copia)`, 
-        files: project.files as any 
+        files: project.files as unknown as Record<string, unknown> 
       })
       .select()
       .single();
@@ -176,7 +193,7 @@ export function useStudioProjects() {
     if (error) { toast.error('Error al duplicar'); return null; }
     if (!data) return null;
 
-    const typedData = data as any;
+    const typedData = data as unknown as DBStudioProject;
     const newProject = { 
       ...typedData, 
       files: normalizeFiles(typedData.files) 

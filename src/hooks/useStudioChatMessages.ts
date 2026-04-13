@@ -11,7 +11,7 @@ interface UseStudioChatMessagesProps {
   user: User | null;
   setArtifacts: (a: UIArtifact[]) => void;
   setTasks: (t: UIPlanTask[]) => void;
-  setLogs: (l: (prev: UILog[]) => UILog[]) => void;
+  setLogs: React.Dispatch<React.SetStateAction<UILog[]>>;
 }
 
 export function useStudioChatMessages({

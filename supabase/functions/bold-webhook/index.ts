@@ -1,4 +1,3 @@
-// @ts-nocheck
 // ──────────────────────────────────────────────────────────────────────────────
 // Supabase Edge Function — Deno Runtime (NOT Node.js)
 // This file uses Deno-native imports. TypeScript errors from the Node engine

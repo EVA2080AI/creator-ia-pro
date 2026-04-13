@@ -4,7 +4,7 @@ import type { PostgrestResponse } from "@supabase/supabase-js";
 
 // ─── Custom Types for Missing RPCs ──────────────────────────────────────────
 type SupabaseCustom = {
-  rpc: <T = any>(name: string, args: Record<string, any>) => Promise<PostgrestResponse<T>>;
+  rpc: <T = unknown>(name: string, args: Record<string, unknown>) => Promise<PostgrestResponse<T>>;
 } & typeof supabase;
 
 const sb = supabase as unknown as SupabaseCustom;
@@ -36,8 +36,8 @@ export interface AIResponse {
   text?: string;
   url?: string;
   model?: string;
-  ui?: Record<string, any>; // Dynamic UI structure from AI
-  [key: string]: string | number | boolean | Record<string, any> | undefined;
+  ui?: Record<string, unknown>; // Dynamic UI structure from AI
+  [key: string]: unknown;
 }
 
 interface ProfileData {
@@ -159,8 +159,8 @@ export const aiService = {
     return data || {};
   },
 
-  async callSearch(query: string): Promise<any> {
-    const { data, error } = await supabase.functions.invoke<{ results: any[], error?: string }>("search-service", {
+  async callSearch(query: string): Promise<unknown[]> {
+    const { data, error } = await supabase.functions.invoke<{ results: unknown[], error?: string }>("search-service", {
       body: { query },
     });
 

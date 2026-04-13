@@ -7,8 +7,8 @@ export type CreditPack = (typeof CREDIT_PACKS)[number];
 
 // ─── Custom Types for Missing RPCs ──────────────────────────────────────────
 type SupabaseCustom = {
-  rpc: <T = any>(name: string, args: Record<string, any>) => Promise<PostgrestResponse<T>>;
-  from: (table: string) => any; // Allow temporary access to non-generated tables
+  rpc: <T = unknown>(name: string, args: Record<string, unknown>) => Promise<PostgrestResponse<T>>;
+  from: (table: string) => ReturnType<typeof supabase.from>; 
 } & typeof supabase;
 
 const sb = (supabase as unknown) as SupabaseCustom;
@@ -149,7 +149,7 @@ export const creditService = {
   },
 
   async spend(amount: number, action: string, model: string, nodeId?: string | null) {
-    const { error } = await (supabase as any).rpc("spend_credits", {
+    const { error } = await sb.rpc("spend_credits", {
       _amount: amount,
       _action: action,
       _model: model,
@@ -159,7 +159,7 @@ export const creditService = {
   },
 
   async refund(amount: number, userId: string) {
-    await (supabase as any).rpc("refund_credits", {
+    await sb.rpc("refund_credits", {
       _amount: amount,
       _user_id: userId,
     });
@@ -188,7 +188,7 @@ export const creditService = {
 
 export const adminService = {
   async addCredits(targetUserId: string, amount: number, reason?: string) {
-    const { data, error } = await (supabase as any).rpc("admin_add_credits", {
+    const { data, error } = await sb.rpc("admin_add_credits", {
       _target_user_id: targetUserId,
       _amount: amount,
       _reason: reason || 'Admin grant',
@@ -198,7 +198,7 @@ export const adminService = {
   },
 
   async deductCredits(targetUserId: string, amount: number, reason?: string) {
-    const { data, error } = await (supabase as any).rpc("admin_deduct_credits", {
+    const { data, error } = await sb.rpc("admin_deduct_credits", {
       _target_user_id: targetUserId,
       _amount: amount,
       _reason: reason || 'Admin deduction',

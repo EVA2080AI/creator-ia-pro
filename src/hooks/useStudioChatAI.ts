@@ -318,7 +318,7 @@ ${contentSnapshots}
       let effectiveSystemPrompt = isArchitectRequest ? ARCHITECT_SYSTEM_PROMPT : (isChatModeActive ? (persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM) : CODE_GEN_SYSTEM);
       effectiveSystemPrompt += mcpContext;
       
-      let userContent: any = prompt + contextBlock;
+      let userContent: string | Array<{ type: string; text?: string; image_url?: { url: string } }> = prompt + contextBlock;
 
       // Image-to-Code: user uploaded an image to replicate as code
       if (isImageToCode) {
@@ -485,7 +485,7 @@ ${contentSnapshots}
 
       // ─── PUNTO 2.5: SEARCH DETECTION & EXECUTION ───────────────
       // If the AI requested a search, intercept it, perform the search, and auto-continue.
-      let searchMatch = accumulated.match(/<search>(.*?)<\/search>/);
+      const searchMatch = accumulated.match(/<search>(.*?)<\/search>/);
       if (searchMatch && !signal.aborted) {
         const query = searchMatch[1];
         setGenSpecialist('engineer');
@@ -553,13 +553,13 @@ ${contentSnapshots}
       }
 
       // ─── PUNTO 2.6: GITHUB DETECTION & EXECUTION ───────────────
-      let githubMatch = accumulated.match(/<github>(.*?)<\/github>/s);
+      const githubMatch = accumulated.match(/<github>(.*?)<\/github>/s);
       if (githubMatch && !signal.aborted) {
         setGenSpecialist('engineer');
         onPhaseChange?.('generating', 'engineer');
         
         let operationResult = "";
-        let parsedOp: any = null;
+        let parsedOp: { action: string; path: string; message?: string; content?: string } | null = null;
 
         try {
           parsedOp = JSON.parse(githubMatch[1].trim());
@@ -651,13 +651,13 @@ ${contentSnapshots}
       }
 
       // ─── PUNTO 2.7: MCP EXTENSION DETECTION ───────────────
-      let mcpMatch = accumulated.match(/<mcp>(.*?)<\/mcp>/s);
+      const mcpMatch = accumulated.match(/<mcp>(.*?)<\/mcp>/s);
       if (mcpMatch && !signal.aborted) {
         setGenSpecialist('engineer');
         onPhaseChange?.('generating', 'engineer');
         
         let mcpResult = "";
-        let parsedMcp: any = null;
+        let parsedMcp: { serverId: string; tool: string; args?: Record<string, unknown> } | null = null;
 
         try {
           parsedMcp = JSON.parse(mcpMatch[1].trim());

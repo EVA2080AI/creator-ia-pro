@@ -63,6 +63,7 @@ const Chat         = lazy(() => import("./pages/Chat"));
 const ShareScreen  = lazy(() => import("./pages/ShareScreen"));
 const SystemStatus = lazy(() => import("./pages/SystemStatus"));
 const CodeIDE      = lazy(() => import("./pages/CodeIDE"));
+const Studio       = lazy(() => import("./pages/Studio"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 
 // Light loading screen — no dark bg
@@ -115,7 +116,7 @@ const App = () => {
 
                   {/* ── Redirects ── */}
                   <Route path="/canvas"  element={<CanvasRedirect />} />
-                  <Route path="/studio"  element={<Navigate to="/tools"  replace />} />
+                  <Route path="/studio"  element={<Studio />} />
                   <Route path="/genesis" element={<Navigate to="/chat"   replace />} />
 
                   {/* ── Platform routes (wrapped in AppLayout) ── */}

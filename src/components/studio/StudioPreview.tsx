@@ -42,7 +42,6 @@ export function StudioPreview({
   onDeviceModeChange,
   isGenerating = false,
   streamChars = 0,
-  streamPreview,
   supabaseConfig,
   onError,
   viewMode,
@@ -53,31 +52,27 @@ export function StudioPreview({
   onToggleFullscreen,
   onShare,
 }: StudioPreviewProps) {
-  const [refreshKey, setRefreshKey] = useState(0);
   const [sandpackKey, setSandpackKey] = useState(0);
   const prevFilesRef = useRef<string>('');
   const [compilationStatus, setCompilationStatus] = useState<'idle' | 'compiling' | 'success' | 'error'>('idle');
 
+  // Logic to detect if we need to hard-reload Sandpack (major project changes)
   useEffect(() => {
     if (!isGenerating && Object.keys(files).length > 0) {
-      const sortedKeys = Object.keys(files).sort();
-      const currentFilesHash = JSON.stringify(sortedKeys.map(k => ({ k, c: files[k].content })));
-      
+      const currentFilesHash = JSON.stringify(Object.keys(files).sort());
       if (prevFilesRef.current !== currentFilesHash) {
         prevFilesRef.current = currentFilesHash;
         setSandpackKey(k => k + 1);
-        setRefreshKey(r => r + 1);
         setCompilationStatus('compiling');
       }
-    } else {
-      setCompilationStatus('compiling');
     }
   }, [isGenerating, files]);
 
   const isVanillaHtml = useMemo(() => {
     const vals = Object.values(files);
-    return vals.some(f => f.language === 'html' || f.language === 'javascript') && 
-           !vals.some(f => f.language === 'tsx' || f.language === 'jsx');
+    const hasTJSX = vals.some(f => f.language === 'tsx' || f.language === 'jsx');
+    const hasHtml = vals.some(f => f.language === 'html' || f.language === 'javascript');
+    return hasHtml && !hasTJSX;
   }, [files]);
   
   const sandpackFiles = useMemo(() => {
@@ -123,12 +118,14 @@ export function StudioPreview({
               exit={{ opacity: 0 }}
               className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FAFAFA]/95 backdrop-blur-md overflow-hidden"
             >
-              <motion.div 
-                className="absolute inset-0 z-0 pointer-events-none"
-                initial={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(var(--primary-rgb), 0.1) 50%, transparent 100%)', y: '-100%' }}
-                animate={{ y: '100%' }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              />
+              {/* Background scanning effect */}
+              <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+                <motion.div 
+                   className="w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent"
+                   animate={{ y: ['0vh', '100vh'] }}
+                   transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                />
+              </div>
 
               <motion.div 
                 initial={{ y: 20, opacity: 0, scale: 0.9 }}
@@ -137,7 +134,7 @@ export function StudioPreview({
                 transition={{ duration: 0.5, type: 'spring', bounce: 0.4 }}
                 className="relative z-10 flex flex-col items-center max-w-sm w-full bg-white p-10 rounded-[3rem] shadow-2xl border border-zinc-100"
               >
-                <div className="w-20 h-20 bg-zinc-900 rounded-[1.75rem] shadow-2xl shadow-zinc-200 flex items-center justify-center mb-8 relative overflow-hidden group">
+                <div className="w-20 h-20 bg-zinc-900 rounded-[1.75rem] shadow-2xl flex items-center justify-center mb-8 relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-500/20 opacity-50 group-hover:opacity-100 transition-opacity" />
                   <Terminal className="w-10 h-10 text-white relative z-10" />
                 </div>
@@ -170,12 +167,6 @@ export function StudioPreview({
                   </div>
                 </div>
               </motion.div>
-
-              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-20 flex gap-12">
-                {['SEQUENTIAL_BUILD', 'DATA_PERSISTENCE', 'MODEL_ORCHESTRATION'].map(t => (
-                  <span key={t} className="text-[8px] font-black tracking-[0.4em] text-zinc-400">{t}</span>
-                ))}
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -186,7 +177,6 @@ export function StudioPreview({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, type: 'spring', bounce: 0.2 }}
-            key={refreshKey}
             style={{
               width: deviceMode === 'desktop' ? '100%' : frameWidth[deviceMode],
               height: deviceMode === 'desktop' ? '100%' : frameHeight[deviceMode],
@@ -265,6 +255,9 @@ export function StudioPreview({
         onToggleViewMode={onToggleViewMode} 
         isSidebarCollapsed={isSidebarCollapsed} 
         onToggleSidebar={onToggleSidebar}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={onToggleFullscreen}
+        onShare={onShare}
       />
     </div>
   );

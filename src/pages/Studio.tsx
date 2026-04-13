@@ -73,13 +73,11 @@ export default function Studio() {
         .single();
       
       if (!error && data) {
-         setSubscriptionTier(data.subscription_tier as any);
+         setSubscriptionTier(data.subscription_tier as 'free' | 'pro' | 'admin' | null);
       }
     };
     fetchTier();
   }, [user?.id]);
-
-  const activeTasks = useMemo(() => tasks, [tasks]);
 
   // Handle Project Selection & Basic Routing
   useEffect(() => {
@@ -231,7 +229,7 @@ export default function Studio() {
               isOpen={true} 
               onClose={() => setViewMode('preview')} 
               artifacts={artifacts} 
-              tasks={activeTasks}
+              tasks={tasks}
               logs={logs}
               files={activeProject.files}
               agentPhase={agentPhase}

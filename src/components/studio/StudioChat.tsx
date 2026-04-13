@@ -140,7 +140,39 @@ function StudioProjectHeader({
 }
 
 // ─── Main Component ─────────────────────────────────────────────────────────────
-export function StudioChat(props: StudioChatProps) {
+export function StudioChat({
+  projectId,
+  projectFiles,
+  onCodeGenerated,
+  onNewConversation,
+  initialPrompt,
+  onInitialPromptUsed,
+  onAutoName,
+  onGeneratingChange,
+  onStreamCharsChange,
+  supabaseConfig,
+  persona = 'genesis',
+  activeFile,
+  previewError,
+  projectName = 'Proyecto',
+  isSaving,
+  onShare,
+  onPublish,
+  onBack,
+  onToggleArtifacts,
+  onSelectFile,
+  artifacts,
+  setArtifacts,
+  tasks,
+  setTasks,
+  logs,
+  setLogs,
+  runtimeError,
+  onClearError,
+  onPhaseChange,
+  onHardReset,
+  subscriptionTier = 'free'
+}: StudioChatProps) {
   const { user } = useAuth();
   const { preferences } = useAgentPreferences();
   const [input, setInput] = useState('');
@@ -166,12 +198,12 @@ export function StudioChat(props: StudioChatProps) {
   const [internalTasks, setInternalTasks] = useState<UIPlanTask[]>([]);
   const [internalLogs, setInternalLogs] = useState<UILog[]>([]);
 
-  const activeArtifacts = props.artifacts || internalArtifacts;
-  const setArtifactsState = props.setArtifacts || setInternalArtifacts;
-  const activeTasks = props.tasks || internalTasks;
-  const setTasksState = props.setTasks || setInternalTasks;
-  const activeLogs = props.logs || internalLogs;
-  const setLogsState = props.setLogs || setInternalLogs;
+  const activeArtifacts = artifacts || internalArtifacts;
+  const setArtifactsState = setArtifacts || setInternalArtifacts;
+  const activeTasks = tasks || internalTasks;
+  const setTasksState = setTasks || setInternalTasks;
+  const activeLogs = logs || internalLogs;
+  const setLogsState = setLogs || setInternalLogs;
 
   const {
     messages,
@@ -182,38 +214,38 @@ export function StudioChat(props: StudioChatProps) {
     addLog,
     resetConversation
   } = useStudioChatMessages({
-    projectId: props.projectId,
+    projectId,
     user,
     setArtifacts: setArtifactsState,
     setTasks: setTasksState,
-    setLogs: setLogsState as any
+    setLogs: setLogsState
   });
 
   // Reset conversation if project becomes empty (when hard reset clears all files)
-  const prevFileCountRef = useRef(Object.keys(props.projectFiles).length);
+  const prevFileCountRef = useRef(Object.keys(projectFiles).length);
   useEffect(() => {
-    const currentCount = Object.keys(props.projectFiles).length;
+    const currentCount = Object.keys(projectFiles).length;
     // Only reset if we went from >0 files to 0 files (i.e., hard reset just happened)
     if (prevFileCountRef.current > 0 && currentCount === 0) {
       resetConversation();
     }
     prevFileCountRef.current = currentCount;
-  }, [props.projectFiles, resetConversation]);
+  }, [projectFiles, resetConversation]);
 
   const {
     isGenerating, streamChars, streamingContent, genPhase, genSpecialist, currentGenIntent, generateCode, stopGeneration
   } = useStudioChatAI({
-    projectFiles: props.projectFiles,
+    projectFiles,
     selectedModel,
     convHistory,
-    persona: props.persona || 'genesis',
+    persona,
     isArchitectMode,
-    activeFile: props.activeFile,
-    supabaseConfig: props.supabaseConfig,
-    subscriptionTier: props.subscriptionTier,
-    onPhaseChange: props.onPhaseChange,
-    onStreamCharsChange: props.onStreamCharsChange,
-    onGeneratingChange: props.onGeneratingChange
+    activeFile,
+    supabaseConfig,
+    subscriptionTier,
+    onPhaseChange,
+    onStreamCharsChange,
+    onGeneratingChange
   });
 
   // ─── PERSISTENCE Helper ───────────────────────────────────────────────────
@@ -224,7 +256,7 @@ export function StudioChat(props: StudioChatProps) {
 
   // ─── ACTION: Auto-name project ───────────────────────────────────────────
   const autoNameProject = useCallback(async (p: string) => {
-    if (!props.onAutoName) return;
+    if (!onAutoName) return;
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
@@ -242,9 +274,9 @@ export function StudioChat(props: StudioChatProps) {
       });
       const data = await res.json();
       const name = (data?.choices?.[0]?.message?.content ?? '').trim().replace(/^["']|["']$/g, '');
-      if (name) props.onAutoName(name);
+      if (name) onAutoName(name);
     } catch { /* auto-naming is non-critical, silently fail */ }
-  }, [props.onAutoName]);
+  }, [onAutoName]);
 
   // ─── ACTION: Send message ────────────────────────────────────────────────
   const handleSend = useCallback(async (override?: string) => {
@@ -253,11 +285,11 @@ export function StudioChat(props: StudioChatProps) {
 
     // Early Navigation Intent
     const navMatch = text.toLowerCase().match(/(?:abre|abrir|open|show|view|file|archivo|ver)\s+([\w./\-]+(?:\.\w+)?)/i);
-    if (navMatch && props.onSelectFile) {
+    if (navMatch && onSelectFile) {
       const target = navMatch[1].trim();
-      const targetFile = Object.keys(props.projectFiles).find(f => f.toLowerCase().includes(target.toLowerCase()));
+      const targetFile = Object.keys(projectFiles).find(f => f.toLowerCase().includes(target.toLowerCase()));
       if (targetFile) {
-        props.onSelectFile(targetFile);
+        onSelectFile(targetFile);
         const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text, timestamp: new Date() };
         const assistantMsg: Message = { id: crypto.randomUUID(), role: 'assistant', content: `He abierto **${targetFile}** para ti.`, timestamp: new Date() };
         setMessages(prev => [...prev, userMsg, assistantMsg]);
@@ -303,7 +335,7 @@ export function StudioChat(props: StudioChatProps) {
       } else if (result.isChatOnly) {
         const content = result.text || result.explanation;
         const chatFiles = extractChatCodeFiles(content);
-        if (chatFiles) props.onCodeGenerated({ ...props.projectFiles, ...chatFiles });
+        if (chatFiles) onCodeGenerated({ ...projectFiles, ...chatFiles });
         
         assistantMsg = { 
           id: crypto.randomUUID(), 
@@ -315,7 +347,7 @@ export function StudioChat(props: StudioChatProps) {
           projectFilesMap: result.files instanceof Map ? result.files : undefined
         };
       } else {
-        props.onCodeGenerated({ ...props.projectFiles, ...result.files });
+        onCodeGenerated({ ...projectFiles, ...result.files });
         assistantMsg = { 
           id: crypto.randomUUID(), 
           role: 'assistant', 
@@ -338,45 +370,40 @@ export function StudioChat(props: StudioChatProps) {
     } catch (err: any) {
       toast.error(`Error: ${err.message}`);
     }
-  }, [input, isGenerating, user, generateCode, props, pendingImage, pendingContext, pendingUrl, selectedModel, isArchitectMode, preferences, saveMessage, addLog, setMessages, autoNameProject, messages.length]);
+  }, [input, isGenerating, user, generateCode, onSelectFile, projectFiles, onCodeGenerated, pendingImage, pendingContext, pendingUrl, selectedModel, isArchitectMode, preferences, saveMessage, addLog, setMessages, autoNameProject, messages.length]);
 
   // ─── INITIAL PROMPT TRIGGER ──────────────────────────────────────────────
   useEffect(() => {
-    if (props.initialPrompt && !initialPromptTriggered.current && messages.length > 0 && !isGenerating) {
+    if (initialPrompt && !initialPromptTriggered.current && messages.length > 0 && !isGenerating) {
       // Only fire when chat only has the welcome message (all messages have id 'welcome')
       if (messages.every(m => m.id === 'welcome')) {
         initialPromptTriggered.current = true;
-        handleSend(props.initialPrompt);
-        props.onInitialPromptUsed?.();
+        handleSend(initialPrompt);
+        onInitialPromptUsed?.();
       }
     }
-  }, [props.initialPrompt, messages, isGenerating, handleSend, props]);
+  }, [initialPrompt, messages, isGenerating, handleSend, onInitialPromptUsed]);
 
   // ─── AUTO-FIX Logic ───────────────────────────────────────────────────────
   useEffect(() => {
-    const error = props.runtimeError || props.previewError;
+    const error = runtimeError || previewError;
     if (!error || isGenerating || !user) return;
     if (error === lastAutoFixError.current) return;
     if (autoFixCountRef.current >= 3) return;
 
     // Skip auto-fix if the error is caused by raw JSON saved as code
-    // (happens when AI responds with JSON format instead of markdown blocks)
     if (error.includes('"explanation"') || error.includes('"files"') || error.includes('"deps"')) {
-      console.warn('[AutoFix] Skipping — error caused by raw JSON in file, not a code bug');
       return;
     }
 
-    // Helper to find the first existing file mentioned in the error string
     const extractErrorFile = (err: string) => {
-      // Regex matches common file paths: src/App.tsx, ./components/Header.tsx, main.tsx
       const pathRegex = /(?:src\/|[\w.-]+\/)*[\w.-]+\.(?:tsx?|jsx?|css|html|json)/gi;
       const matches = [...err.matchAll(pathRegex)];
       for (const m of matches) {
-        const path = m[0].replace(/^\/|^\.\//, ''); // Clean leading / or ./
-        if (props.projectFiles[path]) return path;
-        // Try without src/ if not found
+        const path = m[0].replace(/^\/|^\.\//, '');
+        if (projectFiles[path]) return path;
         const noSrc = path.replace(/^src\//, '');
-        if (props.projectFiles[noSrc]) return noSrc;
+        if (projectFiles[noSrc]) return noSrc;
       }
       return null;
     };
@@ -386,13 +413,11 @@ export function StudioChat(props: StudioChatProps) {
       autoFixCountRef.current += 1;
       setIsAutoFixing(true);
       
-      // Auto-trigger artifacts panel to show the "Fixing" state
-      props.onToggleArtifacts?.();
+      onToggleArtifacts?.();
       
       const probFile = extractErrorFile(error);
       addLog(`🤖 PROTOCOLO FIX #${autoFixCountRef.current}/3: ${probFile ? `Analizando ${probFile}...` : 'Analizando error...'}`, "info");
       
-      // Enriched Fix Prompt
       let fixPrompt = `[AUTO-FIX] Error detectado en el preview:
 \`\`\`
 ${error}
@@ -400,7 +425,7 @@ ${error}
 
 POR FAVOR, corrige este error analizando el estado actual de los archivos críticos:
 ${probFile ? `- Archivo detectado como origen: @${probFile}` : ''}
-- Archivo activo: @${props.activeFile || 'App.tsx'}
+- Archivo activo: @${activeFile || 'App.tsx'}
 - Punto de entrada: @App.tsx
 
 Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archivos corregidos como bloques markdown.`;
@@ -411,9 +436,9 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
 
       await handleSend(fixPrompt);
       setIsAutoFixing(false);
-    }, 2500); // Slightly longer delay to let the UI stabilize
+    }, 2500);
     return () => clearTimeout(timer);
-  }, [props.runtimeError, props.previewError, isGenerating, user, handleSend, addLog, props.activeFile, props.projectFiles]);
+  }, [runtimeError, previewError, isGenerating, user, handleSend, addLog, activeFile, projectFiles, onToggleArtifacts]);
 
   // ─── Handlers ─────────────────────────────────────────────────────────────
   const onAttachUrl = async (url: string) => {
@@ -462,14 +487,14 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
       <div className="absolute inset-0 bg-noise opacity-[0.02] pointer-events-none" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/10 rounded-full blur-[120px] opacity-40 pointer-events-none" />
       <StudioProjectHeader 
-        name={props.projectName} 
-        isSaving={props.isSaving} 
+        name={projectName} 
+        isSaving={isSaving} 
         agentPhase={genPhase} 
         activeSpecialist={genSpecialist}
-        onShare={props.onShare} 
-        onPublish={props.onPublish} 
-        onBack={props.onBack} 
-        onToggleArtifacts={props.onToggleArtifacts} 
+        onShare={onShare} 
+        onPublish={onPublish} 
+        onBack={onBack} 
+        onToggleArtifacts={onToggleArtifacts} 
       />
 
       <div ref={containerRef} onScroll={() => setShowScrollBtn((containerRef.current?.scrollTop || 0) > 400)}

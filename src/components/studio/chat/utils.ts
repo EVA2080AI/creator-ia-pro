@@ -106,8 +106,8 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
   let count = 0;
 
   while ((match = blockRegex.exec(text)) !== null) {
-    let [_, lang, filename, content] = match;
-    filename = filename?.trim();
+    const [_, lang, rawFilename, content] = match;
+    let filename = rawFilename?.trim();
     
     // If no filename in backticks, look at the line before
     if (!filename) {

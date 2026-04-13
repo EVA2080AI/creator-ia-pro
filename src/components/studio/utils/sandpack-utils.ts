@@ -108,7 +108,7 @@ ${routes}
 
 export function toSandpackFiles(
   files: Record<string, StudioFile>,
-  supabaseConfig: any,
+  supabaseConfig: { url: string; anonKey: string } | null | undefined,
   isVanillaHtml: boolean
 ): Record<string, SandpackFile> {
   const result: Record<string, SandpackFile> = {};
@@ -119,14 +119,14 @@ export function toSandpackFiles(
   }
   
   const ROOT_FILES = ['package.json', 'vite.config.js', 'vite.config.ts', 'tailwind.config.js', 'postcss.config.js', 'tsconfig.json', 'index.html', 'index.css'];
-  let customPackageJson: any = null;
+  let customPackageJson: { dependencies?: Record<string, string>; devDependencies?: Record<string, string>; name?: string } | null = null;
 
   Object.entries(files).forEach(([name, file]) => {
     if (!file || typeof file !== 'object') return;
     if (typeof file.content !== 'string') return;
     if (file.content === '__genesis_delete__') return; // skip deleted files
     
-    let cleanName = name.replace(/^\//, '');
+    const cleanName = name.replace(/^\//, '');
     let abs = '/' + cleanName;
 
     if (isVanillaHtml) {
@@ -134,7 +134,11 @@ export function toSandpackFiles(
     } else {
       if (ROOT_FILES.includes(cleanName) || cleanName.startsWith('public/')) {
         if (cleanName === 'package.json') {
-          try { customPackageJson = JSON.parse(file.content); } catch(e) {}
+          try { 
+            customPackageJson = JSON.parse(file.content); 
+          } catch(e) {
+            console.warn("Could not parse generated package.json", e);
+          }
         }
       } else {
         if (!abs.startsWith('/src/')) abs = '/src' + abs;
