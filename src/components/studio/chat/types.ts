@@ -69,7 +69,12 @@ export interface ModelOption {
   id: string;
   label: string;
   badge: string;
+  provider: string;
   description?: string;
   vision: boolean;
   premium: boolean;
+  free: boolean;
+  inputCost: number;
+  outputCost: number;
+  context: string;
 }

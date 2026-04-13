@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   X, Activity, CheckCircle2, Circle, Loader2,
-  Zap, Layout, ImageIcon
+  Zap, Layout, ChevronDown, AlertTriangle, Info, CheckCircle, XCircle, Terminal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Mermaid } from './Mermaid';
@@ -55,6 +55,19 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
   tasks, artifacts, logs, isOpen, onClose, agentPhase = 'idle',
 }) => {
   const [tab, setTab] = useState<PanelTab>('tasks');
+  const [expandedLogs, setExpandedLogs] = useState<Set<string>>(new Set());
+  const logsEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (tab === 'logs') logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [logs.length, tab]);
+
+  const toggleLog = (id: string) =>
+    setExpandedLogs(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
 
   if (!isOpen) return null;
 
@@ -195,27 +208,93 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
 
         {/* Logs Tab */}
         {tab === 'logs' && (
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             {logs.length > 0 ? (
-              logs.slice(0, 50).map(log => (
-                <div key={log.id} className={cn(
-                  "flex items-start gap-2 px-3 py-2 rounded-lg text-[11px] border",
-                  log.type === 'error' ? "bg-red-50 border-red-100 text-red-700" :
-                  log.type === 'warning' ? "bg-amber-50 border-amber-100 text-amber-700" :
-                  log.type === 'success' ? "bg-emerald-50 border-emerald-100 text-emerald-700" :
-                  "bg-zinc-50 border-zinc-100 text-zinc-600"
-                )}>
-                  <span className="text-[9px] font-mono text-zinc-400 shrink-0 mt-0.5">
-                    {log.timestamp.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                  </span>
-                  <span className="leading-relaxed">{log.message}</span>
-                </div>
-              ))
+              <>
+                {logs.slice(-100).map(log => {
+                  const isExpanded = expandedLogs.has(log.id);
+                  const hasDetail = !!(log.source);
+
+                  const Icon = log.type === 'error' ? XCircle
+                    : log.type === 'warning' ? AlertTriangle
+                    : log.type === 'success' ? CheckCircle
+                    : Info;
+
+                  const colors = {
+                    error:   'bg-red-50 border-red-100 text-red-700',
+                    warning: 'bg-amber-50 border-amber-100 text-amber-700',
+                    success: 'bg-emerald-50 border-emerald-100 text-emerald-700',
+                    info:    'bg-zinc-50 border-zinc-100 text-zinc-600',
+                  }[log.type];
+
+                  const iconColors = {
+                    error: 'text-red-400',
+                    warning: 'text-amber-400',
+                    success: 'text-emerald-500',
+                    info: 'text-zinc-400',
+                  }[log.type];
+
+                  return (
+                    <div
+                      key={log.id}
+                      className={cn(
+                        "rounded-xl border overflow-hidden transition-all",
+                        colors
+                      )}
+                    >
+                      {/* Row */}
+                      <button
+                        className={cn(
+                          "w-full flex items-start gap-2 px-3 py-2 text-left transition-all",
+                          hasDetail ? "cursor-pointer hover:brightness-[0.97]" : "cursor-default"
+                        )}
+                        onClick={() => hasDetail && toggleLog(log.id)}
+                        disabled={!hasDetail}
+                      >
+                        <Icon className={cn("h-3.5 w-3.5 mt-0.5 shrink-0", iconColors)} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] leading-snug font-medium break-words">{log.message}</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[8px] font-mono opacity-60">
+                            {log.timestamp.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                          {hasDetail && (
+                            <ChevronDown className={cn(
+                              "h-3 w-3 opacity-50 transition-transform duration-200",
+                              isExpanded && "rotate-180"
+                            )} />
+                          )}
+                        </div>
+                      </button>
+
+                      {/* Expanded detail */}
+                      {isExpanded && hasDetail && (
+                        <div className="px-8 pb-2.5 pt-0">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <Terminal className="h-2.5 w-2.5 opacity-50" />
+                            <span className="text-[8.5px] font-bold uppercase tracking-wider opacity-60">Fuente</span>
+                          </div>
+                          <pre className="text-[10px] font-mono opacity-75 whitespace-pre-wrap break-all leading-relaxed bg-black/5 rounded-lg p-2">
+                            {log.source}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+                <div ref={logsEndRef} />
+              </>
             ) : (
-              <EmptyState icon={<Zap className="h-8 w-8" />} title="Sin logs" description="Los logs de ejecución aparecerán aquí cuando Genesis procese." />
+              <EmptyState
+                icon={<Terminal className="h-8 w-8" />}
+                title="Sin logs"
+                description="Los logs de ejecución aparecerán aquí cuando Génesis procese."
+              />
             )}
           </div>
         )}
+
       </div>
     </div>
   );
