@@ -5,7 +5,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
-export type ViewMode = 'preview' | 'code' | 'artifacts' | 'files';
+export type ViewMode = 'preview' | 'code' | 'artifacts' | 'files' | 'cloud' | 'nexus' | 'analytics';
 export type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 
 interface StudioTopbarProps {

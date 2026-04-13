@@ -255,7 +255,7 @@ Para hacerlo, responde EXACTAMENTE con:
 
 **2. GITHUB INTEGRATION:**
 Tienes permisos para leer y escribir en el repositorio de GitHub configurado por el usuario. 
-Si el usuario pide leer un código existente del repo o hacer un commit allí, usa esta herramienta respondiendo EXACTAMENTE con un bloque JSON dentro de una etiqueta <github>. Acciones permitidas: `read_dir`, `read_file`, `commit`.
+Si el usuario pide leer un código existente del repo o hacer un commit allí, usa esta herramienta respondiendo EXACTAMENTE con un bloque JSON dentro de una etiqueta <github>. Acciones permitidas: \`read_dir\`, \`read_file\`, \`commit\`.
 Ejemplos:
 - Leer directorio:
 <github>{"action": "read_dir", "path": "src/components"}</github>

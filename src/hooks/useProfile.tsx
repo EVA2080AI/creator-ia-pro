@@ -5,6 +5,7 @@ interface Profile {
   id: string;
   user_id: string;
   display_name: string | null;
+  full_name: string | null;
   email: string;
   credits_balance: number;
   subscription_tier: string;
