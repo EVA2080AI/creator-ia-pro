@@ -188,19 +188,16 @@ export function StudioChat(props: StudioChatProps) {
     setLogs: setLogsState as any
   });
 
-  // Handle hard reset signal from parent
+  // Reset conversation if project becomes empty (when hard reset clears all files)
+  const prevFileCountRef = useRef(Object.keys(props.projectFiles).length);
   useEffect(() => {
-    if (props.onHardReset) {
+    const currentCount = Object.keys(props.projectFiles).length;
+    // Only reset if we went from >0 files to 0 files (i.e., hard reset just happened)
+    if (prevFileCountRef.current > 0 && currentCount === 0) {
       resetConversation();
     }
-  }, [props.onHardReset, resetConversation]);
-
-  // Reset conversation if project files are cleared
-  useEffect(() => {
-    if (Object.keys(props.projectFiles).length === 0 && messages.length > 1) {
-       resetConversation();
-    }
-  }, [props.projectFiles, messages.length, resetConversation]);
+    prevFileCountRef.current = currentCount;
+  }, [props.projectFiles, resetConversation]);
 
   const {
     isGenerating, streamChars, streamingContent, genPhase, genSpecialist, currentGenIntent, generateCode, stopGeneration

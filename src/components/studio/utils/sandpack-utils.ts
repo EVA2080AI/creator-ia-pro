@@ -179,9 +179,9 @@ export function toSandpackFiles(
         result[targetPath] = { code: files[mainFile].content, active: true };
         if (targetPath !== '/src/App.tsx') {
           // Re-export so main.tsx can always import from './App'
-          const compName = mainFile.replace(/.*\//, '').replace(/\.(tsx|jsx)$/, '');
+          const importPath = targetPath.replace('/src/', '').replace(/\.(tsx|jsx)$/, '');
           result['/src/App.tsx'] = { 
-            code: `export { default } from './${targetPath.replace('/src/', '').replace(/\.(tsx|jsx)$/, '')}';`,
+            code: `export { default } from './${importPath}';`,
             active: false 
           };
         }
@@ -192,8 +192,8 @@ export function toSandpackFiles(
     // The Sandpack react-ts template needs /src/main.tsx to mount the app.
     // If the user's generated code already has one, respect it.
     // Otherwise inject a clean one.
-    if (!allKeys.includes('/src/main.tsx') && !result['/src/main.tsx']) {
-      const userIndexCss = allKeys.includes('/src/index.css') || result['/src/index.css'];
+    if (!result['/src/main.tsx']) {
+      const userIndexCss = !!result['/src/index.css'];
       result['/src/main.tsx'] = {
         code: `import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -209,7 +209,7 @@ if (rootElement) {
 
     // ── STEP 3: Always guarantee a valid index.html ───────────────────────────
     // Without a proper index.html the preview iframe has no entry point.
-    if (!allKeys.includes('/index.html') && !result['/index.html']) {
+    if (!result['/index.html']) {
       result['/index.html'] = {
         code: `<!DOCTYPE html>
 <html lang="en">
