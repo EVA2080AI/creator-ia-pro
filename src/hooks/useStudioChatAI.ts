@@ -7,7 +7,17 @@ import { genesisOrchestrator } from '@/services/genesis-orchestrator';
 import { GitHubService } from '@/services/github-service';
 import { mcpService } from '@/services/mcp-service';
 import { generateAutonomousProject } from '@/services/scaffold-service';
-import { detectIntent, processRawResponse, applyPatchToFiles, isResponseTruncated, extractPatchBlocks } from '@/components/studio/chat/utils';
+import {
+  detectIntent,
+  processRawResponse,
+  applyPatchToFiles,
+  isResponseTruncated,
+  extractPatchBlocks,
+  processFileOperations,
+  wantsProjectReset,
+  detectMissingDependencies,
+  extractDeleteCommands
+} from '@/components/studio/chat/utils';
 
 import {
   CODE_GEN_SYSTEM,
@@ -209,6 +219,54 @@ ${contentSnapshots}
     const isHtmlImport = intent === 'html-import';
     const isVanillaHtml = intent === 'vanilla-html';
     const isImageToCode = hasImage && (intent === 'codegen' || !prompt.trim());
+
+    // ─── RESET DETECTION: Check if user wants to clear the project ───────
+    const shouldResetProject = wantsProjectReset(prompt);
+    if (shouldResetProject) {
+      setIsGenerating(false);
+      onGeneratingChange?.(false);
+      onPhaseChange?.('idle');
+      setGenPhase('idle');
+
+      return {
+        files: {}, // Empty project
+        explanation: '🗑️ **Proyecto limpiado.**\n\nHe eliminado todos los archivos del proyecto actual. Puedes empezar desde cero con un nuevo prompt.',
+        isChatOnly: false,
+        stack: [],
+        deps: [],
+        suggestions: ['Crear un nuevo proyecto', 'Generar una landing page', 'Crear un dashboard']
+      };
+    }
+
+    // ─── DELETE DETECTION: Check for explicit delete commands ─────────────
+    const deleteCommands = extractDeleteCommands(prompt);
+    if (deleteCommands.length > 0 && Object.keys(projectFiles).length > 0) {
+      const updatedFiles = { ...projectFiles };
+      const deletedFiles: string[] = [];
+
+      for (const filename of deleteCommands) {
+        if (updatedFiles[filename]) {
+          delete updatedFiles[filename];
+          deletedFiles.push(filename);
+        }
+      }
+
+      if (deletedFiles.length > 0) {
+        setIsGenerating(false);
+        onGeneratingChange?.(false);
+        onPhaseChange?.('idle');
+        setGenPhase('idle');
+
+        return {
+          files: updatedFiles,
+          explanation: `🗑️ **Archivos eliminados:** ${deletedFiles.join(', ')}`,
+          isChatOnly: false,
+          stack: [],
+          deps: [],
+          suggestions: []
+        };
+      }
+    }
 
     // ─── DIRECT HTML OPEN: Complete HTML documents are opened as-is ──────
     // If the user pastes a complete HTML document (has <!DOCTYPE or <html>),
@@ -788,20 +846,55 @@ ${contentSnapshots}
       // ─── PUNTO 2: SURGICAL PATCH DETECTION + MERGE ───────────────────────
       // If Genesis used PATCH blocks, apply them surgically to existing files
       // instead of full rewrites — same as Antigravity's replace_file_content.
-      if (extractPatchBlocks(accumulated) && fileKeys.length > 0) {
-        const patchedFiles = applyPatchToFiles(accumulated, projectFiles);
+      // Also handles DELETE commands and new file extraction in one operation.
+      const fileOps = processFileOperations(accumulated, projectFiles);
+
+      // Check if there were any operations performed
+      const hasOperations =
+        fileOps.deletedFiles.length > 0 ||
+        fileOps.patchedFiles.length > 0 ||
+        fileOps.newFiles.length > 0;
+
+      if (hasOperations) {
+        // Detect missing dependencies from the new/updated files
+        const detectedDeps = detectMissingDependencies(fileOps.files);
+
+        const opsSummary = [
+          fileOps.deletedFiles.length > 0 ? `🗑️ Eliminados: ${fileOps.deletedFiles.join(', ')}` : '',
+          fileOps.patchedFiles.length > 0 ? `🔧 Modificados: ${fileOps.patchedFiles.join(', ')}` : '',
+          fileOps.newFiles.length > 0 ? `📄 Nuevos: ${fileOps.newFiles.join(', ')}` : ''
+        ].filter(Boolean).join('\n');
+
         return {
-          files: patchedFiles,
-          explanation: accumulated.replace(/```patch[\s\S]*?```/g, '').trim() || 'Cambios aplicados quirurgicamente.',
+          files: fileOps.files,
+          explanation: opsSummary || accumulated.replace(/```[a-z]*[\s\S]*?```/g, '').trim() || 'Cambios aplicados.',
           isChatOnly: false,
           stack: ['React', 'TypeScript'],
-          deps: [],
-          suggestions: []
+          deps: detectedDeps,
+          suggestions: detectedDeps.length > 0
+            ? [`Instalar dependencias: ${detectedDeps.join(', ')}`]
+            : []
         };
       }
 
       // G-1 FIX: Pass only isChatModeActive (not || isArchitectRequest)
       const finalResult = processRawResponse(accumulated, prompt, isChatModeActive);
+
+      // Detect missing dependencies from generated files
+      if (finalResult && finalResult.files && Object.keys(finalResult.files).length > 0) {
+        const detectedDeps = detectMissingDependencies(finalResult.files);
+        if (detectedDeps.length > 0) {
+          return {
+            ...finalResult,
+            deps: detectedDeps,
+            suggestions: [
+              ...(finalResult.suggestions || []),
+              `📦 Instalar dependencias detectadas: ${detectedDeps.join(', ')}`
+            ]
+          };
+        }
+      }
+
       return finalResult;
 
     } catch (e: any) {

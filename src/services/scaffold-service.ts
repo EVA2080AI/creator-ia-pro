@@ -48,22 +48,83 @@ function pascalCase(s: string): string {
 }
 
 const DEPENDENCY_RULES = [
-  { keywords: ['pago', 'stripe', 'venda', 'checkout'], deps: { 'stripe': '^16.0.0', '@stripe/stripe-js': '^4.0.0' } },
+  { keywords: ['pago', 'stripe', 'venda', 'checkout', 'payment'], deps: { 'stripe': '^16.0.0', '@stripe/stripe-js': '^4.0.0' } },
   { keywords: ['animac', 'motion', 'framer'], deps: { 'framer-motion': '^11.0.0' } },
-  { keywords: ['grafic', 'chart', 'data', 'recharts'], deps: { 'recharts': '^2.12.0', 'lucide-react': '^0.462.0' } },
-  { keywords: ['chat', 'mensaje', 'realtime'], deps: { '@supabase/supabase-js': '^2.45.0', 'lucide-react': '^0.462.0' } },
-  { keywords: ['mapa', 'google maps', 'leaflet'], deps: { 'leaflet': '^1.9.4', '@types/leaflet': '^1.9.12' } },
+  { keywords: ['grafic', 'chart', 'data', 'recharts', 'grafica', 'gráfico'], deps: { 'recharts': '^2.12.0', 'lucide-react': '^0.462.0' } },
+  { keywords: ['chat', 'mensaje', 'realtime', 'tiempo real'], deps: { '@supabase/supabase-js': '^2.45.0', 'lucide-react': '^0.462.0' } },
+  { keywords: ['mapa', 'google maps', 'leaflet', 'map', 'location'], deps: { 'leaflet': '^1.9.4', '@types/leaflet': '^1.9.12' } },
+  { keywords: ['three.js', 'threejs', '3d', 'webgl', 'three'], deps: { 'three': '^0.170.0', '@types/three': '^0.169.0', '@react-three/fiber': '^8.17.10', '@react-three/drei': '^9.117.0' } },
+  { keywords: ['date', 'fecha', 'format date'], deps: { 'date-fns': '^3.6.0' } },
+  { keywords: ['form', 'formulario', 'validacion', 'validation', 'zod'], deps: { 'react-hook-form': '^7.52.0', 'zod': '^3.23.8', '@hookform/resolvers': '^3.9.0' } },
+  { keywords: ['query', 'react-query', 'tanstack', 'fetch'], deps: { '@tanstack/react-query': '^5.45.0' } },
+  { keywords: ['slider', 'carousel', 'swipe', 'swiper'], deps: { 'swiper': '^11.1.0' } },
+  { keywords: ['calendar', 'calendario', 'date picker'], deps: { 'react-calendar': '^5.0.0', 'date-fns': '^3.6.0' } },
+  { keywords: ['pdf', 'export pdf', 'generar pdf'], deps: { 'jspdf': '^2.5.1', 'html2canvas': '^1.4.1' } },
+  { keywords: ['excel', 'csv', 'export excel'], deps: { 'xlsx': '^0.18.5' } },
+  { keywords: ['toast', 'notification', 'alert'], deps: { 'sonner': '^1.5.0' } },
+  { keywords: ['table', 'tabla', 'data grid', 'spreadsheet'], deps: { '@tanstack/react-table': '^8.17.0' } },
+  { keywords: ['drag', 'drop', 'sortable', 'dnd'], deps: { '@dnd-kit/core': '^6.1.0', '@dnd-kit/sortable': '^8.0.0' } },
+  { keywords: ['zustand', 'store', 'state management'], deps: { 'zustand': '^5.0.1' } },
+  { keywords: ['axios', 'http', 'api client'], deps: { 'axios': '^1.7.0' } },
+  { keywords: ['lodash', 'utils', 'utilities'], deps: { 'lodash-es': '^4.17.21', '@types/lodash-es': '^4.17.12' } },
 ];
 
-function getDynamicDeps(description: string = ''): Record<string, string> {
+/**
+ * Detecta dependencias basándose en la descripción del proyecto
+ * y también escanea el código generado para imports
+ */
+function getDynamicDeps(description: string = '', codeContent: string = ''): Record<string, string> {
   const d = description.toLowerCase();
   const extra: Record<string, string> = {};
+
+  // Detectar por keywords en descripción
   DEPENDENCY_RULES.forEach(rule => {
     if (rule.keywords.some(k => d.includes(k))) {
       Object.assign(extra, rule.deps);
     }
   });
+
+  // Detectar por imports en código
+  const importPatterns = [
+    { pattern: /from\s+['"]framer-motion['"]|import\s+.*from\s+['"]framer-motion['"]/, deps: { 'framer-motion': '^11.0.0' } },
+    { pattern: /from\s+['"]recharts['"]|import\s+.*from\s+['"]recharts['"]/, deps: { 'recharts': '^2.12.0' } },
+    { pattern: /from\s+['"]@supabase\/supabase-js['"]/, deps: { '@supabase/supabase-js': '^2.45.0' } },
+    { pattern: /from\s+['"]lucide-react['"]/, deps: { 'lucide-react': '^0.462.0' } },
+    { pattern: /from\s+['"]zustand['"]/, deps: { 'zustand': '^5.0.1' } },
+    { pattern: /from\s+['"]axios['"]/, deps: { 'axios': '^1.7.0' } },
+    { pattern: /from\s+['"]date-fns['"]/, deps: { 'date-fns': '^3.6.0' } },
+    { pattern: /from\s+['"]react-hook-form['"]/, deps: { 'react-hook-form': '^7.52.0' } },
+    { pattern: /from\s+['"]zod['"]/, deps: { 'zod': '^3.23.8' } },
+    { pattern: /from\s+['"]three['"]/, deps: { 'three': '^0.170.0', '@types/three': '^0.169.0' } },
+    { pattern: /from\s+['"]@react-three\/(fiber|drei)['"]/, deps: { '@react-three/fiber': '^8.17.10', '@react-three/drei': '^9.117.0' } },
+    { pattern: /from\s+['"]@tanstack\/react-query['"]/, deps: { '@tanstack/react-query': '^5.45.0' } },
+    { pattern: /from\s+['"]@tanstack\/react-table['"]/, deps: { '@tanstack/react-table': '^8.17.0' } },
+    { pattern: /from\s+['"]swiper['"]/, deps: { 'swiper': '^11.1.0' } },
+    { pattern: /from\s+['"]sonner['"]/, deps: { 'sonner': '^1.5.0' } },
+    { pattern: /from\s+['"]jspdf['"]/, deps: { 'jspdf': '^2.5.1' } },
+    { pattern: /from\s+['"]html2canvas['"]/, deps: { 'html2canvas': '^1.4.1' } },
+  ];
+
+  importPatterns.forEach(({ pattern, deps }) => {
+    if (pattern.test(codeContent)) {
+      Object.assign(extra, deps);
+    }
+  });
+
   return extra;
+}
+
+/**
+ * Genera un bloque de instrucciones para instalar dependencias detectadas
+ */
+export function generateDependencyInstructions(deps: Record<string, string>): string {
+  const depList = Object.entries(deps)
+    .map(([name, version]) => `${name}@${version}`)
+    .join(' ');
+
+  return `\n\n## 📦 Instalación de Dependencias\n\n\`\`\`bash
+npm install ${depList}
+\`\`\``;
 }
 
 // ─── React (Vite) Templates ────────────────────────────────────────────────

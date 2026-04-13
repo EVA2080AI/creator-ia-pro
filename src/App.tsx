@@ -43,6 +43,7 @@ function AuthWatcher() {
 // Public
 const Index        = lazy(() => import("./pages/Index"));
 const Auth         = lazy(() => import("./pages/Auth"));
+const HomePage     = lazy(() => import("./pages/Home"));
 const Pricing      = lazy(() => import("./pages/Pricing"));
 const Downloads    = lazy(() => import("./pages/Downloads"));
 const ToolLanding  = lazy(() => import("./pages/ToolLanding"));
@@ -73,6 +74,9 @@ const LuminaSummary = lazy(() => import("./pages/LuminaSummary"));
 
 // Nebula Finance Ecosystem
 const NebulaDashboard = lazy(() => import("./pages/NebulaDashboard"));
+
+// Alanding Sensilla Ecosystem
+const LandingPage = lazy(() => import("./pages/Landing"));
 
 // Light loading screen — no dark bg
 const LoadingScreen = () => (
@@ -113,6 +117,7 @@ const App = () => {
                 <Routes>
                   {/* ── Public routes (no AppLayout) ── */}
                   <Route path="/"                     element={<Index />} />
+                  <Route path="/home"                 element={<HomePage />} />
                   <Route path="/auth"                 element={<Auth />} />
                   <Route path="/pricing"              element={<Pricing />} />
                   <Route path="/descargar"            element={<Downloads />} />
@@ -121,6 +126,7 @@ const App = () => {
                   <Route path="/reset-password"       element={<ResetPassword />} />
                   <Route path="/documentation"        element={<Documentation />} />
                   <Route path="/docs"                 element={<Docs />} />
+                  <Route path="/landing-test"         element={<LandingPage />} />
                   
                   {/* Lumina Bistro Flow */}
                   <Route path="/menu"              element={<LuminaMenu />} />

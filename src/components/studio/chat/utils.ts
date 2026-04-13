@@ -208,3 +208,337 @@ function buildSuggestions(stack: string[], prompt: string): string[] {
   const sList = ['Agregar modo oscuro', 'Optimizar para móviles', 'Añadir animaciones', 'Pulir diseño'];
   return sList;
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// FUNCIONES DE MANIPULACIÓN DE ARCHIVOS (PATCH, DELETE, TRUNCATION)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Detecta si la respuesta de la IA fue truncada (cortada)
+ * Verifica si hay bloques de código sin cerrar o estructuras incompletas
+ */
+export function isResponseTruncated(text: string): boolean {
+  if (!text || text.length < 100) return false;
+
+  // Contar bloques de código abiertos vs cerrados
+  const openCodeBlocks = (text.match(/```[a-z]*/gi) || []).length;
+  const closeCodeBlocks = (text.match(/```\s*$/gm) || []).length;
+
+  // Si hay bloques abiertos pero no cerrados apropiadamente
+  if (openCodeBlocks > closeCodeBlocks) return true;
+
+  // Verificar si termina en medio de un bloque de código
+  const lastCodeBlock = text.lastIndexOf('```');
+  const lastContent = text.slice(lastCodeBlock + 3).trim();
+  if (lastCodeBlock !== -1 && lastContent.length > 0 && !lastContent.startsWith('\n')) {
+    // Parece que hay contenido después del último ``` que no es un cierre
+    const hasUnclosedBlock = /```(tsx|jsx|ts|js|css|html|json)\s*\n[\s\S]*$/.test(text);
+    if (hasUnclosedBlock) return true;
+  }
+
+  // Verificar si termina abruptamente con caracteres de continuación
+  const endsWithContinuation = /[\w\s,;:+\-\*/=<{(\[]$/.test(text.slice(-100));
+  const hasIncompleteLine = !text.endsWith('}') && !text.endsWith('`') && !text.endsWith('>');
+
+  // Verificar patrones de truncación comunes
+  const truncationPatterns = [
+    /export\s+default\s+\w+\s*\{[^}]*$/, // export default X { ... (sin cerrar)
+    /return\s*\([^)]*$/,                 // return ( ... (sin cerrar)
+    /<\w+[^>]*>$/,                       // <Tag ...> (sin cerrar)
+    /\{[^}]*$/,                          // { ... (sin cerrar)
+    /\[[^\]]*$/,                         // [ ... (sin cerrar)
+  ];
+
+  const lastLines = text.slice(-500);
+  const appearsTruncated = truncationPatterns.some(pattern => pattern.test(lastLines));
+
+  return appearsTruncated && endsWithContinuation;
+}
+
+/**
+ * Extrae bloques PATCH del formato FIND/REPLACE del markdown
+ * Formato esperado:
+ * ```patch
+ * // archivo.tsx
+ * FIND:
+ * código a buscar
+ * REPLACE:
+ * código nuevo
+ * ```
+ */
+export function extractPatchBlocks(text: string): Array<{
+  filename: string;
+  find: string;
+  replace: string;
+}> | null {
+  const patches: Array<{ filename: string; find: string; replace: string }> = [];
+
+  // Patrón para bloques patch
+  const patchRegex = /```patch\s*\n?(?:\/\/\s*)?([^\n]+)\n?([\s\S]*?)```/g;
+
+  let match;
+  while ((match = patchRegex.exec(text)) !== null) {
+    const filename = match[1].trim().replace(/^\/\//, '').trim();
+    const content = match[2];
+
+    // Buscar secciones FIND y REPLACE
+    const findMatch = content.match(/FIND:\s*\n?([\s\S]*?)(?=\n?REPLACE:|$)/);
+    const replaceMatch = content.match(/REPLACE:\s*\n?([\s\S]*?)$/);
+
+    if (findMatch && replaceMatch) {
+      patches.push({
+        filename,
+        find: findMatch[1].trim(),
+        replace: replaceMatch[1].trim()
+      });
+    }
+  }
+
+  // También soportar formato simplificado: ```patch filename
+  const simplePatchRegex = /```patch\s+([\w.\/\-]+)\n([\s\S]*?)```/g;
+  while ((match = simplePatchRegex.exec(text)) !== null) {
+    const filename = match[1].trim();
+    const patchContent = match[2];
+
+    // Intentar separar por === o similar
+    if (patchContent.includes('===')) {
+      const [find, replace] = patchContent.split('===').map(s => s.trim());
+      patches.push({ filename, find, replace });
+    }
+  }
+
+  return patches.length > 0 ? patches : null;
+}
+
+/**
+ * Extrae comandos DELETE del código
+ * Busca comentarios // DELETE o instrucciones de eliminación
+ */
+export function extractDeleteCommands(text: string): string[] {
+  const filesToDelete: string[] = [];
+
+  // Patrón 1: // DELETE en bloques de código
+  const deleteRegex = /```[a-z]*\s*\n?(?:\/\/\s*)?([^\n]+)\s*\n?\/\/\s*DELETE\s*```/gi;
+  let match;
+  while ((match = deleteRegex.exec(text)) !== null) {
+    filesToDelete.push(match[1].trim().replace(/^\/\//, '').trim());
+  }
+
+  // Patrón 2: Texto explícito "elimina archivo X" o "borra X"
+  const explicitDeleteRegex = /(?:elimina|borra|delete|remove)\s+(?:el\s+)?(?:archivo|file)?\s*:?\s*`?([\w.\/\-]+)`?/gi;
+  while ((match = explicitDeleteRegex.exec(text)) !== null) {
+    const filename = match[1].trim();
+    if (filename.includes('.') && !filesToDelete.includes(filename)) {
+      filesToDelete.push(filename);
+    }
+  }
+
+  // Patrón 3: Comentarios inline // DELETE: filename
+  const inlineDeleteRegex = /\/\/\s*DELETE\s*:\s*([\w.\/\-]+)/gi;
+  while ((match = inlineDeleteRegex.exec(text)) !== null) {
+    const filename = match[1].trim();
+    if (!filesToDelete.includes(filename)) {
+      filesToDelete.push(filename);
+    }
+  }
+
+  return filesToDelete;
+}
+
+/**
+ * Aplica patches quirúrgicos a archivos existentes
+ * Usa el formato FIND/REPLACE para hacer cambios precisos
+ */
+export function applyPatchToFiles(
+  text: string,
+  projectFiles: Record<string, StudioFile>
+): Record<string, StudioFile> {
+  const patchedFiles = { ...projectFiles };
+  const patches = extractPatchBlocks(text);
+
+  if (!patches) return patchedFiles;
+
+  for (const patch of patches) {
+    const filename = patch.filename;
+    const file = patchedFiles[filename];
+
+    if (!file) {
+      console.warn(`[applyPatchToFiles] Archivo no encontrado: ${filename}`);
+      continue;
+    }
+
+    // Normalizar el contenido para la búsqueda
+    const normalizedContent = file.content.replace(/\r\n/g, '\n');
+    const normalizedFind = patch.find.replace(/\r\n/g, '\n');
+    const normalizedReplace = patch.replace.replace(/\r\n/g, '\n');
+
+    // Intentar reemplazo exacto
+    if (normalizedContent.includes(normalizedFind)) {
+      const newContent = normalizedContent.replace(normalizedFind, normalizedReplace);
+      patchedFiles[filename] = {
+        ...file,
+        content: newContent
+      };
+      console.log(`[applyPatchToFiles] Patch aplicado a ${filename}`);
+    } else {
+      // Intentar búsqueda flexible (ignorando espacios extras)
+      const flexibleFind = normalizedFind.replace(/\s+/g, '\\s+');
+      const flexibleRegex = new RegExp(flexibleFind, 'g');
+
+      if (flexibleRegex.test(normalizedContent)) {
+        const newContent = normalizedContent.replace(flexibleRegex, normalizedReplace);
+        patchedFiles[filename] = {
+          ...file,
+          content: newContent
+        };
+        console.log(`[applyPatchToFiles] Patch flexible aplicado a ${filename}`);
+      } else {
+        console.warn(`[applyPatchToFiles] No se encontró el patrón en ${filename}`);
+      }
+    }
+  }
+
+  return patchedFiles;
+}
+
+/**
+ * Procesa todas las operaciones de archivo (PATCH, DELETE, nuevos archivos)
+ * Retorna el estado actualizado de los archivos del proyecto
+ */
+export function processFileOperations(
+  text: string,
+  projectFiles: Record<string, StudioFile>
+): {
+  files: Record<string, StudioFile>;
+  deletedFiles: string[];
+  patchedFiles: string[];
+  newFiles: string[];
+} {
+  let result = { ...projectFiles };
+  const deletedFiles: string[] = [];
+  const patchedFiles: string[] = [];
+  const newFiles: string[] = [];
+
+  // 1. Procesar DELETE primero
+  const deletes = extractDeleteCommands(text);
+  for (const filename of deletes) {
+    if (result[filename]) {
+      delete result[filename];
+      deletedFiles.push(filename);
+      console.log(`[processFileOperations] Archivo eliminado: ${filename}`);
+    }
+  }
+
+  // 2. Procesar PATCH
+  const patches = extractPatchBlocks(text);
+  if (patches) {
+    for (const patch of patches) {
+      const filename = patch.filename;
+      const file = result[filename];
+
+      if (file) {
+        const normalizedContent = file.content.replace(/\r\n/g, '\n');
+        const normalizedFind = patch.find.replace(/\r\n/g, '\n');
+        const normalizedReplace = patch.replace.replace(/\r\n/g, '\n');
+
+        if (normalizedContent.includes(normalizedFind)) {
+          result[filename] = {
+            ...file,
+            content: normalizedContent.replace(normalizedFind, normalizedReplace)
+          };
+          patchedFiles.push(filename);
+        }
+      }
+    }
+  }
+
+  // 3. Extraer nuevos archivos de bloques de código
+  const newFileBlocks = extractChatCodeFiles(text);
+  if (newFileBlocks) {
+    for (const [filename, fileData] of Object.entries(newFileBlocks)) {
+      // Si el archivo ya existe y es idéntico, no lo marcamos como nuevo
+      if (!result[filename] || result[filename].content !== fileData.content) {
+        if (!result[filename]) {
+          newFiles.push(filename);
+        }
+        result[filename] = fileData;
+      }
+    }
+  }
+
+  return {
+    files: result,
+    deletedFiles,
+    patchedFiles,
+    newFiles
+  };
+}
+
+/**
+ * Detecta si el usuario quiere limpiar/resetear el proyecto completamente
+ */
+export function wantsProjectReset(prompt: string): boolean {
+  const p = prompt.toLowerCase().trim();
+  const resetKeywords = [
+    'limpia todo', 'borra todo', 'empezar de cero', 'resetear proyecto',
+    'nuevo proyecto', 'clear all', 'start fresh', 'reset project',
+    'elimina todo', 'desde cero', 'from scratch', 'clean slate'
+  ];
+  return resetKeywords.some(kw => p.includes(kw));
+}
+
+/**
+ * Detecta dependencias faltantes basándose en los imports del código
+ */
+export function detectMissingDependencies(
+  files: Record<string, StudioFile>
+): string[] {
+  const deps = new Set<string>();
+  const importRegex = /import\s+(?:(?:\{[^}]*\}|[^'"]*)\s+from\s+)?['"]([^'"]+)['"];?/g;
+
+  const dependencyMap: Record<string, string> = {
+    'lucide-react': 'lucide-react',
+    'framer-motion': 'framer-motion',
+    'recharts': 'recharts',
+    '@supabase/supabase-js': '@supabase/supabase-js',
+    'react-router-dom': 'react-router-dom',
+    'axios': 'axios',
+    'clsx': 'clsx',
+    'tailwind-merge': 'tailwind-merge',
+    'zustand': 'zustand',
+    '@react-three/fiber': '@react-three/fiber',
+    '@react-three/drei': '@react-three/drei',
+    'three': 'three',
+    'date-fns': 'date-fns',
+    'lodash': 'lodash',
+    'zod': 'zod',
+    'react-hook-form': 'react-hook-form',
+    '@hookform/resolvers': '@hookform/resolvers',
+  };
+
+  for (const file of Object.values(files)) {
+    let match;
+    const content = file.content;
+    while ((match = importRegex.exec(content)) !== null) {
+      const importPath = match[1];
+
+      // Ignorar imports relativos y de React
+      if (importPath.startsWith('.') || importPath.startsWith('/')) continue;
+      if (importPath === 'react' || importPath === 'react-dom') continue;
+
+      // Extraer el nombre del paquete (sin subpaths)
+      const packageName = importPath.split('/')[0];
+
+      // Mapear a dependencia conocida o usar el nombre del paquete
+      if (dependencyMap[importPath]) {
+        deps.add(dependencyMap[importPath]);
+      } else if (dependencyMap[packageName]) {
+        deps.add(dependencyMap[packageName]);
+      } else if (!importPath.startsWith('@')) {
+        deps.add(packageName);
+      }
+    }
+  }
+
+  return Array.from(deps);
+}
