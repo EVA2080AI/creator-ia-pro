@@ -142,7 +142,7 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.97 }}
               transition={{ duration: 0.15 }}
-              className="absolute right-0 bottom-full mb-2 w-[26rem] max-w-[calc(100vw-2rem)] rounded-2xl overflow-hidden z-[100] bg-white border border-zinc-200 shadow-[0_20px_60px_rgba(0,0,0,0.12)]"
+              className="absolute left-0 top-full mt-2 w-[26rem] max-w-[calc(100vw-2rem)] rounded-2xl overflow-hidden z-[100] bg-white border border-zinc-200 shadow-[0_20px_60px_rgba(0,0,0,0.12)]"
             >
               {/* Header */}
               <div className="px-4 py-3 border-b border-zinc-100 bg-zinc-50 flex items-center justify-between">
