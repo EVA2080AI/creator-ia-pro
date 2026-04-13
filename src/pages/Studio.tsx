@@ -24,7 +24,6 @@ import { type AgentPhase, type AgentSpecialist } from '@/components/studio/chat/
 import { Loader2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
-import { hardResetProject } from '@/hooks/useStudioProjects';
 
 export default function Studio() {
   const { user } = useAuth('/auth');
@@ -38,7 +37,8 @@ export default function Studio() {
     setActiveProject, 
     loading: loadingProjects, 
     updateProjectFiles, 
-    createProject 
+    createProject,
+    hardResetProject
   } = useStudioProjects();
 
   // ── Operational State ──
