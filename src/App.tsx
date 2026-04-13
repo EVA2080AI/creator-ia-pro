@@ -71,6 +71,7 @@ const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 const LuminaMenu = lazy(() => import("./pages/LuminaMenu"));
 const LuminaCustomize = lazy(() => import("./pages/LuminaCustomize"));
 const LuminaSummary = lazy(() => import("./pages/LuminaSummary"));
+const ConfirmacionDeEnvio = lazy(() => import("./pages/ConfirmacionDeEnvio"));
 
 // Nebula Finance Ecosystem
 const NebulaDashboard = lazy(() => import("./pages/NebulaDashboard"));
