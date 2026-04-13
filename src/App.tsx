@@ -44,6 +44,7 @@ function AuthWatcher() {
 const Index        = lazy(() => import("./pages/Index"));
 const Auth         = lazy(() => import("./pages/Auth"));
 const HomePage     = lazy(() => import("./pages/Home"));
+const Inicio       = lazy(() => import("./pages/Inicio"));
 const Pricing      = lazy(() => import("./pages/Pricing"));
 const Downloads    = lazy(() => import("./pages/Downloads"));
 const ToolLanding  = lazy(() => import("./pages/ToolLanding"));
@@ -119,6 +120,7 @@ const App = () => {
                   {/* ── Public routes (no AppLayout) ── */}
                   <Route path="/"                     element={<Index />} />
                   <Route path="/home"                 element={<HomePage />} />
+                  <Route path="/inicio"               element={<Inicio />} />
                   <Route path="/auth"                 element={<Auth />} />
                   <Route path="/pricing"              element={<Pricing />} />
                   <Route path="/descargar"            element={<Downloads />} />
