@@ -53,10 +53,8 @@ export function StudioPreview({
   const prevFilesRef = useRef<string>('');
   const [compilationStatus, setCompilationStatus] = useState<'idle' | 'compiling' | 'success' | 'error'>('idle');
 
-  // When files change from generating or manual edits, reset status
   useEffect(() => {
     if (!isGenerating && Object.keys(files).length > 0) {
-      // Create a deterministic hash of the files to avoid non-consistent object order refreshes
       const sortedKeys = Object.keys(files).sort();
       const currentFilesHash = JSON.stringify(sortedKeys.map(k => ({ k, c: files[k].content })));
       
@@ -67,8 +65,6 @@ export function StudioPreview({
         setCompilationStatus('compiling');
       }
     } else {
-      // While generating, we might want to keep status as compiling 
-      // but avoid constant sandpackKey resets to prevent flickering
       setCompilationStatus('compiling');
     }
   }, [isGenerating, files]);
@@ -79,10 +75,9 @@ export function StudioPreview({
            !vals.some(f => f.language === 'tsx' || f.language === 'jsx');
   }, [files]);
   
-  const sandpackFiles = useMemo(() => 
-    toSandpackFiles(files, supabaseConfig, isVanillaHtml), 
-    [files, supabaseConfig, isVanillaHtml]
-  );
+  const sandpackFiles = useMemo(() => {
+    return toSandpackFiles(files, supabaseConfig, isVanillaHtml);
+  }, [files, supabaseConfig, isVanillaHtml]);
   
   useEffect(() => {
     const handleMessage = (e: MessageEvent) => {
@@ -103,15 +98,17 @@ export function StudioPreview({
   const frameHeight: Record<DeviceMode, string | undefined> = { desktop: undefined, tablet: '1024px', mobile: '812px' };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-white selection:bg-primary/10 relative">
+    <div className="flex h-full flex-col overflow-hidden bg-white relative">
       <div className="flex flex-1 items-start justify-center overflow-auto relative bg-[#FAFAFA]">
         
         {/* DOT GRID BACKGROUND */}
-        <div className="absolute inset-0 opacity-[0.4]" 
-             style={{ 
-               backgroundImage: 'radial-gradient(#e5e7eb 1px, transparent 1px)', 
-               backgroundSize: '24px 24px' 
-             }} />
+        <div 
+          className="absolute inset-0 opacity-[0.4] pointer-events-none" 
+          style={{ 
+            backgroundImage: 'radial-gradient(#e5e7eb 1px, transparent 1px)', 
+            backgroundSize: '24px 24px' 
+          }} 
+        />
 
         <AnimatePresence>
           {isGenerating && (
@@ -121,7 +118,6 @@ export function StudioPreview({
               exit={{ opacity: 0 }}
               className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FAFAFA]/95 backdrop-blur-md overflow-hidden"
             >
-              {/* INDUSTRIAL SCANNING BEAM */}
               <motion.div 
                 className="absolute inset-0 z-0 pointer-events-none"
                 initial={{ background: 'linear-gradient(to bottom, transparent 0%, rgba(var(--primary-rgb), 0.1) 50%, transparent 100%)', y: '-100%' }}
@@ -170,7 +166,6 @@ export function StudioPreview({
                 </div>
               </motion.div>
 
-              {/* FLOATING TEXT DECORATION */}
               <div className="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-20 flex gap-12">
                 {['SEQUENTIAL_BUILD', 'DATA_PERSISTENCE', 'MODEL_ORCHESTRATION'].map(t => (
                   <span key={t} className="text-[8px] font-black tracking-[0.4em] text-zinc-400">{t}</span>
@@ -202,8 +197,6 @@ export function StudioPreview({
               options={{ externalResources: isVanillaHtml ? [] : ['https://cdn.tailwindcss.com'] }}
             >
               <div className="relative h-full w-full bg-white">
-                
-                {/* ── SUBTLE COMPILATION TOAST ── */}
                 <AnimatePresence>
                   {compilationStatus === 'error' && (
                     <motion.div 
@@ -213,7 +206,7 @@ export function StudioPreview({
                       className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 bg-red-500 text-white rounded-2xl shadow-xl shadow-red-500/20 font-medium text-xs pointer-events-auto"
                     >
                       <AlertCircle className="w-4 h-4 shrink-0" />
-                      <span className="max-w-[200px] md:max-w-md truncate">Problema detectado. Revisa tus logs o pide soporte.</span>
+                      <span className="max-w-[200px] md:max-w-md truncate">Problema detectado. Revisa tus logs.</span>
                       <button 
                         onClick={() => setCompilationStatus('idle')} 
                         className="ml-2 hover:bg-white/20 p-1.5 rounded-xl transition-colors"
