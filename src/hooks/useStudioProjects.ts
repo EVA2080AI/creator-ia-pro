@@ -212,10 +212,46 @@ export function useStudioProjects() {
     return normalizeFiles(data.files);
   }, []);
 
+  const hardResetProject = useCallback(async (projectId: string) => {
+    // 1. Wipe all files to empty state
+    const { error: fileError } = await supabase
+      .from('studio_projects')
+      .update({ 
+        files: {}, 
+        updated_at: new Date().toISOString(),
+        description: null 
+      })
+      .eq('id', projectId);
+
+    if (fileError) {
+      toast.error('Error al limpiar archivos');
+      return false;
+    }
+
+    // 2. Wipe chat history for this project
+    const { error: chatError } = await supabase
+      .from('studio_conversations')
+      .delete()
+      .eq('project_id', projectId);
+
+    if (chatError) {
+      console.error('Error clearing chat history during reset:', chatError);
+    }
+
+    // 3. Update local state
+    setProjects(prev => prev.map(p => p.id === projectId ? { ...p, files: {}, description: null } : p));
+    if (activeProject?.id === projectId) {
+      setActiveProject(prev => prev ? { ...prev, files: {}, description: null } : null);
+    }
+
+    toast.success('Proyecto reseteado a cero');
+    return true;
+  }, [activeProject]);
+
   return { 
     projects, activeProject, setActiveProject, loading, 
     createProject, updateProjectFiles, renameProject, 
     deleteProject, duplicateProject, rollbackFiles, canUndo: !!previousFiles,
-    refetch: fetchProjects, getProjectFiles
+    refetch: fetchProjects, getProjectFiles, hardResetProject
   };
 }

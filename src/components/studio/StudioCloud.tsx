@@ -627,33 +627,6 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
           </div>
         )}
 
-        {/* ── AUDIT LOGS ────────────────────────────────────────────────────── */}
-        {section === 'audit' && isConnected && (
-          <div className="p-4 space-y-4">
-            <div>
-              <h3 className="text-[11px] font-black text-white/30 uppercase tracking-[0.25em] mb-1">Workspace Audit Logs</h3>
-              <p className="text-[10px] text-white/20">Registro de cumplimiento empresarial</p>
-            </div>
-
-            <div className="space-y-1">
-              {[
-                { action: 'Project Created', member: 'Genesis AI', time: '10m ago' },
-                { action: 'Secret Added',    member: 'Admin',      time: '1h ago' },
-              ].map((log, idx) => (
-                <div key={idx} className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <History className="h-3 w-3 text-white/20" />
-                    <div>
-                      <div className="text-[11px] font-bold text-white/70">{log.action}</div>
-                      <div className="text-[9px] text-white/20">by {log.member}</div>
-                    </div>
-                  </div>
-                  <span className="text-[9px] text-white/15">{log.time}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
         {/* ── KNOWLEDGE CORE ────────────────────────────────────────────────── */}
         {section === 'knowledge' && isConnected && (
           <div className="p-4 space-y-4">
@@ -692,9 +665,27 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
               ))}
             </div>
 
-            <button className="w-full py-2.5 rounded-xl bg-white/5 text-white/40 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all border border-white/5">
-              Sincronizar Conocimiento
-            </button>
+            <div className="pt-4 border-t border-white/5 space-y-3">
+              <button className="w-full py-2.5 rounded-xl bg-white/5 text-white/40 text-[10px] font-black uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all border border-white/5">
+                Sincronizar Conocimiento
+              </button>
+
+              <div className="px-2 py-3 rounded-2xl bg-red-500/5 border border-red-500/10 space-y-2">
+                <p className="text-[9px] text-red-400/60 font-medium px-1">
+                  ÁREA CRÍTICA: Borra todos los archivos, historial de chat y documentos para reiniciar el núcleo desde cero.
+                </p>
+                <button 
+                  onClick={() => {
+                    if (window.confirm("¿Estás seguro de resetear el proyecto a CERO? Esta acción no se puede deshacer.")) {
+                      onHardReset?.();
+                    }
+                  }}
+                  className="w-full py-2.5 rounded-xl bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all border border-red-500/20"
+                >
+                  HARD RESET (Nivel 0)
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

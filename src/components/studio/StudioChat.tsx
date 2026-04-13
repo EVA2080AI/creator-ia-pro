@@ -64,6 +64,7 @@ interface StudioChatProps {
   runtimeError?: string | null;
   onClearError?: () => void;
   onPhaseChange?: (phase: AgentPhase, specialist?: AgentSpecialist) => void;
+  onHardReset?: () => void;
 }
 
 interface StudioProjectHeaderProps {
@@ -171,8 +172,14 @@ export function StudioChat(props: StudioChatProps) {
   const activeLogs = props.logs || internalLogs;
   const setLogsState = props.setLogs || setInternalLogs;
 
-  const { 
-    messages, setMessages, convHistory, setConvHistory, saveToSupabase, addLog 
+  const {
+    messages,
+    setMessages,
+    convHistory,
+    setConvHistory,
+    saveToSupabase,
+    addLog,
+    resetConversation
   } = useStudioChatMessages({
     projectId: props.projectId,
     user,
@@ -180,6 +187,20 @@ export function StudioChat(props: StudioChatProps) {
     setTasks: setTasksState,
     setLogs: setLogsState as any
   });
+
+  // Handle hard reset signal from parent
+  useEffect(() => {
+    if (props.onHardReset) {
+      resetConversation();
+    }
+  }, [props.onHardReset, resetConversation]);
+
+  // Reset conversation if project files are cleared
+  useEffect(() => {
+    if (Object.keys(props.projectFiles).length === 0 && messages.length > 1) {
+       resetConversation();
+    }
+  }, [props.projectFiles, messages.length, resetConversation]);
 
   const {
     isGenerating, streamChars, streamingContent, genPhase, genSpecialist, currentGenIntent, generateCode, stopGeneration

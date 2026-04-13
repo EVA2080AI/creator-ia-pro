@@ -167,6 +167,16 @@ export function useStudioChatMessages({
     setTasks(newTasks);
   }, [messages, setArtifacts, setTasks]);
 
+  const resetConversation = useCallback(() => {
+    setMessages([{
+      id: 'welcome',
+      role: 'assistant',
+      content: '✨ ¡Bienvenido a Génesis! Estoy listo para evolucionar tu visión. ¿Qué construiremos hoy?',
+      timestamp: new Date()
+    }]);
+    setConvHistory([]);
+  }, []);
+
   return {
     messages,
     setMessages,
@@ -175,6 +185,7 @@ export function useStudioChatMessages({
     activeConversationId,
     saveToSupabase,
     addLog,
-    loadHistory
+    loadHistory,
+    resetConversation
   };
 }

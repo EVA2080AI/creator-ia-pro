@@ -85,21 +85,19 @@ export default function Studio() {
     }
   }, [activeProject, activeFile]);
 
-  // Project Health check: Ensure boilerplate files exist
+  // Project Health check: Only inject boilerplate if the project is TOTALLY EMPTY
   useEffect(() => {
     if (!activeProject) return;
     const files = activeProject.files;
-    const hasHtml = !!files['index.html'];
-    const hasPkg = !!files['package.json'];
-    const hasVite = !!files['vite.config.ts'];
-
-    if (!hasHtml || !hasPkg || !hasVite || (!files['App.tsx'] && !files['src/App.tsx'])) {
-      const u = { ...files };
+    const fileKeys = Object.keys(files);
+    
+    // Only auto-initialize if it's a brand new empty project
+    if (fileKeys.length === 0) {
+      const u: Record<string, StudioFile> = {};
       
-      if (!hasHtml) {
-        u['index.html'] = { 
-          language: 'html', 
-          content: `<!DOCTYPE html>
+      u['index.html'] = { 
+        language: 'html', 
+        content: `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -112,39 +110,32 @@ export default function Studio() {
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>` 
-        };
-      }
+      };
 
-      if (!hasPkg) {
-        u['package.json'] = { 
-          language: 'json', 
-          content: JSON.stringify({ 
-            name: "genesis-project", 
-            type: "module", 
-            dependencies: { 
-              "react": "^18.2.0", 
-              "react-dom": "^18.2.0",
-              "lucide-react": "latest",
-              "framer-motion": "latest",
-              "clsx": "latest",
-              "tailwind-merge": "latest"
-            } 
-          }, null, 2) 
-        };
-      }
+      u['package.json'] = { 
+        language: 'json', 
+        content: JSON.stringify({ 
+          name: "genesis-project", 
+          type: "module", 
+          dependencies: { 
+            "react": "^18.2.0", 
+            "react-dom": "^18.2.0",
+            "lucide-react": "latest",
+            "framer-motion": "latest",
+            "clsx": "latest",
+            "tailwind-merge": "latest"
+          } 
+        }, null, 2) 
+      };
 
-      if (!hasVite) {
-        u['vite.config.ts'] = { 
-          language: 'typescript', 
-          content: "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({ plugins: [react()] });" 
-        };
-      }
+      u['vite.config.ts'] = { 
+        language: 'typescript', 
+        content: "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({ plugins: [react()] });" 
+      };
 
-      // Final critical files: main.tsx, index.css and App.tsx
-      if (!files['src/main.tsx']) {
-        u['src/main.tsx'] = {
-          language: 'tsx',
-          content: `import React from 'react';
+      u['src/main.tsx'] = {
+        language: 'tsx',
+        content: `import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
@@ -154,91 +145,36 @@ if (rootElement) {
   const root = createRoot(rootElement);
   root.render(<App />);
 }`
-        };
-      }
+      };
 
-      if (!files['src/index.css']) {
-        u['src/index.css'] = {
-          language: 'css',
-          content: `@tailwind base;
+      u['src/index.css'] = {
+        language: 'css',
+        content: `@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
+body { margin: 0; background: #FDFDFF; }`
+      };
 
-.animate-shimmer {
-  animation: shimmer 2s infinite linear;
-  background-size: 200% 100%;
-}
-
-body {
-  margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: #FDFDFF;
-}`
-        };
-      }
-
-      if (!files['src/App.tsx'] && !files['App.tsx']) {
-        u['src/App.tsx'] = {
-          language: 'tsx',
-          content: `import React from 'react';
-import { Sparkles, Code2, Zap, ShieldCheck } from 'lucide-react';
+      u['src/App.tsx'] = {
+        language: 'tsx',
+        content: `import React from 'react';
+import { Sparkles } from 'lucide-react';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-[#FDFDFF] flex flex-col items-center justify-center p-6 text-zinc-900 font-sans">
-      <div className="max-w-md w-full">
-        <div className="bg-white rounded-[2.5rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-zinc-100 flex flex-col items-center text-center relative overflow-hidden">
-          {/* Decorative background element */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-zinc-900/5 to-transparent" />
-          
-          <div className="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center mb-8 shadow-2xl shadow-zinc-200 rotate-3 hover:rotate-0 transition-all duration-500 group">
-            <Sparkles className="text-white w-10 h-10 group-hover:scale-110 transition-transform" />
-          </div>
-          
-          <h1 className="text-3xl font-black mb-3 tracking-tight text-zinc-900">Génesis Studio</h1>
-          <p className="text-zinc-400 text-sm leading-relaxed mb-8 px-2">
-            El nucleo de inteligencia ha orquestado tu entorno. Todo está listo para construir.
-          </p>
-          
-          <div className="grid grid-cols-2 gap-3 w-full mb-8">
-            <div className="bg-zinc-50/50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center gap-2">
-              <Code2 className="w-5 h-5 text-zinc-400" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">React + TS</span>
-            </div>
-            <div className="bg-zinc-50/50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-emerald-500/60" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Ready</span>
-            </div>
-          </div>
-
-          <div className="w-full bg-zinc-100 h-1.5 rounded-full overflow-hidden mb-3">
-            <div className="h-full bg-zinc-900 w-full rounded-full animate-shimmer" 
-                 style={{
-                   backgroundImage: 'linear-gradient(90deg, #18181b 0%, #3f3f46 50%, #18181b 100%)',
-                 }} />
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.2em]">Engine Active</span>
-          </div>
-        </div>
-        
-        <p className="mt-8 text-center text-zinc-400 text-[11px] font-medium leading-relaxed max-w-[280px] mx-auto">
-          Utiliza el chat para generar tu primera aplicación o página web profesional.
-        </p>
+    <div className="min-h-screen bg-[#FDFDFF] flex flex-col items-center justify-center p-6 text-zinc-900 font-sans text-center">
+      <div className="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center mb-8 shadow-2xl">
+        <Sparkles className="text-white w-10 h-10" />
       </div>
+      <h1 className="text-3xl font-black mb-3 text-zinc-900 uppercase tracking-tighter italic">Génesis Studio</h1>
+      <p className="text-zinc-400 text-sm max-w-xs">
+        Núcleo listo. Describe tu visión en el chat para comenzar la orquestación.
+      </p>
     </div>
   );
 }`
-        };
-      }
+      };
       
       updateProjectFiles(activeProject.id, u);
     }
@@ -249,6 +185,18 @@ export default function App() {
     setIsSaving(true);
     await updateProjectFiles(activeProject.id, newFiles);
     setIsSaving(false);
+  };
+
+  const handleHardReset = async () => {
+    if (!activeProject) return;
+    const ok = await hardResetProject(activeProject.id);
+    if (ok) {
+      setArtifacts([]);
+      setTasks([]);
+      setLogs([]);
+      setActiveFile('src/App.tsx');
+      setViewMode('preview');
+    }
   };
 
   const handleAddFile = (name: string) => {
@@ -364,7 +312,15 @@ export default function App() {
           </div>
         );
       case 'cloud':
-        return <StudioCloud projectId={activeProject.id} config={cloudConfig} onConfigChange={setCloudConfig} />;
+        return (
+          <StudioCloud 
+            projectId={activeProject.id} 
+            projectName={activeProject.name}
+            config={cloudConfig} 
+            onConfigChange={setCloudConfig} 
+            onHardReset={handleHardReset}
+          />
+        );
       case 'analytics':
         return <StudioAnalytics projectId={activeProject.id} />;
       case 'nexus':

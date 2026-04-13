@@ -123,7 +123,9 @@ export function toSandpackFiles(
 
   Object.entries(files).forEach(([name, file]) => {
     if (!file || typeof file !== 'object') return;
-    if (typeof file.content !== 'string') return; // skip files with null/undefined content
+    if (typeof file.content !== 'string') return;
+    if (file.content === '__genesis_delete__') return; // skip deleted files
+    
     let cleanName = name.replace(/^\//, '');
     let abs = '/' + cleanName;
 
@@ -131,11 +133,8 @@ export function toSandpackFiles(
       result[abs] = { code: file.content };
     } else {
       if (ROOT_FILES.includes(cleanName) || cleanName.startsWith('public/')) {
-        // Keep at root
         if (cleanName === 'package.json') {
-          try {
-            customPackageJson = JSON.parse(file.content);
-          } catch(e) {}
+          try { customPackageJson = JSON.parse(file.content); } catch(e) {}
         }
       } else {
         if (!abs.startsWith('/src/')) abs = '/src' + abs;
@@ -145,6 +144,9 @@ export function toSandpackFiles(
   });
 
   if (!isVanillaHtml) {
+    const allKeys = Object.keys(result);
+
+    // ── STEP 1: Detect or generate App.tsx ───────────────────────────────────
     const pages = Object.entries(files)
       .filter(([name]) => name.startsWith('pages/') || name.startsWith('src/pages/'))
       .map(([name]) => {
@@ -154,43 +156,93 @@ export function toSandpackFiles(
       });
 
     if (pages.length > 1) {
+      // Multi-page project: generate a router wrapper
       result['/src/App.tsx'] = { code: generateRouterWrapper(pages, files), active: true };
-    } else if (!result['/src/App.tsx'] && !result['/App.tsx'] && !result['/src/App.jsx']) {
-      // Logic: Pick the first TSX/JSX file that looks like a main component, or the largest one.
+    } else if (!allKeys.includes('/src/App.tsx') && !allKeys.includes('/App.tsx') && !allKeys.includes('/src/App.jsx')) {
+      // Single-file/component: pick the best candidate
       const candidateFiles = Object.keys(files).filter(n => n.endsWith('.tsx') || n.endsWith('.jsx'));
-      
-      // Try specific names first (App, Main, Index)
-      let mainFile = candidateFiles.find(n => 
-        n.toLowerCase().endsWith('app.tsx') || 
+
+      let mainFile = candidateFiles.find(n =>
+        n.toLowerCase().endsWith('app.tsx') ||
         n.toLowerCase().endsWith('app.jsx') ||
-        n.toLowerCase().endsWith('main.tsx') || 
+        n.toLowerCase().endsWith('main.tsx') ||
         n.toLowerCase().endsWith('index.tsx') ||
         n.toLowerCase().endsWith('dashboard.tsx')
       );
-      
-      // Fallback: If no standard names, take the largest component found (usually the main one)
+
       if (!mainFile && candidateFiles.length > 0) {
-        mainFile = candidateFiles.sort((a,b) => (files[b].content?.length || 0) - (files[a].content?.length || 0))[0];
+        mainFile = candidateFiles.sort((a, b) => (files[b].content?.length || 0) - (files[a].content?.length || 0))[0];
       }
 
       if (mainFile) {
-         // Force mapped to /src/ for Sandpack consistency if not already there
-         const targetPath = mainFile.startsWith('/src/') ? mainFile : '/src/' + mainFile.replace(/^(\/|src\/)?/, '');
-         result[targetPath] = { code: files[mainFile].content, active: true };
+        const targetPath = '/src/' + mainFile.replace(/^(\/?src\/)/, '');
+        result[targetPath] = { code: files[mainFile].content, active: true };
+        if (targetPath !== '/src/App.tsx') {
+          // Re-export so main.tsx can always import from './App'
+          const compName = mainFile.replace(/.*\//, '').replace(/\.(tsx|jsx)$/, '');
+          result['/src/App.tsx'] = { 
+            code: `export { default } from './${targetPath.replace('/src/', '').replace(/\.(tsx|jsx)$/, '')}';`,
+            active: false 
+          };
+        }
       }
     }
-    
+
+    // ── STEP 2: Always guarantee a valid main.tsx ─────────────────────────────
+    // The Sandpack react-ts template needs /src/main.tsx to mount the app.
+    // If the user's generated code already has one, respect it.
+    // Otherwise inject a clean one.
+    if (!allKeys.includes('/src/main.tsx') && !result['/src/main.tsx']) {
+      const userIndexCss = allKeys.includes('/src/index.css') || result['/src/index.css'];
+      result['/src/main.tsx'] = {
+        code: `import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App';
+${userIndexCss ? "import './index.css';" : ''}
+
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  createRoot(rootElement).render(<App />);
+}`,
+      };
+    }
+
+    // ── STEP 3: Always guarantee a valid index.html ───────────────────────────
+    // Without a proper index.html the preview iframe has no entry point.
+    if (!allKeys.includes('/index.html') && !result['/index.html']) {
+      result['/index.html'] = {
+        code: `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genesis Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>`,
+      };
+    }
+
+    // ── STEP 4: Figma bridge ──────────────────────────────────────────────────
     result['/src/figma-bridge.js'] = { code: figmaBridgeCode };
     
-    // Merge dependencies intelligently
+    // ── STEP 5: Merge dependencies ────────────────────────────────────────────
     const baseDependencies = {
       'react': '^18.0.0', 'react-dom': '^18.0.0', 'lucide-react': '^0.468.0',
       'clsx': '^2.0.0', 'tailwind-merge': '^2.0.0', 'framer-motion': '^11.0.0',
       'react-router-dom': '^6.0.0', 'recharts': '^2.0.0', 'axios': '^1.0.0', 'zustand': '^4.0.0',
+      '@headlessui/react': '^2.0.0', '@heroicons/react': '^2.0.0',
       ...(supabaseConfig ? { '@supabase/supabase-js': '^2.0.0' } : {}),
     };
 
-    const finalDeps = customPackageJson?.dependencies ? { ...baseDependencies, ...customPackageJson.dependencies } : baseDependencies;
+    const finalDeps = customPackageJson?.dependencies
+      ? { ...baseDependencies, ...customPackageJson.dependencies }
+      : baseDependencies;
 
     result['/package.json'] = {
       code: JSON.stringify({
@@ -210,3 +262,4 @@ export function toSandpackFiles(
 
   return result;
 }
+
