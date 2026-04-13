@@ -17,8 +17,10 @@ export interface SupabaseConfig {
 
 interface StudioCloudProps {
   projectId: string | null;
+  projectName?: string;
   config: SupabaseConfig | null;
   onConfigChange: (config: SupabaseConfig | null) => void;
+  onHardReset?: () => void;
 }
 
 type CloudSection = 'overview' | 'deployment' | 'github' | 'database' | 'users' | 'storage' | 'functions' | 'connectors' | 'secrets' | 'security' | 'analytics' | 'audit' | 'knowledge' | 'billing';
@@ -40,7 +42,7 @@ const NAV: { id: CloudSection; label: string; icon: React.ElementType }[] = [
   { id: 'audit',      label: 'Audit Logs',      icon: History   },
 ];
 
-export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudProps) {
+export function StudioCloud({ projectId, projectName, config, onConfigChange, onHardReset }: StudioCloudProps) {
   const [urlInput,  setUrlInput]  = useState(config?.url ?? '');
   const [keyInput,  setKeyInput]  = useState(config?.anonKey ?? '');
   const [status,    setStatus]    = useState<'idle' | 'testing' | 'connected' | 'error'>('idle');

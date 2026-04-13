@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import {
   X, Activity, CheckCircle2, Circle, Loader2,
   Zap, Layout, ChevronDown, AlertTriangle, Info, CheckCircle, XCircle, Terminal
