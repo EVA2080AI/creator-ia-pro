@@ -114,6 +114,7 @@ interface WelcomeScreenProps {
   onRemoveFile?: () => void;
   selectedModel: string;
   onModelSelect: (model: string) => void;
+  subscriptionTier?: string;
 }
 
 // Plan credit limits for bar calculation
@@ -123,7 +124,7 @@ function WelcomeScreen({
   onPrompt, onCreateProject, creating, projects, onSelectProject, onDeleteProject, 
   displayName, onOpenSearch, onMic, isListening, 
   onFileSelect, pendingFile, onRemoveFile,
-  selectedModel, onModelSelect
+  selectedModel, onModelSelect, subscriptionTier = 'free'
 }: WelcomeScreenProps) {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
@@ -222,14 +223,10 @@ function WelcomeScreen({
                 onInput={handleTextareaInput}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
                 placeholder="Describe qué quieres construir..."
-                className={`w-full bg-transparent pr-32 pb-6 text-[16px] font-medium text-zinc-800 placeholder:text-zinc-400 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px] ${pendingFile ? 'pt-14 pl-5' : 'pt-5 pl-14'}`}
+                className={`w-full bg-transparent pr-32 pb-14 text-[16px] font-medium text-zinc-800 placeholder:text-zinc-400 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px] ${pendingFile ? 'pt-14 pl-5' : 'pt-5 pl-14'}`}
                 rows={1}
                 style={{ overflowY: 'hidden' }}
               />
-              
-              <div className="absolute bottom-4 left-4 z-30">
-                <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
-              </div>
               
               <div className="absolute bottom-4 right-4 flex items-center gap-2 z-30">
                 <button onClick={onMic}
@@ -246,6 +243,28 @@ function WelcomeScreen({
                 >
                   {creating ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <ArrowUp className="h-5 w-5" aria-hidden="true" />}
                 </button>
+              </div>
+            </div>
+
+            {/* Model Selector + Plan Badge — OUTSIDE overflow-hidden so dropdown renders */}
+            <div className="flex items-center gap-3 mt-3 px-2">
+              <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
+              <div className="h-4 w-px bg-zinc-200" />
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border shadow-sm ${
+                subscriptionTier === 'free' ? 'bg-white border-zinc-200' :
+                subscriptionTier === 'pro' ? 'bg-amber-50 border-amber-200' :
+                'bg-violet-50 border-violet-200'
+              }`}>
+                <Zap className={`h-3 w-3 ${
+                  subscriptionTier === 'free' ? 'text-primary' :
+                  subscriptionTier === 'pro' ? 'text-amber-500' :
+                  'text-violet-500'
+                }`} />
+                <span className={`text-[10px] font-black uppercase tracking-widest ${
+                  subscriptionTier === 'free' ? 'text-zinc-500' :
+                  subscriptionTier === 'pro' ? 'text-amber-600' :
+                  'text-violet-600'
+                }`}>Plan {subscriptionTier}</span>
               </div>
             </div>
           </div>
@@ -922,6 +941,7 @@ export default function Chat() {
             onRemoveFile={() => setPendingFile(null)}
             selectedModel={selectedModel}
             onModelSelect={setSelectedModel}
+            subscriptionTier={profile?.subscription_tier ?? 'free'}
           />
           <input 
             type="file" 

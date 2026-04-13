@@ -1,8 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-interface BistroButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface BistroButtonProps extends Omit<HTMLMotionProps<"button">, 'size'> {
   variant?: 'primary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
@@ -46,11 +46,11 @@ export const BistroButton = ({
   );
 };
 
-export const BistroCard = ({ children, className }: { children: React.ReactNode, className?: string }) => (
+export const BistroCard = ({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div className={cn(
     'bg-bistro-surface border border-bistro-zinc/50 rounded-[2.5rem] p-8 backdrop-blur-xl shadow-2xl',
     className
-  )}>
+  )} {...props}>
     {children}
   </div>
 );
