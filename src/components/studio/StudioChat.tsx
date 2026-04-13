@@ -495,34 +495,38 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
           />
         ))}
 
-        {/* ── Thinking indicator ── */}
+        {/* ── Thinking indicator (The three dots) ── */}
         {genPhase === 'thinking' && (
-          <div className="flex items-start gap-3 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
-              <Sparkles className="h-3 w-3 text-primary" />
+          <div className="flex items-start gap-3 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-700">
+            <div className="h-7 w-7 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5 relative">
+               <div className="absolute inset-0 bg-primary/20 animate-pulse rounded-xl" />
+               <Sparkles className="h-3.5 w-3.5 text-primary relative z-10" />
             </div>
-            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl rounded-tl-sm bg-white border border-zinc-100 shadow-sm">
-              <div className="flex gap-1">
-                {[0, 1, 2].map(i => (
-                  <span
-                    key={i}
-                    className="h-1.5 w-1.5 rounded-full bg-primary"
-                    style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }}
-                  />
-                ))}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-2xl rounded-tl-sm bg-white border border-zinc-100 shadow-sm">
+                <div className="flex gap-1.5">
+                  {[0, 1, 2].map(i => (
+                    <motion.span
+                      key={i}
+                      animate={{ y: [0, -4, 0] }}
+                      transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" }}
+                      className="h-2 w-2 rounded-full bg-primary/40"
+                    />
+                  ))}
+                </div>
+                <span className="text-[11px] font-black text-zinc-400 uppercase tracking-widest italic">
+                  {isAutoFixing ? 'Analizando error' : (
+                    <>
+                      {genSpecialist === 'architect' && 'Planificando'}
+                      {genSpecialist === 'ux' && 'Diseñando'}
+                      {genSpecialist === 'frontend' && 'Compilando'}
+                      {genSpecialist === 'backend' && 'Orquestando'}
+                      {genSpecialist === 'engineer' && 'Refinando'}
+                      {(genSpecialist === 'none' || !genSpecialist) && 'Iniciando Núcleo'}
+                    </>
+                  )}
+                </span>
               </div>
-              <span className="text-[11px] font-semibold text-zinc-500">
-                {isAutoFixing ? 'Analizando error...' : (
-                  <>
-                    {genSpecialist === 'architect' && 'Planificando arquitectura...'}
-                    {genSpecialist === 'ux' && 'Diseñando experiencia...'}
-                    {genSpecialist === 'frontend' && 'Compilando interfaz...'}
-                    {genSpecialist === 'backend' && 'Orquestando lógica...'}
-                    {genSpecialist === 'engineer' && 'Refinando código...'}
-                    {(genSpecialist === 'none' || !genSpecialist) && 'Génesis está pensando...'}
-                  </>
-                )}
-              </span>
             </div>
           </div>
         )}
@@ -530,32 +534,48 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
         {/* ── Streaming bubble ── */}
         {(genPhase === 'streaming' || genPhase === 'done') && streamingContent && (
           <div className="flex flex-col items-start gap-3 mb-8">
-            <div className="flex items-center gap-2 pl-0.5">
-              <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                <Sparkles className="h-3 w-3 text-primary" />
+            <div className="flex items-center justify-between w-full pr-4">
+              <div className="flex items-center gap-2 pl-0.5">
+                <div className="h-6 w-6 rounded-lg bg-zinc-900 flex items-center justify-center shrink-0">
+                  <Sparkles className="h-3 w-3 text-white" />
+                </div>
+                <span className="text-[11.5px] font-black text-zinc-900 uppercase italic tracking-tighter">Génesis Engine</span>
+                {genPhase === 'streaming' && (
+                  <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
+                    <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
+                    <span className="text-[8px] font-black text-primary uppercase tracking-widest">Streaming</span>
+                  </div>
+                )}
               </div>
-              <span className="text-[11.5px] font-bold text-zinc-800">Génesis AI</span>
-              <span className="px-1.5 py-0.5 rounded-md bg-primary/8 border border-primary/15 text-[9px] font-bold text-primary uppercase tracking-wider">V21</span>
               {genPhase === 'streaming' && (
-                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-100 text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
-                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
-                  Escribiendo
+                <span className="font-mono text-[9px] text-zinc-300 font-bold uppercase tracking-widest">
+                  {streamChars.toLocaleString()} b processed
                 </span>
               )}
             </div>
-            <div className="w-full max-w-[97%] bg-white border border-zinc-100 shadow-sm rounded-2xl rounded-tl-sm px-4 md:px-5 py-4 relative overflow-hidden">
-              <div className="result-prose text-[13px] text-zinc-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent) }} />
+
+            <div className="w-full max-w-[97%] bg-white border border-zinc-100 shadow-xl shadow-black/[0.02] rounded-[1.5rem] rounded-tl-sm px-4 md:px-5 py-5 relative overflow-hidden group">
+              {/* PROGRESS BAR (CYBER INDUSTRIAL) */}
               {genPhase === 'streaming' && (
-                <span className="inline-block h-3.5 w-1 ml-1 align-baseline rounded-sm animate-pulse bg-primary" />
+                <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-zinc-50 overflow-hidden">
+                  <motion.div 
+                    className="h-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.5)]"
+                    style={{ width: `${Math.min((streamChars / 6000) * 100, 98)}%` }}
+                    transition={{ type: "spring", stiffness: 50, damping: 20 }}
+                  />
+                </div>
+              )}
+
+              <div className="result-prose text-[13px] text-zinc-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent) }} />
+              
+              {genPhase === 'streaming' && (
+                <motion.span 
+                  animate={{ opacity: [1, 0] }}
+                  transition={{ duration: 0.8, repeat: Infinity }}
+                  className="inline-block h-3.5 w-1.5 ml-1 align-baseline rounded-sm bg-primary/40 shadow-[0_0_5px_rgba(var(--primary-rgb),0.3)]" 
+                />
               )}
             </div>
-            {isGenerating && currentGenIntent === 'codegen' && (
-              <div className="w-48 pl-1">
-                <div className="h-0.5 w-full rounded-full bg-zinc-100 overflow-hidden">
-                  <div className="h-full bg-primary transition-all duration-300" style={{ width: `${Math.min((streamChars / 10000) * 100, 95)}%` }} />
-                </div>
-              </div>
-            )}
           </div>
         )}
         <div ref={messagesEndRef} />
