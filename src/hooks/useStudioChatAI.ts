@@ -880,19 +880,23 @@ ${contentSnapshots}
       // G-1 FIX: Pass only isChatModeActive (not || isArchitectRequest)
       const finalResult = processRawResponse(accumulated, prompt, isChatModeActive);
 
-      // Detect missing dependencies from generated files
-      if (finalResult && finalResult.files && Object.keys(finalResult.files).length > 0) {
-        const detectedDeps = detectMissingDependencies(finalResult.files);
-        if (detectedDeps.length > 0) {
-          return {
-            ...finalResult,
-            deps: detectedDeps,
-            suggestions: [
-              ...(finalResult.suggestions || []),
-              `📦 Instalar dependencias detectadas: ${detectedDeps.join(', ')}`
-            ]
-          };
-        }
+      // CRITICAL FIX: Merge generated files with existing project files so we don't wipe out the project when Genesis adds/updates a specific file.
+      if (finalResult && finalResult.files && Object.keys(finalResult.files).length > 0 && !finalResult.isChatOnly) {
+        // Merge! Keep existing files, update/add the newly generated ones
+        const mergedFiles = { ...projectFiles, ...finalResult.files };
+        const detectedDeps = detectMissingDependencies(mergedFiles);
+        
+        return {
+          ...finalResult,
+          files: mergedFiles, // Return the full merged state
+          deps: detectedDeps,
+          suggestions: detectedDeps.length > 0
+            ? [
+                ...(finalResult.suggestions || []),
+                `📦 Instalar dependencias detectadas: ${detectedDeps.join(', ')}`
+              ]
+            : finalResult.suggestions
+        };
       }
 
       return finalResult;

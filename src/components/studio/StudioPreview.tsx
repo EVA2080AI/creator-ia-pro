@@ -199,6 +199,16 @@ export function StudioPreview({
               template={isVanillaHtml ? "static" : "react-ts"}
               files={sandpackFiles}
               theme="light"
+              customSetup={{
+                dependencies: {
+                  "lucide-react": "latest",
+                  "framer-motion": "latest",
+                  "recharts": "latest",
+                  "date-fns": "latest",
+                  "clsx": "latest",
+                  "tailwind-merge": "latest"
+                }
+              }}
               options={{ 
                 externalResources: isVanillaHtml ? [] : ['https://cdn.tailwindcss.com'] 
               }}
