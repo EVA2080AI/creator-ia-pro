@@ -247,7 +247,7 @@ export const aiService = {
           data_payload: {
             ...result,
             _metadata: { generated_at: new Date().toISOString(), model: model || "openrouter", cost },
-          },
+          } as any,
         }).eq("id", safeNodeId);
       }
 

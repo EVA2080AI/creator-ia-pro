@@ -3,6 +3,8 @@ import {
   SandpackProvider,
   SandpackPreview,
   SandpackLayout,
+  SandpackCodeEditor,
+  SandpackConsole,
   useSandpack,
 } from '@codesandbox/sandpack-react';
 import {
@@ -53,6 +55,7 @@ export function StudioPreview({
   onShare,
 }: StudioPreviewProps) {
   const [sandpackKey, setSandpackKey] = useState(0);
+  const [showConsole, setShowConsole] = useState(false);
   const prevFilesRef = useRef<string>('');
   const [compilationStatus, setCompilationStatus] = useState<'idle' | 'compiling' | 'success' | 'error'>('idle');
 
@@ -185,11 +188,11 @@ export function StudioPreview({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, type: 'spring', bounce: 0.2 }}
             style={{
-              width: deviceMode === 'desktop' ? '100%' : frameWidth[deviceMode],
-              height: deviceMode === 'desktop' ? '100%' : frameHeight[deviceMode],
+              width: (deviceMode === 'desktop' || viewMode === 'code') ? '100%' : frameWidth[deviceMode],
+              height: (deviceMode === 'desktop' || viewMode === 'code') ? '100%' : frameHeight[deviceMode],
               transformOrigin: 'top center',
             }}
-            className={`${deviceMode === 'desktop' ? 'h-full w-full' : 'my-8 rounded-3xl shadow-2xl shadow-black/5'} flex-shrink-0 flex flex-col overflow-hidden bg-white border border-zinc-200/60 z-10 relative`}
+            className={`${(deviceMode === 'desktop' || viewMode === 'code') ? 'h-full w-full' : 'my-8 rounded-[2.5rem] shadow-2xl shadow-black/10'} flex-shrink-0 flex flex-col overflow-hidden bg-white border border-zinc-200/60 z-10 relative transition-all duration-300`}
           >
             <SandpackProvider
               key={sandpackKey}
@@ -232,17 +235,44 @@ export function StudioPreview({
                   )}
                 </AnimatePresence>
 
-                <SandpackLayout style={{ border: 'none', height: '100%', background: 'transparent' }}>
-                  <SandpackPreview 
-                    showOpenInCodeSandbox={false} 
-                    showRefreshButton={false} 
-                    showSandpackErrorOverlay={true}
-                    style={{ height: '100%', background: 'transparent' }} 
-                  />
+                <SandpackLayout style={{ border: 'none', height: '100%', background: 'transparent', flexDirection: 'column' }}>
+                  <div className="flex flex-1 w-full h-full overflow-hidden relative">
+                    {viewMode === 'code' && (
+                      <div className="flex-1 h-full w-full bg-zinc-50/50">
+                        <SandpackCodeEditor 
+                          style={{ height: '100%' }} 
+                          showTabs={true} 
+                          showLineNumbers={true}
+                        />
+                      </div>
+                    )}
+                    {viewMode === 'preview' && (
+                      <div className="flex-1 flex flex-col relative w-full h-full">
+                        <SandpackPreview 
+                          showOpenInCodeSandbox={true} 
+                          showRefreshButton={true} 
+                          showSandpackErrorOverlay={true}
+                          style={{ flex: showConsole ? '0 0 60%' : '1 1 100%', background: 'transparent' }} 
+                        />
+                        {showConsole && (
+                          <div className="flex-shrink-0 h-[40%] bg-zinc-950 border-t border-zinc-200/50 overflow-hidden">
+                            <SandpackConsole style={{ height: '100%', background: 'transparent' }} />
+                          </div>
+                        )}
+                        <button 
+                          onClick={() => setShowConsole(!showConsole)}
+                          className="absolute bottom-4 right-4 z-50 bg-zinc-900 text-white px-3 py-2 text-[10px] uppercase tracking-widest font-bold rounded-xl shadow-lg shadow-black/20 flex items-center gap-2 hover:bg-zinc-800 transition-colors"
+                        >
+                          <Terminal className="w-3.5 h-3.5" />
+                          {showConsole ? 'Ocultar Logs' : 'Ver Logs'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </SandpackLayout>
                 <SandpackErrorBridge 
                   onError={onError} 
-                  onStatusChange={(status: any) => setCompilationStatus(status)} 
+                  onStatusChange={(status) => setCompilationStatus(status)} 
                 />
               </div>
             </SandpackProvider>

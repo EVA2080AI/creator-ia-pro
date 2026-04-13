@@ -36,6 +36,7 @@ interface StudioChatProps {
   onCodeGenerated: (files: Record<string, StudioFile>) => void;
   onNewConversation?: () => void;
   initialPrompt?: string | null;
+  initialModel?: string;
   onInitialPromptUsed?: () => void;
   onAutoName?: (name: string) => void;
   onGeneratingChange?: (v: boolean) => void;
@@ -146,6 +147,7 @@ export function StudioChat({
   onCodeGenerated,
   onNewConversation,
   initialPrompt,
+  initialModel,
   onInitialPromptUsed,
   onAutoName,
   onGeneratingChange,
@@ -179,7 +181,7 @@ export function StudioChat({
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
   const [pendingContext, setPendingContext] = useState<{ name: string; content: string } | null>(null);
-  const [selectedModel, setSelectedModel] = useState('google/gemini-2.0-flash-001');
+  const [selectedModel, setSelectedModel] = useState(initialModel || 'google/gemini-2.0-flash-001');
   const [isArchitectMode, setIsArchitectMode] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -231,6 +233,10 @@ export function StudioChat({
     }
     prevFileCountRef.current = currentCount;
   }, [projectFiles, resetConversation]);
+
+  useEffect(() => {
+    if (initialModel) setSelectedModel(initialModel);
+  }, [initialModel]);
 
   const {
     isGenerating, streamChars, streamingContent, genPhase, genSpecialist, currentGenIntent, generateCode, stopGeneration
@@ -505,7 +511,7 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
           <MessageItem 
             key={msg.id} 
             msg={msg} 
-            persona={props.persona || 'genesis'} 
+            persona={persona || 'genesis'} 
             copiedId={copiedId}
             onCopy={handleCopy}
             onRetry={() => { const idx = messages.indexOf(msg); if (idx > 0) handleSend(messages[idx-1].content); }}
@@ -606,7 +612,7 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
         <div ref={messagesEndRef} />
       </div>
 
-      {props.runtimeError && <AutoFixAlert runtimeError={props.runtimeError} isGenerating={isGenerating} onClear={() => props.onClearError?.()} onApply={() => handleSend(`[FIX] ${props.runtimeError}`)} />}
+      {runtimeError && <AutoFixAlert runtimeError={runtimeError} isGenerating={isGenerating} onClear={() => onClearError?.()} onApply={() => handleSend(`[FIX] ${runtimeError}`)} />}
 
       {showScrollBtn && (
         <button 
@@ -624,7 +630,7 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
         pendingImage={pendingImage} onRemoveImage={() => setPendingImage(null)}
         pendingUrl={pendingUrl} onRemoveUrl={() => setPendingUrl(null)}
         pendingContext={pendingContext} onRemoveContext={() => setPendingContext(null)}
-        activeFile={props.activeFile || null}
+        activeFile={activeFile || null}
         onAttachFile={(f) => {if(f.type.startsWith('image/')){const r=new FileReader();r.onload=(e)=>setPendingImage(e.target?.result as string);r.readAsDataURL(f);}else{const r=new FileReader();r.onload=(e)=>setPendingContext({name:f.name,content:e.target?.result as string});r.readAsText(f);}}}
         onAttachUrl={onAttachUrl} isScraping={isScraping}
       />

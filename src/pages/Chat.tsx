@@ -26,6 +26,7 @@ import { SitemapView } from '@/components/studio/SitemapView';
 import { CommandPalette } from '@/components/studio/CommandPalette';
 import { StudioArtifactsPanel, type UIArtifact, type UIPlanTask, type UILog } from '@/components/studio/StudioArtifactsPanel';
 import { StudioTopbar } from '@/components/studio/StudioTopbar';
+import { ModelSelector } from '@/components/studio/chat/ModelSelector';
 import { useStudioProjects, type StudioFile, type StudioProject } from '@/hooks/useStudioProjects';
 import { StudioCloud, type SupabaseConfig } from '@/components/studio/StudioCloud';
 import { useProfile } from '@/hooks/useProfile';
@@ -111,6 +112,8 @@ interface WelcomeScreenProps {
   onFileSelect?: (file: File) => void;
   pendingFile?: { name: string } | null;
   onRemoveFile?: () => void;
+  selectedModel: string;
+  onModelSelect: (model: string) => void;
 }
 
 // Plan credit limits for bar calculation
@@ -119,7 +122,8 @@ const PLAN_CREDITS: Record<string, number> = { free: 5, creador: 1000, pro: 3000
 function WelcomeScreen({ 
   onPrompt, onCreateProject, creating, projects, onSelectProject, onDeleteProject, 
   displayName, onOpenSearch, onMic, isListening, 
-  onFileSelect, pendingFile, onRemoveFile 
+  onFileSelect, pendingFile, onRemoveFile,
+  selectedModel, onModelSelect
 }: WelcomeScreenProps) {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
@@ -223,7 +227,11 @@ function WelcomeScreen({
                 style={{ overflowY: 'hidden' }}
               />
               
-              <div className="absolute bottom-4 right-4 flex items-center gap-2">
+              <div className="absolute bottom-4 left-4 z-30">
+                <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
+              </div>
+              
+              <div className="absolute bottom-4 right-4 flex items-center gap-2 z-30">
                 <button onClick={onMic}
                   aria-label={isListening ? 'Detener grabación de voz' : 'Activar dictado por voz'}
                   className={`flex items-center justify-center p-2 rounded-full transition-all ${isListening ? 'text-red-500 bg-red-100 animate-pulse' : 'text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100'}`}>
@@ -487,6 +495,7 @@ export default function Chat() {
   const [pendingFile, setPendingFile] = useState<{name: string, content: string} | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const [selectedModel, setSelectedModel] = useState('google/gemini-2.0-flash-001');
 
   // --- Lifted Engineering State ---
   const [artifacts, setArtifacts] = useState<UIArtifact[]>([]);
@@ -911,6 +920,8 @@ export default function Chat() {
             onFileSelect={handleFileSelect}
             pendingFile={pendingFile}
             onRemoveFile={() => setPendingFile(null)}
+            selectedModel={selectedModel}
+            onModelSelect={setSelectedModel}
           />
           <input 
             type="file" 
@@ -947,6 +958,7 @@ export default function Chat() {
     projectFiles,
     onCodeGenerated: handleCodeGenerated,
     initialPrompt: pendingPrompt,
+    initialModel: selectedModel,
     onGeneratingChange: setIsGenerating,
     supabaseConfig,
     previewError,
