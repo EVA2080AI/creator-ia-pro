@@ -35,7 +35,7 @@ const getFileIcon = (name: string) => {
     return <FileText className="h-3.5 w-3.5 text-yellow-400 shrink-0" />;
   if (name.endsWith('.html'))
     return <FileText className="h-3.5 w-3.5 text-orange-400 shrink-0" />;
-  return <FileText className="h-3.5 w-3.5 text-white/40 shrink-0" />;
+  return <FileText className="h-3.5 w-3.5 text-zinc-400 shrink-0" />;
 };
 
 function buildFileTree(files: Record<string, StudioFile>): FileNode[] {
@@ -106,12 +106,12 @@ function InlineRename({
           if (e.key === 'Enter') confirm();
           if (e.key === 'Escape') onCancel();
         }}
-        className="flex-1 min-w-0 bg-white/10 border border-primary/40 rounded px-1.5 py-0.5 text-xs text-white outline-none font-mono"
+        className="flex-1 min-w-0 bg-black/5 border border-primary/40 rounded px-1.5 py-0.5 text-xs text-zinc-900 outline-none font-mono"
       />
       <button onClick={confirm} className="p-0.5 rounded text-emerald-400 hover:bg-white/10 shrink-0">
         <Check className="h-3 w-3" />
       </button>
-      <button onClick={onCancel} className="p-0.5 rounded text-white/40 hover:bg-white/10 shrink-0">
+      <button onClick={onCancel} className="p-0.5 rounded text-zinc-400 hover:bg-black/5 shrink-0">
         <X className="h-3 w-3" />
       </button>
     </div>
@@ -189,7 +189,7 @@ export function StudioFileTree({
       return (
         <div key={node.path}>
           <div
-            className="flex items-center gap-2 py-1 cursor-pointer hover:bg-white/[0.04] transition-colors text-white/40 hover:text-white/70 relative group/folder"
+            className="flex items-center gap-2 py-1 cursor-pointer hover:bg-black/[0.04] transition-colors text-zinc-400 hover:text-zinc-900 relative group/folder"
             style={{ paddingLeft: `${depth * 12 + 12}px` }}
             onClick={() => toggleFolder(node.path)}
             onMouseEnter={() => setHovered(node.path)}
@@ -212,8 +212,8 @@ export function StudioFileTree({
         className={cn(
           "group flex items-center justify-between gap-1 py-1 cursor-pointer transition-all relative",
           isSelected
-            ? 'bg-primary/15 text-primary'
-            : 'text-white/50 hover:bg-white/[0.04] hover:text-white/80'
+            ? 'bg-primary/10 text-primary font-bold'
+            : 'text-zinc-500 hover:bg-black/[0.04] hover:text-zinc-900'
         )}
         style={{ paddingLeft: `${depth * 12 + (node.path.includes('/') ? 28 : 12)}px`, paddingRight: '8px' }}
         onClick={() => !isRenaming && onSelect(node.path)}
@@ -241,7 +241,7 @@ export function StudioFileTree({
             {!isProtected && onRenameFile && (
               <button
                 onClick={e => { e.stopPropagation(); setRenamingPath(node.path); }}
-                className="p-1 rounded hover:bg-white/10 text-white/30 hover:text-white/70 transition-all"
+                className="p-1 rounded hover:bg-black/10 text-zinc-300 hover:text-zinc-900 transition-all"
                 title="Renombrar"
               >
                 <Pencil className="h-3 w-3" />
@@ -272,7 +272,7 @@ export function StudioFileTree({
     <div className="flex flex-col h-full bg-transparent overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/[0.06] bg-black/20 shrink-0">
-        <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.25em]">Quantum Explorer</span>
+        <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.25em]">Quantum Explorer</span>
         <div className="flex items-center gap-1">
           {onAddFolder && (
             <button
@@ -313,7 +313,7 @@ export function StudioFileTree({
               }}
               onBlur={handleAddFile}
               placeholder="nombre.tsx"
-              className="flex-1 bg-white/5 border border-primary/30 rounded-lg px-2 py-1 text-xs text-white placeholder:text-white/20 outline-none focus:border-primary/60 font-mono"
+              className="flex-1 bg-black/5 border border-primary/30 rounded-lg px-2 py-1 text-xs text-zinc-900 placeholder:text-zinc-300 outline-none focus:border-primary/60 font-mono"
             />
           </div>
         )}
