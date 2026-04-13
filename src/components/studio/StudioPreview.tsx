@@ -50,14 +50,16 @@ export function StudioPreview({
 }: StudioPreviewProps) {
   const [refreshKey, setRefreshKey] = useState(0);
   const [sandpackKey, setSandpackKey] = useState(0);
-  const prevFilesRef = useRef<Record<string, StudioFile>>({});
+  const prevFilesRef = useRef<string>('');
   const [compilationStatus, setCompilationStatus] = useState<'idle' | 'compiling' | 'success' | 'error'>('idle');
 
   // When files change from generating or manual edits, reset status
   useEffect(() => {
-    if (!isGenerating) {
-      // Re-calculate hash to avoid unnecessary refreshes, but ensure we refresh on generation end
-      const currentFilesHash = JSON.stringify(files);
+    if (!isGenerating && Object.keys(files).length > 0) {
+      // Create a deterministic hash of the files to avoid non-consistent object order refreshes
+      const sortedKeys = Object.keys(files).sort();
+      const currentFilesHash = JSON.stringify(sortedKeys.map(k => ({ k, c: files[k].content })));
+      
       if (prevFilesRef.current !== currentFilesHash) {
         prevFilesRef.current = currentFilesHash;
         setSandpackKey(k => k + 1);

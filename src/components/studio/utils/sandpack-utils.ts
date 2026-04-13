@@ -159,21 +159,24 @@ export function toSandpackFiles(
       // Logic: Pick the first TSX/JSX file that looks like a main component, or the largest one.
       const candidateFiles = Object.keys(files).filter(n => n.endsWith('.tsx') || n.endsWith('.jsx'));
       
-      // Try specific names first
+      // Try specific names first (App, Main, Index)
       let mainFile = candidateFiles.find(n => 
         n.toLowerCase().endsWith('app.tsx') || 
+        n.toLowerCase().endsWith('app.jsx') ||
         n.toLowerCase().endsWith('main.tsx') || 
         n.toLowerCase().endsWith('index.tsx') ||
         n.toLowerCase().endsWith('dashboard.tsx')
       );
       
-      // If not, just take the first component found or the largest one
+      // Fallback: If no standard names, take the largest component found (usually the main one)
       if (!mainFile && candidateFiles.length > 0) {
         mainFile = candidateFiles.sort((a,b) => (files[b].content?.length || 0) - (files[a].content?.length || 0))[0];
       }
 
       if (mainFile) {
-         result['/src/App.tsx'] = { code: files[mainFile].content, active: true };
+         // Force mapped to /src/ for Sandpack consistency if not already there
+         const targetPath = mainFile.startsWith('/src/') ? mainFile : '/src/' + mainFile.replace(/^(\/|src\/)?/, '');
+         result[targetPath] = { code: files[mainFile].content, active: true };
       }
     }
     

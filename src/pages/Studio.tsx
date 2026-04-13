@@ -93,22 +93,153 @@ export default function Studio() {
     const hasPkg = !!files['package.json'];
     const hasVite = !!files['vite.config.ts'];
 
-    if (!hasHtml || !hasPkg || !hasVite) {
+    if (!hasHtml || !hasPkg || !hasVite || (!files['App.tsx'] && !files['src/App.tsx'])) {
       const u = { ...files };
+      
       if (!hasHtml) {
-        // Safe string construction to avoid parser conflicts
-        const h = "<!DOCTYPE html><html><head><meta charset=\"UTF-8\" /><title>Genesis Project</title></head><body><div id=\"root\"></div><script type=\"module\" src=\"/src/main.tsx\"></script></body></html>";
-        u['index.html'] = { language: 'html', content: h };
+        u['index.html'] = { 
+          language: 'html', 
+          content: `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genesis Studio App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>` 
+        };
       }
+
       if (!hasPkg) {
-        u['package.json'] = { language: 'json', content: JSON.stringify({ name: "project", type: "module", scripts: { dev: "vite" } }, null, 2) };
+        u['package.json'] = { 
+          language: 'json', 
+          content: JSON.stringify({ 
+            name: "genesis-project", 
+            type: "module", 
+            dependencies: { 
+              "react": "^18.2.0", 
+              "react-dom": "^18.2.0",
+              "lucide-react": "latest",
+              "framer-motion": "latest",
+              "clsx": "latest",
+              "tailwind-merge": "latest"
+            } 
+          }, null, 2) 
+        };
       }
+
       if (!hasVite) {
         u['vite.config.ts'] = { 
           language: 'typescript', 
           content: "import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({ plugins: [react()] });" 
         };
       }
+
+      // Final critical files: main.tsx, index.css and App.tsx
+      if (!files['src/main.tsx']) {
+        u['src/main.tsx'] = {
+          language: 'tsx',
+          content: `import React from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App';
+import './index.css';
+
+const rootElement = document.getElementById('root');
+if (rootElement) {
+  const root = createRoot(rootElement);
+  root.render(<App />);
+}`
+        };
+      }
+
+      if (!files['src/index.css']) {
+        u['src/index.css'] = {
+          language: 'css',
+          content: `@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background-size: 200% 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #FDFDFF;
+}`
+        };
+      }
+
+      if (!files['src/App.tsx'] && !files['App.tsx']) {
+        u['src/App.tsx'] = {
+          language: 'tsx',
+          content: `import React from 'react';
+import { Sparkles, Code2, Zap, ShieldCheck } from 'lucide-react';
+
+export default function App() {
+  return (
+    <div className="min-h-screen bg-[#FDFDFF] flex flex-col items-center justify-center p-6 text-zinc-900 font-sans">
+      <div className="max-w-md w-full">
+        <div className="bg-white rounded-[2.5rem] p-10 shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-zinc-100 flex flex-col items-center text-center relative overflow-hidden">
+          {/* Decorative background element */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-zinc-900/5 to-transparent" />
+          
+          <div className="w-20 h-20 bg-zinc-900 rounded-3xl flex items-center justify-center mb-8 shadow-2xl shadow-zinc-200 rotate-3 hover:rotate-0 transition-all duration-500 group">
+            <Sparkles className="text-white w-10 h-10 group-hover:scale-110 transition-transform" />
+          </div>
+          
+          <h1 className="text-3xl font-black mb-3 tracking-tight text-zinc-900">Génesis Studio</h1>
+          <p className="text-zinc-400 text-sm leading-relaxed mb-8 px-2">
+            El nucleo de inteligencia ha orquestado tu entorno. Todo está listo para construir.
+          </p>
+          
+          <div className="grid grid-cols-2 gap-3 w-full mb-8">
+            <div className="bg-zinc-50/50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center gap-2">
+              <Code2 className="w-5 h-5 text-zinc-400" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">React + TS</span>
+            </div>
+            <div className="bg-zinc-50/50 p-4 rounded-2xl border border-zinc-100 flex flex-col items-center gap-2">
+              <ShieldCheck className="w-5 h-5 text-emerald-500/60" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Ready</span>
+            </div>
+          </div>
+
+          <div className="w-full bg-zinc-100 h-1.5 rounded-full overflow-hidden mb-3">
+            <div className="h-full bg-zinc-900 w-full rounded-full animate-shimmer" 
+                 style={{
+                   backgroundImage: 'linear-gradient(90deg, #18181b 0%, #3f3f46 50%, #18181b 100%)',
+                 }} />
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[10px] font-black text-zinc-300 uppercase tracking-[0.2em]">Engine Active</span>
+          </div>
+        </div>
+        
+        <p className="mt-8 text-center text-zinc-400 text-[11px] font-medium leading-relaxed max-w-[280px] mx-auto">
+          Utiliza el chat para generar tu primera aplicación o página web profesional.
+        </p>
+      </div>
+    </div>
+  );
+}`
+        };
+      }
+      
       updateProjectFiles(activeProject.id, u);
     }
   }, [activeProject, updateProjectFiles]);

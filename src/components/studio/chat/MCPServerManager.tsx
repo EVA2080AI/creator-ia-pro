@@ -44,7 +44,12 @@ export function MCPServerManager() {
       await mcpService.listTools(id);
       toast.success("Reglas y Tools sincronizadas");
     } catch (e: any) {
-      toast.error(e.message);
+      const msg = e.message;
+      if (msg.includes('npx') || msg.includes('PATH')) {
+        toast.error("Error de PATH: El servidor remoto no encuentra 'npx'. Asegúrate de que Node.js esté en el PATH del servidor.");
+      } else {
+        toast.error(msg);
+      }
     }
     setServers(mcpService.getServers());
   };

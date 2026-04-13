@@ -241,9 +241,9 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
 
     // Search for a filename inside the block (first 3 lines)
     let filename = '';
-    const fileMatchInside = code.match(/(?:\/\/|#|--)\s*([\w./\-]+\.\w+)/);
+    const fileMatchInside = code.match(/(?:\/\/|#|--)\s*([\w./\-]+\.[a-zA-Z0-9]+)/);
     
-    if (fileMatchInside) {
+    if (fileMatchInside && !fileMatchInside[1].startsWith('http')) {
       filename = fileMatchInside[1];
     } else {
       // Look for filename in the text BEFORE the block (e.g. "File: src/App.tsx")
@@ -252,10 +252,14 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
         filename = fileMatchBefore[1];
       } else {
         // Guess filename based on language and content
-        if (lang === 'html') filename = 'index.html';
-        else if (lang === 'css') filename = 'index.css';
-        else if (code.includes('export default') || code.includes('ReactDOM')) {
-          filename = (lang === 'typescript' || lang === 'ts' || lang === 'tsx') ? 'src/App.tsx' : 'src/App.jsx';
+        const lowerCode = code.toLowerCase();
+        const isReact = lowerCode.includes('import react') || lowerCode.includes('export default') || lowerCode.includes('jsx') || lowerCode.includes('lucide-react');
+        
+        if (lang === 'html' || lowerCode.includes('<!doctype')) filename = 'index.html';
+        else if (lang === 'css' || (lowerCode.includes('{') && lowerCode.includes(':') && !isReact)) filename = 'src/index.css';
+        else if (isReact) {
+          // If it's a React component and we don't have App.tsx yet, use it as main
+          filename = 'src/App.tsx';
         } else {
           filename = `src/component-${Object.keys(files).length}.${lang || 'tsx'}`;
         }
