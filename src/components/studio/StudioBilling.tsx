@@ -136,10 +136,10 @@ export function StudioBilling() {
           <PlanCard 
             title="Free tier"
             price="$0"
-            billing="/mes"
-            credits="30"
+            billing="COP/mes"
+            credits="5"
             features={[
-              { text: '5 Créditos diarios', included: true },
+              { text: '5 Créditos iniciales', included: true },
               { text: 'Colaboración básica', included: true },
               { text: 'Proyectos privados', included: true },
               { text: 'Dominios Custom', included: false },
@@ -148,28 +148,28 @@ export function StudioBilling() {
           />
           <PlanCard 
             active
-            title="Pro Architect"
-            price="$25"
-            billing="/mes"
-            credits="150"
+            title="Creador"
+            price="$149k"
+            billing="COP/mes"
+            credits="1.000"
             features={[
-              { text: '150 Créditos / Mes', included: true },
-              { text: 'Dominios Custom', included: true },
-              { text: 'Code Mode Editor', included: true },
-              { text: 'Quitar Badge Creator', included: true },
-              { text: 'Design Templates', included: false },
+              { text: '1.000 Créditos / Mes', included: true },
+              { text: 'Studio creativo con IA', included: true },
+              { text: 'Acceso modelos rápidos', included: true },
+              { text: 'Soporte por chat', included: true },
+              { text: 'Exportación avanzada', included: false },
             ]}
           />
           <PlanCard 
-            title="Business Swarm"
-            price="$50"
-            billing="/mes"
-            credits="500"
+            title="Pro"
+            price="$349k"
+            billing="COP/mes"
+            credits="3.000"
             features={[
-              { text: 'Todo en Pro', included: true },
-              { text: 'Restricted Projects', included: true },
-              { text: 'SSO & Seguridad', included: true },
-              { text: 'Design Templates', included: true },
+              { text: '3.000 Créditos / Mes', included: true },
+              { text: 'Modelos Premium (GPT-4)', included: true },
+              { text: 'Generación Prioritaria', included: true },
+              { text: 'Soporte Prioritario', included: true },
               { text: 'Opt-out Training', included: true },
             ]}
           />

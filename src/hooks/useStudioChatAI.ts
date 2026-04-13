@@ -65,7 +65,7 @@ export function useStudioChatAI({
   const [currentGenIntent, setCurrentGenIntent] = useState<'codegen' | 'chat' | null>(null);
 
   // ─── TIER-BASED BUDGET LIMITS ──────────────────────────────────────────────
-  const isPro = subscriptionTier === 'pro' || subscriptionTier === 'admin';
+  const isPro = subscriptionTier && subscriptionTier !== 'free' && subscriptionTier !== 'null';
   const BUDGET = {
     maxHistory: isPro ? 15 : 6,
     maxSnapshotFiles: isPro ? 8 : 3,

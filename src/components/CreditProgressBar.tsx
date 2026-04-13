@@ -6,14 +6,11 @@ import { cn } from '@/lib/utils';
 
 // Credit caps per plan tier (for progress bar %)
 const TIER_CAPS: Record<string, number> = {
-  free:      5,
-  starter:   100_000,
-  creator:   500_000,
-  pymes:     2_000_000,
-  agency:    2_000_000,
-  educacion: 500,
-  pro:       1_000,
-  business:  5_000,
+  free:       5,
+  creador:    1000,
+  pro:        3000,
+  agencia:    8000,
+  pyme:       20000,
 };
 
 const HIDDEN_PATHS = ['/', '/auth', '/descargar', '/product-backlog', '/reset-password', '/chat', '/formarketing', '/code', '/studio', '/admin'];

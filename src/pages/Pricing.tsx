@@ -22,6 +22,26 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 const PLANS = [
   {
+    key: "free" as const,
+    name: "Free",
+    price: 0,
+    priceLabel: "$0",
+    credits: 5,
+    creditsLabel: "5 créditos de por vida",
+    description: "Para explorar el potencial de la IA sin compromiso.",
+    color: "#64748B",
+    gradient: "from-slate-500/10 to-slate-500/5",
+    border: "border-slate-200",
+    icon: Zap,
+    badge: "Para empezar",
+    features: [
+      { label: "5 créditos totales", highlight: true },
+      { label: "Studio creativo básico", highlight: true },
+      { label: "Acceso a modelos estándar", highlight: false },
+      { label: "Soporte comunitario", highlight: false },
+    ],
+  },
+  {
     key: "creador" as const,
     name: "Creador",
     price: 149900,
