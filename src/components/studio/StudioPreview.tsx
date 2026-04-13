@@ -6,9 +6,9 @@ import {
   useSandpack,
 } from '@codesandbox/sandpack-react';
 import {
-  Zap, Bot
+  Zap, Bot, AlertCircle, X, TerminalSquare, Loader2
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 
 import type { StudioFile } from '@/hooks/useStudioProjects';
@@ -93,62 +93,70 @@ export function StudioPreview({
   const frameHeight: Record<DeviceMode, string | undefined> = { desktop: undefined, tablet: '1024px', mobile: '812px' };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-white selection:bg-primary/10">
-      <div className="flex flex-1 items-start justify-center overflow-auto relative bg-[#F8FAFC]">
+    <div className="flex h-full flex-col overflow-hidden bg-white selection:bg-primary/10 relative">
+      <div className="flex flex-1 items-start justify-center overflow-auto relative bg-[#FAFAFA]">
         
-        {isGenerating && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute inset-0 z-30 flex flex-col items-center justify-center overflow-hidden bg-black"
-          >
-            <div className="absolute inset-0 opacity-[0.1]" 
-                 style={{ 
-                   backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', 
-                   backgroundSize: '40px 40px' 
-                 }} />
+        {/* DOT GRID BACKGROUND */}
+        <div className="absolute inset-0 opacity-[0.4]" 
+             style={{ 
+               backgroundImage: 'radial-gradient(#e5e7eb 1px, transparent 1px)', 
+               backgroundSize: '24px 24px' 
+             }} />
 
+        <AnimatePresence>
+          {isGenerating && (
             <motion.div 
-              initial={{ scale: 0.9, opacity: 0, filter: 'blur(10px)' }}
-              animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="relative z-10 flex flex-col items-center text-center space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FAFAFA]/80 backdrop-blur-sm"
             >
-              <h2 className="text-4xl md:text-5xl font-black text-white tracking-widest uppercase shadow-black drop-shadow-2xl">
-                GENESIS ENGINE
-              </h2>
-              <p className="text-[10px] md:text-xs text-zinc-400 tracking-[0.3em] font-medium uppercase">
-                ARCHITECTURE VERIFIED - VITE V5.0
-              </p>
-              
-              <div className="pt-8 flex flex-col items-center gap-3">
-                 <div className="w-32 h-[2px] bg-zinc-800 rounded-full overflow-hidden relative">
-                    <motion.div 
-                      animate={{ x: ['-100%', '100%'] }}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                      className="absolute inset-0 w-1/2 bg-white"
-                    />
-                 </div>
-                 {streamChars > 0 && (
-                   <div className="font-mono text-[10px] text-zinc-500 tracking-widest mt-2">
-                     SYNC: {(streamChars / 1024).toFixed(1)} KB
-                   </div>
-                 )}
-              </div>
+              <motion.div 
+                initial={{ y: 20, opacity: 0, scale: 0.9 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: -20, opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.5, type: 'spring', bounce: 0.4 }}
+                className="relative z-10 flex flex-col items-center max-w-sm w-full bg-white p-8 rounded-3xl shadow-2xl border border-zinc-100"
+              >
+                <div className="w-16 h-16 bg-zinc-900 rounded-2xl shadow-xl shadow-zinc-200 flex items-center justify-center mb-6">
+                  <TerminalSquare className="w-8 h-8 text-white animate-pulse" />
+                </div>
+                <h2 className="text-xl font-bold tracking-tight text-zinc-900 mb-2">
+                  Construyendo Visión...
+                </h2>
+                <p className="text-sm text-zinc-500 mb-6 text-center leading-relaxed">
+                  Génesis Engine está ensamblando y orquestando la arquitectura solicitada.
+                </p>
+                <div className="w-full bg-zinc-100 h-1.5 rounded-full overflow-hidden">
+                   <motion.div 
+                     className="h-full bg-zinc-900"
+                     animate={{ width: ["0%", "100%"] }}
+                     transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                   />
+                </div>
+                {streamChars > 0 && (
+                  <div className="font-mono text-[10px] text-zinc-400 mt-4 uppercase tracking-wider font-semibold">
+                    {streamChars} Bytes Procesados
+                  </div>
+                )}
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
+          )}
+        </AnimatePresence>
 
         {hasContent ? (
-          <div
+          <motion.div
+            layout
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, type: 'spring', bounce: 0.2 }}
             key={refreshKey}
             style={{
               width: deviceMode === 'desktop' ? '100%' : frameWidth[deviceMode],
               height: deviceMode === 'desktop' ? '100%' : frameHeight[deviceMode],
               transformOrigin: 'top center',
             }}
-            className="flex-shrink-0 flex flex-col shadow-xl rounded-2xl overflow-hidden bg-white mt-10 mb-10 border border-zinc-100"
+            className={\`\${deviceMode === 'desktop' ? 'h-full w-full' : 'my-8 rounded-3xl shadow-2xl shadow-black/5'} flex-shrink-0 flex flex-col overflow-hidden bg-white border border-zinc-200/60 z-10 relative\`}
           >
             <SandpackProvider
               key={sandpackKey}
@@ -157,46 +165,46 @@ export function StudioPreview({
               theme="light"
               options={{ externalResources: isVanillaHtml ? [] : ['https://cdn.tailwindcss.com'] }}
             >
-              <div className="relative h-full w-full">
+              <div className="relative h-full w-full bg-white">
                 
-                {/* ── GHOST COMPILATION OVERLAY ── */}
-                {compilationStatus === 'error' && (
-                  <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-zinc-900/95 backdrop-blur-md">
+                {/* ── SUBTLE COMPILATION TOAST ── */}
+                <AnimatePresence>
+                  {compilationStatus === 'error' && (
                     <motion.div 
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex flex-col items-center max-w-sm text-center"
+                      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                      className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 bg-red-500 text-white rounded-2xl shadow-xl shadow-red-500/20 font-medium text-xs pointer-events-auto"
                     >
-                      <div className="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6 border border-red-500/20">
-                        <Bot className="w-8 h-8 text-red-400 animate-pulse" />
-                      </div>
-                      <h3 className="text-xl font-bold text-white tracking-wide mb-2">Error de Compilación</h3>
-                      <p className="text-sm text-zinc-400 mb-8 leading-relaxed">
-                        Genesis Engine detectó un error en tiempo de ejecución. El protocolo de Auto-Fix automatizado está trabajando en una solución...
-                      </p>
-                      
-                      {/* Auto-fix progress bar */}
-                      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                        <motion.div 
-                          initial={{ x: '-100%' }}
-                          animate={{ x: '100%' }}
-                          transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                          className="w-1/2 h-full bg-gradient-to-r from-transparent via-red-400 to-transparent"
-                        />
-                      </div>
-                      <div className="font-mono text-[10px] text-zinc-500 tracking-widest mt-4 uppercase">
-                        Ejecutando parche quirúrgico
-                      </div>
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span className="max-w-[200px] md:max-w-md truncate">Problema detectado. Revisa tus logs o pide soporte.</span>
+                      <button 
+                        onClick={() => setCompilationStatus('idle')} 
+                        className="ml-2 hover:bg-white/20 p-1.5 rounded-xl transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5"/>
+                      </button>
                     </motion.div>
-                  </div>
-                )}
+                  )}
+                  {compilationStatus === 'compiling' && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 20 }}
+                      className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-zinc-900 text-white rounded-full shadow-xl font-medium text-[11px] pointer-events-none"
+                    >
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
+                      Ensamblando módulos...
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
-                <SandpackLayout style={{ border: 'none', height: '100%' }}>
+                <SandpackLayout style={{ border: 'none', height: '100%', background: 'transparent' }}>
                   <SandpackPreview 
                     showOpenInCodeSandbox={false} 
                     showRefreshButton={false} 
-                    showSandpackErrorOverlay={false} // WE HIDE THE NATIVE RED SCREEN
-                    style={{ height: '100%', background: '#FFFFFF' }} 
+                    showSandpackErrorOverlay={true}
+                    style={{ height: '100%', background: 'transparent' }} 
                   />
                 </SandpackLayout>
                 <SandpackErrorBridge 
@@ -205,11 +213,16 @@ export function StudioPreview({
                 />
               </div>
             </SandpackProvider>
-          </div>
+          </motion.div>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full text-zinc-200">
-            <Zap className="w-16 h-16 mb-4 opacity-20 stroke-[1]" />
-            <p className="font-bold uppercase tracking-[0.4em] text-[9px]">En Espera</p>
+          <div className="flex flex-col items-center justify-center h-full text-zinc-400 z-10">
+            <div className="w-20 h-20 rounded-3xl bg-white shadow-xl shadow-black/5 border border-zinc-100 flex items-center justify-center mb-6">
+              <Bot className="w-10 h-10 text-zinc-300" />
+            </div>
+            <p className="font-bold uppercase tracking-widest text-[11px] text-zinc-500 mb-2">Editor en Reposo</p>
+            <p className="text-zinc-400 text-xs text-center max-w-[200px] leading-relaxed">
+              Describe lo que deseas construir para inicializar el motor.
+            </p>
           </div>
         )}
       </div>
