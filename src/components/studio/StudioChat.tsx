@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { 
-  ChevronDown, ChevronLeft, Share2, Globe, Activity, Sparkles, Loader2, Zap, Brain, LayoutGrid, Code2, BookOpen, RefreshCw
+  ChevronDown, ChevronLeft, Activity, Sparkles, Loader2, RefreshCw, Zap
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -80,42 +80,57 @@ interface StudioProjectHeaderProps {
 function StudioProjectHeader({ 
   name = 'Proyecto Sin Nombre', 
   isSaving, 
-  onShare, 
-  onPublish, 
   onBack, 
   onToggleArtifacts,
   agentPhase, 
   activeSpecialist
 }: StudioProjectHeaderProps) {
-  const isSovereign = true; 
+  const isActive = agentPhase !== 'idle';
 
   return (
-    <header 
-      className="shrink-0 h-14 border-b px-4 flex items-center justify-between z-30 sticky top-0 bg-white/70 border-zinc-100 backdrop-blur-xl"
-    >
-      <div className="flex items-center gap-3 overflow-hidden">
-        <button 
-          onClick={onBack} 
-          className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-all border border-zinc-200/60"
+    <header className="shrink-0 h-[52px] border-b border-zinc-100 px-3 flex items-center justify-between z-30 sticky top-0 bg-white/80 backdrop-blur-xl">
+      {/* Left */}
+      <div className="flex items-center gap-2 overflow-hidden min-w-0">
+        <button
+          onClick={onBack}
+          className="h-8 w-8 rounded-xl flex items-center justify-center text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all shrink-0"
+          aria-label="Volver"
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <div className="flex items-center gap-2">
-             {agentPhase !== 'idle' && (
-               <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shrink-0" />
-             )}
-             <h2 className="text-[12px] font-bold text-zinc-800 truncate tracking-tight">{name}</h2>
-             {isSaving && <RefreshCw className="w-3 h-3 text-primary animate-spin shrink-0" />}
+        <div className="flex items-center gap-1.5 min-w-0">
+          {isActive ? (
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-60" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+            </span>
+          ) : (
+            <span className="h-2 w-2 rounded-full bg-zinc-200 shrink-0" />
+          )}
+          <h2 className="text-[12.5px] font-bold text-zinc-800 truncate tracking-tight">{name}</h2>
+          {isSaving && <RefreshCw className="w-3 h-3 text-primary animate-spin shrink-0 ml-1" />}
         </div>
       </div>
 
-      <div className="flex items-center">
-        <button 
-          onClick={onToggleArtifacts} 
-          className="h-8 px-3 rounded-lg border border-zinc-200/60 bg-white flex items-center gap-1.5 text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all"
+      {/* Right */}
+      <div className="flex items-center gap-2 shrink-0">
+        {isActive && activeSpecialist && activeSpecialist !== 'none' && (
+          <span className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/8 border border-primary/15 text-[9px] font-bold text-primary uppercase tracking-wider">
+            <Zap className="h-2.5 w-2.5" />
+            {activeSpecialist}
+          </span>
+        )}
+        <button
+          onClick={onToggleArtifacts}
+          className={cn(
+            "h-8 px-3 rounded-xl border flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider transition-all",
+            isActive
+              ? "border-primary/20 bg-primary/5 text-primary hover:bg-primary/10"
+              : "border-zinc-200 bg-white text-zinc-500 hover:bg-zinc-50"
+          )}
         >
-          <Activity className={cn("h-3.5 w-3.5", agentPhase !== 'idle' ? "text-primary animate-pulse" : "text-zinc-400")} />
-          <span className="text-[10px] font-bold uppercase tracking-wider">Console</span>
+          <Activity className={cn("h-3 w-3", isActive ? "animate-pulse" : "")} />
+          Console
         </button>
       </div>
     </header>
@@ -460,48 +475,65 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
           />
         ))}
 
+        {/* ── Thinking indicator ── */}
         {genPhase === 'thinking' && (
-          <div className="flex flex-col items-start gap-4 mb-8 pl-1 animate-in fade-in slide-in-from-left-4 duration-700">
-             <div className="flex items-center gap-4 py-4 px-6 rounded-[2rem] bg-white text-zinc-900 border border-zinc-100 shadow-[0_20px_40px_-12px_rgba(0,0,0,0.08)] transition-all relative overflow-hidden group">
-                <div className="absolute inset-0 scanline-overlay opacity-[0.02] group-hover:opacity-[0.04] transition-opacity" />
-                <div className="relative z-10 flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-2xl bg-zinc-50 flex items-center justify-center relative overflow-hidden ring-1 ring-zinc-100">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
-                    <Loader2 className="h-5 w-5 text-primary animate-spin relative z-10" />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[11px] font-black text-zinc-900 uppercase tracking-[0.3em] italic leading-none mb-1">
-                      {isAutoFixing ? 'NEURAL_PROTOCOL_FIX' : `GENESIS_${genSpecialist?.toUpperCase() || 'CORE'}_AI`}
-                    </span>
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-[0.1em] italic">
-                      {isAutoFixing ? '🔧 Analizando discrepancia...' : (
-                        <>
-                          {genSpecialist === 'architect' && '🏗️ Planificando trayectoria...'}
-                          {genSpecialist === 'ux' && '🎨 Sintetizando experiencia...'}
-                          {genSpecialist === 'frontend' && '💻 Compilando interfaz...'}
-                          {genSpecialist === 'backend' && '⚙️ Orquestando lógica...'}
-                          {genSpecialist === 'engineer' && '🛠️ Refinando código...'}
-                          {genSpecialist === 'none' && '🧠 Sincronizando redes...'}
-                        </>
-                      )}
-                    </span>
-                  </div>
-                </div>
-             </div>
+          <div className="flex items-start gap-3 mb-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+              <Sparkles className="h-3 w-3 text-primary" />
+            </div>
+            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl rounded-tl-sm bg-white border border-zinc-100 shadow-sm">
+              <div className="flex gap-1">
+                {[0, 1, 2].map(i => (
+                  <span
+                    key={i}
+                    className="h-1.5 w-1.5 rounded-full bg-primary"
+                    style={{ animation: `bounce 1.2s ease-in-out ${i * 0.2}s infinite` }}
+                  />
+                ))}
+              </div>
+              <span className="text-[11px] font-semibold text-zinc-500">
+                {isAutoFixing ? 'Analizando error...' : (
+                  <>
+                    {genSpecialist === 'architect' && 'Planificando arquitectura...'}
+                    {genSpecialist === 'ux' && 'Diseñando experiencia...'}
+                    {genSpecialist === 'frontend' && 'Compilando interfaz...'}
+                    {genSpecialist === 'backend' && 'Orquestando lógica...'}
+                    {genSpecialist === 'engineer' && 'Refinando código...'}
+                    {(genSpecialist === 'none' || !genSpecialist) && 'Génesis está pensando...'}
+                  </>
+                )}
+              </span>
+            </div>
           </div>
         )}
 
+        {/* ── Streaming bubble ── */}
         {(genPhase === 'streaming' || genPhase === 'done') && streamingContent && (
-          <div className="flex flex-col items-start gap-5 mb-10 group/stream">
-            <div className="aether-glass border border-zinc-100 px-6 md:px-10 py-6 md:py-10 rounded-[2.5rem] md:rounded-[4rem] rounded-tl-none shadow-[0_20px_60px_-20px_rgba(0,0,0,0.05)] min-w-[240px] md:min-w-[280px] relative overflow-hidden">
-              <div className="absolute inset-0 scanline-overlay opacity-[0.01] pointer-events-none" />
-              <div className="absolute inset-0 neural-mesh opacity-[0.02] pointer-events-none" />
-              <div className="prose prose-sm max-w-none font-medium prose-zinc prose-p:text-zinc-700 prose-headings:text-zinc-950 relative z-10" dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent) }} />
-              {genPhase === 'streaming' && <span className="inline-block h-4 w-1.5 ml-2 align-baseline rounded-full animate-pulse bg-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.8)]" />}
+          <div className="flex flex-col items-start gap-3 mb-8">
+            <div className="flex items-center gap-2 pl-0.5">
+              <div className="h-6 w-6 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                <Sparkles className="h-3 w-3 text-primary" />
+              </div>
+              <span className="text-[11.5px] font-bold text-zinc-800">Génesis AI</span>
+              <span className="px-1.5 py-0.5 rounded-md bg-primary/8 border border-primary/15 text-[9px] font-bold text-primary uppercase tracking-wider">V21</span>
+              {genPhase === 'streaming' && (
+                <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-100 text-[9px] font-bold text-zinc-400 uppercase tracking-wider">
+                  <Loader2 className="h-2.5 w-2.5 animate-spin" />
+                  Escribiendo
+                </span>
+              )}
+            </div>
+            <div className="w-full max-w-[97%] bg-white border border-zinc-100 shadow-sm rounded-2xl rounded-tl-sm px-4 md:px-5 py-4 relative overflow-hidden">
+              <div className="result-prose text-[13px] text-zinc-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent) }} />
+              {genPhase === 'streaming' && (
+                <span className="inline-block h-3.5 w-1 ml-1 align-baseline rounded-sm animate-pulse bg-primary" />
+              )}
             </div>
             {isGenerating && currentGenIntent === 'codegen' && (
-              <div className="w-full max-w-xs mt-2 pl-2">
-                <div className="h-1 w-full rounded-full bg-zinc-100 border overflow-hidden"><div className="h-full bg-primary" style={{ width: `${Math.min((streamChars / 10000) * 100, 95)}%` }} /></div>
+              <div className="w-48 pl-1">
+                <div className="h-0.5 w-full rounded-full bg-zinc-100 overflow-hidden">
+                  <div className="h-full bg-primary transition-all duration-300" style={{ width: `${Math.min((streamChars / 10000) * 100, 95)}%` }} />
+                </div>
               </div>
             )}
           </div>
