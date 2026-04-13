@@ -519,32 +519,34 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                     <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Causa del error: npx not in $PATH</p>
                   </div>
                   <p className="text-[10px] text-white/40 leading-relaxed pl-5">
-                    Cursor / Claude spawnan el proceso MCP con un entorno mínimo que <strong className="text-white/60">no hereda tu $PATH del shell</strong>. 
+                    Claude Desktop spawnea el proceso MCP con un entorno mínimo que <strong className="text-white/60">no hereda tu $PATH del shell</strong>. 
                     Por eso <code className="bg-white/10 px-1 rounded text-red-300 font-mono">npx</code> no se encuentra aunque esté instalado.
                   </p>
                 </div>
 
                 {/* Solution */}
                 <div>
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">✅ Solución — usar ruta absoluta en .cursor/mcp.json</p>
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-2">✅ Solución — usar ruta absoluta en el config de Claude</p>
                   <p className="text-[10px] text-white/25 mb-2 leading-relaxed">
                     Tu <code className="bg-white/10 px-1 rounded font-mono text-white/50">npx</code> está en <code className="bg-white/10 px-1 rounded font-mono text-emerald-400">/usr/local/bin/npx</code>. 
-                    El archivo ya fue creado automáticamente. Reinicia Cursor para que tome efecto.
+                    El archivo de configuración ya fue actualizado automáticamente.
                   </p>
 
                   <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
                     <div className="flex items-center justify-between px-3 py-2 bg-zinc-900">
-                      <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest font-mono">.cursor/mcp.json</span>
-                      <span className="text-[9px] text-emerald-400 font-bold">✓ Auto-generado</span>
+                      <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest font-mono">claude_desktop_config.json</span>
+                      <span className="text-[9px] text-emerald-400 font-bold">✓ Actualizado</span>
                     </div>
                     <pre className="p-3 text-[10px] font-mono text-zinc-300 overflow-x-auto leading-relaxed bg-black/40">{`{
   "mcpServers": {
     "supabase": {
       "command": "/usr/local/bin/npx",
-      "args": ["-y", "@modelcontextprotocol/server-supabase",
-               "--supabase-url", "${config?.url ?? 'TU_SUPABASE_URL'}",
-               "--supabase-key", "TU_SERVICE_KEY"],
-      "env": { "PATH": "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin" }
+      "args": ["-y", "@modelcontextprotocol/server-supabase", "--read-only"],
+      "env": {
+        "SUPABASE_URL": "${config?.url ?? 'TU_SUPABASE_URL'}",
+        "SUPABASE_SERVICE_KEY": "TU_SERVICE_KEY",
+        "PATH": "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin"
+      }
     }
   }
 }`}</pre>
@@ -554,10 +556,10 @@ export function StudioCloud({ projectId, config, onConfigChange }: StudioCloudPr
                 {/* Steps */}
                 <div className="space-y-2">
                   {[
-                    { n: '1', text: 'El archivo .cursor/mcp.json fue creado en tu proyecto' },
-                    { n: '2', text: 'Reemplaza TU_SERVICE_KEY con tu Supabase service_role key (Dashboard → Settings → API)' },
-                    { n: '3', text: 'Reinicia Cursor IDE completamente (Cmd+Q → reabrir)' },
-                    { n: '4', text: 'Verifica en Cursor Settings → MCP que "supabase" aparece como activo' },
+                    { n: '1', text: 'Configuración aplicada en ~/Library/Application Support/Claude/claude_desktop_config.json' },
+                    { n: '2', text: 'RECUERDA: Reemplaza TU_SERVICE_KEY con tu service_role key en ese archivo' },
+                    { n: '3', text: 'Reinicia Claude Desktop completamente (Cmd+Q → reabrir)' },
+                    { n: '4', text: 'Verifica en el icono de "M" (MCP) de Claude que el servidor esté activo' },
                   ].map(step => (
                     <div key={step.n} className="flex items-start gap-3">
                       <div className="h-5 w-5 rounded-full bg-emerald-400/15 border border-emerald-400/25 flex items-center justify-center shrink-0 mt-0.5">
