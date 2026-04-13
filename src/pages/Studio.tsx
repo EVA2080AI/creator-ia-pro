@@ -120,6 +120,41 @@ export default function Studio() {
     setIsSaving(false);
   };
 
+  const handleAddFile = (name: string) => {
+    if (!activeProject) return;
+    const lang = name.endsWith('.tsx') || name.endsWith('.ts') ? 'tsx'
+      : name.endsWith('.css') ? 'css'
+      : name.endsWith('.json') ? 'json'
+      : name.endsWith('.html') ? 'html'
+      : 'typescript';
+    const newFiles = {
+      ...activeProject.files,
+      [name]: { language: lang, content: `// ${name}\n` },
+    };
+    handleFilesChange(newFiles);
+    setActiveFile(name);
+  };
+
+  const handleDeleteFile = (name: string) => {
+    if (!activeProject) return;
+    const newFiles = { ...activeProject.files };
+    delete newFiles[name];
+    if (activeFile === name) {
+      const remaining = Object.keys(newFiles);
+      setActiveFile(remaining[0] ?? null);
+    }
+    handleFilesChange(newFiles);
+  };
+
+  const handleRenameFile = (oldName: string, newName: string) => {
+    if (!activeProject || oldName === newName) return;
+    const newFiles = { ...activeProject.files };
+    newFiles[newName] = newFiles[oldName];
+    delete newFiles[oldName];
+    if (activeFile === oldName) setActiveFile(newName);
+    handleFilesChange(newFiles);
+  };
+
   const handleCodeGenerated = (newFiles: Record<string, StudioFile>) => {
     if (!activeProject) return;
     handleFilesChange(newFiles);
@@ -159,16 +194,20 @@ export default function Studio() {
         return (
           <div className="flex h-full w-full bg-[#080808]">
             <div className="w-64 shrink-0 border-r border-white/5 bg-black/20">
-              <StudioFileTree 
-                files={activeProject.files} 
-                selectedFile={activeFile || ''} 
-                onSelect={(f) => setActiveFile(f)} 
+              <StudioFileTree
+                files={activeProject.files}
+                selectedFile={activeFile || ''}
+                onSelect={(f) => setActiveFile(f)}
+                onAddFile={handleAddFile}
+                onDeleteFile={handleDeleteFile}
+                onRenameFile={handleRenameFile}
+                onAddFolder={(folder) => handleAddFile(`${folder}/.gitkeep`)}
               />
             </div>
             <div className="flex-1 overflow-hidden">
-              <StudioCodeEditor 
-                selectedFile={activeFile || ''} 
-                projectFiles={activeProject.files} 
+              <StudioCodeEditor
+                selectedFile={activeFile || ''}
+                projectFiles={activeProject.files}
                 onFilesChange={handleFilesChange}
                 isGenerating={isGenerating}
                 streamPreview={streamPreview}
