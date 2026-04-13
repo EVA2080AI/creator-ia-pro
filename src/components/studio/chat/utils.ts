@@ -101,27 +101,43 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
   
   // 1. Try to find code blocks with filenames in the preceding lines or inside backticks
   // Pattern: ```tsx filename.tsx ... ``` or file: filename.tsx \n ``` ... ```
-  const blockRegex = /```(tsx|jsx|ts|js|css|html|json)\s*([\w\.\/\-]*)\n([\s\S]*?)```/g;
+  const blockRegex = /```(tsx|jsx|ts|js|css|html|json)\s*([\w\.\/\-]*)\n([\s\S]*?)```/gi;
   let match;
   let count = 0;
 
   while ((match = blockRegex.exec(text)) !== null) {
-    const [_, lang, rawFilename, content] = match;
+    const lang = match[1].toLowerCase();
+    const rawFilename = match[2];
+    const content = match[3];
     let filename = rawFilename?.trim();
     
-    // If no filename in backticks, look at the line before
+    // If no filename in backticks, check if the VERY FIRST line of the code block is a path comment!
+    // Example: // src/components/Hero.tsx
+    if (!filename) {
+      const firstLine = content.trim().split('\n')[0]?.trim();
+      if (firstLine && (firstLine.startsWith('//') || firstLine.startsWith('/*') || firstLine.startsWith('<!--'))) {
+         const commentPathMatch = firstLine.match(/([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/i);
+         if (commentPathMatch && !commentPathMatch[1].includes('http')) {
+           filename = commentPathMatch[1];
+         }
+      }
+    }
+    
+    // If STILL no filename, look at the line before
     if (!filename) {
       const beforeBlock = text.slice(0, match.index).trim().split('\n').pop() || '';
-      const fileMatch = beforeBlock.match(/([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/);
-      if (fileMatch) {
+      // Avoid matching http:// URLs
+      const fileMatch = beforeBlock.match(/(?:^|\s|>)([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))(?:$|\s|<)/i);
+      if (fileMatch && !fileMatch[1].includes('http')) {
         filename = fileMatch[1];
       }
     }
 
     // Default filenames if still missing
     if (!filename) {
-      if (lang === 'css') filename = 'styles.css';
+      if (lang === 'css') filename = 'style.css';
       else if (lang === 'html') filename = 'index.html';
+      else if (lang === 'json') filename = 'data.json';
       else if (count === 0) filename = 'App.tsx';
       else filename = `Component${count}.tsx`;
     }
@@ -236,15 +252,20 @@ export function isResponseTruncated(text: string): boolean {
     if (hasUnclosedBlock) return true;
   }
 
-  // Verificar si termina abruptamente con caracteres de continuación
-  const endsWithContinuation = /[\w\s,;:+\-\*/=<{(\[]$/.test(text.slice(-100));
-  const hasIncompleteLine = !text.endsWith('}') && !text.endsWith('`') && !text.endsWith('>');
+  // Verificar si termina abruptamente al final de alguna estructura sin cerrar
+  const openBraces = (text.match(/\{/g) || []).length;
+  const closeBraces = (text.match(/\}/g) || []).length;
+  if (openBraces > closeBraces) return true;
+  
+  // También revisamos si termina en un caracter que indica continuación obvia
+  const endsWithContinuation = /[\w\s,;:+\-\*/=<{(\[>]$/.test(text.slice(-100).trim());
 
   // Verificar patrones de truncación comunes
   const truncationPatterns = [
     /export\s+default\s+\w+\s*\{[^}]*$/, // export default X { ... (sin cerrar)
     /return\s*\([^)]*$/,                 // return ( ... (sin cerrar)
     /<\w+[^>]*>$/,                       // <Tag ...> (sin cerrar)
+    /className=(['"])[^\1]*$/,           // className=" ... (sin cerrar comillas)
     /\{[^}]*$/,                          // { ... (sin cerrar)
     /\[[^\]]*$/,                         // [ ... (sin cerrar)
   ];
