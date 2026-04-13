@@ -190,13 +190,13 @@ function WelcomeScreen({
         </div>
 
         {/* Centered content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-40 pb-32">
-          <h1 className="text-[32px] md:text-[42px] font-bold text-zinc-900 tracking-tight mb-10 text-center leading-tight">
+        <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-40 pb-32 pointer-events-none">
+          <h1 className="text-[32px] md:text-[42px] font-bold text-zinc-900 tracking-tight mb-10 text-center leading-tight pointer-events-auto">
             {greeting}
           </h1>
 
           {/* Input Box */}
-          <div className="w-full max-w-3xl relative z-20">
+          <div className="w-full max-w-3xl relative z-20 pointer-events-auto">
             <div className="relative rounded-[28px] overflow-hidden shadow-2xl transition-all border border-zinc-200 bg-white shadow-zinc-200/50">
               
               <button 
