@@ -66,6 +66,14 @@ const CodeIDE      = lazy(() => import("./pages/CodeIDE"));
 const Studio       = lazy(() => import("./pages/Studio"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 
+// Delicias Colombianas
+const LuminaMenu = lazy(() => import("./pages/LuminaMenu"));
+const LuminaCustomize = lazy(() => import("./pages/LuminaCustomize"));
+const LuminaSummary = lazy(() => import("./pages/LuminaSummary"));
+
+// Nebula Finance Ecosystem
+const NebulaDashboard = lazy(() => import("./pages/NebulaDashboard"));
+
 // Light loading screen — no dark bg
 const LoadingScreen = () => (
   <div className="flex h-screen w-screen items-center justify-center bg-white" role="status" aria-live="polite">
@@ -113,6 +121,15 @@ const App = () => {
                   <Route path="/reset-password"       element={<ResetPassword />} />
                   <Route path="/documentation"        element={<Documentation />} />
                   <Route path="/docs"                 element={<Docs />} />
+                  
+                  {/* Lumina Bistro Flow */}
+                  <Route path="/menu"              element={<LuminaMenu />} />
+                  <Route path="/customize"         element={<LuminaCustomize />} />
+                  <Route path="/summary"           element={<LuminaSummary />} />
+                  <Route path="/success"           element={<ConfirmacionDeEnvio />} />
+
+                  {/* Nebula Finance Ecosystem */}
+                  <Route path="/nebula"            element={<NebulaDashboard />} />
 
                   {/* ── Redirects ── */}
                   <Route path="/canvas"  element={<CanvasRedirect />} />

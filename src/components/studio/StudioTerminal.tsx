@@ -30,10 +30,10 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
   onFix 
 }) => {
   const [history, setHistory] = useState<TermLine[]>([
-    { id: 'init-1', type: 'info', content: 'GENESIS_SHELL_KERNEL V10.0.4.5-STABLE [PRO_EDITION]' },
-    { id: 'init-2', type: 'info', content: 'ESTABLISHING_NEURAL_LINK... [OK]' },
-    { id: 'init-3', type: 'success', content: 'SOVEREIGN_LINK_COLLECTIVE_ACTIVE. SYSTEM_READY.' },
-    { id: 'init-4', type: 'output', content: 'TYPE "HELP" FOR COMMAND_DIRECTORY_ACCESS' },
+    { id: 'init-1', type: 'info', content: 'AI_CORE_SHELL V1.0.0-PRO [ACTIVE]' },
+    { id: 'init-2', type: 'info', content: 'ESTABLISHING_NEURAL_BRIDGE... [OK]' },
+    { id: 'init-3', type: 'success', content: 'COGNITIVE_LINK_STABLE. SYSTEM_OPERATIONAL.' },
+    { id: 'init-4', type: 'output', content: 'TYPE "HELP" FOR COMMAND_DIRECTORY' },
   ]);
   const [input, setInput] = useState('');
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
@@ -52,7 +52,7 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
     if (!trimmed) return;
 
     // Add to UI history (echo)
-    setHistory(prev => [...prev, { id: crypto.randomUUID(), type: 'input', content: trimmed, prefix: 'ROOT@GENESIS:~#' }]);
+    setHistory(prev => [...prev, { id: crypto.randomUUID(), type: 'input', content: trimmed, prefix: 'ROOT@AI_CORE:~#' }]);
     setCmdHistory(prev => [trimmed, ...prev]);
     setHistoryIdx(-1);
 
@@ -66,8 +66,8 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
           'AVAILABLE_COMMANDS:',
           '  ls              List active project architecture',
           '  cat <file>      Read file content in buffer',
-          '  genesis fix     Initialize AI auto-correction loop',
-          '  genesis stats   Display project heuristics',
+          '  fix             Initialize AI auto-correction',
+          '  stats           Display project heuristics',
           '  clear           Flush console buffer',
           '  pwd             Print virtual working directory',
           '  whoami          Display operator identity',
@@ -81,16 +81,16 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
         break;
 
       case 'pwd':
-        addLines(['/ARCHITECTURE/PROJECT_ALPHA'], 'output');
+        addLines(['/ARCHITECTURE/CURRENT_PROJECT'], 'output');
         break;
 
       case 'whoami':
-        addLines(['GENESIS_OPERATOR_001'], 'output');
+        addLines(['OPERATOR_001'], 'output');
         break;
 
       case 'cat':
         if (!args[0]) {
-          addLines(['ERROR: SPECIFY_FILENAME_PARAMETER (E.G. CAT APP.TSX)'], 'error');
+          addLines(['ERROR: SPECIFY_FILENAME_PARAMETER'], 'error');
         } else {
           const file = files[args[0]];
           if (file) {
@@ -101,22 +101,20 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
         }
         break;
 
-      case 'genesis':
-        if (args[0] === 'fix') {
-          addLines(['INITIALIZING_AUTO_REPAIR_PROTOCOL...', 'ANALYZING_SANDBOX_ERRORS...'], 'info');
-          onFix?.();
-        } else if (args[0] === 'stats') {
-           const totalChars = Object.values(files).reduce((acc, f) => acc + f.content.length, 0);
-           addLines([
-             'PROJECT_HEURISTICS:',
-             `  FILES: ${Object.keys(files).length}`,
-             `  SIZE: ${totalChars.toLocaleString()} CHARS`,
-             `  LATENCY: 24MS`,
-             `  COLLECTIVE: GENESIS_SOVEREIGN`
-           ], 'success');
-        } else {
-           addLines(['GENESIS_CLI: INVALID_PARAMETER. USE "GENESIS HELP"'], 'error');
-        }
+      case 'fix':
+        addLines(['INITIALIZING_AI_REPAIR_PROTOCOL...', 'ANALYZING_SANDBOX_ERRORS...'], 'info');
+        onFix?.();
+        break;
+
+      case 'stats':
+         const totalChars = Object.values(files).reduce((acc, f) => acc + f.content.length, 0);
+         addLines([
+           'PROJECT_HEURISTICS:',
+           `  FILES: ${Object.keys(files).length}`,
+           `  SIZE: ${totalChars.toLocaleString()} CHARS`,
+           `  LATENCY: 12MS`,
+           `  COLLECTIVE: AI_BRIDGE_ENABLED`
+         ], 'success');
         break;
 
       case 'clear':
@@ -180,7 +178,7 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
           <div className="h-4 w-[1px] bg-white/10 mx-1" />
           <div className="flex items-center gap-2">
             <CommandLineIcon className="w-3.5 h-3.5 text-zinc-500" />
-            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic">ROOT://GENESIS_SHELL</span>
+            <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest italic">ROOT://AI_CORE_SHELL</span>
           </div>
         </div>
         <div className="flex items-center gap-4">
@@ -216,7 +214,7 @@ export const StudioTerminal: React.FC<StudioTerminalProps> = ({
         ))}
         
         <div className="flex gap-3 items-center text-white">
-          <span className="text-primary font-black shrink-0 tracking-tighter italic">ROOT@GENESIS:~#</span>
+          <span className="text-primary font-black shrink-0 tracking-tighter italic">ROOT@AI_CORE:~#</span>
           <div className="relative flex-1">
             <input
               ref={inputRef}

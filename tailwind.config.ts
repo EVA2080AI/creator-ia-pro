@@ -114,6 +114,24 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Lumina Bistro Identity
+        bistro: {
+          black: "#050505",
+          gold: "#D4AF37",
+          "gold-light": "#E5C158",
+          zinc: "#18181B",
+          surface: "#0F0F0F",
+          muted: "#3F3F46"
+        },
+        // Nebula Finance Identity
+        nebula: {
+          indigo: "#6366F1",
+          emerald: "#10B981",
+          obsidian: "#0B0B0C",
+          surface: "#121214",
+          border: "rgba(255, 255, 255, 0.08)",
+          muted: "#71717A"
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

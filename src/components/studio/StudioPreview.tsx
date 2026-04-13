@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   SandpackProvider,
   SandpackPreview,
@@ -56,7 +56,6 @@ export function StudioPreview({
   const prevFilesRef = useRef<string>('');
   const [compilationStatus, setCompilationStatus] = useState<'idle' | 'compiling' | 'success' | 'error'>('idle');
 
-  // Logic to detect if we need to hard-reload Sandpack (major project changes)
   useEffect(() => {
     if (!isGenerating && Object.keys(files).length > 0) {
       const currentFilesHash = JSON.stringify(Object.keys(files).sort());
@@ -94,14 +93,23 @@ export function StudioPreview({
   }, []);
 
   const hasContent = Object.keys(files).length > 0;
-  const frameWidth: Record<DeviceMode, string> = { desktop: '100%', tablet: '768px', mobile: '375px' };
-  const frameHeight: Record<DeviceMode, string | undefined> = { desktop: undefined, tablet: '1024px', mobile: '812px' };
+  
+  const frameWidth: Record<DeviceMode, string> = { 
+    desktop: '100%', 
+    tablet: '768px', 
+    mobile: '375px' 
+  };
+  
+  const frameHeight: Record<DeviceMode, string | undefined> = { 
+    desktop: undefined, 
+    tablet: '1024px', 
+    mobile: '812px' 
+  };
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-white relative">
       <div className="flex flex-1 items-start justify-center overflow-auto relative bg-[#FAFAFA]">
         
-        {/* DOT GRID BACKGROUND */}
         <div 
           className="absolute inset-0 opacity-[0.4] pointer-events-none" 
           style={{ 
@@ -118,7 +126,6 @@ export function StudioPreview({
               exit={{ opacity: 0 }}
               className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-[#FAFAFA]/95 backdrop-blur-md overflow-hidden"
             >
-              {/* Background scanning effect */}
               <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                 <motion.div 
                    className="w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent"
@@ -136,15 +143,15 @@ export function StudioPreview({
               >
                 <div className="w-20 h-20 bg-zinc-900 rounded-[1.75rem] shadow-2xl flex items-center justify-center mb-8 relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-purple-500/20 opacity-50 group-hover:opacity-100 transition-opacity" />
-                  <Terminal className="w-10 h-10 text-white relative z-10" />
+                  <Zap className="w-10 h-10 text-white relative z-10 animate-pulse" />
                 </div>
                 
                 <div className="text-center space-y-1 mb-8">
                   <h2 className="text-2xl font-black italic tracking-tighter text-zinc-900 uppercase">
-                    Architecting
+                    Generando IA
                   </h2>
                   <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">
-                    Genesis v19.5 Engine
+                    Capacidades Inteligentes Activas
                   </p>
                 </div>
 
@@ -158,7 +165,7 @@ export function StudioPreview({
                   </div>
                   
                   <div className="flex justify-between items-center px-1">
-                    <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest">Ensamblando Capas</span>
+                    <span className="text-[9px] font-bold text-zinc-300 uppercase tracking-widest">Procesando</span>
                     {streamChars > 0 && (
                       <span className="font-mono text-[10px] text-primary font-black">
                         {streamChars.toLocaleString()} BYTES
@@ -189,7 +196,9 @@ export function StudioPreview({
               template={isVanillaHtml ? "static" : "react-ts"}
               files={sandpackFiles}
               theme="light"
-              options={{ externalResources: isVanillaHtml ? [] : ['https://cdn.tailwindcss.com'] }}
+              options={{ 
+                externalResources: isVanillaHtml ? [] : ['https://cdn.tailwindcss.com'] 
+              }}
             >
               <div className="relative h-full w-full bg-white">
                 <AnimatePresence>
@@ -218,7 +227,7 @@ export function StudioPreview({
                       className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-zinc-900 text-white rounded-full shadow-xl font-medium text-[11px] pointer-events-none"
                     >
                       <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
-                      Ensamblando módulos...
+                      Ensamblando...
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -233,7 +242,7 @@ export function StudioPreview({
                 </SandpackLayout>
                 <SandpackErrorBridge 
                   onError={onError} 
-                  onStatusChange={setCompilationStatus} 
+                  onStatusChange={(status: any) => setCompilationStatus(status)} 
                 />
               </div>
             </SandpackProvider>
