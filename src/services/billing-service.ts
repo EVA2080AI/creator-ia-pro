@@ -234,11 +234,32 @@ export const adminService = {
     }
   },
 
-  async saveSettings(settings: Record<string, string>) {
+  async saveSettings(key: string, value: string) {
     const { data, error } = await supabase.functions.invoke("admin-save-settings", {
-      body: settings,
+      body: { key, value },
     });
     if (error) throw error;
     return data;
+  },
+
+  async getSettings(): Promise<Record<string, string>> {
+    const { data, error } = await supabase
+      .from("app_settings")
+      .select("key, value");
+
+    if (error) {
+      console.warn("[Admin] Could not fetch settings directly, might be restricted.");
+      return {};
+    }
+
+    const settings: Record<string, string> = {};
+    data?.forEach(item => {
+      try {
+        settings[item.key] = JSON.parse(item.value);
+      } catch {
+        settings[item.key] = item.value;
+      }
+    });
+    return settings;
   },
 };

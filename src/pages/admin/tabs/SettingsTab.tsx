@@ -25,11 +25,8 @@ export function SettingsTab({
     if (!boldApiKey.trim() && !boldWebhookSecret.trim()) { toast.error("Ingresa al menos una clave"); return; }
     setSavingSettings(true);
     try {
-      const settings: any = {};
-      if (boldApiKey.trim()) settings.BOLD_API_KEY = boldApiKey;
-      if (boldWebhookSecret.trim()) settings.BOLD_WEBHOOK_SECRET = boldWebhookSecret;
-      
-      await adminService.saveSettings(settings);
+      if (boldApiKey.trim()) await adminService.saveSettings("BOLD_API_KEY", boldApiKey);
+      if (boldWebhookSecret.trim()) await adminService.saveSettings("BOLD_WEBHOOK_SECRET", boldWebhookSecret);
       toast.success("Configuración de Bold guardada");
       setBoldApiKey("");
       setBoldWebhookSecret("");
