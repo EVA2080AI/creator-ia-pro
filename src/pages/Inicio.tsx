@@ -3,7 +3,7 @@ import HeroSection from '../components/HeroSection';
 import ValuePropositionGrid from '../components/ValuePropositionGrid';
 import TestimonialSlider from '../components/TestimonialSlider';
 import PartnersLogoStrip from '../components/PartnersLogoStrip';
-import Footer from '../components/Footer';
+import { Footer } from '../components/Footer';
 
 /**
  * Inicio Page — The primary landing experience for Genesis Builder
