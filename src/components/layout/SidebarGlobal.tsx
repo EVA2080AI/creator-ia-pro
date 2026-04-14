@@ -1,15 +1,13 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   LayoutTemplate, Brain, FolderOpen, Image, Download,
-  Coins, LogOut, User, Shield, ChevronRight, Clock,
-  FileCode, Layers, Briefcase, Zap, Settings, CreditCard, Sparkles,
+  Coins, LogOut, User, Shield, Zap, Settings, CreditCard, Sparkles,
   PanelLeftClose, PanelLeftOpen, List, Code2,
   Home, LayoutGrid, ShieldCheck, Activity, Bot,
   Users2, Palette, type LucideIcon
 } from 'lucide-react';
-import { useProjectStore } from '@/stores';
 
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/Logo';
@@ -73,15 +71,6 @@ const NAV_BOTTOM = [
   { path: '/descargar',       label: 'Descargar',   icon: Download },
 ];
 
-// Sub-menu items for Projects section
-interface SubMenuItem {
-  id: string;
-  label: string;
-  icon: LucideIcon;
-  onClick: () => void;
-  badge?: number;
-}
-
 export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -90,13 +79,6 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const { isAdmin } = useAdmin(user?.id);
   const { globalExpanded, toggleGlobal } = useSidebarV2();
   const { groups, workspaceTitle } = useWorkspaceActions();
-
-  // Get projects from store
-  const { projects, activeProject, setActiveProject } = useProjectStore();
-  const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
-
-  // Get recent projects (last 5 updated)
-  const recentProjects = projects.slice(0, 5);
 
   const userTier = profile?.subscription_tier?.toLowerCase() ?? 'free';
   const userTierLevel = TIER_LEVELS[userTier] || 0;
@@ -174,45 +156,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
               </span>
             </div>
           )}
-
-          {/* Genesis IA con submenú desplegable */}
-          <ExpandableMenu
-            icon={Brain}
-            label="Genesis IA"
-            expanded={globalExpanded || isMobile}
-            isOpen={expandedMenu === 'genesis'}
-            onToggle={() => setExpandedMenu(expandedMenu === 'genesis' ? null : 'genesis')}
-            active={isActive('/chat') || isActive('/studio')}
-            items={[
-              {
-                id: 'projects',
-                label: 'Mis Proyectos',
-                icon: Briefcase,
-                onClick: () => navigate('/studio'),
-                badge: projects.length,
-              },
-              {
-                id: 'recent',
-                label: 'Recientes',
-                icon: Clock,
-                onClick: () => navigate('/studio'),
-              },
-              {
-                id: 'templates',
-                label: 'Plantillas',
-                icon: Layers,
-                onClick: () => navigate('/chat'),
-              },
-              {
-                id: 'chat',
-                label: 'Nuevo Chat',
-                icon: Sparkles,
-                onClick: () => navigate('/chat'),
-              },
-            ]}
-          />
-
-          {NAV_MAIN.filter(item => item.path !== '/chat').map((item) => (
+          {NAV_MAIN.map((item) => (
             <NavItem
               key={item.path}
               path={item.path}
@@ -237,15 +181,15 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
               </div>
             )}
             {NAV_SYSTEM.map((item) => (
-              <NavItem 
-                key={`${item.path}-${item.label}`} 
+              <NavItem
+                key={`${item.path}-${item.label}`}
                 path={item.path}
                 label={item.label}
                 icon={item.icon}
-                active={isActive(item.path)} 
+                active={isActive(item.path)}
                 expanded={globalExpanded || isMobile}
                 minTier={item.minTier}
-                onClick={() => handleNav(item.path, item.minTier, item.label, item.tab)} 
+                onClick={() => handleNav(item.path, item.minTier, item.label, item.tab)}
               />
             ))}
           </div>
@@ -342,91 +286,6 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
         </div>
       </div>
     </motion.aside>
-  );
-}
-
-function ExpandableMenu({
-  icon: Icon,
-  label,
-  expanded,
-  isOpen,
-  onToggle,
-  active,
-  items,
-}: {
-  icon: LucideIcon;
-  label: string;
-  expanded: boolean;
-  isOpen: boolean;
-  onToggle: () => void;
-  active: boolean;
-  items: SubMenuItem[];
-}) {
-  return (
-    <div className="space-y-1">
-      <button
-        onClick={onToggle}
-        title={!expanded ? label : undefined}
-        aria-label={label}
-        aria-expanded={isOpen}
-        className={cn(
-          'group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold outline-none relative overflow-hidden',
-          expanded ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
-          active ? 'bg-primary/5 text-primary border border-primary/10 shadow-[0_4px_20px_-4px_rgba(168,85,247,0.1)]' : 'bg-transparent text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50/80 border border-transparent'
-        )}
-      >
-        <Icon className={cn('shrink-0 transition-transform duration-300', expanded ? 'w-4 h-4' : 'w-5 h-5', active ? 'text-primary scale-105' : 'text-zinc-400 group-hover:scale-105 group-hover:text-zinc-600')} />
-        {expanded && (
-          <>
-            <span className="truncate flex-1 text-left mt-0.5 leading-none">{label}</span>
-            <ChevronRight className={cn(
-              'w-3.5 h-3.5 shrink-0 transition-transform duration-300 text-zinc-400',
-              isOpen && 'rotate-90'
-            )} />
-          </>
-        )}
-        {active && expanded && (
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-gradient-to-b from-primary to-blue-500 shadow-[2px_0_8px_rgba(168,85,247,0.5)]" />
-        )}
-      </button>
-
-      {/* Sub-menu items */}
-      <AnimatePresence initial={false}>
-        {isOpen && expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="pl-3 space-y-0.5">
-              {items.map((item, index) => (
-                <motion.button
-                  key={item.id}
-                  initial={{ x: -10, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.05, duration: 0.2 }}
-                  onClick={item.onClick}
-                  className={cn(
-                    'w-full flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 text-[11px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100/60',
-                    item.id === 'chat' && 'text-primary/70 hover:text-primary hover:bg-primary/5'
-                  )}
-                >
-                  <item.icon className="w-3.5 h-3.5 shrink-0" />
-                  <span className="flex-1 text-left">{item.label}</span>
-                  {item.badge !== undefined && item.badge > 0 && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                      {item.badge}
-                    </span>
-                  )}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
   );
 }
 
