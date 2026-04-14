@@ -7,9 +7,8 @@ import { Footer } from '../components/Footer';
 
 /**
  * Inicio Page — The primary landing experience for Genesis Builder
- * Resolves the missing module error by unifying the generated components.
  */
-const Inicio = () => {
+const Inicio: React.FC = () => {
   return (
     <div className="min-h-screen bg-white">
       <main className="animate-in fade-in duration-500">
@@ -36,8 +35,8 @@ const Inicio = () => {
         </section>
 
         <section id="cta" className="py-32 px-6 flex flex-col items-center text-center">
-          <h2 className="text-5xl md:text-7xl font-black text-zinc-900 tracking-tighter mb-8 max-w-4xl leading-none">
-            ¿LISTO PARA <span className="text-zinc-300">TRASCENDER?</span>
+          <h2 className="text-5xl md:text-7xl font-black text-zinc-900 tracking-tighter mb-8 max-w-4xl leading-none italic uppercase">
+            Listo para <span className="text-zinc-300">Trascender?</span>
           </h2>
           <button className="px-12 py-6 bg-primary text-white text-xl font-bold rounded-full shadow-2xl shadow-primary/30 hover:scale-110 active:scale-95 transition-all">
             Empezar a Construir Ahora
