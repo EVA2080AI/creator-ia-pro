@@ -98,51 +98,84 @@ export function detectIntent(prompt: string, hasContext: boolean): ChatIntent {
 
 export function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
   const files: Record<string, StudioFile> = {};
-  
+
+  // Map of language aliases to standard names
+  const langMap: Record<string, string> = {
+    'typescript': 'ts', 'ts': 'ts',
+    'javascript': 'js', 'js': 'js',
+    'tsx': 'tsx', 'jsx': 'jsx',
+    'css': 'css', 'html': 'html', 'json': 'json',
+    'react': 'tsx', 'react-ts': 'tsx',
+    'python': 'py', 'go': 'go', 'rust': 'rs'
+  };
+
   // 1. Try to find code blocks with filenames in the preceding lines or inside backticks
   // Pattern: ```tsx filename.tsx ... ``` or file: filename.tsx \n ``` ... ```
-  const blockRegex = /```(tsx|jsx|ts|js|css|html|json)\s*([\w\.\/\-]*)\n([\s\S]*?)```/gi;
+  // IMPROVED: More flexible language matching
+  const blockRegex = /```([\w+-]+)\s*([\w\.\/\-]*)\n([\s\S]*?)```/gi;
   let match;
   let count = 0;
 
   while ((match = blockRegex.exec(text)) !== null) {
-    const lang = match[1].toLowerCase();
+    const rawLang = match[1].toLowerCase().trim();
+    const lang = langMap[rawLang] || rawLang;
     const rawFilename = match[2];
     const content = match[3];
     let filename = rawFilename?.trim();
-    
-    // If no filename in backticks, check if the VERY FIRST line of the code block is a path comment!
-    // Example: // src/components/Hero.tsx
+
+    // If no filename in backticks, check if ANY line at the START of the code block is a path comment!
+    // Example: // src/components/Hero.tsx  or  /* src/components/Hero.tsx */
     if (!filename) {
-      const firstLine = content.trim().split('\n')[0]?.trim();
-      if (firstLine && (firstLine.startsWith('//') || firstLine.startsWith('/*') || firstLine.startsWith('<!--'))) {
-         const commentPathMatch = firstLine.match(/([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/i);
-         if (commentPathMatch && !commentPathMatch[1].includes('http')) {
-           filename = commentPathMatch[1];
-         }
-      }
-    }
-    
-    // If STILL no filename, look at the line before
-    if (!filename) {
-      const beforeBlock = text.slice(0, match.index).trim().split('\n').pop() || '';
-      // Avoid matching http:// URLs
-      const fileMatch = beforeBlock.match(/(?:^|\s|>)([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))(?:$|\s|<)/i);
-      if (fileMatch && !fileMatch[1].includes('http')) {
-        filename = fileMatch[1];
+      const lines = content.trim().split('\n').slice(0, 5); // Check first 5 lines
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('//') || trimmedLine.startsWith('/*') || trimmedLine.startsWith('<!--')) {
+           const commentPathMatch = trimmedLine.match(/([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/i);
+           if (commentPathMatch && !commentPathMatch[1].includes('http')) {
+             filename = commentPathMatch[1];
+             break;
+           }
+        }
       }
     }
 
-    // Default filenames if still missing
+    // If STILL no filename, look at the line before the code block
+    if (!filename) {
+      const beforeBlock = text.slice(0, match.index).trim().split('\n').pop() || '';
+      // Look for explicit file mentions
+      const filePatterns = [
+        /(?:^|\s|>|#|\*|`)([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))(?:$|\s|:|<|\*)/i,
+        /file:\s*([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/i,
+        /archivo:\s*([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/i,
+        /\/\/\s*([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/i,
+      ];
+      for (const pattern of filePatterns) {
+        const fileMatch = beforeBlock.match(pattern);
+        if (fileMatch && !fileMatch[1].includes('http')) {
+          filename = fileMatch[1];
+          break;
+        }
+      }
+    }
+
+    // Default filenames if still missing - IMPROVED logic
     if (!filename) {
       if (lang === 'css') filename = 'style.css';
       else if (lang === 'html') filename = 'index.html';
       else if (lang === 'json') filename = 'data.json';
-      else if (count === 0) filename = 'App.tsx';
+      else if (lang === 'py') filename = 'script.py';
+      else if (count === 0) {
+        // Try to detect if this is the main component
+        if (content.includes('export default function') || content.includes('export default')) {
+          filename = 'App.tsx';
+        } else {
+          filename = 'App.tsx';
+        }
+      }
       else filename = `Component${count}.tsx`;
     }
 
-    // Normalize path
+    // Normalize path - remove src/ and ./ prefixes
     if (filename.startsWith('src/')) filename = filename.replace('src/', '');
     if (filename.startsWith('./')) filename = filename.replace('./', '');
 
@@ -167,11 +200,17 @@ export function extractJson(text: string) {
 }
 
 export function processRawResponse(rawText: string, prompt: string, isChatOnly: boolean) {
-  if (!rawText) return null;
-  
+  if (!rawText) {
+    console.warn('[processRawResponse] Empty response received');
+    return null;
+  }
+
+  console.log('[processRawResponse] Processing response, length:', rawText.length, 'isChatOnly:', isChatOnly);
+
   // 1. Try structured JSON extraction first
   const extracted = extractJson(rawText);
   if (extracted?.files && Object.keys(extracted.files).length > 0) {
+    console.log('[processRawResponse] Found JSON with files:', Object.keys(extracted.files));
     const normalizedFiles: Record<string, StudioFile> = {};
     for (const [filename, value] of Object.entries(extracted.files)) {
       if (typeof value === 'string') {
@@ -193,9 +232,11 @@ export function processRawResponse(rawText: string, prompt: string, isChatOnly: 
   }
 
   // 2. Fallback: extract code from markdown blocks (even if intent says chat)
+  console.log('[processRawResponse] Attempting markdown extraction...');
   const mdFiles = extractChatCodeFiles(rawText);
+  console.log('[processRawResponse] Markdown extraction result:', mdFiles ? Object.keys(mdFiles) : 'null');
   if (mdFiles && Object.keys(mdFiles).length > 0) {
-    const stack = ['React', 'Tailwind'];
+    const stack = ['React', 'TypeScript', 'Tailwind'];
     const deps = detectDeps(mdFiles);
     const suggestions = buildSuggestions(stack, prompt);
     const firstBlock = rawText.indexOf('```');
@@ -203,7 +244,40 @@ export function processRawResponse(rawText: string, prompt: string, isChatOnly: 
     return { files: mdFiles, explanation, tech_stack: stack, deps, suggestions, isChatOnly: false };
   }
 
-  // 3. Final fallback: only use chat if absolutely NO code was found
+  // 3. AGGRESSIVE fallback: if response looks like it contains code blocks but we couldn't extract them
+  // Try with a more lenient regex
+  const hasCodeBlocks = /```[\s\S]*?```/.test(rawText);
+  if (hasCodeBlocks) {
+    console.warn('[processRawResponse] Found code blocks but extraction failed. Attempting aggressive extraction...');
+    const aggressiveRegex = /```[\w+-]*\s*\n?([\s\S]*?)```/g;
+    let aggressiveMatch;
+    let aggressiveCount = 0;
+    const aggressiveFiles: Record<string, StudioFile> = {};
+
+    while ((aggressiveMatch = aggressiveRegex.exec(rawText)) !== null) {
+      const content = aggressiveMatch[1].trim();
+      if (content.length > 50) { // Only consider substantial code blocks
+        const filename = aggressiveCount === 0 ? 'App.tsx' : `Component${aggressiveCount}.tsx`;
+        aggressiveFiles[filename] = { language: 'tsx', content };
+        aggressiveCount++;
+      }
+    }
+
+    if (Object.keys(aggressiveFiles).length > 0) {
+      console.log('[processRawResponse] Aggressive extraction found files:', Object.keys(aggressiveFiles));
+      return {
+        files: aggressiveFiles,
+        explanation: 'Código generado (formato detectado automáticamente).',
+        tech_stack: ['React', 'TypeScript'],
+        deps: detectDeps(aggressiveFiles),
+        suggestions: [],
+        isChatOnly: false
+      };
+    }
+  }
+
+  // 4. Final fallback: only use chat if absolutely NO code was found
+  console.log('[processRawResponse] No code found, returning as chat message');
   return { files: {} as Record<string, StudioFile>, explanation: rawText, tech_stack: [], deps: [], suggestions: [], isChatOnly: true };
 }
 

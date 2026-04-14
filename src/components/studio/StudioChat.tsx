@@ -341,19 +341,37 @@ export function StudioChat({
       } else if (result.isChatOnly) {
         const content = result.text || result.explanation;
         const chatFiles = extractChatCodeFiles(content);
-        if (chatFiles) onCodeGenerated({ ...projectFiles, ...chatFiles });
-        
-        assistantMsg = { 
-          id: crypto.randomUUID(), 
-          role: 'assistant', 
-          content: content, 
-          timestamp: new Date(), 
-          ...(chatFiles ? { files: Object.keys(chatFiles), type: 'code' } : {}),
-          blob: result.blob, 
-          projectFilesMap: result.files instanceof Map ? result.files : undefined
-        };
+
+        // Only call onCodeGenerated if we actually extracted files
+        if (chatFiles && Object.keys(chatFiles).length > 0) {
+          onCodeGenerated({ ...projectFiles, ...chatFiles });
+          assistantMsg = {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: content,
+            timestamp: new Date(),
+            files: Object.keys(chatFiles),
+            type: 'code',
+            blob: result.blob,
+            projectFilesMap: result.files instanceof Map ? result.files : undefined
+          };
+        } else {
+          // No files extracted - show the message as a chat response
+          assistantMsg = {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: content,
+            timestamp: new Date(),
+            type: 'chat'
+          };
+        }
       } else {
-        onCodeGenerated({ ...projectFiles, ...result.files });
+        // We have files in result.files
+        if (result.files && Object.keys(result.files).length > 0) {
+          onCodeGenerated({ ...projectFiles, ...result.files });
+        } else {
+          console.warn('[StudioChat] Expected files but received empty files object');
+        }
         assistantMsg = { 
           id: crypto.randomUUID(), 
           role: 'assistant', 

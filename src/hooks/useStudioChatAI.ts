@@ -884,15 +884,22 @@ ${contentSnapshots}
       // G-1 FIX: Pass only isChatModeActive (not || isArchitectRequest)
       const finalResult = processRawResponse(accumulated, prompt, isChatModeActive);
 
+      // DEBUG LOGGING
+      console.log('[useStudioChatAI] Final result:', {
+        hasFiles: finalResult?.files && Object.keys(finalResult.files).length > 0,
+        isChatOnly: finalResult?.isChatOnly,
+        fileCount: finalResult?.files ? Object.keys(finalResult.files).length : 0
+      });
+
       // CRITICAL FIX: Merge generated files with existing project files so we don't wipe out the project when Genesis adds/updates a specific file.
       if (finalResult && finalResult.files && Object.keys(finalResult.files).length > 0 && !finalResult.isChatOnly) {
         // Merge! Keep existing files, update/add the newly generated ones
         const mergedFiles = { ...projectFiles, ...finalResult.files };
         const detectedDeps = detectMissingDependencies(mergedFiles);
-        
+
         // Autonomous dependency injection
         const finalFiles = injectDependenciesIntoPackageJson(mergedFiles, detectedDeps);
-        
+
         return {
           ...finalResult,
           files: finalFiles, // Return the full merged state with auto-injected deps
@@ -903,6 +910,19 @@ ${contentSnapshots}
                 `📦 Instaladas automáticamente: ${detectedDeps.join(', ')}`
               ]
             : finalResult.suggestions
+        };
+      }
+
+      // ERROR HANDLING: If we expected code but got none, provide a helpful fallback
+      if (!isChatModeActive && (!finalResult || !finalResult.files || Object.keys(finalResult.files).length === 0)) {
+        console.warn('[useStudioChatAI] Expected code generation but no files were extracted. Response length:', accumulated?.length);
+        return {
+          files: {},
+          explanation: `⚠️ **No se pudieron extraer archivos del código generado.**\n\nLa IA respondió pero no pude identificar bloques de código válidos. Intenta:\n1. Reformular tu solicitud para ser más específico\n2. Pedir "genera el código completo en bloques markdown"\n3. Probar con otro modelo\n\n**Respuesta original:**\n${accumulated.slice(0, 500)}${accumulated.length > 500 ? '...' : ''}`,
+          isChatOnly: true,
+          stack: [],
+          deps: [],
+          suggestions: ['Intentar de nuevo con otro prompt', 'Cambiar a otro modelo', 'Pedir código más específico']
         };
       }
 
