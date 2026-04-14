@@ -166,29 +166,18 @@ function WelcomeScreen({
       {/* ── Main Area ─────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden relative bg-transparent">
 
-        {/* Genesis Premium Header (Replicated and Improved) */}
-        <header className="h-[60px] w-full border-b border-black/[0.08] bg-white/[0.85] backdrop-blur-[40px] saturate-[1.2] flex items-center justify-between px-6 shrink-0 transition-all z-[100] absolute top-0 left-0 right-0 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)]">
-          <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center shadow-lg shadow-primary/20">
-                <Sparkles className="w-4 h-4 text-white" />
+        {/* Minimal Header */}
+        <header className="h-14 w-full flex items-center justify-between px-6 shrink-0 z-[100] absolute top-0 left-0 right-0">
+          <div className="flex items-center gap-2">
+             <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+                <Sparkles className="w-3.5 h-3.5 text-white" />
              </div>
-             <span className="text-[13px] font-black tracking-widest text-zinc-900 uppercase">Genesis Builder</span>
-          </div>
-          <div className="flex items-center gap-4">
-             <div className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-black/[0.03] border border-black/[0.05] shadow-inner shadow-black/5">
-                <Globe className="w-3.5 h-3.5 text-zinc-500" />
-                <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">IA Mode</span>
-             </div>
-             <button className="flex items-center gap-2 px-5 h-9 rounded-2xl bg-zinc-900 text-white hover:bg-black text-[11px] font-black tracking-widest uppercase transition-all active:scale-95 shadow-md shadow-zinc-900/20">
-                Lanzar Studio
-             </button>
+             <span className="text-[13px] font-bold text-zinc-800">Genesis</span>
           </div>
         </header>
 
-        {/* Genesis Mesh Background (Solicitado) */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none genesis-panel-background animate-in fade-in duration-1000 mt-[60px]">
-          <div className="absolute inset-0 bg-grid-canvas opacity-[0.4]" />
-        </div>
+        {/* Clean Background - Subtle gradient only */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none bg-gradient-to-b from-zinc-50/50 via-white to-white" />
 
         {/* Centered content */}
         <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-40 pb-32 pointer-events-none">
@@ -271,22 +260,17 @@ function WelcomeScreen({
           </div>
         </div>
 
-        {/* Bottom Floating Panel — Redesigned with Secondary Sidebar UX */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center px-4 w-full h-[320px]">
-          <div className="w-full max-w-6xl rounded-t-[40px] overflow-hidden flex relative z-30" 
-            style={{ 
-              background: '#ffffff', 
-              borderTop: '1px solid rgba(0,0,0,0.06)', 
-              boxShadow: '0 -30px 80px rgba(0,0,0,0.12)' 
-            }}>
+        {/* Bottom Panel — Simplified */}
+        <div className="absolute bottom-0 left-0 right-0 flex justify-center px-4 w-full h-[260px]">
+          <div className="w-full max-w-5xl rounded-t-[32px] overflow-hidden flex relative z-30 bg-white border-t border-zinc-200 shadow-[0_-20px_60px_rgba(0,0,0,0.08)]">
 
-            {/* Side Navigation Sidebar */}
-            <aside className="w-[200px] border-r border-zinc-100 bg-zinc-50/50 flex flex-col pt-10 px-4 shrink-0">
-               <div className="px-2 mb-6">
-                 <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-none">Navegación</h3>
+            {/* Side Navigation — Slimmer */}
+            <aside className="w-[160px] border-r border-zinc-100 bg-zinc-50/30 flex flex-col pt-6 px-3 shrink-0">
+               <div className="px-2 mb-4">
+                 <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Navegación</h3>
                </div>
                
-               <nav className="space-y-1.5">
+               <nav className="space-y-0.5">
                   {[
                     { id: 'projects', label: 'Mis proyectos', icon: FolderOpen },
                     { id: 'recents', label: 'Recientes', icon: Clock },
@@ -298,30 +282,21 @@ function WelcomeScreen({
                       <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id as WelcomeTab)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all relative group ${
-                          isActive ? 'bg-primary/10 text-primary shadow-sm' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-[12px] font-medium ${
+                          isActive ? 'bg-primary/10 text-primary' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
                         }`}
                       >
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-600'}`} />
-                        <span className="text-[12.5px] font-bold tracking-tight">{tab.label}</span>
-                        {isActive && (
-                          <motion.div 
-                            layoutId="nav-active" 
-                            className="absolute left-[-16px] w-[3px] h-5 bg-primary rounded-r-full" 
-                          />
-                        )}
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-zinc-400'}`} />
+                        <span>{tab.label}</span>
                       </button>
                     );
                   })}
                </nav>
 
-               <div className="mt-auto px-2 pb-6">
-                  <div className="bg-zinc-100/50 rounded-xl p-3 border border-zinc-200/50">
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <p className="text-[9px] font-black text-zinc-500 tracking-wider uppercase">Genesis Pro</p>
-                    </div>
-                    <p className="text-[8.5px] text-zinc-400 leading-tight">IA Generadora Activa</p>
+               <div className="mt-auto px-2 pb-4">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-100/50">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    <p className="text-[10px] font-medium text-zinc-500">Genesis Pro Activo</p>
                   </div>
                </div>
             </aside>
@@ -329,36 +304,36 @@ function WelcomeScreen({
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col min-w-0 bg-white">
                {/* Action Header */}
-               <div className="flex items-center justify-between px-10 pt-10 pb-6 shrink-0">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-[18px] font-black text-zinc-900 tracking-tight leading-none">
+               <div className="flex items-center justify-between px-6 pt-6 pb-4 shrink-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-[16px] font-bold text-zinc-900">
                       {activeTab === 'projects' ? 'Mis Proyectos' : activeTab === 'recents' ? 'Recientes' : 'Plantillas'}
                     </h2>
-                    <div className="px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-500 text-[9px] font-black uppercase tracking-widest shrink-0">
+                    <span className="text-[11px] text-zinc-400">
                       {activeTab === 'projects' ? filteredProjects.length : activeTab === 'recents' ? projects.length : GENESIS_TEMPLATES.length}
-                    </div>
+                    </span>
                   </div>
-                  
-                  <button 
+
+                  <button
                     onClick={() => document.getElementById('welcome-folder-input')?.click()}
-                    className="flex items-center gap-2 px-4 h-9 rounded-2xl bg-zinc-900 text-white hover:bg-black transition-all text-[10px] font-black uppercase tracking-widest shadow-lg shadow-zinc-900/20 active:scale-95"
+                    className="flex items-center gap-2 px-3 h-8 rounded-lg bg-zinc-900 text-white text-[11px] font-medium hover:bg-zinc-800 transition-colors"
                   >
-                    <UploadCloud className="w-3.5 h-3.5 text-primary" />
-                    Importar Proyecto
+                    <UploadCloud className="w-4 h-4" />
+                    Importar
                   </button>
                </div>
 
                {/* Tab content area */}
-               <div className="px-10 pb-10 flex-1 overflow-y-auto custom-scrollbar">
+               <div className="px-6 pb-6 flex-1 overflow-y-auto custom-scrollbar">
                   {activeTab === 'projects' && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                       {filteredProjects.map(p => (
                         <button key={p.id} onClick={() => onSelectProject(p)}
-                          className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm group relative">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-                            <Code2 className="h-4 w-4 text-primary" />
+                          className="flex flex-col gap-2 p-3 rounded-xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all group relative">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                            <Code2 className="h-3.5 w-3.5 text-primary" />
                           </div>
-                          <p className="text-[12px] font-bold text-zinc-700 group-hover:text-zinc-900 truncate mt-1">{p.name}</p>
+                          <p className="text-[12px] font-medium text-zinc-700 group-hover:text-zinc-900 truncate">{p.name}</p>
                           <Trash2 
                             className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all" 
                             onClick={(e) => onDeleteProject(p.id, e)}
@@ -375,18 +350,18 @@ function WelcomeScreen({
                   )}
 
                   {activeTab === 'recents' && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                       {[...projects]
                         .sort((a, b) => new Date(b.updated_at ?? b.created_at ?? 0).getTime() - new Date(a.updated_at ?? a.created_at ?? 0).getTime())
                         .slice(0, 10)
                         .map(p => (
                           <button key={p.id} onClick={() => onSelectProject(p)}
-                            className="flex flex-col gap-2 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all shadow-sm group relative">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 border border-primary/20">
-                              <Clock className="h-4 w-4 text-primary" />
+                            className="flex flex-col gap-2 p-3 rounded-xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all group relative">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+                              <Clock className="h-3.5 w-3.5 text-primary" />
                             </div>
-                            <p className="text-[12px] font-bold text-zinc-700 group-hover:text-zinc-900 truncate mt-1">{p.name}</p>
-                            <p className="text-[10px] text-zinc-400 font-medium">
+                            <p className="text-[12px] font-medium text-zinc-700 group-hover:text-zinc-900 truncate">{p.name}</p>
+                            <p className="text-[10px] text-zinc-400">
                               {new Date(p.updated_at ?? p.created_at ?? Date.now()).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
                             </p>
                             <Trash2 
@@ -408,36 +383,36 @@ function WelcomeScreen({
                   {activeTab === 'templates' && (
                     <div className="space-y-4">
                       {/* Template Search + Category Filter */}
-                      <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="flex flex-col sm:flex-row gap-2 mb-2">
                         <div className="relative flex-1">
                           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
                           <input
                             value={templateSearch}
                             onChange={e => setTemplateSearch(e.target.value)}
-                            placeholder="Buscar arquitectura..."
-                            className="w-full pl-9 pr-4 py-2 text-[12px] rounded-xl border border-zinc-200 bg-zinc-50 focus:outline-none focus:border-primary/40 font-medium text-zinc-700 placeholder:text-zinc-400"
+                            placeholder="Buscar plantillas..."
+                            className="w-full pl-9 pr-4 py-2 text-[12px] rounded-lg border border-zinc-200 bg-zinc-50 focus:outline-none focus:border-primary/40 text-zinc-700 placeholder:text-zinc-400"
                           />
                         </div>
-                        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                        <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide">
                           <button
                             onClick={() => setTemplateCategory('all')}
-                            className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border ${
+                            className={`shrink-0 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all border ${
                               templateCategory === 'all'
                                 ? 'bg-zinc-900 text-white border-zinc-900'
-                            : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
-                        }`}
-                      >
-                        Todos
-                      </button>
-                      {TEMPLATE_CATEGORIES.map(cat => (
-                        <button
-                          key={cat.id}
-                          onClick={() => setTemplateCategory(cat.id)}
-                          className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all border ${
-                            templateCategory === cat.id
-                              ? 'bg-zinc-900 text-white border-zinc-900'
-                              : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
-                          }`}
+                                : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
+                            }`}
+                          >
+                            Todos
+                          </button>
+                          {TEMPLATE_CATEGORIES.slice(0, 4).map(cat => (
+                            <button
+                              key={cat.id}
+                              onClick={() => setTemplateCategory(cat.id)}
+                              className={`shrink-0 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all border ${
+                                templateCategory === cat.id
+                                  ? 'bg-zinc-900 text-white border-zinc-900'
+                                  : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
+                              }`}
                         >
                           <span>{cat.emoji}</span>
                           {cat.label}
@@ -463,7 +438,7 @@ function WelcomeScreen({
                     );
 
                     return (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {filtered.map(t => {
                           const cat = TEMPLATE_CATEGORIES.find(c => c.id === t.category);
                           const complexityColors = {
@@ -475,38 +450,22 @@ function WelcomeScreen({
                             <button
                               key={t.id}
                               onClick={() => handleSubmit(t.prompt)}
-                              className="group flex flex-col gap-3 p-4 rounded-2xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 hover:shadow-md transition-all relative overflow-hidden"
+                              className="group flex flex-col gap-2 p-3 rounded-xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all relative overflow-hidden"
                             >
-                              {/* Category gradient strip */}
-                              <div className={`absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r ${cat?.color || 'from-zinc-300 to-zinc-400'} opacity-60 group-hover:opacity-100 transition-opacity`} />
-
                               <div className="flex items-start justify-between gap-2">
-                                <div className="flex items-center gap-2.5">
-                                  <span className="text-xl shrink-0">{t.emoji}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg">{t.emoji}</span>
                                   <div>
-                                    <p className="text-[13px] font-bold text-zinc-900 leading-tight">{t.label}</p>
-                                    <span className="text-[10px] font-medium text-zinc-400">{cat?.emoji} {cat?.label}</span>
+                                    <p className="text-[13px] font-medium text-zinc-900">{t.label}</p>
+                                    <span className="text-[10px] text-zinc-400">{cat?.label}</span>
                                   </div>
                                 </div>
-                                <span className={`shrink-0 text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-lg ${complexityColors[t.complexity]}`}>
+                                <span className={`shrink-0 text-[9px] font-medium px-2 py-0.5 rounded ${complexityColors[t.complexity]}`}>
                                   {t.complexity === 'basic' ? 'Simple' : t.complexity === 'medium' ? 'Medio' : 'Avanzado'}
                                 </span>
                               </div>
 
-                              <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">{t.description}</p>
-
-                              <div className="flex flex-wrap gap-1.5">
-                                {t.tags.slice(0, 3).map(tag => (
-                                  <span key={tag} className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-zinc-100 text-zinc-500">
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
-
-                              <div className="flex items-center gap-1.5 mt-auto pt-2 border-t border-zinc-100 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Sparkles className="h-3 w-3 text-primary" />
-                                <span className="text-[10px] font-black text-primary uppercase tracking-wider">Construir con Genesis →</span>
-                              </div>
+                              <p className="text-[11px] text-zinc-500 leading-relaxed">{t.description}</p>
                             </button>
                           );
                         })}
