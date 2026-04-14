@@ -1,8 +1,8 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, Sparkles } from 'lucide-react';
+import { Loader2, Sparkles, Puzzle } from 'lucide-react';
 
 // New Unified Hook
 import { useGenesisUnified } from '@/hooks/useGenesisUnified';
@@ -17,6 +17,7 @@ import { StudioCloud } from '@/components/studio/StudioCloud';
 import { StudioAnalytics } from '@/components/studio/StudioAnalytics';
 import { StudioNexus } from '@/components/studio/Nexus/StudioNexus';
 import { StudioFloatingToolbar } from '@/components/studio/StudioFloatingToolbar';
+import { PluginManager } from '@/components/studio/PluginManager';
 
 import { cn } from '@/lib/utils';
 
@@ -26,6 +27,7 @@ export default function Studio() {
   const projectId = searchParams.get('project');
 
   const genesis = useGenesisUnified({ projectId });
+  const [isPluginManagerOpen, setIsPluginManagerOpen] = useState(false);
 
   // Initialize auto-fix on error
   useEffect(() => {
@@ -181,6 +183,13 @@ export default function Studio() {
             >
               Dashboard
             </button>
+            <button
+              onClick={() => setIsPluginManagerOpen(true)}
+              className="text-[10px] font-black text-zinc-500 hover:text-white uppercase tracking-widest transition-colors flex items-center gap-2"
+            >
+              <Puzzle className="h-3 w-3" />
+              Plugins
+            </button>
             <button className="text-[10px] font-black text-zinc-500 hover:text-white uppercase tracking-widest transition-colors">
               Protocol_Docs
             </button>
@@ -294,6 +303,12 @@ export default function Studio() {
           </div>
         </div>
       </div>
+
+      {/* Plugin Manager Modal */}
+      <PluginManager
+        isOpen={isPluginManagerOpen}
+        onClose={() => setIsPluginManagerOpen(false)}
+      />
     </div>
   );
 }
