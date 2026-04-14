@@ -15,6 +15,7 @@ import {
 } from '@/stores';
 import { aiCache } from '@/services/ai-cache';
 import { aiService, MODEL_COSTS } from '@/services/ai-service';
+import { multiAgentOrchestrator, type OrchestrationResult } from '@/services/multi-agent-orchestrator';
 import { useAuth } from './useAuth';
 
 interface UseGenesisUnifiedOptions {
@@ -239,12 +240,78 @@ export function useGenesisUnified({ projectId }: UseGenesisUnifiedOptions = {}) 
     [activeProject, activeFile, handleFilesChange, setActiveFile]
   );
 
-  // Code Generation with Cache
-  const generateCode = useCallback(
-    async (prompt: string, options: { useCache?: boolean } = {}) => {
+  // Multi-Agent Orchestration for complex projects
+  const generateWithMultiAgent = useCallback(
+    async (prompt: string, options: { complexity?: 'basic' | 'medium' | 'advanced'; enableBackend?: boolean } = {}) => {
       if (!activeProject || !user) {
         toast.error('No active project or user');
         return null;
+      }
+
+      setGenerating(true);
+      setAgentPhase('thinking');
+      setActiveSpecialist('conductor');
+      addLog({ type: 'info', message: '🎼 Iniciando orquestación multi-agente...' });
+      addLog({ type: 'info', message: `Complexidad: ${options.complexity || 'medium'}` });
+
+      try {
+        const result: OrchestrationResult = await multiAgentOrchestrator.orchestrate(prompt, {
+          complexity: options.complexity || 'medium',
+          enableBackend: options.enableBackend || false,
+          useCache: true,
+        });
+
+        // Add tasks to studio
+        result.tasks.forEach((task) => {
+          addTask({
+            id: task.id,
+            text: task.title,
+            status: task.status === 'completed' ? 'completed' : task.status === 'in_progress' ? 'in-progress' : 'pending',
+          });
+        });
+
+        // Add messages as logs
+        result.messages.forEach((msg) => {
+          addLog({
+            type: msg.type === 'error' ? 'error' : 'info',
+            message: `[${msg.from}] ${msg.content.slice(0, 100)}...`,
+          });
+        });
+
+        addLog({ type: 'success', message: `✅ Orquestación completada en ${result.duration}ms` });
+        addLog({ type: 'success', message: `💰 Costo total: ${result.totalCost} créditos` });
+
+        setAgentPhase('done');
+        setActiveSpecialist('none');
+
+        return {
+          text: `Proyecto generado: ${result.blueprint.projectName}`,
+          files: result.blueprint.fileStructure,
+          blueprint: result.blueprint,
+        };
+      } catch (err: any) {
+        console.error('Multi-agent error:', err);
+        addLog({ type: 'error', message: err.message });
+        setRuntimeError(err.message);
+        throw err;
+      } finally {
+        setGenerating(false);
+      }
+    },
+    [activeProject, user, setGenerating, setAgentPhase, setActiveSpecialist, addLog, addTask, setRuntimeError]
+  );
+
+  // Code Generation with Cache (fallback simple)
+  const generateCode = useCallback(
+    async (prompt: string, options: { useCache?: boolean; useMultiAgent?: boolean } = {}) => {
+      if (!activeProject || !user) {
+        toast.error('No active project or user');
+        return null;
+      }
+
+      // Use multi-agent for complex requests
+      if (options.useMultiAgent || prompt.length > 200) {
+        return generateWithMultiAgent(prompt, { complexity: 'medium' });
       }
 
       setGenerating(true);
@@ -301,7 +368,7 @@ export function useGenesisUnified({ projectId }: UseGenesisUnifiedOptions = {}) 
         setGenerating(false);
       }
     },
-    [activeProject, user, selectedModel, setGenerating, setAgentPhase, addLog, setRuntimeError]
+    [activeProject, user, selectedModel, setGenerating, setAgentPhase, addLog, setRuntimeError, generateWithMultiAgent]
   );
 
   // Message Handling
@@ -528,6 +595,7 @@ POR FAVOR, corrige este error analizando el estado actual de los archivos.`;
 
     // Generation
     generateCode,
+    generateWithMultiAgent,
     handleSendMessage,
     handleAutoFix,
 
