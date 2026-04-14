@@ -512,7 +512,8 @@ function WelcomeScreen({
                         })}
                       </div>
                     );
-                  })()}
+                    })()}
+                  </div>
                 )}
               </div>
             </main>
