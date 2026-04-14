@@ -9,7 +9,7 @@ const HeroSection = () => (
         animate={{ opacity: 1, y: 0 }}
         className="text-6xl font-black tracking-tighter text-zinc-900 mb-6"
       >
-        Diseño Sensilla, <span className="text-primary">Impacto Total</span>
+        Diseño Simple, <span className="text-primary">Impacto Total</span>
       </motion.h1>
       <motion.p 
         initial={{ opacity: 0, y: 20 }}
