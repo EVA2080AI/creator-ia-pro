@@ -24,7 +24,7 @@ function AuthWatcher() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
-        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog"];
+        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/inicio"];
         const isPublic = publicPaths.some(p =>
           window.location.pathname === p || window.location.pathname.startsWith("/herramienta")
         );
@@ -120,7 +120,6 @@ const App = () => {
                   {/* ── Public routes (no AppLayout) ── */}
                   <Route path="/"                     element={<Index />} />
                   <Route path="/home"                 element={<HomePage />} />
-                  <Route path="/inicio"               element={<Inicio />} />
                   <Route path="/auth"                 element={<Auth />} />
                   <Route path="/pricing"              element={<Pricing />} />
                   <Route path="/descargar"            element={<Downloads />} />
@@ -166,6 +165,9 @@ const App = () => {
                     <Route path="/code"         element={<CodeIDE />} />
                     <Route path="/code-editor"  element={<CodeIDE />} />
                   </Route>
+
+                  {/* ── Landing Page (Public) ── */}
+                  <Route path="/inicio"               element={<Inicio />} />
 
                   {/* ── 404 ── */}
                   <Route path="*" element={<NotFound />} />
