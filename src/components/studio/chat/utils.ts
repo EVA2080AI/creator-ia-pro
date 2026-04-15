@@ -1,11 +1,6 @@
 import { StudioFile } from '@/hooks/useStudioProjects';
 
 const GREETINGS = ['hola', 'hi', 'hey', 'buenos dias', 'buenas noches', 'hello'];
-const FILE_MGMT_KEYWORDS = ['borra', 'elimina', 'nuevo archivo', 'crear archivo', 'renombra', 'delete', 'remove', 'new file', 'rename'];
-const VISION_KEYWORDS = ['explica', 'como funciona', 'analiza', 'review', 'describe', 'que hace'];
-const CODE_VERBS = ['haz', 'crea', 'creame', 'has', 'pon', 'agrega', 'modifica', 'cambia', 'arregla', 'repara', 'fix', 'add', 'create', 'update', 'modify', 'corregir'];
-const CODE_NOUNS = ['componente', 'estilo', 'script', 'button', 'input', 'div', 'clase', 'archivo', 'file', 'code', 'codigo', 'component', 'logic', 'hook'];
-
 const TECH_KEYWORDS = [
   'button', 'page', 'component', 'style', 'input', 'form', 'api', 'route', 'hook', 'context',
   'navbar', 'hero', 'footer', 'layout', 'grid', 'flex', 'design', 'ui', 'ux', 'tailwind',
@@ -17,15 +12,9 @@ const TECH_KEYWORDS = [
 /** Detect if prompt contains raw HTML code */
 export function containsHtml(text: string): boolean {
   const htmlPatterns = [
-    /<!DOCTYPE\s+html/i,
-    /<html[\s>]/i,
-    /<head[\s>]/i,
-    /<body[\s>]/i,
-    /<div[\s>][\s\S]{50,}/i,
-    /<section[\s>][\s\S]{50,}/i,
-    /<nav[\s>]/i,
-    /<header[\s>][\s\S]{30,}/i,
-    /<footer[\s>][\s\S]{30,}/i,
+    /<!DOCTYPE\s+html/i, /<html[\s>]/i, /<head[\s>]/i, /<body[\s>]/i,
+    /<div[\s>][\s\S]{50,}/i, /<section[\s>][\s\S]{50,}/i,
+    /<nav[\s>]/i, /<header[\s>][\s\S]{30,}/i, /<footer[\s>][\s\S]{30,}/i,
   ];
   const matchCount = htmlPatterns.filter(p => p.test(text)).length;
   return matchCount >= 2;
@@ -45,143 +34,112 @@ export function wantsVanillaHtml(text: string): boolean {
 
 export type ChatIntent = 'chat' | 'codegen' | 'fullstack' | 'vanilla-html' | 'html-import';
 
-export function detectIntent(prompt: string, hasContext: boolean): ChatIntent {
+export function detectIntent(prompt: string, _hasContext?: boolean): ChatIntent {
   let p = prompt.toLowerCase().trim();
-  
-  // Normalization
-  p = p.replace(/apagina/g, 'pagina')
-       .replace(/asuna/g, 'una')
-       .replace(/hasme/g, 'hazme')
-       .replace(/has un/g, 'haz un')
-       .replace(/has una/g, 'haz una')
-       .replace(/vender/g, 'ventas');
 
+  // Normalization - common typos
+  p = p.replace(/apagina/g, 'pagina').replace(/asuna/g, 'una')
+       .replace(/hasme/g, 'hazme').replace(/has un/g, 'haz un').replace(/has una/g, 'haz una');
+
+  // Check for HTML imports
   if (containsHtml(prompt)) return 'html-import';
   if (wantsVanillaHtml(prompt)) return 'vanilla-html';
 
-  const CREATION_KEYWORDS = [
-    'crea un web', 'hazme una web', 'crea un proyecto', 'crea un saas', 'crea una app completa',
-    'creame una', 'hazme una', 'hasme una', 'has una', 'has un',
-    'create a full mvp', 'create a saas', 'industrial project', 'sistema completo',
-    'build a complete system', 'dashboard completo', 'diseña un', 'armar una plataforma',
-    'genera el alma del producto', 'visión estratégica', 'arquitectura de', 'propuesta de landing',
-    'haz una pagina de', 'monta un sistema', 'create a website', 'make a landing', 'building a website'
+  // Check for fix/repair commands
+  if (p.includes('[auto-fix]') || p.includes('[fix]') || p.startsWith('corregir') || p.startsWith('repara') || p.startsWith('arregla')) {
+    return 'codegen';
+  }
+
+  // Check for greetings/simple chat
+  if (GREETINGS.includes(p)) return 'chat';
+  if (p.length < 5 && !TECH_KEYWORDS.some(k => p.includes(k))) return 'chat';
+  if (p.includes('quien eres') || p.includes('que puedes hacer') || p.includes('como estas') || p.includes('que tal')) return 'chat';
+  if (p.startsWith('ayuda') && p.length < 20) return 'chat';
+
+  // Landing page detection - more specific
+  const LANDING_KEYWORDS = [
+    'landing page', 'pagina de inicio', 'landing', 'home page', 'pagina principal',
+    'sitio web', 'website', 'portafolio', 'portfolio', 'web de', 'pagina de'
   ];
+  const CREATION_VERBS = ['crea', 'haz', 'hazme', 'creame', 'genera', 'build', 'make', 'create', 'diseña', 'monta'];
 
-  if (GREETINGS.includes(p) || (p.length < 5 && !TECH_KEYWORDS.some(k => p.includes(k)))) return 'chat';
-  
-  const isVisionRequest = p.includes('estrategia') || p.includes('arquitectura') || p.includes('pensamiento') || p.includes('planifica');
-  const isCreationRequest = CREATION_KEYWORDS.some(k => p.includes(k)) || 
-                           ((p.includes('web') || p.includes('landing') || p.includes('website') || p.includes('app') || p.includes('página') || p.includes('sitio')) && 
-                            (p.includes('crea') || p.includes('haz') || p.includes('has') || p.includes('genera') || p.includes('build') || p.includes('make')));
+  const hasLandingKeyword = LANDING_KEYWORDS.some(k => p.includes(k));
+  const hasCreationVerb = CREATION_VERBS.some(v => p.includes(v));
 
-  if (isVisionRequest || isCreationRequest) return 'fullstack';
+  // If it's a landing/site creation, it's fullstack (needs multiple files)
+  if (hasLandingKeyword && hasCreationVerb) return 'fullstack';
 
-  // [FIX & CODE PRIORITY]
-  if (p.includes('[auto-fix]') || p.includes('[fix]') || p.includes('corregir') || p.includes('repara') || p.includes('arregla')) return 'codegen';
+  // Dashboard/app creation - fullstack
+  const FULLSTACK_KEYWORDS = ['dashboard', 'app', 'aplicacion', 'saas', 'plataforma', 'sistema', 'web app'];
+  if (FULLSTACK_KEYWORDS.some(k => p.includes(k)) && hasCreationVerb) return 'fullstack';
 
-  if (FILE_MGMT_KEYWORDS.some(k => p.includes(k)) && hasContext) return 'codegen';
-  if (VISION_KEYWORDS.some(k => p.includes(k))) return 'codegen';
-  if (p.includes('quien eres') || p.includes('que puedes hacer') || p.includes('ayuda')) return 'chat';
-  
+  // Component creation - codegen
+  const COMPONENT_KEYWORDS = ['componente', 'component', 'button', 'boton', 'card', 'input', 'form', 'modal'];
+  if (COMPONENT_KEYWORDS.some(k => p.includes(k)) && hasCreationVerb) return 'codegen';
+
+  // Style/modify operations - codegen
+  const CODE_VERBS = ['pon', 'agrega', 'modifica', 'cambia', 'update', 'add', 'fix', 'modificar'];
+  const CODE_NOUNS = ['estilo', 'script', 'div', 'clase', 'archivo', 'file', 'codigo', 'logic', 'hook', 'style'];
+
   const containsCodeNoun = CODE_NOUNS.some(n => p.includes(n));
-  const startsWithCodeVerb = CODE_VERBS.some(v => p.startsWith(v + ' ') || p.startsWith(v + '\n'));
+  const hasCodeVerb = CODE_VERBS.some(v => p.startsWith(v + ' ') || p.includes(' ' + v + ' '));
   const hasTechKeyword = TECH_KEYWORDS.some(k => p.includes(k));
 
-  if (startsWithCodeVerb || containsCodeNoun || hasTechKeyword) return 'codegen';
-  
-  if (p.includes('pon un') || p.includes('agrega') || p.includes('modifica') || p.includes('add a') || p.includes('haz un')) return 'codegen';
-  if (hasContext && !containsCodeNoun && !startsWithCodeVerb && !hasTechKeyword) return 'chat';
-  
+  if (hasCodeVerb || (containsCodeNoun && hasCreationVerb) || hasTechKeyword) return 'codegen';
+
+  // Default to chat
   return 'chat';
 }
 
+/** IMPROVED: Extract code blocks from markdown with better filename detection */
 export function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
   const files: Record<string, StudioFile> = {};
 
-  // Map of language aliases to standard names
-  const langMap: Record<string, string> = {
-    'typescript': 'ts', 'ts': 'ts',
-    'javascript': 'js', 'js': 'js',
-    'tsx': 'tsx', 'jsx': 'jsx',
-    'css': 'css', 'html': 'html', 'json': 'json',
-    'react': 'tsx', 'react-ts': 'tsx',
-    'python': 'py', 'go': 'go', 'rust': 'rs'
-  };
-
-  // 1. Try to find code blocks with filenames in the preceding lines or inside backticks
-  // Pattern: ```tsx filename.tsx ... ``` or file: filename.tsx \n ``` ... ```
-  // IMPROVED: More flexible language matching
-  const blockRegex = /```([\w+-]+)\s*([\w\.\/\-]*)\n([\s\S]*?)```/gi;
+  // Improved regex that handles:
+  // 1. ```tsx App.tsx
+  // 2. ```tsx // src/App.tsx
+  // 3. ```tsx
+  // 4. Different languages
+  const blockRegex = /```(\w+)(?:\s*\n|\s+)(?:\/\/\s*)?([^\n`]*?)\n([\s\S]*?)```/gi;
   let match;
   let count = 0;
 
   while ((match = blockRegex.exec(text)) !== null) {
     const rawLang = match[1].toLowerCase().trim();
-    const lang = langMap[rawLang] || rawLang;
-    const rawFilename = match[2];
+    const firstLine = match[2].trim();
     const content = match[3];
-    let filename = rawFilename?.trim();
 
-    // If no filename in backticks, check if ANY line at the START of the code block is a path comment!
-    // Example: // src/components/Hero.tsx  or  /* src/components/Hero.tsx */
-    if (!filename) {
-      const lines = content.trim().split('\n').slice(0, 5); // Check first 5 lines
-      for (const line of lines) {
-        const trimmedLine = line.trim();
-        if (trimmedLine.startsWith('//') || trimmedLine.startsWith('/*') || trimmedLine.startsWith('<!--')) {
-           const commentPathMatch = trimmedLine.match(/([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/i);
-           if (commentPathMatch && !commentPathMatch[1].includes('http')) {
-             filename = commentPathMatch[1];
-             break;
-           }
-        }
+    // Determine filename - check multiple patterns
+    let filename: string | null = null;
+
+    // Pattern 1: Filename right after language (```tsx App.tsx)
+    // Pattern 2: Comment with path (```tsx // src/App.tsx)
+    // Pattern 3: Plain comment (```tsx // App.tsx)
+    if (firstLine) {
+      // Check if first line looks like a filename
+      const filenameMatch = firstLine.match(/(?:\/?(?:src\/)?)?([\w\-./]+\.(tsx|jsx|ts|js|css|html|json))$/);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
       }
     }
 
-    // If STILL no filename, look at the line before the code block
+    // If no filename found, use language-based default
     if (!filename) {
-      const beforeBlock = text.slice(0, match.index).trim().split('\n').pop() || '';
-      // Look for explicit file mentions
-      const filePatterns = [
-        /(?:^|\s|>|#|\*|`)([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))(?:$|\s|:|<|\*)/i,
-        /file:\s*([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/i,
-        /archivo:\s*([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/i,
-        /\/\/\s*([\w\.\/\-]+\.(tsx|jsx|ts|js|css|html|json))/i,
-      ];
-      for (const pattern of filePatterns) {
-        const fileMatch = beforeBlock.match(pattern);
-        if (fileMatch && !fileMatch[1].includes('http')) {
-          filename = fileMatch[1];
-          break;
-        }
-      }
+      const langMap: Record<string, string> = {
+        'tsx': 'App.tsx', 'ts': 'utils.ts', 'jsx': 'App.jsx', 'js': 'script.js',
+        'css': 'styles.css', 'html': 'index.html', 'json': 'package.json'
+      };
+      filename = langMap[rawLang] || (count === 0 ? 'App.tsx' : `Component${count}.tsx`);
     }
 
-    // Default filenames if still missing - IMPROVED logic
-    if (!filename) {
-      if (lang === 'css') filename = 'style.css';
-      else if (lang === 'html') filename = 'index.html';
-      else if (lang === 'json') filename = 'data.json';
-      else if (lang === 'py') filename = 'script.py';
-      else if (count === 0) {
-        // Try to detect if this is the main component
-        if (content.includes('export default function') || content.includes('export default')) {
-          filename = 'App.tsx';
-        } else {
-          filename = 'App.tsx';
-        }
-      }
-      else filename = `Component${count}.tsx`;
-    }
-
-    // Normalize path - remove src/ and ./ prefixes
-    if (filename.startsWith('src/')) filename = filename.replace('src/', '');
-    if (filename.startsWith('./')) filename = filename.replace('./', '');
+    // Normalize path - preserve src/ prefix if present
+    if (filename.startsWith('./')) filename = filename.slice(2);
+    // Don't strip src/ prefix, just clean double slashes
+    filename = filename.replace(/\/+/g, '/');
 
     files[filename] = {
       content: content.trim(),
-      language: lang as any
+      language: rawLang as any
     };
     count++;
   }
@@ -199,18 +157,16 @@ export function extractJson(text: string) {
   }
 }
 
+/** SIMPLIFIED: Process AI response */
 export function processRawResponse(rawText: string, prompt: string, isChatOnly: boolean) {
   if (!rawText) {
     console.warn('[processRawResponse] Empty response received');
     return null;
   }
 
-  console.log('[processRawResponse] Processing response, length:', rawText.length, 'isChatOnly:', isChatOnly);
-
-  // 1. Try structured JSON extraction first
+  // 1. Try JSON extraction first
   const extracted = extractJson(rawText);
   if (extracted?.files && Object.keys(extracted.files).length > 0) {
-    console.log('[processRawResponse] Found JSON with files:', Object.keys(extracted.files));
     const normalizedFiles: Record<string, StudioFile> = {};
     for (const [filename, value] of Object.entries(extracted.files)) {
       if (typeof value === 'string') {
@@ -224,61 +180,81 @@ export function processRawResponse(rawText: string, prompt: string, isChatOnly: 
       }
     }
     if (Object.keys(normalizedFiles).length > 0) {
-      const stack = extracted.tech_stack || [];
-      const deps  = detectDeps(normalizedFiles);
-      const suggestions = buildSuggestions(stack, prompt);
-      return { files: normalizedFiles, explanation: extracted.explanation || '', tech_stack: stack, deps, suggestions };
-    }
-  }
-
-  // 2. Fallback: extract code from markdown blocks (even if intent says chat)
-  console.log('[processRawResponse] Attempting markdown extraction...');
-  const mdFiles = extractChatCodeFiles(rawText);
-  console.log('[processRawResponse] Markdown extraction result:', mdFiles ? Object.keys(mdFiles) : 'null');
-  if (mdFiles && Object.keys(mdFiles).length > 0) {
-    const stack = ['React', 'TypeScript', 'Tailwind'];
-    const deps = detectDeps(mdFiles);
-    const suggestions = buildSuggestions(stack, prompt);
-    const firstBlock = rawText.indexOf('```');
-    const explanation = firstBlock > 0 ? rawText.slice(0, firstBlock).trim() : 'Código generado.';
-    return { files: mdFiles, explanation, tech_stack: stack, deps, suggestions, isChatOnly: false };
-  }
-
-  // 3. AGGRESSIVE fallback: if response looks like it contains code blocks but we couldn't extract them
-  // Try with a more lenient regex
-  const hasCodeBlocks = /```[\s\S]*?```/.test(rawText);
-  if (hasCodeBlocks) {
-    console.warn('[processRawResponse] Found code blocks but extraction failed. Attempting aggressive extraction...');
-    const aggressiveRegex = /```[\w+-]*\s*\n?([\s\S]*?)```/g;
-    let aggressiveMatch;
-    let aggressiveCount = 0;
-    const aggressiveFiles: Record<string, StudioFile> = {};
-
-    while ((aggressiveMatch = aggressiveRegex.exec(rawText)) !== null) {
-      const content = aggressiveMatch[1].trim();
-      if (content.length > 50) { // Only consider substantial code blocks
-        const filename = aggressiveCount === 0 ? 'App.tsx' : `Component${aggressiveCount}.tsx`;
-        aggressiveFiles[filename] = { language: 'tsx', content };
-        aggressiveCount++;
-      }
-    }
-
-    if (Object.keys(aggressiveFiles).length > 0) {
-      console.log('[processRawResponse] Aggressive extraction found files:', Object.keys(aggressiveFiles));
       return {
-        files: aggressiveFiles,
-        explanation: 'Código generado (formato detectado automáticamente).',
-        tech_stack: ['React', 'TypeScript'],
-        deps: detectDeps(aggressiveFiles),
-        suggestions: [],
+        files: normalizedFiles,
+        explanation: extracted.explanation || '',
+        tech_stack: extracted.tech_stack || [],
+        deps: detectDeps(normalizedFiles),
+        suggestions: buildSuggestions(extracted.tech_stack || [], prompt),
         isChatOnly: false
       };
     }
   }
 
-  // 4. Final fallback: only use chat if absolutely NO code was found
-  console.log('[processRawResponse] No code found, returning as chat message');
-  return { files: {} as Record<string, StudioFile>, explanation: rawText, tech_stack: [], deps: [], suggestions: [], isChatOnly: true };
+  // 2. Fallback: extract code from markdown blocks
+  const mdFiles = extractChatCodeFiles(rawText);
+  if (mdFiles && Object.keys(mdFiles).length > 0) {
+    const firstBlock = rawText.indexOf('```');
+    const explanation = firstBlock > 0 ? rawText.slice(0, firstBlock).trim() : 'Código generado.';
+
+    // Ensure we have essential files for a React project
+    const ensuredFiles = ensureEssentialFiles(mdFiles);
+
+    return {
+      files: ensuredFiles,
+      explanation,
+      tech_stack: ['React', 'TypeScript', 'Tailwind'],
+      deps: detectDeps(ensuredFiles),
+      suggestions: buildSuggestions(['React'], prompt),
+      isChatOnly: false
+    };
+  }
+
+  // 3. Chat only response
+  return {
+    files: {} as Record<string, StudioFile>,
+    explanation: rawText,
+    tech_stack: [],
+    deps: [],
+    suggestions: [],
+    isChatOnly: true
+  };
+}
+
+/**
+ * Ensures that essential files exist for a working React project
+ */
+function ensureEssentialFiles(files: Record<string, StudioFile>): Record<string, StudioFile> {
+  const result = { ...files };
+
+  // Check if we have at least one .tsx or .jsx file
+  const hasComponentFile = Object.keys(result).some(name =>
+    name.endsWith('.tsx') || name.endsWith('.jsx')
+  );
+
+  // If no component file, but we have HTML/CSS/JS, it's a vanilla project
+  const hasHtmlFile = Object.keys(result).some(name => name.endsWith('.html'));
+  const hasJsFile = Object.keys(result).some(name => name.endsWith('.js') && !name.includes('.json'));
+
+  // For React projects (has TSX/JSX files)
+  if (hasComponentFile && !hasHtmlFile) {
+    // Ensure App.tsx exists
+    const hasApp = Object.keys(result).some(name =>
+      name === 'App.tsx' || name === 'App.jsx' || name.endsWith('/App.tsx') || name.endsWith('/App.jsx')
+    );
+
+    if (!hasApp) {
+      // Find the first component file to use as App
+      const firstComponent = Object.keys(result).find(name =>
+        name.endsWith('.tsx') || name.endsWith('.jsx')
+      );
+      if (firstComponent) {
+        result['App.tsx'] = result[firstComponent];
+      }
+    }
+  }
+
+  return result;
 }
 
 function detectDeps(files: Record<string, StudioFile>): string[] {
@@ -289,138 +265,31 @@ function detectDeps(files: Record<string, StudioFile>): string[] {
     if (content.includes('framer-motion')) deps.add('framer-motion');
     if (content.includes('clsx') || content.includes('tailwind-merge')) deps.add('clsx tailwind-merge');
     if (content.includes('recharts')) deps.add('recharts');
-    if (content.includes('lucide')) deps.add('lucide-react');
   });
   return Array.from(deps);
 }
 
-function buildSuggestions(stack: string[], prompt: string): string[] {
-  const sList = ['Agregar modo oscuro', 'Optimizar para móviles', 'Añadir animaciones', 'Pulir diseño'];
-  return sList;
+function buildSuggestions(stack: string[], _prompt: string): string[] {
+  const suggestions = ['Agregar modo oscuro', 'Optimizar para móviles', 'Añadir animaciones'];
+  if (stack.includes('React')) suggestions.push('Agregar TypeScript strict');
+  return suggestions;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// FUNCIONES DE MANIPULACIÓN DE ARCHIVOS (PATCH, DELETE, TRUNCATION)
+// PATCH & FILE OPERATIONS (SIMPLIFIED - REMOVED COMPLEX PATCH SYSTEM)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Detecta si la respuesta de la IA fue truncada (cortada)
- * Verifica si hay bloques de código sin cerrar o estructuras incompletas
- */
-export function isResponseTruncated(text: string): boolean {
-  if (!text || text.length < 100) return false;
-
-  // Contar bloques de código abiertos vs cerrados
-  const openCodeBlocks = (text.match(/```[a-z]*/gi) || []).length;
-  const closeCodeBlocks = (text.match(/```\s*$/gm) || []).length;
-
-  // Si hay bloques abiertos pero no cerrados apropiadamente
-  if (openCodeBlocks > closeCodeBlocks) return true;
-
-  // Verificar si termina en medio de un bloque de código
-  const lastCodeBlock = text.lastIndexOf('```');
-  const lastContent = text.slice(lastCodeBlock + 3).trim();
-  if (lastCodeBlock !== -1 && lastContent.length > 0 && !lastContent.startsWith('\n')) {
-    // Parece que hay contenido después del último ``` que no es un cierre
-    const hasUnclosedBlock = /```(tsx|jsx|ts|js|css|html|json)\s*\n[\s\S]*$/.test(text);
-    if (hasUnclosedBlock) return true;
-  }
-
-  // Verificar si termina abruptamente al final de alguna estructura sin cerrar
-  const openBraces = (text.match(/\{/g) || []).length;
-  const closeBraces = (text.match(/\}/g) || []).length;
-  if (openBraces > closeBraces) return true;
-  
-  // También revisamos si termina en un caracter que indica continuación obvia
-  const endsWithContinuation = /[\w\s,;:+\-\*/=<{(\[>]$/.test(text.slice(-100).trim());
-
-  // Verificar patrones de truncación comunes
-  const truncationPatterns = [
-    /export\s+default\s+\w+\s*\{[^}]*$/, // export default X { ... (sin cerrar)
-    /return\s*\([^)]*$/,                 // return ( ... (sin cerrar)
-    /<\w+[^>]*>$/,                       // <Tag ...> (sin cerrar)
-    /className=(['"])[^\1]*$/,           // className=" ... (sin cerrar comillas)
-    /\{[^}]*$/,                          // { ... (sin cerrar)
-    /\[[^\]]*$/,                         // [ ... (sin cerrar)
-  ];
-
-  const lastLines = text.slice(-500);
-  const appearsTruncated = truncationPatterns.some(pattern => pattern.test(lastLines));
-
-  return appearsTruncated && endsWithContinuation;
+export function extractPatchBlocks(_text: string): null {
+  // PATCH SYSTEM REMOVED - Too complex and buggy
+  return null;
 }
 
-/**
- * Extrae bloques PATCH del formato FIND/REPLACE del markdown
- * Formato esperado:
- * ```patch
- * // archivo.tsx
- * FIND:
- * código a buscar
- * REPLACE:
- * código nuevo
- * ```
- */
-export function extractPatchBlocks(text: string): Array<{
-  filename: string;
-  find: string;
-  replace: string;
-}> | null {
-  const patches: Array<{ filename: string; find: string; replace: string }> = [];
-
-  // Patrón para bloques patch
-  const patchRegex = /```patch\s*\n?(?:\/\/\s*)?([^\n]+)\n?([\s\S]*?)```/g;
-
-  let match;
-  while ((match = patchRegex.exec(text)) !== null) {
-    const filename = match[1].trim().replace(/^\/\//, '').trim();
-    const content = match[2];
-
-    // Buscar secciones FIND y REPLACE
-    const findMatch = content.match(/FIND:\s*\n?([\s\S]*?)(?=\n?REPLACE:|$)/);
-    const replaceMatch = content.match(/REPLACE:\s*\n?([\s\S]*?)$/);
-
-    if (findMatch && replaceMatch) {
-      patches.push({
-        filename,
-        find: findMatch[1].trim(),
-        replace: replaceMatch[1].trim()
-      });
-    }
-  }
-
-  // También soportar formato simplificado: ```patch filename
-  const simplePatchRegex = /```patch\s+([\w.\/\-]+)\n([\s\S]*?)```/g;
-  while ((match = simplePatchRegex.exec(text)) !== null) {
-    const filename = match[1].trim();
-    const patchContent = match[2];
-
-    // Intentar separar por === o similar
-    if (patchContent.includes('===')) {
-      const [find, replace] = patchContent.split('===').map(s => s.trim());
-      patches.push({ filename, find, replace });
-    }
-  }
-
-  return patches.length > 0 ? patches : null;
-}
-
-/**
- * Extrae comandos DELETE del código
- * Busca comentarios // DELETE o instrucciones de eliminación
- */
 export function extractDeleteCommands(text: string): string[] {
   const filesToDelete: string[] = [];
 
-  // Patrón 1: // DELETE en bloques de código
-  const deleteRegex = /```[a-z]*\s*\n?(?:\/\/\s*)?([^\n]+)\s*\n?\/\/\s*DELETE\s*```/gi;
-  let match;
-  while ((match = deleteRegex.exec(text)) !== null) {
-    filesToDelete.push(match[1].trim().replace(/^\/\//, '').trim());
-  }
-
-  // Patrón 2: Texto explícito "elimina archivo X" o "borra X"
+  // Simple pattern: "elimina archivo X" or "borra X"
   const explicitDeleteRegex = /(?:elimina|borra|delete|remove)\s+(?:el\s+)?(?:archivo|file)?\s*:?\s*`?([\w.\/\-]+)`?/gi;
+  let match;
   while ((match = explicitDeleteRegex.exec(text)) !== null) {
     const filename = match[1].trim();
     if (filename.includes('.') && !filesToDelete.includes(filename)) {
@@ -428,78 +297,17 @@ export function extractDeleteCommands(text: string): string[] {
     }
   }
 
-  // Patrón 3: Comentarios inline // DELETE: filename
-  const inlineDeleteRegex = /\/\/\s*DELETE\s*:\s*([\w.\/\-]+)/gi;
-  while ((match = inlineDeleteRegex.exec(text)) !== null) {
-    const filename = match[1].trim();
-    if (!filesToDelete.includes(filename)) {
-      filesToDelete.push(filename);
-    }
-  }
-
   return filesToDelete;
 }
 
-/**
- * Aplica patches quirúrgicos a archivos existentes
- * Usa el formato FIND/REPLACE para hacer cambios precisos
- */
 export function applyPatchToFiles(
-  text: string,
+  _text: string,
   projectFiles: Record<string, StudioFile>
 ): Record<string, StudioFile> {
-  const patchedFiles = { ...projectFiles };
-  const patches = extractPatchBlocks(text);
-
-  if (!patches) return patchedFiles;
-
-  for (const patch of patches) {
-    const filename = patch.filename;
-    const file = patchedFiles[filename];
-
-    if (!file) {
-      console.warn(`[applyPatchToFiles] Archivo no encontrado: ${filename}`);
-      continue;
-    }
-
-    // Normalizar el contenido para la búsqueda
-    const normalizedContent = file.content.replace(/\r\n/g, '\n');
-    const normalizedFind = patch.find.replace(/\r\n/g, '\n');
-    const normalizedReplace = patch.replace.replace(/\r\n/g, '\n');
-
-    // Intentar reemplazo exacto
-    if (normalizedContent.includes(normalizedFind)) {
-      const newContent = normalizedContent.replace(normalizedFind, normalizedReplace);
-      patchedFiles[filename] = {
-        ...file,
-        content: newContent
-      };
-      console.log(`[applyPatchToFiles] Patch aplicado a ${filename}`);
-    } else {
-      // Intentar búsqueda flexible (ignorando espacios extras)
-      const flexibleFind = normalizedFind.replace(/\s+/g, '\\s+');
-      const flexibleRegex = new RegExp(flexibleFind, 'g');
-
-      if (flexibleRegex.test(normalizedContent)) {
-        const newContent = normalizedContent.replace(flexibleRegex, normalizedReplace);
-        patchedFiles[filename] = {
-          ...file,
-          content: newContent
-        };
-        console.log(`[applyPatchToFiles] Patch flexible aplicado a ${filename}`);
-      } else {
-        console.warn(`[applyPatchToFiles] No se encontró el patrón en ${filename}`);
-      }
-    }
-  }
-
-  return patchedFiles;
+  // PATCH SYSTEM REMOVED - Files are replaced entirely
+  return projectFiles;
 }
 
-/**
- * Procesa todas las operaciones de archivo (PATCH, DELETE, nuevos archivos)
- * Retorna el estado actualizado de los archivos del proyecto
- */
 export function processFileOperations(
   text: string,
   projectFiles: Record<string, StudioFile>
@@ -511,67 +319,36 @@ export function processFileOperations(
 } {
   let result = { ...projectFiles };
   const deletedFiles: string[] = [];
-  const patchedFiles: string[] = [];
   const newFiles: string[] = [];
 
-  // 1. Procesar DELETE primero
+  // Process deletes
   const deletes = extractDeleteCommands(text);
   for (const filename of deletes) {
     if (result[filename]) {
       delete result[filename];
       deletedFiles.push(filename);
-      console.log(`[processFileOperations] Archivo eliminado: ${filename}`);
     }
   }
 
-  // 2. Procesar PATCH
-  const patches = extractPatchBlocks(text);
-  if (patches) {
-    for (const patch of patches) {
-      const filename = patch.filename;
-      const file = result[filename];
-
-      if (file) {
-        const normalizedContent = file.content.replace(/\r\n/g, '\n');
-        const normalizedFind = patch.find.replace(/\r\n/g, '\n');
-        const normalizedReplace = patch.replace.replace(/\r\n/g, '\n');
-
-        if (normalizedContent.includes(normalizedFind)) {
-          result[filename] = {
-            ...file,
-            content: normalizedContent.replace(normalizedFind, normalizedReplace)
-          };
-          patchedFiles.push(filename);
-        }
-      }
-    }
-  }
-
-  // 3. Extraer nuevos archivos de bloques de código
+  // Extract new files
   const newFileBlocks = extractChatCodeFiles(text);
   if (newFileBlocks) {
     for (const [filename, fileData] of Object.entries(newFileBlocks)) {
-      // Si el archivo ya existe y es idéntico, no lo marcamos como nuevo
-      if (!result[filename] || result[filename].content !== fileData.content) {
-        if (!result[filename]) {
-          newFiles.push(filename);
-        }
-        result[filename] = fileData;
+      if (!result[filename]) {
+        newFiles.push(filename);
       }
+      result[filename] = fileData;
     }
   }
 
   return {
     files: result,
     deletedFiles,
-    patchedFiles,
+    patchedFiles: [], // PATCH SYSTEM REMOVED
     newFiles
   };
 }
 
-/**
- * Detecta si el usuario quiere limpiar/resetear el proyecto completamente
- */
 export function wantsProjectReset(prompt: string): boolean {
   const p = prompt.toLowerCase().trim();
   const resetKeywords = [
@@ -582,12 +359,7 @@ export function wantsProjectReset(prompt: string): boolean {
   return resetKeywords.some(kw => p.includes(kw));
 }
 
-/**
- * Detecta dependencias faltantes basándose en los imports del código
- */
-export function detectMissingDependencies(
-  files: Record<string, StudioFile>
-): string[] {
+export function detectMissingDependencies(files: Record<string, StudioFile>): string[] {
   const deps = new Set<string>();
   const importRegex = /import\s+(?:(?:\{[^}]*\}|[^'"]*)\s+from\s+)?['"]([^'"]+)['"];?/g;
 
@@ -600,22 +372,7 @@ export function detectMissingDependencies(
     'axios': 'axios',
     'clsx': 'clsx',
     'tailwind-merge': 'tailwind-merge',
-    'zustand': 'zustand',
-    '@react-three/fiber': '@react-three/fiber',
-    '@react-three/drei': '@react-three/drei',
-    'three': 'three',
-    'date-fns': 'date-fns',
-    'lodash': 'lodash',
-    'zod': 'zod',
-    'react-hook-form': 'react-hook-form',
-    '@hookform/resolvers': '@hookform/resolvers',
-    'lucide': 'lucide-react',
-    'motion': 'framer-motion',
-    'chart.js': 'chart.js',
-    'react-chartjs-2': 'react-chartjs-2',
-    'canvas-confetti': 'canvas-confetti',
-    'react-confetti': 'react-confetti',
-    'lucide-react/dist/esm/icons': 'lucide-react'
+    'zustand': 'zustand'
   };
 
   for (const file of Object.values(files)) {
@@ -623,21 +380,13 @@ export function detectMissingDependencies(
     const content = file.content;
     while ((match = importRegex.exec(content)) !== null) {
       const importPath = match[1];
+      if (importPath.startsWith('.') || importPath === 'react' || importPath === 'react-dom') continue;
 
-      // Ignorar imports relativos y de React
-      if (importPath.startsWith('.') || importPath.startsWith('/')) continue;
-      if (importPath === 'react' || importPath === 'react-dom') continue;
-
-      // Extraer el nombre del paquete (sin subpaths)
       const packageName = importPath.split('/')[0];
-
-      // Mapear a dependencia conocida o usar el nombre del paquete
       if (dependencyMap[importPath]) {
         deps.add(dependencyMap[importPath]);
       } else if (dependencyMap[packageName]) {
         deps.add(dependencyMap[packageName]);
-      } else if (!importPath.startsWith('@')) {
-        deps.add(packageName);
       }
     }
   }
@@ -645,9 +394,6 @@ export function detectMissingDependencies(
   return Array.from(deps);
 }
 
-/**
- * Autonomously inject missing dependencies into package.json
- */
 export function injectDependenciesIntoPackageJson(
   files: Record<string, StudioFile>,
   dependencies: string[]
@@ -655,11 +401,9 @@ export function injectDependenciesIntoPackageJson(
   if (!dependencies || dependencies.length === 0) return files;
 
   const result = { ...files };
-  
-  // Find or create package.json
   const pkgFileKey = Object.keys(result).find(k => k.toLowerCase() === 'package.json') || 'package.json';
   const pkgFile = result[pkgFileKey] || { language: 'json', content: '{}' };
-  
+
   let pkgJson: any;
   try {
     pkgJson = JSON.parse(pkgFile.content);
@@ -668,7 +412,7 @@ export function injectDependenciesIntoPackageJson(
   }
 
   if (!pkgJson.dependencies) pkgJson.dependencies = {};
-  
+
   const pkgVersions: Record<string, string> = {
     'lucide-react': '^0.468.0',
     'framer-motion': '^11.0.0',
@@ -682,7 +426,7 @@ export function injectDependenciesIntoPackageJson(
 
   let changed = false;
   dependencies.forEach(dep => {
-    if (!pkgJson.dependencies[dep] && (!pkgJson.devDependencies || !pkgJson.devDependencies[dep])) {
+    if (!pkgJson.dependencies[dep]) {
       pkgJson.dependencies[dep] = pkgVersions[dep] || 'latest';
       changed = true;
     }
@@ -697,4 +441,47 @@ export function injectDependenciesIntoPackageJson(
   }
 
   return result;
+}
+
+export function isResponseTruncated(text: string): boolean {
+  if (!text || text.length < 100) return false;
+
+  // Count code blocks
+  const openCodeBlocks = (text.match(/```[a-z]*/gi) || []).length;
+  const closeCodeBlocks = (text.match(/```\s*(?:\n|$)/gm) || []).length;
+  if (openCodeBlocks > closeCodeBlocks) return true;
+
+  // Check for unclosed braces in TypeScript/JavaScript code
+  // Only check within code blocks, not the whole text
+  const codeBlocks = text.match(/```(?:tsx?|jsx?|js)?\n([\s\S]*?)```/g) || [];
+  for (const block of codeBlocks) {
+    const code = block.replace(/```[a-z]*\n?/, '').replace(/```$/, '');
+
+    // Count braces, parentheses, brackets
+    const openBraces = (code.match(/\{/g) || []).length;
+    const closeBraces = (code.match(/\}/g) || []).length;
+    const openParens = (code.match(/\(/g) || []).length;
+    const closeParens = (code.match(/\)/g) || []).length;
+    const openBrackets = (code.match(/\[/g) || []).length;
+    const closeBrackets = (code.match(/\]/g) || []).length;
+
+    // Allow small mismatches (1-2) but flag big mismatches
+    if (Math.abs(openBraces - closeBraces) > 2) return true;
+    if (Math.abs(openParens - closeParens) > 3) return true;
+    if (Math.abs(openBrackets - closeBrackets) > 3) return true;
+
+    // Check for incomplete export/function/component
+    const hasIncompleteExport = code.includes('export') && !code.match(/export\s+(?:default\s+)?(?:function|class|const|interface|type)?\s*\w+/);
+    if (hasIncompleteExport) return true;
+  }
+
+  // Check if ends mid-line with code-like patterns
+  const lastLine = text.trim().split('\n').pop() || '';
+  const endsMidCode = /[<\w]+\s*$/.test(lastLine) || // ends with opening tag or word
+                     /[=:]\s*$/.test(lastLine) ||      // ends with assignment
+                     /\(\s*$/.test(lastLine);          // ends with open paren
+
+  if (endsMidCode && text.length > 500) return true;
+
+  return false;
 }

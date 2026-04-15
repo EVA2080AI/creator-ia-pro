@@ -1,4 +1,4 @@
-import { type StudioFile } from '@/hooks/useStudioProjects';
+import type { StudioFile } from '@/hooks/useStudioProjects';
 
 export interface SandpackFile {
   code: string;
@@ -6,17 +6,15 @@ export interface SandpackFile {
 }
 
 /**
- * Convierte archivos del usuario a formato Sandpack (VERSIÓN SIMPLIFICADA)
+ * Convierte archivos del usuario a formato Sandpack (versión simplificada)
  */
 export function toSandpackFiles(
   files: Record<string, StudioFile>,
-  _supabaseConfig?: { url: string; anonKey: string } | null | undefined,
-  isVanillaHtml: boolean = false
+  _supabaseConfig?: { url: string; anonKey: string } | null
 ): Record<string, SandpackFile> {
   const result: Record<string, SandpackFile> = {};
 
-  if (!files || typeof files !== 'object' || Array.isArray(files)) {
-    console.error("[toSandpackFiles] Invalid files object:", files);
+  if (!files || typeof files !== 'object') {
     return result;
   }
 
@@ -27,58 +25,50 @@ export function toSandpackFiles(
     }
 
     const cleanName = name.replace(/^\//, '');
-    let abs: string;
+    let path: string;
 
-    if (isVanillaHtml) {
-      abs = '/' + cleanName;
-      result[abs] = { code: file.content };
+    // Archivos raíz van a /, el resto a /src/
+    const rootFiles = ['package.json', 'index.html', 'tsconfig.json', 'vite.config.ts', 'tailwind.config.js'];
+
+    // Si ya tiene src/ al inicio, preservar la ruta completa
+    if (cleanName.startsWith('src/')) {
+      path = '/' + cleanName;
+    } else if (rootFiles.includes(cleanName) || cleanName.startsWith('public/')) {
+      path = '/' + cleanName;
     } else {
-      // Archivos raíz van a /, el resto a /src/
-      const rootFiles = ['package.json', 'index.html', 'tsconfig.json', 'vite.config.ts', 'tailwind.config.js'];
-
-      // Si el archivo ya tiene src/ en el nombre, preservarlo
-      if (cleanName.startsWith('src/')) {
-        abs = '/' + cleanName;
-      } else if (rootFiles.includes(cleanName) || cleanName.startsWith('public/')) {
-        abs = '/' + cleanName;
-      } else {
-        abs = '/src/' + cleanName;
-      }
-      result[abs] = { code: file.content };
+      path = '/src/' + cleanName;
     }
+
+    result[path] = { code: file.content };
   });
 
-  // Si es vanilla HTML, no necesitamos más
-  if (isVanillaHtml) {
-    return result;
-  }
-
-  // Para React: Asegurar archivos esenciales
-  const allKeys = Object.keys(result);
-
-  // Crear App.tsx si no existe
-  if (!allKeys.includes('/src/App.tsx') && !allKeys.includes('/App.tsx')) {
-    // Buscar componente principal
+  // Crear App.tsx si no existe (usando el primer componente encontrado)
+  if (!result['/src/App.tsx'] && !result['/App.tsx']) {
     const componentFiles = Object.keys(files).filter(n =>
       n.endsWith('.tsx') || n.endsWith('.jsx')
     );
 
     if (componentFiles.length > 0) {
-      // Usar el primer archivo como App
       const mainFile = componentFiles[0];
       const content = files[mainFile].content;
 
+      // Si el archivo tiene export default, usarlo directamente
       if (content.includes('export default')) {
         result['/src/App.tsx'] = { code: content, active: true };
       } else {
         // Wrap como App
         result['/src/App.tsx'] = {
-          code: `export { default } from './${mainFile.replace(/\.tsx?$/, '')}';`,
-          active: true
+          code: `import React from 'react';
+import Component from './${mainFile.replace(/\.(tsx|jsx)$/, '')}';
+
+export default function App() {
+  return <Component />;
+}`,
+          active: false
         };
       }
     } else {
-      // App por defecto
+      // App.tsx por defecto
       result['/src/App.tsx'] = {
         code: `export default function App() {
   return (
@@ -94,7 +84,8 @@ export function toSandpackFiles(
 
   // Crear main.tsx si no existe
   if (!result['/src/main.tsx']) {
-    const hasIndexCss = !!result['/src/index.css'];
+    const hasIndexCss = !!result['/src/index.css'] || !!result['/index.css'];
+
     result['/src/main.tsx'] = {
       code: `import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -130,10 +121,12 @@ if (root) {
 
   // Crear package.json si no existe
   if (!result['/package.json']) {
-    // Detectar dependencias de los imports
     const deps = new Set<string>();
+
+    // Detectar dependencias de los imports
     Object.values(files).forEach(file => {
       if (!file.content) return;
+
       const importRegex = /from\s+['"]([^'"]+)['"]/g;
       let match;
       while ((match = importRegex.exec(file.content)) !== null) {
@@ -165,49 +158,3 @@ if (root) {
 
   return result;
 }
-
-/**
- * Genera un wrapper de router (SIMPLIFICADO - solo para casos simples)
- */
-export function generateRouterWrapper(
-  pages: { path: string; name: string; file: string }[],
-  _files: Record<string, StudioFile>
-): string {
-  const imports = pages.map((p, i) => {
-    const importPath = './' + p.file.replace(/^(src\/)?/, '').replace(/\.(tsx|jsx)$/, '');
-    return `import Page${i} from '${importPath}';`;
-  }).join('\n');
-
-  const routes = pages.map((p, i) =>
-    `      <Route path="${p.path}" element={<Page${i} />} />`
-  ).join('\n');
-
-  return `import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-${imports}
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-${routes}
-      </Routes>
-    </BrowserRouter>
-  );
-}
-`;
-}
-
-// Figma bridge (mantenido para compatibilidad)
-export const figmaBridgeCode = `(function() {
-  window.addEventListener('message', (e) => {
-    if (e.data.type === 'FIGMA_EXTRACT_REQUEST') {
-      try {
-        const data = { ready: true, url: window.location.href };
-        window.parent.postMessage({ type: 'FIGMA_EXTRACT_RESULT', data }, '*');
-      } catch (err) {
-        window.parent.postMessage({ type: 'FIGMA_EXTRACT_ERROR', error: String(err) }, '*');
-      }
-    }
-  });
-})()`;

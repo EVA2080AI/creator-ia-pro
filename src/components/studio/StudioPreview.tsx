@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 import type { SupabaseConfig } from './StudioCloud';
 import { StudioViewToolbar } from './StudioViewToolbar';
-import { toSandpackFiles } from './utils/sandpack-utils';
+import { toSandpackFiles } from './utils/sandpack-simple';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 
@@ -57,15 +57,30 @@ export function StudioPreview({
   const [sandpackKey, setSandpackKey] = useState(0);
   const [showConsole, setShowConsole] = useState(false);
   const prevFilesRef = useRef<string>('');
+  const prevFilesCountRef = useRef<number>(0);
   const [compilationStatus, setCompilationStatus] = useState<'idle' | 'compiling' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     if (!isGenerating && Object.keys(files).length > 0) {
       const currentFilesHash = JSON.stringify(Object.keys(files).sort());
-      if (prevFilesRef.current !== currentFilesHash) {
+      const currentFilesCount = Object.keys(files).length;
+
+      // Solo recargar si:
+      // 1. Es la primera carga (prevFilesCountRef.current === 0)
+      // 2. Cambió el número de archivos (se agregó/eliminó)
+      // 3. Cambió completamente el set de archivos (cambio de proyecto)
+      const isFirstLoad = prevFilesCountRef.current === 0;
+      const fileCountChanged = currentFilesCount !== prevFilesCountRef.current;
+      const fileSetChanged = prevFilesRef.current !== currentFilesHash && prevFilesRef.current !== '';
+
+      if (isFirstLoad || fileCountChanged || fileSetChanged) {
         prevFilesRef.current = currentFilesHash;
+        prevFilesCountRef.current = currentFilesCount;
         setSandpackKey(k => k + 1);
         setCompilationStatus('compiling');
+      } else {
+        // Solo actualizar el hash sin recargar el preview
+        prevFilesRef.current = currentFilesHash;
       }
     }
   }, [isGenerating, files]);
