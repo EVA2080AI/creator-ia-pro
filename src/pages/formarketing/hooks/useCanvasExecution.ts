@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { aiService } from "@/services/ai-service";
 import { toast } from "sonner";
-import { Node, useReactFlow } from "@xyflow/react";
+import { Node, useReactFlow, Edge } from "@xyflow/react";
 
 interface CanvasNodeData {
   title?: string;
@@ -23,8 +23,9 @@ interface UserProfile {
 export function useCanvasExecution(
   spaceId: string | null,
   user: UserProfile | null,
-  _setNodes: (nodes: Node<CanvasNodeData>[]) => void, // Kept for signature compatibility if needed
-  addLog: (node: string, msg: string, type?: 'info' | 'success' | 'error') => void
+  _setNodes: (nodes: Node<CanvasNodeData>[]) => void,
+  addLog: (node: string, msg: string, type?: 'info' | 'success' | 'error') => void,
+  setEdges?: (updater: (edges: any[]) => any[]) => void
 ) {
   const { getNodes, getEdges, setNodes: rfSetNodes } = useReactFlow<Node<CanvasNodeData>>();
 
@@ -56,6 +57,26 @@ export function useCanvasExecution(
     return !insertError;
   };
 
+  const animateEdgesToNode = (targetNodeId: string, isActive: boolean) => {
+    if (!setEdges) return;
+    const edges = getEdges();
+    const incomingEdges = edges.filter(e => e.target === targetNodeId);
+
+    setEdges((eds) => eds.map(edge => {
+      if (edge.target === targetNodeId) {
+        return {
+          ...edge,
+          data: {
+            ...edge.data,
+            isActive,
+            isExecuting: isActive,
+          },
+        };
+      }
+      return edge;
+    }));
+  };
+
   const executeNode = async (nodeId: string) => {
     const isPersisted = await ensureNodePersisted(nodeId);
     const currentNodes = getNodes();
@@ -63,6 +84,10 @@ export function useCanvasExecution(
     if (!node) return;
 
     const nodeName = node.data.title || node.type || 'Unknown Node';
+
+    // Animate incoming edges
+    animateEdgesToNode(nodeId, true);
+
     rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'executing' }, style: { boxShadow: '0 0 0 2px rgba(245,158,11,0.5)', borderRadius: '24px' } } : n));
     addLog(nodeName, 'Iniciando ejecución…', 'info');
 
@@ -116,10 +141,13 @@ export function useCanvasExecution(
       if (assetUrl) updatePayload.assetUrl = assetUrl;
 
       rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, ...updatePayload }, style: { boxShadow: '0 0 0 2px rgba(52,211,153,0.4)', borderRadius: '24px' } } : n));
-      
+
+      // Stop edge animation
+      animateEdgesToNode(nodeId, false);
+
       if (spaceId) {
-        await supabase.from('canvas_nodes').update({ 
-          status: 'ready', 
+        await supabase.from('canvas_nodes').update({
+          status: 'ready',
           asset_url: assetUrl || undefined,
           data_payload: { ...node.data, ...updatePayload }
         } as any).eq('id', nodeId);
@@ -128,10 +156,82 @@ export function useCanvasExecution(
       addLog(nodeName, 'Completado ✓', 'success');
     } catch (e: any) {
       rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
+      // Stop edge animation on error
+      animateEdgesToNode(nodeId, false);
       addLog(nodeName, 'Error: ' + e.message, 'error');
       toast.error(e.message);
     }
   };
 
-  return { executeNode };
+  // Execute all upstream nodes leading to target node (in topological order)
+  const executeUpstream = async (targetNodeId: string) => {
+    const currentNodes = getNodes();
+    const currentEdges = getEdges();
+
+    // Build adjacency list (reverse direction - who connects TO each node)
+    const incomingEdges: Record<string, string[]> = {};
+    currentEdges.forEach(edge => {
+      if (!incomingEdges[edge.target]) incomingEdges[edge.target] = [];
+      incomingEdges[edge.target].push(edge.source);
+    });
+
+    // Collect all upstream nodes using BFS backwards
+    const upstream = new Set<string>();
+    const queue = [targetNodeId];
+    const visited = new Set<string>();
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      if (visited.has(current)) continue;
+      visited.add(current);
+
+      if (current !== targetNodeId) upstream.add(current);
+
+      const sources = incomingEdges[current] || [];
+      sources.forEach(src => {
+        if (!visited.has(src)) queue.push(src);
+      });
+    }
+
+    // Topological sort: order nodes by dependency depth
+    const depth: Record<string, number> = {};
+    const calcDepth = (nodeId: string): number => {
+      if (depth[nodeId] !== undefined) return depth[nodeId];
+      const sources = incomingEdges[nodeId] || [];
+      if (sources.length === 0) {
+        depth[nodeId] = 0;
+        return 0;
+      }
+      depth[nodeId] = Math.max(...sources.map(calcDepth)) + 1;
+      return depth[nodeId];
+    };
+
+    // Calculate depth for all upstream nodes
+    upstream.forEach(nodeId => calcDepth(nodeId));
+
+    // Sort upstream nodes by depth (ascending = execute dependencies first)
+    const sortedUpstream = Array.from(upstream).sort((a, b) => depth[a] - depth[b]);
+
+    if (sortedUpstream.length === 0) {
+      // No upstream nodes, just execute the target
+      await executeNode(targetNodeId);
+      return;
+    }
+
+    addLog('Sistema', `Ejecutando ${sortedUpstream.length} nodo(s) upstream + objetivo...`, 'info');
+
+    // Execute upstream nodes sequentially
+    for (const nodeId of sortedUpstream) {
+      await executeNode(nodeId);
+      // Small delay between executions for visual feedback
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    // Finally execute the target node
+    await executeNode(targetNodeId);
+
+    addLog('Sistema', 'Flujo completado ✓', 'success');
+  };
+
+  return { executeNode, executeUpstream };
 }

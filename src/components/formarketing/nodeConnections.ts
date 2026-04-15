@@ -1,29 +1,45 @@
+// Enhanced node connection system with better type safety and UX
 export type DataType = 'text' | 'image' | 'video' | 'layout' | 'campaign' | 'context' | 'json' | 'any';
 
-export const DATA_TYPE_COLORS: Record<string, string> = {
-  text:     '#facc15',
-  image:    '#a78bfa',
-  video:    '#f472b6',
-  layout:   '#60a5fa',
-  campaign: '#34d399',
-  context:  '#fb923c',
-  json:     '#60a5fa',
-  any:      '#94a3b8',
+export const DATA_TYPE_COLORS: Record<DataType, string> = {
+  text:     '#fbbf24',     // amber-400
+  image:    '#a855f7',     // purple-500
+  video:    '#f472b6',     // pink-400
+  layout:   '#60a5fa',     // blue-400
+  campaign: '#34d399',     // emerald-400
+  context:  '#fb923c',     // orange-400
+  json:     '#22d3ee',     // cyan-400
+  any:      '#94a3b8',     // slate-400
 };
 
-interface HandleDef {
+export const DATA_TYPE_LABELS: Record<DataType, string> = {
+  text:     'Texto',
+  image:    'Imagen',
+  video:    'Video',
+  layout:   'Layout',
+  campaign: 'Campaña',
+  context:  'Contexto',
+  json:     'JSON',
+  any:      'Cualquiera',
+};
+
+export interface HandleDef {
   id: string;
   dataType: DataType;
   label: string;
+  description?: string;
+  required?: boolean;
 }
 
-interface NodeConnectionDef {
+export interface NodeConnectionDef {
   label: string;
   emoji: string;
   description: string;
   inputHandles: HandleDef[];
   outputHandles: HandleDef[];
   compatibleTargets: string[];
+  category: 'input' | 'process' | 'output' | 'bridge';
+  color: string;
 }
 
 export interface NodeMeta {
@@ -33,85 +49,195 @@ export interface NodeMeta {
   inputHandles: HandleDef[];
   outputHandles: HandleDef[];
   compatibleTargets: string[];
+  category: 'input' | 'process' | 'output' | 'bridge';
+  color: string;
 }
 
+// Enhanced node definitions with better organization
 export const NODE_META: Record<string, NodeMeta> = {
-  characterBreakdown: {
-    label: 'Personaje',
-    emoji: '🧬',
-    description: 'Define la identidad del personaje / marca',
-    inputHandles: [],
-    outputHandles: [{ id: 'any-out', dataType: 'text' as DataType, label: 'Contexto' }],
-    compatibleTargets: ['modelView', 'videoModel', 'llmNode', 'captionNode', 'promptBuilder'],
-  },
+  // Input nodes - sources of data
   textInput: {
     label: 'Texto',
     emoji: '📝',
-    description: 'Entrada de texto libre',
+    description: 'Entrada de texto libre para usar en otros nodos',
     inputHandles: [],
-    outputHandles: [{ id: 'text-out', dataType: 'text' as DataType, label: 'Texto' }],
-    compatibleTargets: ['llmNode', 'modelView', 'videoModel', 'captionNode', 'promptBuilder', 'campaignManager'],
-  },
-  llmNode: {
-    label: 'LLM',
-    emoji: '🤖',
-    description: 'Genera texto con IA',
-    inputHandles: [{ id: 'text-in', dataType: 'text' as DataType, label: 'Contexto' }],
-    outputHandles: [{ id: 'text-out', dataType: 'text' as DataType, label: 'Texto generado' }],
-    compatibleTargets: ['modelView', 'videoModel', 'captionNode', 'campaignManager', 'layoutBuilder'],
-  },
-  modelView: {
-    label: 'Imagen IA',
-    emoji: '🖼️',
-    description: 'Genera imágenes con modelos de difusión',
-    inputHandles: [{ id: 'any-in', dataType: 'any' as DataType, label: 'Contexto' }],
-    outputHandles: [{ id: 'image-out', dataType: 'image' as DataType, label: 'Imagen' }],
-    compatibleTargets: ['videoModel', 'campaignManager', 'exportNode'],
-  },
-  videoModel: {
-    label: 'Video IA',
-    emoji: '🎬',
-    description: 'Genera videos con IA',
-    inputHandles: [
-      { id: 'any-in', dataType: 'any' as DataType, label: 'Contexto' },
-      { id: 'image-in', dataType: 'image' as DataType, label: 'Imagen base' },
+    outputHandles: [
+      { id: 'text-out', dataType: 'text', label: 'Texto', description: 'Texto de entrada' }
     ],
-    outputHandles: [{ id: 'video-out', dataType: 'video' as DataType, label: 'Video' }],
-    compatibleTargets: ['campaignManager', 'exportNode'],
+    compatibleTargets: ['llmNode', 'modelView', 'videoModel', 'captionNode', 'promptBuilder'],
+    category: 'input',
+    color: '#fbbf24',
   },
-  layoutBuilder: {
-    label: 'Layout Builder',
-    emoji: '🏗️',
-    description: 'Estructura visual de la campaña',
-    inputHandles: [{ id: 'any-in', dataType: 'any' as DataType, label: 'Contenido' }],
-    outputHandles: [{ id: 'ui-out', dataType: 'json' as DataType, label: 'Layout' }],
-    compatibleTargets: ['campaignManager', 'exportNode'],
-  },
-  campaignManager: {
-    label: 'Campaign Manager',
-    emoji: '🚀',
-    description: 'Distribuye el contenido a plataformas',
-    inputHandles: [{ id: 'any-in', dataType: 'any' as DataType, label: 'Contenido' }],
-    outputHandles: [],
-    compatibleTargets: ['exportNode'],
-  },
-  captionNode: {
-    label: 'Caption IA',
-    emoji: '💬',
-    description: 'Genera captions para redes sociales',
-    inputHandles: [{ id: 'text-in', dataType: 'text' as DataType, label: 'Contexto' }],
-    outputHandles: [{ id: 'text-out', dataType: 'text' as DataType, label: 'Caption' }],
-    compatibleTargets: ['exportNode', 'campaignManager'],
+  characterBreakdown: {
+    label: 'Personaje',
+    emoji: '🧬',
+    description: 'Define la identidad del personaje o marca con atributos',
+    inputHandles: [],
+    outputHandles: [
+      { id: 'context-out', dataType: 'context', label: 'Contexto', description: 'Contexto del personaje' }
+    ],
+    compatibleTargets: ['modelView', 'videoModel', 'llmNode', 'captionNode'],
+    category: 'input',
+    color: '#fb923c',
   },
   promptBuilder: {
     label: 'Prompt Builder',
     emoji: '🔧',
-    description: 'Constructor de prompts con variables',
-    inputHandles: [],
-    outputHandles: [{ id: 'text-out', dataType: 'text' as DataType, label: 'Prompt compilado' }],
-    compatibleTargets: ['llmNode', 'modelView', 'videoModel', 'captionNode', 'characterBreakdown'],
+    description: 'Constructor de prompts con variables y plantillas',
+    inputHandles: [
+      { id: 'context-in', dataType: 'context', label: 'Contexto', required: false }
+    ],
+    outputHandles: [
+      { id: 'text-out', dataType: 'text', label: 'Prompt', description: 'Prompt compilado' }
+    ],
+    compatibleTargets: ['llmNode', 'modelView', 'videoModel', 'captionNode'],
+    category: 'input',
+    color: '#94a3b8',
+  },
+
+  // Process nodes - transform data
+  llmNode: {
+    label: 'LLM',
+    emoji: '🤖',
+    description: 'Genera texto con modelos de lenguaje (Claude, GPT, etc.)',
+    inputHandles: [
+      { id: 'text-in', dataType: 'text', label: 'Prompt', description: 'Texto de entrada o instrucción', required: false },
+      { id: 'context-in', dataType: 'context', label: 'Contexto', description: 'Contexto adicional', required: false },
+    ],
+    outputHandles: [
+      { id: 'text-out', dataType: 'text', label: 'Texto generado', description: 'Respuesta del modelo' }
+    ],
+    compatibleTargets: ['modelView', 'videoModel', 'captionNode', 'campaignManager', 'layoutBuilder', 'exportNode'],
+    category: 'process',
+    color: '#3b82f6',
+  },
+  modelView: {
+    label: 'Imagen IA',
+    emoji: '🖼️',
+    description: 'Genera imágenes con modelos de difusión (DALL-E, FLUX, etc.)',
+    inputHandles: [
+      { id: 'prompt-in', dataType: 'text', label: 'Prompt', description: 'Descripción de la imagen', required: false },
+      { id: 'context-in', dataType: 'context', label: 'Contexto', description: 'Contexto visual', required: false },
+    ],
+    outputHandles: [
+      { id: 'image-out', dataType: 'image', label: 'Imagen', description: 'Imagen generada' }
+    ],
+    compatibleTargets: ['videoModel', 'campaignManager', 'exportNode', 'layoutBuilder'],
+    category: 'process',
+    color: '#a855f7',
+  },
+  videoModel: {
+    label: 'Video IA',
+    emoji: '🎬',
+    description: 'Genera videos animados a partir de imágenes o prompts',
+    inputHandles: [
+      { id: 'prompt-in', dataType: 'text', label: 'Prompt', description: 'Descripción del video', required: false },
+      { id: 'image-in', dataType: 'image', label: 'Imagen', description: 'Imagen de referencia', required: false },
+      { id: 'context-in', dataType: 'context', label: 'Contexto', description: 'Estilo y contexto', required: false },
+    ],
+    outputHandles: [
+      { id: 'video-out', dataType: 'video', label: 'Video', description: 'Video generado' }
+    ],
+    compatibleTargets: ['campaignManager', 'exportNode'],
+    category: 'process',
+    color: '#f472b6',
+  },
+  captionNode: {
+    label: 'Caption IA',
+    emoji: '💬',
+    description: 'Genera captions y copy para redes sociales',
+    inputHandles: [
+      { id: 'text-in', dataType: 'text', label: 'Contexto', description: 'Contexto o tema', required: false },
+      { id: 'image-in', dataType: 'image', label: 'Imagen', description: 'Imagen de referencia', required: false },
+    ],
+    outputHandles: [
+      { id: 'text-out', dataType: 'text', label: 'Caption', description: 'Texto para redes' }
+    ],
+    compatibleTargets: ['campaignManager', 'exportNode', 'llmNode'],
+    category: 'process',
+    color: '#fbbf24',
+  },
+  layoutBuilder: {
+    label: 'Layout Builder',
+    emoji: '🏗️',
+    description: 'Estructura visual de la campaña con componentes',
+    inputHandles: [
+      { id: 'content-in', dataType: 'any', label: 'Contenido', description: 'Imágenes, textos, videos', required: false },
+      { id: 'json-in', dataType: 'json', label: 'Configuración', description: 'Configuración JSON', required: false },
+    ],
+    outputHandles: [
+      { id: 'layout-out', dataType: 'layout', label: 'Layout', description: 'Estructura visual' }
+    ],
+    compatibleTargets: ['campaignManager', 'exportNode'],
+    category: 'process',
+    color: '#60a5fa',
+  },
+
+  // Bridge nodes - connect to external systems
+  antigravityBridge: {
+    label: 'Antigravity Bridge',
+    emoji: '🌉',
+    description: 'Conecta con Antigravity para publicación multiplataforma',
+    inputHandles: [
+      { id: 'content-in', dataType: 'any', label: 'Contenido', description: 'Lo que quieres publicar', required: true },
+    ],
+    outputHandles: [
+      { id: 'status-out', dataType: 'json', label: 'Estado', description: 'Resultado de la publicación' }
+    ],
+    compatibleTargets: ['exportNode'],
+    category: 'bridge',
+    color: '#22d3ee',
+  },
+
+  // Output nodes - final destinations
+  campaignManager: {
+    label: 'Campaign Manager',
+    emoji: '🚀',
+    description: 'Distribuye el contenido a plataformas y calendariza',
+    inputHandles: [
+      { id: 'content-in', dataType: 'any', label: 'Contenido', description: 'Assets para publicar', required: true },
+      { id: 'caption-in', dataType: 'text', label: 'Caption', description: 'Texto para publicación', required: false },
+      { id: 'layout-in', dataType: 'layout', label: 'Layout', description: 'Diseño visual', required: false },
+    ],
+    outputHandles: [],
+    compatibleTargets: ['exportNode'],
+    category: 'output',
+    color: '#34d399',
+  },
+  exportNode: {
+    label: 'Exportar',
+    emoji: '📤',
+    description: 'Exporta el contenido final en múltiples formatos',
+    inputHandles: [
+      { id: 'content-in', dataType: 'any', label: 'Contenido', description: 'Lo que quieres exportar', required: true },
+    ],
+    outputHandles: [],
+    compatibleTargets: [],
+    category: 'output',
+    color: '#10b981',
   },
 };
+
+// Helper functions for connection validation
+export function canConnectNodes(sourceType: string, targetType: string): boolean {
+  const sourceMeta = NODE_META[sourceType];
+  const targetMeta = NODE_META[targetType];
+
+  if (!sourceMeta || !targetMeta) return false;
+
+  // Check if target is in compatible targets
+  return sourceMeta.compatibleTargets.includes(targetType);
+}
+
+export function getCompatibleSourceTypes(targetType: string): string[] {
+  return Object.entries(NODE_META)
+    .filter(([_, meta]) => meta.compatibleTargets.includes(targetType))
+    .map(([type, _]) => type);
+}
+
+export function getNodesByCategory(category: NodeMeta['category']): [string, NodeMeta][] {
+  return Object.entries(NODE_META).filter(([_, meta]) => meta.category === category);
+}
 
 // backward-compat alias
 export const NODE_CONNECTIONS = NODE_META;
