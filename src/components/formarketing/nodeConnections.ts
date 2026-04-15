@@ -72,7 +72,9 @@ export const NODE_META: Record<string, NodeMeta> = {
     label: 'Personaje',
     emoji: '🧬',
     description: 'Define la identidad del personaje o marca con atributos',
-    inputHandles: [],
+    inputHandles: [
+      { id: 'text-in', dataType: 'text', label: 'Texto', required: false }
+    ],
     outputHandles: [
       { id: 'context-out', dataType: 'context', label: 'Contexto', description: 'Contexto del personaje' }
     ],
@@ -85,7 +87,7 @@ export const NODE_META: Record<string, NodeMeta> = {
     emoji: '🔧',
     description: 'Constructor de prompts con variables y plantillas',
     inputHandles: [
-      { id: 'context-in', dataType: 'context', label: 'Contexto', required: false }
+      { id: 'text-in', dataType: 'text', label: 'Texto', required: false }
     ],
     outputHandles: [
       { id: 'text-out', dataType: 'text', label: 'Prompt', description: 'Prompt compilado' }
@@ -131,9 +133,7 @@ export const NODE_META: Record<string, NodeMeta> = {
     emoji: '🎬',
     description: 'Genera videos animados a partir de imágenes o prompts',
     inputHandles: [
-      { id: 'prompt-in', dataType: 'text', label: 'Prompt', description: 'Descripción del video', required: false },
-      { id: 'image-in', dataType: 'image', label: 'Imagen', description: 'Imagen de referencia', required: false },
-      { id: 'context-in', dataType: 'context', label: 'Contexto', description: 'Estilo y contexto', required: false },
+      { id: 'any-in', dataType: 'any', label: 'Entrada', description: 'Cualquier entrada', required: false },
     ],
     outputHandles: [
       { id: 'video-out', dataType: 'video', label: 'Video', description: 'Video generado' }
@@ -162,11 +162,10 @@ export const NODE_META: Record<string, NodeMeta> = {
     emoji: '🏗️',
     description: 'Estructura visual de la campaña con componentes',
     inputHandles: [
-      { id: 'content-in', dataType: 'any', label: 'Contenido', description: 'Imágenes, textos, videos', required: false },
-      { id: 'json-in', dataType: 'json', label: 'Configuración', description: 'Configuración JSON', required: false },
+      { id: 'any-in', dataType: 'any', label: 'Contenido', description: 'Cualquier entrada', required: false },
     ],
     outputHandles: [
-      { id: 'layout-out', dataType: 'layout', label: 'Layout', description: 'Estructura visual' }
+      { id: 'ui-out', dataType: 'layout', label: 'UI', description: 'Layout generado' }
     ],
     compatibleTargets: ['campaignManager', 'exportNode'],
     category: 'process',
@@ -179,10 +178,10 @@ export const NODE_META: Record<string, NodeMeta> = {
     emoji: '🌉',
     description: 'Conecta con Antigravity para publicación multiplataforma',
     inputHandles: [
-      { id: 'content-in', dataType: 'any', label: 'Contenido', description: 'Lo que quieres publicar', required: true },
+      { id: 'any-in', dataType: 'any', label: 'Contenido', description: 'Lo que quieres publicar', required: true },
     ],
     outputHandles: [
-      { id: 'status-out', dataType: 'json', label: 'Estado', description: 'Resultado de la publicación' }
+      { id: 'any-out', dataType: 'any', label: 'Salida', description: 'Resultado' }
     ],
     compatibleTargets: ['exportNode'],
     category: 'bridge',
@@ -195,11 +194,11 @@ export const NODE_META: Record<string, NodeMeta> = {
     emoji: '🚀',
     description: 'Distribuye el contenido a plataformas y calendariza',
     inputHandles: [
-      { id: 'content-in', dataType: 'any', label: 'Contenido', description: 'Assets para publicar', required: true },
-      { id: 'caption-in', dataType: 'text', label: 'Caption', description: 'Texto para publicación', required: false },
-      { id: 'layout-in', dataType: 'layout', label: 'Layout', description: 'Diseño visual', required: false },
+      { id: 'any-in', dataType: 'any', label: 'Contenido', description: 'Assets para publicar', required: true },
     ],
-    outputHandles: [],
+    outputHandles: [
+      { id: 'any-out', dataType: 'any', label: 'Salida', description: 'Resultado' }
+    ],
     compatibleTargets: ['exportNode'],
     category: 'output',
     color: '#34d399',
