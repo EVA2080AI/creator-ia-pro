@@ -28,6 +28,7 @@ import PromptBuilderNode from '@/components/formarketing/PromptBuilderNode';
 import LLMNode from '@/components/formarketing/LLMNode';
 import TextInputNode from '@/components/formarketing/TextInputNode';
 import ExportNode from '@/components/formarketing/ExportNode';
+import AnimatedEdge from '@/components/formarketing/AnimatedEdge';
 import { BlueprintProjectNode } from '@/components/formarketing/BlueprintProjectNode';
 import { BlueprintPageNode } from '@/components/formarketing/BlueprintPageNode';
 import { CommandPalette } from '@/components/formarketing/CommandPalette';
@@ -36,6 +37,7 @@ import { ExportModal } from '@/components/formarketing/ExportModal';
 import { StudioToolbar } from '@/components/studio/StudioToolbar';
 import { Onboarding } from './formarketing/components/Onboarding';
 import { ExecutionLog } from './formarketing/components/ExecutionLog';
+import { NODE_META } from '@/components/formarketing/nodeConnections';
 
 // Hooks
 import { useCanvasPersistence } from './formarketing/hooks/useCanvasPersistence';
@@ -46,6 +48,7 @@ import { useCanvasSync } from './formarketing/hooks/useCanvasSync';
 // --- Types ---
 interface NodeContext {
   executeNode?: (id: string) => void;
+  executeUpstream?: (id: string) => Promise<void>;
 }
 
 interface NodeDataWithContext extends Record<string, unknown> {
@@ -153,18 +156,18 @@ const FormarketingContent = () => {
     spaceId, user, setNodes, setEdges, onNodesChange, onEdgesChange, edges, record
   );
 
-  const { executeNode } = useCanvasExecution(spaceId, user, setNodes, addLog);
-  
   // Enable bi-directional Reverse Sync (Canvas -> Blueprint)
   useCanvasSync(spaceId, user, nodes, edges);
-  
+
+  const { executeNode, executeUpstream } = useCanvasExecution(spaceId, user, setNodes, addLog, setEdges);
+
   // Inject execution context into node data updates
   useEffect(() => {
     setNodes(nds => nds.map(n => ({
       ...n,
-      data: { ...n.data, _context: { executeNode } }
+      data: { ...n.data, _context: { executeNode, executeUpstream } }
     })));
-  }, [executeNode, setNodes]);
+  }, [executeNode, executeUpstream, setNodes]);
 
   // Template Listener
   useEffect(() => {
@@ -275,6 +278,35 @@ const FormarketingContent = () => {
     blueprint_page: BlueprintPageNodeWrapper,
   }), []);
 
+  // Custom edge types with animation
+  const edgeTypes = useMemo(() => ({
+    animated: AnimatedEdge,
+  }), []);
+
+  // Enhanced onConnect that adds data type information
+  const handleConnect = useCallback((params: any) => {
+    // Get data type from source node's output handle
+    const sourceNode = nodes.find(n => n.id === params.source);
+    const sourceMeta = sourceNode ? NODE_META[sourceNode.type || ''] : null;
+    const outputHandle = sourceMeta?.outputHandles.find(h => h.id === params.sourceHandle);
+    const dataType = outputHandle?.dataType || 'any';
+
+    const newEdge = {
+      ...params,
+      type: 'animated',
+      data: {
+        dataType,
+        isActive: false,
+        isExecuting: false,
+      },
+      animated: true,
+      style: { stroke: '#94a3b8', strokeWidth: 2 },
+    };
+
+    setEdges((eds: Edge[]) => addEdge(newEdge, eds));
+    record();
+  }, [nodes, setEdges, record]);
+
   return (
     <div className="h-full w-full bg-[#f8f9fa] flex flex-col relative overflow-hidden font-sans">
       <Helmet><title>Canvas IA — ForMarketing | Creator IA Pro</title></Helmet>
@@ -326,16 +358,36 @@ const FormarketingContent = () => {
             nodes={nodes} edges={edges}
             onNodesChange={handleNodesChange}
             onEdgesChange={handleEdgesChange}
-            onConnect={onConnect}
+            onConnect={handleConnect}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
             onDragOver={onDragOver}
             onDrop={onDrop}
             onSelectionChange={({ nodes }) => setSelectedNodeId(nodes[0]?.id || null)}
             fitView selectionMode={SelectionMode.Partial}
             snapToGrid={false}
+            defaultEdgeOptions={{
+              type: 'animated',
+              animated: true,
+            }}
           >
             <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="#e5e7eb" />
             <Controls className="!bg-white !border-zinc-200 !rounded-2xl !shadow-xl !m-6" />
+
+            {/* Mini Map for navigation */}
+            <MiniMap
+              className="!bg-white/90 !backdrop-blur-xl !border !border-zinc-200 !rounded-2xl !shadow-xl !m-6"
+              nodeColor={(node) => {
+                const meta = NODE_META[node.type || ''];
+                return meta?.color || '#94a3b8';
+              }}
+              maskColor="rgba(0, 0, 0, 0.1)"
+              maskStrokeColor="#3b82f6"
+              maskStrokeWidth={2}
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              }}
+            />
           </ReactFlow>
 
           <ExecutionLog logs={execLog} isOpen={logOpen} onClose={() => setLogOpen(false)} />
