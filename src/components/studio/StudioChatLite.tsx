@@ -30,6 +30,7 @@ interface StudioChatLiteProps {
   onRename: (name: string) => void;
   onDelete: () => void;
   onRetry?: () => void;
+  onImportHtml?: (htmlContent: string, fileName: string) => void;
 }
 
 const MODELS = [
@@ -105,6 +106,7 @@ export function StudioChatLite({
   onRename,
   onDelete,
   onRetry,
+  onImportHtml,
 }: StudioChatLiteProps) {
   const [input, setInput] = useState('');
   const [isEditingName, setIsEditingName] = useState(false);
@@ -112,9 +114,12 @@ export function StudioChatLite({
   const [copied, setCopied] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [isDragging, setIsDragging] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Smart scroll - only auto-scroll if user is near bottom
   const shouldAutoScroll = useCallback(() => {
@@ -198,10 +203,66 @@ export function StudioChatLite({
     }
   };
 
+  // Handle file drop for HTML
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      processFile(file);
+    }
+  };
+
+  const processFile = (file: File) => {
+    if (file.type === 'text/html' || file.name.endsWith('.html') || file.name.endsWith('.htm')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        if (content && onImportHtml) {
+          onImportHtml(content, file.name);
+          toast.success(`HTML importado: ${file.name}`);
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      toast.error('Por favor arrastra un archivo HTML (.html)');
+    }
+  };
+
   const hasError = messages.some(m => m.isError);
 
   return (
     <div className="flex flex-col h-full bg-white">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".html,.htm"
+        onChange={handleFileSelect}
+        className="hidden"
+      />
+
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
@@ -299,8 +360,38 @@ export function StudioChatLite({
       {/* Messages */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth"
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={cn(
+          "flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth relative",
+          isDragging && "bg-primary/5"
+        )}
       >
+        {/* Drag overlay */}
+        <AnimatePresence>
+          {isDragging && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-primary/10 border-2 border-dashed border-primary/50 rounded-lg m-4 flex flex-col items-center justify-center z-20 pointer-events-none"
+            >
+              <motion.div
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                className="bg-white rounded-2xl p-6 shadow-2xl flex flex-col items-center"
+              >
+                <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center mb-3">
+                  <FileCode className="h-6 w-6 text-primary" />
+                </div>
+                <p className="text-sm font-medium text-zinc-900">Suelta el archivo HTML aquí</p>
+                <p className="text-xs text-zinc-500 mt-1">Genesis lo importará automáticamente</p>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <AnimatePresence mode="popLayout">
           {/* Empty State with Suggestions */}
           {messages.length === 0 && showSuggestions && (
@@ -365,6 +456,28 @@ export function StudioChatLite({
                   </motion.button>
                 ))}
               </motion.div>
+
+              {/* Import HTML option */}
+              {onImportHtml && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  className="mt-6 pt-6 border-t border-zinc-100"
+                >
+                  <p className="text-xs text-zinc-400 mb-3">¿Ya tienes un diseño HTML?</p>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-2 mx-auto px-4 py-2 rounded-lg border border-dashed border-zinc-300 hover:border-primary hover:bg-primary/5 transition-all text-zinc-600 hover:text-primary"
+                  >
+                    <FileCode className="h-4 w-4" />
+                    <span className="text-xs font-medium">Importar archivo HTML</span>
+                  </motion.button>
+                  <p className="text-[10px] text-zinc-400 mt-2">O arrastra un archivo .html aquí</p>
+                </motion.div>
+              )}
             </motion.div>
           )}
 

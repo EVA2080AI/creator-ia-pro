@@ -10,7 +10,8 @@ export interface SandpackFile {
  */
 export function toSandpackFiles(
   files: Record<string, StudioFile>,
-  _supabaseConfig?: { url: string; anonKey: string } | null
+  _supabaseConfig?: { url: string; anonKey: string } | null,
+  isVanillaHtml: boolean = false
 ): Record<string, SandpackFile> {
   const result: Record<string, SandpackFile> = {};
 
@@ -41,6 +42,21 @@ export function toSandpackFiles(
 
     result[path] = { code: file.content };
   });
+
+  // Para proyectos HTML vanilla, no necesitamos crear archivos React
+  if (isVanillaHtml) {
+    // Asegurar que package.json existe para HTML vanilla
+    if (!result['/package.json']) {
+      result['/package.json'] = {
+        code: JSON.stringify({
+          name: 'html-project',
+          type: 'module',
+          dependencies: {}
+        }, null, 2)
+      };
+    }
+    return result;
+  }
 
   // Crear App.tsx si no existe (usando el primer componente encontrado)
   if (!result['/src/App.tsx'] && !result['/App.tsx']) {

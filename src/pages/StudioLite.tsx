@@ -92,6 +92,7 @@ export default function StudioLite() {
           onBack={() => navigate('/studio')}
           onRename={genesis.renameProject}
           onDelete={genesis.deleteProject}
+          onImportHtml={genesis.importHtml}
         />
       </div>
 

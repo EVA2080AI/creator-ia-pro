@@ -319,6 +319,34 @@ export default function App() {
     }
   }, [project, user]);
 
+  // Import HTML file
+  const importHtml = useCallback(async (htmlContent: string, fileName: string) => {
+    if (!project) return;
+
+    // Create files for vanilla HTML project
+    const newFiles: Record<string, StudioFile> = {
+      'index.html': { language: 'html', content: htmlContent },
+      'package.json': {
+        language: 'json',
+        content: JSON.stringify({
+          name: 'html-import',
+          type: 'module',
+          dependencies: {}
+        }, null, 2)
+      }
+    };
+
+    await updateFiles(newFiles);
+    setViewMode('preview');
+
+    // Add message
+    setMessages(prev => [...prev,
+      { id: crypto.randomUUID(), role: 'assistant', content: `HTML importado desde "${fileName}". Puedes verlo en el preview.`, timestamp: new Date() }
+    ]);
+
+    toast.success(`HTML cargado: ${fileName}`);
+  }, [project, updateFiles]);
+
   return {
     // State
     project,
@@ -337,6 +365,7 @@ export default function App() {
     handleSendMessage,
     deleteProject,
     renameProject,
+    importHtml,
 
     // Setters
     setActiveFile,
