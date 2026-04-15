@@ -66,6 +66,7 @@ const ShareScreen  = lazy(() => import("./pages/ShareScreen"));
 const SystemStatus = lazy(() => import("./pages/SystemStatus"));
 const CodeIDE      = lazy(() => import("./pages/CodeIDE"));
 const Studio       = lazy(() => import("./pages/Studio"));
+const StudioLite   = lazy(() => import("./pages/StudioLite"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 
 // Delicias Colombianas
@@ -141,7 +142,7 @@ const App = () => {
 
                   {/* ── Redirects ── */}
                   <Route path="/canvas"  element={<CanvasRedirect />} />
-                  <Route path="/studio"  element={<Studio />} />
+                  <Route path="/studio"  element={<StudioLite />} />
                   <Route path="/genesis" element={<Navigate to="/chat"   replace />} />
 
                   {/* ── Platform routes (wrapped in AppLayout) ── */}
