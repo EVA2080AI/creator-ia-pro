@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, Sparkles, ChevronLeft, Code, Eye, Trash2 } from 'lucide-react';
+import { Send, Loader2, Sparkles, ChevronLeft, Code, Eye, Trash2, Terminal, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -62,8 +62,31 @@ export function StudioChatLite({
     setIsEditingName(false);
   };
 
-  return (
-    <div className="flex flex-col h-full bg-white">
+// Simple syntax highlighting for TypeScript/React
+function highlightCode(line: string): string {
+  let highlighted = line
+    // Escape HTML
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    // Keywords
+    .replace(/\b(import|export|from|return|function|const|let|var|if|else|for|while|switch|case|break|default|class|interface|type|extends|implements|async|await|new|this|typeof|as)\b/g, '<span class="text-[#c586c0]">$1</span>')
+    // React hooks and common functions
+    .replace(/\b(useState|useEffect|useCallback|useMemo|useRef|React|useNavigate|useSearchParams)\b/g, '<span class="text-[#4ec9b0]">$1</span>')
+    // JSX tags
+    .replace(/(&lt;\/?)([a-zA-Z][a-zA-Z0-9]*)/g, '$1<span class="text-[#569cd6]">$2</span>')
+    // Strings
+    .replace(/"([^"]*)"/g, '<span class="text-[#ce9178]">"$1"</span>')
+    .replace(/'([^']*)'/g, '<span class="text-[#ce9178]">\'$1\'</span>')
+    // Numbers
+    .replace(/\b(\d+)\b/g, '<span class="text-[#b5cea8]">$1</span>')
+    // Comments
+    .replace(/(\/\/.*$)/g, '<span class="text-[#6a9955]">$1</span>');
+
+  return highlighted;
+}
+
+export function StudioChatLite({
       {/* Header */}
       <div className="h-14 border-b border-zinc-100 flex items-center justify-between px-4 shrink-0">
         <div className="flex items-center gap-3">
@@ -164,28 +187,86 @@ export function StudioChatLite({
           </motion.div>
         ))}
 
-        {/* Streaming */}
-        {isGenerating && streamContent && (
+        {/* Generating Indicator */}
+        {isGenerating && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex justify-start gap-3"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-start"
           >
-            <div className="max-w-[85%] rounded-2xl px-4 py-3 text-sm bg-zinc-100 text-zinc-900">
-              <pre className="whitespace-pre-wrap font-mono text-xs overflow-x-auto">
-                {streamContent}
-              </pre>
+            <div className="flex items-center gap-3 bg-gradient-to-r from-zinc-900 to-zinc-800 text-white px-4 py-2.5 rounded-full shadow-lg shadow-zinc-900/20">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/30 rounded-full animate-ping" />
+                <div className="relative h-2 w-2 bg-primary rounded-full" />
+              </div>
+              <span className="text-xs font-medium">Genesis está creando...</span>
+              <Zap className="h-3 w-3 text-primary animate-pulse" />
             </div>
           </motion.div>
         )}
 
-        {isGenerating && !streamContent && (
-          <div className="flex justify-start gap-3">
-            <div className="bg-zinc-100 rounded-2xl px-4 py-3 flex items-center gap-2">
-              <Loader2 className="h-4 w-4 animate-spin text-zinc-500" />
-              <span className="text-xs text-zinc-500">Generando...</span>
+        {/* Code Streaming Display */}
+        {isGenerating && streamContent && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+            className="flex justify-start"
+          >
+            <div className="w-full max-w-[95%] bg-[#1e1e1e] rounded-xl overflow-hidden shadow-2xl border border-zinc-800">
+              {/* Window Header */}
+              <div className="flex items-center gap-2 px-3 py-2 bg-[#252526] border-b border-zinc-800">
+                <div className="flex gap-1.5">
+                  <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+                </div>
+                <div className="flex-1 flex items-center justify-center gap-2">
+                  <Terminal className="h-3 w-3 text-zinc-500" />
+                  <span className="text-[10px] text-zinc-500 font-mono">App.tsx</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="flex gap-0.5">
+                    {[0, 1, 2].map((i) => (
+                      <motion.div
+                        key={i}
+                        animate={{ opacity: [0.3, 1, 0.3] }}
+                        transition={{ duration: 1, repeat: Infinity, delay: i * 0.15 }}
+                        className="w-1 h-1 bg-zinc-500 rounded-full"
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Code Content */}
+              <div className="relative">
+                <pre className="p-4 text-xs font-mono leading-relaxed overflow-x-auto max-h-[400px] overflow-y-auto">
+                  <code className="text-zinc-300">
+                    {streamContent.split('\n').map((line, i) => (
+                      <div key={i} className="flex">
+                        <span className="text-zinc-600 select-none w-6 text-right mr-3 text-[10px]">
+                          {i + 1}
+                        </span>
+                        <span
+                          dangerouslySetInnerHTML={{
+                            __html: highlightCode(line)
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </code>
+                </pre>
+
+                {/* Cursor */}
+                <motion.span
+                  animate={{ opacity: [1, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity }}
+                  className="absolute bottom-4 right-4 h-4 w-0.5 bg-primary"
+                />
+              </div>
             </div>
-          </div>
+          </motion.div>
         )}
 
         <div ref={messagesEndRef} />
