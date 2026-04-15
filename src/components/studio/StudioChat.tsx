@@ -336,7 +336,16 @@ export function StudioChat({
 
       let assistantMsg: Message;
 
-      if ((shouldPlan || isArchitectMode) && result.isChatOnly && !result.blob) {
+      if (intent === 'reasoning') {
+        // Reasoning mode - always show as reasoning type
+        assistantMsg = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: result.explanation || result.text || 'Análisis completado.',
+          timestamp: new Date(),
+          type: 'reasoning'
+        };
+      } else if ((shouldPlan || isArchitectMode) && result.isChatOnly && !result.blob) {
         assistantMsg = { id: crypto.randomUUID(), role: 'assistant', content: result.explanation || result.text, timestamp: new Date(), type: 'plan', planStatus: 'pending', originalPrompt: text };
       } else if (result.isChatOnly) {
         const content = result.text || result.explanation;
@@ -566,12 +575,13 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
                 <span className="text-[11px] font-black text-zinc-400 uppercase tracking-widest italic">
                   {isAutoFixing ? 'Analizando error' : (
                     <>
-                      {genSpecialist === 'architect' && 'Planificando'}
-                      {genSpecialist === 'ux' && 'Diseñando'}
-                      {genSpecialist === 'frontend' && 'Compilando'}
-                      {genSpecialist === 'backend' && 'Orquestando'}
-                      {genSpecialist === 'engineer' && 'Refinando'}
-                      {(genSpecialist === 'none' || !genSpecialist) && 'Iniciando Núcleo'}
+                      {currentGenIntent === 'reasoning' && 'Razonando...'}
+                      {currentGenIntent !== 'reasoning' && genSpecialist === 'architect' && 'Planificando'}
+                      {currentGenIntent !== 'reasoning' && genSpecialist === 'ux' && 'Diseñando'}
+                      {currentGenIntent !== 'reasoning' && genSpecialist === 'frontend' && 'Compilando'}
+                      {currentGenIntent !== 'reasoning' && genSpecialist === 'backend' && 'Orquestando'}
+                      {currentGenIntent !== 'reasoning' && genSpecialist === 'engineer' && 'Refinando'}
+                      {currentGenIntent !== 'reasoning' && (genSpecialist === 'none' || !genSpecialist) && 'Iniciando Núcleo'}
                     </>
                   )}
                 </span>
@@ -642,7 +652,7 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
         </button>
       )}
 
-      <ChatInput 
+      <ChatInput
         input={input} setInput={setInput} isGenerating={isGenerating} onSend={handleSend} onStop={stopGeneration}
         selectedModel={selectedModel} onModelSelect={setSelectedModel} isArchitectMode={isArchitectMode} onArchitectToggle={() => setIsArchitectMode(!isArchitectMode)}
         pendingImage={pendingImage} onRemoveImage={() => setPendingImage(null)}
@@ -651,6 +661,22 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
         activeFile={activeFile || null}
         onAttachFile={(f) => {if(f.type.startsWith('image/')){const r=new FileReader();r.onload=(e)=>setPendingImage(e.target?.result as string);r.readAsDataURL(f);}else{const r=new FileReader();r.onload=(e)=>setPendingContext({name:f.name,content:e.target?.result as string});r.readAsText(f);}}}
         onAttachUrl={onAttachUrl} isScraping={isScraping}
+        onNewConversation={() => {
+          resetConversation();
+          setPendingImage(null);
+          setPendingUrl(null);
+          setPendingContext(null);
+          setInput('');
+          toast.success('Nueva conversación iniciada');
+        }}
+        projectFiles={projectFiles}
+        onMentionFile={(filename) => {
+          const file = projectFiles[filename];
+          if (file) {
+            setPendingContext({ name: filename, content: file.content });
+            toast.success(`@${filename} adjuntado`);
+          }
+        }}
       />
     </aside>
   );

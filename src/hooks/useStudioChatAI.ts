@@ -10,7 +10,7 @@ import {
   injectDependenciesIntoPackageJson,
   isResponseTruncated
 } from '@/components/studio/chat/utils';
-import { CODE_GEN_SYSTEM, GENESIS_CHAT_SYSTEM, IMAGE_TO_CODE_SYSTEM } from '@/prompts';
+import { CODE_GEN_SYSTEM, GENESIS_CHAT_SYSTEM, IMAGE_TO_CODE_SYSTEM, REASONING_SYSTEM_PROMPT } from '@/prompts';
 import type { AgentPhase, AgentSpecialist, CodeGenResult, Message, AgentPreference } from '@/components/studio/chat/types';
 
 export type { AgentPhase, AgentSpecialist };
@@ -47,7 +47,7 @@ export function useStudioChatAI({
   const [streamingContent, setStreamingContent] = useState<string | null>(null);
   const [genPhase, setGenPhase] = useState<AgentPhase>('idle');
   const [genSpecialist, setGenSpecialist] = useState<AgentSpecialist>('none');
-  const [currentGenIntent, setCurrentGenIntent] = useState<'codegen' | 'chat' | null>(null);
+  const [currentGenIntent, setCurrentGenIntent] = useState<'codegen' | 'chat' | 'reasoning' | null>(null);
 
   // Budget limits segun tier
   const isPro = subscriptionTier && subscriptionTier !== 'free';
@@ -110,7 +110,7 @@ export function useStudioChatAI({
 
     const hasImage = !!(options?.pendingImage);
     const intent = hasImage && !prompt.trim() ? 'codegen' : detectIntent(prompt);
-    setCurrentGenIntent(intent === 'chat' ? 'chat' : 'codegen');
+    setCurrentGenIntent(intent === 'chat' ? 'chat' : intent === 'reasoning' ? 'reasoning' : 'codegen');
 
     // Handle reset
     if (wantsProjectReset(prompt)) {
@@ -147,11 +147,14 @@ export function useStudioChatAI({
       };
     }
 
-    // HTML import
-    const isHtmlImport = intent === 'html-import' && (prompt.includes('<!DOCTYPE') || prompt.includes('<html'));
+    // HTML import - extract HTML content from prompt if it contains context markers
+    const htmlContentMatch = prompt.match(/\[CONTEXTO:.*?\]\n```(?:html)?\n([\s\S]*?)\n```/i);
+    const htmlContent = htmlContentMatch ? htmlContentMatch[1] : prompt;
+
+    const isHtmlImport = intent === 'html-import' && (htmlContent.includes('<!DOCTYPE') || htmlContent.includes('<html'));
     if (isHtmlImport) {
       const files: Record<string, StudioFile> = {
-        'index.html': { language: 'html', content: prompt }
+        'index.html': { language: 'html', content: htmlContent }
       };
       setIsGenerating(false);
       onGeneratingChange?.(false);
@@ -166,25 +169,40 @@ export function useStudioChatAI({
       };
     }
 
+    // Vanilla HTML mode - when user explicitly wants plain HTML
+    const wantsVanillaHtml = intent === 'vanilla-html' ||
+      (prompt.toLowerCase().includes('solo html') || prompt.toLowerCase().includes('sin react') ||
+       prompt.toLowerCase().includes('html puro') || prompt.toLowerCase().includes('vanilla html'));
+
+    if (wantsVanillaHtml && intent !== 'chat') {
+      // For vanilla HTML requests, we'll generate a single HTML file
+      // This is handled by the AI response, but we mark it for special processing
+      console.log('[useStudioChatAI] Vanilla HTML mode detected');
+    }
+
     try {
       const isChatMode = intent === 'chat';
+      const isReasoningMode = intent === 'reasoning';
       const projectContext = buildContext(projectFiles, activeFile);
 
       // Build system prompt
-      let systemPrompt = isChatMode
-        ? (persona === 'antigravity' ? GENESIS_CHAT_SYSTEM : CODE_GEN_SYSTEM)
-        : CODE_GEN_SYSTEM;
-
-      if (hasImage) {
+      let systemPrompt;
+      if (isReasoningMode) {
+        systemPrompt = REASONING_SYSTEM_PROMPT;
+      } else if (isChatMode) {
+        systemPrompt = persona === 'antigravity' ? GENESIS_CHAT_SYSTEM : CODE_GEN_SYSTEM;
+      } else if (hasImage) {
         systemPrompt = IMAGE_TO_CODE_SYSTEM;
+      } else {
+        systemPrompt = CODE_GEN_SYSTEM;
       }
 
-      // Add context for code generation
-      if (!isChatMode && projectContext) {
+      // Add context for code generation (but not for reasoning mode)
+      if (!isChatMode && !isReasoningMode && projectContext) {
         systemPrompt += `\n\n${projectContext}`;
       }
 
-      if (supabaseConfig) {
+      if (supabaseConfig && !isReasoningMode) {
         systemPrompt += `\n\nSupabase: URL=${supabaseConfig.url}`;
       }
 
@@ -197,9 +215,20 @@ export function useStudioChatAI({
         ];
       }
 
+      // Special instructions for vanilla HTML mode
+      if (wantsVanillaHtml && !isChatMode) {
+        systemPrompt += `
+
+IMPORTANTE: El usuario solicita HTML VANILLA (sin React).
+- Genera UN SOLO archivo index.html con HTML, CSS y JavaScript inline.
+- NO uses JSX, componentes de React, ni imports de React.
+- Usa HTML5 semántico, CSS en <style> y JavaScript en <script>.
+- El código debe funcionar al abrir el archivo directamente en un navegador.`;
+      }
+
       // Special instructions for landing pages
       if (intent === 'fullstack' || intent === 'codegen') {
-        if (prompt.toLowerCase().includes('landing')) {
+        if (prompt.toLowerCase().includes('landing') && !wantsVanillaHtml) {
           systemPrompt += '\n\nCREA UNA LANDING PAGE COMPLETA con Hero, Features, CTA y Footer.';
         }
       }
@@ -220,8 +249,8 @@ export function useStudioChatAI({
       }
 
       setGenPhase('streaming');
-      setGenSpecialist('frontend');
-      onPhaseChange?.('generating', 'frontend');
+      setGenSpecialist(isReasoningMode ? 'architect' : 'frontend');
+      onPhaseChange?.('generating', isReasoningMode ? 'architect' : 'frontend');
 
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
@@ -286,8 +315,8 @@ export function useStudioChatAI({
         }
       }
 
-      // Process response
-      const result = processRawResponse(accumulated, prompt, isChatMode);
+      // Process response - for reasoning mode, always treat as chat only
+      const result = processRawResponse(accumulated, prompt, isChatMode || isReasoningMode);
 
       // Check if response was truncated
       const wasTruncated = isResponseTruncated(accumulated);

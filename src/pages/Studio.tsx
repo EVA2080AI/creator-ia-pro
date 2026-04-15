@@ -89,6 +89,17 @@ export default function Studio() {
                 onFilesChange={genesis.handleFilesChange}
                 isGenerating={genesis.isGenerating}
                 streamPreview={genesis.streamPreview}
+                onFixFile={(filename) => {
+                  const file = genesis.activeProject?.files[filename];
+                  if (!file) return;
+                  const prompt = `[FIX FILE: ${filename}]\n\nPor favor analiza y corrige este archivo:\n\n\`\`\`${file.language || 'tsx'}\n${file.content}\n\`\`\`\n\nBusca posibles errores de sintaxis, imports rotos, o problemas de lógica. Devuelve el archivo completo corregido.`;
+                  genesis.setInput(prompt);
+                }}
+                onExplainCode={(code, filename) => {
+                  const prompt = `Explica este código de ${filename}:\n\n\`\`\`${genesis.activeProject?.files[filename]?.language || 'tsx'}\n${code}\n\`\`\`\n\nPor favor explica qué hace, cómo funciona y cualquier detalle importante.`;
+                  genesis.setInput(prompt);
+                  toast.success('Código cargado para explicación');
+                }}
               />
             </div>
           </div>

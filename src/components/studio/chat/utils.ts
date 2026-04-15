@@ -32,7 +32,7 @@ export function wantsVanillaHtml(text: string): boolean {
   return vanillaKeywords.some(k => p.includes(k));
 }
 
-export type ChatIntent = 'chat' | 'codegen' | 'fullstack' | 'vanilla-html' | 'html-import';
+export type ChatIntent = 'chat' | 'codegen' | 'fullstack' | 'vanilla-html' | 'html-import' | 'reasoning';
 
 export function detectIntent(prompt: string, _hasContext?: boolean): ChatIntent {
   let p = prompt.toLowerCase().trim();
@@ -40,6 +40,16 @@ export function detectIntent(prompt: string, _hasContext?: boolean): ChatIntent 
   // Normalization - common typos
   p = p.replace(/apagina/g, 'pagina').replace(/asuna/g, 'una')
        .replace(/hasme/g, 'hazme').replace(/has un/g, 'haz un').replace(/has una/g, 'haz una');
+
+  // Check for reasoning mode - user wants Genesis to think first
+  const REASONING_KEYWORDS = [
+    'piensa primero', 'razona antes', 'planifica antes', 'analiza antes',
+    'think first', 'reason first', 'plan first', 'analyze first',
+    'quiero que primero', 'quiero que analices', 'quiero que planifiques',
+    'dame un plan', 'dame una propuesta', 'cómo lo harías',
+    'que piensas', 'que opinas', 'cual seria el approach'
+  ];
+  if (REASONING_KEYWORDS.some(k => p.includes(k))) return 'reasoning';
 
   // Check for HTML imports
   if (containsHtml(prompt)) return 'html-import';
@@ -157,6 +167,15 @@ export function extractJson(text: string) {
   }
 }
 
+/** Check if project is vanilla HTML (no React) */
+export function isVanillaHtmlProject(files: Record<string, StudioFile>): boolean {
+  const keys = Object.keys(files);
+  const hasHtml = keys.some(k => k.endsWith('.html'));
+  const hasReact = keys.some(k => k.endsWith('.tsx') || k.endsWith('.jsx'));
+  // It's vanilla if has HTML but no React files
+  return hasHtml && !hasReact;
+}
+
 /** SIMPLIFIED: Process AI response */
 export function processRawResponse(rawText: string, prompt: string, isChatOnly: boolean) {
   if (!rawText) {
@@ -164,28 +183,39 @@ export function processRawResponse(rawText: string, prompt: string, isChatOnly: 
     return null;
   }
 
+  // Check for vanilla HTML request
+  const wantsVanilla = prompt.toLowerCase().includes('solo html') ||
+    prompt.toLowerCase().includes('sin react') ||
+    prompt.toLowerCase().includes('html puro') ||
+    prompt.toLowerCase().includes('vanilla html') ||
+    prompt.toLowerCase().includes('html básico') ||
+    prompt.toLowerCase().includes('html basico');
+
   // 1. Try JSON extraction first
   const extracted = extractJson(rawText);
   if (extracted?.files && Object.keys(extracted.files).length > 0) {
     const normalizedFiles: Record<string, StudioFile> = {};
     for (const [filename, value] of Object.entries(extracted.files)) {
       if (typeof value === 'string') {
-        const lang = filename.endsWith('.css') ? 'css' : filename.endsWith('.json') ? 'json' : 'tsx';
+        const lang = filename.endsWith('.css') ? 'css' : filename.endsWith('.json') ? 'json' : filename.endsWith('.html') ? 'html' : 'tsx';
         normalizedFiles[filename] = { language: lang, content: value };
       } else if (value && typeof value === 'object' && (value as any).content) {
         normalizedFiles[filename] = {
-          language: (value as any).language || (filename.endsWith('.css') ? 'css' : 'tsx'),
+          language: (value as any).language || (filename.endsWith('.css') ? 'css' : filename.endsWith('.html') ? 'html' : 'tsx'),
           content: (value as any).content
         };
       }
     }
     if (Object.keys(normalizedFiles).length > 0) {
+      const isVanilla = isVanillaHtmlProject(normalizedFiles);
       return {
         files: normalizedFiles,
         explanation: extracted.explanation || '',
-        tech_stack: extracted.tech_stack || [],
-        deps: detectDeps(normalizedFiles),
-        suggestions: buildSuggestions(extracted.tech_stack || [], prompt),
+        tech_stack: isVanilla ? ['HTML', 'CSS', 'JavaScript'] : (extracted.tech_stack || ['React', 'TypeScript', 'Tailwind']),
+        deps: isVanilla ? [] : detectDeps(normalizedFiles),
+        suggestions: isVanilla
+          ? ['Agregar CSS framework', 'Agregar interactividad JS', 'Convertir a React']
+          : buildSuggestions(extracted.tech_stack || ['React'], prompt),
         isChatOnly: false
       };
     }
@@ -197,15 +227,20 @@ export function processRawResponse(rawText: string, prompt: string, isChatOnly: 
     const firstBlock = rawText.indexOf('```');
     const explanation = firstBlock > 0 ? rawText.slice(0, firstBlock).trim() : 'Código generado.';
 
-    // Ensure we have essential files for a React project
-    const ensuredFiles = ensureEssentialFiles(mdFiles);
+    // Check if this is a vanilla HTML project
+    const isVanilla = wantsVanilla || isVanillaHtmlProject(mdFiles);
+
+    // Only ensure essential files for React projects
+    const ensuredFiles = isVanilla ? mdFiles : ensureEssentialFiles(mdFiles);
 
     return {
       files: ensuredFiles,
       explanation,
-      tech_stack: ['React', 'TypeScript', 'Tailwind'],
-      deps: detectDeps(ensuredFiles),
-      suggestions: buildSuggestions(['React'], prompt),
+      tech_stack: isVanilla ? ['HTML', 'CSS', 'JavaScript'] : ['React', 'TypeScript', 'Tailwind'],
+      deps: isVanilla ? [] : detectDeps(ensuredFiles),
+      suggestions: isVanilla
+        ? ['Agregar CSS framework', 'Agregar interactividad JS', 'Convertir a React']
+        : buildSuggestions(['React'], prompt),
       isChatOnly: false
     };
   }

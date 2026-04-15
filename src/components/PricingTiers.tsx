@@ -11,9 +11,9 @@ const PricingTiers = () => (
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {[
-          { name: 'Starter', price: '$0', features: ['1 Workspace', 'AI Básica', 'Comunidad'] },
-          { name: 'Pro', price: '$29', features: ['Workspaces Ilimitados', 'AI Avanzada', 'Soporte 24/7'], highlight: true },
-          { name: 'Enterprise', price: 'Custom', features: ['Seguridad Grado Militar', 'SLA Garantizado', 'Manager Dedicado'] },
+          { name: 'Free', price: '$0', description: '5 créditos', features: ['Genesis IDE básico', '5 créditos totales', 'Modelos estándar', 'Soporte comunitario'] },
+          { name: 'Pro', price: '$12', description: '200 créditos/mes', features: ['200 créditos/mes', 'Modelos avanzados', 'Exportación de código', 'Soporte prioritario'], highlight: true },
+          { name: 'Empresarial', price: 'Custom', description: 'Ilimitado', features: ['Créditos ilimitados', 'API privada', 'On-premise opcional', 'Account manager'] },
         ].map((plan, i) => (
           <motion.div 
             key={i}
@@ -24,6 +24,7 @@ const PricingTiers = () => (
               <div className="space-y-2">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">{plan.name}</p>
                 <h3 className="text-4xl font-black italic tracking-tighter">{plan.price}</h3>
+                <p className="text-[11px] text-zinc-500">{plan.description}</p>
               </div>
               <ul className="space-y-4">
                 {plan.features.map((f, idx) => (

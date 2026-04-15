@@ -1,21 +1,16 @@
 import { memo, useCallback, useState } from 'react';
-import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { MessageSquare, Trash2, Sparkles, Copy, Check, ChevronDown, Loader2 } from 'lucide-react';
+import { useReactFlow } from '@xyflow/react';
+import { MessageSquare, Copy, Check, ChevronDown, Loader2, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { NodeNextAction } from './NodeNextAction';
-
-
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+import BaseNode from './BaseNode';
 
 const NETWORKS = [
   { id: 'instagram', label: 'Instagram', emoji: '📸', maxChars: 2200 },
-  { id: 'tiktok',    label: 'TikTok',    emoji: '🎵', maxChars: 2200 },
-  { id: 'twitter',   label: 'X/Twitter', emoji: '🐦', maxChars: 280  },
-  { id: 'linkedin',  label: 'LinkedIn',  emoji: '💼', maxChars: 3000 },
-  { id: 'facebook',  label: 'Facebook',  emoji: '👥', maxChars: 63206},
+  { id: 'tiktok', label: 'TikTok', emoji: '🎵', maxChars: 2200 },
+  { id: 'twitter', label: 'X/Twitter', emoji: '🐦', maxChars: 280 },
+  { id: 'linkedin', label: 'LinkedIn', emoji: '💼', maxChars: 3000 },
+  { id: 'facebook', label: 'Facebook', emoji: '👥', maxChars: 63206 },
 ];
 
 const TONES = ['Viral 🔥', 'Profesional 💼', 'Casual 😊', 'Urgente ⚡', 'Inspirador ✨'];
@@ -27,7 +22,6 @@ interface CaptionNodeData {
   tone?: string;
   output?: string;
   status?: 'idle' | 'generating' | 'done' | 'error';
-  onAddConnected?: (sourceId: string, targetType: string) => void;
 }
 
 const CaptionNode = ({ id, data }: { id: string; data: CaptionNodeData }) => {
@@ -67,9 +61,13 @@ Máximo ${network.maxChars} caracteres.
 Incluye emojis relevantes, hashtags populares al final, y un call-to-action claro.
 Devuelve SOLO el caption, sin explicaciones.`;
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/ai-proxy`, {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'apikey': SUPABASE_ANON_KEY },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+        },
         body: JSON.stringify({
           provider: 'openrouter',
           path: 'chat/completions',
@@ -130,41 +128,37 @@ Devuelve SOLO el caption, sin explicaciones.`;
   const currentNetwork = NETWORKS.find(n => n.id === (data.network || 'instagram')) || NETWORKS[0];
   const displayText = streamedText || data.output || '';
 
-  return (
-    <div className="group relative rounded-[2rem] overflow-hidden bg-white/90 backdrop-blur-xl border border-zinc-200/60 hover:border-zinc-300 hover:bg-white transition-all w-[280px] shadow-sm hover:shadow-xl duration-500">
-      {/* Header */}
-      <div className="flex h-12 items-center justify-between px-5 border-b border-zinc-100/80 bg-zinc-50/40">
-        <div className="flex items-center gap-2.5">
-          <div className="p-1.5 rounded-xl bg-emerald-50 border border-emerald-100">
-            <MessageSquare className="w-4 h-4 text-emerald-500" />
-          </div>
-          <h3 className="text-[10px] font-bold text-zinc-900 tracking-[0.15em] font-sans uppercase">
-            {data.title || 'Caption IA'}
-          </h3>
-        </div>
-        <button onClick={deleteNode} className="p-2 hover:bg-red-50 text-zinc-400 hover:text-red-500 rounded-lg transition-all">
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
+  const status: 'idle' | 'generating' | 'done' | 'error' | 'running' = data.status || 'idle';
 
-      {/* Body */}
-      <div className="p-4 space-y-3 bg-white">
+  return (
+    <BaseNode
+      nodeId={id}
+      type="captionNode"
+      title={data.title || 'Caption IA'}
+      status={status}
+      onDelete={deleteNode}
+      onExecute={handleGenerate}
+      minWidth="300px"
+      outputData={data.output}
+      outputType="text"
+    >
+      <div className="space-y-3">
         {/* Network selector */}
         <div className="relative">
           <button
             onClick={() => setNetworkOpen(!networkOpen)}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white border border-zinc-200 shadow-sm text-[10px] text-zinc-600 hover:border-emerald-300 transition-all font-medium"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white border border-zinc-200 shadow-sm text-[11px] text-zinc-700 hover:border-amber-300 transition-all"
           >
-            <span>{currentNetwork.emoji} {currentNetwork.label}</span>
-            <ChevronDown className={`w-3 h-3 transition-transform ${networkOpen ? 'rotate-180' : ''}`} />
+            <span className="font-medium">{currentNetwork.emoji} {currentNetwork.label}</span>
+            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${networkOpen ? 'rotate-180' : ''}`} />
           </button>
           {networkOpen && (
             <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-zinc-200 overflow-hidden z-50 bg-white shadow-lg">
               {NETWORKS.map(n => (
                 <button key={n.id} onClick={() => { update({ network: n.id }); setNetworkOpen(false); }}
-                  className="w-full px-3 py-2 text-left text-[10px] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-all flex items-center justify-between">
+                  className="w-full px-3 py-2.5 text-left text-[11px] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-all flex items-center justify-between">
                   <span>{n.emoji} {n.label}</span>
-                  <span className="text-zinc-400 text-[9px]">{n.maxChars < 1000 ? `${n.maxChars} chars` : ''}</span>
+                  <span className="text-zinc-400 text-[10px]">{n.maxChars < 1000 ? `${n.maxChars} chars` : ''}</span>
                 </button>
               ))}
             </div>
@@ -175,11 +169,11 @@ Devuelve SOLO el caption, sin explicaciones.`;
         <div className="flex flex-wrap gap-1">
           {TONES.map(t => (
             <button key={t} onClick={() => update({ tone: t })}
-              className="px-2 py-1 rounded-lg text-[9px] font-semibold transition-all"
-              style={data.tone === t || (!data.tone && t === TONES[0])
-                ? { background: 'var(--emerald-50, #ecfdf5)', border: '1px solid var(--emerald-200, #a7f3d0)', color: 'var(--emerald-600, #059669)' }
-                : { background: '#ffffff', border: '1px solid #e4e4e7', color: '#71717a' }
-              }>
+              className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium transition-all ${
+                data.tone === t || (!data.tone && t === TONES[0])
+                  ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                  : 'bg-zinc-50 text-zinc-600 border border-zinc-200 hover:bg-zinc-100'
+              }`}>
               {t}
             </button>
           ))}
@@ -191,48 +185,22 @@ Devuelve SOLO el caption, sin explicaciones.`;
           onChange={e => update({ topic: e.target.value })}
           onKeyDown={e => e.stopPropagation()}
           placeholder="Tema del caption (ej: nuevo producto, oferta, lifestyle…)"
-          className="w-full text-xs leading-relaxed text-zinc-900 bg-white border shadow-sm border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/10 transition-all resize-none min-h-[48px] placeholder:text-zinc-400"
+          className="w-full text-xs leading-relaxed text-zinc-900 bg-zinc-50 border border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/10 transition-all resize-none min-h-[56px] placeholder:text-zinc-400"
         />
-
-        {/* Output */}
-        {displayText && (
-          <div className="relative rounded-xl bg-zinc-50 border border-zinc-200 shadow-sm p-3 max-h-[100px] overflow-y-auto">
-            <p className="text-[10px] leading-relaxed whitespace-pre-wrap pr-5"
-               style={{ color: isGenerating ? 'var(--emerald-600, #059669)' : '#52525b' }}>
-              {displayText}{isGenerating ? <span className="animate-pulse">|</span> : null}
-            </p>
-            {!isGenerating && (
-              <button onClick={handleCopy} className="absolute top-2 right-2 p-1 rounded-lg text-zinc-400 hover:text-zinc-700 transition-all hover:bg-white border border-transparent hover:border-zinc-200 shadow-sm">
-                {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-              </button>
-            )}
-          </div>
-        )}
 
         {/* Generate button */}
         <button
           onClick={handleGenerate}
           disabled={isGenerating}
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-emerald-500 shadow-md text-white text-[11px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all active:scale-95 disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-amber-500 text-white text-[12px] font-bold uppercase tracking-wider hover:bg-amber-600 shadow-md transition-all active:scale-95 disabled:opacity-50"
         >
           {isGenerating
-            ? <><Loader2 className="w-3.5 h-3.5 animate-spin" />Generando…</>
-            : <><Sparkles className="w-3.5 h-3.5" />Generar Caption</>
+            ? <><Loader2 className="w-4 h-4 animate-spin" />Generando...</>
+            : <><Sparkles className="w-4 h-4" />Generar Caption</>
           }
         </button>
-
-        {/* Port labels */}
-        <div className="flex items-center justify-between text-[9px] text-zinc-400 uppercase tracking-widest font-sans">
-          <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block shadow-sm" />Contexto</span>
-          <span className="flex items-center gap-1">Copy salida<span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shadow-sm" /></span>
-        </div>
       </div>
-
-      <Handle type="target" position={Position.Left} id="text-in" className="!w-4 !h-4 !-left-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
-      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
-      <NodeNextAction nodeId={id} />
-    </div>
-
+    </BaseNode>
   );
 };
 

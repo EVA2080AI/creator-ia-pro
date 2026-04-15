@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Mic, ArrowUp, X, Globe, Link2, FileCode2, Paperclip, Shield, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -25,6 +25,9 @@ interface ChatInputProps {
   onAttachFile: (file: File) => void;
   onAttachUrl: (url: string) => Promise<void>;
   isScraping: boolean;
+  onNewConversation?: () => void;
+  projectFiles?: Record<string, { content: string; language?: string }>;
+  onMentionFile?: (filename: string) => void;
 }
 
 export function ChatInput({
@@ -46,7 +49,10 @@ export function ChatInput({
   activeFile,
   onAttachFile,
   onAttachUrl,
-  isScraping
+  isScraping,
+  onNewConversation,
+  projectFiles,
+  onMentionFile
 }: ChatInputProps) {
   const [isPlusMenuOpen, setIsPlusMenuOpen] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
@@ -55,12 +61,35 @@ export function ChatInput({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const [showFileMentions, setShowFileMentions] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState('');
+  const [cursorPosition, setCursorPosition] = useState(0);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInput(e.target.value);
+    const newValue = e.target.value;
+    setInput(newValue);
     const ta = e.target;
     ta.style.height = 'auto';
     ta.style.height = Math.min(ta.scrollHeight, 280) + 'px';
+
+    // Check for @ mention
+    const cursorPos = ta.selectionStart;
+    setCursorPosition(cursorPos);
+    const textBeforeCursor = newValue.slice(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex !== -1 && lastAtIndex === cursorPos - 1) {
+      // User just typed @
+      setShowFileMentions(true);
+      setMentionQuery('');
+    } else if (lastAtIndex !== -1 && !textBeforeCursor.slice(lastAtIndex).includes(' ')) {
+      // User is typing after @
+      setMentionQuery(textBeforeCursor.slice(lastAtIndex + 1));
+      setShowFileMentions(true);
+    } else {
+      setShowFileMentions(false);
+      setMentionQuery('');
+    }
   };
 
   const toggleListening = () => {
@@ -89,11 +118,32 @@ export function ChatInput({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Cmd/Ctrl + Enter = Send
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      if (input.trim() || pendingImage || pendingUrl || pendingContext) onSend();
+      return;
+    }
+    // Regular Enter (without shift) = Send
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       if (input.trim() || pendingImage || pendingUrl || pendingContext) onSend();
     }
   };
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + K = New conversation
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        onNewConversation?.();
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [onNewConversation]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -304,21 +354,72 @@ export function ChatInput({
               </AnimatePresence>
             </div>
 
-            {/* Textarea */}
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={handleInputChange}
-              onKeyDown={handleKeyDown}
-              placeholder={
-                isArchitectMode
-                  ? "Describe la arquitectura a planificar..."
-                  : "Describe lo que quieres construir..."
-              }
-              className="flex-1 bg-transparent py-2.5 px-1 text-[14px] font-medium text-zinc-900 outline-none resize-none min-h-[44px] max-h-[280px] placeholder:text-zinc-400/80 leading-relaxed selection:bg-primary/20 custom-scrollbar block mb-0"
-              disabled={isGenerating}
-              rows={1}
-            />
+            {/* Textarea with @ mentions */}
+            <div className="flex-1 relative">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder={
+                  isArchitectMode
+                    ? "Describe la arquitectura a planificar..."
+                    : "Describe lo que quieres construir..."
+                }
+                className="w-full bg-transparent py-2.5 px-1 text-[14px] font-medium text-zinc-900 outline-none resize-none min-h-[44px] max-h-[280px] placeholder:text-zinc-400/80 leading-relaxed selection:bg-primary/20 custom-scrollbar block mb-0"
+                disabled={isGenerating}
+                rows={1}
+              />
+
+              {/* File Mention Menu */}
+              <AnimatePresence>
+                {showFileMentions && projectFiles && Object.keys(projectFiles).length > 0 && (
+                  <>
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.96, y: 8 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.96, y: 8 }}
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.25 }}
+                      className="absolute left-0 bottom-full mb-2 w-64 max-h-60 rounded-xl bg-white border border-zinc-200 shadow-xl z-50 overflow-hidden"
+                    >
+                      <div className="px-3 py-2 border-b border-zinc-100 bg-zinc-50">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Archivos</span>
+                      </div>
+                      <div className="overflow-y-auto max-h-48 custom-scrollbar">
+                        {Object.keys(projectFiles)
+                          .filter(f => f.toLowerCase().includes(mentionQuery.toLowerCase()))
+                          .slice(0, 5)
+                          .map((filename) => (
+                            <button
+                              key={filename}
+                              onClick={() => {
+                                const beforeAt = input.slice(0, input.lastIndexOf('@', cursorPosition));
+                                const afterQuery = input.slice(cursorPosition);
+                                const newInput = beforeAt + '@' + filename + ' ' + afterQuery;
+                                setInput(newInput);
+                                setShowFileMentions(false);
+                                onMentionFile?.(filename);
+                                inputRef.current?.focus();
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-2.5 text-left hover:bg-zinc-50 transition-colors border-b border-zinc-50 last:border-0"
+                            >
+                              <FileCode2 className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                              <span className="text-[12px] font-medium text-zinc-700 truncate">{filename}</span>
+                            </button>
+                          ))}
+                      </div>
+                      <div className="px-3 py-1.5 border-t border-zinc-100 bg-zinc-50">
+                        <span className="text-[9px] text-zinc-400">Escribe para filtrar archivos</span>
+                      </div>
+                    </motion.div>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowFileMentions(false)}
+                    />
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Right action buttons */}
             <div className="flex items-center gap-1.5 shrink-0 self-end mb-1">
@@ -404,8 +505,12 @@ export function ChatInput({
         </motion.div>
 
         {/* Hint */}
-        <p className="text-center text-[10px] text-zinc-400 mt-2 font-medium">
-          Enter para enviar · Shift+Enter para nueva línea
+        <p className="text-center text-[10px] text-zinc-400 mt-2 font-medium flex items-center justify-center gap-2">
+          <span>Cmd+Enter para enviar</span>
+          <span>·</span>
+          <span>Shift+Enter nueva línea</span>
+          <span>·</span>
+          <span>Cmd+K nueva conversación</span>
         </p>
       </div>
 

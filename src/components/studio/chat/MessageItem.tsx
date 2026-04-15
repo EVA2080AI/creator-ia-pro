@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Sparkles, Shield, CheckCircle2, Copy, Check, RotateCcw,
-  Download, Cpu, ChevronDown, FileCode2, Package, Lightbulb, XCircle
+  Download, Cpu, ChevronDown, FileCode2, Package, Lightbulb, XCircle, Brain
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { renderMarkdown } from './renderer';
@@ -159,6 +159,12 @@ export function MessageItem({
             <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 border border-amber-200 text-[9px] font-bold text-amber-600 uppercase tracking-wider">
               <Shield className="h-2.5 w-2.5" />
               Plan
+            </span>
+          )}
+          {msg.type === 'reasoning' && (
+            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-violet-50 border border-violet-200 text-[9px] font-bold text-violet-600 uppercase tracking-wider">
+              <Brain className="h-2.5 w-2.5" />
+              Razonando
             </span>
           )}
         </header>

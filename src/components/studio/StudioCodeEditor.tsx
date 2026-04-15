@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Circle, Save, Code, CheckCircle2 } from 'lucide-react';
+import { X, Circle, Save, Code, CheckCircle2, Wand2, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 
@@ -9,6 +9,8 @@ interface StudioCodeEditorProps {
   onFilesChange: (files: Record<string, StudioFile>) => void;
   isGenerating?: boolean;
   streamPreview?: string;
+  onFixFile?: (filename: string) => void;
+  onExplainCode?: (code: string, filename: string) => void;
 }
 
 const KEYWORDS = ['import','from','export','default','const','let','var','return','function',
@@ -52,13 +54,14 @@ function highlightLine(line: string): React.ReactNode[] {
   return tokens;
 }
 
-export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, isGenerating, streamPreview }: StudioCodeEditorProps) {
+export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, isGenerating, streamPreview, onFixFile, onExplainCode }: StudioCodeEditorProps) {
   const fileNames = Object.keys(projectFiles);
   const [openTabs, setOpenTabs] = useState<string[]>(() => fileNames.slice(0, 3));
   const [activeTab, setActiveTab] = useState(() => selectedFile || fileNames[0] || '');
   const [isEditing, setIsEditing] = useState(false);
   const [modified, setModified] = useState<Set<string>>(new Set());
   const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
+  const [selectedText, setSelectedText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
 
@@ -211,7 +214,7 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
             value={file.content}
             onChange={handleContentChange}
             onKeyDown={handleKeyDown}
-            onBlur={() => setIsEditing(false)}
+            onBlur={() => { setIsEditing(false); setSelectedText(''); }}
             onScroll={syncScroll}
             onSelect={(e) => {
               const ta = e.currentTarget;
@@ -219,6 +222,17 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
               const lineNum = text.split('\n').length;
               const col = ta.selectionStart - text.lastIndexOf('\n');
               setCursorPos({ line: lineNum, col });
+
+              // Capture selected text
+              const selection = ta.value.substring(ta.selectionStart, ta.selectionEnd);
+              setSelectedText(selection);
+            }}
+            onMouseUp={() => {
+              const ta = textareaRef.current;
+              if (ta) {
+                const selection = ta.value.substring(ta.selectionStart, ta.selectionEnd);
+                setSelectedText(selection);
+              }
             }}
             className="flex-1 resize-none bg-transparent p-4 font-mono text-[12px] leading-6 text-foreground/80 outline-none caret-primary custom-scrollbar selection:bg-primary/20"
             spellCheck={false}
@@ -226,6 +240,22 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
           />
         )}
       </div>
+
+      {/* Explain Code Button - Shows when text is selected */}
+      {isEditing && selectedText && onExplainCode && (
+        <div className="absolute bottom-20 right-6 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <button
+            onClick={() => {
+              onExplainCode(selectedText, resolvedTab);
+              setSelectedText('');
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white text-[11px] font-semibold rounded-xl shadow-xl hover:bg-zinc-800 transition-all active:scale-95"
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>Explicar código</span>
+          </button>
+        </div>
+      )}
 
       {/* Status bar (GitHub Style) */}
       <div className="flex items-center justify-between border-t border-border bg-white px-4 py-1 text-[10px] text-zinc-500 font-mono shrink-0">
@@ -240,6 +270,17 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
               <Circle className="w-1.5 h-1.5 fill-current" />
               <span>Unsaved changes</span>
             </div>
+          )}
+          {onFixFile && (
+            <button
+              onClick={() => onFixFile(resolvedTab)}
+              disabled={isGenerating}
+              className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-50"
+              title="Corregir errores con IA"
+            >
+              <Wand2 className="w-3 h-3" />
+              <span>Fix with AI</span>
+            </button>
           )}
         </div>
         <div className="flex items-center gap-3">

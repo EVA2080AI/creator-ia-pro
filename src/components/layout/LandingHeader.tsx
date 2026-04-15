@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Menu, X, Sparkles, Code2, Image, 
-  CreditCard, BookOpen, ArrowRight, type LucideIcon 
+import {
+  Menu, X, Sparkles, Code2, Image,
+  CreditCard, BookOpen, ArrowRight, Layers, type LucideIcon
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ interface NavLink {
   path: string;
   icon: LucideIcon;
   external?: boolean;
+  badge?: string;
 }
 
 export function LandingHeader(): React.ReactElement {
@@ -31,6 +32,7 @@ export function LandingHeader(): React.ReactElement {
   const NAV_LINKS: NavLink[] = [
     { name: "Neural Architect", path: "/chat", icon: Code2 },
     { name: "Genesis Studio", path: "/studio", icon: Image },
+    { name: "Canvas IA", path: "/canvas", icon: Layers, badge: "Nuevo" },
     { name: "Computo", path: "/pricing", icon: CreditCard },
     { name: "Operaciones", path: "/documentation", icon: BookOpen },
   ];
@@ -56,7 +58,7 @@ export function LandingHeader(): React.ReactElement {
               const Icon = link.icon;
               if (link.external) {
                 return (
-                  <a 
+                  <a
                     key={link.name}
                     href={link.path}
                     target="_blank"
@@ -65,17 +67,27 @@ export function LandingHeader(): React.ReactElement {
                   >
                     <Icon className="h-4 w-4 opacity-40 group-hover-link:opacity-100 group-hover-link:animate-pulse" />
                     {link.name}
+                    {link.badge && (
+                      <span className="px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-black uppercase">
+                        {link.badge}
+                      </span>
+                    )}
                   </a>
                 );
               }
               return (
-                <Link 
+                <Link
                   key={link.name}
                   to={link.path}
                   className="text-[13px] font-bold text-zinc-500 hover:text-primary transition-colors flex items-center gap-2 group-link"
                 >
                   <Icon className="h-4 w-4 opacity-40 group-hover-link:opacity-100 group-hover-link:animate-pulse" />
                   {link.name}
+                  {link.badge && (
+                    <span className="px-1.5 py-0.5 rounded-full bg-primary/10 text-primary text-[9px] font-black uppercase">
+                      {link.badge}
+                    </span>
+                  )}
                 </Link>
               );
             })}

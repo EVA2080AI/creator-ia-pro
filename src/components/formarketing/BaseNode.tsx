@@ -1,6 +1,6 @@
 import { memo, ReactNode, useState } from 'react';
 import { Position, useReactFlow } from '@xyflow/react';
-import { Trash2, Play, Loader2, AlertCircle, PlayCircle, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Trash2, Play, Loader2, AlertCircle, PlayCircle, ArrowRight, ArrowLeft, Eye, Database } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -11,6 +11,7 @@ import {
 import { toast } from 'sonner';
 import { NODE_META, DATA_TYPE_COLORS, DataType } from './nodeConnections';
 import { NodeHandles } from './NodeHandles';
+import NodeDataPreview from './NodeDataPreview';
 
 interface BaseNodeProps {
   nodeId: string;
@@ -22,6 +23,8 @@ interface BaseNodeProps {
   onExecute?: () => void;
   children: ReactNode;
   minWidth?: string;
+  outputData?: any;
+  outputType?: 'text' | 'image' | 'json' | 'any';
 }
 
 interface NodeDataWithContext extends Record<string, unknown> {
@@ -39,14 +42,18 @@ const BaseNode = memo(({
   onDelete,
   onExecute,
   children,
-  minWidth = '280px'
+  minWidth = '280px',
+  outputData,
+  outputType = 'any'
 }: BaseNodeProps) => {
   const { getNode } = useReactFlow();
   const [isUpstreamExecuting, setIsUpstreamExecuting] = useState(false);
+  const [showPreview, setShowPreview] = useState(true);
   const meta = NODE_META[type];
   const isExecuting = status === 'executing' || status === 'running';
   const isError = status === 'error';
   const isReady = status === 'ready' || status === 'done';
+  const hasOutput = outputData && (isReady || status === 'done');
 
   // Get executeUpstream from node data context
   const node = getNode(nodeId);
@@ -158,6 +165,34 @@ const BaseNode = memo(({
       <div className="relative p-4">
         {children}
       </div>
+
+      {/* Data Preview Section - Shows when node has output */}
+      {hasOutput && (
+        <div className="px-4 pb-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-1.5">
+              <Database className="w-3 h-3 text-emerald-500" />
+              <span className="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider">
+                Output
+              </span>
+            </div>
+            <button
+              onClick={() => setShowPreview(!showPreview)}
+              className="flex items-center gap-1 text-[9px] text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              <Eye className="w-3 h-3" />
+              {showPreview ? 'Ocultar' : 'Ver'}
+            </button>
+          </div>
+          {showPreview && (
+            <NodeDataPreview
+              data={outputData}
+              type={outputType}
+              maxLength={150}
+            />
+          )}
+        </div>
+      )}
 
       {/* Connection indicators footer */}
       <div className="px-4 py-2 bg-zinc-50/80 border-t border-zinc-100 flex items-center justify-between text-[10px] text-zinc-400">

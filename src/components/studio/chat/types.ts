@@ -27,7 +27,7 @@ export interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
-  type?: 'chat' | 'code' | 'plan';
+  type?: 'chat' | 'code' | 'plan' | 'reasoning';
   files?: string[];
   imagePreview?: string;
   stack?: string[];
