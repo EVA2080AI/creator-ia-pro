@@ -145,6 +145,10 @@ if (root) {
 
     deps.forEach(dep => {
       dependencies[dep] = 'latest';
+      // Agregar react-is automáticamente si se usa recharts
+      if (dep === 'recharts') {
+        dependencies['react-is'] = '^18.0.0';
+      }
     });
 
     result['/package.json'] = {

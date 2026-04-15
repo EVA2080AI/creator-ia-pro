@@ -144,18 +144,29 @@ export function useGenesisLite(projectId?: string | null) {
 
       const systemPrompt = `Eres Genesis AI. Genera código React + TypeScript + Tailwind CSS.
 
-REGLAS:
-1. Genera TODO el código en UN SOLO ARCHIVO App.tsx
-2. Usa Lucide React para iconos
-3. Código completo, funcional, sin placeholders
-4. Responde SOLO con el bloque de código, sin explicaciones
+REGLAS CRÍTICAS:
+1. Para dashboards/proyectos COMPLETOS: genera TODO en UN SOLO ARCHIVO App.tsx (componentes inline)
+2. Para componentes SIMPLES: un solo archivo es suficiente
+3. Si necesitas recharts: incluye 'import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts"'
+4. Usa Lucide React para iconos: import { IconName } from 'lucide-react'
+5. Código COMPLETO, FUNCIONAL, sin placeholders
+6. Responde SOLO con el bloque de código
 
-Ejemplo de formato:
+DEPENDENCIAS (se instalan automáticamente):
+- recharts → incluye react-is automáticamente
+- lucide-react → para iconos
+- framer-motion → para animaciones
+
+Ejemplo:
 \`\`\`tsx
+import React from 'react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
+import { TrendingUp, Users } from 'lucide-react';
+
 export default function App() {
   return (
-    <div className="min-h-screen bg-zinc-50 p-8">
-      <h1 className="text-3xl font-bold">Hola</h1>
+    <div className="min-h-screen bg-zinc-900 p-8">
+      <h1 className="text-3xl font-bold text-white">Dashboard</h1>
     </div>
   );
 }
@@ -179,7 +190,7 @@ export default function App() {
             ],
             stream: true,
             temperature: 0.3,
-            max_tokens: 8000
+            max_tokens: 12000
           }
         })
       });
@@ -219,10 +230,38 @@ export default function App() {
       const codeMatch = accumulated.match(/```(?:tsx?)?\n?([\s\S]*?)```/);
       if (codeMatch) {
         const code = codeMatch[1].trim();
+
+        // Detect dependencies from imports
+        const deps = new Set<string>(['react', 'react-dom', 'lucide-react']);
+        if (code.includes('recharts')) {
+          deps.add('recharts');
+          deps.add('react-is'); // Required by recharts
+        }
+        if (code.includes('framer-motion')) deps.add('framer-motion');
+        if (code.includes('date-fns')) deps.add('date-fns');
+        if (code.includes('clsx') || code.includes('tailwind-merge')) {
+          deps.add('clsx');
+          deps.add('tailwind-merge');
+        }
+
+        // Build package.json
+        const dependencies: Record<string, string> = {};
+        deps.forEach(dep => {
+          dependencies[dep] = dep === 'react-is' ? '^18.0.0' : 'latest';
+        });
+
+        const pkgJson = {
+          name: 'genesis-project',
+          type: 'module',
+          dependencies
+        };
+
         const newFiles = {
           ...project.files,
-          'App.tsx': { language: 'tsx', content: code }
+          'App.tsx': { language: 'tsx', content: code },
+          'package.json': { language: 'json', content: JSON.stringify(pkgJson, null, 2) }
         };
+
         await updateFiles(newFiles);
         setActiveFile('App.tsx');
         setViewMode('preview');
@@ -230,7 +269,7 @@ export default function App() {
         // Add message
         setMessages(prev => [...prev,
           { id: crypto.randomUUID(), role: 'user', content: prompt, timestamp: new Date() },
-          { id: crypto.randomUUID(), role: 'assistant', content: 'Código generado.', timestamp: new Date() }
+          { id: crypto.randomUUID(), role: 'assistant', content: `Código generado. Dependencias: ${Array.from(deps).join(', ')}`, timestamp: new Date() }
         ]);
 
         return { code, files: newFiles };
