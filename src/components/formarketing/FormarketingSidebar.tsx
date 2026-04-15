@@ -3,8 +3,9 @@ import { useReactFlow } from '@xyflow/react';
 import {
   Search, LayoutGrid, Image, Video,
   Type, Sparkles, Upload,
-  X, Play, Hand, Scissors, Square, MessageSquare, Undo, Redo, Settings, Share2, Rocket,
-  Braces, Brain, Download, FileOutput, ChevronDown,
+  X, Hand, MessageSquare, Settings, Share2, Rocket,
+  Braces, Brain, FileOutput, ChevronDown,
+  Text, Wand2, Download, Layers, ChevronRight
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -16,66 +17,47 @@ import {
 } from "@/components/ui/tooltip";
 import { TemplateModal } from './TemplateModal';
 import { type Template } from '@/lib/templates';
+import { NODE_META, getNodesByCategory } from './nodeConnections';
 
-interface NodeDef {
-  label: string;
-  icon: React.ElementType;
-  type: string;
-  color: string;
-  description: string;
+interface FormarketingSidebarProps {
+  onAddNode: (type: string, label: string, assetUrl?: string) => void;
 }
 
-interface Category {
-  id: string;
-  label: string;
-  nodes: NodeDef[];
-}
+// Map node types to icons
+const NODE_ICONS: Record<string, React.ElementType> = {
+  textInput: Type,
+  characterBreakdown: Braces,
+  promptBuilder: Wand2,
+  llmNode: Brain,
+  modelView: Image,
+  videoModel: Video,
+  captionNode: MessageSquare,
+  layoutBuilder: LayoutGrid,
+  campaignManager: Share2,
+  exportNode: FileOutput,
+  antigravityBridge: Rocket,
+};
 
-const CATEGORIES: Category[] = [
-  {
-    id: 'entrada',
-    label: 'Entrada',
-    nodes: [
-      { label: 'Texto libre',     icon: Type,          type: 'textInput',          color: '#facc15', description: 'Entrada de texto libre' },
-      { label: 'Personaje',       icon: Braces,         type: 'characterBreakdown', color: '#a78bfa', description: 'Identidad de persona / marca' },
-      { label: 'Prompt Builder',  icon: Braces,         type: 'promptBuilder',      color: '#fb923c', description: 'Prompts con variables {{var}}' },
-    ],
-  },
-  {
-    id: 'ia',
-    label: 'IA Generativa',
-    nodes: [
-      { label: 'LLM · Texto IA',  icon: Brain,          type: 'llmNode',            color: '#60a5fa', description: 'Genera texto con modelos de IA' },
-      { label: 'Imagen IA',       icon: Image,          type: 'modelView',          color: '#8AB4F8', description: 'Imágenes con modelos de difusión' },
-      { label: 'Video IA',        icon: Video,          type: 'videoModel',         color: '#f472b6', description: 'Videos generados con IA' },
-      { label: 'Caption IA',      icon: MessageSquare,  type: 'captionNode',        color: '#34d399', description: 'Captions para redes sociales' },
-    ],
-  },
-  {
-    id: 'flujo',
-    label: 'Flujo & Distribución',
-    nodes: [
-      { label: 'Layout Builder',  icon: LayoutGrid,     type: 'layoutBuilder',      color: 'rgba(255,255,255,0.5)', description: 'Estructura visual del diseño' },
-      { label: 'Campaign Mgr',    icon: Share2,         type: 'campaignManager',    color: '#f87171', description: 'Distribución omnicanal' },
-      { label: 'Exportar',        icon: FileOutput,     type: 'exportNode',         color: '#34d399', description: 'Exporta resultados del flujo' },
-      { label: 'Conector',        icon: Rocket,         type: 'antigravityBridge',  color: 'rgba(255,255,255,0.6)', description: 'Sincroniza módulos' },
-    ],
-  },
-];
+// Category labels
+const CATEGORY_LABELS: Record<string, { label: string; emoji: string; description: string }> = {
+  input: { label: 'Entrada de Datos', emoji: '📝', description: 'Fuentes de texto, contexto y prompts' },
+  process: { label: 'Procesamiento IA', emoji: '🤖', description: 'Transforman datos usando IA' },
+  output: { label: 'Salida', emoji: '📤', description: 'Exportación y distribución final' },
+  bridge: { label: 'Conectores', emoji: '🔗', description: 'Integración con sistemas externos' },
+};
 
-export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, label: string, assetUrl?: string) => void }) {
+export function FormarketingSidebar({ onAddNode }: FormarketingSidebarProps) {
   const [search, setSearch] = useState('');
   const [menuOpen, setMenuOpen] = useState(true);
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({ output: true, bridge: true });
   const [templateOpen, setTemplateOpen] = useState(false);
 
-  // Global listener to open templates from the top toolbar
+  // Global listener to open templates
   useEffect(() => {
     const handleOpen = () => setTemplateOpen(true);
     window.addEventListener('open-template-modal', handleOpen);
     return () => window.removeEventListener('open-template-modal', handleOpen);
   }, []);
-
 
   const handleFileUpload = () => {
     const input = document.createElement('input');
@@ -85,7 +67,9 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
       const file = e.target.files?.[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = () => { onAddNode('modelView', 'imagen_subida', reader.result as string); };
+        reader.onload = () => {
+          onAddNode('modelView', 'imagen_subida', reader.result as string);
+        };
         reader.readAsDataURL(file);
       }
     };
@@ -97,7 +81,6 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
     window.dispatchEvent(new CustomEvent('add-template', { detail: template }));
   };
 
-
   const onDragStart = (event: React.DragEvent, nodeType: string, label: string) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
     event.dataTransfer.setData('application/label', label);
@@ -107,34 +90,43 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
   const toggleCategory = (id: string) =>
     setCollapsed(prev => ({ ...prev, [id]: !prev[id] }));
 
-  // Filter nodes by search
-  const filteredCategories = CATEGORIES.map(cat => ({
-    ...cat,
-    nodes: cat.nodes.filter(n =>
-      n.label.toLowerCase().includes(search.toLowerCase()) ||
-      n.description.toLowerCase().includes(search.toLowerCase())
-    ),
-  })).filter(cat => cat.nodes.length > 0);
+  // Get nodes organized by category
+  const nodesByCategory = getNodesByCategory('input')
+    .concat(getNodesByCategory('process'))
+    .concat(getNodesByCategory('output'))
+    .concat(getNodesByCategory('bridge'));
 
-  const totalNodes = CATEGORIES.reduce((s, c) => s + c.nodes.length, 0);
+  // Group by category
+  const groupedNodes = nodesByCategory.reduce((acc, [type, meta]) => {
+    if (!acc[meta.category]) acc[meta.category] = [];
+    acc[meta.category].push({ type, meta });
+    return acc;
+  }, {} as Record<string, Array<{ type: string; meta: typeof NODE_META[string] }>>);
 
-  const toolbarIcons = [
-    { icon: Hand,        id: 'hand',     label: 'Mover' },
-    { icon: Scissors,    id: 'scissors', label: 'Cortar' },
-    { icon: Square,      id: 'square',   label: 'Seleccionar' },
-    { icon: MessageSquare, id: 'message', label: 'Notas' },
-    { icon: Settings,    id: 'settings', label: 'Configuración' },
-  ];
+  // Filter by search
+  const filteredCategories = Object.entries(groupedNodes)
+    .map(([category, nodes]) => ({
+      category,
+      nodes: nodes.filter(({ meta }) =>
+        meta.label.toLowerCase().includes(search.toLowerCase()) ||
+        meta.description.toLowerCase().includes(search.toLowerCase())
+      ),
+    }))
+    .filter(({ nodes }) => nodes.length > 0);
 
+  const totalNodes = Object.values(groupedNodes).flat().length;
 
   return (
     <div className="flex h-full shrink-0 border-r border-zinc-200 z-20">
-
       {/* Vertical Toolbar */}
       <div className="flex flex-col items-center gap-2 w-14 py-4 bg-white/95 backdrop-blur-xl border-r border-zinc-200/60">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-300 mb-1 ${menuOpen ? 'bg-zinc-900 text-white shadow-md' : 'bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 border border-zinc-200'}`}
+          className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-300 mb-1 ${
+            menuOpen
+              ? 'bg-zinc-900 text-white shadow-md'
+              : 'bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 border border-zinc-200'
+          }`}
         >
           {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
         </button>
@@ -142,33 +134,41 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
         <div className="w-8 h-px bg-zinc-100 my-1" />
 
         <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all group">
+                <Hand className="h-4 w-4 group-hover:scale-110 transition-transform" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Mover canvas</TooltipContent>
+          </Tooltip>
 
-
-          {toolbarIcons.map(tool => (
-            <Tooltip key={tool.id}>
-              <TooltipTrigger asChild>
-                <button
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all group ${tool.id === 'settings' ? 'mt-auto border-t border-zinc-100 pt-3 rounded-none w-8' : ''}`}
-                >
-                  <tool.icon className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right">{tool.label}</TooltipContent>
-            </Tooltip>
-          ))}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all group mt-auto border-t border-zinc-100 pt-3 rounded-none w-8">
+                <Settings className="h-4 w-4 group-hover:scale-110 transition-transform" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">Configuración</TooltipContent>
+          </Tooltip>
         </TooltipProvider>
       </div>
 
       {/* Slide-in Panel */}
       {menuOpen && (
-        <div className="w-72 flex flex-col bg-zinc-50/50 border-l border-zinc-200/60 overflow-y-auto no-scrollbar animate-in slide-in-from-left duration-200">
-
+        <div className="w-80 flex flex-col bg-zinc-50/50 border-l border-zinc-200/60 overflow-y-auto no-scrollbar animate-in slide-in-from-left duration-200">
           {/* Header */}
           <div className="px-5 pt-5 pb-3 border-b border-zinc-200/60 bg-white/80 backdrop-blur-md">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em]">Módulos</span>
-              <span className="text-[10px] text-zinc-400 font-bold tabular-nums">{totalNodes} nodos</span>
+              <div className="flex items-center gap-2">
+                <Layers className="h-4 w-4 text-primary" />
+                <span className="text-[11px] font-black text-zinc-900 uppercase tracking-wider">Canvas IA</span>
+              </div>
+              <span className="text-[10px] text-zinc-400 font-bold tabular-nums bg-zinc-100 px-2 py-0.5 rounded-full">
+                {totalNodes} nodos
+              </span>
             </div>
+
             {/* Search */}
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
@@ -179,8 +179,10 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
                 className="pl-9 pr-8 bg-zinc-50/80 border-zinc-200/60 focus:border-primary/30 rounded-xl h-9 text-[11px] text-zinc-900 placeholder:text-zinc-400 transition-all shadow-sm"
               />
               {search && (
-                <button onClick={() => setSearch('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors">
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+                >
                   <X className="h-3 w-3" />
                 </button>
               )}
@@ -194,63 +196,115 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
               onOpenChange={setTemplateOpen}
               onSelect={handleSelectTemplate}
               trigger={
-                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-[1.5rem] border border-primary/20 bg-primary/5 hover:border-primary/40 hover:bg-primary/10 transition-all group/tpl shadow-[0_10px_30px_rgba(var(--primary-rgb),0.05)] active:scale-95">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white shadow-xl shadow-primary/10 group-hover/tpl:bg-primary group-hover/tpl:text-white transition-all shrink-0">
-                    <Sparkles className="h-5 w-5 text-primary group-hover/tpl:text-white transition-colors" />
+                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:border-primary/40 hover:bg-primary/10 transition-all group/tpl shadow-sm active:scale-95">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-md group-hover/tpl:bg-primary group-hover/tpl:text-white transition-all shrink-0">
+                    <Sparkles className="h-4 w-4 text-primary group-hover/tpl:text-white transition-colors" />
                   </div>
                   <div className="text-left">
-                    <p className="text-[12px] font-black text-primary/80 group-hover/tpl:text-primary transition-colors uppercase tracking-widest leading-none mb-1">Plantillas</p>
-                    <p className="text-[10px] font-bold text-zinc-400 group-hover/tpl:text-zinc-500 transition-colors">Acelera tu flujo creativo</p>
+                    <p className="text-[12px] font-bold text-primary group-hover/tpl:text-primary transition-colors">Plantillas</p>
+                    <p className="text-[10px] text-zinc-500">Acelera tu flujo creativo</p>
                   </div>
+                  <ChevronRight className="h-4 w-4 text-zinc-400 ml-auto group-hover/tpl:translate-x-0.5 transition-transform" />
                 </button>
               }
             />
           </div>
 
           {/* Categories */}
-          <div className="flex flex-col gap-1 px-3 pb-3">
+          <div className="flex flex-col gap-2 px-3 pb-3">
             {filteredCategories.length === 0 && (
               <div className="flex flex-col items-center gap-3 py-10 text-center">
                 <Search className="h-5 w-5 text-zinc-300" />
-                <span className="text-[11px] text-zinc-400">Sin resultados para <span className="text-zinc-600">"{search}"</span></span>
-                <button onClick={() => setSearch('')} className="text-[10px] text-primary/80 hover:text-primary font-bold uppercase tracking-widest">Limpiar</button>
+                <span className="text-[11px] text-zinc-400">
+                  Sin resultados para <span className="text-zinc-600 font-medium">"{search}"</span>
+                </span>
+                <button
+                  onClick={() => setSearch('')}
+                  className="text-[10px] text-primary hover:text-primary/80 font-medium"
+                >
+                  Limpiar búsqueda
+                </button>
               </div>
             )}
 
-            {filteredCategories.map(cat => {
-              const isCollapsed = collapsed[cat.id];
+            {filteredCategories.map(({ category, nodes }) => {
+              const isCollapsed = collapsed[category];
+              const catInfo = CATEGORY_LABELS[category];
+              if (!catInfo) return null;
+
               return (
-                <div key={cat.id} className="mt-2">
+                <div key={category} className="mt-1">
                   {/* Category header */}
                   <button
-                    onClick={() => toggleCategory(cat.id)}
-                    className="w-full flex items-center justify-between px-2 py-1.5 mb-1.5 group/cat"
+                    onClick={() => toggleCategory(category)}
+                    className="w-full flex items-center justify-between px-2 py-2 mb-1 group/cat hover:bg-zinc-100/50 rounded-lg transition-colors"
                   >
-                    <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.25em] group-hover/cat:text-zinc-600 transition-colors">{cat.label}</span>
-                    <ChevronDown className={`h-3 w-3 text-zinc-400 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`} />
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">{catInfo.emoji}</span>
+                      <div className="text-left">
+                        <span className="text-[10px] font-bold text-zinc-800 uppercase tracking-wider block">
+                          {catInfo.label}
+                        </span>
+                        <span className="text-[9px] text-zinc-400">{catInfo.description}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[10px] text-zinc-400 font-medium">{nodes.length}</span>
+                      <ChevronDown className={`h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${isCollapsed ? '-rotate-90' : ''}`} />
+                    </div>
                   </button>
 
                   {/* Nodes grid */}
                   {!isCollapsed && (
-                    <div className="flex flex-col gap-1.5">
-                      {cat.nodes.map((node, idx) => (
-                        <button
-                          key={idx}
-                          draggable
-                          onDragStart={e => onDragStart(e, node.type, node.label)}
-                          onClick={() => onAddNode(node.type, node.label)}
-                          className="flex w-full gap-3 rounded-[1.2rem] border border-zinc-200 bg-white items-center px-4 py-3 cursor-pointer hover:border-primary/20 hover:shadow-[0_15px_35px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all group/item shadow-sm active:scale-95 duration-300"
-                        >
-                          <div className="flex h-10 w-10 items-center justify-center rounded-2xl shrink-0 transition-transform group-hover/item:scale-110 shadow-sm"
-                            style={{ background: `${node.color}10`, border: `1px solid ${node.color}20` }}>
-                            <node.icon className="h-5 w-5" style={{ color: node.color !== 'rgba(255,255,255,0.5)' && node.color !== 'rgba(255,255,255,0.6)' ? node.color : '#71717a' }} />
-                          </div>
-                          <div className="flex flex-col text-left min-w-0 pr-2">
-                            <span className="text-[12px] font-black text-zinc-800 group-hover/item:text-primary transition-colors uppercase tracking-tight truncate leading-none mb-1">{node.label}</span>
-                            <span className="text-[9px] font-bold text-zinc-400 group-hover/item:text-zinc-500 transition-colors truncate tracking-wide">{node.description}</span>
-                          </div>
-                        </button>
-                      ))}
+                    <div className="flex flex-col gap-1.5 pl-2">
+                      {nodes.map(({ type, meta }) => {
+                        const Icon = NODE_ICONS[type] || Layers;
+                        return (
+                          <button
+                            key={type}
+                            draggable
+                            onDragStart={e => onDragStart(e, type, meta.label)}
+                            onClick={() => onAddNode(type, meta.label)}
+                            className="flex w-full gap-3 rounded-xl border border-zinc-200 bg-white items-center px-3 py-2.5 cursor-pointer hover:border-primary/30 hover:shadow-md hover:-translate-y-px transition-all group/item shadow-sm active:scale-95"
+                          >
+                            <div
+                              className="flex h-8 w-8 items-center justify-center rounded-lg shrink-0 transition-transform group-hover/item:scale-110"
+                              style={{
+                                backgroundColor: `${meta.color}15`,
+                                border: `1px solid ${meta.color}30`,
+                              }}
+                            >
+                              <Icon className="h-4 w-4" style={{ color: meta.color }} />
+                            </div>
+                            <div className="flex flex-col text-left min-w-0 flex-1">
+                              <span className="text-[12px] font-semibold text-zinc-800 group-hover/item:text-primary transition-colors truncate">
+                                {meta.emoji} {meta.label}
+                              </span>
+                              <span className="text-[10px] text-zinc-400 truncate">
+                                {meta.description}
+                              </span>
+                              {/* Connection indicators */}
+                              <div className="flex items-center gap-2 mt-1">
+                                {meta.inputHandles.length > 0 && (
+                                  <span className="text-[9px] text-zinc-400 flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" />
+                                    {meta.inputHandles.length} entrada{meta.inputHandles.length > 1 ? 's' : ''}
+                                  </span>
+                                )}
+                                {meta.outputHandles.length > 0 && (
+                                  <span className="text-[9px] text-zinc-400 flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" />
+                                    {meta.outputHandles.length} salida{meta.outputHandles.length > 1 ? 's' : ''}
+                                  </span>
+                                )}
+                                {meta.inputHandles.length === 0 && meta.outputHandles.length === 0 && (
+                                  <span className="text-[9px] text-zinc-400">Sin conexiones</span>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -262,20 +316,26 @@ export function FormarketingSidebar({ onAddNode }: { onAddNode: (type: string, l
           <div className="mt-auto px-3 pb-4 pt-2 border-t border-zinc-200 bg-white">
             <button
               onClick={handleFileUpload}
-              className="flex items-center gap-3 w-full px-3.5 py-3 rounded-2xl bg-white border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50 transition-all group shadow-sm"
+              className="flex items-center gap-3 w-full px-3.5 py-3 rounded-xl bg-zinc-50 border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100 transition-all group shadow-sm"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 group-hover:bg-zinc-100 transition-colors shrink-0">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white group-hover:bg-zinc-50 transition-colors shrink-0">
                 <Upload className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-[10px] font-bold text-zinc-600 group-hover:text-zinc-900 uppercase tracking-widest">Subir imagen</span>
-                <span className="text-[9px] text-zinc-400">Drag & drop o clic aquí</span>
+                <span className="text-[11px] font-semibold text-zinc-700 group-hover:text-zinc-900">
+                  Subir imagen
+                </span>
+                <span className="text-[10px] text-zinc-400">Drag & drop o clic aquí</span>
               </div>
             </button>
 
-            <div className="flex items-center justify-between mt-3 text-[9px] font-bold text-zinc-300 tracking-[0.2em]">
-              <span className="text-zinc-400">Creator IA Pro</span>
-              <span className="hover:text-zinc-600 transition-colors cursor-pointer text-zinc-400">LOGS</span>
+            <div className="flex items-center justify-between mt-3 px-1">
+              <span className="text-[9px] font-medium text-zinc-400">
+                Creator IA Pro v21.0
+              </span>
+              <span className="text-[9px] text-primary font-medium cursor-pointer hover:underline">
+                Ver logs
+              </span>
             </div>
           </div>
         </div>

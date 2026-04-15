@@ -1,6 +1,6 @@
 import { memo, ReactNode, useState } from 'react';
 import { Position, useReactFlow } from '@xyflow/react';
-import { Trash2, Play, Loader2, AlertCircle, PlayCircle } from 'lucide-react';
+import { Trash2, Play, Loader2, AlertCircle, PlayCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -9,7 +9,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { toast } from 'sonner';
-import { NODE_META } from './nodeConnections';
+import { NODE_META, DATA_TYPE_COLORS, DataType } from './nodeConnections';
 import { NodeHandles } from './NodeHandles';
 
 interface BaseNodeProps {
@@ -157,6 +157,51 @@ const BaseNode = memo(({
       {/* Content */}
       <div className="relative p-4">
         {children}
+      </div>
+
+      {/* Connection indicators footer */}
+      <div className="px-4 py-2 bg-zinc-50/80 border-t border-zinc-100 flex items-center justify-between text-[10px] text-zinc-400">
+        {/* Input indicators */}
+        <div className="flex items-center gap-2">
+          {meta?.inputHandles && meta.inputHandles.length > 0 ? (
+            <div className="flex items-center gap-1.5">
+              <ArrowLeft className="w-3 h-3" />
+              <div className="flex items-center gap-1">
+                {meta.inputHandles.map((h) => (
+                  <span
+                    key={h.id}
+                    className="w-2 h-2 rounded-full border border-white shadow-sm"
+                    style={{ backgroundColor: DATA_TYPE_COLORS[h.dataType] }}
+                    title={`${h.label} (${h.dataType})`}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <span className="text-zinc-300">Sin entradas</span>
+          )}
+        </div>
+
+        {/* Output indicators */}
+        <div className="flex items-center gap-2">
+          {meta?.outputHandles && meta.outputHandles.length > 0 ? (
+            <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
+                {meta.outputHandles.map((h) => (
+                  <span
+                    key={h.id}
+                    className="w-2 h-2 rounded-full border border-white shadow-sm"
+                    style={{ backgroundColor: DATA_TYPE_COLORS[h.dataType] }}
+                    title={`${h.label} (${h.dataType})`}
+                  />
+                ))}
+              </div>
+              <ArrowRight className="w-3 h-3" />
+            </div>
+          ) : (
+            <span className="text-zinc-300">Sin salidas</span>
+          )}
+        </div>
       </div>
 
       {/* Input handles (left side) */}
