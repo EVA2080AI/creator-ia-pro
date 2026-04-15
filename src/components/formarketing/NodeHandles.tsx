@@ -33,30 +33,21 @@ export const NodeHandles = memo(({
           : '50%';
 
         return (
-          <div
-            key={handle.id}
-            className="absolute pointer-events-auto"
-            style={{
-              top: topPosition,
-              left: position === Position.Left ? 0 : 'auto',
-              right: position === Position.Right ? 0 : 'auto',
-              transform: 'translateY(-50%)',
-              width: '100%',
-              height: '24px',
-            }}
-          >
-            <NodeHandle
-              type={type}
-              position={position}
-              id={handle.id}
-              dataType={handle.dataType}
-              label={handle.label}
-              description={handle.description}
-              required={handle.required}
-              isConnected={isConnected(handle.id)}
-            />
-          </div>
-        );
+        <NodeHandle
+          key={handle.id}
+          type={type}
+          position={position}
+          id={handle.id}
+          dataType={handle.dataType}
+          label={handle.label}
+          description={handle.description}
+          required={handle.required}
+          isConnected={isConnected(handle.id)}
+          style={{
+            top: topPosition,
+          }}
+        />
+      );
       })}
     </>
   );

@@ -204,9 +204,9 @@ const BaseNode = memo(({
         </div>
       </div>
 
-      {/* Input handles (left side) */}
+      {/* Input handles (left side) - ALWAYS CLICKABLE */}
       {meta?.inputHandles && meta.inputHandles.length > 0 && (
-        <div className="absolute inset-y-0 left-0 w-4 pointer-events-none">
+        <div className="absolute inset-y-0 -left-2 w-6 z-50">
           <NodeHandles
             handles={meta.inputHandles}
             type="target"
@@ -216,9 +216,9 @@ const BaseNode = memo(({
         </div>
       )}
 
-      {/* Output handles (right side) */}
+      {/* Output handles (right side) - ALWAYS CLICKABLE */}
       {meta?.outputHandles && meta.outputHandles.length > 0 && (
-        <div className="absolute inset-y-0 right-0 w-4 pointer-events-none">
+        <div className="absolute inset-y-0 -right-2 w-6 z-50">
           <NodeHandles
             handles={meta.outputHandles}
             type="source"
