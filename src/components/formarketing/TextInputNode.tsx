@@ -29,7 +29,7 @@ const TextInputNode = ({ id, data }: { id: string; data: TextInputNodeData }) =>
   };
 
   return (
-    <div className="group relative rounded-[2rem] overflow-hidden bg-white/90 backdrop-blur-xl border border-zinc-200/60 hover:border-zinc-300 hover:bg-white transition-all w-[260px] shadow-sm hover:shadow-xl duration-500">
+    <div className="group relative rounded-[2rem] bg-white/90 backdrop-blur-xl border border-zinc-200/60 hover:border-zinc-300 hover:bg-white transition-all w-[260px] shadow-sm hover:shadow-xl duration-500">
       {/* Header */}
       <div className="flex h-12 items-center justify-between px-5 border-b border-zinc-100/80 bg-zinc-50/40">
         <div className="flex items-center gap-2.5">
@@ -69,13 +69,13 @@ const TextInputNode = ({ id, data }: { id: string; data: TextInputNodeData }) =>
         onAddConnected={data.onAddConnected ?? (() => {})}
       />
 
-      {/* Output handle — text (yellow) */}
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="text-out"
-        className="!w-4 !h-4 !-right-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm"
-      />
+      {/* Output handle - visible colored dot with glow */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-50">
+        <div className="w-4 h-4 rounded-full bg-amber-400 border-2 border-white shadow-md cursor-crosshair hover:scale-125 transition-transform"
+             style={{ boxShadow: '0 0 8px rgba(251, 191, 68, 0.6), 0 0 0 2px white' }}>
+          <Handle type="source" position={Position.Right} id="text-out" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
+        </div>
+      </div>
       <NodeNextAction nodeId={id} />
     </div>
   );

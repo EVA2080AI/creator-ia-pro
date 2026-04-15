@@ -166,8 +166,21 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
         </div>
       )}
 
-      <Handle type="target" position={Position.Left} id="any-in" className="!w-4 !h-4 !-left-2 !bg-zinc-400 !border-2 !border-white shadow-sm hover:scale-125 transition-transform" />
-      <Handle type="source" position={Position.Right} id="ui-out" className="!w-4 !h-4 !-right-2 !bg-blue-400 !border-2 !border-white shadow-sm hover:scale-125 transition-transform" />
+      {/* Input handle - visible colored dot with glow */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-50">
+        <div className="w-4 h-4 rounded-full bg-zinc-400 border-2 border-white shadow-md cursor-crosshair hover:scale-125 transition-transform"
+             style={{ boxShadow: '0 0 8px rgba(156, 163, 175, 0.6), 0 0 0 2px white' }}>
+          <Handle type="target" position={Position.Left} id="any-in" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
+        </div>
+      </div>
+
+      {/* Output handle - visible colored dot with glow */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-50">
+        <div className="w-4 h-4 rounded-full bg-blue-400 border-2 border-white shadow-md cursor-crosshair hover:scale-125 transition-transform"
+             style={{ boxShadow: '0 0 8px rgba(96, 165, 250, 0.6), 0 0 0 2px white' }}>
+          <Handle type="source" position={Position.Right} id="ui-out" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
+        </div>
+      </div>
       <NodeNextAction nodeId={id} />
     </div>
 

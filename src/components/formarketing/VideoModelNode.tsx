@@ -100,7 +100,7 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
   };
 
   return (
-    <div className={`group relative rounded-[2rem] overflow-hidden transition-all duration-500 hover:scale-[1.02]
+    <div className={`group relative rounded-[2rem] transition-all duration-500 hover:scale-[1.02]
       ${isRendering ? 'bg-white border-primary shadow-lg ring-2 ring-primary/20' : 'bg-white border border-zinc-200/60 hover:border-zinc-300 hover:shadow-xl shadow-sm transition-all'}
       w-[260px]
     `}>
@@ -270,8 +270,21 @@ const VideoModelNode = ({ id, data }: { id: string, data: VideoNodeData }) => {
         </div>
       )}
 
-      <Handle type="target" position={Position.Left} id="any-in" className="!w-4 !h-4 !-left-2 !bg-zinc-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
-      <Handle type="source" position={Position.Right} id="video-out" className="!w-4 !h-4 !-right-2 !bg-rose-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      {/* Input handle - visible colored dot with glow */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-50">
+        <div className="w-4 h-4 rounded-full bg-zinc-400 border-2 border-white shadow-md cursor-crosshair hover:scale-125 transition-transform"
+             style={{ boxShadow: '0 0 8px rgba(156, 163, 175, 0.6), 0 0 0 2px white' }}>
+          <Handle type="target" position={Position.Left} id="any-in" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
+        </div>
+      </div>
+
+      {/* Output handle - visible colored dot with glow */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-50">
+        <div className="w-4 h-4 rounded-full bg-rose-400 border-2 border-white shadow-md cursor-crosshair hover:scale-125 transition-transform"
+             style={{ boxShadow: '0 0 8px rgba(251, 113, 133, 0.6), 0 0 0 2px white' }}>
+          <Handle type="source" position={Position.Right} id="video-out" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
+        </div>
+      </div>
       <NodeNextAction nodeId={id} />
     </div>
 

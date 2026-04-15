@@ -157,10 +157,22 @@ const PromptBuilderNode = ({ id, data }: { id: string; data: PromptBuilderNodeDa
         </div>
       </div>
 
-      <Handle type="source" position={Position.Right} id="text-out" className="!w-4 !h-4 !-right-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      {/* Output handle - visible colored dot with glow */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-50">
+        <div className="w-4 h-4 rounded-full bg-amber-400 border-2 border-white shadow-md cursor-crosshair hover:scale-125 transition-transform"
+             style={{ boxShadow: '0 0 8px rgba(251, 191, 68, 0.6), 0 0 0 2px white' }}>
+          <Handle type="source" position={Position.Right} id="text-out" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
+        </div>
+      </div>
       <NodeNextAction nodeId={id} />
 
-      <Handle type="target" position={Position.Left} id="text-in" className="!w-4 !h-4 !-left-2 !bg-amber-400 !border-2 !border-white hover:!scale-125 transition-transform cursor-crosshair shadow-sm" />
+      {/* Input handle - visible colored dot with glow */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-50">
+        <div className="w-4 h-4 rounded-full bg-amber-400 border-2 border-white shadow-md cursor-crosshair hover:scale-125 transition-transform"
+             style={{ boxShadow: '0 0 8px rgba(251, 191, 68, 0.6), 0 0 0 2px white' }}>
+          <Handle type="target" position={Position.Left} id="text-in" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
+        </div>
+      </div>
     </div>
 
   );
