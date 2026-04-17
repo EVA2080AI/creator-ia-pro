@@ -272,6 +272,114 @@ export const TEMPLATES: Template[] = [
       { source: 1, target: 2, sourceHandle: 'text-out', targetHandle: 'text-in' },
       { source: 1, target: 3, sourceHandle: 'text-out', targetHandle: 'content-in' }
     ]
+  },
+  // Nueva plantilla: Character/Personajes consistentes estilo Higgsfield
+  {
+    id: 'character_consistent',
+    title: 'Character AI Engine',
+    description: 'Sistema de generación de personajes consistentes: Concepto → Estilo → Poses → Video. Inspirado en Higgsfield AI. PLANTILLA CON EJEMPLOS EJECUTADOS.',
+    category: 'Marca',
+    icon: Sparkles,
+    color: '#a855f7',
+    tags: ['Character', 'Consistent', 'AI', 'Video', 'Pre-ejecutado'],
+    nodes: [
+      { type: 'textInput', data: {
+        title: "CHARACTER BRIEF",
+        value: "Personaje: Mascota tech startup 'Pixel'
+Descripción: Robot adorable, ojos LED azules, cuerpo redondeado blanco con acentos naranja.
+Personalidad: Curioso, amigable, futurista pero acogedor.
+Uso: Videos explicativos, tutoriales, redes sociales."
+      }},
+      { type: 'characterBreakdown', data: {
+        title: 'CHARACTER DNA',
+        flavor: "Robotic Companion - Cute Tech",
+        description: "ANATOMÍA DEL PERSONAJE:
+
+🎨 ESTILO VISUAL:
+- 3D render estilo Pixar/Disney
+- Iluminación suave, sombras difuminadas
+- Materiales: Plástico mate, LED brillante, metal cepillado
+- Paleta: Blanco #FFFFFF, Naranja #FF6B35, Azul LED #00D9FF
+
+📐 PROPIEDADES:
+- Altura: 60cm (tamaño de gato grande)
+- Forma: Cuerpo esférico, patas cortas, antenas flexibles
+- Ojos: Dos pantallas LED circulares, expresivos
+- Accesorios: Pequeño panel solar en la espalda
+
+🎭 EXPRESIONES CLAVE:
+1. Feliz: Ojos en forma de ^^, LED brillante
+2. Curioso: Ojos en forma de oo, inclinación de cabeza
+3. Sorprendido: Ojos grandes circulares, antenas erectas
+4. Pensativo: Ojos entrecerrados, tilde de carga visible
+
+📏 REGLAS DE CONSISTENCIA:
+- Siempre mantener proporción 2:3 (ancho:alto)
+- Ojos LED siempre azul #00D9FF
+- Nunca cambiar el naranja de los acentos
+- Fondos limpios, minimalistas, tecnológicos",
+        status: 'ready'
+      }},
+      { type: 'modelView', data: {
+        title: 'CHARACTER CONCEPT ART',
+        prompt: 'Cute robot mascot character, spherical white body, orange accents, blue LED eyes, 3D Pixar style, soft lighting, clean background, character design sheet, multiple angles, consistent character',
+        assetUrl: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop',
+        status: 'ready'
+      }},
+      { type: 'llmNode', data: {
+        title: 'PROMPT ENGINE',
+        systemPrompt: "Genera prompts optimizados para mantener consistencia del personaje en diferentes poses y escenarios.",
+        output: "PROMPTS CONSISTENTES PARA PIXEL:
+
+🤖 POSE 1 - Waving Hello:
+'Cute robot mascot Pixel, spherical white body with orange accents, blue LED eyes glowing friendly, waving hand, 3D Pixar style, soft studio lighting, solid light blue background, character facing camera, happy expression, 8k render'
+
+📚 POSE 2 - Reading/Teaching:
+'Cute robot mascot Pixel, spherical white body with orange accents, blue LED eyes focused, holding digital tablet, reading pose, 3D Pixar style, warm classroom lighting, solid cream background, character 3/4 view, concentrated expression, 8k render'
+
+🎉 POSE 3 - Celebrating:
+'Cute robot mascot Pixel, spherical white body with orange accents, blue LED eyes sparkling with joy, jumping celebration pose, confetti particles, 3D Pixar style, dynamic lighting, solid gradient background, character mid-air, excited expression, 8k render'
+
+💡 POSE 4 - Idea/Eureka:
+'Cute robot mascot Pixel, spherical white body with orange accents, blue LED eyes wide with realization, finger pointing up, lightbulb hologram above head, 3D Pixar style, rim lighting, solid mint background, character profile view, inspired expression, 8k render'
+
+🎬 VIDEO INTRO:
+'Cute robot mascot Pixel walking into frame, spherical white body with orange accents, blue LED eyes blinking friendly, waving at camera, smooth motion, 3D Pixar style, cinematic lighting, clean tech background, 8 seconds, loopable animation'
+
+✅ REGLAS DE NEGATIVO:
+- Sin cambios de color
+- Sin proporciones alteradas
+- Sin fondos complejos
+- Sin estilos artísticos diferentes",
+        status: 'ready'
+      }},
+      { type: 'modelView', data: {
+        title: 'POSE VARIATIONS',
+        prompt: 'Character design sheet, cute robot mascot Pixel in 4 different poses: waving, reading, celebrating, thinking, consistent 3D Pixar style, white body orange accents blue LED eyes, grid layout, clean white background',
+        assetUrl: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&auto=format&fit=crop',
+        status: 'ready'
+      }},
+      { type: 'videoModel', data: {
+        title: 'CHARACTER VIDEO',
+        model: 'veo-3',
+        prompt: 'Cute robot mascot Pixel walking and waving, smooth animation loop, 3D Pixar style, cinematic lighting, clean tech background, professional character animation',
+        assetUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+        status: 'ready'
+      }},
+      { type: 'exportNode', data: {
+        title: 'CHARACTER KIT',
+        content: 'pixel-character-kit.zip',
+        status: 'ready'
+      }}
+    ],
+    edges: [
+      { source: 0, target: 1, sourceHandle: 'text-out', targetHandle: 'text-in' },
+      { source: 0, target: 2, sourceHandle: 'text-out', targetHandle: 'prompt-in' },
+      { source: 1, target: 3, sourceHandle: 'context-out', targetHandle: 'text-in' },
+      { source: 3, target: 4, sourceHandle: 'text-out', targetHandle: 'prompt-in' },
+      { source: 4, target: 5, sourceHandle: 'image-out', targetHandle: 'any-in' },
+      { source: 5, target: 6, sourceHandle: 'video-out', targetHandle: 'content-in' }
+    ]
   }
 ];
 
