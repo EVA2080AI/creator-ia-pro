@@ -9,6 +9,8 @@ interface ExportNodeData {
   title?: string;
   content?: string;
   contentType?: 'text' | 'image' | 'video';
+  status?: 'idle' | 'bypassed';
+  collapsed?: boolean;
 }
 
 const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
@@ -19,6 +21,20 @@ const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
     await supabase.from('canvas_nodes').delete().eq('id', id);
     setNodes((nds) => nds.filter((n) => n.id !== id));
     toast.success('Nodo eliminado');
+  };
+
+  const handleToggleBypass = () => {
+    const newStatus = data.status === 'bypassed' ? 'idle' : 'bypassed';
+    setNodes((nds) =>
+      nds.map((n) => n.id === id ? { ...n, data: { ...n.data, status: newStatus } } : n)
+    );
+    toast.success(newStatus === 'bypassed' ? 'Nodo desactivado (bypass)' : 'Nodo reactivado');
+  };
+
+  const handleToggleCollapsed = () => {
+    setNodes((nds) =>
+      nds.map((n) => n.id === id ? { ...n, data: { ...n.data, collapsed: !data.collapsed } } : n)
+    );
   };
 
   const handleDownload = () => {
@@ -69,7 +85,11 @@ const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
       type="exportNode"
       title={data.title}
       minWidth="260px"
+      status={data.status}
       onDelete={deleteNode}
+      defaultCollapsed={data.collapsed}
+      onToggleCollapsed={handleToggleCollapsed}
+      onToggleBypass={handleToggleBypass}
     >
       <div className="space-y-3">
         {/* Preview */}

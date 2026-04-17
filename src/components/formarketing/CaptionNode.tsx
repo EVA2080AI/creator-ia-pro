@@ -21,7 +21,8 @@ interface CaptionNodeData {
   network?: string;
   tone?: string;
   output?: string;
-  status?: 'idle' | 'generating' | 'done' | 'error';
+  status?: 'idle' | 'generating' | 'done' | 'error' | 'bypassed';
+  collapsed?: boolean;
 }
 
 const CaptionNode = ({ id, data }: { id: string; data: CaptionNodeData }) => {
@@ -39,6 +40,16 @@ const CaptionNode = ({ id, data }: { id: string; data: CaptionNodeData }) => {
     await supabase.from('canvas_nodes').delete().eq('id', id);
     setNodes(nds => nds.filter(n => n.id !== id));
     toast.success('Nodo eliminado');
+  };
+
+  const handleToggleBypass = () => {
+    const newStatus = data.status === 'bypassed' ? 'idle' : 'bypassed';
+    update({ status: newStatus });
+    toast.success(newStatus === 'bypassed' ? 'Nodo desactivado (bypass)' : 'Nodo reactivado');
+  };
+
+  const handleToggleCollapsed = () => {
+    update({ collapsed: !data.collapsed });
   };
 
   const handleGenerate = async () => {
@@ -141,6 +152,9 @@ Devuelve SOLO el caption, sin explicaciones.`;
       minWidth="300px"
       outputData={data.output}
       outputType="text"
+      defaultCollapsed={data.collapsed}
+      onToggleCollapsed={handleToggleCollapsed}
+      onToggleBypass={handleToggleBypass}
     >
       <div className="space-y-3">
         {/* Network selector */}

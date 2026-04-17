@@ -71,6 +71,110 @@ Deno.serve(async (req: Request) => {
     let modelVersion = "";
     let input: Record<string, string | number | boolean | undefined> = {};
 
+    // ── VIDEO MODEL HANDLERS ─────────────────────────────────────────────────────
+
+    /** Google Veo 3 Video Generation */
+    async function generateVeo3Video(prompt: string, imageUrl?: string): Promise<string> {
+      const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
+      if (!geminiApiKey) throw new Error("GEMINI_API_KEY not configured for Veo-3.");
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/veo-3-generate-preview:generateVideo?key=${geminiApiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            prompt: prompt || "A cinematic scene",
+            image: imageUrl ? { mimeType: "image/jpeg", bytes: imageUrl } : undefined,
+            aspectRatio: "16:9",
+            durationSeconds: 8,
+            personGeneration: "DONT_ALLOW",
+            enhancePrompt: true,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("[Veo-3] API Error:", errorData);
+        throw new Error(`Veo-3 API error: ${errorData.error?.message || response.statusText}`);
+      }
+
+      const data = await response.json();
+      const operationName = data.name;
+
+      if (!operationName) {
+        throw new Error("Veo-3 did not return an operation name.");
+      }
+
+      // Poll for video generation completion
+      for (let i = 0; i < 60; i++) {
+        await new Promise(r => setTimeout(r, 5000)); // Wait 5 seconds between polls
+
+        const pollRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/${operationName}?key=${geminiApiKey}`
+        );
+        const pollData = await pollRes.json();
+
+        if (pollData.done) {
+          if (pollData.error) {
+            throw new Error(`Veo-3 generation failed: ${pollData.error.message}`);
+          }
+          const videoData = pollData.response?.video?.videoData;
+          if (videoData) {
+            return `data:video/mp4;base64,${videoData}`;
+          }
+          throw new Error("Veo-3 returned no video data.");
+        }
+      }
+
+      throw new Error("Veo-3 generation timed out after 5 minutes.");
+    }
+
+    /** Replicate Video Models (SVD, etc.) */
+    async function generateReplicateVideo(model: string, input: Record<string, any>): Promise<string> {
+      const replicateApiToken = Deno.env.get("REPLICATE_API_TOKEN");
+      if (!replicateApiToken) throw new Error("REPLICATE_API_TOKEN not configured.");
+
+      const res = await fetch(
+        `https://api.replicate.com/v1/models/${model}/predictions`,
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Token ${replicateApiToken}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ input }),
+        }
+      );
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Replicate error: ${res.status} - ${errorText}`);
+      }
+
+      const prediction = await res.json();
+      const pollUrl = prediction.urls.get;
+
+      // Poll until completion (max 5 minutes)
+      for (let i = 0; i < 150; i++) {
+        await new Promise(r => setTimeout(r, 2000));
+        const checkRes = await fetch(pollUrl, {
+          headers: { "Authorization": `Token ${replicateApiToken}` }
+        });
+        const checkData = await checkRes.json();
+
+        if (checkData.status === "succeeded") {
+          const output = checkData.output;
+          return Array.isArray(output) ? output[0] : output;
+        } else if (checkData.status === "failed") {
+          throw new Error(`Replicate prediction failed: ${checkData.error}`);
+        }
+      }
+
+      throw new Error("Replicate video generation timed out.");
+    }
+
     // Mapeo industrial a modelos de Replicate
     switch (tool) {
       case "generate":
@@ -100,10 +204,53 @@ Deno.serve(async (req: Request) => {
         input = { image: image_url, face_upsample: true, background_enhance: true, upsample: 2 };
         break;
       case "video":
-        // Stable Video Diffusion — text-to-video via Replicate
-        modelSlug = "stability-ai/stable-video-diffusion";
-        input = { motion_bucket_id: 127, frames_per_second: 6, sizing_strategy: "maintain_aspect_ratio" };
-        if (image_url) input.input_image = image_url;
+        // Video generation with model selection
+        const videoModel = (prompt as any)?.model || "svd";
+        const videoPrompt = (prompt as any)?.prompt || prompt || "A cinematic scene";
+
+        if (videoModel === "veo-3") {
+          // Veo-3 uses Gemini API
+          const videoUrl = await generateVeo3Video(videoPrompt, image_url);
+          return new Response(JSON.stringify({ url: videoUrl, model: "veo-3" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        } else if (videoModel === "luma") {
+          // Luma Dream Machine
+          const videoUrl = await generateReplicateVideo("luma-ai/dream-machine", {
+            prompt: videoPrompt,
+            image_url: image_url,
+          });
+          return new Response(JSON.stringify({ url: videoUrl, model: "luma" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        } else if (videoModel === "pika") {
+          // Pika Labs
+          const videoUrl = await generateReplicateVideo("pikalabs/pika", {
+            prompt: videoPrompt,
+            image: image_url,
+            motion_scale: 1.0,
+          });
+          return new Response(JSON.stringify({ url: videoUrl, model: "pika" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        } else {
+          // Default: Stable Video Diffusion
+          modelSlug = "stability-ai/stable-video-diffusion";
+          input = {
+            motion_bucket_id: 127,
+            frames_per_second: 6,
+            sizing_strategy: "maintain_aspect_ratio"
+          };
+          if (image_url) input.input_image = image_url;
+          const videoUrl = await generateReplicateVideo(modelSlug, input);
+          return new Response(JSON.stringify({ url: videoUrl, model: "svd" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        }
         break;
       case "variation":
       case "style":

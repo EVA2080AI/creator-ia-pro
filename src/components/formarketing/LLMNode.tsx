@@ -11,8 +11,9 @@ interface LLMNodeData {
   systemPrompt?: string;
   model?: string;
   output?: string;
-  status?: 'idle' | 'running' | 'done' | 'error';
+  status?: 'idle' | 'running' | 'done' | 'error' | 'bypassed';
   onExecute?: () => void;
+  collapsed?: boolean;
 }
 
 const LLM_MODELS = [
@@ -38,6 +39,16 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
     toast.success('Nodo eliminado');
   };
 
+  const handleToggleBypass = () => {
+    const newStatus = data.status === 'bypassed' ? 'idle' : 'bypassed';
+    update({ status: newStatus });
+    toast.success(newStatus === 'bypassed' ? 'Nodo desactivado (bypass)' : 'Nodo reactivado');
+  };
+
+  const handleToggleCollapsed = () => {
+    update({ collapsed: !data.collapsed });
+  };
+
   const currentModel = LLM_MODELS.find(m => m.id === (data.model || LLM_MODELS[0].id)) ?? LLM_MODELS[0];
 
   return (
@@ -50,6 +61,9 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
       onExecute={data.onExecute}
       outputData={data.output}
       outputType="text"
+      defaultCollapsed={data.collapsed}
+      onToggleCollapsed={handleToggleCollapsed}
+      onToggleBypass={handleToggleBypass}
     >
       <div className="space-y-3">
         {/* Model selector */}

@@ -19,7 +19,8 @@ interface ModelNodeData {
   assetUrl?: string;
   ratio?: string;
   imageHistory?: string[];
-  status?: 'idle' | 'loading' | 'executing' | 'ready' | 'error';
+  status?: 'idle' | 'loading' | 'executing' | 'ready' | 'error' | 'bypassed';
+  collapsed?: boolean;
 }
 
 const IMAGE_STEPS = [
@@ -116,6 +117,24 @@ const ModelNode = ({ id, data }: { id: string; data: ModelNodeData }) => {
     }
   };
 
+  const handleToggleBypass = () => {
+    const newStatus = data.status === 'bypassed' ? 'idle' : 'bypassed';
+    const updateData: any = { data_payload: { ...data, status: newStatus } };
+    supabase.from('canvas_nodes').update(updateData).eq('id', id).then(() => {
+      setNodes((nds) =>
+        nds.map((n) => n.id === id ? { ...n, data: { ...n.data, status: newStatus } } : n)
+      );
+      toast.success(newStatus === 'bypassed' ? 'Nodo desactivado (bypass)' : 'Nodo reactivado');
+    });
+  };
+
+  const handleToggleCollapsed = () => {
+    const newCollapsed = !data.collapsed;
+    setNodes((nds) =>
+      nds.map((n) => n.id === id ? { ...n, data: { ...n.data, collapsed: newCollapsed } } : n)
+    );
+  };
+
   const isExecuting = data.status === 'executing';
 
   return (
@@ -125,6 +144,9 @@ const ModelNode = ({ id, data }: { id: string; data: ModelNodeData }) => {
       title={data.title}
       status={data.status}
       onDelete={deleteNode}
+      defaultCollapsed={data.collapsed}
+      onToggleCollapsed={handleToggleCollapsed}
+      onToggleBypass={handleToggleBypass}
     >
       <div className="space-y-3">
         {/* Prompt input */}

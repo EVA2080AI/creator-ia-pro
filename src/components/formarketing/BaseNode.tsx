@@ -1,6 +1,6 @@
 import { memo, ReactNode, useState } from 'react';
 import { Position, useReactFlow } from '@xyflow/react';
-import { Trash2, Play, Loader2, AlertCircle, PlayCircle, ArrowRight, ArrowLeft, Eye, Database } from 'lucide-react';
+import { Trash2, Play, Loader2, AlertCircle, PlayCircle, ArrowRight, ArrowLeft, Eye, Database, Minimize2, Maximize2, Power, PowerOff } from 'lucide-react';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -17,7 +17,7 @@ interface BaseNodeProps {
   nodeId: string;
   type: string;
   title?: string;
-  status?: 'idle' | 'loading' | 'executing' | 'ready' | 'error' | 'done' | 'running';
+  status?: 'idle' | 'loading' | 'executing' | 'ready' | 'error' | 'done' | 'running' | 'bypassed';
   error?: string;
   onDelete?: () => void;
   onExecute?: () => void;
@@ -25,6 +25,9 @@ interface BaseNodeProps {
   minWidth?: string;
   outputData?: any;
   outputType?: 'text' | 'image' | 'json' | 'any';
+  defaultCollapsed?: boolean;
+  onToggleCollapsed?: () => void;
+  onToggleBypass?: () => void;
 }
 
 interface NodeDataWithContext extends Record<string, unknown> {
@@ -44,16 +47,30 @@ const BaseNode = memo(({
   children,
   minWidth = '280px',
   outputData,
-  outputType = 'any'
+  outputType = 'any',
+  defaultCollapsed = false,
+  onToggleCollapsed,
+  onToggleBypass
 }: BaseNodeProps) => {
   const { getNode } = useReactFlow();
   const [isUpstreamExecuting, setIsUpstreamExecuting] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const meta = NODE_META[type];
   const isExecuting = status === 'executing' || status === 'running';
   const isError = status === 'error';
   const isReady = status === 'ready' || status === 'done';
-  const hasOutput = outputData && (isReady || status === 'done');
+  const isBypassed = status === 'bypassed';
+  const hasOutput = outputData && (isReady || status === 'done') && !isBypassed;
+
+  const handleToggleCollapsed = () => {
+    setIsCollapsed(!isCollapsed);
+    onToggleCollapsed?.();
+  };
+
+  const handleToggleBypass = () => {
+    onToggleBypass?.();
+  };
 
   // Get executeUpstream from node data context
   const node = getNode(nodeId);
@@ -75,18 +92,22 @@ const BaseNode = memo(({
   const borderColor = isExecuting ? 'border-primary' :
                      isError ? 'border-red-400' :
                      isReady ? 'border-emerald-400' :
+                     isBypassed ? 'border-zinc-300' :
                      'border-zinc-200';
+
+  const bgColor = isBypassed ? 'bg-zinc-50' : 'bg-white';
 
   const nodeContent = (
     <div
       className={`
         group relative rounded-2xl overflow-hidden
-        bg-white border-2 transition-all duration-300
+        ${bgColor} border-2 transition-all duration-300
         hover:shadow-xl hover:scale-[1.01]
         ${isExecuting ? 'shadow-lg ring-2 ring-primary/20' : 'shadow-sm'}
         ${borderColor}
+        ${isBypassed ? 'opacity-60' : ''}
       `}
-      style={{ minWidth, maxWidth: '340px' }}
+      style={{ minWidth: isCollapsed ? '180px' : minWidth, maxWidth: isCollapsed ? '200px' : '340px' }}
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100 bg-zinc-50/80">
@@ -117,15 +138,50 @@ const BaseNode = memo(({
           {isExecuting && (
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           )}
-          {isReady && (
+          {isReady && !isBypassed && (
             <div className="w-2 h-2 rounded-full bg-emerald-400" />
           )}
           {isError && (
             <div className="w-2 h-2 rounded-full bg-red-400" />
           )}
+          {isBypassed && (
+            <div className="w-2 h-2 rounded-full bg-zinc-400" title="Bypassed" />
+          )}
+
+          {/* Collapse/Expand button */}
+          <button
+            onClick={handleToggleCollapsed}
+            className="p-1.5 hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 rounded-lg transition-colors"
+            title={isCollapsed ? 'Expandir' : 'Contraer'}
+          >
+            {isCollapsed ? (
+              <Maximize2 className="w-3.5 h-3.5" />
+            ) : (
+              <Minimize2 className="w-3.5 h-3.5" />
+            )}
+          </button>
+
+          {/* Bypass button */}
+          {onToggleBypass && (
+            <button
+              onClick={handleToggleBypass}
+              className={`p-1.5 rounded-lg transition-colors ${
+                isBypassed
+                  ? 'bg-zinc-200 text-zinc-500 hover:bg-zinc-300'
+                  : 'hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600'
+              }`}
+              title={isBypassed ? 'Reactivar nodo' : 'Bypass (desactivar)'}
+            >
+              {isBypassed ? (
+                <PowerOff className="w-3.5 h-3.5" />
+              ) : (
+                <Power className="w-3.5 h-3.5" />
+              )}
+            </button>
+          )}
 
           {/* Execute button */}
-          {onExecute && status !== 'executing' && status !== 'running' && (
+          {onExecute && !isBypassed && status !== 'executing' && status !== 'running' && (
             <button
               onClick={onExecute}
               className="p-1.5 hover:bg-primary/10 text-zinc-400 hover:text-primary rounded-lg transition-colors"
@@ -161,13 +217,15 @@ const BaseNode = memo(({
         </div>
       )}
 
-      {/* Content */}
-      <div className="relative p-4">
-        {children}
-      </div>
+      {/* Content - Hidden when collapsed */}
+      {!isCollapsed && (
+        <div className="relative p-4">
+          {children}
+        </div>
+      )}
 
-      {/* Data Preview Section - Shows when node has output */}
-      {hasOutput && (
+      {/* Data Preview Section - Shows when node has output and not collapsed */}
+      {!isCollapsed && hasOutput && (
         <div className="px-4 pb-3">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
@@ -194,7 +252,16 @@ const BaseNode = memo(({
         </div>
       )}
 
-      {/* Connection indicators footer */}
+      {/* Bypass indicator */}
+      {isBypassed && (
+        <div className="px-4 py-2 bg-zinc-100 border-t border-zinc-200 flex items-center justify-center gap-2">
+          <PowerOff className="w-3 h-3 text-zinc-400" />
+          <span className="text-[9px] font-medium text-zinc-500 uppercase tracking-wider">Nodo Desactivado (Bypass)</span>
+        </div>
+      )}
+
+      {/* Connection indicators footer - Hidden when collapsed */}
+      {!isCollapsed && (
       <div className="px-4 py-2 bg-zinc-50/80 border-t border-zinc-100 flex items-center justify-between text-[10px] text-zinc-400">
         {/* Input indicators */}
         <div className="flex items-center gap-2">
@@ -238,6 +305,7 @@ const BaseNode = memo(({
           )}
         </div>
       </div>
+      )}
 
       {/* Input handles (left side) - ALWAYS CLICKABLE */}
       {meta?.inputHandles && meta.inputHandles.length > 0 && (
@@ -284,7 +352,7 @@ const BaseNode = memo(({
         <ContextMenuSeparator />
         <ContextMenuItem
           onClick={onExecute}
-          disabled={!onExecute || isExecuting}
+          disabled={!onExecute || isExecuting || isBypassed}
           className="cursor-pointer"
         >
           <Play className="mr-2 h-4 w-4 text-emerald-500" />
@@ -293,6 +361,44 @@ const BaseNode = memo(({
           </span>
         </ContextMenuItem>
         <ContextMenuSeparator />
+        <ContextMenuItem
+          onClick={handleToggleCollapsed}
+          className="cursor-pointer"
+        >
+          {isCollapsed ? (
+            <>
+              <Maximize2 className="mr-2 h-4 w-4 text-zinc-500" />
+              <span className="text-xs">Expandir nodo</span>
+            </>
+          ) : (
+            <>
+              <Minimize2 className="mr-2 h-4 w-4 text-zinc-500" />
+              <span className="text-xs">Contraer nodo</span>
+            </>
+          )}
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        {onToggleBypass && (
+          <>
+            <ContextMenuItem
+              onClick={handleToggleBypass}
+              className="cursor-pointer"
+            >
+              {isBypassed ? (
+                <>
+                  <Power className="mr-2 h-4 w-4 text-emerald-500" />
+                  <span className="text-xs">Reactivar nodo</span>
+                </>
+              ) : (
+                <>
+                  <PowerOff className="mr-2 h-4 w-4 text-zinc-500" />
+                  <span className="text-xs">Bypass (desactivar)</span>
+                </>
+              )}
+            </ContextMenuItem>
+            <ContextMenuSeparator />
+          </>
+        )}
         <ContextMenuItem
           onClick={onDelete}
           disabled={!onDelete}

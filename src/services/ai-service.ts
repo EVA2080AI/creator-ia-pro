@@ -107,6 +107,14 @@ export const MODEL_COSTS: Record<string, number> = {
   "upscale": 3, "background": 1, "enhance": 2, "restore": 3, "variation": 4, "video": 5,
 };
 
+// Video model costs
+export const VIDEO_MODEL_COSTS: Record<string, number> = {
+  'veo-3': 15,
+  'luma': 10,
+  'pika': 8,
+  'svd': 5,
+};
+
 const PREMIUM_MODELS = new Set([
   "anthropic/claude-3.5-sonnet",
   "anthropic/claude-3-5-sonnet-20241022",
@@ -321,18 +329,49 @@ export const aiService = {
     throw new Error("No se pudo generar la imagen. Intenta de nuevo.");
   },
 
-  async handleVideoGen(prompt: string, onProgress?: (step: string, pct: number) => void): Promise<AIResponse> {
+  // VIDEO MODELS CONFIG
+  VIDEO_MODELS: {
+    id: string;
+    name: string;
+    provider: string;
+    cost: number;
+    maxDuration: string;
+  }[] = [
+    { id: 'veo-3', name: 'Veo 3', provider: 'Google', cost: 15, maxDuration: '8s' },
+    { id: 'luma', name: 'Dream Machine', provider: 'Luma AI', cost: 10, maxDuration: '5s' },
+    { id: 'pika', name: 'Pika 2.0', provider: 'Pika Labs', cost: 8, maxDuration: '3s' },
+    { id: 'svd', name: 'Stable Video', provider: 'Stability AI', cost: 5, maxDuration: '4s' },
+  ],
+
+  VIDEO_MODEL_COSTS: Record<string, number> = {
+    'veo-3': 15,
+    'luma': 10,
+    'pika': 8,
+    'svd': 5,
+    'video': 5,
+  },
+
+  async handleVideoGen(
+    prompt: string,
+    model: string = 'veo-3',
+    imageUrl?: string,
+    onProgress?: (step: string, pct: number) => void
+  ): Promise<AIResponse> {
     const steps = [['Iniciando…', 5], ['Procesando…', 50], ['Listo', 100]] as [string, number][];
     onProgress?.(steps[0][0], steps[0][1]);
 
-    const { data, error } = await supabase.functions.invoke<{ url?: string, error?: string }>("media-proxy", {
-      body: { tool: "video", prompt },
+    const { data, error } = await supabase.functions.invoke<{ url?: string, model?: string, error?: string }>("media-proxy", {
+      body: {
+        tool: "video",
+        prompt: { model, prompt },
+        image_url: imageUrl,
+      },
     });
 
     onProgress?.('Listo', 100);
     if (error) throw new Error(error.message);
     if (data?.error) throw new Error(data.error);
-    if (data?.url) return { url: data.url, text: "Video generado con IA" };
+    if (data?.url) return { url: data.url, text: `Video generado con ${data.model || model}`, model: data.model || model };
     throw new Error("La generación de video falló.");
   },
 
