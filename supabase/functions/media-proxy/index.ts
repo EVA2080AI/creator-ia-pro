@@ -57,9 +57,9 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const replicateApiToken = Deno.env.get("REPLICATE_API_TOKEN");
-    if (!replicateApiToken) {
-      throw new Error("REPLICATE_API_TOKEN is not configured in Supabase Secrets.");
+    const falApiKey = Deno.env.get("FAL_KEY");
+    if (!falApiKey) {
+      throw new Error("FAL_KEY is not configured in Supabase Secrets.");
     }
 
     const { tool, image_url, mask_url, prompt } = await req.json();
@@ -71,67 +71,81 @@ Deno.serve(async (req: Request) => {
     let modelVersion = "";
     let input: Record<string, string | number | boolean | undefined> = {};
 
-    // ── VIDEO MODEL HANDLERS ─────────────────────────────────────────────────────
+    // ── FAL.AI VIDEO MODEL HANDLERS ─────────────────────────────────────────────
 
-    /** Google Veo 3 Video Generation */
-    async function generateVeo3Video(prompt: string, imageUrl?: string): Promise<string> {
-      const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
-      if (!geminiApiKey) throw new Error("GEMINI_API_KEY not configured for Veo-3.");
+    /** Fal.ai Video Generation */
+    async function generateFalVideo(model: string, input: Record<string, any>): Promise<{ url: string; model: string }> {
+      const falApiKey = Deno.env.get("FAL_KEY");
+      if (!falApiKey) throw new Error("FAL_KEY not configured.");
 
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/veo-3-generate-preview:generateVideo?key=${geminiApiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            prompt: prompt || "A cinematic scene",
-            image: imageUrl ? { mimeType: "image/jpeg", bytes: imageUrl } : undefined,
-            aspectRatio: "16:9",
-            durationSeconds: 8,
-            personGeneration: "DONT_ALLOW",
-            enhancePrompt: true,
-          }),
-        }
-      );
+      // Map internal model IDs to Fal.ai endpoints
+      const FAL_ENDPOINTS: Record<string, string> = {
+        'wan-2.5': 'fal-ai/wan/v2.5/text-to-video',
+        'wan-i2v': 'fal-ai/wan/v2.5/image-to-video',
+        'pika-2.2': 'fal-ai/pika/v2.2/text-to-video',
+        'pika-i2v': 'fal-ai/pika/v2.2/image-to-video',
+        'luma': 'fal-ai/luma-dream-machine',
+        'kling': 'fal-ai/kling/v2.5/text-to-video',
+      };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("[Veo-3] API Error:", errorData);
-        throw new Error(`Veo-3 API error: ${errorData.error?.message || response.statusText}`);
+      const endpoint = FAL_ENDPOINTS[model] || FAL_ENDPOINTS['wan-2.5'];
+
+      const res = await fetch(`https://queue.fal.run/${endpoint}`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Key ${falApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...input,
+          webhook_url: undefined, // We'll poll instead
+        }),
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Fal.ai error: ${res.status} - ${errorText}`);
       }
 
-      const data = await response.json();
-      const operationName = data.name;
+      const { request_id } = await res.json();
 
-      if (!operationName) {
-        throw new Error("Veo-3 did not return an operation name.");
-      }
+      // Poll for completion (max 5 minutes)
+      const statusUrl = `https://queue.fal.run/${endpoint}/requests/${request_id}/status`;
 
-      // Poll for video generation completion
-      for (let i = 0; i < 60; i++) {
-        await new Promise(r => setTimeout(r, 5000)); // Wait 5 seconds between polls
+      for (let i = 0; i < 150; i++) {
+        await new Promise(r => setTimeout(r, 2000));
 
-        const pollRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/${operationName}?key=${geminiApiKey}`
-        );
-        const pollData = await pollRes.json();
+        const statusRes = await fetch(statusUrl, {
+          headers: { "Authorization": `Key ${falApiKey}` }
+        });
 
-        if (pollData.done) {
-          if (pollData.error) {
-            throw new Error(`Veo-3 generation failed: ${pollData.error.message}`);
+        if (!statusRes.ok) continue;
+
+        const statusData = await statusRes.json();
+
+        if (statusData.status === "COMPLETED") {
+          // Get result
+          const resultRes = await fetch(`https://queue.fal.run/${endpoint}/requests/${request_id}`, {
+            headers: { "Authorization": `Key ${falApiKey}` }
+          });
+
+          if (resultRes.ok) {
+            const result = await resultRes.json();
+            const videoUrl = result.video?.url || result.output?.video?.url || result.output?.url;
+            if (videoUrl) {
+              return { url: videoUrl, model };
+            }
           }
-          const videoData = pollData.response?.video?.videoData;
-          if (videoData) {
-            return `data:video/mp4;base64,${videoData}`;
-          }
-          throw new Error("Veo-3 returned no video data.");
+          throw new Error("Video generation completed but no URL found");
+        } else if (statusData.status === "FAILED") {
+          throw new Error(`Generation failed: ${statusData.error || 'Unknown error'}`);
         }
       }
 
-      throw new Error("Veo-3 generation timed out after 5 minutes.");
+      throw new Error("Video generation timed out after 5 minutes.");
     }
 
-    /** Replicate Video Models (SVD, etc.) */
+    /** Replicate Video Models (SVD - Budget option) */
     async function generateReplicateVideo(model: string, input: Record<string, any>): Promise<string> {
       const replicateApiToken = Deno.env.get("REPLICATE_API_TOKEN");
       if (!replicateApiToken) throw new Error("REPLICATE_API_TOKEN not configured.");
@@ -175,147 +189,134 @@ Deno.serve(async (req: Request) => {
       throw new Error("Replicate video generation timed out.");
     }
 
-    // Mapeo industrial a modelos de Replicate
+    // Mapeo a modelos de Fal.ai / Replicate
     switch (tool) {
       case "generate":
-        // Flux Schnell (black-forest-labs/flux-schnell)
-        modelSlug = "black-forest-labs/flux-schnell";
-        input = { prompt: prompt || "A professional creative design" };
-        break;
+        // Flux Schnell via Fal.ai
+        const falKey = Deno.env.get("FAL_KEY");
+        const imageRes = await fetch("https://queue.fal.run/fal-ai/flux/schnell", {
+          method: "POST",
+          headers: {
+            "Authorization": `Key ${falKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            prompt: prompt || "A professional creative design",
+            seed: Math.floor(Math.random() * 1000000),
+          }),
+        });
+
+        if (!imageRes.ok) throw new Error("Failed to generate image");
+        const imageData = await imageRes.json();
+        const imageUrl = imageData.images?.[0]?.url;
+        if (imageUrl) {
+          return new Response(JSON.stringify({ url: imageUrl, model: "flux-schnell" }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        }
+        throw new Error("No image URL in response");
+
       case "background":
         if (!image_url) throw new Error("Falta image_url");
-        // Remove BG HQ (lucataco/remove-bg)
-        modelVersion = "95fcc2a26d3899cd6c2691c900465aaeff466285a65c14638cc5f36f34befaf1";
-        input = { image: image_url };
-        break;
-      case "upscale":
-        // Real-ESRGAN (nightmareai/real-esrgan)
-        modelVersion = "42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b";
-        input = { image: image_url, scale: 4, face_enhance: true };
-        break;
-      case "restore":
-        // GFPGAN - Face restoration
-        modelVersion = "9283608cb6b01c6f1f415392fe19cdab3cd62fcdd959bc2d449dae9fead8408a";
-        input = { img: image_url, scale: 2, version: "v1.4" };
-        break;
-      case "enhance":
-        // Codeformer - General enhancement
-        modelVersion = "7de2ea26c61f15beb8d1a3ba5b583f721d09e519e48f7ee6f1a8c9918fb59dd3";
-        input = { image: image_url, face_upsample: true, background_enhance: true, upsample: 2 };
-        break;
-      case "video":
-        // Video generation with model selection
-        const videoModel = (prompt as any)?.model || "svd";
-        const videoPrompt = (prompt as any)?.prompt || prompt || "A cinematic scene";
+        // Remove BG via Fal.ai
+        const bgRes = await fetch("https://queue.fal.run/fal-ai/bria/background-remove", {
+          method: "POST",
+          headers: {
+            "Authorization": `Key ${falApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ image_url }),
+        });
 
-        if (videoModel === "veo-3") {
-          // Veo-3 uses Gemini API
-          const videoUrl = await generateVeo3Video(videoPrompt, image_url);
-          return new Response(JSON.stringify({ url: videoUrl, model: "veo-3" }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
-        } else if (videoModel === "luma") {
-          // Luma Dream Machine
-          const videoUrl = await generateReplicateVideo("luma-ai/dream-machine", {
-            prompt: videoPrompt,
-            image_url: image_url,
-          });
-          return new Response(JSON.stringify({ url: videoUrl, model: "luma" }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
-        } else if (videoModel === "pika") {
-          // Pika Labs
-          const videoUrl = await generateReplicateVideo("pikalabs/pika", {
-            prompt: videoPrompt,
+        if (!bgRes.ok) throw new Error("Background removal failed");
+        const bgData = await bgRes.json();
+        return new Response(JSON.stringify({ url: bgData.image?.url, model: "bria-bg-remove" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+
+      case "upscale":
+        // Real-ESRGAN via Fal.ai
+        const upscaleRes = await fetch("https://queue.fal.run/fal-ai/real-esrgan", {
+          method: "POST",
+          headers: {
+            "Authorization": `Key ${falApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ image_url, scale: 4 }),
+        });
+
+        if (!upscaleRes.ok) throw new Error("Upscale failed");
+        const upscaleData = await upscaleRes.json();
+        return new Response(JSON.stringify({ url: upscaleData.image?.url, model: "real-esrgan" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+
+      case "video":
+        // Video generation with Fal.ai
+        const videoModel = (prompt as any)?.model || "wan-2.5";
+        const videoPrompt = (prompt as any)?.prompt || "A cinematic scene";
+        const aspectRatio = (prompt as any)?.aspectRatio || "16:9";
+        const duration = (prompt as any)?.duration || 5;
+
+        // Budget tier: SVD (Replicate)
+        if (videoModel === "svd") {
+          const videoUrl = await generateReplicateVideo("stability-ai/stable-video-diffusion", {
             image: image_url,
-            motion_scale: 1.0,
-          });
-          return new Response(JSON.stringify({ url: videoUrl, model: "pika" }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
-        } else {
-          // Default: Stable Video Diffusion
-          modelSlug = "stability-ai/stable-video-diffusion";
-          input = {
             motion_bucket_id: 127,
             frames_per_second: 6,
-            sizing_strategy: "maintain_aspect_ratio"
-          };
-          if (image_url) input.input_image = image_url;
-          const videoUrl = await generateReplicateVideo(modelSlug, input);
+          });
           return new Response(JSON.stringify({ url: videoUrl, model: "svd" }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
             status: 200,
           });
         }
-        break;
+
+        // Premium tier: Fal.ai models
+        const falInput: any = {
+          prompt: videoPrompt,
+          aspect_ratio: aspectRatio,
+          duration: duration,
+          ...(image_url && { image_url }),
+        };
+
+        const falResult = await generateFalVideo(videoModel, falInput);
+        return new Response(JSON.stringify(falResult), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+
       case "variation":
       case "style":
       case "product":
-        // These are handled client-side via ai-proxy (img2img with GPT-5 Image Mini)
         throw new Error(`La herramienta "${tool}" debe llamarse a través de ai-proxy con imagen de entrada.`);
+
+      case "enhance":
+        // Codeformer via Fal.ai
+        const enhanceRes = await fetch("https://queue.fal.run/fal-ai/codeformer", {
+          method: "POST",
+          headers: {
+            "Authorization": `Key ${falApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ image_url, upscale: 2 }),
+        });
+
+        if (!enhanceRes.ok) throw new Error("Enhancement failed");
+        const enhanceData = await enhanceRes.json();
+        return new Response(JSON.stringify({ url: enhanceData.image?.url, model: "codeformer" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+
       case "eraser":
         throw new Error("La herramienta borrar requiere una máscara de borrado (próximamente).");
+
       default:
         throw new Error(`Tool "${tool}" no está soportada por el proxy de medios.`);
     }
-
-    console.log(`[Media Proxy] Llamando a Replicate para herramienta: ${tool}`);
-
-    // Call Replicate API to start prediction
-    const apiUrl = modelSlug 
-      ? `https://api.replicate.com/v1/models/${modelSlug}/predictions`
-      : `https://api.replicate.com/v1/predictions`;
-
-    const res = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Authorization": `Token ${replicateApiToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(modelSlug ? { input } : { version: modelVersion, input }),
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Replicate Error:", errorText);
-      throw new Error(`Replicate error: ${res.status} - ${errorText}`);
-    }
-
-    const prediction = await res.json();
-    const pollUrl = prediction.urls.get;
-
-    // Poll until completion (max 60 seconds)
-    let resultUrl = null;
-    for (let i = 0; i < 30; i++) {
-        await new Promise(r => setTimeout(r, 2000));
-        const checkRes = await fetch(pollUrl, {
-            headers: { "Authorization": `Token ${replicateApiToken}` }
-        });
-        const checkData = await checkRes.json();
-        
-        if (checkData.status === "succeeded") {
-            resultUrl = checkData.output;
-            break;
-        } else if (checkData.status === "failed") {
-            console.error("Replicate Prediction Failed:", checkData.error);
-            throw new Error("Fallo en la predicción industrial de imagen.");
-        }
-    }
-
-    if (!resultUrl) {
-      throw new Error("Timeout: La IA tardó demasiado en procesar la imagen.");
-    }
-
-    const finalImageUrl = Array.isArray(resultUrl) ? resultUrl[0] : resultUrl;
-
-    return new Response(JSON.stringify({ url: finalImageUrl }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
 
   } catch (error) {
     const err = error as Error;

@@ -107,12 +107,17 @@ export const MODEL_COSTS: Record<string, number> = {
   "upscale": 3, "background": 1, "enhance": 2, "restore": 3, "variation": 4, "video": 5,
 };
 
-// Video model costs
+// Video model costs (Fal.ai + Replicate) - Optimizados para SaaS
 export const VIDEO_MODEL_COSTS: Record<string, number> = {
-  'veo-3': 15,
-  'luma': 10,
-  'pika': 8,
-  'svd': 5,
+  // Fal.ai Models - Costo real vs Créditos (margen ~20x)
+  'wan-2.5': 5,      // Costo real ~$0.25
+  'wan-i2v': 6,      // Costo real ~$0.30
+  'pika-2.2': 4,     // Costo real ~$0.20
+  'pika-i2v': 5,     // Costo real ~$0.25
+  'luma': 6,         // Costo real ~$0.30
+  'kling': 5,        // Costo real ~$0.25
+  // Replicate (Budget)
+  'svd': 2,          // Costo real ~$0.05
 };
 
 const PREMIUM_MODELS = new Set([
@@ -329,31 +334,9 @@ export const aiService = {
     throw new Error("No se pudo generar la imagen. Intenta de nuevo.");
   },
 
-  // VIDEO MODELS CONFIG
-  VIDEO_MODELS: {
-    id: string;
-    name: string;
-    provider: string;
-    cost: number;
-    maxDuration: string;
-  }[] = [
-    { id: 'veo-3', name: 'Veo 3', provider: 'Google', cost: 15, maxDuration: '8s' },
-    { id: 'luma', name: 'Dream Machine', provider: 'Luma AI', cost: 10, maxDuration: '5s' },
-    { id: 'pika', name: 'Pika 2.0', provider: 'Pika Labs', cost: 8, maxDuration: '3s' },
-    { id: 'svd', name: 'Stable Video', provider: 'Stability AI', cost: 5, maxDuration: '4s' },
-  ],
-
-  VIDEO_MODEL_COSTS: Record<string, number> = {
-    'veo-3': 15,
-    'luma': 10,
-    'pika': 8,
-    'svd': 5,
-    'video': 5,
-  },
-
   async handleVideoGen(
     prompt: string,
-    model: string = 'veo-3',
+    model: string = 'wan-2.5',
     imageUrl?: string,
     onProgress?: (step: string, pct: number) => void
   ): Promise<AIResponse> {

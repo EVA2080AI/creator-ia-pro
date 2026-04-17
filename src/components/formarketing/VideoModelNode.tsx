@@ -1,52 +1,82 @@
 import { memo, useState, useEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { Video, Trash2, Zap, ChevronDown, ChevronUp, Play, Download, Loader2, Sparkles, Wand2, Image as ImageIcon, Clock } from 'lucide-react';
+import { Video, Trash2, Zap, ChevronDown, ChevronUp, Play, Download, Loader2, Sparkles, Wand2, Image as ImageIcon, Clock, Star, ZapOff } from 'lucide-react';
 import BaseNode from './BaseNode';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
+// MODELOS ECONÓMICOS VIA FAL.AI
 const VIDEO_MODELS = [
   {
-    id: 'veo-3',
-    name: 'Veo 3',
-    provider: 'Google',
-    description: 'Text-to-video de alta calidad con audio integrado',
-    maxDuration: '8s',
+    id: 'wan-2.5',
+    name: 'Wan 2.5',
+    provider: 'Alibaba',
+    description: 'Mejor calidad/precio. Audio sincronizado, movimiento fluido',
+    maxDuration: '10s',
     aspectRatios: ['16:9', '9:16', '1:1'],
-    cost: 15,
-    badge: 'Nuevo',
+    credits: 5, // Costo real ~$0.25, margen SaaS
+    badge: 'Recomendado',
     color: '#10b981',
+    tier: 'premium',
+  },
+  {
+    id: 'wan-i2v',
+    name: 'Wan Image-to-Video',
+    provider: 'Alibaba',
+    description: 'Convierte tu imagen en video animado fluido',
+    maxDuration: '10s',
+    aspectRatios: ['16:9', '9:16', '1:1'],
+    credits: 6,
+    badge: 'Hot',
+    color: '#059669',
+    tier: 'premium',
+  },
+  {
+    id: 'pika-2.2',
+    name: 'Pika 2.2',
+    provider: 'Pika Labs',
+    description: 'Efectos visuales creativos, motion cinemático',
+    maxDuration: '5s',
+    aspectRatios: ['16:9', '9:16', '1:1', '4:5'],
+    credits: 4, // Costo real ~$0.20
+    badge: 'Creativo',
+    color: '#f59e0b',
+    tier: 'standard',
   },
   {
     id: 'luma',
     name: 'Dream Machine',
     provider: 'Luma AI',
-    description: 'Motion cinematográfica realista',
+    description: 'Cinemática realista, personajes consistentes',
     maxDuration: '5s',
     aspectRatios: ['16:9', '9:16', '1:1'],
-    cost: 10,
-    badge: 'Popular',
+    credits: 6,
     color: '#8b5cf6',
+    tier: 'premium',
   },
   {
-    id: 'pika',
-    name: 'Pika 2.0',
-    provider: 'Pika Labs',
-    description: 'Ideal para efectos visuales y motion',
-    maxDuration: '3s',
+    id: 'kling',
+    name: 'Kling 2.5',
+    provider: 'Kuaishou',
+    description: 'Motion profesional, ideal para ads',
+    maxDuration: '10s',
     aspectRatios: ['16:9', '9:16', '1:1'],
-    cost: 8,
-    color: '#f59e0b',
+    credits: 5,
+    color: '#3b82f6',
+    tier: 'premium',
   },
   {
     id: 'svd',
     name: 'Stable Video',
     provider: 'Stability AI',
-    description: 'Image-to-video estable y confiable',
+    description: 'Opción económica. Solo image-to-video',
     maxDuration: '4s',
     aspectRatios: ['16:9', '9:16', '1:1'],
-    cost: 5,
-    color: '#3b82f6',
+    credits: 2, // Costo real ~$0.05
+    badge: 'Económico',
+    color: '#6b7280',
+    tier: 'budget',
+    imageOnly: true,
   },
 ];
 
@@ -54,6 +84,7 @@ const ASPECT_RATIOS = [
   { id: '16:9', label: 'Horizontal', icon: '🖥️', dimensions: '1280x720' },
   { id: '9:16', label: 'Vertical', icon: '📱', dimensions: '720x1280' },
   { id: '1:1', label: 'Cuadrado', icon: '⬜', dimensions: '768x768' },
+  { id: '4:5', label: 'Feed', icon: '📸', dimensions: '800x1000' },
 ];
 
 interface VideoNodeData {
@@ -72,10 +103,12 @@ interface VideoNodeData {
 }
 
 const VIDEO_STEPS: Record<string, string[]> = {
-  'veo-3': ['Inicializando Veo 3…', 'Generando frames…', 'Sintetizando audio…', 'Finalizando…'],
-  'luma': ['Preparando Dream Machine…', 'Renderizando escena…', 'Procesando motion…', 'Exportando…'],
-  'pika': ['Iniciando Pika…', 'Generando motion…', 'Aplicando efectos…', 'Listo'],
-  'svd': ['Preparando SVD…', 'Procesando frames…', 'Interpolando motion…', 'Finalizando…'],
+  'wan-2.5': ['Iniciando Wan 2.5…', 'Analizando prompt…', 'Generando frames…', 'Sintetizando motion…', 'Finalizando…'],
+  'wan-i2v': ['Cargando imagen…', 'Extrayendo movimiento…', 'Generando video…', 'Refinando detalles…', 'Listo'],
+  'pika-2.2': ['Iniciando Pika…', 'Procesando creatividad…', 'Generando motion…', 'Aplicando efectos…', 'Exportando…'],
+  'luma': ['Iniciando Dream Machine…', 'Renderizando escena…', 'Procesando personajes…', 'Finalizando…', 'Listo'],
+  'kling': ['Iniciando Kling…', 'Generando motion profesional…', 'Refinando transiciones…', 'Procesando…', 'Listo'],
+  'svd': ['Iniciando SVD…', 'Analizando imagen…', 'Generando motion simple…', 'Finalizando…', 'Listo'],
 };
 
 const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
@@ -86,7 +119,7 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const currentModel = VIDEO_MODELS.find(m => m.id === (data.model || 'veo-3')) || VIDEO_MODELS[0];
+  const currentModel = VIDEO_MODELS.find(m => m.id === (data.model || 'wan-2.5')) || VIDEO_MODELS[0];
   const currentRatio = ASPECT_RATIOS.find(r => r.id === (data.aspectRatio || '16:9')) || ASPECT_RATIOS[0];
 
   useEffect(() => {
@@ -94,10 +127,10 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
       setStepIndex(0);
       return;
     }
-    const steps = VIDEO_STEPS[currentModel.id] || VIDEO_STEPS['svd'];
+    const steps = VIDEO_STEPS[currentModel.id] || VIDEO_STEPS['wan-2.5'];
     const interval = setInterval(() => {
       setStepIndex(i => Math.min(i + 1, steps.length - 1));
-    }, 8000);
+    }, 6000);
     return () => clearInterval(interval);
   }, [data.status, isGenerating, currentModel.id]);
 
@@ -125,6 +158,13 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
 
   const handleGenerate = async () => {
     if (isGenerating) return;
+
+    // Validar imageRef para modelos que requieren imagen
+    if (currentModel.imageOnly && !data.imageRef) {
+      toast.error(`${currentModel.name} requiere una imagen de referencia`);
+      return;
+    }
+
     setIsGenerating(true);
     update({ status: 'executing' });
 
@@ -145,6 +185,7 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
             model: currentModel.id,
             prompt: data.prompt || 'A cinematic scene',
             aspectRatio: currentRatio.id,
+            duration: parseInt(currentModel.maxDuration),
           },
           image_url: data.imageRef,
         }),
@@ -178,7 +219,12 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
 
   const isExecuting = data.status === 'executing' || isGenerating;
   const isReady = data.status === 'ready' && data.assetUrl;
-  const steps = VIDEO_STEPS[currentModel.id] || VIDEO_STEPS['svd'];
+  const steps = VIDEO_STEPS[currentModel.id] || VIDEO_STEPS['wan-2.5'];
+
+  // Filtrar ratios disponibles para el modelo actual
+  const availableRatios = ASPECT_RATIOS.filter(r =>
+    currentModel.aspectRatios.includes(r.id)
+  );
 
   return (
     <BaseNode
@@ -193,7 +239,7 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
       defaultCollapsed={data.collapsed}
       onToggleCollapsed={handleToggleCollapsed}
       onToggleBypass={handleToggleBypass}
-      minWidth="340px"
+      minWidth="360px"
     >
       <div className="space-y-4">
         {/* Model Selector */}
@@ -219,9 +265,15 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <span
+                className="px-1.5 py-0.5 rounded text-[8px] font-bold text-white"
+                style={{ backgroundColor: currentModel.color }}
+              >
+                {currentModel.credits}⭐
+              </span>
               {currentModel.badge && (
                 <span
-                  className="px-1.5 py-0.5 rounded text-[8px] font-bold text-white"
+                  className="px-1 py-0.5 rounded text-[7px] font-bold text-white"
                   style={{ backgroundColor: currentModel.color }}
                 >
                   {currentModel.badge}
@@ -232,8 +284,12 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
           </button>
 
           {modelOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1.5 rounded-xl border border-zinc-200 bg-white shadow-xl z-50 overflow-hidden">
-              {VIDEO_MODELS.map(model => (
+            <div className="absolute top-full left-0 right-0 mt-1.5 rounded-xl border border-zinc-200 bg-white shadow-xl z-50 overflow-hidden max-h-[400px] overflow-y-auto">
+              {/* Premium Tier */}
+              <div className="px-3 py-2 bg-gradient-to-r from-amber-50 to-orange-50 border-b border-amber-100">
+                <span className="text-[9px] font-bold text-amber-700 uppercase tracking-wider">⭐ Premium</span>
+              </div>
+              {VIDEO_MODELS.filter(m => m.tier === 'premium').map(model => (
                 <button
                   key={model.id}
                   onClick={() => { update({ model: model.id }); setModelOpen(false); }}
@@ -262,7 +318,81 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
                     <span className="text-[9px] text-zinc-500 block">{model.description}</span>
                     <div className="flex items-center gap-3 mt-1">
                       <span className="text-[8px] text-zinc-400">⏱️ {model.maxDuration}</span>
-                      <span className="text-[8px] text-zinc-400">💎 {model.cost} créditos</span>
+                      <span className="text-[8px] font-bold" style={{ color: model.color }}>
+                        {model.credits} créditos
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+
+              {/* Standard Tier */}
+              <div className="px-3 py-2 bg-zinc-50 border-b border-zinc-200">
+                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">Standard</span>
+              </div>
+              {VIDEO_MODELS.filter(m => m.tier === 'standard').map(model => (
+                <button
+                  key={model.id}
+                  onClick={() => { update({ model: model.id }); setModelOpen(false); }}
+                  className={`w-full px-3 py-3 flex items-start gap-3 hover:bg-zinc-50 transition-all border-b border-zinc-100 ${
+                    data.model === model.id ? 'bg-blue-50/50' : ''
+                  }`}
+                >
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0"
+                    style={{ backgroundColor: model.color }}
+                  >
+                    <Video className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-zinc-900">{model.name}</span>
+                      {model.badge && (
+                        <span className="px-1 py-0.5 rounded text-[7px] font-bold text-white bg-amber-500">
+                          {model.badge}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-zinc-500 block">{model.description}</span>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-[8px] text-zinc-400">⏱️ {model.maxDuration}</span>
+                      <span className="text-[8px] font-bold text-zinc-600">{model.credits} créditos</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+
+              {/* Budget Tier */}
+              <div className="px-3 py-2 bg-zinc-100 border-b border-zinc-200">
+                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-wider">💰 Económico</span>
+              </div>
+              {VIDEO_MODELS.filter(m => m.tier === 'budget').map(model => (
+                <button
+                  key={model.id}
+                  onClick={() => { update({ model: model.id }); setModelOpen(false); }}
+                  className={`w-full px-3 py-3 flex items-start gap-3 hover:bg-zinc-50 transition-all ${
+                    data.model === model.id ? 'bg-blue-50/50' : ''
+                  }`}
+                >
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0"
+                    style={{ backgroundColor: model.color }}
+                  >
+                    <ZapOff className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-zinc-900">{model.name}</span>
+                      {model.badge && (
+                        <span className="px-1 py-0.5 rounded text-[7px] font-bold text-white bg-zinc-500">
+                          {model.badge}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[9px] text-zinc-500 block">{model.description}</span>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className="text-[8px] text-zinc-400">⏱️ {model.maxDuration}</span>
+                      <span className="text-[8px] font-bold text-emerald-600">{model.credits} créditos</span>
                     </div>
                   </div>
                 </button>
@@ -277,7 +407,7 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
             Proporción
           </label>
           <div className="flex gap-2">
-            {ASPECT_RATIOS.map(ratio => (
+            {availableRatios.map(ratio => (
               <button
                 key={ratio.id}
                 onClick={() => { update({ aspectRatio: ratio.id }); setRatioOpen(false); }}
@@ -288,11 +418,37 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
                 }`}
               >
                 <span className="block text-center">{ratio.icon}</span>
-                <span className="block text-center mt-0.5">{ratio.label}</span>
+                <span className="block text-center mt-0.5 text-[9px]">{ratio.label}</span>
               </button>
             ))}
           </div>
         </div>
+
+        {/* Image Reference (for i2v models) */}
+        {(currentModel.imageOnly || currentModel.id === 'wan-i2v' || currentModel.id === 'pika-i2v') && (
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-1">
+              <ImageIcon className="w-3 h-3" />
+              Imagen de referencia {currentModel.imageOnly && <span className="text-red-500">*</span>}
+            </label>
+            {data.imageRef ? (
+              <div className="relative rounded-xl overflow-hidden border border-zinc-200">
+                <img src={data.imageRef} alt="Reference" className="w-full h-24 object-cover" />
+                <button
+                  onClick={() => update({ imageRef: undefined })}
+                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+            ) : (
+              <div className="h-20 rounded-xl border-2 border-dashed border-zinc-300 bg-zinc-50 flex flex-col items-center justify-center gap-2 text-zinc-400 hover:border-zinc-400 hover:bg-zinc-100 transition-all cursor-pointer">
+                <ImageIcon className="w-5 h-5" />
+                <span className="text-[10px]">Conecta una imagen de entrada</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Prompt Input */}
         <div className="space-y-2">
@@ -303,30 +459,12 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
             value={data.prompt || ''}
             onChange={e => update({ prompt: e.target.value })}
             onKeyDown={e => e.stopPropagation()}
-            placeholder="Describe la escena cinematográfica que quieres generar..."
+            placeholder={`Describe la escena para ${currentModel.name}...`}
             className="w-full text-xs leading-relaxed text-zinc-900 bg-zinc-50 border border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all resize-none min-h-[80px] placeholder:text-zinc-400"
           />
         </div>
 
-        {/* Reference Image */}
-        {data.imageRef && (
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">
-              Imagen de referencia
-            </label>
-            <div className="relative rounded-xl overflow-hidden border border-zinc-200">
-              <img src={data.imageRef} alt="Reference" className="w-full h-24 object-cover" />
-              <button
-                onClick={() => update({ imageRef: undefined })}
-                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Advanced Options Toggle */}
+        {/* Advanced Options */}
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
           className="flex items-center gap-2 text-[10px] text-zinc-500 hover:text-zinc-700 transition-colors"
@@ -344,7 +482,7 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
                 value={data.negativePrompt || ''}
                 onChange={e => update({ negativePrompt: e.target.value })}
                 onKeyDown={e => e.stopPropagation()}
-                placeholder="Elementos a evitar..."
+                placeholder="Elementos a evitar: blur, deformities..."
                 className="w-full text-[10px] text-zinc-800 bg-white border border-zinc-200 px-2.5 py-1.5 rounded-lg focus:outline-none focus:border-blue-400"
               />
             </div>
@@ -354,7 +492,7 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
         {/* Generate Button */}
         <button
           onClick={handleGenerate}
-          disabled={isExecuting || !data.prompt}
+          disabled={isExecuting || !data.prompt || (currentModel.imageOnly && !data.imageRef)}
           className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white text-xs font-bold uppercase tracking-wider shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             background: `linear-gradient(135deg, ${currentModel.color}, ${currentModel.color}dd)`,
@@ -369,7 +507,7 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
           ) : (
             <>
               <Sparkles className="w-4 h-4" />
-              Generar Video ({currentModel.cost} créditos)
+              Generar Video ({currentModel.credits} créditos)
             </>
           )}
         </button>
@@ -382,7 +520,7 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
                 <div
                   key={i}
                   className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-                    i <= stepIndex ? 'bg-blue-500' : 'bg-zinc-200'
+                    i <= stepIndex ? 'bg-emerald-500' : 'bg-zinc-200'
                   }`}
                 />
               ))}
@@ -441,22 +579,32 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
             <div className="text-center">
               <p className="text-[10px] text-zinc-500 font-medium">El video aparecerá aquí</p>
               <p className="text-[9px] text-zinc-400 mt-0.5">
-                {currentRatio.dimensions} • {currentModel.maxDuration}
+                {currentRatio.dimensions} • {currentModel.maxDuration} • {currentModel.credits} créditos
               </p>
             </div>
           </div>
         )}
 
-        {/* Model Info Footer */}
-        <div className="pt-3 border-t border-zinc-100 flex items-center justify-between text-[9px] text-zinc-400">
-          <div className="flex items-center gap-2">
-            <Clock className="w-3 h-3" />
-            <span>~{currentModel.maxDuration} duración</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span>{currentRatio.label}</span>
+        {/* Cost Info Footer */}
+        <div className="pt-3 border-t border-zinc-100">
+          <div className="flex items-center justify-between text-[9px] text-zinc-500 mb-2">
+            <div className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              <span>{currentModel.maxDuration}</span>
+            </div>
             <span className="text-zinc-300">|</span>
-            <span>{currentModel.cost} créditos</span>
+            <div className="flex items-center gap-1">
+              <Star className="w-3 h-3" />
+              <span>{currentModel.credits} créditos</span>
+            </div>
+          </div>
+
+          {/* Pricing explanation */}
+          <div className="p-2 bg-emerald-50 rounded-lg border border-emerald-100">
+            <p className="text-[9px] text-emerald-700 leading-relaxed">
+              💡 <strong>Modelo económico:</strong> Wan 2.5 ofrece la mejor calidad/precio.
+              SVD es la opción más barata para pruebas rápidas.
+            </p>
           </div>
         </div>
       </div>
