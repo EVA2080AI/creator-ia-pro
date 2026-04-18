@@ -33,8 +33,8 @@ export function LandingHeader(): React.ReactElement {
     { name: "Neural Architect", path: "/chat", icon: Code2 },
     { name: "Genesis Studio", path: "/studio", icon: Image },
     { name: "Canvas IA", path: "/canvas", icon: Layers, badge: "Nuevo" },
-    { name: "Computo", path: "/pricing", icon: CreditCard },
-    { name: "Operaciones", path: "/documentation", icon: BookOpen },
+    { name: "Planes", path: "/pricing", icon: CreditCard },
+    { name: "Docs", path: "/documentation", icon: BookOpen },
   ];
 
   return (
@@ -100,12 +100,12 @@ export function LandingHeader(): React.ReactElement {
             >
               INGRESAR
             </button>
-            <button 
-              onClick={() => navigate("/auth")}
+            <button
+              onClick={() => navigate("/pricing")}
               className="flex items-center gap-3 px-6 py-2.5 rounded-xl bg-zinc-950 text-white text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-black transition-all active:scale-95 group-cta italic"
             >
               <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-              Adquirir Soberania
+              Ver Planes
               <ArrowRight className="h-4 w-4 group-hover-cta:translate-x-1 transition-transform" />
             </button>
 

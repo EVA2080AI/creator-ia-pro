@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowRight, Code2, Image, Zap,
   CheckCircle2, Layers, MessageSquare, Video,
-  Star, Shield, Users, ChevronRight, Sparkles, Wand2, Check
+  Star, Shield, Users, ChevronRight, Sparkles, Wand2, Check, Bot
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { LandingHeader } from "@/components/layout/LandingHeader";
@@ -67,12 +67,13 @@ const PLANS = [
     color: "#64748B",
     description: "Para explorar el potencial de la IA",
     image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop",
+    badge: "Para empezar",
     features: ["Genesis IDE básico", "5 créditos totales", "Modelos estándar", "Soporte comunitario"]
   },
   {
     name: "Creador",
     price: "$149.900",
-    per: "/mes",
+    per: "COP/mes",
     credits: "1.000 créditos",
     color: "#94A3B8",
     description: "Todo lo que necesitas para empezar",
@@ -82,44 +83,47 @@ const PLANS = [
   {
     name: "Pro",
     price: "$349.900",
-    per: "/mes",
+    per: "COP/mes",
     credits: "3.000 créditos",
     color: "#6366F1",
     popular: true,
+    badge: "Más popular",
     description: "Para creadores que publican a diario",
     image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop",
-    features: ["Modelos premium (GPT-4, Claude)", "3.000 créditos/mes", "Generación prioritaria", "Soporte prioritario"]
+    features: ["Modelos premium (GPT-4, Claude)", "3.000 créditos/mes", "Generación prioritaria", "Múltiples chats simultáneos", "Soporte prioritario"]
   },
   {
     name: "Agencia",
     price: "$699.900",
-    per: "/mes",
+    per: "COP/mes",
     credits: "8.000 créditos",
     color: "#F59E0B",
+    badge: "Acceso total",
     description: "Ideal para equipos que crean en escala",
     image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=400&fit=crop",
-    features: ["Suite completa de IA", "8.000 créditos/mes", "Soporte 24/7", "Facturación directa"]
+    features: ["Suite completa: texto, imágenes y código", "8.000 créditos/mes", "Todos los modelos de IA", "Soporte 24/7", "Facturación directa"]
   },
   {
     name: "Pyme",
     price: "$1.499.900",
-    per: "/mes",
+    per: "COP/mes",
     credits: "20.000 créditos",
     color: "#10B981",
+    badge: "Para negocios",
     description: "IA a escala sin límites para negocios",
     image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&h=400&fit=crop",
-    features: ["20.000 créditos/mes", "Usuarios del equipo", "Integraciones API", "Gerente de cuenta"]
+    features: ["20.000 créditos/mes", "Todo del plan Agencia", "Usuarios adicionales del equipo", "Integraciones y API disponibles", "Gerente de cuenta"]
   },
   {
     name: "Empresarial",
     price: "A medida",
     per: "",
-    credits: "Créditos ilimitados",
+    credits: "Créditos personalizados",
     color: "#A855F7",
     description: "Solución personalizada para grandes organizaciones",
     image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop",
     isContact: true,
-    features: ["Volumen personalizado", "Infraestructura dedicada", "SLA garantizado", "Soporte enterprise"]
+    features: ["Volumen de créditos a la medida", "Infraestructura dedicada", "SLA personalizado", "Integración con tus herramientas", "Facturación corporativa NIT"]
   },
 ];
 
@@ -624,6 +628,174 @@ export default function Index() {
                   <p className="text-[11px] text-zinc-500">+50,000 creadores confían en nosotros</p>
                 </div>
               </motion.div>
+
+              {/* Hero Banner - Visual App Preview */}
+              <motion.div
+                variants={fadeUp}
+                initial="hidden"
+                animate="show"
+                custom={0.75}
+                className="relative mt-16 max-w-5xl mx-auto"
+              >
+                {/* Glow Effect */}
+                <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-violet-500/20 to-primary/20 rounded-3xl blur-3xl opacity-40" />
+
+                {/* Browser Frame */}
+                <div className="relative rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl overflow-hidden">
+                  {/* Browser Header */}
+                  <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-800 bg-zinc-800/50">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-rose-500" />
+                      <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                      <div className="w-3 h-3 rounded-full bg-green-500" />
+                    </div>
+                    <div className="flex-1 flex justify-center">
+                      <div className="px-4 py-1.5 rounded-lg bg-zinc-800 text-[10px] text-zinc-500 font-mono">
+                        creator-ia.com/studio
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* App Content */}
+                  <div className="p-4 space-y-4">
+                    {/* Studio Header */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">C</span>
+                        </div>
+                        <span className="text-white font-bold text-sm">Genesis Studio</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+                          2,847 créditos
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Chat Interface */}
+                    <div className="space-y-3">
+                      {/* AI Message */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 1 }}
+                        className="flex gap-3"
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shrink-0">
+                          <Sparkles className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="flex-1 space-y-2 bg-zinc-800/50 rounded-2xl rounded-tl-sm p-3 max-w-md">
+                          <div className="h-2 w-3/4 bg-zinc-700 rounded" />
+                          <div className="h-2 w-full bg-zinc-700 rounded" />
+                          <div className="h-2 w-1/2 bg-zinc-700 rounded" />
+                        </div>
+                      </motion.div>
+
+                      {/* User Message */}
+                      <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 1.2 }}
+                        className="flex gap-3 justify-end"
+                      >
+                        <div className="bg-primary/20 rounded-2xl rounded-tr-sm p-3 max-w-xs">
+                          <div className="h-2 w-32 bg-primary/40 rounded" />
+                        </div>
+                      </motion.div>
+
+                      {/* AI Response with Images */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 1.4 }}
+                        className="flex gap-3"
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center shrink-0">
+                          <Sparkles className="h-4 w-4 text-white" />
+                        </div>
+                        <div className="flex-1 space-y-3 bg-zinc-800/50 rounded-2xl rounded-tl-sm p-3 max-w-md">
+                          <div className="h-2 w-1/2 bg-zinc-700 rounded" />
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="aspect-square rounded-lg bg-zinc-700/50 border border-zinc-700 flex items-center justify-center">
+                              <Image className="h-6 w-6 text-zinc-600" />
+                            </div>
+                            <div className="aspect-square rounded-lg bg-zinc-700/50 border border-zinc-700 flex items-center justify-center">
+                              <Image className="h-6 w-6 text-zinc-600" />
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </div>
+
+                    {/* Input Area */}
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-zinc-800 border border-zinc-700">
+                      <div className="flex-1 text-[11px] text-zinc-500">
+                        Escribe tu mensaje...
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Image className="h-4 w-4 text-zinc-500" />
+                        <Code2 className="h-4 w-4 text-zinc-500" />
+                        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                          <ArrowRight className="h-4 w-4 text-white" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Cards */}
+                <motion.div
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.6 }}
+                  className="absolute -left-4 md:-left-12 top-1/4 px-4 py-3 rounded-xl bg-white border border-zinc-200 shadow-xl"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                      <Zap className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-zinc-500 uppercase tracking-wider">Generación</div>
+                      <div className="text-xs font-bold text-zinc-900">10x más rápida</div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.7 }}
+                  className="absolute -right-4 md:-right-12 top-1/3 px-4 py-3 rounded-xl bg-white border border-zinc-200 shadow-xl"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Bot className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-zinc-500 uppercase tracking-wider">Modelos</div>
+                      <div className="text-xs font-bold text-zinc-900">GPT-4, Claude, Gemini</div>
+                    </div>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.8 }}
+                  className="absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-3 rounded-xl bg-white border border-zinc-200 shadow-xl"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-violet-100 flex items-center justify-center">
+                      <Code2 className="h-5 w-5 text-violet-600" />
+                    </div>
+                    <div>
+                      <div className="text-[10px] text-zinc-500 uppercase tracking-wider">Exportar</div>
+                      <div className="text-xs font-bold text-zinc-900">Código + Imágenes</div>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
             </div>
           </section>
 
@@ -1126,12 +1298,12 @@ export default function Index() {
 
           {/* ── Pricing ─────────────────────────────────────────────────── */}
           <section className="px-6 md:px-12 py-20 border-t border-zinc-200 bg-zinc-50">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-6xl mx-auto">
               <InViewSection className="text-center mb-12">
-                <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-black text-zinc-900 mb-3">Precios simples.</motion.h2>
-                <motion.p variants={fadeUp} custom={0.1} className="text-zinc-400 text-[15px]">Sin sorpresas. Cancela cuando quieras.</motion.p>
+                <motion.h2 variants={fadeUp} custom={0} className="text-3xl md:text-4xl font-black text-zinc-900 mb-3">Planes Flexibles.</motion.h2>
+                <motion.p variants={fadeUp} custom={0.1} className="text-zinc-400 text-[15px]">Escala a tu propio ritmo. Paga en pesos colombianos con Bold.</motion.p>
               </InViewSection>
-              <InViewSection className="grid md:grid-cols-3 gap-6">
+              <InViewSection className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {PLANS.map((plan, pi) => (
                   <motion.div
                     key={plan.name}
@@ -1140,8 +1312,8 @@ export default function Index() {
                     whileHover={{ y: -8, boxShadow: plan.popular ? `0 20px 60px ${plan.color}25` : "0 12px 32px rgba(0,0,0,0.08)" }}
                     className={`group relative rounded-2xl border overflow-hidden transition-all cursor-pointer flex flex-col ${
                       plan.popular
-                        ? 'border-primary/40 bg-white'
-                        : 'border-zinc-200 bg-white'
+                        ? 'border-primary/40 bg-white shadow-2xl'
+                        : 'border-zinc-200 bg-white hover:border-zinc-300'
                     }`}
                   >
                     {/* Plan Image */}
@@ -1153,13 +1325,13 @@ export default function Index() {
                         whileHover={{ scale: 1.05 }}
                         transition={{ duration: 0.4 }}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                       <div className="absolute bottom-3 left-4 right-4">
                         <p className="text-[11px] font-bold uppercase tracking-widest text-white/90">{plan.name}</p>
                       </div>
-                      {plan.popular && (
-                        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-primary text-white text-[9px] font-black uppercase tracking-wider shadow-lg">
-                          Popular
+                      {plan.badge && (
+                        <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-white text-[9px] font-black uppercase tracking-wider shadow-lg ${plan.popular ? 'bg-primary' : 'bg-zinc-800'}`}>
+                          {plan.badge}
                         </div>
                       )}
                     </div>
@@ -1171,12 +1343,12 @@ export default function Index() {
                           <span className="text-3xl font-black text-zinc-900">{plan.price}</span>
                           <span className="text-zinc-400 text-sm">{plan.per}</span>
                         </div>
-                        <p className="text-[12px] text-zinc-500">{plan.credits}</p>
+                        <p className="text-[12px] text-primary font-medium">{plan.credits}</p>
                         <p className="text-[11px] text-zinc-400 mt-2">{plan.description}</p>
                       </div>
                       <ul className="flex flex-col gap-2 mb-5 flex-1">
-                        {plan.features.slice(0, 4).map((f) => (
-                          <li key={f} className="flex items-center gap-2 text-[12px] text-zinc-500">
+                        {plan.features.map((f) => (
+                          <li key={f} className="flex items-center gap-2 text-[12px] text-zinc-600">
                             <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: plan.color }} />
                             {f}
                           </li>
@@ -1186,13 +1358,15 @@ export default function Index() {
                         onClick={() => navigate("/pricing")}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.97 }}
-                        className={`w-full py-2.5 rounded-xl text-[13px] font-bold transition-all ${
+                        className={`w-full py-3 rounded-xl text-[13px] font-black uppercase tracking-wider transition-all ${
                           plan.popular
                             ? 'bg-primary text-white hover:bg-primary/90'
-                            : 'border border-zinc-200 text-zinc-500 hover:text-zinc-900 hover:border-zinc-300'
+                            : plan.isContact
+                              ? 'bg-zinc-900 text-white hover:bg-zinc-800'
+                              : 'border border-zinc-200 text-zinc-600 hover:text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50'
                         }`}
                       >
-                        Empezar con {plan.name}
+                        {plan.isContact ? 'Contactar' : `Elegir ${plan.name}`}
                       </motion.button>
                     </div>
                   </motion.div>
