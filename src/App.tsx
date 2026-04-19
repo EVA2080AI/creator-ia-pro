@@ -23,7 +23,7 @@ function AuthWatcher() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
-        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/inicio", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs"];
+        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/inicio", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs", "/cookies"];
         const isPublic = publicPaths.some(p =>
           window.location.pathname === p || window.location.pathname.startsWith("/herramienta")
         );
@@ -58,6 +58,7 @@ const Privacy       = lazy(() => import("./pages/Privacy"));
 const Security      = lazy(() => import("./pages/Security"));
 const Contact       = lazy(() => import("./pages/Contact"));
 const Help          = lazy(() => import("./pages/Help"));
+const Cookies       = lazy(() => import("./pages/Cookies"));
 
 // Auth — rendered inside AppLayout
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
@@ -142,6 +143,7 @@ const App = () => {
                   <Route path="/security"             element={<Security />} />
                   <Route path="/contact"              element={<Contact />} />
                   <Route path="/help"                 element={<Help />} />
+                  <Route path="/cookies"              element={<Cookies />} />
                   
                   {/* Lumina Bistro Flow */}
                   <Route path="/menu"              element={<LuminaMenu />} />
