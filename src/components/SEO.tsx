@@ -101,4 +101,24 @@ export const seoPresets = {
     description: "Restablece tu contraseña de Creator IA Pro.",
     noindex: true,
   },
+  terms: {
+    title: "Términos de Servicio",
+    description: "Términos y condiciones de uso de Creator IA Pro. Lee nuestras políticas de uso del servicio, pagos, créditos y responsabilidades.",
+    keywords: "términos, condiciones, legal, contrato, Creator IA Pro, Colombia",
+  },
+  privacy: {
+    title: "Política de Privacidad",
+    description: "Política de privacidad de Creator IA Pro. Conoce cómo protegemos tus datos personales y cumplimos con la legislación colombiana.",
+    keywords: "privacidad, datos personales, protección, Ley 1581, Colombia, GDPR",
+  },
+  security: {
+    title: "Seguridad",
+    description: "Conoce nuestras medidas de seguridad: encriptación AES-256, autenticación segura, cumplimiento SOC 2 y protección de datos empresarial.",
+    keywords: "seguridad, encriptación, AES-256, SOC 2, protección datos, privacidad",
+  },
+  contact: {
+    title: "Contacto",
+    description: "Contacta al equipo de Creator IA Pro. Soporte técnico, preguntas sobre planes, o consultas generales. Estamos aquí para ayudarte.",
+    keywords: "contacto, soporte, ayuda, Creator IA Pro, Colombia, atención al cliente",
+  },
 };

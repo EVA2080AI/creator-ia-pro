@@ -653,6 +653,17 @@ export default function Pricing() {
               </div>
             ))}
           </section>
+
+          {/* Terms Notice */}
+          <section className="px-6 max-w-3xl mx-auto mb-20 text-center">
+            <p className="text-xs text-zinc-400">
+              Al adquirir cualquier plan, aceptas nuestros{" "}
+              <a href="/terms" className="text-primary hover:underline">Términos de Servicio</a>{" "}
+              y{" "}
+              <a href="/privacy" className="text-primary hover:underline">Política de Privacidad</a>.
+              Los pagos son procesados por Bold.co. Precios en pesos colombianos (COP).
+            </p>
+          </section>
         </div>
       </div>
     </>

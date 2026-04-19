@@ -48,6 +48,32 @@
     <priority>0.5</priority>
   </url>
 
+  <!-- Legal Pages -->
+  <url>
+    <loc>https://creator-ia.com/terms</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://creator-ia.com/privacy</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://creator-ia.com/security</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://creator-ia.com/contact</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Tool Landing Pages -->
   <url>
     <loc>https://creator-ia.com/herramienta/mejorar-imagen</loc>

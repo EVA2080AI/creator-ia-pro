@@ -249,10 +249,11 @@ Creator IA Pro
 ## 7. RUTAS FALTANTES / POR IMPLEMENTAR
 
 ### Para Producción (Must Have)
-- [ ] `/terms` — Términos de servicio
-- [ ] `/privacy` — Política de privacidad completa
-- [ ] `/contact` — Página de contacto/soporte
-- [ ] `/help` — Centro de ayuda
+- [x] `/terms` — Términos de servicio ✅
+- [x] `/privacy` — Política de privacidad completa ✅
+- [x] `/security` — Página de seguridad ✅
+- [x] `/contact` — Página de contacto/soporte ✅
+- [ ] `/help` — Centro de ayuda (documentación funciona como help)
 
 ### Post-Launch (Should Have)
 - [ ] `/blog` — Blog de contenido

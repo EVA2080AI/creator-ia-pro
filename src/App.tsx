@@ -24,7 +24,7 @@ function AuthWatcher() {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
-        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/inicio"];
+        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/inicio", "/terms", "/privacy", "/security", "/contact", "/documentation", "/docs"];
         const isPublic = publicPaths.some(p =>
           window.location.pathname === p || window.location.pathname.startsWith("/herramienta")
         );
@@ -52,6 +52,12 @@ const ProductBacklog = lazy(() => import("./pages/ProductBacklog"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const Documentation  = lazy(() => import("./pages/Documentation"));
 const NotFound      = lazy(() => import("./pages/NotFound"));
+
+// Legal pages
+const Terms         = lazy(() => import("./pages/Terms"));
+const Privacy       = lazy(() => import("./pages/Privacy"));
+const Security      = lazy(() => import("./pages/Security"));
+const Contact       = lazy(() => import("./pages/Contact"));
 
 // Auth — rendered inside AppLayout
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
@@ -130,6 +136,12 @@ const App = () => {
                   <Route path="/documentation"        element={<Documentation />} />
                   <Route path="/docs"                 element={<Docs />} />
                   <Route path="/landing-test"         element={<LandingPage />} />
+
+                  {/* Legal pages */}
+                  <Route path="/terms"                element={<Terms />} />
+                  <Route path="/privacy"              element={<Privacy />} />
+                  <Route path="/security"             element={<Security />} />
+                  <Route path="/contact"              element={<Contact />} />
                   
                   {/* Lumina Bistro Flow */}
                   <Route path="/menu"              element={<LuminaMenu />} />
