@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -9,6 +9,10 @@ import { HelmetProvider } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { GlobalSearch } from "@/components/search/GlobalSearch";
+import { PerformanceMonitor } from "@/components/performance/PerformanceMonitor";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { usePageTracking } from "@/hooks/useAnalytics";
 import Docs from "./pages/Docs";
 
 // Redirect /canvas → /studio-flow preserving query params
@@ -20,6 +24,19 @@ const CanvasRedirect = () => {
 // Global auth session watcher — handles token expiry and forced sign-out
 function AuthWatcher() {
   const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Track page views for analytics
+  usePageTracking();
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    { key: 'k', meta: true, handler: () => setSearchOpen(true) },
+    { key: 'p', meta: true, shift: true, handler: () => navigate('/profile') },
+    { key: 'd', meta: true, shift: true, handler: () => navigate('/dashboard') },
+    { key: 'h', meta: true, shift: true, handler: () => navigate('/help') },
+  ]);
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
@@ -35,7 +52,13 @@ function AuthWatcher() {
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
-  return null;
+
+  return (
+    <>
+      <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <PerformanceMonitor enabled={import.meta.env.DEV} />
+    </>
+  );
 }
 
 // ── Lazy pages ───────────────────────────────────────────────────────────────

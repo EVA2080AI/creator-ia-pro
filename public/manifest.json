@@ -1,12 +1,16 @@
 {
   "name": "Creator IA Pro",
   "short_name": "Creator IA",
-  "description": "Tu hub de IA generativa — imágenes, textos, videos y chat con los mejores modelos.",
+  "description": "Hub de IA Generativa para crear apps, imágenes y contenido con los mejores modelos de IA",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#050506",
-  "theme_color": "#050506",
+  "background_color": "#ffffff",
+  "theme_color": "#8B5CF6",
   "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["productivity", "developer tools", "graphics", "ai"],
+  "lang": "es",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/favicon.svg",
@@ -15,25 +19,36 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "utilities", "business"],
-  "lang": "es",
-  "dir": "ltr",
-  "screenshots": [],
   "shortcuts": [
     {
-      "name": "AI Tools",
-      "url": "/tools",
-      "description": "Genera imágenes y textos con IA"
+      "name": "Nuevo Proyecto",
+      "short_name": "Proyecto",
+      "description": "Crear un nuevo proyecto",
+      "url": "/studio-flow",
+      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
     },
     {
-      "name": "Aether Chat",
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Ver dashboard personal",
+      "url": "/dashboard",
+      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Chat IA",
+      "short_name": "Chat",
+      "description": "Abrir chat con BuilderAI",
       "url": "/chat",
-      "description": "Chat con Claude, Gemini, Mistral y más"
+      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
     },
     {
-      "name": "Studio Canvas",
-      "url": "/formarketing",
-      "description": "Canvas creativo node-based"
+      "name": "Herramientas IA",
+      "short_name": "Tools",
+      "description": "Generar imágenes y texto",
+      "url": "/tools",
+      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
     }
-  ]
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }
