@@ -121,4 +121,9 @@ export const seoPresets = {
     description: "Contacta al equipo de Creator IA Pro. Soporte técnico, preguntas sobre planes, o consultas generales. Estamos aquí para ayudarte.",
     keywords: "contacto, soporte, ayuda, Creator IA Pro, Colombia, atención al cliente",
   },
+  help: {
+    title: "Centro de Ayuda",
+    description: "Encuentra respuestas a tus preguntas sobre Creator IA Pro. Guías, FAQs, documentación y soporte.",
+    keywords: "ayuda, soporte, FAQ, preguntas frecuentes, Creator IA Pro, tutorial",
+  },
 };

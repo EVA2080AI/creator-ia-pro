@@ -253,7 +253,7 @@ Creator IA Pro
 - [x] `/privacy` — Política de privacidad completa ✅
 - [x] `/security` — Página de seguridad ✅
 - [x] `/contact` — Página de contacto/soporte ✅
-- [ ] `/help` — Centro de ayuda (documentación funciona como help)
+- [x] `/help` — Centro de ayuda ✅
 
 ### Post-Launch (Should Have)
 - [ ] `/blog` — Blog de contenido
