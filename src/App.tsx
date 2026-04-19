@@ -127,7 +127,7 @@ const App = () => {
                 <Routes>
                   {/* ── Public routes (no AppLayout) ── */}
                   <Route path="/"                     element={<Index />} />
-                  <Route path="/home"                 element={<HomePage />} />
+                  <Route path="/home"                 element={<Navigate to="/" replace />} />
                   <Route path="/auth"                 element={<Auth />} />
                   <Route path="/pricing"              element={<Pricing />} />
                   <Route path="/descargar"            element={<Downloads />} />
@@ -136,7 +136,7 @@ const App = () => {
                   <Route path="/reset-password"       element={<ResetPassword />} />
                   <Route path="/documentation"        element={<Documentation />} />
                   <Route path="/docs"                 element={<Docs />} />
-                  <Route path="/landing-test"         element={<LandingPage />} />
+                  <Route path="/landing-test"         element={<Navigate to="/" replace />} />
 
                   {/* Legal pages */}
                   <Route path="/terms"                element={<Terms />} />

@@ -155,7 +155,32 @@ export function classifyError(msg: string): ClassifiedError {
   return { type: 'unknown', userMessage: msg || 'Error desconocido. Intenta de nuevo.', canRetry: true };
 }
 
+// ─── RETRY CONFIGURATION ───────────────────────────────────────────────────
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000;
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export const aiService = {
+
+  async callProxyWithRetry(provider: string, path: string, body: unknown, retries = MAX_RETRIES): Promise<ProxyResponse> {
+    try {
+      return await this.callProxy(provider, path, body);
+    } catch (err) {
+      const error = err as Error;
+      const classified = classifyError(error.message);
+
+      if (classified.canRetry && retries > 0) {
+        console.log(`[AI Retry] Reintentando... ${MAX_RETRIES - retries + 1}/${MAX_RETRIES}`);
+        await sleep(RETRY_DELAY_MS * (MAX_RETRIES - retries + 1)); // Exponential backoff
+        return this.callProxyWithRetry(provider, path, body, retries - 1);
+      }
+
+      throw err;
+    }
+  },
 
   async callProxy(provider: string, path: string, body: unknown): Promise<ProxyResponse> {
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -295,7 +320,7 @@ export const aiService = {
       systemPrompt += `\n\nEres un experto UX/UI. Genera SOLO JSON válido: { "ui": { "title": "string", "description": "string", "components": [...] }, "device": "mobile|tablet|desktop" }. Sin markdown.`;
     }
 
-    const data = await this.callProxy("openrouter", "chat/completions", {
+    const data = await this.callProxyWithRetry("openrouter", "chat/completions", {
       model: orModel,
       messages: [
         { role: "system", content: systemPrompt },
@@ -329,7 +354,7 @@ export const aiService = {
     const body: Record<string, unknown> = { prompt: finalPrompt, model: orModel, width: width || 1024, height: height || 1024 };
     if (imageUrl) body.image_url = imageUrl;
 
-    const data = await this.callProxy("openrouter-image", "", body);
+    const data = await this.callProxyWithRetry("openrouter-image", "", body);
     if (data?.url) return { url: data.url, model: data.model ?? orModel };
     throw new Error("No se pudo generar la imagen. Intenta de nuevo.");
   },
