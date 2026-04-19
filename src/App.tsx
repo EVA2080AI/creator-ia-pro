@@ -152,7 +152,8 @@ const App = () => {
                   <Route path="/success"           element={<ConfirmacionDeEnvio />} />
 
                   {/* Nebula Finance Ecosystem */}
-                  <Route path="/nebula"            element={<NebulaDashboard />} />
+                  {/* Nebula Finance - Coming Soon */}
+                  <Route path="/nebula"            element={<Navigate to="/dashboard" replace />} />
 
                   {/* ── Redirects ── */}
                   <Route path="/canvas"  element={<CanvasRedirect />} />

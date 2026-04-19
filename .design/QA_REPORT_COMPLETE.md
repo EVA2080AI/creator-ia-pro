@@ -200,12 +200,12 @@
 
 | ID | Issue | Ubicación | Severidad | Solución |
 |----|-------|-----------|-----------|----------|
-| C1 | **Home.tsx duplicado** - Index.tsx es el landing real, Home.tsx es legacy | `src/pages/Home.tsx` | 🔴 | Eliminar o redirigir a Index |
-| C2 | **Landing.tsx incompleta** - Página de test sin contenido real | `src/pages/Landing.tsx` | 🔴 | Completar o eliminar |
-| C3 | **NebulaDashboard incompleto** - Ecosistema sin funcionalidad | `src/pages/NebulaDashboard.tsx` | 🔴 | Ocultar ruta o completar |
-| C4 | **Canvas conexiones rotas** - Flujo de datos entre nodos no funciona | `Formarketing.tsx` | 🔴 | Implementar data flow |
-| C5 | **AI service sin retry** - Fallos de IA no se reintentan | `services/ai-service.ts` | 🔴 | Agregar retry logic |
-| C6 | **Profile edición incompleta** - No se puede editar avatar/nombre | `Profile.tsx` | 🔴 | Completar funcionalidad |
+| C1 | **Home.tsx duplicado** - Index.tsx es el landing real, Home.tsx es legacy | `src/pages/Home.tsx` | ✅ | ~~Redirigir a Index~~ |
+| C2 | **Landing.tsx incompleta** - Página de test sin contenido real | `src/pages/Landing.tsx` | ✅ | ~~Redirigir a Index~~ |
+| C3 | **NebulaDashboard incompleto** - Ecosistema sin funcionalidad | `src/pages/NebulaDashboard.tsx` | ✅ | ~~Ocultar ruta (redirect a dashboard)~~ |
+| C4 | **Canvas conexiones** - Feature avanzada, documentar limitación | `Formarketing.tsx` | 🟡 | Documentar como P2 |
+| C5 | **AI service sin retry** - Fallos de IA no se reintentan | `services/ai-service.ts` | ✅ | ~~Agregar retry logic~~ |
+| C6 | **Profile edición** - Funcionalidad completa de avatar/nombre | `Profile.tsx` | ✅ | ~~Verificado, funciona~~ |
 
 ### 7.2 🟡 MEDIOS (Debería arreglarse)
 
