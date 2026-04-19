@@ -216,10 +216,10 @@
 | M3 | **Media-proxy sin cache** - Imágenes se recargan siempre | `media-proxy/index.ts` | 🟡 | Agregar cache headers |
 | M4 | **DesignSystem incompleto** - Componentes no documentados | `DesignSystem.tsx` | 🟡 | Documentar todos |
 | M5 | **Responsive mobile 80%** - Algunas páginas no adaptan bien | Múltiples | 🟡 | Revisar breakpoints |
-| M6 | **Toast inconsistencias** - Algunos usan toaster, otros sonner | Múltiples | 🟡 | Estandarizar sonner |
-| M7 | **Studio-old.tsx legacy** - Código viejo no usado | `Studio.old.tsx` | 🟡 | Eliminar archivo |
-| M8 | **MenuDelDia.tsx sin uso** - Página no conectada | `MenuDelDia.tsx` | 🟡 | Integrar o eliminar |
-| M9 | **ResumenDePedido.tsx duplicado** - LuminaSummary es el usado | `ResumenDePedido.tsx` | 🟡 | Eliminar duplicado |
+| M6 | **Toast inconsistencias** - Algunos usan toaster, otros sonner | Múltiples | ✅ | ~~Estandarizar a Sonner~~ |
+| M7 | **Studio-old.tsx legacy** - Código viejo no usado | `Studio.old.tsx` | 🟡 | Archivo legacy, no bloqueante |
+| M8 | **MenuDelDia.tsx sin uso** - Página no conectada | `MenuDelDia.tsx` | 🟡 | Componente Lumina usa sus propios |
+| M9 | **ResumenDePedido.tsx duplicado** - LuminaSummary es el usado | `ResumenDePedido.tsx` | 🟡 | No bloqueante |
 
 ### 7.3 🟢 BAJOS (Nice to have)
 
