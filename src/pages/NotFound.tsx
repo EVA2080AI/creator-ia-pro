@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { Helmet } from "react-helmet-async";
+import { SEO, seoPresets } from "@/components/SEO";
 
 const NotFound = () => {
   const location = useLocation();
@@ -11,7 +11,7 @@ const NotFound = () => {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background font-sans">
-      <Helmet><title>Página No Encontrada | Creator IA Pro</title></Helmet>
+      <SEO {...seoPresets.notFound} />
       <div className="text-center animate-in fade-in zoom-in duration-700">
         <h1 className="mb-6 text-[10rem] font-black text-zinc-200 tracking-tighter lowercase leading-none">404</h1>
         <p className="mb-10 text-[9px] font-black text-zinc-400 uppercase tracking-[0.5em]">Página no encontrada</p>

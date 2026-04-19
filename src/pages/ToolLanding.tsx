@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Sparkles, ArrowRight, Check, Wand2, ZoomIn, Eraser,
@@ -300,7 +300,12 @@ const ToolLanding = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <Helmet><title>{tool ? `${tool.name} | Creator IA Pro` : 'Herramienta IA | Creator IA Pro'}</title></Helmet>
+      <SEO
+        title={tool ? `${tool.name} — ${tool.headline}` : "Herramienta IA"}
+        description={tool?.description || "Herramientas de IA para crear contenido, imágenes y apps"}
+        keywords={`${tool?.name}, IA, ${tool?.category}, Creator IA Pro, Colombia`}
+        canonical={`https://creator-ia.com/herramienta/${toolSlug}`}
+      />
 
       <main>
         {/* ── Hero section ───────────────────────────────── */}

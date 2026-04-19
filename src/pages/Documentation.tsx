@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
-import { 
-  Book, Code2, Cpu, Globe, Rocket, 
-  Shield, Zap, ChevronRight, Search, 
-  Terminal, Layers, Sparkles, Box 
+import {
+  Book, Code2, Cpu, Globe, Rocket,
+  Shield, Zap, ChevronRight, Search,
+  Terminal, Layers, Sparkles, Box
 } from "lucide-react";
 import { LandingHeader } from "../components/layout/LandingHeader";
 import { Footer } from "../components/Footer";
+import { SEO } from "@/components/SEO";
 import { cn } from "@/lib/utils";
 
 const DOCS_SECTIONS = [
@@ -41,6 +42,12 @@ const DOCS_SECTIONS = [
 export default function Documentation() {
   return (
     <div className="min-h-screen bg-white selection:bg-primary/10">
+      <SEO
+        title="Documentación — Genesis IDE"
+        description="Guías técnicas, protocolos y estándares arquitectónicos de Creator IA Pro. Aprende a diseñar, construir y desplegar con la potencia de Genesis."
+        keywords="documentación, Genesis IDE, API, guía, tutorial, React, Colombia"
+        canonical="https://creator-ia.com/documentation"
+      />
       <LandingHeader />
       
       {/* Hero Section */}

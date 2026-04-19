@@ -1,21 +1,21 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { 
-  Book, 
-  Zap, 
-  Terminal, 
-  Shield, 
-  Cpu, 
-  Globe, 
-  ArrowLeft, 
+import {
+  Book,
+  Zap,
+  Terminal,
+  Shield,
+  Cpu,
+  Globe,
+  ArrowLeft,
   ChevronRight,
   Sparkles,
   Code,
   Layout,
   Database
 } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
+import { SEO } from '@/components/SEO';
 
 const Docs = () => {
   const navigate = useNavigate();
@@ -106,7 +106,12 @@ const Docs = () => {
 
   return (
     <div className="min-h-screen bg-black text-white selection:bg-primary/30 font-sans">
-      <Helmet><title>Documentation | Genesis IA</title></Helmet>
+      <SEO
+        title="Documentación Neural — Genesis Studio"
+        description="Documentación técnica de Genesis Studio: Neural Cycles, Studio Flow, despliegues cloud y más."
+        keywords="documentación, Neural Cycles, Genesis Studio, API, Colombia"
+        canonical="https://creator-ia.com/docs"
+      />
 
       {/* Iridescent Header */}
       <header className="h-20 border-b border-white/5 flex items-center justify-between px-10 sticky top-0 bg-black/80 backdrop-blur-xl z-50">

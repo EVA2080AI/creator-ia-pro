@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEO, seoPresets } from "@/components/SEO";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,7 +73,7 @@ const Auth = () => {
 
   return (
     <div className="flex min-h-screen bg-background bg-grid-white/[0.02] font-sans selection:bg-primary/15 selection:text-zinc-900 overflow-hidden">
-      <Helmet><title>Iniciar Sesión | Creator IA Pro</title></Helmet>
+      <SEO {...seoPresets.auth} />
 
       {/* Left Panel — Value Prop */}
       <div className="hidden lg:flex lg:w-[45%] flex-col justify-between px-16 py-16 relative overflow-hidden bg-zinc-50 border-r border-zinc-200">

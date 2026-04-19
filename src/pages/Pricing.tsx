@@ -273,8 +273,25 @@ export default function Pricing() {
   return (
     <>
       <Helmet>
-        <title>Planes y Precios | Creator IA Pro</title>
-        <meta name="description" content="Crea contenido increíble con IA. Elige el plan ideal para ti y paga en pesos colombianos con Bold." />
+        <title>Planes y Precios — Creator IA Pro (Desde $0)</title>
+        <meta name="description" content="6 planes flexibles: Free, Creador ($149.900), Pro ($349.900), Agencia ($699.900), Pyme y Empresarial. Paga en pesos colombianos con Bold." />
+        <meta name="keywords" content="precios IA, planes GPT-4, Bold Colombia, créditos IA, suscripción IA" />
+        <meta name="robots" content="index, follow" />
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://creator-ia.com/pricing" />
+        <meta property="og:title" content="Planes y Precios — Creator IA Pro" />
+        <meta property="og:description" content="6 planes desde $0. Paga en pesos colombianos con Bold. GPT-4, Claude, Gemini incluidos." />
+        <meta property="og:image" content="https://creator-ia.com/og-pricing.jpg" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:title" content="Planes y Precios — Creator IA Pro" />
+        <meta property="twitter:description" content="6 planes desde $0. Paga en COP con Bold." />
+        <meta property="twitter:image" content="https://creator-ia.com/og-pricing.jpg" />
+
+        <link rel="canonical" href="https://creator-ia.com/pricing" />
       </Helmet>
 
       <div className="h-full bg-background selection:bg-primary/15 relative overflow-x-hidden">

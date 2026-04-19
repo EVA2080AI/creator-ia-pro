@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import { SEO } from "@/components/SEO";
 import {
   Sparkles, ArrowLeft, Globe,
   Check, Shield, Zap, RefreshCw, Cloud, Monitor, Smartphone,
@@ -10,7 +10,12 @@ const Downloads = () => {
 
   return (
     <>
-      <Helmet><title>Descargas | Creator IA Pro</title></Helmet>
+      <SEO
+        title="Descargar Creator IA Pro"
+        description="Accede a Creator IA Pro desde cualquier dispositivo. Web app disponible sin instalación. Compatible con Chrome, Safari, Firefox y Edge."
+        keywords="descargar, web app, Chrome, Safari, Firefox, Edge, Colombia"
+        canonical="https://creator-ia.com/descargar"
+      />
       {/* Background glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-primary/4 blur-[180px] opacity-60" />

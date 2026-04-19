@@ -1,8 +1,13 @@
+# Creator IA Pro - Robots.txt
+# https://creator-ia.com
+
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 1
 
 User-agent: Twitterbot
 Allow: /
@@ -12,3 +17,18 @@ Allow: /
 
 User-agent: *
 Allow: /
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://creator-ia.com/sitemap.xml
+
+# Disallow private/admin routes
+Disallow: /admin
+Disallow: /system-status
+Disallow: /sharescreen
+Disallow: /product-backlog
+Disallow: /design-system
+Disallow: /nebula
+
+# Disallow auth callbacks (optional)
+Disallow: /auth/callback

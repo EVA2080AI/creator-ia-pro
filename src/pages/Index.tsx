@@ -434,8 +434,34 @@ export default function Index() {
   return (
     <>
       <Helmet>
-        <title>Creator IA Pro — Genesis IDE + Studio de IA</title>
-        <meta name="description" content="Genera apps React completas con Genesis IDE y crea imágenes, logos y textos con Studio. Todo con IA. Desde $69.000 COP/mes." />
+        <title>Creator IA Pro — Crea Apps con IA en Segundos</title>
+        <meta name="description" content="La plataforma definitiva para crear apps React, imágenes y contenido con IA. Usa GPT-4, Claude y Gemini. Paga en pesos colombianos con Bold." />
+        <meta name="keywords" content="IA generativa, crear apps, React, imágenes IA, GPT-4, Claude, Gemini, Colombia, Bold" />
+        <meta name="author" content="Creator IA Pro" />
+        <meta name="robots" content="index, follow" />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://creator-ia.com/" />
+        <meta property="og:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
+        <meta property="og:description" content="Plataforma todo-en-uno: Genesis IDE para apps React + Studio para imágenes y texto. Paga en COP con Bold." />
+        <meta property="og:image" content="https://creator-ia.com/og-image.jpg" />
+        <meta property="og:site_name" content="Creator IA Pro" />
+        <meta property="og:locale" content="es_CO" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content="https://creator-ia.com/" />
+        <meta property="twitter:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
+        <meta property="twitter:description" content="Plataforma todo-en-uno: Genesis IDE para apps React + Studio para imágenes y texto. Paga en COP con Bold." />
+        <meta property="twitter:image" content="https://creator-ia.com/og-image.jpg" />
+
+        {/* Canonical */}
+        <link rel="canonical" href="https://creator-ia.com/" />
+
+        {/* Additional SEO */}
+        <meta name="theme-color" content="#8B5CF6" />
+        <meta name="msapplication-TileColor" content="#8B5CF6" />
       </Helmet>
 
       <div className="min-h-screen bg-white text-foreground selection:bg-primary/20 font-sans overflow-x-hidden relative">
