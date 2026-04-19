@@ -1,3 +1,6 @@
+// AI Proxy - Multi-Provider Router
+// Routes requests to Open Source, Freemium, or Pro providers based on tier
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 
@@ -9,6 +12,146 @@ const corsHeaders = {
 const OR_BASE   = 'https://openrouter.ai/api/v1';
 const OR_REFERER = 'https://creator-ia.com';
 const OR_TITLE   = 'Creator IA Pro - AI Infinite Canvas';
+
+// ── Multi-Provider Routing Configuration ────────────────────────────────────
+interface ProviderConfig {
+  name: string;
+  baseUrl: string;
+  authHeader: string;
+  apiKeyEnv: string;
+  models: string[];
+  tier: 'open-source' | 'freemium' | 'pro';
+}
+
+const PROVIDER_CONFIGS: Record<string, ProviderConfig> = {
+  'groq': {
+    name: 'Groq',
+    baseUrl: 'https://api.groq.com/openai/v1',
+    authHeader: 'Authorization',
+    apiKeyEnv: 'GROQ_API_KEY',
+    models: ['llama3-8b-8192', 'llama3-70b-8192', 'mixtral-8x7b-32768', 'gemma-7b-it'],
+    tier: 'open-source',
+  },
+  'openrouter': {
+    name: 'OpenRouter',
+    baseUrl: 'https://openrouter.ai/api/v1',
+    authHeader: 'Authorization',
+    apiKeyEnv: 'OPENROUTER_API_KEY',
+    models: ['*'], // All models
+    tier: 'pro',
+  },
+  'gemini': {
+    name: 'Google Gemini',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta',
+    authHeader: 'key',
+    apiKeyEnv: 'GEMINI_API_KEY',
+    models: ['gemini-1.5-flash', 'gemini-1.5-pro'],
+    tier: 'freemium',
+  },
+};
+
+// Model to provider mapping
+const MODEL_PROVIDER_MAP: Record<string, { provider: string; modelId: string }> = {
+  // Open Source (Groq)
+  'llama3-8b': { provider: 'groq', modelId: 'llama3-8b-8192' },
+  'llama3-70b': { provider: 'groq', modelId: 'llama3-70b-8192' },
+  'llama-3.1-8b': { provider: 'groq', modelId: 'llama-3.1-8b-instant' },
+  'llama-3.1-70b': { provider: 'groq', modelId: 'llama-3.1-70b-versatile' },
+  'mixtral-8x7b': { provider: 'groq', modelId: 'mixtral-8x7b-32768' },
+  'gemma-7b': { provider: 'groq', modelId: 'gemma-7b-it' },
+  // Freemium
+  'gemini-1.5-flash': { provider: 'gemini', modelId: 'models/gemini-1.5-flash' },
+  // Pro (OpenRouter)
+  'claude-sonnet-4': { provider: 'openrouter', modelId: 'anthropic/claude-sonnet-4' },
+  'claude-opus-4': { provider: 'openrouter', modelId: 'anthropic/claude-opus-4' },
+  'gpt-4o': { provider: 'openrouter', modelId: 'openai/gpt-4o' },
+};
+
+// Smart router - determines provider based on model and tier
+async function routeToProvider(
+  model: string,
+  tier: string,
+  explicitPro: boolean,
+  supabaseAdmin: any,
+  userId: string
+): Promise<{ provider: string; modelId: string; config: ProviderConfig } | null> {
+  // If explicit Pro, verify credits
+  if (tier === 'pro' || explicitPro) {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('credits_balance')
+      .eq('user_id', userId)
+      .single();
+
+    if (!profile || profile.credits_balance <= 0) {
+      console.warn(`[Router] User ${userId} has no credits for Pro model`);
+      return null;
+    }
+  }
+
+  // Check if model is in our mapping
+  const mapping = MODEL_PROVIDER_MAP[model];
+  if (mapping) {
+    const config = PROVIDER_CONFIGS[mapping.provider];
+    if (config) {
+      return { provider: mapping.provider, modelId: mapping.modelId, config };
+    }
+  }
+
+  // Fallback: determine by tier
+  if (tier === 'open-source') {
+    return { provider: 'groq', modelId: 'llama3-70b-8192', config: PROVIDER_CONFIGS.groq };
+  }
+
+  if (tier === 'freemium') {
+    return { provider: 'gemini', modelId: 'models/gemini-1.5-flash', config: PROVIDER_CONFIGS.gemini };
+  }
+
+  return { provider: 'openrouter', modelId: model, config: PROVIDER_CONFIGS.openrouter };
+}
+
+// Provider call functions
+async function callGroq(config: ProviderConfig, body: any, apiKey: string): Promise<Response> {
+  const response = await fetch(`${config.baseUrl}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      [config.authHeader]: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: body.model,
+      messages: body.messages,
+      temperature: body.temperature ?? 0.7,
+      max_tokens: body.max_tokens ?? 4096,
+      stream: body.stream ?? false,
+    }),
+  });
+  return response;
+}
+
+async function callGemini(config: ProviderConfig, body: any, apiKey: string): Promise<Response> {
+  const isStreaming = body.stream;
+  const endpoint = isStreaming ? 'streamGenerateContent' : 'generateContent';
+
+  const response = await fetch(
+    `${config.baseUrl}/${body.model}:${endpoint}?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: body.messages.map((m: any) => ({
+          role: m.role === 'assistant' ? 'model' : 'user',
+          parts: [{ text: m.content }],
+        })),
+        generationConfig: {
+          temperature: body.temperature ?? 0.7,
+          maxOutputTokens: body.max_tokens ?? 2048,
+        },
+      }),
+    }
+  );
+  return response;
+}
 
 // ── Per-user rate limiting (20 req/min for openrouter + openrouter-image) ─────
 const RATE_LIMIT = 20;
