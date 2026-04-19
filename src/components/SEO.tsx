@@ -54,17 +54,28 @@ export function SEO({
   );
 }
 
+// OG Images by category
+const OG_IMAGES = {
+  default: "https://creator-ia.com/og-image.jpg",
+  pricing: "https://creator-ia.com/og-pricing.jpg",
+  tools: "https://creator-ia.com/og-tools.jpg",
+  docs: "https://creator-ia.com/og-docs.jpg",
+  legal: "https://creator-ia.com/og-image.jpg",
+};
+
 // Preset SEO configs for common pages
 export const seoPresets = {
   home: {
     title: "Crea Apps con IA en Segundos",
     description: "La plataforma definitiva para crear apps React, imágenes y contenido con IA. Usa GPT-4, Claude y Gemini. Paga en pesos colombianos con Bold.",
     keywords: "IA generativa, crear apps, React, imágenes IA, GPT-4, Claude, Gemini, Colombia",
+    ogImage: OG_IMAGES.default,
   },
   pricing: {
     title: "Planes y Precios",
     description: "6 planes flexibles desde $0. Free, Creador, Pro, Agencia, Pyme y Empresarial. Paga en pesos colombianos con Bold.",
     keywords: "precios IA, planes GPT-4, Bold Colombia, créditos IA, suscripción IA",
+    ogImage: OG_IMAGES.pricing,
   },
   auth: {
     title: "Iniciar Sesión",
@@ -85,11 +96,13 @@ export const seoPresets = {
     title: "Documentación — Genesis IDE",
     description: "Guías técnicas, protocolos y estándares arquitectónicos de Creator IA Pro. Aprende a diseñar, construir y desplegar con la potencia de Genesis.",
     keywords: "documentación, Genesis IDE, API, guía, tutorial, React, Colombia",
+    ogImage: OG_IMAGES.docs,
   },
   docs: {
     title: "Documentación Neural — Genesis Studio",
     description: "Documentación técnica de Genesis Studio: Neural Cycles, Studio Flow, despliegues cloud y más.",
     keywords: "documentación, Neural Cycles, Genesis Studio, API, Colombia",
+    ogImage: OG_IMAGES.docs,
   },
   downloads: {
     title: "Descargar Creator IA Pro",
@@ -105,16 +118,19 @@ export const seoPresets = {
     title: "Términos de Servicio",
     description: "Términos y condiciones de uso de Creator IA Pro. Lee nuestras políticas de uso del servicio, pagos, créditos y responsabilidades.",
     keywords: "términos, condiciones, legal, contrato, Creator IA Pro, Colombia",
+    ogImage: OG_IMAGES.legal,
   },
   privacy: {
     title: "Política de Privacidad",
     description: "Política de privacidad de Creator IA Pro. Conoce cómo protegemos tus datos personales y cumplimos con la legislación colombiana.",
     keywords: "privacidad, datos personales, protección, Ley 1581, Colombia, GDPR",
+    ogImage: OG_IMAGES.legal,
   },
   security: {
     title: "Seguridad",
     description: "Conoce nuestras medidas de seguridad: encriptación AES-256, autenticación segura, cumplimiento SOC 2 y protección de datos empresarial.",
     keywords: "seguridad, encriptación, AES-256, SOC 2, protección datos, privacidad",
+    ogImage: OG_IMAGES.legal,
   },
   contact: {
     title: "Contacto",
@@ -125,5 +141,12 @@ export const seoPresets = {
     title: "Centro de Ayuda",
     description: "Encuentra respuestas a tus preguntas sobre Creator IA Pro. Guías, FAQs, documentación y soporte.",
     keywords: "ayuda, soporte, FAQ, preguntas frecuentes, Creator IA Pro, tutorial",
+    ogImage: OG_IMAGES.docs,
+  },
+  tools: {
+    title: "Herramientas IA",
+    description: "12 herramientas de IA para crear imágenes, texto, código y más. Mejora fotos, genera contenido y automatiza tu flujo creativo.",
+    keywords: "herramientas IA, generar imágenes, mejorar fotos, quitar fondo, copywriting",
+    ogImage: OG_IMAGES.tools,
   },
 };

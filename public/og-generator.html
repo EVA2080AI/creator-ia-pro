@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>OG Image Generator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #000;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .og-container {
+      width: 1200px;
+      height: 630px;
+      background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .og-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    }
+
+    .og-container::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 200px;
+      background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+    }
+
+    .content { position: relative; z-index: 10; text-align: center; }
+
+    .logo {
+      font-size: 32px;
+      font-weight: 900;
+      color: white;
+      margin-bottom: 30px;
+      letter-spacing: -0.02em;
+    }
+
+    .title {
+      font-size: 72px;
+      font-weight: 900;
+      color: white;
+      line-height: 1.1;
+      margin-bottom: 30px;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      font-size: 32px;
+      color: rgba(255,255,255,0.9);
+      font-weight: 500;
+    }
+
+    .url {
+      position: absolute;
+      bottom: 40px;
+      left: 60px;
+      font-size: 24px;
+      color: rgba(255,255,255,0.8);
+      font-weight: 600;
+    }
+
+    /* Variantes */
+    .og-tool {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+    }
+
+    .og-pricing {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
+    }
+
+    .og-docs {
+      background: linear-gradient(135deg, #0891b2 0%, #0e7490 50%, #155e75 100%);
+    }
+  </style>
+</head>
+<body>
+  <!-- OG Image Principal -->
+  <div class="og-container" id="og-home">
+    <div class="content">
+      <div class="logo">✦ Creator IA Pro</div>
+      <div class="title">Crea Apps con IA<br>en Segundos</div>
+      <div class="subtitle">La plataforma definitiva para creators</div>
+    </div>
+    <div class="url">creator-ia.com</div>
+  </div>
+
+  <!-- OG Image Pricing -->
+  <div class="og-container og-pricing" id="og-pricing">
+    <div class="content">
+      <div class="logo">✦ Creator IA Pro</div>
+      <div class="title">Planes y Precios</div>
+      <div class="subtitle">Desde $0 COP · Sin tarjeta de crédito</div>
+    </div>
+    <div class="url">creator-ia.com/pricing</div>
+  </div>
+
+  <!-- OG Image Tools -->
+  <div class="og-container og-tool" id="og-tools">
+    <div class="content">
+      <div class="logo">✦ Creator IA Pro</div>
+      <div class="title">Herramientas IA</div>
+      <div class="subtitle">12 herramientas para crear contenido</div>
+    </div>
+    <div class="url">creator-ia.com/herramienta</div>
+  </div>
+
+  <!-- OG Image Docs -->
+  <div class="og-container og-docs" id="og-docs">
+    <div class="content">
+      <div class="logo">✦ Creator IA Pro</div>
+      <div class="title">Documentación</div>
+      <div class="subtitle">Aprende a dominar Genesis IDE</div>
+    </div>
+    <div class="url">creator-ia.com/docs</div>
+  </div>
+
+  <script>
+    // Instrucciones: Abrir esta página en Chrome, hacer screenshots de cada contenedor
+    // Dimensiones: 1200x630px
+    // Guardar como: og-image.jpg, og-pricing.jpg, og-tools.jpg, og-docs.jpg
+  </script>
+</body>
+</html>

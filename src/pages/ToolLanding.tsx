@@ -305,6 +305,7 @@ const ToolLanding = () => {
         description={tool?.description || "Herramientas de IA para crear contenido, imágenes y apps"}
         keywords={`${tool?.name}, IA, ${tool?.category}, Creator IA Pro, Colombia`}
         canonical={`https://creator-ia.com/herramienta/${toolSlug}`}
+        ogImage={tool?.demoImage ? `https://creator-ia.com${tool.demoImage}` : "https://creator-ia.com/og-tools.jpg"}
       />
 
       <main>
