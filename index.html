@@ -30,10 +30,18 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Diagnostic marker -->
-    <div id="debug-html" style="position:fixed; top:50px; right:20px; background:blue; color:white; padding:10px; z-index:10001;">
-      HTML CARGADO - ESPERANDO JS...
+    <!-- Diagnostic markers -->
+    <div id="debug-html" style="position:fixed; top:50px; right:20px; background:blue; color:white; padding:10px; z-index:10001; font-family:sans-serif;">
+      1. HTML CARGADO
     </div>
+    <div id="debug-legacy" style="position:fixed; top:100px; right:20px; background:orange; color:white; padding:10px; z-index:10002; font-family:sans-serif; display:none;">
+      2. LEGACY JS ACTIVO
+    </div>
+    <script>
+      // Test if legacy JS runs
+      document.getElementById('debug-legacy').style.display = 'block';
+      console.log("--- LEGACY JS RUNNING ---");
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
