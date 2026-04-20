@@ -130,7 +130,10 @@ const App = () => {
     const hostname = window.location.hostname;
     const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
     const isWrongDomain = hostname.includes("vercel.app") && hostname !== "creator-ia.com";
-    if (!isLocal && isWrongDomain) {
+    const searchParams = new URLSearchParams(window.location.search);
+    const skipRedirect = searchParams.get("skipRedirect") === "true";
+
+    if (!isLocal && isWrongDomain && !skipRedirect) {
       window.location.replace(
         `https://creator-ia.com${window.location.pathname}${window.location.search}${window.location.hash}`
       );
