@@ -285,15 +285,15 @@ export const TEMPLATES: Template[] = [
     nodes: [
       { type: 'textInput', data: {
         title: "CHARACTER BRIEF",
-        value: "Personaje: Mascota tech startup 'Pixel'
+        value: `Personaje: Mascota tech startup 'Pixel'
 Descripción: Robot adorable, ojos LED azules, cuerpo redondeado blanco con acentos naranja.
 Personalidad: Curioso, amigable, futurista pero acogedor.
-Uso: Videos explicativos, tutoriales, redes sociales."
+Uso: Videos explicativos, tutoriales, redes sociales.`
       }},
       { type: 'characterBreakdown', data: {
         title: 'CHARACTER DNA',
         flavor: "Robotic Companion - Cute Tech",
-        description: "ANATOMÍA DEL PERSONAJE:
+        description: `ANATOMÍA DEL PERSONAJE:
 
 🎨 ESTILO VISUAL:
 - 3D render estilo Pixar/Disney
@@ -317,7 +317,7 @@ Uso: Videos explicativos, tutoriales, redes sociales."
 - Siempre mantener proporción 2:3 (ancho:alto)
 - Ojos LED siempre azul #00D9FF
 - Nunca cambiar el naranja de los acentos
-- Fondos limpios, minimalistas, tecnológicos",
+- Fondos limpios, minimalistas, tecnológicos`,
         status: 'ready'
       }},
       { type: 'modelView', data: {
@@ -329,7 +329,7 @@ Uso: Videos explicativos, tutoriales, redes sociales."
       { type: 'llmNode', data: {
         title: 'PROMPT ENGINE',
         systemPrompt: "Genera prompts optimizados para mantener consistencia del personaje en diferentes poses y escenarios.",
-        output: "PROMPTS CONSISTENTES PARA PIXEL:
+        output: `PROMPTS CONSISTENTES PARA PIXEL:
 
 🤖 POSE 1 - Waving Hello:
 'Cute robot mascot Pixel, spherical white body with orange accents, blue LED eyes glowing friendly, waving hand, 3D Pixar style, soft studio lighting, solid light blue background, character facing camera, happy expression, 8k render'
@@ -350,7 +350,7 @@ Uso: Videos explicativos, tutoriales, redes sociales."
 - Sin cambios de color
 - Sin proporciones alteradas
 - Sin fondos complejos
-- Sin estilos artísticos diferentes",
+- Sin estilos artísticos diferentes`,
         status: 'ready'
       }},
       { type: 'modelView', data: {
