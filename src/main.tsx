@@ -1,16 +1,3 @@
-// Emergency debug: write directly to body to confirm script execution
-const debugDiv = document.createElement('div');
-debugDiv.style.position = 'fixed';
-debugDiv.style.top = '20px';
-debugDiv.style.left = '20px';
-debugDiv.style.background = 'red';
-debugDiv.style.color = 'white';
-debugDiv.style.padding = '10px';
-debugDiv.style.zIndex = '10000';
-debugDiv.style.fontFamily = 'sans-serif';
-debugDiv.innerHTML = '3. JS BUNDLE EXECUTING';
-document.body.appendChild(debugDiv);
-
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
