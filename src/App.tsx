@@ -38,9 +38,7 @@ function AuthWatcher() {
   ]);
 
   useEffect(() => {
-    console.log("[AuthWatcher] Initializing auth state listener...");
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log("[AuthWatcher] Event:", event, session ? "Session active" : "No session");
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
         const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/inicio", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs", "/cookies"];
         const isPublic = publicPaths.some(p =>
@@ -128,7 +126,15 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
-    console.log("[App] Component mounted successfully.");
+    // Domain Guard: force primary domain in production
+    const hostname = window.location.hostname;
+    const isLocal = hostname === "localhost" || hostname === "127.0.0.1";
+    const isWrongDomain = hostname.includes("vercel.app") && hostname !== "creator-ia.com";
+    if (!isLocal && isWrongDomain) {
+      window.location.replace(
+        `https://creator-ia.com${window.location.pathname}${window.location.search}${window.location.hash}`
+      );
+    }
   }, []);
 
   return (
@@ -136,10 +142,6 @@ const App = () => {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
-            {/* Visual indicator that the JS bundle is running and React mounted */}
-            <div style={{ position: 'fixed', top: 0, left: 0, padding: '2px 6px', background: '#8B5CF6', color: 'white', fontSize: '10px', zIndex: 9999, fontWeight: 'bold' }}>
-              CREATOR READY v1.1
-            </div>
             <Toaster />
             <BrowserRouter>
               <AuthWatcher />
