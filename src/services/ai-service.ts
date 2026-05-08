@@ -120,19 +120,8 @@ export const VIDEO_MODEL_COSTS: Record<string, number> = {
   'svd': 2,          // Costo real ~$0.05
 };
 
-const PREMIUM_MODELS = new Set([
-  "anthropic/claude-3.5-sonnet",
-  "anthropic/claude-3-5-sonnet-20241022",
-  "anthropic/claude-3-opus-20240229",
-  "openai/gpt-4o",
-  "deepseek/deepseek-r1",
-  "google/gemini-2.5-pro-preview-03-25",
-  "mistralai/mistral-large",
-  "claude-3.5-sonnet",
-  "claude-3-opus",
-  "gpt-oss-120b",
-  "gemini-3.1-pro-high",
-]);
+// All models are accessible to all plans.
+// Plan differences are: credits balance + unlocked features (not model access).
 
 // ─── ERROR CLASSIFIER ─────────────────────────────────────────────────────────
 export function classifyError(msg: string): ClassifiedError {
@@ -238,19 +227,7 @@ export const aiService = {
         throw new Error("Créditos exhaustos");
       }
 
-      const userTier = profile?.subscription_tier?.toLowerCase() || 'free';
-      const orModel = TEXT_MODEL_MAP[model] || model;
-      if (PREMIUM_MODELS.has(orModel) || PREMIUM_MODELS.has(model)) {
-        const premiumTiers = ['pyme', 'pymes', 'agencia', 'agency', 'admin'];
-        if (!premiumTiers.includes(userTier)) {
-          toast.error("Modelo bloqueado", {
-            description: "Los modelos Premium son exclusivos del plan Agencia o superior.",
-            action: { label: "Actualizar Plan", onClick: () => { window.location.href = '/pricing'; } },
-            duration: 8000,
-          });
-          throw new Error("Este modelo premium requiere el plan Agencia o superior.");
-        }
-      }
+      // All models available to all plans — only credits and features differ per plan.
 
       const { error: rpcError } = await sb.rpc("spend_credits", {
         _amount: cost,
