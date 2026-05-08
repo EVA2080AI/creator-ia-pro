@@ -67,7 +67,7 @@ const TEXT_MODEL_MAP: Record<string, string> = {
   "gemini-3.1-pro-high": "google/gemini-2.5-pro-preview-03-25",
   "claude-3.5-sonnet":   "anthropic/claude-3.5-sonnet",
   "claude-3-opus":       "anthropic/claude-3-opus-20240229",
-  "gpt-oss-120b":        "meta-llama/llama-4-maverick",
+  "gpt-oss-120b":        "meta-llama/llama-3.3-70b-instruct",
   "mistral-large":       "mistralai/mistral-large",
   "mistral-small":       "mistralai/mistral-small-3.1-24b-instruct",
 };
@@ -100,10 +100,12 @@ export const MODEL_COSTS: Record<string, number> = {
   "deepseek/deepseek-r1":                  3,
   "google/gemini-2.5-pro-preview-03-25":   3,
   "mistralai/mistral-large":               3,
-  "black-forest-labs/flux-schnell": 2,
-  "black-forest-labs/flux-1.1-pro": 5,
+  "meta-llama/llama-3.3-70b-instruct":     2,
+  "black-forest-labs/flux-schnell":        2,
+  "black-forest-labs/flux-1.1-pro":        5,
+  "ideogram-ai/ideogram-v2":               4,
   "stability-ai/stable-diffusion-3-5-large": 3,
-  "flux-schnell": 2, "flux-pro": 5, "flux-pro-1.1": 5, "sdxl": 3,
+  "flux-schnell": 2, "flux-pro": 5, "flux-pro-1.1": 5, "flux-realism": 5, "ideogram-v2": 4, "sdxl": 3,
   "upscale": 3, "background": 1, "enhance": 2, "restore": 3, "variation": 4, "video": 5,
 };
 
