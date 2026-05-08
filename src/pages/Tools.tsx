@@ -374,30 +374,30 @@ const Tools = () => {
 
     if (resultImage) {
       return (
-        <div className="flex flex-col h-full gap-4 animate-in fade-in duration-500 p-4">
-          <div className="flex-1 relative min-h-0">
+        <div className="flex flex-col h-full gap-4 animate-in fade-in duration-500 p-4 z-10">
+          <div className="flex-1 relative min-h-0 rounded-[1.5rem] overflow-hidden shadow-sm">
             <ImageWithFallback src={resultImage} onRetry={handleProcess} />
           </div>
           {/* Action bar */}
           <div className="flex items-center gap-2 shrink-0">
             <a href={resultImage} download={`creator-ia-${activeTool}-${Date.now()}.png`} target="_blank" rel="noreferrer" className="flex-1">
-              <button className="w-full h-11 rounded-xl border border-zinc-200 bg-zinc-50 text-sm font-semibold text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-all flex items-center justify-center gap-2">
+              <button className="w-full h-11 rounded-[0.85rem] border border-white/60 bg-white/70 shadow-[0_2px_10px_rgba(0,0,0,0.02)] text-sm font-semibold text-zinc-700 hover:text-zinc-900 hover:bg-white transition-all flex items-center justify-center gap-2">
                 <Download className="h-4 w-4" /> Descargar
               </button>
             </a>
             <button onClick={handleSaveToAssets} disabled={savingAsset || savedAsset}
-              className={cn("h-11 px-4 rounded-xl border text-sm font-semibold flex items-center gap-2 transition-all",
-                savedAsset ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                           : "border-zinc-200 bg-zinc-50 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100")}>
+              className={cn("h-11 px-4 rounded-[0.85rem] border text-sm font-semibold flex items-center gap-2 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)]",
+                savedAsset ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
+                           : "border-white/60 bg-white/70 text-zinc-500 hover:text-zinc-900 hover:bg-white")}>
               {savingAsset ? <Loader2 className="h-4 w-4 animate-spin" /> : savedAsset ? <CheckCircle2 className="h-4 w-4" /> : <BookmarkPlus className="h-4 w-4" />}
               {savedAsset ? "Guardado" : "Guardar"}
             </button>
             <button onClick={() => handleCopyImage(resultImage)}
-              className="h-11 w-11 rounded-xl border border-zinc-200 bg-zinc-50 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all flex items-center justify-center">
+              className="h-11 w-11 rounded-[0.85rem] border border-white/60 bg-white/70 shadow-[0_2px_10px_rgba(0,0,0,0.02)] text-zinc-500 hover:text-zinc-900 hover:bg-white transition-all flex items-center justify-center">
               <Copy className="h-4 w-4" />
             </button>
             <button onClick={() => { setResultImage(null); setSavedAsset(false); }}
-              className="h-11 w-11 rounded-xl border border-zinc-200 text-zinc-500 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
+              className="h-11 w-11 rounded-[0.85rem] border border-white/60 bg-white/70 shadow-[0_2px_10px_rgba(0,0,0,0.02)] text-zinc-500 hover:text-rose-500 hover:border-rose-500/30 transition-all flex items-center justify-center">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -407,15 +407,15 @@ const Tools = () => {
 
     if (resultText || streaming) {
       return (
-        <div className="flex flex-col h-full gap-4 animate-in fade-in duration-300 p-4">
-          <div ref={resultRef} className="flex-1 overflow-y-auto rounded-2xl border border-zinc-200 bg-zinc-50 p-5 relative min-h-0">
+        <div className="flex flex-col h-full gap-4 animate-in fade-in duration-300 p-4 z-10">
+          <div ref={resultRef} className="flex-1 overflow-y-auto rounded-[1.5rem] border border-white/60 bg-white/70 shadow-[0_8px_30px_rgba(0,0,0,0.04)] backdrop-blur-md p-6 relative min-h-0">
             {streaming && !resultText && (
               <div className="flex items-center gap-3 text-zinc-400 text-sm">
                 <Loader2 className="h-4 w-4 animate-spin text-primary" />
                 <span>Escribiendo...</span>
               </div>
             )}
-            <div className="result-prose text-sm leading-relaxed"
+            <div className="result-prose text-[15px] leading-relaxed"
               dangerouslySetInnerHTML={{ __html: parseMarkdown(resultText) }} />
             {streaming && resultText && (
               <span className="inline-block w-2 h-4 bg-primary/70 animate-pulse ml-0.5 rounded-sm" />
@@ -424,20 +424,20 @@ const Tools = () => {
           {!streaming && resultText && (
             <div className="flex gap-2 shrink-0">
               <button onClick={() => { navigator.clipboard.writeText(resultText); toast.success("Texto copiado"); }}
-                className="flex-[2] h-11 rounded-xl bg-primary text-white font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-[0.98] transition-all">
+                className="flex-[2] h-11 rounded-[0.85rem] bg-gradient-to-br from-primary to-blue-600 shadow-brand text-white font-semibold text-sm flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all">
                 <Copy className="h-4 w-4" /> Copiar texto
               </button>
               <button 
                 onClick={handleSaveToAssets} disabled={savingAsset || savedAsset}
-                className={cn("flex-1 h-11 px-4 rounded-xl border text-sm font-semibold flex items-center justify-center gap-2 transition-all",
-                  savedAsset ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                             : "border-zinc-200 bg-zinc-50 text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100")}
+                className={cn("flex-1 h-11 px-4 rounded-[0.85rem] border text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)]",
+                  savedAsset ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500"
+                             : "border-white/60 bg-white/70 text-zinc-600 hover:text-zinc-900 hover:bg-white")}
               >
                 {savingAsset ? <Loader2 className="h-4 w-4 animate-spin" /> : savedAsset ? <CheckCircle2 className="h-4 w-4" /> : <BookmarkPlus className="h-4 w-4" />}
                 {savedAsset ? "Guardado" : "Guardar"}
               </button>
               <button onClick={() => { setResultText(""); setSavedAsset(false); }}
-                className="h-11 w-11 shrink-0 rounded-xl border border-zinc-200 text-zinc-500 hover:text-rose-400 hover:border-rose-500/30 transition-all flex items-center justify-center">
+                className="h-11 w-11 shrink-0 rounded-[0.85rem] border border-white/60 bg-white/70 shadow-[0_2px_10px_rgba(0,0,0,0.02)] text-zinc-500 hover:text-rose-500 hover:border-rose-500/30 transition-all flex items-center justify-center">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -458,15 +458,15 @@ const Tools = () => {
         </div>
       ) : (
         <button onClick={() => fileRef.current?.click()}
-          className="flex-1 m-4 flex flex-col items-center justify-center gap-5 rounded-2xl border-2 border-dashed border-zinc-200 bg-zinc-50 hover:border-primary/30 hover:bg-primary/[0.03] transition-all group">
-          <div className="w-16 h-16 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-center group-hover:scale-105 transition-transform">
-            <Upload className="h-7 w-7 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
+          className="flex-1 m-4 flex flex-col items-center justify-center gap-5 rounded-[2rem] border-2 border-dashed border-primary/20 bg-white/40 backdrop-blur-sm hover:border-primary/50 hover:bg-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.02)] transition-all group z-10">
+          <div className="w-20 h-20 rounded-[1.5rem] bg-white border border-white/60 shadow-sm flex items-center justify-center group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+            <Upload className="h-8 w-8 text-primary group-hover:text-blue-500 transition-colors" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-semibold text-zinc-400 group-hover:text-zinc-500 transition-colors">
-              Arrastra o haz clic para subir
+            <p className="text-[15px] font-bold text-zinc-600 group-hover:text-zinc-800 transition-colors">
+              Arrastra o haz clic para subir tu imagen
             </p>
-            <p className="text-xs text-zinc-500 mt-1">PNG, JPG, WEBP · Máx 10MB</p>
+            <p className="text-xs text-zinc-400 mt-2 font-medium tracking-wide">PNG, JPG, WEBP · Máx 10MB</p>
           </div>
         </button>
       );
@@ -474,16 +474,16 @@ const Tools = () => {
 
     // Empty state — text tool or image gen
     return (
-      <div className="flex-1 flex flex-col items-center justify-center gap-5 text-center p-10">
-        <div className="relative">
-          <div className="absolute inset-0 blur-3xl rounded-full bg-primary/10" />
-          <div className="relative w-16 h-16 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-center">
-            <currentTool.icon className={cn("h-7 w-7", currentTool.color)} />
+      <div className="flex-1 flex flex-col items-center justify-center gap-6 text-center p-10 bg-grid-canvas mask-radial-faded">
+        <div className="relative aether-iridescent">
+          <div className="absolute inset-0 blur-3xl rounded-full bg-primary/20 animate-pulse" />
+          <div className="relative w-20 h-20 rounded-[1.5rem] aether-glass border border-white/60 flex items-center justify-center shadow-brand">
+            <currentTool.icon className={cn("h-10 w-10 text-primary drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]")} />
           </div>
         </div>
         <div>
-          <h3 className="text-base font-bold text-zinc-400 font-display tracking-tight">{currentTool.name}</h3>
-          <p className="text-sm text-zinc-500 mt-1 max-w-xs leading-relaxed">{currentTool.desc}</p>
+          <h3 className="text-xl font-bold text-zinc-800 font-display tracking-tight drop-shadow-sm">{currentTool.name}</h3>
+          <p className="text-[15px] text-zinc-500 mt-2 max-w-sm leading-relaxed">{currentTool.desc}</p>
         </div>
         <p className="text-[11px] text-zinc-500 uppercase tracking-widest">
           Escribe un prompt y presiona Generar
@@ -504,11 +504,11 @@ const Tools = () => {
   const textTools  = tools.filter(t => t.category === "text");
 
   return (
-    <div className="flex h-full w-full bg-background text-zinc-900 font-sans overflow-hidden">
+    <div className="flex h-full w-full text-zinc-900 font-sans overflow-hidden genesis-panel-background">
       <Helmet><title>Herramientas IA | Creator IA Pro</title></Helmet>
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
-      <aside className="hidden md:flex w-[260px] shrink-0 flex-col border-r border-zinc-100 bg-white/60 backdrop-blur-md shadow-[1px_0_20px_rgba(0,0,0,0.02)] overflow-hidden relative z-20">
+      <aside className="hidden md:flex w-[280px] shrink-0 flex-col border-r border-white/30 aether-glass shadow-[1px_0_30px_rgba(0,0,0,0.03)] overflow-hidden relative z-20">
 
         {/* Sidebar header */}
         <div className="px-5 pt-7 pb-4 shrink-0">
@@ -537,12 +537,12 @@ const Tools = () => {
                   "w-full flex items-center gap-3.5 px-3 py-3 rounded-[1rem] text-left transition-all duration-300 relative group overflow-hidden outline-none",
                   tool.disabled ? "opacity-40 cursor-not-allowed" :
                   isActive
-                    ? "bg-primary/5 text-primary border border-primary/10 shadow-[0_4px_20px_-4px_rgba(168,85,247,0.1)]"
-                    : "bg-transparent text-zinc-500 hover:bg-zinc-50 border border-transparent hover:text-zinc-900"
+                    ? "bg-white/80 text-primary aether-border-gradient shadow-brand"
+                    : "bg-transparent text-zinc-500 hover:bg-white/50 hover:shadow-sm border border-transparent hover:text-zinc-900"
                 )}>
                 <div className={cn(
-                  "w-9 h-9 rounded-[0.8rem] flex items-center justify-center shrink-0 transition-all duration-300",
-                  isActive ? "bg-primary/15 text-primary scale-105" : "bg-zinc-100 text-zinc-400 group-hover:bg-zinc-200 group-hover:scale-105 group-hover:text-zinc-600"
+                  "w-10 h-10 rounded-[0.85rem] flex items-center justify-center shrink-0 transition-all duration-300",
+                  isActive ? "bg-gradient-to-br from-primary to-blue-500 text-white shadow-brand scale-110" : "bg-white/60 border border-white/40 text-zinc-400 group-hover:bg-white group-hover:scale-105 group-hover:text-zinc-600 shadow-sm"
                 )}>
                   {tool.disabled ? <Lock className="h-4 w-4" /> : <tool.icon className="h-4 w-4" />}
                 </div>
@@ -576,12 +576,12 @@ const Tools = () => {
                   "w-full flex items-center gap-3.5 px-3 py-3 rounded-[1rem] text-left transition-all duration-300 relative group overflow-hidden outline-none",
                   tool.disabled ? "opacity-40 cursor-not-allowed" :
                   isActive
-                    ? "bg-primary/5 text-primary border border-primary/10 shadow-[0_4px_20px_-4px_rgba(168,85,247,0.1)]"
-                    : "bg-transparent text-zinc-500 hover:bg-zinc-50 border border-transparent hover:text-zinc-900"
+                    ? "bg-white/80 text-primary aether-border-gradient shadow-brand"
+                    : "bg-transparent text-zinc-500 hover:bg-white/50 hover:shadow-sm border border-transparent hover:text-zinc-900"
                 )}>
                 <div className={cn(
-                  "w-9 h-9 rounded-[0.8rem] flex items-center justify-center shrink-0 transition-all duration-300",
-                  isActive ? "bg-primary/15 text-primary scale-105" : "bg-zinc-100 text-zinc-400 group-hover:bg-zinc-200 group-hover:scale-105 group-hover:text-zinc-600"
+                  "w-10 h-10 rounded-[0.85rem] flex items-center justify-center shrink-0 transition-all duration-300",
+                  isActive ? "bg-gradient-to-br from-primary to-blue-500 text-white shadow-brand scale-110" : "bg-white/60 border border-white/40 text-zinc-400 group-hover:bg-white group-hover:scale-105 group-hover:text-zinc-600 shadow-sm"
                 )}>
                   {tool.disabled ? <Lock className="h-4 w-4" /> : <tool.icon className="h-4 w-4" />}
                 </div>
@@ -612,21 +612,21 @@ const Tools = () => {
           {renderCanvas()}
         </div>
 
-        {/* ── Input bar (same pattern as Chat IA) ─────────────────────────── */}
-        <div className="shrink-0 border-t border-zinc-200 bg-background px-5 py-4">
-
+        {/* ── Input bar (Premium Aether Dock) ─────────────────────────── */}
+        <div className="shrink-0 border-t border-white/30 bg-white/40 backdrop-blur-2xl px-4 py-5 z-30 shadow-[0_-10px_40px_rgba(0,0,0,0.03)] relative">
+          <div className="max-w-5xl mx-auto w-full">
           {/* Contextual settings row — always visible, compact */}
-          <div className="flex flex-wrap items-center gap-2 mb-3">
+          <div className="flex flex-wrap items-center gap-2 mb-3 px-1">
 
             {/* Model chip */}
             {category === "image" && !currentTool.needsUpload ? (
               <div className="relative">
                 <button onClick={() => setShowSettings(v => !v)}
                   className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all",
+                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all shadow-sm",
                     showSettings
                       ? "border-primary/40 bg-primary/10 text-primary"
-                      : "border-zinc-200 bg-zinc-50 text-zinc-400 hover:text-zinc-600 hover:border-white/15"
+                      : "border-white/60 bg-white/70 text-zinc-600 hover:text-zinc-900 hover:bg-white"
                   )}>
                   <Sparkles className="h-3 w-3" />
                   {imageModelObj.name}
@@ -636,10 +636,10 @@ const Tools = () => {
             ) : category === "text" ? (
               <button onClick={() => setShowSettings(v => !v)}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all",
+                  "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-[11px] font-semibold transition-all shadow-sm",
                   showSettings
                     ? "border-primary/40 bg-primary/10 text-primary"
-                    : "border-zinc-200 bg-zinc-50 text-zinc-400 hover:text-zinc-600 hover:border-white/15"
+                    : "border-white/60 bg-white/70 text-zinc-600 hover:text-zinc-900 hover:bg-white"
                 )}>
                 <Sparkles className="h-3 w-3" />
                 {textModelObj.name}
@@ -653,10 +653,10 @@ const Tools = () => {
                 {ASPECT_RATIOS.map((ar) => (
                   <button key={ar.label} onClick={() => setAspectRatio(ar)}
                     className={cn(
-                      "px-2.5 py-1.5 rounded-lg border text-[10px] font-bold transition-all",
+                      "px-3 py-1.5 rounded-[0.6rem] border text-[10.5px] font-bold transition-all shadow-sm",
                       aspectRatio.label === ar.label
-                        ? "bg-zinc-100 border-zinc-300 text-zinc-900"
-                        : "bg-zinc-50 border-zinc-200 text-zinc-500 hover:text-zinc-500"
+                        ? "bg-white border-zinc-300 text-zinc-900"
+                        : "bg-white/50 border-white/40 text-zinc-500 hover:bg-white hover:text-zinc-800"
                     )}>
                     {ar.label}
                   </button>
@@ -665,15 +665,15 @@ const Tools = () => {
             )}
 
             {/* Credits cost badge */}
-            <div className="ml-auto flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-50 border border-zinc-200">
-              <Zap className="h-3 w-3 text-primary" />
-              <span className="text-[10px] font-bold text-zinc-400">{requiredCredits} cr</span>
+            <div className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-[0.6rem] bg-white border border-white/60 shadow-sm">
+              <Zap className="h-3 w-3 text-primary animate-pulse" />
+              <span className="text-[11px] font-bold text-zinc-600">{requiredCredits} cr</span>
             </div>
           </div>
 
           {/* Expandable model selector */}
           {showSettings && (
-            <div className="mb-3 p-3 rounded-2xl border border-zinc-200 bg-zinc-50 space-y-3">
+            <div className="mb-3 p-4 rounded-2xl border border-white/60 bg-white/60 backdrop-blur-md shadow-sm space-y-4">
               {category === "image" && !currentTool.needsUpload && (
                 <div className="space-y-1.5">
                   <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Motor de imagen</p>
@@ -693,7 +693,7 @@ const Tools = () => {
                     {styleList.map((style) => (
                       <button key={style}
                         onClick={() => setTextPrompt(p => p ? `${p}, estilo ${style}` : `Estilo ${style}: `)}
-                        className="px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-[11px] font-medium text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all">
+                        className="px-3 py-1.5 rounded-lg bg-white/70 border border-white/60 text-[11px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-white shadow-sm transition-all">
                         {style}
                       </button>
                     ))}
@@ -736,8 +736,8 @@ const Tools = () => {
                 }
                 rows={1}
                 maxLength={1000}
-                className="w-full resize-none rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3.5 text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none focus:border-primary/30 focus:bg-zinc-100 transition-all leading-relaxed"
-                style={{ minHeight: "48px", maxHeight: "140px", overflowY: "auto" }}
+                className="w-full resize-none rounded-[1.5rem] border border-white/60 bg-white/70 shadow-[inset_0_2px_10px_rgba(0,0,0,0.02)] px-5 py-4 text-[15px] text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-primary/40 focus:bg-white transition-all leading-relaxed"
+                style={{ minHeight: "56px", maxHeight: "140px", overflowY: "auto" }}
               />
             </div>
 
@@ -745,7 +745,7 @@ const Tools = () => {
             <Button
               onClick={handleProcess}
               disabled={isRunning || currentTool.disabled || (currentTool.needsUpload ? !imagePreview : !textPrompt.trim())}
-              className="h-12 w-12 rounded-2xl bg-primary text-white hover:bg-primary/90 active:scale-[0.97] transition-all disabled:opacity-30 shrink-0 flex items-center justify-center p-0"
+              className="h-14 w-14 rounded-[1.2rem] bg-gradient-to-br from-primary to-blue-600 text-white shadow-brand hover:brightness-110 active:scale-[0.96] transition-all disabled:opacity-40 shrink-0 flex items-center justify-center p-0"
             >
               {isRunning
                 ? <Loader2 className="h-4 w-4 animate-spin" />
@@ -767,6 +767,7 @@ const Tools = () => {
                 <span className="text-[9px] font-bold whitespace-nowrap">{tool.name}</span>
               </button>
             ))}
+          </div>
           </div>
         </div>
       </div>
