@@ -1,0 +1,492 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - complementary "Navegación principal" [ref=e10]:
+      - generic [ref=e11]:
+        - button "Creator IA" [ref=e14] [cursor=pointer]:
+          - img [ref=e16]
+          - generic [ref=e19]: Creator IA
+        - button [ref=e20] [cursor=pointer]:
+          - img [ref=e21]
+      - navigation [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e27]: Principal
+          - button "Inicio" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+            - generic [ref=e32]: Inicio
+          - button "Genesis IA" [ref=e33] [cursor=pointer]:
+            - img [ref=e34]
+            - generic [ref=e44]:
+              - text: Genesis IA
+              - generic [ref=e45]: CREADOR
+          - button "Editor" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+            - generic [ref=e52]:
+              - text: Editor
+              - generic [ref=e53]: CREADOR
+          - button "Canvas IA" [ref=e54] [cursor=pointer]:
+            - img [ref=e55]
+            - generic [ref=e59]:
+              - text: Canvas IA
+              - generic [ref=e60]: PRO
+          - button "Proyectos" [ref=e61] [cursor=pointer]:
+            - img [ref=e62]
+            - generic [ref=e64]:
+              - text: Proyectos
+              - generic [ref=e65]: PRO
+          - button "Aplicaciones" [ref=e66] [cursor=pointer]:
+            - img [ref=e67]
+            - generic [ref=e72]: Aplicaciones
+          - button "Antigravity" [ref=e73] [cursor=pointer]:
+            - img [ref=e74]
+            - generic [ref=e77]:
+              - text: Antigravity
+              - generic [ref=e78]: PYME
+        - generic [ref=e79]:
+          - generic [ref=e81]:
+            - img [ref=e82]
+            - text: Sistema
+          - button "Panel Control" [ref=e84] [cursor=pointer]:
+            - img [ref=e85]
+            - generic [ref=e88]:
+              - text: Panel Control
+              - generic [ref=e89]: ADMIN
+          - button "Usuarios" [ref=e90] [cursor=pointer]:
+            - img [ref=e91]
+            - generic [ref=e95]:
+              - text: Usuarios
+              - generic [ref=e96]: ADMIN
+          - button "Sistema de Diseño" [ref=e97] [cursor=pointer]:
+            - img [ref=e98]
+            - generic [ref=e104]:
+              - text: Sistema de Diseño
+              - generic [ref=e105]: ADMIN
+          - button "Estatus" [ref=e106] [cursor=pointer]:
+            - img [ref=e107]
+            - generic [ref=e109]:
+              - text: Estatus
+              - generic [ref=e110]: ADMIN
+          - button "Roadmap" [ref=e111] [cursor=pointer]:
+            - img [ref=e112]
+            - generic [ref=e113]: Roadmap
+        - generic [ref=e114]:
+          - generic [ref=e116]: Créditos
+          - generic [ref=e117]:
+            - img [ref=e118]
+            - generic [ref=e123]: 37,267
+      - generic [ref=e124]:
+        - button "Perfil" [ref=e126] [cursor=pointer]:
+          - img [ref=e127]
+          - generic [ref=e130]: Perfil
+        - button "Planes" [ref=e131] [cursor=pointer]:
+          - img [ref=e132]
+          - generic [ref=e134]: Planes
+        - button "Descargar" [ref=e135] [cursor=pointer]:
+          - img [ref=e136]
+          - generic [ref=e139]: Descargar
+        - generic [ref=e140] [cursor=pointer]:
+          - img [ref=e142]
+          - generic [ref=e145]:
+            - paragraph [ref=e146]: sebastian689
+            - paragraph [ref=e147]: pymes
+          - button "Cerrar sesión" [ref=e148]:
+            - img [ref=e149]
+    - main [ref=e153]:
+      - generic [ref=e1696]:
+        - generic [ref=e1697]:
+          - generic [ref=e1698]:
+            - button [ref=e1699] [cursor=pointer]:
+              - img [ref=e1700]
+            - generic [ref=e1702]: Saas Gestión Tareas Tipo
+          - generic [ref=e1705]:
+            - button "Preview" [ref=e1706] [cursor=pointer]:
+              - img [ref=e1707]
+              - generic [ref=e1710]: Preview
+            - button "Code" [ref=e1711] [cursor=pointer]:
+              - img [ref=e1712]
+              - generic [ref=e1715]: Code
+            - button "Consola" [ref=e1716] [cursor=pointer]:
+              - img [ref=e1717]
+              - generic [ref=e1719]: Consola
+            - button [ref=e1720] [cursor=pointer]:
+              - img [ref=e1721]
+          - generic [ref=e1734]:
+            - generic [ref=e1735]:
+              - button "GitHub" [ref=e1736] [cursor=pointer]:
+                - img [ref=e1737]
+              - button "Compartir" [ref=e1740] [cursor=pointer]:
+                - img [ref=e1741]
+            - button "Push to Cloud" [ref=e1747] [cursor=pointer]:
+              - generic [ref=e1749]: Push to Cloud
+        - generic [ref=e1751]:
+          - complementary "Panel de Chat Génesis" [ref=e1754]:
+            - generic [ref=e1755]:
+              - generic [ref=e1756]:
+                - button "Volver" [ref=e1757] [cursor=pointer]:
+                  - img [ref=e1758]
+                - heading "Proyecto" [level=2] [ref=e1764]
+              - button "Console" [ref=e1769] [cursor=pointer]:
+                - img [ref=e1770]
+                - text: Console
+            - generic [ref=e1772]:
+              - article "Tu mensaje" [ref=e1773]:
+                - generic [ref=e1774]: "[MODO: React + Vite + Tailwind + TypeScript] Crea un SaaS de gestión de tareas tipo Trello/Linear con: (1) Página de login con email+password (usa el LoginPage scaffold y conéctalo a auth.signIn de Supabase), (2) Dashboard con sidebar colapsable usando Sidebar de shadcn, mostrando lista de proyectos a la izquierda y un board kanban a la derecha con 3 columnas (Pendiente, En progreso, Completado) y tarjetas draggables, (3) Página de pricing con 3 planes usando el PricingPage scaffold. Usa react-router-dom para las rutas /login, /dashboard, /pricing. Para el board kanban, usa cards de shadcn y mock data con 6 tareas distribuidas."
+                - time [ref=e1775]: 06:16 AM
+              - article "Mensaje de Génesis" [ref=e1922]:
+                - generic [ref=e1923]:
+                  - generic [ref=e1924]:
+                    - img [ref=e1926]
+                    - generic [ref=e1928]: Génesis AI
+                    - generic [ref=e1929]: V21
+                    - generic [ref=e1930]:
+                      - img [ref=e1931]
+                      - text: Código
+                  - generic [ref=e1934]:
+                    - generic [ref=e1935]: Código generado.
+                    - generic [ref=e1936]:
+                      - button "7 archivos generados" [ref=e1937] [cursor=pointer]:
+                        - generic [ref=e1938]:
+                          - img [ref=e1939]
+                          - text: 7 archivos generados
+                        - img [ref=e1943]
+                      - generic [ref=e1945]:
+                        - generic [ref=e1946]:
+                          - img [ref=e1947]
+                          - generic [ref=e1952]: src/App.tsx
+                        - generic [ref=e1953]:
+                          - img [ref=e1954]
+                          - generic [ref=e1959]: src/pages/Dashboard.tsx
+                        - generic [ref=e1960]:
+                          - img [ref=e1961]
+                          - generic [ref=e1966]: src/components/ProjectList.tsx
+                        - generic [ref=e1967]:
+                          - img [ref=e1968]
+                          - generic [ref=e1973]: src/components/KanbanBoard.tsx
+                        - generic [ref=e1974]:
+                          - img [ref=e1975]
+                          - generic [ref=e1980]: src/components/KanbanColumn.tsx
+                        - generic [ref=e1981]:
+                          - img [ref=e1982]
+                          - generic [ref=e1987]: src/components/TaskCard.tsx
+                        - generic [ref=e1988]:
+                          - img [ref=e1989]
+                          - generic [ref=e1994]: package.json
+                      - button "+4 más" [ref=e1995] [cursor=pointer]
+                    - generic [ref=e1996]:
+                      - button "Copiar mensaje" [ref=e1997] [cursor=pointer]:
+                        - img [ref=e1998]
+                      - button "Reintentar" [ref=e2001] [cursor=pointer]:
+                        - img [ref=e2002]
+                  - navigation "Sugerencias" [ref=e2005]:
+                    - img [ref=e2007]
+                    - button "Agregar modo oscuro" [ref=e2009] [cursor=pointer]
+                    - button "Optimizar para móviles" [ref=e2010] [cursor=pointer]
+                    - button "Añadir animaciones" [ref=e2011] [cursor=pointer]
+                    - button "Agregar TypeScript strict" [ref=e2012] [cursor=pointer]
+            - contentinfo [ref=e1776]:
+              - generic [ref=e1778]:
+                - generic [ref=e1779]:
+                  - generic [ref=e1781]:
+                    - button "Adjuntar archivo o URL" [ref=e1783] [cursor=pointer]:
+                      - img [ref=e1784]
+                    - textbox "Describe lo que quieres construir..." [ref=e1786]
+                    - generic [ref=e1787]:
+                      - button "Dictado por voz" [ref=e1788] [cursor=pointer]:
+                        - img [ref=e1789]
+                      - button "Enviar mensaje" [disabled] [ref=e2013]:
+                        - img [ref=e2014]
+                  - generic [ref=e1795]:
+                    - generic [ref=e1796]:
+                      - button "PLAN" [ref=e1797] [cursor=pointer]:
+                        - img [ref=e1798]
+                        - text: PLAN
+                      - button "BUILD" [ref=e1800] [cursor=pointer]:
+                        - img [ref=e1801]
+                        - text: BUILD
+                    - button "Claude Sonnet 4.5" [ref=e1805] [cursor=pointer]:
+                      - img [ref=e1806]
+                      - generic [ref=e1809]: Claude Sonnet 4.5
+                      - img [ref=e1810]
+                - paragraph [ref=e1812]:
+                  - generic [ref=e1813]: Cmd+Enter para enviar
+                  - generic [ref=e1814]: ·
+                  - generic [ref=e1815]: Shift+Enter nueva línea
+                  - generic [ref=e1816]: ·
+                  - generic [ref=e1817]: Cmd+K nueva conversación
+          - generic [ref=e2257]:
+            - generic [ref=e2258]:
+              - button "src/App.tsx" [ref=e2259] [cursor=pointer]:
+                - img [ref=e2261]
+                - generic [ref=e2263]: src/App.tsx
+                - img [ref=e2264]
+              - button "src/pages/Dashboard.tsx" [active] [ref=e2267] [cursor=pointer]:
+                - img [ref=e2268]
+                - generic [ref=e2270]: src/pages/Dashboard.tsx
+                - img [ref=e2271]
+              - button "src/components/ProjectList.tsx" [ref=e2274] [cursor=pointer]:
+                - img [ref=e2275]
+                - generic [ref=e2277]: src/components/ProjectList.tsx
+                - img [ref=e2278]
+              - button "src/components/KanbanBoard.tsx" [ref=e2281] [cursor=pointer]:
+                - img [ref=e2282]
+                - generic [ref=e2284]: src/components/KanbanBoard.tsx
+                - img [ref=e2285]
+              - button "src/components/KanbanColumn.tsx" [ref=e2288] [cursor=pointer]:
+                - img [ref=e2289]
+                - generic [ref=e2291]: src/components/KanbanColumn.tsx
+                - img [ref=e2292]
+              - button "src/components/TaskCard.tsx" [ref=e2295] [cursor=pointer]:
+                - img [ref=e2296]
+                - generic [ref=e2298]: src/components/TaskCard.tsx
+                - img [ref=e2299]
+            - generic [ref=e2302]:
+              - generic [ref=e2303]:
+                - generic [ref=e2304]: "1"
+                - generic [ref=e2305]: "2"
+                - generic [ref=e2306]: "3"
+                - generic [ref=e2307]: "4"
+                - generic [ref=e2308]: "5"
+                - generic [ref=e2309]: "6"
+                - generic [ref=e2310]: "7"
+                - generic [ref=e2311]: "8"
+                - generic [ref=e2312]: "9"
+                - generic [ref=e2313]: "10"
+                - generic [ref=e2314]: "11"
+                - generic [ref=e2315]: "12"
+                - generic [ref=e2316]: "13"
+                - generic [ref=e2317]: "14"
+                - generic [ref=e2318]: "15"
+                - generic [ref=e2319]: "16"
+                - generic [ref=e2320]: "17"
+                - generic [ref=e2321]: "18"
+                - generic [ref=e2322]: "19"
+                - generic [ref=e2323]: "20"
+                - generic [ref=e2324]: "21"
+                - generic [ref=e2325]: "22"
+                - generic [ref=e2326]: "23"
+                - generic [ref=e2327]: "24"
+                - generic [ref=e2328]: "25"
+                - generic [ref=e2329]: "26"
+                - generic [ref=e2330]: "27"
+                - generic [ref=e2331]: "28"
+                - generic [ref=e2332]: "29"
+                - generic [ref=e2333]: "30"
+                - generic [ref=e2334]: "31"
+                - generic [ref=e2335]: "32"
+                - generic [ref=e2336]: "33"
+                - generic [ref=e2337]: "34"
+                - generic [ref=e2338]: "35"
+                - generic [ref=e2339]: "36"
+                - generic [ref=e2340]: "37"
+                - generic [ref=e2341]: "38"
+                - generic [ref=e2342]: "39"
+                - generic [ref=e2343]: "40"
+                - generic [ref=e2344]: "41"
+                - generic [ref=e2345]: "42"
+                - generic [ref=e2346]: "43"
+                - generic [ref=e2347]: "44"
+                - generic [ref=e2348]: "45"
+                - generic [ref=e2349]: "46"
+                - generic [ref=e2350]: "47"
+                - generic [ref=e2351]: "48"
+                - generic [ref=e2352]: "49"
+                - generic [ref=e2456]: "50"
+                - generic [ref=e2457]: "51"
+                - generic [ref=e2458]: "52"
+                - generic [ref=e2459]: "53"
+                - generic [ref=e2460]: "54"
+                - generic [ref=e2461]: "55"
+                - generic [ref=e2462]: "56"
+                - generic [ref=e2463]: "57"
+                - generic [ref=e2464]: "58"
+                - generic [ref=e2465]: "59"
+                - generic [ref=e2466]: "60"
+                - generic [ref=e2467]: "61"
+                - generic [ref=e2468]: "62"
+                - generic [ref=e2469]: "63"
+                - generic [ref=e2470]: "64"
+                - generic [ref=e2471]: "65"
+                - generic [ref=e2472]: "66"
+                - generic [ref=e2473]: "67"
+                - generic [ref=e2474]: "68"
+                - generic [ref=e2475]: "69"
+                - generic [ref=e2476]: "70"
+                - generic [ref=e2477]: "71"
+                - generic [ref=e2478]: "72"
+                - generic [ref=e2479]: "73"
+                - generic [ref=e2480]: "74"
+                - generic [ref=e2481]: "75"
+                - generic [ref=e2482]: "76"
+                - generic [ref=e2483]: "77"
+                - generic [ref=e2484]: "78"
+                - generic [ref=e2485]: "79"
+                - generic [ref=e2486]: "80"
+                - generic [ref=e2487]: "81"
+                - generic [ref=e2488]: "82"
+                - generic [ref=e2489]: "83"
+                - generic [ref=e2490]: "84"
+                - generic [ref=e2491]: "85"
+                - generic [ref=e2492]: "86"
+                - generic [ref=e2493]: "87"
+                - generic [ref=e2494]: "88"
+                - generic [ref=e2495]: "89"
+                - generic [ref=e2496]: "90"
+                - generic [ref=e2497]: "91"
+                - generic [ref=e2498]: "92"
+                - generic [ref=e2499]: "93"
+                - generic [ref=e2500]: "94"
+                - generic [ref=e2501]: "95"
+                - generic [ref=e2502]: "96"
+                - generic [ref=e2503]: "97"
+                - generic [ref=e2504]: "98"
+                - generic [ref=e2505]: "99"
+                - generic [ref=e2506]: "100"
+                - generic [ref=e2507]: "101"
+                - generic [ref=e2508]: "102"
+                - generic [ref=e2509]: "103"
+                - generic [ref=e2510]: "104"
+                - generic [ref=e2511]: "105"
+                - generic [ref=e2512]: "106"
+                - generic [ref=e2513]: "107"
+                - generic [ref=e2514]: "108"
+                - generic [ref=e2515]: "109"
+                - generic [ref=e2516]: "110"
+                - generic [ref=e2517]: "111"
+                - generic [ref=e2518]: "112"
+                - generic [ref=e2519]: "113"
+                - generic [ref=e2520]: "114"
+              - generic [ref=e2353]:
+                - code [ref=e2355]: "import { useState } from 'react';"
+                - code [ref=e2357]: "import {"
+                - code [ref=e2359]: SidebarProvider,
+                - code [ref=e2361]: Sidebar,
+                - code [ref=e2363]: SidebarContent,
+                - code [ref=e2365]: SidebarHeader,
+                - code [ref=e2522]: SidebarMenu,
+                - code [ref=e2367]: SidebarMenuItem,
+                - code [ref=e2369]: SidebarMenuButton,
+                - code [ref=e2524]: SidebarTrigger,
+                - code [ref=e2371]: SidebarInset,
+                - code [ref=e2373]: "} from '@/components/ui/sidebar';"
+                - code [ref=e2375]: "import { ProjectList } from '@/components/ProjectList';"
+                - code [ref=e2377]: "import { KanbanBoard } from '@/components/KanbanBoard';"
+                - code [ref=e2379]: "import { Button } from '@/components/ui/button';"
+                - code [ref=e2381]: "import { useUser } from '@/hooks/use-supabase';"
+                - code [ref=e2383]: "import { LogOut, LayoutDashboard, Settings, FolderKanban } from 'lucide-react';"
+                - code [ref=e2526]: "import { useNavigate } from 'react-router-dom';"
+                - generic:
+                  - code
+                - code [ref=e2387]: const mockProjects = [
+                - code [ref=e2389]: "{ id: '1', name: 'Rediseño Web', color: '#3B82F6', taskCount: 12 },"
+                - code [ref=e2528]: "{ id: '2', name: 'App Mobile', color: '#10B981', taskCount: 8 },"
+                - code [ref=e2391]: "{ id: '3', name: 'Marketing Q1', color: '#F59E0B', taskCount: 15 },"
+                - code [ref=e2393]: "{ id: '4', name: 'Backend API', color: '#8B5CF6', taskCount: 6 },"
+                - code [ref=e2530]: "];"
+                - generic:
+                  - code
+                - code [ref=e2397]: "export function Dashboard() {"
+                - code [ref=e2399]: const [selectedProject, setSelectedProject] = useState(mockProjects[0]);
+                - code [ref=e2401]: "const { user, signOut } = useUser();"
+                - code [ref=e2403]: const navigate = useNavigate();
+                - generic:
+                  - code
+                - code [ref=e2407]: "const handleLogout = async () => {"
+                - code [ref=e2532]: await signOut();
+                - code [ref=e2409]: navigate('/login');
+                - code [ref=e2411]: "};"
+                - generic:
+                  - code
+                - code [ref=e2415]: return (
+                - code [ref=e2417]: <SidebarProvider>
+                - code [ref=e2419]: <div className="flex min-h-screen w-full bg-zinc-50">
+                - code [ref=e2421]: <Sidebar className="border-r border-zinc-200">
+                - code [ref=e2423]: <SidebarHeader className="border-b border-zinc-200 p-4">
+                - code [ref=e2425]: <div className="flex items-center gap-2">
+                - code [ref=e2427]: <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+                - code [ref=e2429]: <FolderKanban className="h-4 w-4 text-white" />
+                - code [ref=e2431]: </div>
+                - code [ref=e2433]: <div>
+                - code [ref=e2435]: <h2 className="font-semibold text-sm">TaskFlow</h2>
+                - code [ref=e2437]: "<p className=\"text-xs text-zinc-500\">{user?.email}</p>"
+                - code [ref=e2439]: </div>
+                - code [ref=e2534]: </div>
+                - code [ref=e2536]: </SidebarHeader>
+                - generic:
+                  - code
+                - code [ref=e2538]: <SidebarContent className="p-4">
+                - code [ref=e2540]: <SidebarMenu>
+                - code [ref=e2542]: <SidebarMenuItem>
+                - code [ref=e2544]: <SidebarMenuButton className="w-full justify-start">
+                - code [ref=e2546]: <LayoutDashboard className="h-4 w-4" />
+                - code [ref=e2548]: <span>Dashboard</span>
+                - code [ref=e2550]: </SidebarMenuButton>
+                - code [ref=e2552]: </SidebarMenuItem>
+                - code [ref=e2554]: <SidebarMenuItem>
+                - code [ref=e2556]: <SidebarMenuButton className="w-full justify-start">
+                - code [ref=e2558]: <Settings className="h-4 w-4" />
+                - code [ref=e2560]: <span>Configuración</span>
+                - code [ref=e2562]: </SidebarMenuButton>
+                - code [ref=e2564]: </SidebarMenuItem>
+                - code [ref=e2566]: </SidebarMenu>
+                - generic:
+                  - code
+                - code [ref=e2568]: <div className="mt-6">
+                - code [ref=e2570]: <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-3">
+                - code [ref=e2572]: Proyectos
+                - code [ref=e2574]: </h3>
+                - code [ref=e2576]: <ProjectList
+                - code [ref=e2578]: "projects={mockProjects}"
+                - code [ref=e2580]: "selectedProject={selectedProject}"
+                - code [ref=e2582]: "onSelectProject={setSelectedProject}"
+                - code [ref=e2584]: />
+                - code [ref=e2586]: </div>
+                - code [ref=e2588]: </SidebarContent>
+                - generic:
+                  - code
+                - code [ref=e2590]: <div className="border-t border-zinc-200 p-4">
+                - code [ref=e2592]: <Button
+                - code [ref=e2594]: variant="ghost"
+                - code [ref=e2596]: className="w-full justify-start text-zinc-600 hover:text-zinc-900"
+                - code [ref=e2598]: "onClick={handleLogout}"
+                - code [ref=e2600]: ">"
+                - code [ref=e2602]: <LogOut className="h-4 w-4 mr-2" />
+                - code [ref=e2604]: Cerrar sesión
+                - code [ref=e2606]: </Button>
+                - code [ref=e2608]: </div>
+                - code [ref=e2610]: </Sidebar>
+                - generic:
+                  - code
+                - code [ref=e2612]: <SidebarInset className="flex-1">
+                - code [ref=e2614]: <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b border-zinc-200 bg-white px-6">
+                - code [ref=e2616]: <SidebarTrigger />
+                - code [ref=e2618]: <div className="flex-1">
+                - code [ref=e2620]: <h1 className="text-xl font-semibold text-zinc-900">
+                - code [ref=e2622]: "{selectedProject.name}"
+                - code [ref=e2624]: </h1>
+                - code [ref=e2626]: <p className="text-sm text-zinc-500">
+                - code [ref=e2628]: "{selectedProject.taskCount} tareas activas"
+                - code [ref=e2630]: </p>
+                - code [ref=e2632]: </div>
+                - code [ref=e2634]: <Button size="sm">Nueva tarea</Button>
+                - code [ref=e2636]: </header>
+                - generic:
+                  - code
+                - code [ref=e2638]: <main className="flex-1 p-6">
+                - code [ref=e2640]: "<KanbanBoard projectId={selectedProject.id} />"
+                - code [ref=e2642]: </main>
+                - code [ref=e2644]: </SidebarInset>
+                - code [ref=e2646]: </div>
+                - code [ref=e2648]: </SidebarProvider>
+                - code [ref=e2650]: );
+                - code [ref=e2652]: "}"
+            - generic [ref=e2440]:
+              - generic [ref=e2441]:
+                - generic [ref=e2442]:
+                  - img [ref=e2443]
+                  - generic [ref=e2446]: TSX
+                - generic [ref=e2447]: UTF-8
+              - generic [ref=e2448]:
+                - generic [ref=e2449]: Ln 1, Col 1
+                - generic [ref=e2450] [cursor=pointer]:
+                  - img [ref=e2451]
+                  - generic [ref=e2454]: Prettier

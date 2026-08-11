@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Sparkles, ChevronDown, Lock, Zap, Eye, DollarSign, Cpu } from 'lucide-react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { Sparkles, ChevronDown, Zap, Eye, DollarSign, Cpu } from 'lucide-react';
 import { MODELS } from './constants';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -92,14 +93,58 @@ function ModelRow({
   );
 }
 
+const DROPDOWN_WIDTH = 416; // matches w-[26rem]
+const DROPDOWN_GAP = 12;    // 0.75rem breathing room
+const VIEWPORT_PADDING = 12;
+
 export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const [coords, setCoords] = useState<{ left: number; top: number; maxHeight: number; openUpward: boolean } | null>(null);
   const currentModel = MODELS.find(m => m.id === selectedModel) ?? MODELS[0];
   const isFree = currentModel.free;
+
+  // Position the portal dropdown next to the trigger and decide direction based on viewport space.
+  useLayoutEffect(() => {
+    if (!isOpen || !triggerRef.current) return;
+    const update = () => {
+      const rect = triggerRef.current!.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const spaceAbove = rect.top - VIEWPORT_PADDING;
+      const spaceBelow = vh - rect.bottom - VIEWPORT_PADDING;
+      const openUpward = spaceAbove >= 320 || spaceAbove > spaceBelow;
+      const maxHeight = Math.max(220, openUpward ? spaceAbove - DROPDOWN_GAP : spaceBelow - DROPDOWN_GAP);
+      const left = Math.min(
+        Math.max(VIEWPORT_PADDING, rect.left),
+        vw - DROPDOWN_WIDTH - VIEWPORT_PADDING
+      );
+      const top = openUpward
+        ? rect.top - DROPDOWN_GAP
+        : rect.bottom + DROPDOWN_GAP;
+      setCoords({ left, top, maxHeight, openUpward });
+    };
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+    };
+  }, [isOpen]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen]);
 
   return (
     <div className="relative">
       <button
+        ref={triggerRef}
         id="model-selector-trigger"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
@@ -127,85 +172,97 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
         <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform duration-200", isOpen ? "rotate-180 text-primary" : "text-zinc-400")} />
       </button>
 
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40"
-              onClick={() => setIsOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, y: 8, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 8, scale: 0.97 }}
-              transition={{ duration: 0.15 }}
-              className="absolute left-0 bottom-full mb-3 w-[26rem] max-w-[calc(100vw-2rem)] rounded-2xl overflow-hidden z-[100] bg-white/90 backdrop-blur-xl border border-zinc-200/50 shadow-[0_20px_70px_rgba(0,0,0,0.15)]"
-            >
-              {/* Header */}
-              <div className="px-4 py-3 border-b border-zinc-100 bg-zinc-50 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Seleccionar Modelo</span>
-                </div>
-                <span className="text-[9px] text-zinc-400 font-medium">Precios por millón de tokens</span>
-              </div>
-
-              <div className="overflow-y-auto max-h-[70vh] custom-scrollbar">
-                {/* FREE section */}
-                <div className="px-3 pt-3 pb-1">
-                  <div className="flex items-center gap-2 mb-2 px-1">
-                    <span className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em]">
-                      ✓ Gratis — Sin coste OpenRouter
-                    </span>
-                    <div className="flex-1 h-px bg-emerald-100" />
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {isOpen && coords && (
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-[9998]"
+                onClick={() => setIsOpen(false)}
+              />
+              <motion.div
+                initial={{ opacity: 0, y: coords.openUpward ? 8 : -8, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: coords.openUpward ? 8 : -8, scale: 0.97 }}
+                transition={{ duration: 0.15 }}
+                style={{
+                  position: 'fixed',
+                  left: coords.left,
+                  top: coords.openUpward ? undefined : coords.top,
+                  bottom: coords.openUpward ? Math.max(VIEWPORT_PADDING, window.innerHeight - coords.top) : undefined,
+                  width: DROPDOWN_WIDTH,
+                  maxWidth: 'calc(100vw - 24px)',
+                  maxHeight: coords.maxHeight,
+                }}
+                className="rounded-2xl overflow-hidden z-[9999] bg-white/95 backdrop-blur-xl border border-zinc-200/60 shadow-[0_20px_70px_rgba(0,0,0,0.15)] flex flex-col"
+              >
+                {/* Header */}
+                <div className="px-4 py-3 border-b border-zinc-100 bg-zinc-50 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Seleccionar Modelo</span>
                   </div>
-                  <div className="space-y-0.5">
-                    {FREE_MODELS.map(m => (
-                      <ModelRow
-                        key={m.id}
-                        m={m}
-                        isSelected={selectedModel === m.id}
-                        onSelect={() => { onSelect(m.id); setIsOpen(false); }}
-                      />
-                    ))}
-                  </div>
+                  <span className="text-[9px] text-zinc-400 font-medium">Precios por millón de tokens</span>
                 </div>
 
-                {/* PAID section */}
-                <div className="px-3 pt-2 pb-3">
-                  <div className="flex items-center gap-2 mb-2 px-1">
-                    <DollarSign className="h-3 w-3 text-amber-500" />
-                    <span className="text-[9px] font-black text-amber-600 uppercase tracking-[0.2em]">
-                      Premium — Consume créditos OpenRouter
-                    </span>
-                    <div className="flex-1 h-px bg-amber-100" />
+                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                  {/* FREE section */}
+                  <div className="px-3 pt-3 pb-1">
+                    <div className="flex items-center gap-2 mb-2 px-1">
+                      <span className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em]">
+                        ✓ Gratis — Sin coste OpenRouter
+                      </span>
+                      <div className="flex-1 h-px bg-emerald-100" />
+                    </div>
+                    <div className="space-y-0.5">
+                      {FREE_MODELS.map(m => (
+                        <ModelRow
+                          key={m.id}
+                          m={m}
+                          isSelected={selectedModel === m.id}
+                          onSelect={() => { onSelect(m.id); setIsOpen(false); }}
+                        />
+                      ))}
+                    </div>
                   </div>
-                  <div className="space-y-0.5">
-                    {PAID_MODELS.map(m => (
-                      <ModelRow
-                        key={m.id}
-                        m={m}
-                        isSelected={selectedModel === m.id}
-                        onSelect={() => { onSelect(m.id); setIsOpen(false); }}
-                      />
-                    ))}
+
+                  {/* PAID section */}
+                  <div className="px-3 pt-2 pb-3">
+                    <div className="flex items-center gap-2 mb-2 px-1">
+                      <DollarSign className="h-3 w-3 text-amber-500" />
+                      <span className="text-[9px] font-black text-amber-600 uppercase tracking-[0.2em]">
+                        Premium — Consume créditos OpenRouter
+                      </span>
+                      <div className="flex-1 h-px bg-amber-100" />
+                    </div>
+                    <div className="space-y-0.5">
+                      {PAID_MODELS.map(m => (
+                        <ModelRow
+                          key={m.id}
+                          m={m}
+                          isSelected={selectedModel === m.id}
+                          onSelect={() => { onSelect(m.id); setIsOpen(false); }}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Footer */}
-              <div className="px-4 py-2.5 border-t border-zinc-100 bg-zinc-50">
-                <p className="text-[9px] text-zinc-400 text-center">
-                  💡 El modelo predeterminado siempre es <strong className="text-emerald-600">Gemini 2.0 Flash (gratis)</strong>
-                </p>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+                {/* Footer */}
+                <div className="px-4 py-2.5 border-t border-zinc-100 bg-zinc-50 shrink-0">
+                  <p className="text-[9px] text-zinc-400 text-center">
+                    💡 Por defecto <strong className="text-amber-600">Claude Sonnet 4.5</strong> (pro) o <strong className="text-emerald-600">Gemini 2.0 Flash</strong> (gratis)
+                  </p>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }

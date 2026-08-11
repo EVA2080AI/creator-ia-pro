@@ -1,0 +1,10 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e102]:
+        - img [ref=e104]
+        - generic [ref=e107]: Sesión iniciada correctamente.
+  - status [ref=e108]:
+    - generic [ref=e109]:
+      - img [ref=e111]
+      - generic [ref=e113]: Cargando plataforma...

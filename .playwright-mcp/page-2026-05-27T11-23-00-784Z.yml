@@ -1,0 +1,251 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - complementary "Navegación principal" [ref=e10]:
+      - generic [ref=e11]:
+        - button "Creator IA" [ref=e14] [cursor=pointer]:
+          - img [ref=e16]
+          - generic [ref=e19]: Creator IA
+        - button [ref=e20] [cursor=pointer]:
+          - img [ref=e21]
+      - navigation [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e27]: Principal
+          - button "Inicio" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+            - generic [ref=e32]: Inicio
+          - button "Genesis IA" [ref=e33] [cursor=pointer]:
+            - img [ref=e34]
+            - generic [ref=e44]:
+              - text: Genesis IA
+              - generic [ref=e45]: CREADOR
+          - button "Editor" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+            - generic [ref=e52]:
+              - text: Editor
+              - generic [ref=e53]: CREADOR
+          - button "Canvas IA" [ref=e54] [cursor=pointer]:
+            - img [ref=e55]
+            - generic [ref=e59]:
+              - text: Canvas IA
+              - generic [ref=e60]: PRO
+          - button "Proyectos" [ref=e61] [cursor=pointer]:
+            - img [ref=e62]
+            - generic [ref=e64]:
+              - text: Proyectos
+              - generic [ref=e65]: PRO
+          - button "Aplicaciones" [ref=e66] [cursor=pointer]:
+            - img [ref=e67]
+            - generic [ref=e72]: Aplicaciones
+          - button "Antigravity" [ref=e73] [cursor=pointer]:
+            - img [ref=e74]
+            - generic [ref=e77]:
+              - text: Antigravity
+              - generic [ref=e78]: PYME
+        - generic [ref=e79]:
+          - generic [ref=e81]:
+            - img [ref=e82]
+            - text: Sistema
+          - button "Panel Control" [ref=e84] [cursor=pointer]:
+            - img [ref=e85]
+            - generic [ref=e88]:
+              - text: Panel Control
+              - generic [ref=e89]: ADMIN
+          - button "Usuarios" [ref=e90] [cursor=pointer]:
+            - img [ref=e91]
+            - generic [ref=e95]:
+              - text: Usuarios
+              - generic [ref=e96]: ADMIN
+          - button "Sistema de Diseño" [ref=e97] [cursor=pointer]:
+            - img [ref=e98]
+            - generic [ref=e104]:
+              - text: Sistema de Diseño
+              - generic [ref=e105]: ADMIN
+          - button "Estatus" [ref=e106] [cursor=pointer]:
+            - img [ref=e107]
+            - generic [ref=e109]:
+              - text: Estatus
+              - generic [ref=e110]: ADMIN
+          - button "Roadmap" [ref=e111] [cursor=pointer]:
+            - img [ref=e112]
+            - generic [ref=e113]: Roadmap
+        - generic [ref=e114]:
+          - generic [ref=e116]: Créditos
+          - generic [ref=e117]:
+            - img [ref=e118]
+            - generic [ref=e123]: 37,267
+      - generic [ref=e124]:
+        - button "Perfil" [ref=e126] [cursor=pointer]:
+          - img [ref=e127]
+          - generic [ref=e130]: Perfil
+        - button "Planes" [ref=e131] [cursor=pointer]:
+          - img [ref=e132]
+          - generic [ref=e134]: Planes
+        - button "Descargar" [ref=e135] [cursor=pointer]:
+          - img [ref=e136]
+          - generic [ref=e139]: Descargar
+        - generic [ref=e140] [cursor=pointer]:
+          - img [ref=e142]
+          - generic [ref=e145]:
+            - paragraph [ref=e146]: sebastian689
+            - paragraph [ref=e147]: pymes
+          - button "Cerrar sesión" [ref=e148]:
+            - img [ref=e149]
+    - main [ref=e153]:
+      - generic [ref=e1696]:
+        - generic [ref=e1697]:
+          - generic [ref=e1698]:
+            - button [ref=e1699] [cursor=pointer]:
+              - img [ref=e1700]
+            - generic [ref=e1702]: Saas Gestión Tareas Tipo
+          - generic [ref=e1704]:
+            - generic [ref=e1705]:
+              - button "Preview" [active] [ref=e1706] [cursor=pointer]:
+                - img [ref=e1707]
+                - generic [ref=e1710]: Preview
+              - button "Code" [ref=e1711] [cursor=pointer]:
+                - img [ref=e1712]
+                - generic [ref=e1715]: Code
+              - button "Consola" [ref=e1716] [cursor=pointer]:
+                - img [ref=e1717]
+                - generic [ref=e1719]: Consola
+              - button [ref=e1720] [cursor=pointer]:
+                - img [ref=e1721]
+            - generic [ref=e2653]:
+              - button [ref=e2654] [cursor=pointer]:
+                - img [ref=e2655]
+              - button [ref=e2657] [cursor=pointer]:
+                - img [ref=e2658]
+              - button [ref=e2660] [cursor=pointer]:
+                - img [ref=e2661]
+          - generic [ref=e1734]:
+            - generic [ref=e1735]:
+              - button "GitHub" [ref=e1736] [cursor=pointer]:
+                - img [ref=e1737]
+              - button "Compartir" [ref=e1740] [cursor=pointer]:
+                - img [ref=e1741]
+            - button "Push to Cloud" [ref=e1747] [cursor=pointer]:
+              - generic [ref=e1749]: Push to Cloud
+        - generic [ref=e1751]:
+          - complementary "Panel de Chat Génesis" [ref=e1754]:
+            - generic [ref=e1755]:
+              - generic [ref=e1756]:
+                - button "Volver" [ref=e1757] [cursor=pointer]:
+                  - img [ref=e1758]
+                - heading "Proyecto" [level=2] [ref=e1764]
+              - button "Console" [ref=e1769] [cursor=pointer]:
+                - img [ref=e1770]
+                - text: Console
+            - generic [ref=e1772]:
+              - article "Tu mensaje" [ref=e1773]:
+                - generic [ref=e1774]: "[MODO: React + Vite + Tailwind + TypeScript] Crea un SaaS de gestión de tareas tipo Trello/Linear con: (1) Página de login con email+password (usa el LoginPage scaffold y conéctalo a auth.signIn de Supabase), (2) Dashboard con sidebar colapsable usando Sidebar de shadcn, mostrando lista de proyectos a la izquierda y un board kanban a la derecha con 3 columnas (Pendiente, En progreso, Completado) y tarjetas draggables, (3) Página de pricing con 3 planes usando el PricingPage scaffold. Usa react-router-dom para las rutas /login, /dashboard, /pricing. Para el board kanban, usa cards de shadcn y mock data con 6 tareas distribuidas."
+                - time [ref=e1775]: 06:16 AM
+              - article "Mensaje de Génesis" [ref=e1922]:
+                - generic [ref=e1923]:
+                  - generic [ref=e1924]:
+                    - img [ref=e1926]
+                    - generic [ref=e1928]: Génesis AI
+                    - generic [ref=e1929]: V21
+                    - generic [ref=e1930]:
+                      - img [ref=e1931]
+                      - text: Código
+                  - generic [ref=e1934]:
+                    - generic [ref=e1935]: Código generado.
+                    - generic [ref=e1936]:
+                      - button "7 archivos generados" [ref=e1937] [cursor=pointer]:
+                        - generic [ref=e1938]:
+                          - img [ref=e1939]
+                          - text: 7 archivos generados
+                        - img [ref=e1943]
+                      - generic [ref=e1945]:
+                        - generic [ref=e1946]:
+                          - img [ref=e1947]
+                          - generic [ref=e1952]: src/App.tsx
+                        - generic [ref=e1953]:
+                          - img [ref=e1954]
+                          - generic [ref=e1959]: src/pages/Dashboard.tsx
+                        - generic [ref=e1960]:
+                          - img [ref=e1961]
+                          - generic [ref=e1966]: src/components/ProjectList.tsx
+                        - generic [ref=e1967]:
+                          - img [ref=e1968]
+                          - generic [ref=e1973]: src/components/KanbanBoard.tsx
+                        - generic [ref=e1974]:
+                          - img [ref=e1975]
+                          - generic [ref=e1980]: src/components/KanbanColumn.tsx
+                        - generic [ref=e1981]:
+                          - img [ref=e1982]
+                          - generic [ref=e1987]: src/components/TaskCard.tsx
+                        - generic [ref=e1988]:
+                          - img [ref=e1989]
+                          - generic [ref=e1994]: package.json
+                      - button "+4 más" [ref=e1995] [cursor=pointer]
+                    - generic [ref=e1996]:
+                      - button "Copiar mensaje" [ref=e1997] [cursor=pointer]:
+                        - img [ref=e1998]
+                      - button "Reintentar" [ref=e2001] [cursor=pointer]:
+                        - img [ref=e2002]
+                  - navigation "Sugerencias" [ref=e2005]:
+                    - img [ref=e2007]
+                    - button "Agregar modo oscuro" [ref=e2009] [cursor=pointer]
+                    - button "Optimizar para móviles" [ref=e2010] [cursor=pointer]
+                    - button "Añadir animaciones" [ref=e2011] [cursor=pointer]
+                    - button "Agregar TypeScript strict" [ref=e2012] [cursor=pointer]
+            - contentinfo [ref=e1776]:
+              - generic [ref=e1778]:
+                - generic [ref=e1779]:
+                  - generic [ref=e1781]:
+                    - button "Adjuntar archivo o URL" [ref=e1783] [cursor=pointer]:
+                      - img [ref=e1784]
+                    - textbox "Describe lo que quieres construir..." [ref=e1786]
+                    - generic [ref=e1787]:
+                      - button "Dictado por voz" [ref=e1788] [cursor=pointer]:
+                        - img [ref=e1789]
+                      - button "Enviar mensaje" [disabled] [ref=e2013]:
+                        - img [ref=e2014]
+                  - generic [ref=e1795]:
+                    - generic [ref=e1796]:
+                      - button "PLAN" [ref=e1797] [cursor=pointer]:
+                        - img [ref=e1798]
+                        - text: PLAN
+                      - button "BUILD" [ref=e1800] [cursor=pointer]:
+                        - img [ref=e1801]
+                        - text: BUILD
+                    - button "Claude Sonnet 4.5" [ref=e1805] [cursor=pointer]:
+                      - img [ref=e1806]
+                      - generic [ref=e1809]: Claude Sonnet 4.5
+                      - img [ref=e1810]
+                - paragraph [ref=e1812]:
+                  - generic [ref=e1813]: Cmd+Enter para enviar
+                  - generic [ref=e1814]: ·
+                  - generic [ref=e1815]: Shift+Enter nueva línea
+                  - generic [ref=e1816]: ·
+                  - generic [ref=e1817]: Cmd+K nueva conversación
+          - generic [ref=e2664]:
+            - generic [ref=e2671]:
+              - generic [ref=e2673]:
+                - iframe [ref=e2674]:
+                  
+                - generic [ref=e2675]:
+                  - button "Refresh preview" [ref=e2676] [cursor=pointer]:
+                    - img "Refresh preview" [ref=e2677]
+                  - button "Open on CodeSandbox Open Sandbox" [ref=e2679] [cursor=pointer]:
+                    - img "Open on CodeSandbox" [ref=e2680]
+                    - generic [ref=e2684]: Open Sandbox
+                - generic "Open in CodeSandbox" [ref=e2686]
+                - paragraph [ref=e2695]: "[3/3] Starting"
+              - button "Ver Logs" [ref=e2696] [cursor=pointer]:
+                - img [ref=e2697]
+                - text: Ver Logs
+            - generic [ref=e2699]:
+              - generic [ref=e2700]:
+                - button [ref=e2701] [cursor=pointer]:
+                  - img
+                - generic [ref=e2703]: Génesis Studio / v21.0
+              - group [ref=e2705]:
+                - radio "Vista" [checked] [ref=e2706] [cursor=pointer]:
+                  - img [ref=e2707]
+                  - text: Vista
+                - radio "Código" [ref=e2709] [cursor=pointer]:
+                  - img [ref=e2710]
+                  - text: Código

@@ -101,8 +101,77 @@ export function detectIntent(prompt: string, _hasContext?: boolean): ChatIntent 
   return 'chat';
 }
 
+/**
+ * INCREMENTAL parser — extrae solo los <file> que YA SE CERRARON en el stream
+ * (incluye </file> de cierre). Útil para emitir archivos en vivo durante streaming
+ * sin esperar al final.
+ *
+ * @param text  Acumulado del stream hasta el momento
+ * @returns     Diccionario { path → StudioFile } SOLO de archivos completos
+ */
+export function extractCompleteXmlFiles(text: string): Record<string, StudioFile> {
+  if (!text || !text.includes('</file>')) return {};
+
+  const files: Record<string, StudioFile> = {};
+  // Strict: requiere </file> de cierre (no abierto)
+  const re = /<file\s+path\s*=\s*["']([^"']+)["']\s*>([\s\S]*?)<\/file>/gi;
+  let m: RegExpExecArray | null;
+
+  while ((m = re.exec(text)) !== null) {
+    let path = m[1].trim();
+    let content = m[2].replace(/^\r?\n/, '').replace(/\s*$/, '');
+    path = path.replace(/^\.\//, '').replace(/^\/+/, '');
+    if (!path || !content) continue;
+    const ext = path.split('.').pop()?.toLowerCase() ?? '';
+    const langMap: Record<string, string> = {
+      tsx: 'tsx', ts: 'typescript', jsx: 'jsx', js: 'javascript',
+      css: 'css', html: 'html', json: 'json', md: 'markdown',
+    };
+    files[path] = { language: langMap[ext] ?? 'plaintext', content };
+  }
+  return files;
+}
+
+/** Extract <file path="...">...</file> XML blocks (preferred format from Genesis Engine v25+) */
+export function extractXmlFiles(text: string): Record<string, StudioFile> | null {
+  if (!text || !text.includes('<file')) return null;
+
+  const files: Record<string, StudioFile> = {};
+  // Match <file path="..."> with single or double quotes; tolerate whitespace and missing closing tag
+  const re = /<file\s+path\s*=\s*["']([^"']+)["']\s*>([\s\S]*?)(?:<\/file>|$)/gi;
+  let m: RegExpExecArray | null;
+
+  while ((m = re.exec(text)) !== null) {
+    let path = m[1].trim();
+    let content = m[2];
+
+    // Strip a leading newline that comes right after the opening tag
+    content = content.replace(/^\r?\n/, '');
+    // Strip trailing whitespace+newlines that come right before </file>
+    content = content.replace(/\s*$/, '');
+
+    // Normalize path: remove leading ./ or /
+    path = path.replace(/^\.\//, '').replace(/^\/+/, '');
+
+    if (!path || !content) continue;
+
+    const ext = path.split('.').pop()?.toLowerCase() ?? '';
+    const langMap: Record<string, string> = {
+      tsx: 'tsx', ts: 'typescript', jsx: 'jsx', js: 'javascript',
+      css: 'css', html: 'html', json: 'json', md: 'markdown',
+    };
+    files[path] = { language: langMap[ext] ?? 'plaintext', content };
+  }
+
+  return Object.keys(files).length > 0 ? files : null;
+}
+
 /** IMPROVED: Extract code blocks from markdown with better filename detection */
 export function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
+  // Prefer XML format (v25+ engine) — fall back to markdown if no XML tags found
+  const xmlFiles = extractXmlFiles(text);
+  if (xmlFiles) return xmlFiles;
+
   const files: Record<string, StudioFile> = {};
 
   // Improved regex that handles:

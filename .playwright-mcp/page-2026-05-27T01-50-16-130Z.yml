@@ -1,0 +1,204 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e1640]:
+        - img [ref=e1642]
+        - generic [ref=e1645]: Proyecto creado
+  - generic [ref=e9]:
+    - complementary "Navegación principal" [ref=e10]:
+      - generic [ref=e11]:
+        - button "Creator IA" [ref=e14] [cursor=pointer]:
+          - img [ref=e16]
+          - generic [ref=e19]: Creator IA
+        - button [ref=e20] [cursor=pointer]:
+          - img [ref=e21]
+      - navigation [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e27]: Principal
+          - button "Inicio" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+            - generic [ref=e32]: Inicio
+          - button "Genesis IA" [ref=e33] [cursor=pointer]:
+            - img [ref=e34]
+            - generic [ref=e44]:
+              - text: Genesis IA
+              - generic [ref=e45]: CREADOR
+          - button "Editor" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+            - generic [ref=e52]:
+              - text: Editor
+              - generic [ref=e53]: CREADOR
+          - button "Canvas IA" [ref=e54] [cursor=pointer]:
+            - img [ref=e55]
+            - generic [ref=e59]:
+              - text: Canvas IA
+              - generic [ref=e60]: PRO
+          - button "Proyectos" [ref=e61] [cursor=pointer]:
+            - img [ref=e62]
+            - generic [ref=e64]:
+              - text: Proyectos
+              - generic [ref=e65]: PRO
+          - button "Aplicaciones" [ref=e66] [cursor=pointer]:
+            - img [ref=e67]
+            - generic [ref=e72]: Aplicaciones
+          - button "Antigravity" [ref=e73] [cursor=pointer]:
+            - img [ref=e74]
+            - generic [ref=e77]:
+              - text: Antigravity
+              - generic [ref=e78]: PYME
+        - generic [ref=e79]:
+          - generic [ref=e81]:
+            - img [ref=e82]
+            - text: Sistema
+          - button "Panel Control" [ref=e84] [cursor=pointer]:
+            - img [ref=e85]
+            - generic [ref=e88]:
+              - text: Panel Control
+              - generic [ref=e89]: ADMIN
+          - button "Usuarios" [ref=e90] [cursor=pointer]:
+            - img [ref=e91]
+            - generic [ref=e95]:
+              - text: Usuarios
+              - generic [ref=e96]: ADMIN
+          - button "Sistema de Diseño" [ref=e97] [cursor=pointer]:
+            - img [ref=e98]
+            - generic [ref=e104]:
+              - text: Sistema de Diseño
+              - generic [ref=e105]: ADMIN
+          - button "Estatus" [ref=e106] [cursor=pointer]:
+            - img [ref=e107]
+            - generic [ref=e109]:
+              - text: Estatus
+              - generic [ref=e110]: ADMIN
+          - button "Roadmap" [ref=e111] [cursor=pointer]:
+            - img [ref=e112]
+            - generic [ref=e113]: Roadmap
+        - generic [ref=e114]:
+          - generic [ref=e116]: Créditos
+          - generic [ref=e117]:
+            - img [ref=e118]
+            - generic [ref=e123]: 37,267
+      - generic [ref=e124]:
+        - button "Perfil" [ref=e126] [cursor=pointer]:
+          - img [ref=e127]
+          - generic [ref=e130]: Perfil
+        - button "Planes" [ref=e131] [cursor=pointer]:
+          - img [ref=e132]
+          - generic [ref=e134]: Planes
+        - button "Descargar" [ref=e135] [cursor=pointer]:
+          - img [ref=e136]
+          - generic [ref=e139]: Descargar
+        - generic [ref=e140] [cursor=pointer]:
+          - img [ref=e142]
+          - generic [ref=e145]:
+            - paragraph [ref=e146]: sebastian689
+            - paragraph [ref=e147]: pymes
+          - button "Cerrar sesión" [ref=e148]:
+            - img [ref=e149]
+    - main [ref=e153]:
+      - generic [ref=e1646]:
+        - generic [ref=e1647]:
+          - generic [ref=e1648]:
+            - button [ref=e1649] [cursor=pointer]:
+              - img [ref=e1650]
+            - generic [ref=e1652]: Landing Page Café Especialidad
+            - generic [ref=e1653]: Sync
+          - generic [ref=e1654]:
+            - generic [ref=e1655]:
+              - button "Preview" [ref=e1656] [cursor=pointer]:
+                - img [ref=e1657]
+                - generic [ref=e1660]: Preview
+              - button "Code" [ref=e1661] [cursor=pointer]:
+                - img [ref=e1662]
+                - generic [ref=e1665]: Code
+              - button "Consola" [ref=e1666] [cursor=pointer]:
+                - img [ref=e1667]
+                - generic [ref=e1669]: Consola
+              - button [ref=e1670] [cursor=pointer]:
+                - img [ref=e1671]
+            - generic [ref=e1674]:
+              - button [ref=e1675] [cursor=pointer]:
+                - img [ref=e1676]
+              - button [ref=e1678] [cursor=pointer]:
+                - img [ref=e1679]
+              - button [ref=e1681] [cursor=pointer]:
+                - img [ref=e1682]
+          - generic [ref=e1684]:
+            - generic [ref=e1685]:
+              - button "GitHub" [ref=e1686] [cursor=pointer]:
+                - img [ref=e1687]
+              - button "Compartir" [ref=e1690] [cursor=pointer]:
+                - img [ref=e1691]
+            - button "Push to Cloud" [ref=e1697] [cursor=pointer]:
+              - generic [ref=e1699]: Push to Cloud
+        - generic [ref=e1701]:
+          - complementary "Panel de Chat Génesis" [ref=e1704]:
+            - generic [ref=e1705]:
+              - generic [ref=e1706]:
+                - button "Volver" [ref=e1707] [cursor=pointer]:
+                  - img [ref=e1708]
+                - heading "Proyecto" [level=2] [ref=e1714]
+              - generic [ref=e1715]:
+                - generic [ref=e1716]:
+                  - img [ref=e1717]
+                  - text: frontend
+                - button "Console" [ref=e1719] [cursor=pointer]:
+                  - img [ref=e1720]
+                  - text: Console
+            - article "Tu mensaje" [ref=e1723]:
+              - generic [ref=e1724]: "[MODO: React + Vite + Tailwind + TypeScript] crea una landing page para un café de especialidad en Bogotá llamado \"Tinto Bogotá\". Incluye: hero con imagen de café y CTA \"Reservar mesa\", sección de menú con 3 cafés destacados (latte tradicional 8.500 COP, espresso doble 6.500 COP, cold brew con chocolate 11.000 COP), y formulario de reserva al final con nombre, fecha y número de personas. Diseño cálido y moderno."
+              - time [ref=e1725]: 08:50 PM
+            - contentinfo [ref=e1726]:
+              - generic [ref=e1728]:
+                - generic [ref=e1729]:
+                  - generic [ref=e1731]:
+                    - button "Adjuntar archivo o URL" [ref=e1733] [cursor=pointer]:
+                      - img [ref=e1734]
+                    - textbox "Describe lo que quieres construir..." [disabled] [ref=e1736]
+                    - generic [ref=e1737]:
+                      - button "Dictado por voz" [ref=e1738] [cursor=pointer]:
+                        - img [ref=e1739]
+                      - button "Detener generación" [ref=e1742] [cursor=pointer]:
+                        - img [ref=e1743]
+                  - generic [ref=e1745]:
+                    - generic [ref=e1746]:
+                      - button "PLAN" [ref=e1747] [cursor=pointer]:
+                        - img [ref=e1748]
+                        - text: PLAN
+                      - button "BUILD" [ref=e1750] [cursor=pointer]:
+                        - img [ref=e1751]
+                        - text: BUILD
+                    - button "Claude Sonnet 4.5" [ref=e1755] [cursor=pointer]:
+                      - img [ref=e1756]
+                      - generic [ref=e1759]: Claude Sonnet 4.5
+                      - img [ref=e1760]
+                - paragraph [ref=e1762]:
+                  - generic [ref=e1763]: Cmd+Enter para enviar
+                  - generic [ref=e1764]: ·
+                  - generic [ref=e1765]: Shift+Enter nueva línea
+                  - generic [ref=e1766]: ·
+                  - generic [ref=e1767]: Cmd+K nueva conversación
+          - generic [ref=e1770]:
+            - generic [ref=e1771]:
+              - generic [ref=e1773]:
+                - img [ref=e1776]
+                - generic [ref=e1778]:
+                  - heading "Generando IA" [level=2] [ref=e1779]
+                  - paragraph [ref=e1780]: Capacidades Inteligentes Activas
+                - generic [ref=e1784]: Procesando
+              - generic [ref=e1785]:
+                - img [ref=e1787]
+                - paragraph [ref=e1790]: Editor en Reposo
+                - paragraph [ref=e1791]: Describe lo que deseas construir para inicializar el motor.
+            - generic [ref=e1792]:
+              - generic [ref=e1793]:
+                - button [ref=e1794] [cursor=pointer]:
+                  - img
+                - generic [ref=e1796]: Génesis Studio / v21.0
+              - group [ref=e1798]:
+                - radio "Vista" [checked] [ref=e1799] [cursor=pointer]:
+                  - img [ref=e1800]
+                  - text: Vista
+                - radio "Código" [ref=e1802] [cursor=pointer]:
+                  - img [ref=e1803]
+                  - text: Código

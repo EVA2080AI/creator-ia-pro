@@ -1,0 +1,728 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - complementary "Navegación principal" [ref=e10]:
+      - generic [ref=e11]:
+        - button "Creator IA" [ref=e14] [cursor=pointer]:
+          - img [ref=e16]
+          - generic [ref=e19]: Creator IA
+        - button [ref=e20] [cursor=pointer]:
+          - img [ref=e21]
+      - navigation [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e27]: Principal
+          - button "Inicio" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+            - generic [ref=e32]: Inicio
+          - button "Genesis IA" [ref=e33] [cursor=pointer]:
+            - img [ref=e34]
+            - generic [ref=e44]:
+              - text: Genesis IA
+              - generic [ref=e45]: CREADOR
+          - button "Editor" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+            - generic [ref=e52]:
+              - text: Editor
+              - generic [ref=e53]: CREADOR
+          - button "Canvas IA" [ref=e54] [cursor=pointer]:
+            - img [ref=e55]
+            - generic [ref=e59]:
+              - text: Canvas IA
+              - generic [ref=e60]: PRO
+          - button "Proyectos" [ref=e61] [cursor=pointer]:
+            - img [ref=e62]
+            - generic [ref=e64]:
+              - text: Proyectos
+              - generic [ref=e65]: PRO
+          - button "Aplicaciones" [ref=e66] [cursor=pointer]:
+            - img [ref=e67]
+            - generic [ref=e72]: Aplicaciones
+          - button "Antigravity" [ref=e73] [cursor=pointer]:
+            - img [ref=e74]
+            - generic [ref=e77]:
+              - text: Antigravity
+              - generic [ref=e78]: PYME
+        - generic [ref=e79]:
+          - generic [ref=e81]:
+            - img [ref=e82]
+            - text: Sistema
+          - button "Panel Control" [ref=e84] [cursor=pointer]:
+            - img [ref=e85]
+            - generic [ref=e88]:
+              - text: Panel Control
+              - generic [ref=e89]: ADMIN
+          - button "Usuarios" [ref=e90] [cursor=pointer]:
+            - img [ref=e91]
+            - generic [ref=e95]:
+              - text: Usuarios
+              - generic [ref=e96]: ADMIN
+          - button "Sistema de Diseño" [ref=e97] [cursor=pointer]:
+            - img [ref=e98]
+            - generic [ref=e104]:
+              - text: Sistema de Diseño
+              - generic [ref=e105]: ADMIN
+          - button "Estatus" [ref=e106] [cursor=pointer]:
+            - img [ref=e107]
+            - generic [ref=e109]:
+              - text: Estatus
+              - generic [ref=e110]: ADMIN
+          - button "Roadmap" [ref=e111] [cursor=pointer]:
+            - img [ref=e112]
+            - generic [ref=e113]: Roadmap
+        - generic [ref=e114]:
+          - generic [ref=e116]: Créditos
+          - generic [ref=e117]:
+            - img [ref=e118]
+            - generic [ref=e123]: 37,267
+      - generic [ref=e124]:
+        - button "Perfil" [ref=e126] [cursor=pointer]:
+          - img [ref=e127]
+          - generic [ref=e130]: Perfil
+        - button "Planes" [ref=e131] [cursor=pointer]:
+          - img [ref=e132]
+          - generic [ref=e134]: Planes
+        - button "Descargar" [ref=e135] [cursor=pointer]:
+          - img [ref=e136]
+          - generic [ref=e139]: Descargar
+        - generic [ref=e140] [cursor=pointer]:
+          - img [ref=e142]
+          - generic [ref=e145]:
+            - paragraph [ref=e146]: sebastian689
+            - paragraph [ref=e147]: pymes
+          - button "Cerrar sesión" [ref=e148]:
+            - img [ref=e149]
+    - main [ref=e153]:
+      - generic [ref=e157]:
+        - generic [ref=e159]:
+          - img [ref=e161]
+          - generic [ref=e163]: Genesis
+        - generic:
+          - heading "¿Listo para construir?" [level=1] [ref=e164]
+          - generic [ref=e165]:
+            - generic [ref=e166]:
+              - button [ref=e167] [cursor=pointer]:
+                - img [ref=e168]
+              - textbox "Describe qué quieres construir..." [ref=e169]
+              - generic [ref=e170]:
+                - button "Activar dictado por voz" [ref=e171] [cursor=pointer]:
+                  - img [ref=e172]
+                - button "Enviar prompt y crear proyecto" [disabled] [ref=e175]:
+                  - img [ref=e176]
+            - generic [ref=e178]:
+              - button "Claude Sonnet 4.5" [ref=e180] [cursor=pointer]:
+                - img [ref=e181]
+                - generic [ref=e184]: Claude Sonnet 4.5
+                - img [ref=e185]
+              - generic [ref=e187]:
+                - button "React" [pressed] [ref=e188] [cursor=pointer]:
+                  - img [ref=e189]
+                  - text: React
+                - button "HTML" [ref=e193] [cursor=pointer]:
+                  - img [ref=e194]
+                  - text: HTML
+              - generic [ref=e200]:
+                - img [ref=e201]
+                - generic [ref=e203]: Plan pymes
+        - generic [ref=e205]:
+          - complementary [ref=e206]:
+            - heading "Navegación" [level=3] [ref=e208]
+            - navigation [ref=e209]:
+              - button "Mis proyectos" [ref=e210] [cursor=pointer]:
+                - img [ref=e211]
+                - generic [ref=e213]: Mis proyectos
+              - button "Recientes" [ref=e214] [cursor=pointer]:
+                - img [ref=e215]
+                - generic [ref=e218]: Recientes
+              - button "Plantillas" [ref=e219] [cursor=pointer]:
+                - img [ref=e220]
+                - generic [ref=e224]: Plantillas
+            - paragraph [ref=e228]: Genesis Pro Activo
+          - main [ref=e229]:
+            - generic [ref=e230]:
+              - generic [ref=e231]:
+                - heading "Mis Proyectos" [level=2] [ref=e232]
+                - generic [ref=e233]: "145"
+              - button "Importar" [ref=e234] [cursor=pointer]:
+                - img [ref=e235]
+                - text: Importar
+            - generic [ref=e239]:
+              - button "Pagina Mascotas Adopcion" [ref=e240] [cursor=pointer]:
+                - img [ref=e242]
+                - paragraph [ref=e246]: Pagina Mascotas Adopcion
+                - img [ref=e247]
+              - button "Landing Venta Comida Mexicana" [ref=e250] [cursor=pointer]:
+                - img [ref=e252]
+                - paragraph [ref=e256]: Landing Venta Comida Mexicana
+                - img [ref=e257]
+              - button "Pagia Embarazadas" [ref=e260] [cursor=pointer]:
+                - img [ref=e262]
+                - paragraph [ref=e266]: Pagia Embarazadas
+                - img [ref=e267]
+              - button "Landing Simple Pastelería Artesanal" [ref=e270] [cursor=pointer]:
+                - img [ref=e272]
+                - paragraph [ref=e276]: Landing Simple Pastelería Artesanal
+                - img [ref=e277]
+              - button "Landing Page Café Especialidad" [ref=e280] [cursor=pointer]:
+                - img [ref=e282]
+                - paragraph [ref=e286]: Landing Page Café Especialidad
+                - img [ref=e287]
+              - button "Hola Alanidn Venta Sillas" [ref=e290] [cursor=pointer]:
+                - img [ref=e292]
+                - paragraph [ref=e296]: Hola Alanidn Venta Sillas
+                - img [ref=e297]
+              - button "Landing Ejemplo" [ref=e300] [cursor=pointer]:
+                - img [ref=e302]
+                - paragraph [ref=e306]: Landing Ejemplo
+                - img [ref=e307]
+              - button "Landing" [ref=e310] [cursor=pointer]:
+                - img [ref=e312]
+                - paragraph [ref=e316]: Landing
+                - img [ref=e317]
+              - button "Apolo Design System V1" [ref=e320] [cursor=pointer]:
+                - img [ref=e322]
+                - paragraph [ref=e326]: Apolo Design System V1
+                - img [ref=e327]
+              - button "Landing Libreria" [ref=e330] [cursor=pointer]:
+                - img [ref=e332]
+                - paragraph [ref=e336]: Landing Libreria
+                - img [ref=e337]
+              - button "Pagina Donde Las Personas" [ref=e340] [cursor=pointer]:
+                - img [ref=e342]
+                - paragraph [ref=e346]: Pagina Donde Las Personas
+                - img [ref=e347]
+              - button "Pagina Donde Las Personas" [ref=e350] [cursor=pointer]:
+                - img [ref=e352]
+                - paragraph [ref=e356]: Pagina Donde Las Personas
+                - img [ref=e357]
+              - button "Pagina Donde Las Personas" [ref=e360] [cursor=pointer]:
+                - img [ref=e362]
+                - paragraph [ref=e366]: Pagina Donde Las Personas
+                - img [ref=e367]
+              - button "Pagian Sencilla Ui Mejorado" [ref=e370] [cursor=pointer]:
+                - img [ref=e372]
+                - paragraph [ref=e376]: Pagian Sencilla Ui Mejorado
+                - img [ref=e377]
+              - button "Puedes Crear Landin Sencila" [ref=e380] [cursor=pointer]:
+                - img [ref=e382]
+                - paragraph [ref=e386]: Puedes Crear Landin Sencila
+                - img [ref=e387]
+              - button "Apagina Helados Moderna" [ref=e390] [cursor=pointer]:
+                - img [ref=e392]
+                - paragraph [ref=e396]: Apagina Helados Moderna
+                - img [ref=e397]
+              - button "Apagina Helados Moderna" [ref=e400] [cursor=pointer]:
+                - img [ref=e402]
+                - paragraph [ref=e406]: Apagina Helados Moderna
+                - img [ref=e407]
+              - button "L Apgina Web Resturante" [ref=e410] [cursor=pointer]:
+                - img [ref=e412]
+                - paragraph [ref=e416]: L Apgina Web Resturante
+                - img [ref=e417]
+              - button "Sistema Gestión Préstamos (loan" [ref=e420] [cursor=pointer]:
+                - img [ref=e422]
+                - paragraph [ref=e426]: Sistema Gestión Préstamos (loan
+                - img [ref=e427]
+              - button "Apolo Design System V1" [ref=e430] [cursor=pointer]:
+                - img [ref=e432]
+                - paragraph [ref=e436]: Apolo Design System V1
+                - img [ref=e437]
+              - button "Apolo Design System V1" [ref=e440] [cursor=pointer]:
+                - img [ref=e442]
+                - paragraph [ref=e446]: Apolo Design System V1
+                - img [ref=e447]
+              - button "Landing" [ref=e450] [cursor=pointer]:
+                - img [ref=e452]
+                - paragraph [ref=e456]: Landing
+                - img [ref=e457]
+              - button "Dashboard Ejecutivo Completo Alta" [ref=e460] [cursor=pointer]:
+                - img [ref=e462]
+                - paragraph [ref=e466]: Dashboard Ejecutivo Completo Alta
+                - img [ref=e467]
+              - button "Landing Page Startup\" Y" [ref=e470] [cursor=pointer]:
+                - img [ref=e472]
+                - paragraph [ref=e476]: Landing Page Startup" Y
+                - img [ref=e477]
+              - button "Landing Page Saas Productividad" [ref=e480] [cursor=pointer]:
+                - img [ref=e482]
+                - paragraph [ref=e486]: Landing Page Saas Productividad
+                - img [ref=e487]
+              - button "Landing Page Negocio" [ref=e490] [cursor=pointer]:
+                - img [ref=e492]
+                - paragraph [ref=e496]: Landing Page Negocio
+                - img [ref=e497]
+              - button "Dashboard Ejecutivo Completo Alta" [ref=e500] [cursor=pointer]:
+                - img [ref=e502]
+                - paragraph [ref=e506]: Dashboard Ejecutivo Completo Alta
+                - img [ref=e507]
+              - button "Panel Administración Plataforma Saas" [ref=e510] [cursor=pointer]:
+                - img [ref=e512]
+                - paragraph [ref=e516]: Panel Administración Plataforma Saas
+                - img [ref=e517]
+              - button "Ejemplo Landing" [ref=e520] [cursor=pointer]:
+                - img [ref=e522]
+                - paragraph [ref=e526]: Ejemplo Landing
+                - img [ref=e527]
+              - button "Gestor Campañas Marketing Digital" [ref=e530] [cursor=pointer]:
+                - img [ref=e532]
+                - paragraph [ref=e536]: Gestor Campañas Marketing Digital
+                - img [ref=e537]
+              - button "Panel Administración Tienda E-commerce" [ref=e540] [cursor=pointer]:
+                - img [ref=e542]
+                - paragraph [ref=e546]: Panel Administración Tienda E-commerce
+                - img [ref=e547]
+              - button "Puedes Crear Alanding" [ref=e550] [cursor=pointer]:
+                - img [ref=e552]
+                - paragraph [ref=e556]: Puedes Crear Alanding
+                - img [ref=e557]
+              - button "Landinde Carros Renta" [ref=e560] [cursor=pointer]:
+                - img [ref=e562]
+                - paragraph [ref=e566]: Landinde Carros Renta
+                - img [ref=e567]
+              - button "Portal Autoservicio Asegurados (clientes" [ref=e570] [cursor=pointer]:
+                - img [ref=e572]
+                - paragraph [ref=e576]: Portal Autoservicio Asegurados (clientes
+                - img [ref=e577]
+              - button "Landing Sencilla" [ref=e580] [cursor=pointer]:
+                - img [ref=e582]
+                - paragraph [ref=e586]: Landing Sencilla
+                - img [ref=e587]
+              - button "Panel Administración Tienda E-commerce" [ref=e590] [cursor=pointer]:
+                - img [ref=e592]
+                - paragraph [ref=e596]: Panel Administración Tienda E-commerce
+                - img [ref=e597]
+              - button "Landing Sencilla" [ref=e600] [cursor=pointer]:
+                - img [ref=e602]
+                - paragraph [ref=e606]: Landing Sencilla
+                - img [ref=e607]
+              - button "Alanding Sencilla Jemplo" [ref=e610] [cursor=pointer]:
+                - img [ref=e612]
+                - paragraph [ref=e616]: Alanding Sencilla Jemplo
+                - img [ref=e617]
+              - button "Alanding Sensilla Ejemplo" [ref=e620] [cursor=pointer]:
+                - img [ref=e622]
+                - paragraph [ref=e626]: Alanding Sensilla Ejemplo
+                - img [ref=e627]
+              - button "Cre Al Landing Resturante" [ref=e630] [cursor=pointer]:
+                - img [ref=e632]
+                - paragraph [ref=e636]: Cre Al Landing Resturante
+                - img [ref=e637]
+              - button "Landing Restaurante" [ref=e640] [cursor=pointer]:
+                - img [ref=e642]
+                - paragraph [ref=e646]: Landing Restaurante
+                - img [ref=e647]
+              - button "Apagina Portafolio Aruitectura" [ref=e650] [cursor=pointer]:
+                - img [ref=e652]
+                - paragraph [ref=e656]: Apagina Portafolio Aruitectura
+                - img [ref=e657]
+              - button "Apagina Del Menu Restaurante" [ref=e660] [cursor=pointer]:
+                - img [ref=e662]
+                - paragraph [ref=e666]: Apagina Del Menu Restaurante
+                - img [ref=e667]
+              - button "Pagina Web Empresa Que" [ref=e670] [cursor=pointer]:
+                - img [ref=e672]
+                - paragraph [ref=e676]: Pagina Web Empresa Que
+                - img [ref=e677]
+              - button "Crra Alanding Sensilla" [ref=e680] [cursor=pointer]:
+                - img [ref=e682]
+                - paragraph [ref=e686]: Crra Alanding Sensilla
+                - img [ref=e687]
+              - button "Apagian Web Deportafoio Fotografia" [ref=e690] [cursor=pointer]:
+                - img [ref=e692]
+                - paragraph [ref=e696]: Apagian Web Deportafoio Fotografia
+                - img [ref=e697]
+              - button "Alanding Portafilio Fotografia" [ref=e700] [cursor=pointer]:
+                - img [ref=e702]
+                - paragraph [ref=e706]: Alanding Portafilio Fotografia
+                - img [ref=e707]
+              - button "Apagina Web Que Sea" [ref=e710] [cursor=pointer]:
+                - img [ref=e712]
+                - paragraph [ref=e716]: Apagina Web Que Sea
+                - img [ref=e717]
+              - button "Apagina Venta Sillas" [ref=e720] [cursor=pointer]:
+                - img [ref=e722]
+                - paragraph [ref=e726]: Apagina Venta Sillas
+                - img [ref=e727]
+              - button "Apagina Helado S" [ref=e730] [cursor=pointer]:
+                - img [ref=e732]
+                - paragraph [ref=e736]: Apagina Helado S
+                - img [ref=e737]
+              - button "Apagina Helados" [ref=e740] [cursor=pointer]:
+                - img [ref=e742]
+                - paragraph [ref=e746]: Apagina Helados
+                - img [ref=e747]
+              - button "Sistema Gestión Hospitalaria /" [ref=e750] [cursor=pointer]:
+                - img [ref=e752]
+                - paragraph [ref=e756]: Sistema Gestión Hospitalaria /
+                - img [ref=e757]
+              - button "Sistema Gestión Préstamos (loan" [ref=e760] [cursor=pointer]:
+                - img [ref=e762]
+                - paragraph [ref=e766]: Sistema Gestión Préstamos (loan
+                - img [ref=e767]
+              - button "Centro Operaciones (ops Center)" [ref=e770] [cursor=pointer]:
+                - img [ref=e772]
+                - paragraph [ref=e776]: Centro Operaciones (ops Center)
+                - img [ref=e777]
+              - button "Creea Alandind Venta Helados" [ref=e780] [cursor=pointer]:
+                - img [ref=e782]
+                - paragraph [ref=e786]: Creea Alandind Venta Helados
+                - img [ref=e787]
+              - button "Alnadind Venta Medias" [ref=e790] [cursor=pointer]:
+                - img [ref=e792]
+                - paragraph [ref=e796]: Alnadind Venta Medias
+                - img [ref=e797]
+              - button "Apagina Carros Donde Cuenta" [ref=e800] [cursor=pointer]:
+                - img [ref=e802]
+                - paragraph [ref=e806]: Apagina Carros Donde Cuenta
+                - img [ref=e807]
+              - button "Dashboard Ejecutivo Completo Alta" [ref=e810] [cursor=pointer]:
+                - img [ref=e812]
+                - paragraph [ref=e816]: Dashboard Ejecutivo Completo Alta
+                - img [ref=e817]
+              - button "Dashboard Ejecutivo Completo Alta" [ref=e820] [cursor=pointer]:
+                - img [ref=e822]
+                - paragraph [ref=e826]: Dashboard Ejecutivo Completo Alta
+                - img [ref=e827]
+              - button "Apagina Completa Aheladeria" [ref=e830] [cursor=pointer]:
+                - img [ref=e832]
+                - paragraph [ref=e836]: Apagina Completa Aheladeria
+                - img [ref=e837]
+              - button "Alandig Heladeria" [ref=e840] [cursor=pointer]:
+                - img [ref=e842]
+                - paragraph [ref=e846]: Alandig Heladeria
+                - img [ref=e847]
+              - button "Ladin Reservas" [ref=e850] [cursor=pointer]:
+                - img [ref=e852]
+                - paragraph [ref=e856]: Ladin Reservas
+                - img [ref=e857]
+              - button "Landin Portaflio Ux" [ref=e860] [cursor=pointer]:
+                - img [ref=e862]
+                - paragraph [ref=e866]: Landin Portaflio Ux
+                - img [ref=e867]
+              - button "Alanidng Empresa Tarjetsas Creditp" [ref=e870] [cursor=pointer]:
+                - img [ref=e872]
+                - paragraph [ref=e876]: Alanidng Empresa Tarjetsas Creditp
+                - img [ref=e877]
+              - button "Sistema Gestión Préstamos (loan" [ref=e880] [cursor=pointer]:
+                - img [ref=e882]
+                - paragraph [ref=e886]: Sistema Gestión Préstamos (loan
+                - img [ref=e887]
+              - button "Pagina Web Carros Antiguos" [ref=e890] [cursor=pointer]:
+                - img [ref=e892]
+                - paragraph [ref=e896]: Pagina Web Carros Antiguos
+                - img [ref=e897]
+              - button "Apagina Web Carros" [ref=e900] [cursor=pointer]:
+                - img [ref=e902]
+                - paragraph [ref=e906]: Apagina Web Carros
+                - img [ref=e907]
+              - button "As Landing Page Premium" [ref=e910] [cursor=pointer]:
+                - img [ref=e912]
+                - paragraph [ref=e916]: As Landing Page Premium
+                - img [ref=e917]
+              - button "Landing , Venta Carros" [ref=e920] [cursor=pointer]:
+                - img [ref=e922]
+                - paragraph [ref=e926]: Landing , Venta Carros
+                - img [ref=e927]
+              - button "Landind Venta Carros" [ref=e930] [cursor=pointer]:
+                - img [ref=e932]
+                - paragraph [ref=e936]: Landind Venta Carros
+                - img [ref=e937]
+              - button "Landing Page Moderna Fintech." [ref=e940] [cursor=pointer]:
+                - img [ref=e942]
+                - paragraph [ref=e946]: Landing Page Moderna Fintech.
+                - img [ref=e947]
+              - button "Landing Page Moderna Hero" [ref=e950] [cursor=pointer]:
+                - img [ref=e952]
+                - paragraph [ref=e956]: Landing Page Moderna Hero
+                - img [ref=e957]
+              - button "Ayudame Acrear Calculadora Y" [ref=e960] [cursor=pointer]:
+                - img [ref=e962]
+                - paragraph [ref=e966]: Ayudame Acrear Calculadora Y
+                - img [ref=e967]
+              - button "Dame Pagian Ventas Celulares" [ref=e970] [cursor=pointer]:
+                - img [ref=e972]
+                - paragraph [ref=e976]: Dame Pagian Ventas Celulares
+                - img [ref=e977]
+              - button "Apagina Web Venta Comida" [ref=e980] [cursor=pointer]:
+                - img [ref=e982]
+                - paragraph [ref=e986]: Apagina Web Venta Comida
+                - img [ref=e987]
+              - button "Web Restaurante Amburguesas Y" [ref=e990] [cursor=pointer]:
+                - img [ref=e992]
+                - paragraph [ref=e996]: Web Restaurante Amburguesas Y
+                - img [ref=e997]
+              - button "Pagina Musica" [ref=e1000] [cursor=pointer]:
+                - img [ref=e1002]
+                - paragraph [ref=e1006]: Pagina Musica
+                - img [ref=e1007]
+              - button "Apgina Musica" [ref=e1010] [cursor=pointer]:
+                - img [ref=e1012]
+                - paragraph [ref=e1016]: Apgina Musica
+                - img [ref=e1017]
+              - button "Vamos A Trabajr Este" [ref=e1020] [cursor=pointer]:
+                - img [ref=e1022]
+                - paragraph [ref=e1026]: Vamos A Trabajr Este
+                - img [ref=e1027]
+              - button "Apagina Musica" [ref=e1030] [cursor=pointer]:
+                - img [ref=e1032]
+                - paragraph [ref=e1036]: Apagina Musica
+                - img [ref=e1037]
+              - button "Abre Este Archivo Vamso" [ref=e1040] [cursor=pointer]:
+                - img [ref=e1042]
+                - paragraph [ref=e1046]: Abre Este Archivo Vamso
+                - img [ref=e1047]
+              - button "Apagina Ganaderia" [ref=e1050] [cursor=pointer]:
+                - img [ref=e1052]
+                - paragraph [ref=e1056]: Apagina Ganaderia
+                - img [ref=e1057]
+              - button "Hola Quiero Apgina Web" [ref=e1060] [cursor=pointer]:
+                - img [ref=e1062]
+                - paragraph [ref=e1066]: Hola Quiero Apgina Web
+                - img [ref=e1067]
+              - button "Apagina Perros Calients" [ref=e1070] [cursor=pointer]:
+                - img [ref=e1072]
+                - paragraph [ref=e1076]: Apagina Perros Calients
+                - img [ref=e1077]
+              - button "Cre Auna Pagina Webde" [ref=e1080] [cursor=pointer]:
+                - img [ref=e1082]
+                - paragraph [ref=e1086]: Cre Auna Pagina Webde
+                - img [ref=e1087]
+              - button "Apagina Web" [ref=e1090] [cursor=pointer]:
+                - img [ref=e1092]
+                - paragraph [ref=e1096]: Apagina Web
+                - img [ref=e1097]
+              - button "Pagina Par Aun Aiglesia" [ref=e1100] [cursor=pointer]:
+                - img [ref=e1102]
+                - paragraph [ref=e1106]: Pagina Par Aun Aiglesia
+                - img [ref=e1107]
+              - button "Apagina Par Aun Colegio" [ref=e1110] [cursor=pointer]:
+                - img [ref=e1112]
+                - paragraph [ref=e1116]: Apagina Par Aun Colegio
+                - img [ref=e1117]
+              - button "Cre Pagina Ardilla" [ref=e1120] [cursor=pointer]:
+                - img [ref=e1122]
+                - paragraph [ref=e1126]: Cre Pagina Ardilla
+                - img [ref=e1127]
+              - button "Quiero Pagina Cigarrillos" [ref=e1130] [cursor=pointer]:
+                - img [ref=e1132]
+                - paragraph [ref=e1136]: Quiero Pagina Cigarrillos
+                - img [ref=e1137]
+              - button "Sistema Login Y Registro" [ref=e1140] [cursor=pointer]:
+                - img [ref=e1142]
+                - paragraph [ref=e1146]: Sistema Login Y Registro
+                - img [ref=e1147]
+              - button "Apagina Web Comuptadoras" [ref=e1150] [cursor=pointer]:
+                - img [ref=e1152]
+                - paragraph [ref=e1156]: Apagina Web Comuptadoras
+                - img [ref=e1157]
+              - button "Pagina Web Edificios" [ref=e1160] [cursor=pointer]:
+                - img [ref=e1162]
+                - paragraph [ref=e1166]: Pagina Web Edificios
+                - img [ref=e1167]
+              - button "Apagina Web Perros Calientes" [ref=e1170] [cursor=pointer]:
+                - img [ref=e1172]
+                - paragraph [ref=e1176]: Apagina Web Perros Calientes
+                - img [ref=e1177]
+              - button "Asdasd" [ref=e1180] [cursor=pointer]:
+                - img [ref=e1182]
+                - paragraph [ref=e1186]: Asdasd
+                - img [ref=e1187]
+              - button "Apagina Peerros Calientes" [ref=e1190] [cursor=pointer]:
+                - img [ref=e1192]
+                - paragraph [ref=e1196]: Apagina Peerros Calientes
+                - img [ref=e1197]
+              - button "Hcrea Pagina Web Carros" [ref=e1200] [cursor=pointer]:
+                - img [ref=e1202]
+                - paragraph [ref=e1206]: Hcrea Pagina Web Carros
+                - img [ref=e1207]
+              - button "Apagina Ejemplo" [ref=e1210] [cursor=pointer]:
+                - img [ref=e1212]
+                - paragraph [ref=e1216]: Apagina Ejemplo
+                - img [ref=e1217]
+              - button "Pagina Web Mascotas" [ref=e1220] [cursor=pointer]:
+                - img [ref=e1222]
+                - paragraph [ref=e1226]: Pagina Web Mascotas
+                - img [ref=e1227]
+              - button "Apagina Web Cuentos Par" [ref=e1230] [cursor=pointer]:
+                - img [ref=e1232]
+                - paragraph [ref=e1236]: Apagina Web Cuentos Par
+                - img [ref=e1237]
+              - button "Pagina Web Cuentos Niños" [ref=e1240] [cursor=pointer]:
+                - img [ref=e1242]
+                - paragraph [ref=e1246]: Pagina Web Cuentos Niños
+                - img [ref=e1247]
+              - button "Cre Auna Paigian Music" [ref=e1250] [cursor=pointer]:
+                - img [ref=e1252]
+                - paragraph [ref=e1256]: Cre Auna Paigian Music
+                - img [ref=e1257]
+              - button "Pagina Music A" [ref=e1260] [cursor=pointer]:
+                - img [ref=e1262]
+                - paragraph [ref=e1266]: Pagina Music A
+                - img [ref=e1267]
+              - button "Cre Auna Pagina Venta" [ref=e1270] [cursor=pointer]:
+                - img [ref=e1272]
+                - paragraph [ref=e1276]: Cre Auna Pagina Venta
+                - img [ref=e1277]
+              - button "Cre Auna Pagina Vivero" [ref=e1280] [cursor=pointer]:
+                - img [ref=e1282]
+                - paragraph [ref=e1286]: Cre Auna Pagina Vivero
+                - img [ref=e1287]
+              - button "Apagina Musica" [ref=e1290] [cursor=pointer]:
+                - img [ref=e1292]
+                - paragraph [ref=e1296]: Apagina Musica
+                - img [ref=e1297]
+              - button "Pagina Musica" [ref=e1300] [cursor=pointer]:
+                - img [ref=e1302]
+                - paragraph [ref=e1306]: Pagina Musica
+                - img [ref=e1307]
+              - button "Pagina Musica" [ref=e1310] [cursor=pointer]:
+                - img [ref=e1312]
+                - paragraph [ref=e1316]: Pagina Musica
+                - img [ref=e1317]
+              - button "Pagina Mario Bros" [ref=e1320] [cursor=pointer]:
+                - img [ref=e1322]
+                - paragraph [ref=e1326]: Pagina Mario Bros
+                - img [ref=e1327]
+              - button "Pagina Reparacion Y Venta" [ref=e1330] [cursor=pointer]:
+                - img [ref=e1332]
+                - paragraph [ref=e1336]: Pagina Reparacion Y Venta
+                - img [ref=e1337]
+              - button "Genera Pagina Venta Muebles" [ref=e1340] [cursor=pointer]:
+                - img [ref=e1342]
+                - paragraph [ref=e1346]: Genera Pagina Venta Muebles
+                - img [ref=e1347]
+              - button "Dashboard Tarjetas Métricas, Tabla" [ref=e1350] [cursor=pointer]:
+                - img [ref=e1352]
+                - paragraph [ref=e1356]: Dashboard Tarjetas Métricas, Tabla
+                - img [ref=e1357]
+              - button "Pagina Web Reparacion Celulares" [ref=e1360] [cursor=pointer]:
+                - img [ref=e1362]
+                - paragraph [ref=e1366]: Pagina Web Reparacion Celulares
+                - img [ref=e1367]
+              - button "Pagina Agencia Viajes" [ref=e1370] [cursor=pointer]:
+                - img [ref=e1372]
+                - paragraph [ref=e1376]: Pagina Agencia Viajes
+                - img [ref=e1377]
+              - button "Menu Restaurante" [ref=e1380] [cursor=pointer]:
+                - img [ref=e1382]
+                - paragraph [ref=e1386]: Menu Restaurante
+                - img [ref=e1387]
+              - button "Menu Restaurante" [ref=e1390] [cursor=pointer]:
+                - img [ref=e1392]
+                - paragraph [ref=e1396]: Menu Restaurante
+                - img [ref=e1397]
+              - button "Mvp Completo Saas Hoteles" [ref=e1400] [cursor=pointer]:
+                - img [ref=e1402]
+                - paragraph [ref=e1406]: Mvp Completo Saas Hoteles
+                - img [ref=e1407]
+              - button "Menu Restaurante Colombiano Fotos" [ref=e1410] [cursor=pointer]:
+                - img [ref=e1412]
+                - paragraph [ref=e1416]: Menu Restaurante Colombiano Fotos
+                - img [ref=e1417]
+              - button "Agencia Viajes Lujo Expediciones" [ref=e1420] [cursor=pointer]:
+                - img [ref=e1422]
+                - paragraph [ref=e1426]: Agencia Viajes Lujo Expediciones
+                - img [ref=e1427]
+              - button "Jeugo Culebrita En Pixel" [ref=e1430] [cursor=pointer]:
+                - img [ref=e1432]
+                - paragraph [ref=e1436]: Jeugo Culebrita En Pixel
+                - img [ref=e1437]
+              - button "Juego Culebrita Version Pixel" [ref=e1440] [cursor=pointer]:
+                - img [ref=e1442]
+                - paragraph [ref=e1446]: Juego Culebrita Version Pixel
+                - img [ref=e1447]
+              - button "Jego Culebrita Version ," [ref=e1450] [cursor=pointer]:
+                - img [ref=e1452]
+                - paragraph [ref=e1456]: Jego Culebrita Version ,
+                - img [ref=e1457]
+              - button "Quiero Apgina Aveterinaria" [ref=e1460] [cursor=pointer]:
+                - img [ref=e1462]
+                - paragraph [ref=e1466]: Quiero Apgina Aveterinaria
+                - img [ref=e1467]
+              - button "Mvp Completo Saas Hoteles" [ref=e1470] [cursor=pointer]:
+                - img [ref=e1472]
+                - paragraph [ref=e1476]: Mvp Completo Saas Hoteles
+                - img [ref=e1477]
+              - button "Mvp Completo Saas Hoteles" [ref=e1480] [cursor=pointer]:
+                - img [ref=e1482]
+                - paragraph [ref=e1486]: Mvp Completo Saas Hoteles
+                - img [ref=e1487]
+              - button "hola" [ref=e1490] [cursor=pointer]:
+                - img [ref=e1492]
+                - paragraph [ref=e1496]: hola
+                - img [ref=e1497]
+              - button "hola" [ref=e1500] [cursor=pointer]:
+                - img [ref=e1502]
+                - paragraph [ref=e1506]: hola
+                - img [ref=e1507]
+              - button "hola" [ref=e1510] [cursor=pointer]:
+                - img [ref=e1512]
+                - paragraph [ref=e1516]: hola
+                - img [ref=e1517]
+              - button "hola" [ref=e1520] [cursor=pointer]:
+                - img [ref=e1522]
+                - paragraph [ref=e1526]: hola
+                - img [ref=e1527]
+              - button "Proyecto Nuevo" [ref=e1530] [cursor=pointer]:
+                - img [ref=e1532]
+                - paragraph [ref=e1536]: Proyecto Nuevo
+                - img [ref=e1537]
+              - button "hola" [ref=e1540] [cursor=pointer]:
+                - img [ref=e1542]
+                - paragraph [ref=e1546]: hola
+                - img [ref=e1547]
+              - button "hola" [ref=e1550] [cursor=pointer]:
+                - img [ref=e1552]
+                - paragraph [ref=e1556]: hola
+                - img [ref=e1557]
+              - button "hola" [ref=e1560] [cursor=pointer]:
+                - img [ref=e1562]
+                - paragraph [ref=e1566]: hola
+                - img [ref=e1567]
+              - button "hola" [ref=e1570] [cursor=pointer]:
+                - img [ref=e1572]
+                - paragraph [ref=e1576]: hola
+                - img [ref=e1577]
+              - button "hola" [ref=e1580] [cursor=pointer]:
+                - img [ref=e1582]
+                - paragraph [ref=e1586]: hola
+                - img [ref=e1587]
+              - button "hola" [ref=e1590] [cursor=pointer]:
+                - img [ref=e1592]
+                - paragraph [ref=e1596]: hola
+                - img [ref=e1597]
+              - button "hola" [ref=e1600] [cursor=pointer]:
+                - img [ref=e1602]
+                - paragraph [ref=e1606]: hola
+                - img [ref=e1607]
+              - button "crea un apagina apra una vetrinaria" [ref=e1610] [cursor=pointer]:
+                - img [ref=e1612]
+                - paragraph [ref=e1616]: crea un apagina apra una vetrinaria
+                - img [ref=e1617]
+              - button "crea una pagina de reparacion de" [ref=e1620] [cursor=pointer]:
+                - img [ref=e1622]
+                - paragraph [ref=e1626]: crea una pagina de reparacion de
+                - img [ref=e1627]
+              - button "como un Dashboard de alto rendimiento" [ref=e1630] [cursor=pointer]:
+                - img [ref=e1632]
+                - paragraph [ref=e1636]: como un Dashboard de alto rendimiento
+                - img [ref=e1637]
+              - button "hola" [ref=e1640] [cursor=pointer]:
+                - img [ref=e1642]
+                - paragraph [ref=e1646]: hola
+                - img [ref=e1647]
+              - 'button "[CONTRATO/CONTEXTO DE ARCHIVO: apolo-des" [ref=e1650] [cursor=pointer]':
+                - img [ref=e1652]
+                - paragraph [ref=e1656]: "[CONTRATO/CONTEXTO DE ARCHIVO: apolo-des"
+                - img [ref=e1657]
+              - 'button "[CONTRATO/CONTEXTO DE ARCHIVO: apolo-des" [ref=e1660] [cursor=pointer]':
+                - img [ref=e1662]
+                - paragraph [ref=e1666]: "[CONTRATO/CONTEXTO DE ARCHIVO: apolo-des"
+                - img [ref=e1667]
+              - button "Para probar la mejora, intenta decirle" [ref=e1670] [cursor=pointer]:
+                - img [ref=e1672]
+                - paragraph [ref=e1676]: Para probar la mejora, intenta decirle
+                - img [ref=e1677]
+              - 'button "[CONTRATO/CONTEXTO DE ARCHIVO: apolo-des" [ref=e1680] [cursor=pointer]':
+                - img [ref=e1682]
+                - paragraph [ref=e1686]: "[CONTRATO/CONTEXTO DE ARCHIVO: apolo-des"
+                - img [ref=e1687]

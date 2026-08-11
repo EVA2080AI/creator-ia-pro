@@ -1,0 +1,308 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - complementary "Navegación principal" [ref=e10]:
+      - generic [ref=e11]:
+        - button "Creator IA" [ref=e14] [cursor=pointer]:
+          - img [ref=e16]
+          - generic [ref=e19]: Creator IA
+        - button [ref=e20] [cursor=pointer]:
+          - img [ref=e21]
+      - navigation [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e27]: Principal
+          - button "Inicio" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+            - generic [ref=e32]: Inicio
+          - button "Genesis IA" [ref=e33] [cursor=pointer]:
+            - img [ref=e34]
+            - generic [ref=e44]:
+              - text: Genesis IA
+              - generic [ref=e45]: CREADOR
+          - button "Editor" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+            - generic [ref=e52]:
+              - text: Editor
+              - generic [ref=e53]: CREADOR
+          - button "Canvas IA" [ref=e54] [cursor=pointer]:
+            - img [ref=e55]
+            - generic [ref=e59]:
+              - text: Canvas IA
+              - generic [ref=e60]: PRO
+          - button "Proyectos" [ref=e61] [cursor=pointer]:
+            - img [ref=e62]
+            - generic [ref=e64]:
+              - text: Proyectos
+              - generic [ref=e65]: PRO
+          - button "Aplicaciones" [ref=e66] [cursor=pointer]:
+            - img [ref=e67]
+            - generic [ref=e72]: Aplicaciones
+          - button "Antigravity" [ref=e73] [cursor=pointer]:
+            - img [ref=e74]
+            - generic [ref=e77]:
+              - text: Antigravity
+              - generic [ref=e78]: PYME
+        - generic [ref=e79]:
+          - generic [ref=e81]:
+            - img [ref=e82]
+            - text: Sistema
+          - button "Panel Control" [ref=e84] [cursor=pointer]:
+            - img [ref=e85]
+            - generic [ref=e88]:
+              - text: Panel Control
+              - generic [ref=e89]: ADMIN
+          - button "Usuarios" [ref=e90] [cursor=pointer]:
+            - img [ref=e91]
+            - generic [ref=e95]:
+              - text: Usuarios
+              - generic [ref=e96]: ADMIN
+          - button "Sistema de Diseño" [ref=e97] [cursor=pointer]:
+            - img [ref=e98]
+            - generic [ref=e104]:
+              - text: Sistema de Diseño
+              - generic [ref=e105]: ADMIN
+          - button "Estatus" [ref=e106] [cursor=pointer]:
+            - img [ref=e107]
+            - generic [ref=e109]:
+              - text: Estatus
+              - generic [ref=e110]: ADMIN
+          - button "Roadmap" [ref=e111] [cursor=pointer]:
+            - img [ref=e112]
+            - generic [ref=e113]: Roadmap
+        - generic [ref=e114]:
+          - generic [ref=e116]: Créditos
+          - generic [ref=e117]:
+            - img [ref=e118]
+            - generic [ref=e123]: 37,267
+      - generic [ref=e124]:
+        - button "Perfil" [ref=e126] [cursor=pointer]:
+          - img [ref=e127]
+          - generic [ref=e130]: Perfil
+        - button "Planes" [ref=e131] [cursor=pointer]:
+          - img [ref=e132]
+          - generic [ref=e134]: Planes
+        - button "Descargar" [ref=e135] [cursor=pointer]:
+          - img [ref=e136]
+          - generic [ref=e139]: Descargar
+        - generic [ref=e140] [cursor=pointer]:
+          - img [ref=e142]
+          - generic [ref=e145]:
+            - paragraph [ref=e146]: sebastian689
+            - paragraph [ref=e147]: pymes
+          - button "Cerrar sesión" [ref=e148]:
+            - img [ref=e149]
+    - main [ref=e153]:
+      - generic [ref=e1660]:
+        - generic [ref=e1661]:
+          - generic [ref=e1662]:
+            - button [ref=e1663] [cursor=pointer]:
+              - img [ref=e1664]
+            - generic [ref=e1666]: Landing Page Café Especialidad
+          - generic [ref=e1667]:
+            - generic [ref=e1668]:
+              - button "Preview" [active] [ref=e1669] [cursor=pointer]:
+                - img [ref=e1670]
+                - generic [ref=e1673]: Preview
+              - button "Code" [ref=e1674] [cursor=pointer]:
+                - img [ref=e1675]
+                - generic [ref=e1678]: Code
+              - button "Consola" [ref=e1679] [cursor=pointer]:
+                - img [ref=e1680]
+                - generic [ref=e1682]: Consola
+              - button [ref=e1683] [cursor=pointer]:
+                - img [ref=e1684]
+            - generic [ref=e2239]:
+              - button [ref=e2240] [cursor=pointer]:
+                - img [ref=e2241]
+              - button [ref=e2243] [cursor=pointer]:
+                - img [ref=e2244]
+              - button [ref=e2246] [cursor=pointer]:
+                - img [ref=e2247]
+          - generic [ref=e1697]:
+            - generic [ref=e1698]:
+              - button "GitHub" [ref=e1699] [cursor=pointer]:
+                - img [ref=e1700]
+              - button "Compartir" [ref=e1703] [cursor=pointer]:
+                - img [ref=e1704]
+            - button "Push to Cloud" [ref=e1710] [cursor=pointer]:
+              - generic [ref=e1712]: Push to Cloud
+        - generic [ref=e1714]:
+          - complementary "Panel de Chat Génesis" [ref=e1717]:
+            - generic [ref=e1718]:
+              - generic [ref=e1719]:
+                - button "Volver" [ref=e1720] [cursor=pointer]:
+                  - img [ref=e1721]
+                - heading "Proyecto" [level=2] [ref=e1725]
+              - button "Console" [ref=e1727] [cursor=pointer]:
+                - img [ref=e1728]
+                - text: Console
+            - generic [ref=e1730]:
+              - article "Tu mensaje" [ref=e1731]:
+                - generic [ref=e1732]: "[MODO: React + Vite + Tailwind + TypeScript] crea una landing page para un café de especialidad en Bogotá llamado \"Tinto Bogotá\". Incluye: hero con imagen de café y CTA \"Reservar mesa\", sección de menú con 3 cafés destacados (latte tradicional 8.500 COP, espresso doble 6.500 COP, cold brew con chocolate 11.000 COP), y formulario de reserva al final con nombre, fecha y número de personas. Diseño cálido y moderno."
+                - time [ref=e1733]: 08:50 PM
+              - article "Mensaje de Génesis" [ref=e1734]:
+                - generic [ref=e1735]:
+                  - generic [ref=e1736]:
+                    - img [ref=e1738]
+                    - generic [ref=e1740]: Génesis AI
+                    - generic [ref=e1741]: V21
+                  - generic [ref=e1742]:
+                    - generic [ref=e1743]: Código generado.
+                    - generic [ref=e1744]:
+                      - button "Copiar mensaje" [ref=e1745] [cursor=pointer]:
+                        - img [ref=e1746]
+                      - button "Reintentar" [ref=e1749] [cursor=pointer]:
+                        - img [ref=e1750]
+              - article "Tu mensaje" [ref=e1753]:
+                - generic [ref=e1754]: "[AUTO-FIX] Error detectado en el preview: ``` /src/main.tsx: Could not find dependency: 'react' relative to '/src/main.tsx' (1:0) > 1 | import React from 'react'; ^ 2 | import { createRoot } from 'react-dom/client'; 3 | import App from './App'; 4 | import './index.css'; ``` POR FAVOR, corrige este error analizando el estado actual de los archivos críticos: - Archivo detectado como origen: @index.css - Archivo activo: @App.tsx - Punto de entrada: @App.tsx Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archivos corregidos como bloques markdown."
+                - time [ref=e1755]: 08:51 PM
+              - article "Mensaje de Génesis" [ref=e1756]:
+                - generic [ref=e1757]:
+                  - generic [ref=e1758]:
+                    - img [ref=e1760]
+                    - generic [ref=e1762]: Génesis AI
+                    - generic [ref=e1763]: V21
+                  - generic [ref=e1764]:
+                    - generic [ref=e1765]: Código generado.
+                    - generic [ref=e1766]:
+                      - button "Copiar mensaje" [ref=e1767] [cursor=pointer]:
+                        - img [ref=e1768]
+                      - button "Reintentar" [ref=e1771] [cursor=pointer]:
+                        - img [ref=e1772]
+              - article "Tu mensaje" [ref=e1775]:
+                - generic [ref=e1776]: "[AUTO-FIX] Error detectado en el preview: ``` /src/main.tsx: Could not find dependency: 'react' relative to '/src/main.tsx' (1:0) > 1 | import { StrictMode } from 'react'; ^ 2 | import { createRoot } from 'react-dom/client'; 3 | import App from './App'; 4 | import './index.css'; ``` POR FAVOR, corrige este error analizando el estado actual de los archivos críticos: - Archivo detectado como origen: @src/main.tsx - Archivo activo: @App.tsx - Punto de entrada: @App.tsx Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archivos corregidos como bloques markdown."
+                - time [ref=e1777]: 08:51 PM
+              - article "Mensaje de Génesis" [ref=e1778]:
+                - generic [ref=e1779]:
+                  - generic [ref=e1780]:
+                    - img [ref=e1782]
+                    - generic [ref=e1784]: Génesis AI
+                    - generic [ref=e1785]: V21
+                  - generic [ref=e1786]:
+                    - generic [ref=e1787]: Código generado.
+                    - generic [ref=e1788]:
+                      - button "Copiar mensaje" [ref=e1789] [cursor=pointer]:
+                        - img [ref=e1790]
+                      - button "Reintentar" [ref=e1793] [cursor=pointer]:
+                        - img [ref=e1794]
+              - article "Tu mensaje" [ref=e1797]:
+                - generic [ref=e1798]: "[AUTO-FIX] Error detectado en el preview: ``` Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports. Check the render method of `Footer`. ``` POR FAVOR, corrige este error analizando el estado actual de los archivos críticos: - Archivo activo: @App.tsx - Punto de entrada: @App.tsx Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archivos corregidos como bloques markdown."
+                - time [ref=e1799]: 08:51 PM
+              - article "Mensaje de Génesis" [ref=e1800]:
+                - generic [ref=e1801]:
+                  - generic [ref=e1802]:
+                    - img [ref=e1804]
+                    - generic [ref=e1806]: Génesis AI
+                    - generic [ref=e1807]: V21
+                  - generic [ref=e1808]:
+                    - generic [ref=e1809]: Código generado.
+                    - generic [ref=e1810]:
+                      - button "Copiar mensaje" [ref=e1811] [cursor=pointer]:
+                        - img [ref=e1812]
+                      - button "Reintentar" [ref=e1815] [cursor=pointer]:
+                        - img [ref=e1816]
+              - article "Tu mensaje" [ref=e1899]:
+                - generic [ref=e1900]: "[AUTO-FIX] Error detectado en el preview: ``` Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports. Check the render method of `Footer`. ``` POR FAVOR, corrige este error analizando el estado actual de los archivos críticos: - Archivo activo: @App.tsx - Punto de entrada: @App.tsx Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archivos corregidos como bloques markdown."
+                - time [ref=e1901]: 08:57 PM
+              - article "Mensaje de Génesis" [ref=e1902]:
+                - generic [ref=e1903]:
+                  - generic [ref=e1904]:
+                    - img [ref=e1906]
+                    - generic [ref=e1908]: Génesis AI
+                    - generic [ref=e1909]: V21
+                    - generic [ref=e1910]:
+                      - img [ref=e1911]
+                      - text: Código
+                  - generic [ref=e1914]:
+                    - generic [ref=e1915]:
+                      - text: ⚠️
+                      - strong [ref=e1916]: Atención
+                      - text: ": La respuesta parece haber sido truncada por límite de tokens. El código puede estar incompleto."
+                      - text: El error indica que
+                      - code [ref=e1917]: Footer
+                      - text: está importando un componente que no existe o está mal exportado. Voy a revisar y corregir el archivo
+                      - code [ref=e1918]: Footer.tsx
+                      - text: ":"
+                    - generic [ref=e1919]:
+                      - button "3 archivos generados" [ref=e1920] [cursor=pointer]:
+                        - generic [ref=e1921]:
+                          - img [ref=e1922]
+                          - text: 3 archivos generados
+                        - img [ref=e1926]
+                      - generic [ref=e1928]:
+                        - generic [ref=e1929]:
+                          - img [ref=e1930]
+                          - generic [ref=e1935]: components/Footer.tsx
+                        - generic [ref=e1936]:
+                          - img [ref=e1937]
+                          - generic [ref=e1942]: App.tsx
+                        - generic [ref=e1943]:
+                          - img [ref=e1944]
+                          - generic [ref=e1949]: package.json
+                    - generic [ref=e1950]:
+                      - button "Copiar mensaje" [ref=e1951] [cursor=pointer]:
+                        - img [ref=e1952]
+                      - button "Reintentar" [ref=e1955] [cursor=pointer]:
+                        - img [ref=e1956]
+                  - navigation "Sugerencias" [ref=e1959]:
+                    - img [ref=e1961]
+                    - button "Agregar modo oscuro" [ref=e1963] [cursor=pointer]
+                    - button "Optimizar para móviles" [ref=e1964] [cursor=pointer]
+                    - button "Añadir animaciones" [ref=e1965] [cursor=pointer]
+                    - button "Agregar TypeScript strict" [ref=e1966] [cursor=pointer]
+            - contentinfo [ref=e1819]:
+              - generic [ref=e1821]:
+                - generic [ref=e1822]:
+                  - generic [ref=e1823]:
+                    - button "Adjuntar archivo o URL" [ref=e1825] [cursor=pointer]:
+                      - img [ref=e1826]
+                    - textbox "Describe lo que quieres construir..." [ref=e1828]
+                    - generic [ref=e1829]:
+                      - button "Dictado por voz" [ref=e1830] [cursor=pointer]:
+                        - img [ref=e1831]
+                      - button "Enviar mensaje" [disabled] [ref=e1967]:
+                        - img [ref=e1968]
+                  - generic [ref=e1837]:
+                    - generic [ref=e1838]:
+                      - button "PLAN" [ref=e1839] [cursor=pointer]:
+                        - img [ref=e1840]
+                        - text: PLAN
+                      - button "BUILD" [ref=e1842] [cursor=pointer]:
+                        - img [ref=e1843]
+                        - text: BUILD
+                    - button "Claude Sonnet 4.5" [ref=e1847] [cursor=pointer]:
+                      - img [ref=e1848]
+                      - generic [ref=e1851]: Claude Sonnet 4.5
+                      - img [ref=e1852]
+                - paragraph [ref=e1854]:
+                  - generic [ref=e1855]: Cmd+Enter para enviar
+                  - generic [ref=e1856]: ·
+                  - generic [ref=e1857]: Shift+Enter nueva línea
+                  - generic [ref=e1858]: ·
+                  - generic [ref=e1859]: Cmd+K nueva conversación
+          - generic [ref=e2250]:
+            - generic [ref=e2256]:
+              - generic [ref=e2258]:
+                - iframe [ref=e2259]:
+                  
+                - generic [ref=e2213]:
+                  - button "Refresh preview" [ref=e2260] [cursor=pointer]:
+                    - img "Refresh preview" [ref=e2261]
+                  - button "Open on CodeSandbox Open Sandbox" [ref=e2214] [cursor=pointer]:
+                    - img "Open on CodeSandbox" [ref=e2215]
+                    - generic [ref=e2219]: Open Sandbox
+              - button "Ver Logs" [ref=e2220] [cursor=pointer]:
+                - img [ref=e2221]
+                - text: Ver Logs
+            - generic [ref=e2223]:
+              - generic [ref=e2224]:
+                - button [ref=e2225] [cursor=pointer]:
+                  - img
+                - generic [ref=e2227]: Génesis Studio / v21.0
+              - group [ref=e2229]:
+                - radio "Vista" [checked] [ref=e2230] [cursor=pointer]:
+                  - img [ref=e2231]
+                  - text: Vista
+                - radio "Código" [ref=e2233] [cursor=pointer]:
+                  - img [ref=e2234]
+                  - text: Código

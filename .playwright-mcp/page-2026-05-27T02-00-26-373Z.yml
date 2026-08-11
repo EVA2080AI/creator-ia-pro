@@ -1,0 +1,365 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - complementary "Navegación principal" [ref=e10]:
+      - generic [ref=e11]:
+        - button "Creator IA" [ref=e14] [cursor=pointer]:
+          - img [ref=e16]
+          - generic [ref=e19]: Creator IA
+        - button [ref=e20] [cursor=pointer]:
+          - img [ref=e21]
+      - navigation [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e27]: Principal
+          - button "Inicio" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+            - generic [ref=e32]: Inicio
+          - button "Genesis IA" [ref=e33] [cursor=pointer]:
+            - img [ref=e34]
+            - generic [ref=e44]:
+              - text: Genesis IA
+              - generic [ref=e45]: CREADOR
+          - button "Editor" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+            - generic [ref=e52]:
+              - text: Editor
+              - generic [ref=e53]: CREADOR
+          - button "Canvas IA" [ref=e54] [cursor=pointer]:
+            - img [ref=e55]
+            - generic [ref=e59]:
+              - text: Canvas IA
+              - generic [ref=e60]: PRO
+          - button "Proyectos" [ref=e61] [cursor=pointer]:
+            - img [ref=e62]
+            - generic [ref=e64]:
+              - text: Proyectos
+              - generic [ref=e65]: PRO
+          - button "Aplicaciones" [ref=e66] [cursor=pointer]:
+            - img [ref=e67]
+            - generic [ref=e72]: Aplicaciones
+          - button "Antigravity" [ref=e73] [cursor=pointer]:
+            - img [ref=e74]
+            - generic [ref=e77]:
+              - text: Antigravity
+              - generic [ref=e78]: PYME
+        - generic [ref=e79]:
+          - generic [ref=e81]:
+            - img [ref=e82]
+            - text: Sistema
+          - button "Panel Control" [ref=e84] [cursor=pointer]:
+            - img [ref=e85]
+            - generic [ref=e88]:
+              - text: Panel Control
+              - generic [ref=e89]: ADMIN
+          - button "Usuarios" [ref=e90] [cursor=pointer]:
+            - img [ref=e91]
+            - generic [ref=e95]:
+              - text: Usuarios
+              - generic [ref=e96]: ADMIN
+          - button "Sistema de Diseño" [ref=e97] [cursor=pointer]:
+            - img [ref=e98]
+            - generic [ref=e104]:
+              - text: Sistema de Diseño
+              - generic [ref=e105]: ADMIN
+          - button "Estatus" [ref=e106] [cursor=pointer]:
+            - img [ref=e107]
+            - generic [ref=e109]:
+              - text: Estatus
+              - generic [ref=e110]: ADMIN
+          - button "Roadmap" [ref=e111] [cursor=pointer]:
+            - img [ref=e112]
+            - generic [ref=e113]: Roadmap
+        - generic [ref=e114]:
+          - generic [ref=e116]: Créditos
+          - generic [ref=e117]:
+            - img [ref=e118]
+            - generic [ref=e123]: 37,267
+      - generic [ref=e124]:
+        - button "Perfil" [ref=e126] [cursor=pointer]:
+          - img [ref=e127]
+          - generic [ref=e130]: Perfil
+        - button "Planes" [ref=e131] [cursor=pointer]:
+          - img [ref=e132]
+          - generic [ref=e134]: Planes
+        - button "Descargar" [ref=e135] [cursor=pointer]:
+          - img [ref=e136]
+          - generic [ref=e139]: Descargar
+        - generic [ref=e140] [cursor=pointer]:
+          - img [ref=e142]
+          - generic [ref=e145]:
+            - paragraph [ref=e146]: sebastian689
+            - paragraph [ref=e147]: pymes
+          - button "Cerrar sesión" [ref=e148]:
+            - img [ref=e149]
+    - main [ref=e153]:
+      - generic [ref=e3784]:
+        - generic [ref=e3785]:
+          - generic [ref=e3786]:
+            - button [ref=e3787] [cursor=pointer]:
+              - img [ref=e3788]
+            - generic [ref=e3790]: Landing Simple Pastelería Artesanal
+          - generic [ref=e3792]:
+            - generic [ref=e3793]:
+              - button "Preview" [active] [ref=e3794] [cursor=pointer]:
+                - img [ref=e3795]
+                - generic [ref=e3798]: Preview
+              - button "Code" [ref=e3799] [cursor=pointer]:
+                - img [ref=e3800]
+                - generic [ref=e3803]: Code
+              - button "Consola" [ref=e3804] [cursor=pointer]:
+                - img [ref=e3805]
+                - generic [ref=e3807]: Consola
+              - button [ref=e3808] [cursor=pointer]:
+                - img [ref=e3809]
+            - generic [ref=e4464]:
+              - button [ref=e4465] [cursor=pointer]:
+                - img [ref=e4466]
+              - button [ref=e4468] [cursor=pointer]:
+                - img [ref=e4469]
+              - button [ref=e4471] [cursor=pointer]:
+                - img [ref=e4472]
+          - generic [ref=e3822]:
+            - generic [ref=e3823]:
+              - button "GitHub" [ref=e3824] [cursor=pointer]:
+                - img [ref=e3825]
+              - button "Compartir" [ref=e3828] [cursor=pointer]:
+                - img [ref=e3829]
+            - button "Push to Cloud" [ref=e3835] [cursor=pointer]:
+              - generic [ref=e3837]: Push to Cloud
+        - generic [ref=e3839]:
+          - complementary "Panel de Chat Génesis" [ref=e3842]:
+            - generic [ref=e3843]:
+              - generic [ref=e3844]:
+                - button "Volver" [ref=e3845] [cursor=pointer]:
+                  - img [ref=e3846]
+                - heading "Proyecto" [level=2] [ref=e3852]
+              - button "Console" [ref=e3857] [cursor=pointer]:
+                - img [ref=e3858]
+                - text: Console
+            - generic [ref=e3860]:
+              - article "Tu mensaje" [ref=e3861]:
+                - generic [ref=e3862]: "[MODO: React + Vite + Tailwind + TypeScript] crea una landing simple para una pastelería artesanal \"Dulce Amanecer\" en Medellín. Hero con CTA, 3 productos destacados (croissant 4.500 COP, pan de queso 3.000 COP, torta tres leches 35.000 COP por porción), y sección de contacto con dirección y horario."
+                - time [ref=e3863]: 08:59 PM
+              - article "Mensaje de Génesis" [ref=e3947]:
+                - generic [ref=e3948]:
+                  - generic [ref=e3949]:
+                    - img [ref=e3951]
+                    - generic [ref=e3953]: Génesis AI
+                    - generic [ref=e3954]: V21
+                    - generic [ref=e3955]:
+                      - img [ref=e3956]
+                      - text: Código
+                  - generic [ref=e3959]:
+                    - generic [ref=e3960]: Código generado.
+                    - generic [ref=e3961]:
+                      - button "6 archivos generados" [ref=e3962] [cursor=pointer]:
+                        - generic [ref=e3963]:
+                          - img [ref=e3964]
+                          - text: 6 archivos generados
+                        - img [ref=e3968]
+                      - generic [ref=e3970]:
+                        - generic [ref=e3971]:
+                          - img [ref=e3972]
+                          - generic [ref=e3977]: src/App.tsx
+                        - generic [ref=e3978]:
+                          - img [ref=e3979]
+                          - generic [ref=e3984]: src/components/Hero.tsx
+                        - generic [ref=e3985]:
+                          - img [ref=e3986]
+                          - generic [ref=e3991]: src/components/Products.tsx
+                        - generic [ref=e3992]:
+                          - img [ref=e3993]
+                          - generic [ref=e3998]: src/components/Contact.tsx
+                        - generic [ref=e3999]:
+                          - img [ref=e4000]
+                          - generic [ref=e4005]: src/index.css
+                        - generic [ref=e4006]:
+                          - img [ref=e4007]
+                          - generic [ref=e4012]: package.json
+                      - button "+3 más" [ref=e4013] [cursor=pointer]
+                    - generic [ref=e4014]:
+                      - button "Copiar mensaje" [ref=e4015] [cursor=pointer]:
+                        - img [ref=e4016]
+                      - button "Reintentar" [ref=e4019] [cursor=pointer]:
+                        - img [ref=e4020]
+                  - navigation "Sugerencias" [ref=e4023]:
+                    - img [ref=e4025]
+                    - button "Agregar modo oscuro" [ref=e4027] [cursor=pointer]
+                    - button "Optimizar para móviles" [ref=e4028] [cursor=pointer]
+                    - button "Añadir animaciones" [ref=e4029] [cursor=pointer]
+                    - button "Agregar TypeScript strict" [ref=e4030] [cursor=pointer]
+              - article "Tu mensaje" [ref=e4163]:
+                - generic [ref=e4164]: "[AUTO-FIX] Error detectado en el preview: ``` Element type is invalid: expected a string (for built-in components) or a class/function (for composite components) but got: undefined. You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports. Check the render method of `Contact`. ``` POR FAVOR, corrige este error analizando el estado actual de los archivos críticos: - Archivo activo: @App.tsx - Punto de entrada: @App.tsx Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archivos corregidos como bloques markdown."
+                - time [ref=e4165]: 08:59 PM
+              - article "Mensaje de Génesis" [ref=e4222]:
+                - generic [ref=e4223]:
+                  - generic [ref=e4224]:
+                    - img [ref=e4226]
+                    - generic [ref=e4228]: Génesis AI
+                    - generic [ref=e4229]: V21
+                    - generic [ref=e4230]:
+                      - img [ref=e4231]
+                      - text: Código
+                  - generic [ref=e4234]:
+                    - generic [ref=e4235]: Código generado.
+                    - generic [ref=e4236]:
+                      - button "3 archivos generados" [ref=e4237] [cursor=pointer]:
+                        - generic [ref=e4238]:
+                          - img [ref=e4239]
+                          - text: 3 archivos generados
+                        - img [ref=e4243]
+                      - generic [ref=e4245]:
+                        - generic [ref=e4246]:
+                          - img [ref=e4247]
+                          - generic [ref=e4252]: src/components/Contact.tsx
+                        - generic [ref=e4253]:
+                          - img [ref=e4254]
+                          - generic [ref=e4259]: src/App.tsx
+                        - generic [ref=e4260]:
+                          - img [ref=e4261]
+                          - generic [ref=e4266]: package.json
+                    - generic [ref=e4267]:
+                      - button "Copiar mensaje" [ref=e4268] [cursor=pointer]:
+                        - img [ref=e4269]
+                      - button "Reintentar" [ref=e4272] [cursor=pointer]:
+                        - img [ref=e4273]
+                  - navigation "Sugerencias" [ref=e4276]:
+                    - img [ref=e4278]
+                    - button "Agregar modo oscuro" [ref=e4280] [cursor=pointer]
+                    - button "Optimizar para móviles" [ref=e4281] [cursor=pointer]
+                    - button "Añadir animaciones" [ref=e4282] [cursor=pointer]
+                    - button "Agregar TypeScript strict" [ref=e4283] [cursor=pointer]
+            - contentinfo [ref=e3864]:
+              - generic [ref=e3866]:
+                - generic [ref=e3867]:
+                  - generic [ref=e3869]:
+                    - button "Adjuntar archivo o URL" [ref=e3871] [cursor=pointer]:
+                      - img [ref=e3872]
+                    - textbox "Describe lo que quieres construir..." [ref=e3874]
+                    - generic [ref=e3875]:
+                      - button "Dictado por voz" [ref=e3876] [cursor=pointer]:
+                        - img [ref=e3877]
+                      - button "Enviar mensaje" [disabled] [ref=e4284]:
+                        - img [ref=e4285]
+                  - generic [ref=e3883]:
+                    - generic [ref=e3884]:
+                      - button "PLAN" [ref=e3885] [cursor=pointer]:
+                        - img [ref=e3886]
+                        - text: PLAN
+                      - button "BUILD" [ref=e3888] [cursor=pointer]:
+                        - img [ref=e3889]
+                        - text: BUILD
+                    - button "Claude Sonnet 4.5" [ref=e3893] [cursor=pointer]:
+                      - img [ref=e3894]
+                      - generic [ref=e3897]: Claude Sonnet 4.5
+                      - img [ref=e3898]
+                - paragraph [ref=e3900]:
+                  - generic [ref=e3901]: Cmd+Enter para enviar
+                  - generic [ref=e3902]: ·
+                  - generic [ref=e3903]: Shift+Enter nueva línea
+                  - generic [ref=e3904]: ·
+                  - generic [ref=e3905]: Cmd+K nueva conversación
+          - generic [ref=e4413]:
+            - generic [ref=e4420]:
+              - generic [ref=e4422]:
+                - iframe [ref=e4423]:
+                  - generic [ref=f884e3]:
+                    - generic [ref=f884e7]:
+                      - heading "Dulce Amanecer" [level=1] [ref=f884e8]
+                      - paragraph [ref=f884e9]: Pastelería artesanal en el corazón de Medellín
+                      - paragraph [ref=f884e10]: Cada mañana horneamos con amor y los mejores ingredientes. Tradición francesa con el sabor paisa que nos caracteriza.
+                      - button "Llamar ahora" [ref=f884e11] [cursor=pointer]:
+                        - img [ref=f884e12]
+                        - text: Llamar ahora
+                    - generic [ref=f884e15]:
+                      - generic [ref=f884e16]:
+                        - heading "Nuestros Favoritos" [level=2] [ref=f884e17]
+                        - paragraph [ref=f884e18]: Productos frescos todos los días. Llega temprano porque se agotan rápido.
+                      - generic [ref=f884e19]:
+                        - generic [ref=f884e20]:
+                          - generic [ref=f884e21]:
+                            - img "Croissant Artesanal" [ref=f884e22]
+                            - generic [ref=f884e23]: Recién horneado
+                          - generic [ref=f884e24]:
+                            - generic [ref=f884e25]:
+                              - heading "Croissant Artesanal" [level=3] [ref=f884e26]
+                              - generic [ref=f884e27]: $4.500
+                            - paragraph [ref=f884e28]: Hojaldre francés con mantequilla de primera. Crujiente por fuera, suave por dentro.
+                        - generic [ref=f884e29]:
+                          - generic [ref=f884e30]:
+                            - img "Pan de Queso" [ref=f884e31]
+                            - generic [ref=f884e32]: Bestseller
+                          - generic [ref=f884e33]:
+                            - generic [ref=f884e34]:
+                              - heading "Pan de Queso" [level=3] [ref=f884e35]
+                              - generic [ref=f884e36]: $3.000
+                            - paragraph [ref=f884e37]: Tradicional pan paisa con queso campesino. El favorito de nuestros clientes.
+                        - generic [ref=f884e38]:
+                          - generic [ref=f884e39]:
+                            - img "Torta Tres Leches" [ref=f884e40]
+                            - generic [ref=f884e41]: Especialidad
+                          - generic [ref=f884e42]:
+                            - generic [ref=f884e43]:
+                              - heading "Torta Tres Leches" [level=3] [ref=f884e44]
+                              - generic [ref=f884e45]: $35.000
+                            - paragraph [ref=f884e46]: Porción generosa de nuestro clásico. Suave, húmeda y con el punto perfecto de dulce.
+                    - generic [ref=f884e48]:
+                      - generic [ref=f884e49]:
+                        - heading "Contáctanos" [level=2] [ref=f884e50]
+                        - paragraph [ref=f884e51]: ¿Tienes alguna pregunta? Estamos aquí para ayudarte
+                      - generic [ref=f884e52]:
+                        - generic [ref=f884e53]:
+                          - heading "Información de Contacto" [level=3] [ref=f884e54]
+                          - generic [ref=f884e55]:
+                            - generic [ref=f884e56]:
+                              - img [ref=f884e58]
+                              - generic [ref=f884e60]:
+                                - heading "Teléfono" [level=4] [ref=f884e61]
+                                - paragraph [ref=f884e62]: +57 300 123 4567
+                            - generic [ref=f884e63]:
+                              - img [ref=f884e65]
+                              - generic [ref=f884e68]:
+                                - heading "Email" [level=4] [ref=f884e69]
+                                - paragraph [ref=f884e70]: contacto@techstore.com
+                            - generic [ref=f884e71]:
+                              - img [ref=f884e73]
+                              - generic [ref=f884e76]:
+                                - heading "Dirección" [level=4] [ref=f884e77]
+                                - paragraph [ref=f884e78]: "Calle 100 #15-20, Bogotá, Colombia"
+                        - generic [ref=f884e80]:
+                          - generic [ref=f884e81]:
+                            - text: Nombre
+                            - textbox "Nombre" [ref=f884e82]:
+                              - /placeholder: Tu nombre completo
+                          - generic [ref=f884e83]:
+                            - text: Email
+                            - textbox "Email" [ref=f884e84]:
+                              - /placeholder: tu@email.com
+                          - generic [ref=f884e85]:
+                            - text: Mensaje
+                            - textbox "Mensaje" [ref=f884e86]:
+                              - /placeholder: ¿En qué podemos ayudarte?
+                          - button "Enviar Mensaje" [ref=f884e87] [cursor=pointer]
+                    - contentinfo [ref=f884e88]:
+                      - paragraph [ref=f884e90]: © 2024 TechStore. Todos los derechos reservados.
+                - generic [ref=e4424]:
+                  - button "Refresh preview" [ref=e4425] [cursor=pointer]:
+                    - img "Refresh preview" [ref=e4426]
+                  - button "Open on CodeSandbox Open Sandbox" [ref=e4428] [cursor=pointer]:
+                    - img "Open on CodeSandbox" [ref=e4429]
+                    - generic [ref=e4433]: Open Sandbox
+              - button "Ver Logs" [ref=e4445] [cursor=pointer]:
+                - img [ref=e4446]
+                - text: Ver Logs
+            - generic [ref=e4448]:
+              - generic [ref=e4449]:
+                - button [ref=e4450] [cursor=pointer]:
+                  - img
+                - generic [ref=e4452]: Génesis Studio / v21.0
+              - group [ref=e4454]:
+                - radio "Vista" [checked] [ref=e4455] [cursor=pointer]:
+                  - img [ref=e4456]
+                  - text: Vista
+                - radio "Código" [ref=e4458] [cursor=pointer]:
+                  - img [ref=e4459]
+                  - text: Código

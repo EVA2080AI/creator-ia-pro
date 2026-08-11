@@ -1,0 +1,65 @@
+- main [ref=e153]:
+  - generic [ref=e1696]:
+    - generic [ref=e1697]:
+      - generic [ref=e1698]:
+        - button [ref=e1699] [cursor=pointer]:
+          - img [ref=e1700]
+        - generic [ref=e1702]: Saas Gestión Tareas Tipo
+      - generic [ref=e1705]:
+        - button "Preview" [ref=e1706] [cursor=pointer]:
+          - img [ref=e1707]
+          - generic [ref=e1710]: Preview
+        - button "Code" [ref=e1711] [cursor=pointer]:
+          - img [ref=e1712]
+          - generic [ref=e1715]: Code
+        - button "Consola" [ref=e1716] [cursor=pointer]:
+          - img [ref=e1717]
+          - generic [ref=e1719]: Consola
+        - button [ref=e1720] [cursor=pointer]:
+          - img [ref=e1721]
+      - generic [ref=e1734]:
+        - generic [ref=e1735]:
+          - button "GitHub" [ref=e1736] [cursor=pointer]:
+            - img [ref=e1737]
+          - button "Compartir" [ref=e1740] [cursor=pointer]:
+            - img [ref=e1741]
+        - button "Push to Cloud" [ref=e1747] [cursor=pointer]:
+          - generic [ref=e1749]: Push to Cloud
+    - generic [ref=e1751]:
+      - complementary "Panel de Chat Génesis" [ref=e1754]:
+        - generic [ref=e1755]:
+          - generic [ref=e1756]:
+            - button "Volver" [ref=e1757] [cursor=pointer]
+            - heading "Proyecto" [level=2] [ref=e1764]
+          - button "Console" [ref=e1769] [cursor=pointer]:
+            - img [ref=e1770]
+            - text: Console
+        - generic [ref=e1772]:
+          - article "Tu mensaje" [ref=e1773]:
+            - generic [ref=e1774]: "[MODO: React + Vite + Tailwind + TypeScript] Crea un SaaS de gestión de tareas tipo Trello/Linear con: (1) Página de login con email+password (usa el LoginPage scaffold y conéctalo a auth.signIn de Supabase), (2) Dashboard con sidebar colapsable usando Sidebar de shadcn, mostrando lista de proyectos a la izquierda y un board kanban a la derecha con 3 columnas (Pendiente, En progreso, Completado) y tarjetas draggables, (3) Página de pricing con 3 planes usando el PricingPage scaffold. Usa react-router-dom para las rutas /login, /dashboard, /pricing. Para el board kanban, usa cards de shadcn y mock data con 6 tareas distribuidas."
+            - time [ref=e1775]: 06:16 AM
+          - article "Mensaje de Génesis" [ref=e1922]:
+            - generic [ref=e1923]
+        - contentinfo [ref=e1776]:
+          - generic [ref=e1778]:
+            - generic [ref=e1779]
+            - paragraph [ref=e1812]
+      - generic [ref=e1818]:
+        - generic [ref=e2017]:
+          - generic [ref=e2018]:
+            - button "src/App.tsx" [ref=e2019] [cursor=pointer]
+            - button "src/pages/Dashboard.tsx" [ref=e2027] [cursor=pointer]
+            - button "src/components/ProjectList.tsx" [ref=e2034] [cursor=pointer]
+            - button "src/components/KanbanBoard.tsx" [ref=e2041] [cursor=pointer]
+            - button "src/components/KanbanColumn.tsx" [ref=e2048] [cursor=pointer]
+            - button "src/components/TaskCard.tsx" [ref=e2055] [cursor=pointer]
+          - generic [ref=e2062]:
+            - generic [ref=e2063]
+            - generic [ref=e2113]
+          - generic [ref=e2200]:
+            - generic [ref=e2201]
+            - generic [ref=e2208]
+        - generic:
+          - generic:
+            - generic [ref=e2215]
+            - generic [ref=e1843]

@@ -154,6 +154,118 @@ async function callGemini(body: any, apiKey: string): Promise<Response> {
   );
 }
 
+// ── Image Generation (Replicate primary, OpenRouter/Gemini fallback) ─────────
+
+// The frontend's IMAGE_MODEL_MAP ids are Replicate model slugs.
+const REPLICATE_MODEL_ALIASES: Record<string, string> = {
+  // Replicate publishes SD 3.5 with a dot, the frontend map uses dashes
+  'stability-ai/stable-diffusion-3-5-large': 'stability-ai/stable-diffusion-3.5-large',
+};
+
+// Only flux-1.1-pro accepts a reference image (image_prompt) among our models
+const REPLICATE_IMAGE_INPUT_MODELS = new Set(['black-forest-labs/flux-1.1-pro']);
+
+// Subset of aspect ratios supported by flux, ideogram-v2 AND sd-3.5-large
+function toAspectRatio(width: number, height: number): string {
+  const candidates: Array<[string, number]> = [
+    ['1:1', 1], ['16:9', 16 / 9], ['9:16', 9 / 16], ['3:2', 3 / 2], ['2:3', 2 / 3],
+  ];
+  const ratio = width / height;
+  let best = '1:1';
+  let bestDiff = Infinity;
+  for (const [name, value] of candidates) {
+    const diff = Math.abs(value - ratio);
+    if (diff < bestDiff) { bestDiff = diff; best = name; }
+  }
+  return best;
+}
+
+async function generateReplicateImage(
+  model: string,
+  prompt: string,
+  aspectRatio: string,
+  imageUrl: string | undefined,
+  token: string,
+): Promise<string> {
+  let finalModel = REPLICATE_MODEL_ALIASES[model] ?? model;
+  if (imageUrl && !REPLICATE_IMAGE_INPUT_MODELS.has(finalModel)) {
+    finalModel = 'black-forest-labs/flux-1.1-pro';
+  }
+
+  const input: Record<string, unknown> = { prompt, aspect_ratio: aspectRatio };
+  if (imageUrl) input.image_prompt = imageUrl;
+
+  const createRes = await fetch(`https://api.replicate.com/v1/models/${finalModel}/predictions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'wait=60',
+    },
+    body: JSON.stringify({ input }),
+  });
+
+  if (!createRes.ok) {
+    const detail = await createRes.text();
+    throw new Error(`${createRes.status} ${detail.slice(0, 200)}`);
+  }
+
+  let prediction = await createRes.json();
+
+  // If the sync wait expired before the model finished, keep polling
+  for (let i = 0; i < 45 && (prediction.status === 'starting' || prediction.status === 'processing'); i++) {
+    await new Promise((r) => setTimeout(r, 2000));
+    const pollRes = await fetch(prediction.urls?.get, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    if (!pollRes.ok) continue;
+    prediction = await pollRes.json();
+  }
+
+  if (prediction.status !== 'succeeded') {
+    throw new Error(String(prediction.error || `predicción en estado ${prediction.status}`));
+  }
+  const output = Array.isArray(prediction.output) ? prediction.output[0] : prediction.output;
+  if (typeof output !== 'string' || !output) throw new Error('sin URL de imagen en la respuesta');
+  return output;
+}
+
+async function generateOpenRouterImage(
+  prompt: string,
+  imageUrl: string | undefined,
+  apiKey: string,
+): Promise<string> {
+  const content = imageUrl
+    ? [{ type: 'text', text: prompt }, { type: 'image_url', image_url: { url: imageUrl } }]
+    : prompt;
+
+  const res = await fetch(`${OR_BASE}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': OR_REFERER,
+      'X-Title': OR_TITLE,
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.5-flash-image',
+      messages: [{ role: 'user', content }],
+      modalities: ['image', 'text'],
+    }),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text();
+    throw new Error(`${res.status} ${detail.slice(0, 200)}`);
+  }
+  const data = await res.json();
+  const image = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+  if (typeof image !== 'string' || !image) {
+    throw new Error(String(data.error?.message || 'el modelo no devolvió imagen'));
+  }
+  return image;
+}
+
 // ── Response Transformers ────────────────────────────────────────────────────
 
 function transformGroqResponse(data: any): any {
@@ -216,7 +328,124 @@ serve(async (req: Request) => {
   const startTime = Date.now();
 
   try {
-    const payload = await req.json();
+    const rawPayload = await req.json();
+
+    // ── Image generation: { provider: 'openrouter-image', body: {...} } ───────
+    // ai-service.handleImageGen posts { prompt, model, width, height, image_url? }
+    // where model is a Replicate slug (flux, ideogram, sd3.5). Errors return 200
+    // so the client surfaces data.error instead of a generic FunctionsHttpError.
+    if (
+      rawPayload && typeof rawPayload === 'object' &&
+      rawPayload.provider === 'openrouter-image' &&
+      rawPayload.body && typeof rawPayload.body === 'object'
+    ) {
+      const imgBody = rawPayload.body as Record<string, unknown>;
+      const prompt = typeof imgBody.prompt === 'string' ? imgBody.prompt.trim() : '';
+      if (!prompt) return json({ error: 'Falta el prompt para generar la imagen.' }, 200);
+
+      const requestedModel = typeof imgBody.model === 'string' && imgBody.model
+        ? imgBody.model
+        : 'black-forest-labs/flux-schnell';
+      const imageUrl = typeof imgBody.image_url === 'string' && imgBody.image_url
+        ? imgBody.image_url
+        : undefined;
+      const aspectRatio = toAspectRatio(Number(imgBody.width) || 1024, Number(imgBody.height) || 1024);
+
+      const imageErrors: string[] = [];
+
+      const replicateToken = Deno.env.get('REPLICATE_API_TOKEN');
+      if (replicateToken) {
+        try {
+          const url = await generateReplicateImage(requestedModel, prompt, aspectRatio, imageUrl, replicateToken);
+          return json({ url, model: requestedModel });
+        } catch (e) {
+          imageErrors.push(`Replicate: ${e instanceof Error ? e.message : 'error'}`);
+        }
+      } else {
+        imageErrors.push('Replicate: REPLICATE_API_TOKEN no configurada');
+      }
+
+      const orImageKey = Deno.env.get('OPENROUTER_API_KEY');
+      if (orImageKey) {
+        try {
+          const url = await generateOpenRouterImage(prompt, imageUrl, orImageKey);
+          // _fallback_reason: why Replicate didn't serve this (frontend ignores it)
+          return json({ url, model: 'google/gemini-2.5-flash-image', _fallback_reason: imageErrors });
+        } catch (e) {
+          imageErrors.push(`OpenRouter: ${e instanceof Error ? e.message : 'error'}`);
+        }
+      } else {
+        imageErrors.push('OpenRouter: OPENROUTER_API_KEY no configurada');
+      }
+
+      console.error('[ai-proxy] image generation failed:', imageErrors);
+      return json({ error: `No se pudo generar la imagen. ${imageErrors.join(' | ')}` }, 200);
+    }
+
+    // ── Legacy envelope: { provider, path, body } ─────────────────────────────
+    // Genesis chat, useStudioChatAI, useGenesisLite, useSimpleCodeGen, captioning,
+    // and ai-service.callProxy all post in this shape. Route to OpenRouter and
+    // pass streaming responses through verbatim so the client SSE reader works.
+    if (
+      rawPayload && typeof rawPayload === 'object' &&
+      rawPayload.provider === 'openrouter' &&
+      rawPayload.body && typeof rawPayload.body === 'object'
+    ) {
+      const apiKey = Deno.env.get('OPENROUTER_API_KEY');
+      if (!apiKey) {
+        return json({ error: 'OPENROUTER_API_KEY no está configurada en Supabase.' }, 500);
+      }
+
+      const targetPath = typeof rawPayload.path === 'string' && rawPayload.path.length > 0
+        ? rawPayload.path.replace(/^\/+/, '')
+        : 'chat/completions';
+      const orBody = rawPayload.body as Record<string, unknown>;
+      const streamMode = orBody.stream === true;
+
+      const orRes = await fetch(`${OR_BASE}/${targetPath}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+          'HTTP-Referer': OR_REFERER,
+          'X-Title': OR_TITLE,
+        },
+        body: JSON.stringify(orBody),
+      });
+
+      if (streamMode && orRes.ok && orRes.body) {
+        return new Response(orRes.body, {
+          status: orRes.status,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no',
+          },
+        });
+      }
+
+      const ct = orRes.headers.get('content-type') ?? '';
+      const raw = await orRes.text();
+      if (!orRes.ok) {
+        let errMsg = `OpenRouter ${orRes.status}`;
+        try {
+          const parsed = JSON.parse(raw);
+          errMsg = (parsed?.error?.message ?? parsed?.error ?? errMsg) as string;
+        } catch { /* keep default */ }
+        return json({ error: errMsg }, 200);
+      }
+      if (ct.includes('application/json')) {
+        try { return json(JSON.parse(raw)); } catch { /* fall through */ }
+      }
+      return new Response(raw, {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': ct || 'application/json' },
+      });
+    }
+
+    // ── New flat payload (tier-based router) ──────────────────────────────────
+    const payload = rawPayload;
     const {
       model,
       messages,

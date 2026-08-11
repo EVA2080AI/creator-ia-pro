@@ -35,8 +35,9 @@ interface MessageItemProps {
 
 // ── Collapsible File Accordion ───────────────────────────────────────────────
 function FileAccordion({ files }: { files: string[] }) {
-  const [open, setOpen] = useState(false);
-  const PREVIEW = 3;
+  // Default abierto cuando hay <=8 archivos (no abruma) — UX: el user acaba
+  // de ver streamear estos archivos en vivo, expectativa = los sigue viendo
+  const [open, setOpen] = useState(files.length <= 8);
 
   return (
     <div className="mt-4 rounded-xl border border-zinc-100 overflow-hidden">
@@ -62,27 +63,19 @@ function FileAccordion({ files }: { files: string[] }) {
           open ? "max-h-[400px]" : "max-h-0"
         )}
       >
-        <div className="p-2 space-y-1 overflow-y-auto max-h-[400px] custom-scrollbar">
+        <div className="p-2 space-y-0.5 overflow-y-auto max-h-[400px] custom-scrollbar">
           {files.map((f, i) => (
             <div
               key={i}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-zinc-50 transition-colors group"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-zinc-50 transition-colors group"
             >
-              <FileCode2 className="h-3.5 w-3.5 text-primary shrink-0" />
-              <span className="text-[12px] font-mono text-zinc-600 truncate flex-1">{f}</span>
+              <span className="text-emerald-500 text-[10px]">✓</span>
+              <FileCode2 className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+              <span className="text-[11.5px] font-mono text-zinc-600 truncate flex-1">{f}</span>
             </div>
           ))}
         </div>
       </div>
-
-      {!open && files.length > PREVIEW && (
-        <button
-          onClick={() => setOpen(true)}
-          className="w-full text-center py-1.5 text-[10px] font-bold text-zinc-400 hover:text-primary transition-colors border-t border-zinc-100"
-        >
-          +{files.length - PREVIEW} más
-        </button>
-      )}
     </div>
   );
 }
@@ -126,7 +119,7 @@ export function MessageItem({
               <img src={msg.imagePreview} alt="Referencia visual" className="max-h-52 w-auto object-contain" />
             </div>
           )}
-          <div className="chat-bubble-user text-white px-4 py-3 rounded-2xl rounded-tr-sm text-[13.5px] font-medium max-w-[88%] leading-relaxed shadow-md shadow-primary/15">
+          <div className="chat-bubble-user text-white px-4 py-3 rounded-2xl rounded-tr-sm text-[13.5px] font-medium max-w-[88%] leading-relaxed shadow-brand bg-gradient-to-br from-primary to-blue-600">
             <span className="whitespace-pre-wrap">{msg.content}</span>
           </div>
           <time className="text-[10px] text-zinc-400 mr-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -174,8 +167,8 @@ export function MessageItem({
           className={cn(
             "relative rounded-2xl rounded-tl-sm border overflow-hidden transition-all duration-300 group/msg",
             msg.type === 'plan'
-              ? "bg-zinc-50 border-zinc-200 p-4 md:p-5"
-              : "bg-white border-zinc-100 shadow-sm p-4 md:p-5"
+              ? "bg-white/80 backdrop-blur-xl border-white/80 p-4 md:p-5 shadow-[0_8px_30px_rgba(0,0,0,0.02)]"
+              : "bg-white/70 backdrop-blur-xl border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] p-4 md:p-5"
           )}
         >
           {/* Hover glow */}
@@ -183,8 +176,8 @@ export function MessageItem({
 
           {/* ── Plan banner ─── */}
           {msg.type === 'plan' && (
-            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-zinc-200">
-              <div className="h-9 w-9 rounded-xl bg-white border border-zinc-200 flex items-center justify-center shadow-sm shrink-0">
+            <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/50">
+              <div className="h-9 w-9 rounded-[0.85rem] bg-white border border-white/60 flex items-center justify-center shadow-sm shrink-0">
                 <Shield className="h-4 w-4 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
@@ -320,7 +313,7 @@ export function MessageItem({
               <button
                 key={i}
                 onClick={() => onSuggestionClick(s)}
-                className="px-3 py-1.5 rounded-full border border-zinc-200 bg-white text-[10.5px] font-medium text-zinc-500 hover:border-primary/40 hover:text-primary hover:shadow-sm transition-all animate-in fade-in active:scale-95"
+                className="px-3 py-1.5 rounded-full border border-white/60 bg-white/60 backdrop-blur-md shadow-sm text-[10.5px] font-medium text-zinc-600 hover:border-primary/40 hover:text-primary hover:bg-white hover:shadow-md transition-all animate-in fade-in active:scale-95"
                 style={{ animationDelay: `${i * 80}ms` }}
               >
                 {s}

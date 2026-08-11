@@ -8,7 +8,8 @@ import {
   extractDeleteCommands,
   detectMissingDependencies,
   injectDependenciesIntoPackageJson,
-  isResponseTruncated
+  isResponseTruncated,
+  extractCompleteXmlFiles
 } from '@/components/studio/chat/utils';
 import { CODE_GEN_SYSTEM, GENESIS_CHAT_SYSTEM, IMAGE_TO_CODE_SYSTEM, REASONING_SYSTEM_PROMPT } from '@/prompts';
 import type { AgentPhase, AgentSpecialist, CodeGenResult, Message, AgentPreference } from '@/components/studio/chat/types';
@@ -27,6 +28,8 @@ interface UseStudioChatAIProps {
   onPhaseChange?: (phase: AgentPhase, specialist?: AgentSpecialist) => void;
   onStreamCharsChange?: (chars: number, preview: string) => void;
   onGeneratingChange?: (v: boolean) => void;
+  /** Llamado cada vez que un nuevo <file> se cierra durante el stream (UX en vivo) */
+  onFileStream?: (path: string, totalCompleted: number) => void;
 }
 
 export function useStudioChatAI({
@@ -40,7 +43,8 @@ export function useStudioChatAI({
   subscriptionTier = 'free',
   onPhaseChange,
   onStreamCharsChange,
-  onGeneratingChange
+  onGeneratingChange,
+  onFileStream
 }: UseStudioChatAIProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [streamChars, setStreamChars] = useState(0);
@@ -282,6 +286,7 @@ IMPORTANTE: El usuario solicita HTML VANILLA (sin React).
       let accumulated = '';
       let buffer = '';
       let lastUpdate = 0;
+      const emittedFiles = new Set<string>();
 
       while (true) {
         const { done, value } = await reader.read();
@@ -303,6 +308,20 @@ IMPORTANTE: El usuario solicita HTML VANILLA (sin React).
               accumulated += delta;
               streamBufferRef.current = accumulated;
 
+              // Incremental file streaming — FUERA del throttle: cada </file>
+              // se emite inmediatamente para feedback UX en vivo
+              if (onFileStream && delta.includes('</file>')) {
+                const completed = extractCompleteXmlFiles(accumulated);
+                for (const path of Object.keys(completed)) {
+                  if (!emittedFiles.has(path)) {
+                    emittedFiles.add(path);
+                    onFileStream(path, emittedFiles.size);
+                  }
+                }
+              }
+
+              // Text content / stream stats — sí throttleado a 50ms para
+              // no saturar React
               const now = Date.now();
               if (now - lastUpdate > 50) {
                 setStreamChars(accumulated.length);

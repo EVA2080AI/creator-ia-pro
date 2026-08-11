@@ -1,0 +1,306 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e9]:
+    - complementary "Navegación principal" [ref=e10]:
+      - generic [ref=e11]:
+        - button "Creator IA" [ref=e14] [cursor=pointer]:
+          - img [ref=e16]
+          - generic [ref=e19]: Creator IA
+        - button [ref=e20] [cursor=pointer]:
+          - img [ref=e21]
+      - navigation [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e27]: Principal
+          - button "Inicio" [ref=e28] [cursor=pointer]:
+            - img [ref=e29]
+            - generic [ref=e32]: Inicio
+          - button "Genesis IA" [ref=e33] [cursor=pointer]:
+            - img [ref=e34]
+            - generic [ref=e44]:
+              - text: Genesis IA
+              - generic [ref=e45]: CREADOR
+          - button "Editor" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+            - generic [ref=e52]:
+              - text: Editor
+              - generic [ref=e53]: CREADOR
+          - button "Canvas IA" [ref=e54] [cursor=pointer]:
+            - img [ref=e55]
+            - generic [ref=e59]:
+              - text: Canvas IA
+              - generic [ref=e60]: PRO
+          - button "Proyectos" [ref=e61] [cursor=pointer]:
+            - img [ref=e62]
+            - generic [ref=e64]:
+              - text: Proyectos
+              - generic [ref=e65]: PRO
+          - button "Aplicaciones" [ref=e66] [cursor=pointer]:
+            - img [ref=e67]
+            - generic [ref=e72]: Aplicaciones
+          - button "Antigravity" [ref=e73] [cursor=pointer]:
+            - img [ref=e74]
+            - generic [ref=e77]:
+              - text: Antigravity
+              - generic [ref=e78]: PYME
+        - generic [ref=e79]:
+          - generic [ref=e81]:
+            - img [ref=e82]
+            - text: Sistema
+          - button "Panel Control" [ref=e84] [cursor=pointer]:
+            - img [ref=e85]
+            - generic [ref=e88]:
+              - text: Panel Control
+              - generic [ref=e89]: ADMIN
+          - button "Usuarios" [ref=e90] [cursor=pointer]:
+            - img [ref=e91]
+            - generic [ref=e95]:
+              - text: Usuarios
+              - generic [ref=e96]: ADMIN
+          - button "Sistema de Diseño" [ref=e97] [cursor=pointer]:
+            - img [ref=e98]
+            - generic [ref=e104]:
+              - text: Sistema de Diseño
+              - generic [ref=e105]: ADMIN
+          - button "Estatus" [ref=e106] [cursor=pointer]:
+            - img [ref=e107]
+            - generic [ref=e109]:
+              - text: Estatus
+              - generic [ref=e110]: ADMIN
+          - button "Roadmap" [ref=e111] [cursor=pointer]:
+            - img [ref=e112]
+            - generic [ref=e113]: Roadmap
+        - generic [ref=e114]:
+          - generic [ref=e116]: Créditos
+          - generic [ref=e117]:
+            - img [ref=e118]
+            - generic [ref=e123]: 37,267
+      - generic [ref=e124]:
+        - button "Perfil" [ref=e126] [cursor=pointer]:
+          - img [ref=e127]
+          - generic [ref=e130]: Perfil
+        - button "Planes" [ref=e131] [cursor=pointer]:
+          - img [ref=e132]
+          - generic [ref=e134]: Planes
+        - button "Descargar" [ref=e135] [cursor=pointer]:
+          - img [ref=e136]
+          - generic [ref=e139]: Descargar
+        - generic [ref=e140] [cursor=pointer]:
+          - img [ref=e142]
+          - generic [ref=e145]:
+            - paragraph [ref=e146]: sebastian689
+            - paragraph [ref=e147]: pymes
+          - button "Cerrar sesión" [ref=e148]:
+            - img [ref=e149]
+    - main [ref=e153]:
+      - generic [ref=e3784]:
+        - generic [ref=e3785]:
+          - generic [ref=e3786]:
+            - button [ref=e3787] [cursor=pointer]:
+              - img [ref=e3788]
+            - generic [ref=e3790]: Landing Simple Pastelería Artesanal
+          - generic [ref=e3793]:
+            - button "Preview" [ref=e3794] [cursor=pointer]:
+              - img [ref=e3795]
+              - generic [ref=e3798]: Preview
+            - button "Code" [ref=e3799] [cursor=pointer]:
+              - img [ref=e3800]
+              - generic [ref=e3803]: Code
+            - button "Consola" [ref=e3804] [cursor=pointer]:
+              - img [ref=e3805]
+              - generic [ref=e3807]: Consola
+            - button [ref=e3808] [cursor=pointer]:
+              - img [ref=e3809]
+          - generic [ref=e3822]:
+            - generic [ref=e3823]:
+              - button "GitHub" [ref=e3824] [cursor=pointer]:
+                - img [ref=e3825]
+              - button "Compartir" [ref=e3828] [cursor=pointer]:
+                - img [ref=e3829]
+            - button "Push to Cloud" [ref=e3835] [cursor=pointer]:
+              - generic [ref=e3837]: Push to Cloud
+        - generic [ref=e3839]:
+          - complementary "Panel de Chat Génesis" [ref=e3842]:
+            - generic [ref=e3843]:
+              - generic [ref=e3844]:
+                - button "Volver" [ref=e3845] [cursor=pointer]:
+                  - img [ref=e3846]
+                - heading "Proyecto" [level=2] [ref=e3852]
+              - button "Console" [ref=e3857] [cursor=pointer]:
+                - img [ref=e3858]
+                - text: Console
+            - generic [ref=e3860]:
+              - article "Tu mensaje" [ref=e3861]:
+                - generic [ref=e3862]: "[MODO: React + Vite + Tailwind + TypeScript] crea una landing simple para una pastelería artesanal \"Dulce Amanecer\" en Medellín. Hero con CTA, 3 productos destacados (croissant 4.500 COP, pan de queso 3.000 COP, torta tres leches 35.000 COP por porción), y sección de contacto con dirección y horario."
+                - time [ref=e3863]: 08:59 PM
+              - article "Mensaje de Génesis" [ref=e3947]:
+                - generic [ref=e3948]:
+                  - generic [ref=e3949]:
+                    - img [ref=e3951]
+                    - generic [ref=e3953]: Génesis AI
+                    - generic [ref=e3954]: V21
+                    - generic [ref=e3955]:
+                      - img [ref=e3956]
+                      - text: Código
+                  - generic [ref=e3959]:
+                    - generic [ref=e3960]: Código generado.
+                    - generic [ref=e3961]:
+                      - button "6 archivos generados" [ref=e3962] [cursor=pointer]:
+                        - generic [ref=e3963]:
+                          - img [ref=e3964]
+                          - text: 6 archivos generados
+                        - img [ref=e3968]
+                      - generic [ref=e3970]:
+                        - generic [ref=e3971]:
+                          - img [ref=e3972]
+                          - generic [ref=e3977]: src/App.tsx
+                        - generic [ref=e3978]:
+                          - img [ref=e3979]
+                          - generic [ref=e3984]: src/components/Hero.tsx
+                        - generic [ref=e3985]:
+                          - img [ref=e3986]
+                          - generic [ref=e3991]: src/components/Products.tsx
+                        - generic [ref=e3992]:
+                          - img [ref=e3993]
+                          - generic [ref=e3998]: src/components/Contact.tsx
+                        - generic [ref=e3999]:
+                          - img [ref=e4000]
+                          - generic [ref=e4005]: src/index.css
+                        - generic [ref=e4006]:
+                          - img [ref=e4007]
+                          - generic [ref=e4012]: package.json
+                      - button "+3 más" [ref=e4013] [cursor=pointer]
+                    - generic [ref=e4014]:
+                      - button "Copiar mensaje" [ref=e4015] [cursor=pointer]:
+                        - img [ref=e4016]
+                      - button "Reintentar" [ref=e4019] [cursor=pointer]:
+                        - img [ref=e4020]
+                  - navigation "Sugerencias" [ref=e4023]:
+                    - img [ref=e4025]
+                    - button "Agregar modo oscuro" [ref=e4027] [cursor=pointer]
+                    - button "Optimizar para móviles" [ref=e4028] [cursor=pointer]
+                    - button "Añadir animaciones" [ref=e4029] [cursor=pointer]
+                    - button "Agregar TypeScript strict" [ref=e4030] [cursor=pointer]
+            - contentinfo [ref=e3864]:
+              - generic [ref=e3866]:
+                - generic [ref=e3867]:
+                  - generic [ref=e3869]:
+                    - button "Adjuntar archivo o URL" [ref=e3871] [cursor=pointer]:
+                      - img [ref=e3872]
+                    - textbox "Describe lo que quieres construir..." [ref=e3874]
+                    - generic [ref=e3875]:
+                      - button "Dictado por voz" [ref=e3876] [cursor=pointer]:
+                        - img [ref=e3877]
+                      - button "Enviar mensaje" [disabled] [ref=e4031]:
+                        - img [ref=e4032]
+                  - generic [ref=e3883]:
+                    - generic [ref=e3884]:
+                      - button "PLAN" [ref=e3885] [cursor=pointer]:
+                        - img [ref=e3886]
+                        - text: PLAN
+                      - button "BUILD" [ref=e3888] [cursor=pointer]:
+                        - img [ref=e3889]
+                        - text: BUILD
+                    - button "Claude Sonnet 4.5" [ref=e3893] [cursor=pointer]:
+                      - img [ref=e3894]
+                      - generic [ref=e3897]: Claude Sonnet 4.5
+                      - img [ref=e3898]
+                - paragraph [ref=e3900]:
+                  - generic [ref=e3901]: Cmd+Enter para enviar
+                  - generic [ref=e3902]: ·
+                  - generic [ref=e3903]: Shift+Enter nueva línea
+                  - generic [ref=e3904]: ·
+                  - generic [ref=e3905]: Cmd+K nueva conversación
+          - generic [ref=e3906]:
+            - generic [ref=e4035]:
+              - generic [ref=e4036]:
+                - button "src/App.tsx" [ref=e4037] [cursor=pointer]:
+                  - img [ref=e4039]
+                  - generic [ref=e4041]: src/App.tsx
+                  - img [ref=e4042]
+                - button "src/components/Hero.tsx" [ref=e4045] [cursor=pointer]:
+                  - img [ref=e4046]
+                  - generic [ref=e4048]: src/components/Hero.tsx
+                  - img [ref=e4049]
+                - button "src/components/Products.tsx" [ref=e4052] [cursor=pointer]:
+                  - img [ref=e4053]
+                  - generic [ref=e4055]: src/components/Products.tsx
+                  - img [ref=e4056]
+                - button "src/components/Contact.tsx" [ref=e4059] [cursor=pointer]:
+                  - img [ref=e4060]
+                  - generic [ref=e4062]: src/components/Contact.tsx
+                  - img [ref=e4063]
+                - button "src/index.css" [ref=e4066] [cursor=pointer]:
+                  - img [ref=e4067]
+                  - generic [ref=e4069]: src/index.css
+                  - img [ref=e4070]
+                - button "package.json" [ref=e4073] [cursor=pointer]:
+                  - img [ref=e4074]
+                  - generic [ref=e4076]: package.json
+                  - img [ref=e4077]
+              - generic [ref=e4080]:
+                - generic [ref=e4081]:
+                  - generic [ref=e4082]: "1"
+                  - generic [ref=e4083]: "2"
+                  - generic [ref=e4084]: "3"
+                  - generic [ref=e4085]: "4"
+                  - generic [ref=e4086]: "5"
+                  - generic [ref=e4087]: "6"
+                  - generic [ref=e4088]: "7"
+                  - generic [ref=e4089]: "8"
+                  - generic [ref=e4090]: "9"
+                  - generic [ref=e4091]: "10"
+                  - generic [ref=e4092]: "11"
+                  - generic [ref=e4093]: "12"
+                  - generic [ref=e4094]: "13"
+                - generic [ref=e4095]:
+                  - code [ref=e4097]: "import { Hero } from './components/Hero';"
+                  - code [ref=e4099]: "import { Products } from './components/Products';"
+                  - code [ref=e4101]: "import { Contact } from './components/Contact';"
+                  - generic:
+                    - code
+                  - code [ref=e4103]: "export default function App() {"
+                  - code [ref=e4105]: return (
+                  - code [ref=e4107]: <div className="min-h-screen bg-[#FFF8F0]">
+                  - code [ref=e4109]: <Hero />
+                  - code [ref=e4111]: <Products />
+                  - code [ref=e4113]: <Contact />
+                  - code [ref=e4115]: </div>
+                  - code [ref=e4117]: );
+                  - code [ref=e4119]: "}"
+              - generic [ref=e4120]:
+                - generic [ref=e4121]:
+                  - generic [ref=e4122]:
+                    - img [ref=e4123]
+                    - generic [ref=e4126]: TSX
+                  - generic [ref=e4127]: UTF-8
+                - generic [ref=e4128]:
+                  - generic [ref=e4129]: Ln 1, Col 1
+                  - generic [ref=e4130] [cursor=pointer]:
+                    - img [ref=e4131]
+                    - generic [ref=e4134]: Prettier
+            - generic [ref=e3908]:
+              - generic [ref=e4140]:
+                - generic [ref=e4142]:
+                  - iframe [ref=e4143]:
+                    
+                  - generic [ref=e4144]:
+                    - button "Refresh preview" [ref=e4145] [cursor=pointer]:
+                      - img "Refresh preview" [ref=e4146]
+                    - button "Open on CodeSandbox Open Sandbox" [ref=e4148] [cursor=pointer]:
+                      - img "Open on CodeSandbox" [ref=e4149]
+                      - generic [ref=e4153]: Open Sandbox
+                - button "Ver Logs" [ref=e4154] [cursor=pointer]:
+                  - img [ref=e4155]
+                  - text: Ver Logs
+              - generic [ref=e3931]:
+                - generic [ref=e3932]:
+                  - button [ref=e3933] [cursor=pointer]:
+                    - img
+                  - generic [ref=e3935]: Génesis Studio / v21.0
+                - group [ref=e3937]:
+                  - radio "Vista" [checked] [ref=e3938] [cursor=pointer]:
+                    - img [ref=e3939]
+                    - text: Vista
+                  - radio "Código" [ref=e3941] [cursor=pointer]:
+                    - img [ref=e3942]
+                    - text: Código

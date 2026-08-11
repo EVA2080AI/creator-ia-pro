@@ -1,0 +1,6 @@
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - status [ref=e3]:
+    - generic [ref=e4]:
+      - img [ref=e6]
+      - generic [ref=e8]: Cargando plataforma...

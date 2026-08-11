@@ -17,8 +17,10 @@ import {
   MoreHorizontal, Globe, BarChart2, Columns, Cloud,
   Map, ArrowUp, ArrowRight, Layers, X, ArrowLeft,
   PanelLeft, PanelLeftClose, Phone, RefreshCw, Database,
-  AlertTriangle,
+  AlertTriangle, FileCode2, Atom,
 } from 'lucide-react';
+
+type BuildMode = 'react' | 'html';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
 import { StudioPreview } from '@/components/studio/StudioPreview';
@@ -100,7 +102,7 @@ const STARTER_PROMPTS = [
 type WelcomeTab = 'projects' | 'recents' | 'templates';
 
 interface WelcomeScreenProps {
-  onPrompt: (prompt: string) => void;
+  onPrompt: (prompt: string, opts?: { mode?: BuildMode }) => void;
   onCreateProject: () => void;
   creating: boolean;
   projects: StudioProject[];
@@ -133,8 +135,18 @@ function WelcomeScreen({
   const [search, setSearch] = useState('');
   const [templateCategory, setTemplateCategory] = useState<TemplateCategory | 'all'>('all');
   const [templateSearch, setTemplateSearch] = useState('');
+  const [buildMode, setBuildMode] = useState<BuildMode>(() => {
+    if (typeof window === 'undefined') return 'react';
+    const saved = window.localStorage.getItem('genesis-build-mode');
+    return saved === 'html' || saved === 'react' ? saved : 'react';
+  });
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('genesis-build-mode', buildMode);
+    }
+  }, [buildMode]);
 
   const handleTextareaInput = (e: React.FormEvent<HTMLTextAreaElement>) => {
     const t = e.currentTarget;
@@ -144,7 +156,7 @@ function WelcomeScreen({
 
   const handleSubmit = (val?: string) => {
     const text = (val ?? input).trim();
-    if (text) onPrompt(text);
+    if (text) onPrompt(text, { mode: buildMode });
   };
 
   const filteredProjects = projects.filter(p =>
@@ -176,8 +188,8 @@ function WelcomeScreen({
           </div>
         </header>
 
-        {/* Clean Background - Subtle gradient only */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none bg-gradient-to-b from-zinc-50/50 via-white to-white" />
+        {/* Premium Genesis Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none genesis-panel-background mask-radial-faded" />
 
         {/* Centered content */}
         <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-40 pb-32 pointer-events-none">
@@ -186,8 +198,8 @@ function WelcomeScreen({
           </h1>
 
           {/* Input Box */}
-          <div className="w-full max-w-3xl relative z-20 pointer-events-auto">
-            <div className="relative rounded-[28px] overflow-hidden shadow-2xl transition-all border border-zinc-200 bg-white shadow-zinc-200/50">
+          <div className="w-full max-w-3xl relative z-20 pointer-events-auto group">
+            <div className="relative rounded-[28px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.06)] transition-all border border-white/60 bg-white/70 backdrop-blur-2xl group-hover:shadow-[0_12px_50px_rgba(0,0,0,0.08)]">
               
               <button 
                 onClick={() => document.getElementById('welcome-file-input')?.click()}
@@ -228,8 +240,8 @@ function WelcomeScreen({
                   onClick={() => handleSubmit()}
                   disabled={!input.trim() || creating}
                   aria-label="Enviar prompt y crear proyecto"
-                  className="flex items-center justify-center h-10 w-10 rounded-full text-white disabled:opacity-30 transition-all active:scale-95 shadow-md"
-                  style={{ background: input.trim() && !creating ? 'hsl(var(--primary))' : 'hsl(var(--border))' }}
+                  className="flex items-center justify-center h-10 w-10 rounded-full text-white disabled:opacity-30 transition-all active:scale-95 shadow-brand"
+                  style={{ background: input.trim() && !creating ? 'linear-gradient(135deg, hsl(var(--primary)), #2563eb)' : 'hsl(var(--border))' }}
                 >
                   {creating ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <ArrowUp className="h-5 w-5" aria-hidden="true" />}
                 </button>
@@ -237,8 +249,41 @@ function WelcomeScreen({
             </div>
 
             {/* Model Selector + Plan Badge — OUTSIDE overflow-hidden so dropdown renders */}
-            <div className="flex items-center gap-3 mt-3 px-2">
+            <div className="flex items-center gap-3 mt-3 px-2 flex-wrap">
               <ModelSelector selectedModel={selectedModel} onSelect={onModelSelect} />
+
+              {/* Build mode toggle: React vs HTML */}
+              <div className="flex items-center p-0.5 rounded-xl bg-white/70 border border-zinc-200 backdrop-blur-sm shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setBuildMode('react')}
+                  aria-pressed={buildMode === 'react'}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                    buildMode === 'react'
+                      ? 'bg-zinc-900 text-white shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-800'
+                  }`}
+                  title="Genera un proyecto React + Vite + Tailwind"
+                >
+                  <Atom className="h-3 w-3" />
+                  React
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBuildMode('html')}
+                  aria-pressed={buildMode === 'html'}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+                    buildMode === 'html'
+                      ? 'bg-orange-500 text-white shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-800'
+                  }`}
+                  title="Genera un sitio HTML + CSS + JS en un solo archivo"
+                >
+                  <FileCode2 className="h-3 w-3" />
+                  HTML
+                </button>
+              </div>
+
               <div className="h-4 w-px bg-zinc-200" />
               <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border shadow-sm ${
                 subscriptionTier === 'free' ? 'bg-white border-zinc-200' :
@@ -260,9 +305,9 @@ function WelcomeScreen({
           </div>
         </div>
 
-        {/* Bottom Panel — Simplified */}
+        {/* Bottom Panel — Premium Aether */}
         <div className="absolute bottom-0 left-0 right-0 flex justify-center px-4 w-full h-[260px]">
-          <div className="w-full max-w-5xl rounded-t-[32px] overflow-hidden flex relative z-30 bg-white border-t border-zinc-200 shadow-[0_-20px_60px_rgba(0,0,0,0.08)]">
+          <div className="w-full max-w-5xl rounded-t-[2rem] overflow-hidden flex relative z-30 aether-glass border-t border-white/60 shadow-[0_-20px_60px_rgba(0,0,0,0.04)] backdrop-blur-3xl">
 
             {/* Side Navigation — Slimmer */}
             <aside className="w-[160px] border-r border-zinc-100 bg-zinc-50/30 flex flex-col pt-6 px-3 shrink-0">
@@ -302,7 +347,7 @@ function WelcomeScreen({
             </aside>
 
             {/* Main Content Area */}
-            <main className="flex-1 flex flex-col min-w-0 bg-white">
+            <main className="flex-1 flex flex-col min-w-0 bg-transparent">
                {/* Action Header */}
                <div className="flex items-center justify-between px-6 pt-6 pb-4 shrink-0">
                   <div className="flex items-center gap-2">
@@ -329,7 +374,7 @@ function WelcomeScreen({
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                       {filteredProjects.map(p => (
                         <button key={p.id} onClick={() => onSelectProject(p)}
-                          className="flex flex-col gap-2 p-3 rounded-xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all group relative">
+                          className="flex flex-col gap-2 p-3 rounded-[1.25rem] text-left border border-white/60 bg-white/50 backdrop-blur-sm hover:bg-white/80 hover:shadow-md transition-all duration-300 group relative">
                           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
                             <Code2 className="h-3.5 w-3.5 text-primary" />
                           </div>
@@ -355,8 +400,8 @@ function WelcomeScreen({
                         .sort((a, b) => new Date(b.updated_at ?? b.created_at ?? 0).getTime() - new Date(a.updated_at ?? a.created_at ?? 0).getTime())
                         .slice(0, 10)
                         .map(p => (
-                          <button key={p.id} onClick={() => onSelectProject(p)}
-                            className="flex flex-col gap-2 p-3 rounded-xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all group relative">
+                            <button key={p.id} onClick={() => onSelectProject(p)}
+                              className="flex flex-col gap-2 p-3 rounded-[1.25rem] text-left border border-white/60 bg-white/50 backdrop-blur-sm hover:bg-white/80 hover:shadow-md transition-all duration-300 group relative">
                             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
                               <Clock className="h-3.5 w-3.5 text-primary" />
                             </div>
@@ -450,7 +495,7 @@ function WelcomeScreen({
                             <button
                               key={t.id}
                               onClick={() => handleSubmit(t.prompt)}
-                              className="group flex flex-col gap-2 p-3 rounded-xl text-left border border-zinc-200 bg-white hover:bg-zinc-50 hover:border-zinc-300 transition-all relative overflow-hidden"
+                              className="group flex flex-col gap-2 p-3 rounded-[1.25rem] text-left border border-white/60 bg-white/50 backdrop-blur-sm hover:bg-white/80 hover:shadow-md transition-all duration-300 relative overflow-hidden"
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex items-center gap-2">
@@ -525,7 +570,32 @@ export default function Chat() {
   const [pendingFile, setPendingFile] = useState<{name: string, content: string} | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
-  const [selectedModel, setSelectedModel] = useState('google/gemini-2.0-flash-001');
+  const [selectedModel, setSelectedModel] = useState<string>(() => {
+    if (typeof window === 'undefined') return 'anthropic/claude-sonnet-4-5';
+    const saved = window.localStorage.getItem('genesis-selected-model');
+    return saved || 'anthropic/claude-sonnet-4-5';
+  });
+
+  // Persist model choice + auto-downgrade to free Gemini when free user runs out of credits
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('genesis-selected-model', selectedModel);
+    }
+  }, [selectedModel]);
+
+  useEffect(() => {
+    if (!profile) return;
+    const tier = profile.subscription_tier ?? 'free';
+    const credits = profile.credits_balance ?? 0;
+    const saved = typeof window !== 'undefined' ? window.localStorage.getItem('genesis-selected-model') : null;
+    // First load only: if user never picked a model, set tier-appropriate default
+    if (!saved) {
+      const next = tier === 'free' || credits <= 0
+        ? 'google/gemini-2.0-flash-001'
+        : 'anthropic/claude-sonnet-4-5';
+      setSelectedModel(next);
+    }
+  }, [profile]);
 
   // --- Lifted Engineering State ---
   const [artifacts, setArtifacts] = useState<UIArtifact[]>([]);
@@ -603,15 +673,17 @@ export default function Chat() {
     setActiveProject(p => p ? { ...p, name } : p);
   }, [activeProject, renameProject, setActiveProject]);
 
-  const handleWelcomePrompt = async (prompt: string) => {
+  const handleWelcomePrompt = async (prompt: string, opts?: { mode?: BuildMode }) => {
     const p = (prompt || "").toLowerCase().trim();
     const GREETINGS = ['hola', 'hi', 'hello', 'buenos dias', 'buenas tardes', 'buenas noches', 'saludos', 'hey', 'buenas'];
-    
+
     // 1. Detect simple greetings to avoid "hola" projects
     if (GREETINGS.includes(p) || p.length < 3) {
       toast("¡Hola! 👋 ¿Qué quieres construir hoy? Describe tu idea para empezar.");
       return;
     }
+
+    const mode: BuildMode = opts?.mode ?? 'react';
 
     setCreatingWithPrompt(true);
 
@@ -649,6 +721,14 @@ export default function Chat() {
     let finalPrompt = prompt;
     if (pendingFile) {
       finalPrompt = `[CONTRATO/CONTEXTO DE ARCHIVO: ${pendingFile.name}]\n\`\`\`\n${pendingFile.content}\n\`\`\`\n\n${prompt || "Analiza este archivo y construye un proyecto basado en él."}`;
+    }
+
+    // Tag the prompt with the build mode so the AI router picks the right path
+    // (vanilla-html vs React+Vite+Tailwind). Keys are detected by detectIntent.
+    if (mode === 'html') {
+      finalPrompt = `[MODO: HTML puro — sin React, sin JSX, genera index.html con CSS y JS inline. Usa Tailwind CDN si conviene.]\n\n${finalPrompt}`;
+    } else {
+      finalPrompt = `[MODO: React + Vite + Tailwind + TypeScript]\n\n${finalPrompt}`;
     }
 
     // 2. Improved Automated Naming (avoid stop words at start)
@@ -1016,7 +1096,7 @@ export default function Chat() {
 
   return (
     <IDEErrorBoundary onReset={() => setActiveProject(null)}>
-    <div className="flex flex-col h-full overflow-hidden bg-background relative"
+    <div className="flex flex-col h-full overflow-hidden genesis-panel-background relative"
       onDrop={handleWorkspaceDrop}
       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
@@ -1046,6 +1126,19 @@ export default function Chat() {
             </IDEErrorBoundary>
           </div>
         </div>
+
+        {/* Floating collapse handle — anclado en el borde entre chat y canvas */}
+        <button
+          onClick={() => setIsChatOpen(!isChatOpen)}
+          aria-label={isChatOpen ? 'Colapsar chat' : 'Expandir chat'}
+          title={isChatOpen ? 'Colapsar chat (más espacio para preview)' : 'Expandir chat'}
+          className="absolute top-1/2 -translate-y-1/2 z-40 h-14 w-5 flex items-center justify-center rounded-r-lg bg-white/90 border border-l-0 border-zinc-200 shadow-md hover:bg-white hover:shadow-lg transition-all group"
+          style={{ left: isChatOpen ? '440px' : '0px', transition: 'left 350ms cubic-bezier(0.4, 0, 0.2, 1), background 200ms' }}
+        >
+          {isChatOpen
+            ? <PanelLeftClose className="h-3 w-3 text-zinc-500 group-hover:text-zinc-900" />
+            : <PanelLeft className="h-3 w-3 text-zinc-500 group-hover:text-zinc-900" />}
+        </button>
 
         {/* Canvas */}
         <div className="flex flex-col min-w-0 h-full overflow-hidden relative">

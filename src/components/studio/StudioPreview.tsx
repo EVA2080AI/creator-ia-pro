@@ -17,6 +17,7 @@ import type { StudioFile } from '@/hooks/useStudioProjects';
 import type { SupabaseConfig } from './StudioCloud';
 import { StudioViewToolbar } from './StudioViewToolbar';
 import { toSandpackFiles } from './utils/sandpack-simple';
+import { SHADCN_DEPENDENCIES } from './utils/shadcn-base';
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 
@@ -216,12 +217,17 @@ export function StudioPreview({
               theme="light"
               customSetup={{
                 dependencies: {
+                  // React core — explícito porque customSetup.dependencies
+                  // sobreescribe los defaults del template react-ts cuando
+                  // se declara cualquier dep
+                  "react": "^18.0.0",
+                  "react-dom": "^18.0.0",
                   "lucide-react": "latest",
                   "framer-motion": "latest",
                   "recharts": "latest",
                   "date-fns": "latest",
-                  "clsx": "latest",
-                  "tailwind-merge": "latest"
+                  // shadcn/ui base (Radix + cva + clsx + tailwind-merge)
+                  ...SHADCN_DEPENDENCIES,
                 }
               }}
               options={{ 
@@ -273,18 +279,20 @@ export function StudioPreview({
                     )}
                     {viewMode === 'preview' && (
                       <div className="flex-1 flex flex-col relative w-full h-full">
-                        <SandpackPreview 
-                          showOpenInCodeSandbox={true} 
-                          showRefreshButton={true} 
+                        <PreviewUrlBar files={files} />
+                        <SandpackPreview
+                          showOpenInCodeSandbox={false}
+                          showRefreshButton={false}
+                          showNavigator={false}
                           showSandpackErrorOverlay={true}
-                          style={{ flex: showConsole ? '0 0 60%' : '1 1 100%', background: 'transparent' }} 
+                          style={{ flex: showConsole ? '0 0 60%' : '1 1 100%', background: 'transparent' }}
                         />
                         {showConsole && (
                           <div className="flex-shrink-0 h-[40%] bg-zinc-950 border-t border-zinc-200/50 overflow-hidden">
                             <SandpackConsole style={{ height: '100%', background: 'transparent' }} />
                           </div>
                         )}
-                        <button 
+                        <button
                           onClick={() => setShowConsole(!showConsole)}
                           className="absolute bottom-4 right-4 z-50 bg-zinc-900 text-white px-3 py-2 text-[10px] uppercase tracking-widest font-bold rounded-xl shadow-lg shadow-black/20 flex items-center gap-2 hover:bg-zinc-800 transition-colors"
                         >
@@ -352,4 +360,97 @@ function SandpackErrorBridge({
   }, [sandpack?.status, sandpack?.error, onError, onStatusChange]);
 
   return null;
+}
+
+/**
+ * URL bar above the preview — permite navegar entre rutas del sandbox
+ * sin tener que clicker dentro del iframe. Quick-nav buttons para rutas
+ * detectadas en App.tsx.
+ *
+ * Funciona vía postMessage: main.tsx del sandbox escucha GENESIS_NAVIGATE
+ * y dispara history.pushState + popstate. Cross-origin safe.
+ */
+function PreviewUrlBar({ files }: { files: Record<string, StudioFile> }) {
+  const { sandpack } = useSandpack();
+  const [currentPath, setCurrentPath] = useState('/');
+  const [input, setInput] = useState('/');
+
+  // Detectar rutas del App.tsx para mostrar quick-nav buttons
+  const detectedRoutes = useMemo(() => {
+    const app = files['App.tsx'] ?? files['src/App.tsx'];
+    if (!app?.content) return [];
+    const re = /<Route\s+path=["']([^"']+)["']/gi;
+    const routes: string[] = [];
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(app.content)) !== null) {
+      const p = m[1];
+      if (p && p !== '*' && !routes.includes(p)) routes.push(p);
+    }
+    return routes.slice(0, 5);
+  }, [files]);
+
+  // Escuchar cambios de ruta dentro del iframe (postMessage del sandbox)
+  useEffect(() => {
+    const handler = (e: MessageEvent) => {
+      if (e.data?.type === 'GENESIS_ROUTE_CHANGED' && typeof e.data.path === 'string') {
+        setCurrentPath(e.data.path);
+        setInput(e.data.path);
+      }
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, []);
+
+  const navigate = (path: string) => {
+    if (!path.startsWith('/')) path = '/' + path;
+    const iframe = sandpack?.clients?.[Object.keys(sandpack.clients)[0]]?.iframe;
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'GENESIS_NAVIGATE', path }, '*');
+    }
+    setInput(path);
+  };
+
+  const reload = () => {
+    const iframe = sandpack?.clients?.[Object.keys(sandpack.clients)[0]]?.iframe;
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage({ type: 'GENESIS_RELOAD' }, '*');
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1.5 px-3 py-2 border-b border-zinc-200 bg-zinc-50/70 backdrop-blur-md shrink-0">
+      <button onClick={reload} className="h-7 w-7 rounded-md hover:bg-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-900 transition-colors" title="Recargar">
+        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /><path d="M21 3v5h-5" /><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /><path d="M8 16H3v5" /></svg>
+      </button>
+      <form
+        onSubmit={(e) => { e.preventDefault(); navigate(input); }}
+        className="flex-1 flex items-center gap-2 px-3 h-7 rounded-md bg-white border border-zinc-200 focus-within:border-primary/40"
+      >
+        <span className="text-[10px] text-zinc-400 font-mono">localhost</span>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          className="flex-1 bg-transparent text-[12px] font-mono text-zinc-700 outline-none placeholder:text-zinc-400"
+          placeholder="/"
+        />
+        {input !== currentPath && (
+          <button type="submit" className="text-[10px] font-bold text-primary uppercase tracking-wider">Ir →</button>
+        )}
+      </form>
+      {detectedRoutes.length > 0 && (
+        <div className="hidden md:flex items-center gap-1">
+          {detectedRoutes.map((route) => (
+            <button
+              key={route}
+              onClick={() => navigate(route)}
+              className={`px-2 h-7 rounded-md text-[11px] font-medium transition-colors ${currentPath === route ? 'bg-zinc-900 text-white' : 'bg-white border border-zinc-200 text-zinc-600 hover:bg-zinc-100'}`}
+              title={`Navegar a ${route}`}
+            >
+              {route}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }

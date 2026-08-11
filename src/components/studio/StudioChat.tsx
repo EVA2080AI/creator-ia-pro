@@ -91,7 +91,7 @@ function StudioProjectHeader({
   const isActive = agentPhase !== 'idle';
 
   return (
-    <header className="shrink-0 h-[52px] border-b border-zinc-100 px-3 flex items-center justify-between z-30 sticky top-0 bg-white/80 backdrop-blur-xl">
+    <header className="shrink-0 h-[52px] border-b border-white/60 px-3 flex items-center justify-between z-30 sticky top-0 bg-white/40 backdrop-blur-3xl shadow-[0_4px_30px_rgba(0,0,0,0.02)]">
       {/* Left */}
       <div className="flex items-center gap-2 overflow-hidden min-w-0">
         <button
@@ -181,12 +181,13 @@ export function StudioChat({
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
   const [pendingContext, setPendingContext] = useState<{ name: string; content: string } | null>(null);
-  const [selectedModel, setSelectedModel] = useState(initialModel || 'google/gemini-2.0-flash-001');
+  const [selectedModel, setSelectedModel] = useState(initialModel || 'anthropic/claude-sonnet-4-5');
   const [isArchitectMode, setIsArchitectMode] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [isScraping, setIsScraping] = useState(false);
   const [isAutoFixing, setIsAutoFixing] = useState(false);
+  const [streamedFiles, setStreamedFiles] = useState<string[]>([]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -251,8 +252,16 @@ export function StudioChat({
     subscriptionTier,
     onPhaseChange,
     onStreamCharsChange,
-    onGeneratingChange
+    onGeneratingChange,
+    onFileStream: useCallback((path: string) => {
+      setStreamedFiles((prev) => (prev.includes(path) ? prev : [...prev, path]));
+    }, []),
   });
+
+  // Reset stream file tracker when generation starts/stops
+  useEffect(() => {
+    if (genPhase === 'thinking') setStreamedFiles([]);
+  }, [genPhase]);
 
   // ─── PERSISTENCE Helper ───────────────────────────────────────────────────
   const saveMessage = useCallback(async (role: 'user' | 'assistant', content: string) => {
@@ -512,7 +521,7 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
 
   return (
     <aside 
-      className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-white selection:bg-primary/20 overflow-hidden"
+      className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-white/40 backdrop-blur-3xl selection:bg-primary/20 overflow-hidden"
       aria-label="Panel de Chat Génesis"
     >
       {/* Structural Neural Overlays */}
@@ -561,7 +570,7 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
                <Sparkles className="h-3.5 w-3.5 text-primary relative z-10" />
             </div>
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-3 px-4 py-3 rounded-2xl rounded-tl-sm bg-white border border-zinc-100 shadow-sm">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-2xl rounded-tl-sm bg-white/60 border border-white/60 shadow-[0_4px_20px_rgba(0,0,0,0.04)] backdrop-blur-md">
                 <div className="flex gap-1.5">
                   {[0, 1, 2].map(i => (
                     <motion.span
@@ -613,7 +622,7 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
               )}
             </div>
 
-            <div className="w-full max-w-[97%] bg-white border border-zinc-100 shadow-xl shadow-black/[0.02] rounded-[1.5rem] rounded-tl-sm px-4 md:px-5 py-5 relative overflow-hidden group">
+            <div className="w-full max-w-[97%] bg-white/70 backdrop-blur-xl border border-white/80 shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-[1.5rem] rounded-tl-sm px-4 md:px-5 py-5 relative overflow-hidden group">
               {/* PROGRESS BAR (CYBER INDUSTRIAL) */}
               {genPhase === 'streaming' && (
                 <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-zinc-50 overflow-hidden">
@@ -626,13 +635,40 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
               )}
 
               <div className="result-prose text-[13px] text-zinc-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderMarkdown(streamingContent) }} />
-              
+
               {genPhase === 'streaming' && (
-                <motion.span 
+                <motion.span
                   animate={{ opacity: [1, 0] }}
                   transition={{ duration: 0.8, repeat: Infinity }}
-                  className="inline-block h-3.5 w-1.5 ml-1 align-baseline rounded-sm bg-primary/40 shadow-[0_0_5px_rgba(var(--primary-rgb),0.3)]" 
+                  className="inline-block h-3.5 w-1.5 ml-1 align-baseline rounded-sm bg-primary/40 shadow-[0_0_5px_rgba(var(--primary-rgb),0.3)]"
                 />
+              )}
+
+              {/* Live file stream — archivos completándose en tiempo real */}
+              {streamedFiles.length > 0 && (
+                <div className="mt-4 pt-3 border-t border-zinc-100 space-y-1.5">
+                  <div className="flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                    <span className="relative flex h-1.5 w-1.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
+                    </span>
+                    {streamedFiles.length} archivo{streamedFiles.length === 1 ? '' : 's'} listo{streamedFiles.length === 1 ? '' : 's'}
+                  </div>
+                  <ul className="space-y-0.5 max-h-32 overflow-y-auto custom-scrollbar">
+                    {streamedFiles.map((path, i) => (
+                      <motion.li
+                        key={path}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.2, delay: i === streamedFiles.length - 1 ? 0 : 0 }}
+                        className="font-mono text-[10.5px] text-zinc-500 flex items-center gap-1.5"
+                      >
+                        <span className="text-emerald-500">✓</span>
+                        <span className="truncate">{path}</span>
+                      </motion.li>
+                    ))}
+                  </ul>
+                </div>
               )}
             </div>
           </div>
