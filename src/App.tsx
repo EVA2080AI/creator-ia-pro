@@ -91,7 +91,6 @@ const Tools        = lazy(() => import("./pages/Tools"));
 const Admin        = lazy(() => import("./pages/Admin"));
 const Formarketing = lazy(() => import("./pages/Formarketing"));
 const Profile      = lazy(() => import("./pages/Profile"));
-const Antigravity  = lazy(() => import("./pages/Antigravity"));
 const Chat         = lazy(() => import("./pages/Chat"));
 const ShareScreen  = lazy(() => import("./pages/ShareScreen"));
 const SystemStatus = lazy(() => import("./pages/SystemStatus"));
@@ -203,7 +202,8 @@ const App = () => {
                     <Route path="/formarketing" element={<Navigate to="/studio-flow" replace />} />
                     <Route path="/profile"      element={<Profile />} />
                     <Route path="/hub"          element={<Navigate to="/spaces" replace />} />
-                    <Route path="/antigravity"  element={<Antigravity />} />
+                    {/* Antigravity se fusionó dentro de Genesis — mismo motor (StudioChat) sin la piel cosmética. */}
+                    <Route path="/antigravity"  element={<Navigate to="/chat" replace />} />
                     <Route path="/chat"         element={<Chat />} />
                     <Route path="/sharescreen"  element={<ShareScreen />} />
                     <Route path="/system-status" element={<SystemStatus />} />

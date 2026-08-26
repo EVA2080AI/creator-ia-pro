@@ -32,7 +32,35 @@ export function wantsVanillaHtml(text: string): boolean {
   return vanillaKeywords.some(k => p.includes(k));
 }
 
-export type ChatIntent = 'chat' | 'codegen' | 'fullstack' | 'vanilla-html' | 'html-import' | 'reasoning';
+export type ChatIntent = 'chat' | 'codegen' | 'fullstack' | 'vanilla-html' | 'html-import' | 'reasoning' | 'image';
+
+// Sustantivos que indican que el usuario quiere una imagen (no un componente que
+// use una imagen — por eso se combinan con un verbo de creación, igual que
+// LANDING_KEYWORDS + CREATION_VERBS más abajo).
+const IMAGE_NOUNS = [
+  'imagen', 'imágenes', 'logo', 'logotipo', 'icono', 'ícono', 'ilustracion', 'ilustración',
+  'foto', 'fotografia', 'fotografía', 'avatar', 'banner', 'poster', 'póster', 'wallpaper',
+  'mockup visual', 'arte digital', 'dibujo', 'dibuja', 'pinta', 'pintura', 'render de',
+];
+const IMAGE_CREATION_VERBS = ['crea', 'creame', 'créame', 'haz', 'hazme', 'genera', 'generame', 'genérame', 'diseña', 'dibuja', 'dame'];
+
+// Si el prompt trae estas señales, la imagen es un ELEMENTO dentro de algo más
+// grande (landing, componente, app) — se deja pasar a codegen/fullstack en vez
+// de generar una imagen suelta.
+const CODE_CONTEXT_EXCLUSIONS = [
+  'landing', 'pagina', 'página', 'sitio web', 'website', 'componente', 'component',
+  'formulario', 'dashboard', 'app', 'aplicacion', 'aplicación', 'seccion', 'sección',
+  'de fondo', 'background', 'hero', 'navbar', 'header',
+];
+
+/** true si el prompt pide claramente generar una imagen (no un componente con imágenes). */
+function wantsImageGeneration(p: string): boolean {
+  if (!IMAGE_NOUNS.some((n) => p.includes(n))) return false;
+  if (CODE_CONTEXT_EXCLUSIONS.some((k) => p.includes(k))) return false;
+  const hasCreationVerb = IMAGE_CREATION_VERBS.some((v) => p.includes(v));
+  const hasImagePreposition = /\b(imagen|logo|logotipo|icono|ícono|foto|avatar|banner|ilustraci[oó]n)\s+(de|para)\b/.test(p);
+  return hasCreationVerb || hasImagePreposition;
+}
 
 export function detectIntent(prompt: string, _hasContext?: boolean): ChatIntent {
   let p = prompt.toLowerCase().trim();
@@ -40,6 +68,9 @@ export function detectIntent(prompt: string, _hasContext?: boolean): ChatIntent 
   // Normalization - common typos
   p = p.replace(/apagina/g, 'pagina').replace(/asuna/g, 'una')
        .replace(/hasme/g, 'hazme').replace(/has un/g, 'haz un').replace(/has una/g, 'haz una');
+
+  // Generación de imagen — se revisa temprano para que no caiga en codegen genérico.
+  if (wantsImageGeneration(p)) return 'image';
 
   // Check for reasoning mode - user wants Genesis to think first
   const REASONING_KEYWORDS = [

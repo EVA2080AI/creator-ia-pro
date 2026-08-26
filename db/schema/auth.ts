@@ -195,6 +195,9 @@ export const profile = pgTable("profile", {
   creditsBalance: integer("credits_balance").notNull().default(5),
   subscriptionTier: text("subscription_tier").notNull().default("free"),
   isAdmin: boolean("is_admin").notNull().default(false),
+  /** Límite diario de mensajes en modelos "eco" (0 créditos) — ver api/_lib/credits.ts consumeFreeMessage. */
+  freeMsgCount: integer("free_msg_count").notNull().default(0),
+  freeMsgResetAt: timestamp("free_msg_reset_at").notNull().defaultNow(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

@@ -345,7 +345,16 @@ export function StudioChat({
 
       let assistantMsg: Message;
 
-      if (intent === 'reasoning') {
+      if (result.generatedImageUrl) {
+        assistantMsg = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: result.explanation || 'Imagen generada.',
+          timestamp: new Date(),
+          type: 'image',
+          generatedImageUrl: result.generatedImageUrl,
+        };
+      } else if (intent === 'reasoning') {
         // Reasoning mode - always show as reasoning type
         assistantMsg = {
           id: crypto.randomUUID(),

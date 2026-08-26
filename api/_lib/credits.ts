@@ -30,6 +30,30 @@ export async function refundCredits(userId: string, amount: number): Promise<num
   return rows.rows[0]?.credits_balance ?? null;
 }
 
+/** Añade créditos por una compra confirmada (Bold) o un otorgamiento de admin. Misma operación que
+ * refundCredits — nombre propio para que la intención sea clara en api/billing/*. */
+export const addCredits = refundCredits;
+
+/** Límite diario de mensajes gratis (modelos `eco`, 0 créditos) — sin esto, cualquier
+ * usuario/plan free genera costo real ilimitado en OpenRouter con ingreso cero. */
+export const FREE_DAILY_MESSAGE_LIMIT = 30;
+
+/** Cuenta un mensaje gratis contra el límite diario. Devuelve el conteo nuevo, o null si ya se alcanzó el límite. */
+export async function consumeFreeMessage(userId: string, limit = FREE_DAILY_MESSAGE_LIMIT): Promise<number | null> {
+  const db = getDb();
+  const rows = await db.execute<{ free_msg_count: number }>(sql`
+    UPDATE profile
+    SET
+      free_msg_count = CASE WHEN now() - free_msg_reset_at > interval '1 day' THEN 1 ELSE free_msg_count + 1 END,
+      free_msg_reset_at = CASE WHEN now() - free_msg_reset_at > interval '1 day' THEN now() ELSE free_msg_reset_at END,
+      updated_at = now()
+    WHERE user_id = ${userId}
+      AND (now() - free_msg_reset_at > interval '1 day' OR free_msg_count < ${limit})
+    RETURNING free_msg_count
+  `);
+  return rows.rows[0]?.free_msg_count ?? null;
+}
+
 export async function getBalance(userId: string): Promise<number | null> {
   const db = getDb();
   const rows = await db.execute<{ credits_balance: number }>(sql`

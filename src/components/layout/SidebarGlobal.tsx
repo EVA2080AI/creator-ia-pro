@@ -5,7 +5,7 @@ import {
   LayoutTemplate, Brain, FolderOpen, Image, Download,
   Coins, LogOut, User, Shield, Zap, Settings, CreditCard, Sparkles,
   PanelLeftClose, PanelLeftOpen, List, Code2,
-  Home, LayoutGrid, ShieldCheck, Activity, Bot,
+  Home, LayoutGrid, ShieldCheck, Activity,
   Users2, Palette, ListTodo, type LucideIcon
 } from 'lucide-react';
 
@@ -55,7 +55,6 @@ const NAV_MAIN: NavItemDef[] = [
   { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'pro' },
   { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'pro' },
   { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     minTier: 'free' },
-  { path: '/antigravity',  label: 'Antigravity',   icon: Bot,            minTier: 'pyme' },
 ];
 
 const NAV_SYSTEM: NavItemDef[] = [

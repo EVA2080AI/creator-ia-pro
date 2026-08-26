@@ -9,7 +9,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { eq } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { getSessionUser, getProfile } from "../_lib/session.js";
-import { spendCredits, refundCredits } from "../_lib/credits.js";
+import { spendCredits, refundCredits, consumeFreeMessage, FREE_DAILY_MESSAGE_LIMIT } from "../_lib/credits.js";
 import { CHAT_MODELS, DEFAULT_MODEL_ID, canAccessModel, getModel } from "../../src/lib/ai/models.js";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -67,6 +67,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const newBalance = await spendCredits(user.userId, cost);
     if (newBalance === null) {
       res.status(402).json({ ok: false, code: "INSUFFICIENT_CREDITS", error: "No tienes créditos suficientes." });
+      return;
+    }
+  } else {
+    // Modelos eco (0 créditos) sí cuestan dinero real en OpenRouter — sin este tope,
+    // el costo por usuario/plan free no tiene límite mientras el ingreso es cero.
+    const newCount = await consumeFreeMessage(user.userId);
+    if (newCount === null) {
+      res.status(429).json({
+        ok: false,
+        code: "FREE_LIMIT_REACHED",
+        error: `Alcanzaste el límite de ${FREE_DAILY_MESSAGE_LIMIT} mensajes gratis por hoy. Vuelve mañana o mejora tu plan para seguir sin límite.`,
+      });
       return;
     }
   }

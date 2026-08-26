@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { boldService } from "@/services/billing-service";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
 import { CATEGORY_CONFIG } from "@/lib/models.config";
@@ -236,18 +236,11 @@ function SectionHeader({ badge, title, subtitle }: { badge: string; title: strin
 
 export default function Pricing() {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userId, setUserId] = useState<string | undefined>();
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [annual, setAnnual] = useState(false);
   const [estimateSlider, setEstimateSlider] = useState(500);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-      setUserId(session?.user?.id);
-    });
-  }, []);
 
   const handleBoldAction = async (id: string) => {
     if (!isLoggedIn) {

@@ -115,6 +115,49 @@ export function useStudioChatAI({
     const intent = hasImage && !prompt.trim() ? 'codegen' : detectIntent(prompt);
     setCurrentGenIntent(intent === 'chat' ? 'chat' : intent === 'reasoning' ? 'reasoning' : 'codegen');
 
+    // Generación de imagen — corta el flujo de codegen por completo, ver api/ai/image.ts.
+    if (intent === 'image') {
+      setGenPhase('streaming');
+      setGenSpecialist('none');
+      onPhaseChange?.('generating', 'none');
+      try {
+        const res = await fetch('/api/ai/image', {
+          method: 'POST',
+          signal,
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt, imagePrompt: options?.pendingImage || undefined }),
+        });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data?.ok) {
+          throw new Error(data?.error || `Error ${res.status} generando la imagen`);
+        }
+        setGenPhase('done');
+        setTimeout(() => {
+          setIsGenerating(false);
+          onGeneratingChange?.(false);
+          setGenPhase('idle');
+          setGenSpecialist('none');
+          onPhaseChange?.('idle', 'none');
+        }, 100);
+        return {
+          files: {},
+          explanation: `Imagen generada: "${prompt}"`,
+          isChatOnly: true,
+          stack: [],
+          deps: [],
+          suggestions: [],
+          generatedImageUrl: data.imageUrl,
+        };
+      } catch (err: any) {
+        setIsGenerating(false);
+        onGeneratingChange?.(false);
+        setGenPhase('idle');
+        if (err?.name === 'AbortError') return null;
+        throw err;
+      }
+    }
+
     // Handle reset
     if (wantsProjectReset(prompt)) {
       setIsGenerating(false);

@@ -88,99 +88,46 @@ export const CREDIT_PLANS: CreditPlan[] = [
 // ─── Bold Service ──────────────────────────────────────────────────────────
 export const boldService = {
   async purchaseCredits(packOrPlanId: string) {
-    const item = (CREDIT_PACKS.find(p => p.id === packOrPlanId) || 
+    const item = (CREDIT_PACKS.find(p => p.id === packOrPlanId) ||
                   CREDIT_PLANS.find(p => p.id === packOrPlanId)) as CreditPack | CreditPlan | undefined;
-    
     if (!item) throw new Error("Producto no encontrado");
 
-    const rawPrice = 'price_display' in item ? item.price_display : (item as CreditPack).price || "0";
-    const amountStr = rawPrice.replace(/[^0-9]/g, "");
-    const amount = parseInt(amountStr, 10);
-
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData.user) throw new Error("Usuario no autenticado");
-
-    const { data, error } = await supabase.functions.invoke<{ url?: string; error?: string; linkId?: string }>("bold-checkout", {
-      body: {
-        packId: item.id,
-        userId: authData.user.id,
-        buyerEmail: authData.user.email,
-        description: `Creator IA Pro: ${item.name}`
-      },
+    // El usuario y el precio se validan en el servidor a partir de la sesión de
+    // better-auth — el cliente solo manda el id del pack (ver api/billing/checkout.ts).
+    const res = await fetch("/api/billing/checkout", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ packId: item.id }),
     });
+    const data = await res.json().catch(() => null);
 
-    if (error) {
-      console.error("[Bold Checkout Error]", error);
-      // Parse edge function error for user-friendly message
-      const msg = typeof error === 'object' && 'message' in error
-        ? (error as any).message
-        : String(error);
-      if (msg.includes('BOLD_API_KEY')) {
-        throw new Error("Pasarela de pagos no configurada. Contacta soporte.");
-      }
-      throw new Error(msg || "Error al conectar con Bold. Intenta de nuevo.");
+    if (!res.ok || !data?.ok) {
+      throw new Error(data?.error || "Error al conectar con Bold. Intenta de nuevo.");
     }
+    if (!data.url) throw new Error("No se pudo generar el link de pago. Intenta de nuevo.");
 
-    if (!data) throw new Error("Sin respuesta del servidor de pagos.");
-    if (data.error) throw new Error(data.error);
-
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error("No se pudo generar el link de pago. Intenta de nuevo.");
-    }
+    window.location.href = data.url;
   },
 };
 
-// ─── Credit Operations (via Supabase RPCs) ──────────────────────────────────
+// ─── Credit Operations ───────────────────────────────────────────────────────
+// El gasto/reembolso real ocurre atómicamente en el servidor dentro de cada
+// endpoint de IA (api/ai/chat.ts, api/ai/image.ts) — aquí solo queda lectura.
 
 export const creditService = {
   async getBalance(): Promise<number> {
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData.user) return 0;
-
-    const { data } = await supabase
-      .from("profiles")
-      .select("credits_balance")
-      .eq("user_id", authData.user.id)
-      .single();
-
-    return data?.credits_balance ?? 0;
-  },
-
-  async spend(amount: number, action: string, model: string, nodeId?: string | null) {
-    const { error } = await sb.rpc("spend_credits", {
-      _amount: amount,
-      _action: action,
-      _model: model,
-      _node_id: nodeId || null,
-    });
-    if (error) throw new Error(error.message || "No se pudieron deducir los créditos");
-  },
-
-  async refund(amount: number, userId: string) {
-    await sb.rpc("refund_credits", {
-      _amount: amount,
-      _user_id: userId,
-    });
+    const res = await fetch("/api/profile", { credentials: "include" });
+    if (!res.ok) return 0;
+    const data = await res.json().catch(() => null);
+    return data?.creditsBalance ?? 0;
   },
 
   async getTransactions(limit = 20): Promise<Transaction[]> {
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData.user) return [];
-
-    const { data, error } = await supabase
-      .from("transactions")
-      .select("*")
-      .eq("user_id", authData.user.id)
-      .order("created_at", { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('[Billing] Error fetching transactions:', error);
-      return [];
-    }
-    return (data || []) as Transaction[];
+    const res = await fetch(`/api/billing/transactions?limit=${limit}`, { credentials: "include" });
+    if (!res.ok) return [];
+    const data = await res.json().catch(() => null);
+    return (data?.transactions ?? []) as Transaction[];
   },
 };
 

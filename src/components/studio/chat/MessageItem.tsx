@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Sparkles, Shield, CheckCircle2, Copy, Check, RotateCcw,
-  Download, Cpu, ChevronDown, FileCode2, Package, Lightbulb, XCircle, Brain
+  Download, Cpu, ChevronDown, FileCode2, Package, Lightbulb, XCircle, Brain, Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { renderMarkdown } from './renderer';
@@ -160,6 +160,12 @@ export function MessageItem({
               Razonando
             </span>
           )}
+          {msg.type === 'image' && (
+            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-fuchsia-50 border border-fuchsia-200 text-[9px] font-bold text-fuchsia-600 uppercase tracking-wider">
+              <ImageIcon className="h-2.5 w-2.5" />
+              Imagen
+            </span>
+          )}
         </header>
 
         {/* Message card */}
@@ -218,6 +224,22 @@ export function MessageItem({
               ) 
             }}
           />
+
+          {/* ── Generated image ─── */}
+          {msg.type === 'image' && msg.generatedImageUrl && (
+            <div className="relative z-10 mt-3 rounded-xl overflow-hidden border border-zinc-200 bg-zinc-50">
+              <img src={msg.generatedImageUrl} alt="Imagen generada" className="w-full h-auto max-h-[420px] object-contain" loading="lazy" />
+              <a
+                href={msg.generatedImageUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="absolute bottom-2 right-2 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-black/70 backdrop-blur-sm text-white text-[10px] font-bold hover:bg-black/85 transition-colors"
+              >
+                <Download className="h-3 w-3" />
+                Abrir / descargar
+              </a>
+            </div>
+          )}
 
           {/* ── Files accordion ─── */}
           {msg.files && msg.files.length > 0 && (

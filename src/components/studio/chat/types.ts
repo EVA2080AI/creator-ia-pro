@@ -27,9 +27,11 @@ export interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
-  type?: 'chat' | 'code' | 'plan' | 'reasoning';
+  type?: 'chat' | 'code' | 'plan' | 'reasoning' | 'image';
   files?: string[];
   imagePreview?: string;
+  /** URL de la imagen generada (Replicate) — solo cuando type === 'image'. */
+  generatedImageUrl?: string;
   stack?: string[];
   deps?: string[];
   suggestions?: string[];
@@ -49,6 +51,8 @@ export interface CodeGenResult {
   suggestions?: string[];
   isChatOnly?: boolean;
   blob?: Blob;
+  /** Presente cuando el turno fue una generación de imagen (ver detectIntent 'image'). */
+  generatedImageUrl?: string;
 }
 
 export interface DeepBuildResult {
