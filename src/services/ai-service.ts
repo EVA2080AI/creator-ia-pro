@@ -1,14 +1,8 @@
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import type { PostgrestResponse } from "@supabase/supabase-js";
-
-// ─── Custom Types for Missing RPCs ──────────────────────────────────────────
-type SupabaseCustom = {
-  rpc: <T = unknown>(name: string, args: Record<string, unknown>) => Promise<PostgrestResponse<T>>;
-} & typeof supabase;
-
-const sb = supabase as unknown as SupabaseCustom;
-
+// Motor de IA para /tools y Canvas IA — antes llamaba a las Edge Functions de
+// Supabase (ai-proxy/media-proxy) usando un access_token de supabase.auth, que
+// dejó de existir con la migración a better-auth Y cuyo proyecto de Supabase
+// además está pausado (DNS no resuelve). Ahora usa /api/ai/chat y /api/ai/image
+// (cobro de créditos atómico en el servidor — ver docs/PLAN_REFACTOR_GENESIS.md).
 // ─── TYPES & INTERFACES ───────────────────────────────────────────────────────
 
 export type ErrorType = 'credits' | 'rate_limit' | 'timeout' | 'model_down' | 'network' | 'unknown';
@@ -36,7 +30,7 @@ export interface AIResponse {
   text?: string;
   url?: string;
   model?: string;
-  ui?: Record<string, unknown>; // Dynamic UI structure from AI
+  ui?: Record<string, unknown>;
   [key: string]: unknown;
 }
 
@@ -45,85 +39,64 @@ interface ProfileData {
   credits_balance: number | null;
 }
 
-interface ProxyResponse {
-  choices?: Array<{
-    message?: {
-      content?: string;
-    };
-    delta?: {
-      content?: string;
-    };
-  }>;
-  url?: string;
-  model?: string;
-  error?: string;
-}
-
-// ─── TEXT MODEL MAP (internal-id → OpenRouter model ID) ───────────────────────
+// ─── MODEL MAPS (id interno usado por Tools.tsx/ModelSelector → catálogo real) ─
+// src/lib/ai/models.ts es la fuente de verdad de modelos vivos — este mapa solo
+// traduce los ids "de vitrina" que ya usa la UI de /tools sin tocar esa UI.
 const TEXT_MODEL_MAP: Record<string, string> = {
-  "deepseek-chat":       "deepseek/deepseek-chat",
-  "gemini-3-flash":      "google/gemini-2.0-flash-001",
-  "gemini-3.1-pro-low":  "google/gemini-2.5-pro-preview-03-25",
-  "gemini-3.1-pro-high": "google/gemini-2.5-pro-preview-03-25",
-  "claude-3.5-sonnet":   "anthropic/claude-3.5-sonnet",
-  "claude-3-opus":       "anthropic/claude-3-opus-20240229",
-  "gpt-oss-120b":        "meta-llama/llama-3.3-70b-instruct",
-  "mistral-large":       "mistralai/mistral-large",
-  "mistral-small":       "mistralai/mistral-small-3.1-24b-instruct",
+  "deepseek-chat":       "deepseek/deepseek-chat-v3.1",
+  "gemini-3-flash":      "google/gemini-2.5-flash-lite",
+  "gemini-3.1-pro-low":  "google/gemini-2.5-flash",
+  "gemini-3.1-pro-high": "anthropic/claude-sonnet-4.5",
+  "claude-3.5-sonnet":   "anthropic/claude-sonnet-4.5",
+  "claude-3-opus":       "anthropic/claude-opus-4.5",
+  "gpt-oss-120b":        "openai/gpt-oss-120b",
+  "mistral-large":       "google/gemini-2.5-flash",
+  "mistral-small":       "google/gemini-2.5-flash-lite",
 };
 
-// ─── IMAGE MODEL MAP (internal-id → OpenRouter model ID) ──────────────────────
 export const IMAGE_MODEL_MAP: Record<string, string> = {
-  "flux-schnell":  "black-forest-labs/flux-schnell",          
-  "flux-pro":      "black-forest-labs/flux-1.1-pro",          
-  "flux-pro-1.1":  "black-forest-labs/flux-1.1-pro",          
-  "flux-realism":  "black-forest-labs/flux-1.1-pro",          // FLUX with realism LoRA via prompt
-  "ideogram-v2":   "ideogram-ai/ideogram-v2",                  
-  "sdxl":          "stability-ai/stable-diffusion-3-5-large", 
+  "flux-schnell":  "flux-schnell",
+  "flux-pro":      "flux-1.1-pro",
+  "flux-pro-1.1":  "flux-1.1-pro",
+  "flux-realism":  "flux-1.1-pro",
+  "ideogram-v2":   "flux-1.1-pro", // Ideogram no está en el catálogo nuevo — mejor alternativa disponible
+  "sdxl":          "flux-1.1-pro",
 };
 
-const IMAGE_MODEL_IDS = new Set(Object.keys(IMAGE_MODEL_MAP));
-
-// ─── CREDIT COSTS (Credits per request) ──────────────────────────────────────
+// ─── CREDIT COSTS (solo para mostrar el costo estimado en la UI antes de enviar —
+// el cobro real y atómico ocurre en el servidor, en /api/ai/chat y /api/ai/image) ──
 export const MODEL_COSTS: Record<string, number> = {
   "anthropic/claude-3-5-haiku-20241022":   1,
   "openai/gpt-4o-mini":                    1,
   "meta-llama/llama-3-8b-instruct":        1,
   "meta-llama/llama-3-70b-instruct":       1,
   "deepseek/deepseek-chat":                1,
+  "deepseek/deepseek-chat-v3.1":           0,
   "google/gemini-2.0-flash-001":           1,
+  "google/gemini-2.5-flash-lite":          0,
+  "google/gemini-2.5-flash":               1,
+  "meta-llama/llama-3.3-70b-instruct":     0,
+  "openai/gpt-oss-120b":                   0,
+  "openai/gpt-4.1-mini":                   2,
   "mistralai/mistral-small-3.1-24b-instruct": 1,
   "anthropic/claude-3.5-sonnet":           5,
   "anthropic/claude-3-5-sonnet-20241022":  5,
+  "anthropic/claude-sonnet-4.5":           5,
   "anthropic/claude-3-opus-20240229":      5,
-  "openai/gpt-4o":                         5,
+  "anthropic/claude-opus-4.5":             10,
+  "anthropic/claude-haiku-4.5":            2,
+  "qwen/qwen3-coder":                      2,
+  "x-ai/grok-4.5":                         6,
   "deepseek/deepseek-r1":                  3,
   "google/gemini-2.5-pro-preview-03-25":   3,
   "mistralai/mistral-large":               3,
-  "meta-llama/llama-3.3-70b-instruct":     2,
   "black-forest-labs/flux-schnell":        2,
   "black-forest-labs/flux-1.1-pro":        5,
   "ideogram-ai/ideogram-v2":               4,
   "stability-ai/stable-diffusion-3-5-large": 3,
-  "flux-schnell": 2, "flux-pro": 5, "flux-pro-1.1": 5, "flux-realism": 5, "ideogram-v2": 4, "sdxl": 3,
+  "flux-schnell": 2, "flux-pro": 4, "flux-pro-1.1": 4, "flux-realism": 4, "ideogram-v2": 4, "sdxl": 4,
   "upscale": 3, "background": 1, "enhance": 2, "restore": 3, "variation": 4, "video": 5,
 };
-
-// Video model costs (Fal.ai + Replicate) - Optimizados para SaaS
-export const VIDEO_MODEL_COSTS: Record<string, number> = {
-  // Fal.ai Models - Costo real vs Créditos (margen ~20x)
-  'wan-2.5': 5,      // Costo real ~$0.25
-  'wan-i2v': 6,      // Costo real ~$0.30
-  'pika-2.2': 4,     // Costo real ~$0.20
-  'pika-i2v': 5,     // Costo real ~$0.25
-  'luma': 6,         // Costo real ~$0.30
-  'kling': 5,        // Costo real ~$0.25
-  // Replicate (Budget)
-  'svd': 2,          // Costo real ~$0.05
-};
-
-// All models are accessible to all plans.
-// Plan differences are: credits balance + unlocked features (not model access).
 
 // ─── ERROR CLASSIFIER ─────────────────────────────────────────────────────────
 export function classifyError(msg: string): ClassifiedError {
@@ -137,7 +110,7 @@ export function classifyError(msg: string): ClassifiedError {
   if (m.includes('timeout') || m.includes('tardó') || m.includes('too long')) {
     return { type: 'timeout', userMessage: 'La IA tardó demasiado. Tus créditos fueron reembolsados.', canRetry: true };
   }
-  if (m.includes('unavailable') || m.includes('503') || m.includes('overloaded') || m.includes('not configured')) {
+  if (m.includes('unavailable') || m.includes('503') || m.includes('overloaded') || m.includes('not configured') || m.includes('no configurad')) {
     return { type: 'model_down', userMessage: 'El modelo de IA no está disponible ahora. Intenta con otro modelo.', canRetry: true };
   }
   if (m.includes('network') || m.includes('fetch') || m.includes('connection')) {
@@ -146,175 +119,61 @@ export function classifyError(msg: string): ClassifiedError {
   return { type: 'unknown', userMessage: msg || 'Error desconocido. Intenta de nuevo.', canRetry: true };
 }
 
-// ─── RETRY CONFIGURATION ───────────────────────────────────────────────────
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1000;
-
-async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+async function readErrorBody(res: Response): Promise<string> {
+  const body = await res.json().catch(() => null);
+  return body?.error || `Error ${res.status}`;
 }
 
 export const aiService = {
-
-  async callProxyWithRetry(provider: string, path: string, body: unknown, retries = MAX_RETRIES): Promise<ProxyResponse> {
-    try {
-      return await this.callProxy(provider, path, body);
-    } catch (err) {
-      const error = err as Error;
-      const classified = classifyError(error.message);
-
-      if (classified.canRetry && retries > 0) {
-        console.log(`[AI Retry] Reintentando... ${MAX_RETRIES - retries + 1}/${MAX_RETRIES}`);
-        await sleep(RETRY_DELAY_MS * (MAX_RETRIES - retries + 1)); // Exponential backoff
-        return this.callProxyWithRetry(provider, path, body, retries - 1);
-      }
-
-      throw err;
-    }
-  },
-
-  async callProxy(provider: string, path: string, body: unknown): Promise<ProxyResponse> {
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !session) {
-      throw new Error("No hay sesión activa. Por favor, recarga la página o vuelve a ingresar.");
-    }
-
-    const { data, error } = await supabase.functions.invoke<ProxyResponse>("ai-proxy", {
-      body: { provider, path, body },
-    });
-
-    if (error) throw new Error(`[${provider}] ${error.message}`);
-    if (data?.error) throw new Error(`[${provider}] ${data.error}`);
-    return data || {};
-  },
-
-  async callSearch(query: string): Promise<unknown[]> {
-    const { data, error } = await supabase.functions.invoke<{ results: unknown[], error?: string }>("search-service", {
-      body: { query },
-    });
-
-    if (error) throw new Error(error.message);
-    if (data?.error) throw new Error(data.error);
-    return data?.results || [];
-  },
-
   async processAction(params: AIActionParams): Promise<AIResponse> {
-    const { action, prompt, model, image, tool, node_id } = params;
-    const cost = MODEL_COSTS[model] ?? MODEL_COSTS[tool ?? ""] ?? 2;
+    const { action, prompt, model, image, tool, width, height, persona } = params;
 
-    try {
-      const { data: authData } = await supabase.auth.getUser();
-      if (!authData.user) throw new Error("Acceso no autorizado");
-
-      const { data: profile } = await sb
-        .from("profiles")
-        .select("subscription_tier, credits_balance")
-        .eq("user_id", authData.user.id)
-        .single() as { data: ProfileData | null };
-
-      const isUUID = (id: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
-      let safeNodeId = node_id && isUUID(node_id) ? node_id : null;
-      if (safeNodeId) {
-        const { data: exists } = await supabase
-          .from("canvas_nodes").select("id").eq("id", safeNodeId).maybeSingle();
-        if (!exists) safeNodeId = null;
-      }
-
-      const balance = profile?.credits_balance ?? 0;
-      if (balance <= 0 || balance < cost) {
-        toast.error("Créditos insuficientes. Actualiza tu plan o compra créditos extra para continuar.", {
-          action: { label: "Planes", onClick: () => { window.location.href = '/pricing'; } },
-          duration: 6000,
-        });
-        throw new Error("Créditos exhaustos");
-      }
-
-      // All models available to all plans — only credits and features differ per plan.
-
-      const { error: rpcError } = await sb.rpc("spend_credits", {
-        _amount: cost,
-        _action: action || tool || "ai-gen",
-        _model: model || tool || "unknown",
-        _node_id: safeNodeId,
-      });
-      if (rpcError) throw new Error(rpcError.message || "Créditos insuficientes");
-
-      let result: AIResponse;
-      if (tool && ["variation", "style", "product"].includes(tool)) {
-        if (!image) throw new Error(`La herramienta "${tool}" requiere una imagen de origen.`);
-        result = await this.handleImageGen(prompt, model, tool, image);
-      } else if (tool && ["upscale", "background", "enhance", "restore", "eraser"].includes(tool)) {
-        if (!image) throw new Error(`La herramienta "${tool}" requiere una imagen de origen.`);
-        result = await this.handleMediaProxy(tool, image);
-      } else if (action === "image" || IMAGE_MODEL_IDS.has(model) || tool === "generate" || tool === "logo") {
-        result = await this.handleImageGen(prompt, model, tool, undefined, params.width, params.height);
-      } else if (action === "video") {
-        result = await this.handleVideoGen(prompt);
-      } else {
-        result = await this.handleTextGen(action, prompt, model, profile, params.persona);
-      }
-
-      if (safeNodeId) {
-        const name = tool
-          ? `${tool.charAt(0).toUpperCase() + tool.slice(1)}: ${prompt.slice(0, 15)}…`
-          : `${action.charAt(0).toUpperCase() + action.slice(1)}: ${prompt.slice(0, 15)}…`;
-        await supabase.from("canvas_nodes").update({
-          status: "ready", name,
-          asset_url: result?.url ?? null,
-          data_payload: {
-            ...result,
-            _metadata: { generated_at: new Date().toISOString(), model: model || "openrouter", cost },
-          } as any,
-        }).eq("id", safeNodeId);
-      }
-
-      return result;
-
-    } catch (err) {
-      const error = err as Error;
-      console.error("[Genesis Neural] Error:", error.message);
-      try {
-        const { data: authData } = await supabase.auth.getUser();
-        if (authData.user) {
-          await sb.rpc("refund_credits", { _amount: cost, _user_id: authData.user.id });
-        }
-      } catch { /* silent */ }
-      throw new Error(error.message || "Fallo en la síntesis neural. Intenta de nuevo.");
+    if (tool && ["upscale", "background", "enhance", "restore", "eraser"].includes(tool)) {
+      throw new Error(`"${tool}" está temporalmente deshabilitada mientras se migra su motor de edición. Vuelve pronto.`);
     }
+
+    if (tool && ["variation", "style", "product"].includes(tool)) {
+      if (!image) throw new Error(`La herramienta "${tool}" requiere una imagen de origen.`);
+      return this.handleImageGen(prompt, model, tool, image, width, height);
+    }
+    if (action === "image" || tool === "generate" || tool === "logo") {
+      return this.handleImageGen(prompt, model, tool, undefined, width, height);
+    }
+    if (action === "video") {
+      return this.handleVideoGen(prompt);
+    }
+    return this.handleTextGen(action, prompt, model, undefined, persona);
   },
 
-  async handleTextGen(action: string, prompt: string, model: string, profile?: ProfileData | null, persona: string = "antigravity"): Promise<AIResponse> {
-    const orModel    = TEXT_MODEL_MAP[model] ?? "google/gemini-2.0-flash-001";
-    const userTier   = profile?.subscription_tier?.toUpperCase() ?? "FREE";
-    const userCredits = profile?.credits_balance ?? 0;
-
-    let systemPrompt = "";
-    if (persona === "genesis") {
-      systemPrompt = `# ROLE: Genesis AI — Product Leader & Master Architect (v16.0)\\nEres Genesis AI, la consciencia técnica definitiva. Actúas bajo el Protocolo Swarm Autonomy.\\nPropón soluciones Premium, rompe con lo genérico y usa el sistema Aether V9.0.\\n\\n# CRITICAL RULES (TEMPLATE FALLBACK PREVENTION):\\n1. PROHIBICIÓN DE BASH: Bajo ninguna circunstancia uses comandos de terminal (npm install, npx). Genera directamente el archivo package.json con todas las dependencias, seguido de las configuraciones (vite, tailwind).\\n2. CERO BOILERPLATE: Está estrictamente prohibido generar plantillas vacías, comentarios como {/* Your content */} o títulos genéricos. Desde la primera iteración, debes aplicar el diseño, colores y temática FINAL solicitada.\\n3. COMPONENTES COMPLETOS: Si usas Shadcn UI o Glassmorphism, incluye el código completo, no asumas instalación manual.\\n\\n# RULES:\\n- Entrega archivos COMPLETOS.\\n- Usa Tailwind + Framer Motion.\\n- Estilo: Cinematic, Glassmorphism, Premium.\\n# CONTEXT: Plan ${userTier}, Créditos ${userCredits}.`;
-    } else {
-      systemPrompt = `# ROLE: Antigravity — Strategic intelligence\nEres Antigravity, núcleo de Creator IA Pro. Soluciones Senior en diseño y tecnología.\n# CONTEXT: Plan ${userTier}, Créditos ${userCredits}.`;
-    }
-
+  async handleTextGen(action: string, prompt: string, model: string, _profile?: ProfileData | null, persona: string = "antigravity"): Promise<AIResponse> {
+    const orModel = TEXT_MODEL_MAP[model] ?? model;
+    let systemPrompt = persona === "genesis"
+      ? "Eres Genesis AI, arquitecto de producto senior. Responde en español, directo y accionable."
+      : "Eres Antigravity, núcleo de inteligencia estratégica de Creator IA Pro. Responde en español, directo y accionable.";
     if (action === "ui") {
       systemPrompt += `\n\nEres un experto UX/UI. Genera SOLO JSON válido: { "ui": { "title": "string", "description": "string", "components": [...] }, "device": "mobile|tablet|desktop" }. Sin markdown.`;
     }
 
-    const data = await this.callProxyWithRetry("openrouter", "chat/completions", {
-      model: orModel,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user",   content: prompt },
-      ],
-      temperature: 0.85,
-      max_tokens: 4096,
+    const res = await fetch("/api/ai/chat", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: orModel,
+        messages: [{ role: "system", content: systemPrompt }, { role: "user", content: prompt }],
+        temperature: 0.85,
+      }),
     });
+    if (!res.ok || res.headers.get("content-type")?.includes("application/json")) {
+      throw new Error(await readErrorBody(res));
+    }
 
-    let text: string = data?.choices?.[0]?.message?.content ?? "";
-    if (!text) throw new Error("OpenRouter devolvió respuesta vacía.");
+    const text = await consumeChatStream(res);
+    if (!text) throw new Error("El modelo devolvió una respuesta vacía.");
 
     if (action === "ui") {
-      text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-      try { return JSON.parse(text); } catch { return { text }; }
+      const cleaned = text.replace(/```json/g, "").replace(/```/g, "").trim();
+      try { return JSON.parse(cleaned); } catch { return { text }; }
     }
     return { text };
   },
@@ -329,74 +188,56 @@ export const aiService = {
       finalPrompt = prompt || `Apply ${tool} transformation to this image, masterpiece, best quality`;
     }
 
-    const orModel = IMAGE_MODEL_MAP[model] ?? "black-forest-labs/flux-schnell";
-    const body: Record<string, unknown> = { prompt: finalPrompt, model: orModel, width: width || 1024, height: height || 1024 };
-    if (imageUrl) body.image_url = imageUrl;
+    const imageModel = IMAGE_MODEL_MAP[model] ?? "flux-schnell";
+    const aspectRatio = toAspectRatio(width, height);
 
-    const data = await this.callProxyWithRetry("openrouter-image", "", body);
-    if (data?.url) return { url: data.url, model: data.model ?? orModel };
+    const res = await fetch("/api/ai/image", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: finalPrompt, model: imageModel, aspectRatio, imagePrompt: imageUrl }),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) throw new Error(data?.error || `Error ${res.status} generando la imagen`);
+    if (data.imageUrl) return { url: data.imageUrl, model: data.model ?? imageModel };
     throw new Error("No se pudo generar la imagen. Intenta de nuevo.");
   },
 
-  async handleVideoGen(
-    prompt: string,
-    model: string = 'wan-2.5',
-    imageUrl?: string,
-    onProgress?: (step: string, pct: number) => void
-  ): Promise<AIResponse> {
-    const steps = [['Iniciando…', 5], ['Procesando…', 50], ['Listo', 100]] as [string, number][];
-    onProgress?.(steps[0][0], steps[0][1]);
-
-    const { data, error } = await supabase.functions.invoke<{ url?: string, model?: string, error?: string }>("media-proxy", {
-      body: {
-        tool: "video",
-        prompt: { model, prompt },
-        image_url: imageUrl,
-      },
-    });
-
-    onProgress?.('Listo', 100);
-    if (error) throw new Error(error.message);
-    if (data?.error) throw new Error(data.error);
-    if (data?.url) return { url: data.url, text: `Video generado con ${data.model || model}`, model: data.model || model };
-    throw new Error("La generación de video falló.");
+  async handleVideoGen(_prompt: string): Promise<AIResponse> {
+    throw new Error("La generación de video está temporalmente deshabilitada mientras se migra su motor. Vuelve pronto.");
   },
 
   async streamTextGen(tool: string, prompt: string, model: string, profile: ProfileData | null, onToken: (chunk: string) => void): Promise<void> {
-    const orModel = TEXT_MODEL_MAP[model] ?? "google/gemini-2.0-flash-001";
+    const orModel = TEXT_MODEL_MAP[model] ?? model;
     const userTier = profile?.subscription_tier?.toUpperCase() ?? "FREE";
-    const userCredits = profile?.credits_balance ?? 0;
 
     const TOOL_PROMPTS: Record<string, string> = {
-      chat: `Eres Antigravity, IA de nivel Senior en estrategia digital. PLAN: ${userTier}. CRÉDITOS: ${userCredits}. Responde de forma directa, estructurada y en español.`,
+      chat: `Eres Antigravity, IA de nivel Senior en estrategia digital. PLAN: ${userTier}. Responde de forma directa, estructurada y en español.`,
       copywriter: `Eres un copywriter de clase mundial especializado en marketing y ventas. PLAN: ${userTier}. Escribe copy persuasivo, emocional y orientado a conversión. Usa frameworks como AIDA, PAS o FAB según el contexto. Sé directo, impactante y creativo. Responde en español.`,
       social: `Eres un estratega de redes sociales con experiencia en marcas de alto crecimiento. PLAN: ${userTier}. Genera contenido viral, ideas de posts, hooks atractivos y calendarios de contenido. Adapta el tono a cada plataforma (Instagram, LinkedIn, TikTok, X). Incluye emojis cuando sea apropiado. Responde en español.`,
       blog: `Eres un redactor SEO experto con experiencia en content marketing. PLAN: ${userTier}. Escribe artículos completos, bien estructurados con H2/H3, optimizados para motores de búsqueda. Incluye introducción enganchante, desarrollo rico en valor y conclusión con CTA. Usa bullet points y listas cuando mejore la lectura. Responde en español.`,
       ads: `Eres un especialista en publicidad digital (Google Ads, Meta Ads, LinkedIn Ads). PLAN: ${userTier}. Crea anuncios con titulares impactantes, descripciones persuasivas y CTAs que conviertan. Incluye variantes A/B cuando sea posible. Adapta el formato según la plataforma solicitada. Responde en español.`,
     };
 
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) throw new Error("Sesión caducada.");
-
-    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
+    const res = await fetch("/api/ai/chat", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${session.access_token}`,
-        "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      },
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        provider: "openrouter",
-        path: "chat/completions",
-        body: { model: orModel, messages: [{ role: "system", content: TOOL_PROMPTS[tool] ?? TOOL_PROMPTS.chat }, { role: "user", content: prompt }], temperature: 0.85, stream: true },
+        model: orModel,
+        messages: [{ role: "system", content: TOOL_PROMPTS[tool] ?? TOOL_PROMPTS.chat }, { role: "user", content: prompt }],
+        temperature: 0.85,
       }),
     });
 
-    if (!res.ok || !res.body) throw new Error("Streaming no disponible.");
+    if (!res.ok || res.headers.get("content-type")?.includes("application/json")) {
+      throw new Error(await readErrorBody(res));
+    }
+    if (!res.body) throw new Error("Streaming no disponible.");
+
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
-
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -404,26 +245,56 @@ export const aiService = {
       const lines = buffer.split("\n");
       buffer = lines.pop() ?? "";
       for (const line of lines) {
-        if (!line.startsWith("data: ")) continue;
-        const payload = line.slice(6).trim();
-        if (payload === "[DONE]") return;
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
         try {
           const parsed = JSON.parse(payload);
           const chunk = parsed.choices?.[0]?.delta?.content;
           if (chunk) onToken(chunk);
-        } catch { /* skip */ }
+        } catch { /* fragmento no-JSON, se ignora */ }
       }
     }
   },
-
-  async handleMediaProxy(tool: string, imageUrl: string, onProgress?: (step: string, pct: number) => void): Promise<AIResponse> {
-    onProgress?.('Iniciando…', 10);
-    const { data, error } = await supabase.functions.invoke<{ url?: string, error?: string }>("media-proxy", {
-      body: { tool, image_url: imageUrl },
-    });
-    onProgress?.('Listo', 100);
-    if (error) throw new Error(error.message);
-    if (data?.error) throw new Error(data.error);
-    return data || {};
-  }
 };
+
+async function consumeChatStream(res: Response): Promise<string> {
+  if (!res.body) return "";
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let full = "";
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      if (!line.startsWith("data:")) continue;
+      const payload = line.slice(5).trim();
+      if (!payload || payload === "[DONE]") continue;
+      try {
+        const parsed = JSON.parse(payload);
+        const chunk = parsed.choices?.[0]?.delta?.content;
+        if (typeof chunk === "string") full += chunk;
+      } catch { /* fragmento no-JSON, se ignora */ }
+    }
+  }
+  return full;
+}
+
+function toAspectRatio(width?: number, height?: number): string {
+  if (!width || !height) return "1:1";
+  const candidates: Array<[string, number]> = [
+    ["1:1", 1], ["16:9", 16 / 9], ["9:16", 9 / 16], ["3:2", 3 / 2], ["2:3", 2 / 3],
+  ];
+  const ratio = width / height;
+  let best = "1:1";
+  let bestDiff = Infinity;
+  for (const [name, value] of candidates) {
+    const diff = Math.abs(value - ratio);
+    if (diff < bestDiff) { bestDiff = diff; best = name; }
+  }
+  return best;
+}

@@ -14,7 +14,7 @@ import {
   ChevronDown, Check, SlidersHorizontal,
 } from "lucide-react";
 import { ModelSelector, AVAILABLE_MODELS } from "@/components/ModelSelector";
-import { supabase } from "@/integrations/supabase/client";
+import { createAsset } from "@/lib/assets";
 import { cn } from "@/lib/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -41,12 +41,12 @@ interface Tool {
 const tools: Tool[] = [
   { id: "generate",   name: "Crear imagen",        desc: "Genera imágenes desde texto con IA.",            icon: Image,       credits: 2, category: "image", needsUpload: false, placeholder: "Un gato astronauta en Marte al atardecer, estilo fotorrealista, luz dramática...", color: "text-zinc-900" },
   { id: "logo",       name: "Diseñar logo",         desc: "Logos e identidades de marca con IA.",           icon: PenTool,     credits: 3, category: "image", needsUpload: false, placeholder: "Logo minimalista para una cafetería llamada Origen, tonos cálidos, fondo blanco...", color: "text-primary" },
-  { id: "enhance",    name: "Mejorar imagen",       desc: "Mejora iluminación y detalles.",                 icon: Wand2,       credits: 2, category: "image", needsUpload: true,  color: "text-primary" },
-  { id: "upscale",    name: "Aumentar resolución",  desc: "Escala hasta 4K sin perder calidad.",            icon: ZoomIn,      credits: 3, category: "image", needsUpload: true,  color: "text-primary" },
-  { id: "background", name: "Quitar fondo",         desc: "Extrae el fondo con bordes perfectos.",          icon: ImagePlus,   credits: 1, category: "image", needsUpload: true,  color: "text-emerald-400" },
+  { id: "enhance",    name: "Mejorar imagen",       desc: "Mejora iluminación y detalles.",                 icon: Wand2,       credits: 2, category: "image", needsUpload: true,  color: "text-rose-400/40", disabled: true, disabledReason: "Próximamente" },
+  { id: "upscale",    name: "Aumentar resolución",  desc: "Escala hasta 4K sin perder calidad.",            icon: ZoomIn,      credits: 3, category: "image", needsUpload: true,  color: "text-rose-400/40", disabled: true, disabledReason: "Próximamente" },
+  { id: "background", name: "Quitar fondo",         desc: "Extrae el fondo con bordes perfectos.",          icon: ImagePlus,   credits: 1, category: "image", needsUpload: true,  color: "text-rose-400/40", disabled: true, disabledReason: "Próximamente" },
   { id: "style",      name: "Transferir estilo",    desc: "Aplica el estilo de una imagen a otra.",         icon: Palette,     credits: 2, category: "image", needsUpload: true,  color: "text-primary" },
   { id: "product",    name: "Mockup de producto",   desc: "Renders profesionales de producto.",             icon: ShoppingBag, credits: 3, category: "image", needsUpload: true,  color: "text-amber-400" },
-  { id: "restore",    name: "Restaurar foto",       desc: "Restaura fotos antiguas o dañadas.",             icon: RotateCcw,   credits: 3, category: "image", needsUpload: true,  color: "text-amber-400" },
+  { id: "restore",    name: "Restaurar foto",       desc: "Restaura fotos antiguas o dañadas.",             icon: RotateCcw,   credits: 3, category: "image", needsUpload: true,  color: "text-rose-400/40", disabled: true, disabledReason: "Próximamente" },
   { id: "eraser",     name: "Borrar objeto",        desc: "Elimina objetos de la imagen.",                  icon: X,           credits: 2, category: "image", needsUpload: true,  color: "text-rose-400/40", disabled: true, disabledReason: "Próximamente" },
   { id: "copywriter", name: "Crear texto",          desc: "Copy persuasivo para marketing y ventas.",       icon: Megaphone,   credits: 1, category: "text",  needsUpload: false, placeholder: "Escribe un mensaje persuasivo para vender zapatos deportivos en Instagram...", color: "text-primary" },
   { id: "social",     name: "Contenido para redes", desc: "Posts y estrategias para redes sociales.",       icon: Hash,        credits: 2, category: "text",  needsUpload: false, placeholder: "5 ideas de contenido para Instagram de una marca de ropa sostenible...", color: "text-rose-400" },
@@ -264,26 +264,18 @@ const Tools = () => {
     // ── TEXT: streaming ───────────────────────────────────────────────────────
     if (category === "text") {
       setStreaming(true);
-      try {
-        await (supabase.rpc as any)("spend_credits", {
-          _amount: requiredCredits, _action: activeTool, _model: activeModel, _node_id: null,
-        });
-      } catch (err: any) {
-        setStreaming(false);
-        toast.error(err?.message || "Créditos insuficientes");
-        return;
-      }
 
       let fullText = "";
       try {
+        // El cobro/reembolso de créditos ocurre de forma atómica en el servidor
+        // (/api/ai/chat) — no hay que descontarlos aquí de antemano.
         await aiService.streamTextGen(activeTool, textPrompt, activeModel, profile, (chunk) => {
           fullText += chunk;
           setResultText(fullText);
         });
         await refreshProfile();
       } catch (err: any) {
-        const { data: { user: u } } = await supabase.auth.getUser();
-        if (u) await (supabase.rpc as any)("refund_credits", { _amount: requiredCredits, _user_id: u.id });
+        await refreshProfile();
         if (!fullText) {
           setStreaming(false);
           setProcessing(true);
@@ -325,22 +317,14 @@ const Tools = () => {
     setSavingAsset(true);
     try {
       const isDoc = !!resultText;
-      const type = isDoc ? "document" : "image";
-      const payload: any = {
-        user_id: user.id, 
-        type, 
+      const asset = await createAsset({
+        assetUrl: isDoc ? "" : resultImage!,
+        type: isDoc ? "document" : "image",
         prompt: `${currentTool.name} — ${textPrompt.slice(0, 40) || "generado"}`,
         tags: [activeTool, "ai-generated"],
-      };
-
-      if (isDoc) {
-        payload.content = resultText;
-      } else {
-        payload.asset_url = resultImage;
-      }
-
-      const { error } = await supabase.from("saved_assets").insert(payload);
-      if (error) throw error;
+        content: isDoc ? resultText : undefined,
+      });
+      if (!asset) throw new Error("No se pudo guardar el activo");
       setSavedAsset(true);
       toast.success("Guardado en Mis Activos");
     } catch {

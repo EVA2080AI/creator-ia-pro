@@ -36,7 +36,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       assetUrl?: string; prompt?: string; type?: string; spaceId?: string | null;
       tags?: string[]; content?: string;
     };
-    if (!body.assetUrl) {
+    // assetUrl puede venir vacío para assets tipo "document" (su contenido vive en `content`).
+    if (body.assetUrl === undefined) {
       res.status(400).json({ ok: false, code: "BAD_REQUEST", error: "Falta assetUrl." });
       return;
     }

@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { SEO } from "@/components/SEO";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Sparkles, ArrowRight, Check, Wand2, ZoomIn, Eraser,
   ImagePlus, RotateCcw, Image, MessageSquare, PenTool,
@@ -190,19 +190,14 @@ const toolsData: Record<string, ToolInfo> = {
 const ToolLanding = () => {
   const navigate = useNavigate();
   const { toolSlug } = useParams();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user } = useAuth();
+  const isLoggedIn = !!user;
   const [tryItInput, setTryItInput] = useState("");
   const [tryItImage, setTryItImage] = useState<string | null>(null);
   const [demoResult, setDemoResult] = useState<string | null>(null);
   const [demoResultImage, setDemoResultImage] = useState<string | null>(null);
   const [demoing, setDemoing] = useState(false);
   const [demoUsed, setDemoUsed] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-    });
-  }, []);
 
   useEffect(() => {
     setTryItInput("");

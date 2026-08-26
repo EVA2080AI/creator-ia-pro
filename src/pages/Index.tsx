@@ -6,7 +6,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import {
   ArrowRight, Code2, Image, Zap,
   CheckCircle2, Layers, MessageSquare, Video,
@@ -424,12 +424,11 @@ export default function Index() {
   const { scrollY } = useScroll();
   const mockupY = useTransform(scrollY, [0, 400], [0, -40]);
   const mockupScale = useTransform(scrollY, [0, 400], [1, 0.96]);
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard");
-    });
-  }, [navigate]);
+    if (!authLoading && user) navigate("/dashboard");
+  }, [authLoading, user, navigate]);
 
   return (
     <>
