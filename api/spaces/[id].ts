@@ -12,6 +12,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const id = req.query.id as string;
   const owned = and(eq(schema.space.id, id), eq(schema.space.userId, user.userId));
 
+  if (req.method === "GET") {
+    const [row] = await db.select().from(schema.space).where(owned).limit(1);
+    if (!row) return void res.status(404).json({ ok: false, code: "NOT_FOUND", error: "Espacio no encontrado." });
+    res.status(200).json({ ok: true, space: row });
+    return;
+  }
+
   if (req.method === "PATCH") {
     const body = (req.body ?? {}) as { name?: string; description?: string | null; settings?: Record<string, unknown> };
     const patch: Record<string, unknown> = { updatedAt: new Date() };

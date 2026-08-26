@@ -12,7 +12,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { createCanvasNode } from '@/lib/canvas-nodes';
 import { type Template } from '@/lib/templates';
 
 // Components
@@ -213,21 +213,18 @@ const FormarketingContent = () => {
       
       // Persist to DB
       if (spaceId && user) {
-        const dbNodes = newNodes.map(n => ({
+        const results = await Promise.all(newNodes.map(n => createCanvasNode({
           id: n.id,
-          space_id: spaceId,
-          user_id: user.id,
-          type: n.type,
+          spaceId,
+          type: n.type || 'default',
           prompt: (n.data as any).prompt || (n.data as any).title || '',
           status: 'idle',
-          data_payload: n.data,
-          pos_x: n.position.x,
-          pos_y: n.position.y
-        }));
-        
-        const { error } = await supabase.from('canvas_nodes').insert(dbNodes as any);
-        if (error) {
-          console.error("Error persisting template nodes:", error);
+          dataPayload: n.data,
+          posX: n.position.x,
+          posY: n.position.y,
+        })));
+
+        if (results.some(r => !r)) {
           toast.error("Error al persistir la plantilla en la base de datos");
         } else {
           addLog('Sistema', `Plantilla '${template.title}' lista.`, 'success');

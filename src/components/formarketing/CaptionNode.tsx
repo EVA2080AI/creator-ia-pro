@@ -1,7 +1,8 @@
 import { memo, useCallback, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { MessageSquare, Copy, Check, ChevronDown, Loader2, Sparkles } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { deleteCanvasNode } from '@/lib/canvas-nodes';
+import { aiService } from '@/services/ai-service';
 import { toast } from 'sonner';
 import BaseNode from './BaseNode';
 
@@ -37,7 +38,7 @@ const CaptionNode = ({ id, data }: { id: string; data: CaptionNodeData }) => {
   }, [id, setNodes]);
 
   const deleteNode = async () => {
-    await supabase.from('canvas_nodes').delete().eq('id', id);
+    await deleteCanvasNode(id);
     setNodes(nds => nds.filter(n => n.id !== id));
     toast.success('Nodo eliminado');
   };
@@ -63,60 +64,17 @@ const CaptionNode = ({ id, data }: { id: string; data: CaptionNodeData }) => {
     update({ status: 'generating' });
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token ?? '';
-
       const prompt = `Genera un caption optimizado para ${network.label} sobre: "${topic}".
 Tono: ${tone}.
 Máximo ${network.maxChars} caracteres.
 Incluye emojis relevantes, hashtags populares al final, y un call-to-action claro.
 Devuelve SOLO el caption, sin explicaciones.`;
 
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-        },
-        body: JSON.stringify({
-          provider: 'openrouter',
-          path: 'chat/completions',
-          body: {
-            model: 'deepseek/deepseek-chat',
-            messages: [{ role: 'user', content: prompt }],
-            stream: true,
-            max_tokens: 400,
-          },
-        }),
-      });
-
-      if (!res.ok) { toast.error('Error generando caption'); return; }
-
-      const reader = res.body!.getReader();
-      const decoder = new TextDecoder();
       let accumulated = '';
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const payload = line.slice(6).trim();
-          if (payload === '[DONE]') break;
-          try {
-            const delta = JSON.parse(payload)?.choices?.[0]?.delta?.content;
-            if (typeof delta === 'string') {
-              accumulated += delta;
-              setStreamedText(accumulated);
-            }
-          } catch { /* skip */ }
-        }
-      }
+      await aiService.streamTextGen('social', prompt, 'deepseek-chat', null, (chunk) => {
+        accumulated += chunk;
+        setStreamedText(accumulated);
+      });
 
       update({ output: accumulated, status: 'done' });
     } catch {

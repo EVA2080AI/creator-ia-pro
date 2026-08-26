@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { Download, Share2, Copy, Check } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import BaseNode from './BaseNode';
 
@@ -18,7 +18,7 @@ const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
   const [copied, setCopied] = useState(false);
 
   const deleteNode = async () => {
-    await supabase.from('canvas_nodes').delete().eq('id', id);
+    await deleteCanvasNode(id);
     setNodes((nds) => nds.filter((n) => n.id !== id));
     toast.success('Nodo eliminado');
   };

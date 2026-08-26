@@ -1,7 +1,7 @@
 import { memo, useCallback } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Type, Trash2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import { NodeConnectionDropdown } from './NodeConnectionDropdown';
 import { NodeNextAction } from './NodeNextAction';
@@ -23,7 +23,7 @@ const TextInputNode = ({ id, data }: { id: string; data: TextInputNodeData }) =>
   }, [id, setNodes]);
 
   const deleteNode = async () => {
-    await supabase.from('canvas_nodes').delete().eq('id', id);
+    await deleteCanvasNode(id);
     setNodes((nds) => nds.filter((n) => n.id !== id));
     toast.success('Nodo eliminado');
   };

@@ -1,7 +1,7 @@
 import { memo, useCallback, useState, useEffect } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { UserCircle, Trash2, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { updateCanvasNode, deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import { NodeNextAction } from './NodeNextAction';
 
@@ -44,18 +44,14 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
       })
     );
 
-    // 2. Sync to Supabase
-    const { error } = await supabase
-      .from('canvas_nodes')
-      .update({ data_payload: { ...data, [field]: value } as any })
-      .eq('id', id);
-    
-    if (error) console.error("Error syncing character data:", error);
+    // 2. Sync
+    const updated = await updateCanvasNode(id, { dataPayload: { ...data, [field]: value } });
+    if (!updated) console.error("Error syncing character data");
   };
 
   const deleteNode = async () => {
-    const { error } = await supabase.from('canvas_nodes').delete().eq('id', id);
-    if (!error) {
+    const ok = await deleteCanvasNode(id);
+    if (ok) {
       setNodes((nds) => nds.filter((n) => n.id !== id));
       toast.success("Personaje eliminado");
     }

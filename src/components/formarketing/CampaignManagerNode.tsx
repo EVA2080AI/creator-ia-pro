@@ -1,12 +1,10 @@
 import { memo, useState, useCallback } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Share2, Trash2, Instagram, Facebook, Twitter, CheckCircle2, Clock, ChevronDown, ChevronUp, Users, MousePointer2, Zap, Megaphone, Loader2, Copy, Check } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { updateCanvasNode, deleteCanvasNode } from '@/lib/canvas-nodes';
+import { aiService } from '@/services/ai-service';
 import { toast } from 'sonner';
 import { NodeNextAction } from './NodeNextAction';
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 interface CampaignNodeData {
   title?: string;
@@ -34,8 +32,8 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
   }, [id, setNodes]);
 
   const deleteNode = async () => {
-    const { error } = await supabase.from('canvas_nodes').delete().eq('id', id);
-    if (!error) {
+    const ok = await deleteCanvasNode(id);
+    if (ok) {
       setNodes((nds) => nds.filter((n) => n.id !== id));
       toast.success("Gestor de campaña eliminado");
     }
@@ -44,51 +42,11 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
   const generateCopyForPlatform = async (platform: string) => {
     update({ generatingCopy: { ...(data.generatingCopy || {}), [platform]: true } });
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token ?? '';
       const prompt = `Genera un caption optimizado para ${platform} sobre: ${data.title || 'campaña de marketing'}. Máx 150 caracteres. Incluye emojis y hashtags relevantes.`;
-
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/ai-proxy`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, 'apikey': SUPABASE_ANON_KEY },
-        body: JSON.stringify({
-          provider: 'openrouter',
-          path: 'chat/completions',
-          body: {
-            model: data.model || 'deepseek/deepseek-chat',
-            messages: [{ role: 'user', content: prompt }],
-            stream: true,
-            max_tokens: 200,
-          },
-        }),
-      });
-
-      if (!res.ok) { toast.error(`Error generando copy para ${platform}`); return; }
-
-      const reader = res.body!.getReader();
-      const decoder = new TextDecoder();
-      let accumulated = '';
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() ?? '';
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          const payload = line.slice(6).trim();
-          if (payload === '[DONE]') break;
-          try {
-            const delta = JSON.parse(payload)?.choices?.[0]?.delta?.content;
-            if (typeof delta === 'string') accumulated += delta;
-          } catch { /* skip */ }
-        }
-      }
+      const res = await aiService.handleTextGen('chat', prompt, data.model || 'deepseek-chat');
 
       update({
-        platformCopy: { ...(data.platformCopy || {}), [platform]: accumulated },
+        platformCopy: { ...(data.platformCopy || {}), [platform]: res.text || '' },
         generatingCopy: { ...(data.generatingCopy || {}), [platform]: false },
       });
     } catch {
@@ -221,7 +179,7 @@ const CampaignManagerNode = ({ id, data }: { id: string, data: CampaignNodeData 
                     key={m.id}
                     onClick={async () => {
                       setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, model: m.id } } : n));
-                      await supabase.from('canvas_nodes').update({ data_payload: { ...data, model: m.id } as any }).eq('id', id);
+                      await updateCanvasNode(id, { dataPayload: { ...data, model: m.id } });
                     }}
                     className={`px-2 py-1.5 rounded-lg border text-[8px] font-bold lowercase tracking-wider transition-all ${
                       (data.model || 'deepseek-chat') === m.id 

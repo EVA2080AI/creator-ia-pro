@@ -1,7 +1,7 @@
 import { memo, useCallback, useState } from 'react';
 import { Position, useReactFlow } from '@xyflow/react';
 import { Brain, ChevronDown } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import BaseNode from './BaseNode';
 import { NODE_META } from './nodeConnections';
@@ -34,7 +34,7 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
   }, [id, setNodes]);
 
   const deleteNode = async () => {
-    await supabase.from('canvas_nodes').delete().eq('id', id);
+    await deleteCanvasNode(id);
     setNodes((nds) => nds.filter((n) => n.id !== id));
     toast.success('Nodo eliminado');
   };

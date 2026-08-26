@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { createSpace } from "@/lib/spaces";
+import { createCanvasNode, upsertCanvasEdges } from "@/lib/canvas-nodes";
 import { toast } from "sonner";
 import {
   Megaphone, FileText, Image, Video, Hash, PenTool, Type, Monitor,
@@ -32,13 +33,49 @@ export const HubView = () => {
 
   const handleUseTemplate = async (template: typeof TEMPLATES[0]) => {
     if (!user) return;
-    // El sembrado de nodos del canvas (canvas_nodes) todavía depende de una tabla
-    // que no se migró de Supabase a Neon — ver docs/PLAN_REFACTOR_GENESIS.md
-    // fase "Fusión Herramientas". Por ahora solo se crea el espacio vacío.
-    toast.info("Las plantillas con nodos precargados están temporalmente deshabilitadas — se está migrando esa parte. Se creará un espacio en blanco.");
     try {
       const space = await createSpace({ name: template.title, description: template.description });
       if (!space) throw new Error("No se pudo crear el espacio");
+
+      if (template.nodes.length > 0) {
+        const nodeRows = template.nodes.map((node: any, i: number) => ({
+          id: crypto.randomUUID(),
+          type: node.type || "modelView",
+          name: node.data?.title || `Nodo ${i + 1}`,
+          posX: 100 + i * 340,
+          posY: 220,
+          status: "idle",
+          dataPayload: node.data || {},
+          prompt: "",
+        }));
+
+        const created = await Promise.all(nodeRows.map((n) => createCanvasNode({ ...n, spaceId: space.id })));
+        if (created.some((c) => !c)) throw new Error("No se pudieron crear los nodos");
+
+        // Reconstruir los edges usando los IDs generados localmente
+        const edges = (template.edges || []).map((edgeInfo, idx) => {
+          const srcNode = nodeRows[edgeInfo.source];
+          const targetNode = nodeRows[edgeInfo.target];
+          if (!srcNode || !targetNode) return null;
+
+          return {
+            id: `e-${srcNode.id}-${targetNode.id}-${idx}`,
+            source: srcNode.id,
+            target: targetNode.id,
+            sourceHandle: edgeInfo.sourceHandle || 'any-out',
+            targetHandle: edgeInfo.targetHandle || 'any-in',
+            type: 'smoothstep',
+            animated: true,
+            style: { stroke: '#a855f7', strokeWidth: 2 },
+          };
+        }).filter(Boolean);
+
+        if (edges.length > 0) {
+          await upsertCanvasEdges(space.id, edges);
+        }
+      }
+
+      toast.success(`Plantilla "${template.title}" cargada`);
       navigate(`/studio-flow?spaceId=${space.id}`);
     } catch {
       toast.error("Error al crear espacio desde plantilla");

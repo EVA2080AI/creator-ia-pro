@@ -1,7 +1,7 @@
 import { memo, useCallback, useState, useEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { Image as ImageIcon, Wand2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { updateCanvasNode, deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import BaseNode from './BaseNode';
 
@@ -68,15 +68,11 @@ const ModelNode = ({ id, data }: { id: string; data: ModelNodeData }) => {
   ) => {
     const updateData =
       field === 'prompt'
-        ? { prompt: val, data_payload: { ...data, prompt: val } as any }
-        : { data_payload: { ...data, [field]: val } as any };
+        ? { prompt: val, dataPayload: { ...data, prompt: val } }
+        : { dataPayload: { ...data, [field]: val } };
 
-    const { error } = await supabase
-      .from('canvas_nodes')
-      .update(updateData)
-      .eq('id', id);
-
-    if (error) console.error(`Error syncing model ${field}:`, error);
+    const updated = await updateCanvasNode(id, updateData);
+    if (!updated) console.error(`Error syncing model ${field}`);
   };
 
   const updateRatio = useCallback(
@@ -107,11 +103,8 @@ const ModelNode = ({ id, data }: { id: string; data: ModelNodeData }) => {
   }, [data.assetUrl]);
 
   const deleteNode = async () => {
-    const { error } = await supabase
-      .from('canvas_nodes')
-      .delete()
-      .eq('id', id);
-    if (!error) {
+    const ok = await deleteCanvasNode(id);
+    if (ok) {
       setNodes((nds) => nds.filter((n) => n.id !== id));
       toast.success('Nodo eliminado');
     }
@@ -119,8 +112,7 @@ const ModelNode = ({ id, data }: { id: string; data: ModelNodeData }) => {
 
   const handleToggleBypass = () => {
     const newStatus = data.status === 'bypassed' ? 'idle' : 'bypassed';
-    const updateData: any = { data_payload: { ...data, status: newStatus } };
-    supabase.from('canvas_nodes').update(updateData).eq('id', id).then(() => {
+    void updateCanvasNode(id, { dataPayload: { ...data, status: newStatus } }).then(() => {
       setNodes((nds) =>
         nds.map((n) => n.id === id ? { ...n, data: { ...n.data, status: newStatus } } : n)
       );

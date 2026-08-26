@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { createCanvasNode, updateCanvasNode } from "@/lib/canvas-nodes";
 import { aiService } from "@/services/ai-service";
 import { toast } from "sonner";
 import { Node, useReactFlow, Edge } from "@xyflow/react";
@@ -31,30 +31,23 @@ export function useCanvasExecution(
 
   const ensureNodePersisted = async (nodeId: string) => {
     if (!spaceId || !user) return false;
-    const { data: existing } = await supabase
-        .from('canvas_nodes')
-        .select('id')
-        .eq('id', nodeId)
-        .maybeSingle();
-
-    if (existing) return true;
-
     const nodeToPersist = getNodes().find(n => n.id === nodeId);
     if (!nodeToPersist) return false;
 
-    const { error: insertError } = await supabase.from('canvas_nodes').insert({
-        id: nodeId,
-        space_id: spaceId,
-        user_id: user.id,
-        type: nodeToPersist.type || 'default',
-        prompt: nodeToPersist.data.prompt || nodeToPersist.data.title || 'auto-persisted',
-        status: nodeToPersist.data.status || 'idle',
-        data_payload: nodeToPersist.data,
-        pos_x: nodeToPersist.position.x,
-        pos_y: nodeToPersist.position.y
+    // Idempotente por id (onConflictDoNothing en el servidor) — funciona igual si
+    // el nodo ya existía o si se acaba de crear.
+    const persisted = await createCanvasNode({
+      id: nodeId,
+      spaceId,
+      type: nodeToPersist.type || 'default',
+      prompt: nodeToPersist.data.prompt || nodeToPersist.data.title || 'auto-persisted',
+      status: nodeToPersist.data.status || 'idle',
+      dataPayload: nodeToPersist.data,
+      posX: nodeToPersist.position.x,
+      posY: nodeToPersist.position.y,
     });
-    
-    return !insertError;
+
+    return !!persisted;
   };
 
   const animateEdgesToNode = (targetNodeId: string, isActive: boolean) => {
@@ -146,11 +139,11 @@ export function useCanvasExecution(
       animateEdgesToNode(nodeId, false);
 
       if (spaceId) {
-        await supabase.from('canvas_nodes').update({
+        await updateCanvasNode(nodeId, {
           status: 'ready',
-          asset_url: assetUrl || undefined,
-          data_payload: { ...node.data, ...updatePayload }
-        } as any).eq('id', nodeId);
+          assetUrl: assetUrl || undefined,
+          dataPayload: { ...node.data, ...updatePayload },
+        });
       }
 
       addLog(nodeName, 'Completado ✓', 'success');

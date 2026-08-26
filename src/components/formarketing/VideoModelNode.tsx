@@ -2,7 +2,8 @@ import { memo, useState, useEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import { Video, Trash2, Zap, ChevronDown, ChevronUp, Play, Download, Loader2, Sparkles, Wand2, Image as ImageIcon, Clock, Star, ZapOff } from 'lucide-react';
 import BaseNode from './BaseNode';
-import { supabase } from '@/integrations/supabase/client';
+import { deleteCanvasNode } from '@/lib/canvas-nodes';
+import { aiService } from '@/services/ai-service';
 import { toast } from 'sonner';
 
 // MODELOS ECONÓMICOS VIA FAL.AI
@@ -141,7 +142,7 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
   };
 
   const deleteNode = async () => {
-    await supabase.from('canvas_nodes').delete().eq('id', id);
+    await deleteCanvasNode(id);
     setNodes(nds => nds.filter(n => n.id !== id));
     toast.success('Nodo de video eliminado');
   };
@@ -169,32 +170,11 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
     update({ status: 'executing' });
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token ?? '';
-
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/media-proxy`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-        },
-        body: JSON.stringify({
-          tool: 'video',
-          prompt: {
-            model: currentModel.id,
-            prompt: data.prompt || 'A cinematic scene',
-            aspectRatio: currentRatio.id,
-            duration: parseInt(currentModel.maxDuration),
-          },
-          image_url: data.imageRef,
-        }),
+      const result = await aiService.processAction({
+        action: 'video',
+        prompt: data.prompt || 'A cinematic scene',
+        model: currentModel.id,
       });
-
-      if (!res.ok) throw new Error('Error en generación de video');
-
-      const result = await res.json();
-      if (result.error) throw new Error(result.error);
       if (result.url) {
         update({ assetUrl: result.url, status: 'ready' });
         toast.success(`Video generado con ${currentModel.name}`);

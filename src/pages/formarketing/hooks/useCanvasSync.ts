@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Node, Edge } from '@xyflow/react';
-import { supabase } from '@/integrations/supabase/client';
+import { getSpace } from '@/lib/spaces';
 import { genesisOrchestrator } from '@/services/genesis-orchestrator';
 import { useStudioProjects } from '@/hooks/useStudioProjects';
 
@@ -28,14 +28,9 @@ export const useCanvasSync = (
     timeoutRef.current = setTimeout(async () => {
       try {
         // 2. Resolve target project from space settings
-        const { data: space } = await supabase
-          .from('spaces')
-          .select('settings')
-          .eq('id', spaceId)
-          .single();
+        const space = await getSpace(spaceId);
 
-        // Cast settings to expected object shape to resolve type error
-        const settings = space?.settings as { genesis_project_id?: string } | null;
+        const settings = space?.settings as { genesis_project_id?: string } | undefined;
         const projectId = settings?.genesis_project_id;
         if (!projectId) return;
 

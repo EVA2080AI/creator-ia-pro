@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Node, Edge, NodeChange, EdgeChange, addEdge } from "@xyflow/react";
 import { toast } from "sonner";
+import { listCanvasNodes, updateCanvasNode, upsertCanvasEdges } from "@/lib/canvas-nodes";
 
 export function useCanvasPersistence(
   spaceId: string | null,
@@ -18,30 +18,22 @@ export function useCanvasPersistence(
     if (!user || !spaceId) return;
 
     const loadData = async () => {
-      const { data: dbNodes, error } = await supabase
-        .from('canvas_nodes')
-        .select('*')
-        .eq('space_id', spaceId);
-
-      if (error) {
-        toast.error("Error al cargar el espacio");
-        return;
-      }
+      const dbNodes = await listCanvasNodes(spaceId);
 
       const flowNodes: Node[] = [];
       let flowEdges: Edge[] = [];
 
-      dbNodes?.forEach(dbNode => {
+      dbNodes.forEach((dbNode) => {
         if (dbNode.type === 'flow_metadata') {
-          flowEdges = (dbNode.data_payload as any)?.edges || [];
+          flowEdges = (dbNode.dataPayload as any)?.edges || [];
         } else {
           flowNodes.push({
             id: dbNode.id,
             type: dbNode.type,
-            position: { x: dbNode.pos_x || 0, y: dbNode.pos_y || 0 },
-            data: { 
-              ...(dbNode.data_payload as any),
-              assetUrl: dbNode.asset_url,
+            position: { x: dbNode.posX || 0, y: dbNode.posY || 0 },
+            data: {
+              ...(dbNode.dataPayload as any),
+              assetUrl: dbNode.assetUrl,
               status: dbNode.status,
               prompt: dbNode.prompt
             }
@@ -55,19 +47,16 @@ export function useCanvasPersistence(
       }
     };
 
-    loadData();
+    loadData().catch(() => toast.error("Error al cargar el espacio"));
   }, [user, spaceId, setNodes, setEdges]);
 
   // Persist Changes (Positions)
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) => {
       onNodesChange(changes);
-      changes.forEach(async (change) => {
+      changes.forEach((change) => {
         if (change.type === 'position' && change.position && !change.dragging) {
-           await supabase
-             .from('canvas_nodes')
-             .update({ pos_x: change.position.x, pos_y: change.position.y })
-             .eq('id', change.id);
+          void updateCanvasNode(change.id, { posX: change.position.x, posY: change.position.y });
         }
       });
     },
@@ -79,21 +68,10 @@ export function useCanvasPersistence(
     (changes: EdgeChange[]) => {
       onEdgesChange(changes);
       if (spaceId) {
-        const saveEdges = async () => {
-          await supabase
-            .from('canvas_nodes')
-            .upsert({
-              space_id: spaceId,
-              user_id: user?.id || '',
-              type: 'flow_metadata',
-              data_payload: { edges },
-              prompt: 'metadata'
-            } as any, { onConflict: 'space_id,type' });
-        };
-        saveEdges();
+        void upsertCanvasEdges(spaceId, edges);
       }
     },
-    [onEdgesChange, edges, spaceId, user]
+    [onEdgesChange, edges, spaceId]
   );
 
   const onConnect = useCallback((params: any) => {

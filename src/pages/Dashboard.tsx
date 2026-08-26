@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { listSpaces, createSpace, deleteSpace, type Space } from "@/lib/spaces";
 import { listAssets } from "@/lib/assets";
+import { createCanvasNode, upsertCanvasEdges } from "@/lib/canvas-nodes";
+import { genesisOrchestrator } from "@/services/genesis-orchestrator";
 import { toast } from "sonner";
 import {
   Zap, Coins, CreditCard, LayoutGrid, Image,
@@ -142,9 +144,32 @@ export default function Dashboard() {
   };
 
   const handleMapBlueprint = async () => {
-    // El mapeo a Canvas IA (canvas_nodes) todavía depende de una tabla que no se
-    // migró a Neon — ver docs/PLAN_REFACTOR_GENESIS.md fase "Fusión Herramientas".
-    toast.info("El mapa estratégico en Canvas IA está temporalmente deshabilitado — la migración de esa parte sigue en curso.");
+    if (!openingProject) return;
+    try {
+      const blueprintFile = openingProject.files?.['blueprint.json'];
+      if (!blueprintFile) throw new Error("No blueprint found");
+      const blueprint = JSON.parse(blueprintFile.content);
+
+      const space = await createSpace({
+        name: `🗺️ Map: ${openingProject.name}`,
+        settings: { genesis_project_id: openingProject.id },
+      });
+      if (!space) throw new Error("No se pudo crear el espacio");
+
+      const { nodes, edges } = genesisOrchestrator.mapBlueprintToCanvasNodes(blueprint, space.id, user?.id || '');
+
+      const created = await Promise.all(nodes.map((n) => createCanvasNode({
+        id: n.id, spaceId: n.space_id, type: n.type, prompt: n.prompt, status: n.status,
+        dataPayload: n.data_payload, posX: n.pos_x, posY: n.pos_y,
+      })));
+      if (created.some((c) => !c)) throw new Error("No se pudieron crear los nodos del mapa");
+
+      if (edges.length > 0) await upsertCanvasEdges(space.id, edges);
+
+      toast.success("Mapa generado");
+      navigate(`/formarketing?spaceId=${space.id}`);
+      setOpeningProject(null);
+    } catch (err) { console.error(err); toast.error("Error al mapear"); }
   };
 
   return (

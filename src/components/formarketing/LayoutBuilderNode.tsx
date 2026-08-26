@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Layout, Trash2, Globe, Smartphone, Monitor, Zap, ChevronDown, ChevronUp } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { updateCanvasNode, deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import { NodeConnectionDropdown } from './NodeConnectionDropdown';
 import { NodeNextAction } from './NodeNextAction';
@@ -35,15 +35,12 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
     );
 
     // Sync to DB
-    await supabase
-      .from('canvas_nodes')
-      .update({ data_payload: { ...data, [field]: value } as any })
-      .eq('id', id);
+    await updateCanvasNode(id, { dataPayload: { ...data, [field]: value } });
   };
 
   const deleteNode = async () => {
-    const { error } = await supabase.from('canvas_nodes').delete().eq('id', id);
-    if (!error) {
+    const ok = await deleteCanvasNode(id);
+    if (ok) {
       setNodes((nds) => nds.filter((n) => n.id !== id));
       toast.success("Layout eliminado");
     }

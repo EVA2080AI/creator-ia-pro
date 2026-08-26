@@ -1,7 +1,7 @@
 import { memo, useCallback, useState } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Braces, Trash2, ChevronDown } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import { NodeNextAction } from './NodeNextAction';
 
@@ -35,7 +35,7 @@ const PromptBuilderNode = ({ id, data }: { id: string; data: PromptBuilderNodeDa
   }, [id, setNodes]);
 
   const deleteNode = async () => {
-    await supabase.from('canvas_nodes').delete().eq('id', id);
+    await deleteCanvasNode(id);
     setNodes(nds => nds.filter(n => n.id !== id));
     toast.success('Nodo eliminado');
   };

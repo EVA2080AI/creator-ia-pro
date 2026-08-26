@@ -26,6 +26,11 @@ export async function listSpaces(): Promise<Space[]> {
   return res.ok ? res.data!.spaces : [];
 }
 
+export async function getSpace(id: string): Promise<Space | null> {
+  const res = await api<{ space: Space }>(`/api/spaces/${id}`);
+  return res.ok ? res.data!.space : null;
+}
+
 export async function createSpace(input: { name: string; description?: string; settings?: Record<string, unknown> }): Promise<Space | null> {
   const res = await api<{ space: Space }>("/api/spaces", { method: "POST", body: JSON.stringify(input) });
   return res.ok ? res.data!.space : null;
