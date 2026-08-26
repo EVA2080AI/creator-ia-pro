@@ -8,7 +8,12 @@
   "theme_color": "#8B5CF6",
   "orientation": "portrait-primary",
   "scope": "/",
-  "categories": ["productivity", "developer tools", "graphics", "ai"],
+  "categories": [
+    "productivity",
+    "developer tools",
+    "graphics",
+    "ai"
+  ],
   "lang": "es",
   "dir": "ltr",
   "icons": [
@@ -25,28 +30,60 @@
       "short_name": "Proyecto",
       "description": "Crear un nuevo proyecto",
       "url": "/studio-flow",
-      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Tareas",
+      "short_name": "Tareas",
+      "description": "Tablero de tareas (Kanban)",
+      "url": "/tareas",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Dashboard",
       "short_name": "Dashboard",
       "description": "Ver dashboard personal",
       "url": "/dashboard",
-      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Chat IA",
       "short_name": "Chat",
       "description": "Abrir chat con BuilderAI",
       "url": "/chat",
-      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Herramientas IA",
       "short_name": "Tools",
       "description": "Generar imágenes y texto",
       "url": "/tools",
-      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
   "related_applications": [],

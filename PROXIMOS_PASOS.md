@@ -39,3 +39,37 @@ La extensión de Chrome no llegó a conectarse en esta sesión, así que estos d
 - Pantallas de carga infinita tras navegar a `/chat` y tras "Push to Cloud" — la teoría de las ~45 dependencias de shadcn como causa fue investigada y descartada (Sandpack muestra su propio error de timeout, no es un cuelgue silencioso), pero eso no confirma que el problema original ya no exista por otra causa.
 
 Para cerrar esto: conectar la extensión con `/chrome` y pedir que se repita la pasada visual, o probarlo manualmente y contarme qué se ve.
+
+## 🆕 2026-08-25 — Tareas (Kanban móvil) + correo con Resend: pendiente de despliegue
+
+Código listo y verificado localmente (tests, build). Bloqueado porque el proyecto de Supabase está **pausado** (`INACTIVE`, el host ni resuelve en DNS) — es el mismo ítem 🔴 #1 de arriba. Al restaurarlo, ejecutar en orden:
+
+```bash
+npx supabase db push                                   # crea tasks + email_logs
+npx supabase secrets set RESEND_API_KEY='re_...'       # clave gratuita de resend.com
+npx supabase functions deploy send-email               # función de correo
+```
+
+Guía completa (plan gratuito de Resend, verificación de dominio, límites): `docs/TAREAS_Y_EMAIL.md`.
+
+## 🆕 2026-08-26 — Migración a Vercel + Neon: núcleo de Genesis ya funciona en producción
+
+Verificado con pruebas reales contra `creator-ia.com` (no solo en local):
+
+✅ **Funciona hoy en producción:**
+- Registro/login con email+contraseña (`better-auth`, cookies seguras).
+- Perfil con créditos y plan (`/api/profile`).
+- Proyectos de Genesis: crear, guardar archivos, listar, borrar (`/api/projects`).
+- Tareas (`/tareas`): CRUD completo + mover entre columnas, con `completed_at` correcto.
+- Motor de chat de Genesis (`/api/ai/chat`) ya conectado desde `useStudioChatAI` — cobra créditos de forma atómica y hace streaming, pero **sin `OPENROUTER_API_KEY` no genera respuestas reales todavía**.
+- Catálogo de modelos unificado (`src/lib/ai/models.ts`), verificado en vivo contra OpenRouter — reemplaza los 5 catálogos duplicados y elimina 9 IDs de modelo que ya no existían.
+- Bug corregido: selector de modelos con posición negativa en móvil.
+- Bug corregido: instrucciones personalizadas del usuario se recibían y se descartaban sin usarse — ahora se inyectan en el system prompt.
+- **Bug crítico encontrado y corregido**: Vercel no soporta rutas catch-all (`[...all].ts`) fuera de Next.js más allá de un segmento — esto rompía TODO el login en producción (`/api/auth/sign-up/email` daba 404). Se arregló con un rewrite explícito en `vercel.json`.
+
+🔑 **Bloqueadores — solo necesitan una clave que pongas en Vercel → Settings → Environment Variables:**
+- ~~`OPENROUTER_API_KEY`~~ ✅ configurada 2026-08-26 — el chat ya genera código/texto real en producción.
+- ~~`RESEND_API_KEY`~~ ✅ configurada 2026-08-26 — y dominio `creator-ia.com` **verificado** en Resend (DKIM/SPF/MX/DMARC agregados en Vercel DNS; `RESEND_FROM` apunta a `tareas@creator-ia.com`). Correo de prueba enviado a un buzón externo (no el dueño de la cuenta) y confirmado recibido — ya puede enviar a cualquier usuario.
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (y equivalentes de Apple/GitHub) → para que los botones de login social funcionen. Callback: `https://creator-ia.com/api/auth/callback/google`.
+
+⏳ **Todavía en Supabase (siguiente bloque):** Antigravity, Herramientas (imagen/texto), Canvas IA, Biblioteca de assets, panel de Admin más allá del flag `isAdmin`, y la fusión visual de todo dentro de Genesis con personalización por organización. Plan completo en `docs/PLAN_REFACTOR_GENESIS.md`.

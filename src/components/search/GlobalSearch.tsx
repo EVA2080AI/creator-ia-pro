@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, X, Command, Sparkles, Folder, FileText, Image, MessageSquare, Code } from 'lucide-react';
+import { Search, X, Command, Sparkles, Folder, FileText, Image, MessageSquare, Code, ListTodo } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface SearchResult {
@@ -35,6 +35,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
     { id: '6', type: 'tool', title: 'Generar Código', category: 'Tools', icon: Code, action: () => navigate('/tools') },
     { id: '7', type: 'page', title: 'Documentación', category: 'Pages', icon: FileText, action: () => navigate('/docs') },
     { id: '8', type: 'page', title: 'Pricing', category: 'Pages', icon: Sparkles, action: () => navigate('/pricing') },
+    { id: '9', type: 'page', title: 'Tareas', category: 'Pages', icon: ListTodo, action: () => navigate('/tareas') },
   ];
 
   useEffect(() => {

@@ -322,6 +322,45 @@ export type Database = {
           },
         ]
       }
+      email_logs: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          metadata: Json
+          provider_id: string | null
+          status: string
+          subject: string
+          template: string
+          to_email: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          metadata?: Json
+          provider_id?: string | null
+          status?: string
+          subject: string
+          template: string
+          to_email: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          metadata?: Json
+          provider_id?: string | null
+          status?: string
+          subject?: string
+          template?: string
+          to_email?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       error_logs: {
         Row: {
           component_stack: string | null
@@ -751,6 +790,54 @@ export type Database = {
           files?: Json
           id?: string
           name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          notify_email: boolean
+          position: number
+          priority: string
+          reminder_sent_at: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          notify_email?: boolean
+          position?: number
+          priority?: string
+          reminder_sent_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          notify_email?: boolean
+          position?: number
+          priority?: string
+          reminder_sent_at?: string | null
+          status?: string
+          title?: string
           updated_at?: string
           user_id?: string
         }

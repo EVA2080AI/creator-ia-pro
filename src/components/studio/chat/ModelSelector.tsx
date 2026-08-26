@@ -81,7 +81,7 @@ function ModelRow({
           </span>
           {!m.free && (
             <span className="text-[8px] font-mono text-zinc-400">
-              ${m.inputCost}/${ m.outputCost}/M
+              {m.credits} {m.credits === 1 ? 'crédito' : 'créditos'}/msj
             </span>
           )}
           {m.free && (
@@ -115,9 +115,13 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
       const spaceBelow = vh - rect.bottom - VIEWPORT_PADDING;
       const openUpward = spaceAbove >= 320 || spaceAbove > spaceBelow;
       const maxHeight = Math.max(220, openUpward ? spaceAbove - DROPDOWN_GAP : spaceBelow - DROPDOWN_GAP);
+      // El panel se achica con maxWidth en viewports angostos (ver JSX) — usar
+      // ese mismo ancho efectivo aquí, si no `left` puede quedar negativo en
+      // móvil (bug documentado: el dropdown se recortaba contra el borde).
+      const effectiveWidth = Math.min(DROPDOWN_WIDTH, vw - VIEWPORT_PADDING * 2);
       const left = Math.min(
         Math.max(VIEWPORT_PADDING, rect.left),
-        vw - DROPDOWN_WIDTH - VIEWPORT_PADDING
+        vw - effectiveWidth - VIEWPORT_PADDING
       );
       const top = openUpward
         ? rect.top - DROPDOWN_GAP
@@ -205,7 +209,7 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
                     <Sparkles className="h-3.5 w-3.5 text-primary" />
                     <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Seleccionar Modelo</span>
                   </div>
-                  <span className="text-[9px] text-zinc-400 font-medium">Precios por millón de tokens</span>
+                  <span className="text-[9px] text-zinc-400 font-medium">Créditos por mensaje</span>
                 </div>
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar">

@@ -4,11 +4,10 @@ import { toast } from 'sonner';
 import type { Message } from '@/components/studio/chat/types';
 import type { UIArtifact, UIPlanTask, UILog } from '@/components/studio/StudioArtifactsPanel';
 
-import type { User } from '@supabase/supabase-js';
-
 interface UseStudioChatMessagesProps {
   projectId: string | null;
-  user: User | null;
+  /** Solo se usa `.id` — evita atarse al tipo `User` de un proveedor de auth concreto. */
+  user: { id: string } | null;
   setArtifacts: (a: UIArtifact[]) => void;
   setTasks: (t: UIPlanTask[]) => void;
   setLogs: React.Dispatch<React.SetStateAction<UILog[]>>;

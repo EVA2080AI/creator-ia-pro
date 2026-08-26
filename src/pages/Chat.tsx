@@ -30,6 +30,7 @@ import { CommandPalette } from '@/components/studio/CommandPalette';
 import { StudioArtifactsPanel, type UIArtifact, type UIPlanTask, type UILog } from '@/components/studio/StudioArtifactsPanel';
 import { StudioTopbar } from '@/components/studio/StudioTopbar';
 import { ModelSelector } from '@/components/studio/chat/ModelSelector';
+import { DEFAULT_MODEL_ID } from '@/lib/ai/models';
 import { useStudioProjects, type StudioFile, type StudioProject } from '@/hooks/useStudioProjects';
 import { StudioCloud, type SupabaseConfig } from '@/components/studio/StudioCloud';
 import { useProfile } from '@/hooks/useProfile';
@@ -571,12 +572,12 @@ export default function Chat() {
   const [isListening, setIsListening] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>(() => {
-    if (typeof window === 'undefined') return 'anthropic/claude-sonnet-4-5';
-    const saved = window.localStorage.getItem('genesis-selected-model');
-    return saved || 'anthropic/claude-sonnet-4-5';
+    if (typeof window === 'undefined') return DEFAULT_MODEL_ID;
+    return window.localStorage.getItem('genesis-selected-model') || DEFAULT_MODEL_ID;
   });
 
-  // Persist model choice + auto-downgrade to free Gemini when free user runs out of credits
+  // Persist model choice + auto-downgrade a un modelo gratuito si el usuario
+  // free se queda sin créditos (una sola vez, en la primera carga sin elección guardada).
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem('genesis-selected-model', selectedModel);
@@ -588,12 +589,8 @@ export default function Chat() {
     const tier = profile.subscription_tier ?? 'free';
     const credits = profile.credits_balance ?? 0;
     const saved = typeof window !== 'undefined' ? window.localStorage.getItem('genesis-selected-model') : null;
-    // First load only: if user never picked a model, set tier-appropriate default
-    if (!saved) {
-      const next = tier === 'free' || credits <= 0
-        ? 'google/gemini-2.0-flash-001'
-        : 'anthropic/claude-sonnet-4-5';
-      setSelectedModel(next);
+    if (!saved && (tier === 'free' || credits <= 0)) {
+      setSelectedModel(DEFAULT_MODEL_ID);
     }
   }, [profile]);
 

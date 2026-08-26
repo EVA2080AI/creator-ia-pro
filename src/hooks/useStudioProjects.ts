@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
 
@@ -18,16 +17,17 @@ export interface StudioProject {
   updated_at: string;
 }
 
-const DEFAULT_FILES: Record<string, StudioFile> = {};
-
-interface DBStudioProject {
+// Forma que devuelve /api/projects (Drizzle, camelCase) — se traduce a la
+// forma pública snake_case de este hook para no tocar los consumidores
+// (Chat.tsx, Dashboard.tsx) en esta pasada.
+interface ApiProject {
   id: string;
-  user_id: string;
+  userId: string;
   name: string;
   description: string | null;
   files: unknown;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 function normalizeFiles(files: unknown): Record<string, StudioFile> {
@@ -46,84 +46,84 @@ function normalizeFiles(files: unknown): Record<string, StudioFile> {
   return {};
 }
 
+function fromApi(p: ApiProject): StudioProject {
+  return {
+    id: p.id,
+    user_id: p.userId,
+    name: p.name,
+    description: p.description,
+    files: normalizeFiles(p.files),
+    created_at: p.createdAt,
+    updated_at: p.updatedAt,
+  };
+}
+
+async function api<T>(path: string, init?: RequestInit): Promise<{ ok: boolean; error?: string; data?: T }> {
+  try {
+    const res = await fetch(path, {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      ...init,
+    });
+    const json = await res.json();
+    if (!res.ok || !json.ok) return { ok: false, error: json.error || `Error ${res.status}` };
+    return { ok: true, data: json };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Error de red' };
+  }
+}
+
 export function useStudioProjects() {
   const { user } = useAuth(); // no redirect — Studio handles auth via AppHeader
   const [projects, setProjects] = useState<StudioProject[]>([]);
   const [activeProject, setActiveProject] = useState<StudioProject | null>(null);
   const [loading, setLoading] = useState(true);
+  const [previousFiles, setPreviousFiles] = useState<Record<string, StudioFile> | null>(null);
 
   const fetchProjects = useCallback(async (showLoading = false) => {
     if (!user) { setLoading(false); return; }
     if (showLoading) setLoading(true);
-    const { data, error } = await supabase
-      .from('studio_projects')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('updated_at', { ascending: false });
 
-    if (error) {
-      console.error('Error fetching studio projects:', error);
+    const res = await api<{ projects: ApiProject[] }>('/api/projects');
+    if (!res.ok) {
+      console.error('Error fetching projects:', res.error);
       toast.error('No se pudieron cargar los proyectos');
       setLoading(false);
       return;
     }
 
-    const parsed = ((data as unknown as DBStudioProject[]) || []).map((p) => ({
-      ...p,
-      files: normalizeFiles(p.files),
-    })) as StudioProject[];
-
-    setProjects(parsed);
-    
-    // IMPORTANT: Fix to prevent skipping Genesis Home.
-    // Only update activeProject if it already exists (syncing).
-    // DO NOT auto-select the first one if null.
+    setProjects((res.data!.projects || []).map(fromApi));
+    // No autoseleccionar el primero al cargar — evita saltarse la pantalla de bienvenida de Genesis.
     setLoading(false);
   }, [user]);
 
-  useEffect(() => { 
-    fetchProjects(true); // Initial load with spinner
+  useEffect(() => {
+    fetchProjects(true);
   }, [fetchProjects]);
 
   const createProject = useCallback(async (name = 'Nuevo Proyecto') => {
     if (!user) return null;
-    const { data, error } = await supabase
-      .from('studio_projects')
-      .insert({ user_id: user.id, name, files: DEFAULT_FILES })
-      .select()
-      .single();
+    const res = await api<{ project: ApiProject }>('/api/projects', { method: 'POST', body: JSON.stringify({ name }) });
+    if (!res.ok) { toast.error('Error al crear proyecto'); return null; }
 
-    if (error) { toast.error('Error al crear proyecto'); return null; }
-
-    const project = { ...data, files: normalizeFiles(data.files) } as StudioProject;
+    const project = fromApi(res.data!.project);
     setProjects((prev) => [project, ...prev]);
     setActiveProject(project);
     toast.success('Proyecto creado');
     return project;
   }, [user]);
 
-  const [previousFiles, setPreviousFiles] = useState<Record<string, StudioFile> | null>(null);
-
-  // ─── AUTO-SAVE Logic ───────────────────────────────────────────────────────
+  // ─── AUTO-SAVE ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!activeProject || !user) return;
-    
-    const timer = setTimeout(async () => {
-      try {
-        const { error } = await supabase
-          .from('studio_projects')
-          .update({ 
-            files: activeProject.files as unknown as Record<string, unknown>, 
-            updated_at: new Date().toISOString() 
-          })
-          .eq('id', activeProject.id);
 
-        if (!error) {
-          console.log(`💾 Genesis Auto-save: ${activeProject.name}`);
-        }
-      } catch (err) {
-        console.error('Auto-save failed:', err);
-      }
+    const timer = setTimeout(async () => {
+      const res = await api(`/api/projects/${activeProject.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ files: activeProject.files }),
+      });
+      if (res.ok) console.log(`💾 Genesis Auto-save: ${activeProject.name}`);
+      else console.error('Auto-save failed:', res.error);
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -135,44 +135,29 @@ export function useStudioProjects() {
       return;
     }
 
-    // Save previous state for undo (Q-7)
     if (activeProject?.id === projectId) {
       setPreviousFiles(activeProject.files);
     }
 
-    const { error } = await supabase
-      .from('studio_projects')
-      .update({ 
-        files: files as unknown as Record<string, unknown>, 
-        updated_at: new Date().toISOString() 
-      })
-      .eq('id', projectId);
+    const res = await api(`/api/projects/${projectId}`, { method: 'PATCH', body: JSON.stringify({ files }) });
+    if (!res.ok) { console.error('Error saving files:', res.error); return; }
 
-    if (error) { console.error('Error saving files:', error); return; }
-
-    const updater = (p: StudioProject) => p.id === projectId ? { ...p, files: normalizeFiles(files), updated_at: new Date().toISOString() } : p;
+    const now = new Date().toISOString();
+    const updater = (p: StudioProject) => p.id === projectId ? { ...p, files: normalizeFiles(files), updated_at: now } : p;
     setProjects((prev) => prev.map(updater));
     setActiveProject((prev) => prev?.id === projectId ? updater(prev) : prev);
   }, [activeProject]);
 
   const renameProject = useCallback(async (projectId: string, name: string) => {
-    const { error } = await supabase
-      .from('studio_projects')
-      .update({ name, updated_at: new Date().toISOString() })
-      .eq('id', projectId);
-
-    if (error) { toast.error('Error al renombrar'); return; }
+    const res = await api(`/api/projects/${projectId}`, { method: 'PATCH', body: JSON.stringify({ name }) });
+    if (!res.ok) { toast.error('Error al renombrar'); return; }
     setProjects((prev) => prev.map((p) => p.id === projectId ? { ...p, name } : p));
     setActiveProject((prev) => prev?.id === projectId ? { ...prev, name } : prev);
   }, []);
 
   const deleteProject = useCallback(async (projectId: string) => {
-    const { error } = await supabase
-      .from('studio_projects')
-      .delete()
-      .eq('id', projectId);
-    
-    if (error) { toast.error('Error al eliminar proyecto'); return; }
+    const res = await api(`/api/projects/${projectId}`, { method: 'DELETE' });
+    if (!res.ok) { toast.error('Error al eliminar proyecto'); return; }
     setProjects((prev) => prev.filter((p) => p.id !== projectId));
     setActiveProject((prev) => prev?.id === projectId ? null : prev);
     toast.success('Proyecto eliminado');
@@ -180,27 +165,20 @@ export function useStudioProjects() {
 
   const duplicateProject = useCallback(async (project: StudioProject) => {
     if (!user) return null;
-    const { data, error } = await supabase
-      .from('studio_projects')
-      .insert({ 
-        user_id: user.id, 
-        name: `${project.name} (Copia)`, 
-        files: project.files as unknown as Record<string, unknown> 
-      })
-      .select()
-      .single();
+    const created = await api<{ project: ApiProject }>('/api/projects', {
+      method: 'POST',
+      body: JSON.stringify({ name: `${project.name} (Copia)` }),
+    });
+    if (!created.ok) { toast.error('Error al duplicar'); return null; }
 
-    if (error) { toast.error('Error al duplicar'); return null; }
-    if (!data) return null;
-
-    const typedData = data as unknown as DBStudioProject;
-    const newProject = { 
-      ...typedData, 
-      files: normalizeFiles(typedData.files) 
-    } as StudioProject;
-    setProjects((prev) => [newProject, ...prev]);
+    const withFiles = await api<{ project: ApiProject }>(`/api/projects/${created.data!.project.id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ files: project.files }),
+    });
+    const finalProject = fromApi(withFiles.ok ? withFiles.data!.project : created.data!.project);
+    setProjects((prev) => [finalProject, ...prev]);
     toast.success('Proyecto duplicado exitosamente');
-    return newProject;
+    return finalProject;
   }, [user]);
 
   const rollbackFiles = useCallback(async () => {
@@ -215,59 +193,36 @@ export function useStudioProjects() {
   }, [activeProject, previousFiles, updateProjectFiles]);
 
   const getProjectFiles = useCallback(async (projectId: string): Promise<Record<string, StudioFile> | null> => {
-    const { data, error } = await supabase
-      .from('studio_projects')
-      .select('files')
-      .eq('id', projectId)
-      .single();
-
-    if (error || !data) {
-      console.error('Error fetching project files:', error);
+    const res = await api<{ project: ApiProject }>(`/api/projects/${projectId}`);
+    if (!res.ok) {
+      console.error('Error fetching project files:', res.error);
       return null;
     }
-
-    return normalizeFiles(data.files);
+    return normalizeFiles(res.data!.project.files);
   }, []);
 
   const hardResetProject = useCallback(async (projectId: string) => {
-    // 1. Wipe all files to empty state
-    const { error: fileError } = await supabase
-      .from('studio_projects')
-      .update({ 
-        files: {}, 
-        updated_at: new Date().toISOString(),
-        description: null 
-      })
-      .eq('id', projectId);
-
-    if (fileError) {
+    const res = await api(`/api/projects/${projectId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ files: {}, description: null }),
+    });
+    if (!res.ok) {
       toast.error('Error al limpiar archivos');
       return false;
     }
 
-    // 2. Wipe chat history for this project
-    const { error: chatError } = await supabase
-      .from('studio_conversations')
-      .delete()
-      .eq('project_id', projectId);
-
-    if (chatError) {
-      console.error('Error clearing chat history during reset:', chatError);
-    }
-
-    // 3. Update local state
-    setProjects(prev => prev.map(p => p.id === projectId ? { ...p, files: {}, description: null } : p));
+    setProjects((prev) => prev.map((p) => p.id === projectId ? { ...p, files: {}, description: null } : p));
     if (activeProject?.id === projectId) {
-      setActiveProject(prev => prev ? { ...prev, files: {}, description: null } : null);
+      setActiveProject((prev) => prev ? { ...prev, files: {}, description: null } : null);
     }
 
     toast.success('Proyecto reseteado a cero');
     return true;
   }, [activeProject]);
 
-  return { 
-    projects, activeProject, setActiveProject, loading, 
-    createProject, updateProjectFiles, renameProject, 
+  return {
+    projects, activeProject, setActiveProject, loading,
+    createProject, updateProjectFiles, renameProject,
     deleteProject, duplicateProject, rollbackFiles, canUndo: !!previousFiles,
     refetch: fetchProjects, getProjectFiles, hardResetProject
   };

@@ -34,6 +34,7 @@ function AuthWatcher() {
     { key: 'k', meta: true, handler: () => setSearchOpen(true) },
     { key: 'p', meta: true, shift: true, handler: () => navigate('/profile') },
     { key: 'd', meta: true, shift: true, handler: () => navigate('/dashboard') },
+    { key: 't', meta: true, shift: true, handler: () => navigate('/tareas') },
     { key: 'h', meta: true, shift: true, handler: () => navigate('/help') },
   ]);
 
@@ -98,6 +99,8 @@ const CodeIDE      = lazy(() => import("./pages/CodeIDE"));
 const Studio       = lazy(() => import("./pages/Studio"));
 const StudioLite   = lazy(() => import("./pages/StudioLite"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
+const Tasks        = lazy(() => import("./pages/Tasks"));
+const AssistantPage = lazy(() => import("./pages/Assistant"));
 
 // Delicias Colombianas
 const LuminaMenu = lazy(() => import("./pages/LuminaMenu"));
@@ -178,6 +181,9 @@ const App = () => {
                   {/* Nebula Finance - Coming Soon */}
                   <Route path="/nebula"            element={<Navigate to="/dashboard" replace />} />
 
+                  {/* Asistentes personalizables — shell propio, sin AppLayout */}
+                  <Route path="/a/:slug" element={<AssistantPage />} />
+
                   {/* ── Redirects ── */}
                   <Route path="/canvas"  element={<CanvasRedirect />} />
                   <Route path="/studio"  element={<StudioLite />} />
@@ -187,6 +193,8 @@ const App = () => {
                   <Route element={<AppLayout />}>
                     <Route path="/dashboard"    element={<Dashboard />} />
                     <Route path="/spaces"       element={<Spaces />} />
+                    <Route path="/tareas"       element={<Tasks />} />
+                    <Route path="/tasks"        element={<Navigate to="/tareas" replace />} />
                     <Route path="/assets"       element={<Navigate to="/spaces" replace />} />
                     <Route path="/tools"        element={<Tools />} />
                     <Route path="/apps/:appId"  element={<Tools />} />

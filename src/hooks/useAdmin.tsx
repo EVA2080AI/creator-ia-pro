@@ -1,27 +1,9 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useProfile } from "./useProfile";
 
+// El rol de admin ahora vive como columna en `profile` (ver db/schema/auth.ts)
+// en vez de una RPC `has_role` separada — una sola fuente de verdad, sin
+// round-trip extra.
 export function useAdmin(userId: string | undefined) {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!userId) {
-      setLoading(false);
-      return;
-    }
-
-    const check = async () => {
-      const { data, error } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: "admin",
-      });
-      setIsAdmin(!!data && !error);
-      setLoading(false);
-    };
-
-    check();
-  }, [userId]);
-
-  return { isAdmin, loading };
+  const { profile, loading } = useProfile(userId);
+  return { isAdmin: !!profile?.isAdmin, loading };
 }

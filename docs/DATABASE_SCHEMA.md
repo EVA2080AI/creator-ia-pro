@@ -314,3 +314,42 @@ Todas las tablas tienen RLS (Row Level Security) habilitado.
 - Las tablas `transactions` y `studio_messages` pueden crecer grandes → considerar particionamiento en el futuro
 - Usar `jsonb` para campos flexibles permite índices GIN cuando sea necesario
 - Soft deletes preferidos sobre hard deletes (usar `is_archived`, `deleted_at`)
+
+### `tasks`
+Tareas personales del usuario (tablero Kanban en `/tareas`). Migración `20260825120000_tasks_and_email_logs.sql`.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | uuid | PK, DEFAULT gen_random_uuid() | ID único |
+| user_id | uuid | FK → auth.users, NOT NULL | Dueño |
+| title | text | NOT NULL, 1–200 chars | Título |
+| description | text | nullable, ≤ 4000 chars | Detalle |
+| status | text | 'todo' \| 'in_progress' \| 'done' | Columna |
+| priority | text | 'low' \| 'medium' \| 'high' | Prioridad |
+| due_date | date | nullable | Fecha límite (sin hora) |
+| position | integer | DEFAULT 0 | Orden dentro de la columna |
+| notify_email | boolean | DEFAULT false | Avisos por correo (Resend) |
+| reminder_sent_at | timestamptz | nullable | Recordatorio de vencimiento ya enviado |
+| completed_at | timestamptz | nullable | Lo fija el trigger al pasar a 'done' |
+| created_at / updated_at | timestamptz | DEFAULT now() | Auditoría (trigger `update_updated_at_column`) |
+
+**RLS:** SELECT/INSERT/UPDATE/DELETE solo si `user_id = auth.uid()`.
+**Indexes:** `(user_id, status, position)`, `(user_id, due_date) WHERE due_date IS NOT NULL`.
+
+### `email_logs`
+Registro de correos enviados por la edge function `send-email`. Solo el service role escribe.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | uuid | PK | ID único |
+| user_id | uuid | FK → auth.users, nullable | Remitente (usuario autenticado) |
+| to_email | text | NOT NULL | Destinatario |
+| subject | text | NOT NULL | Asunto |
+| template | text | NOT NULL | task_created / task_completed / task_reminder / task_share / custom |
+| status | text | 'sent' \| 'failed' | Resultado |
+| provider_id | text | nullable | ID devuelto por Resend |
+| error | text | nullable | Mensaje de error del proveedor |
+| metadata | jsonb | DEFAULT '{}' | task_id, task_count, from |
+| created_at | timestamptz | DEFAULT now() | Fecha (se usa para los límites diarios) |
+
+**RLS:** SELECT solo propias. Sin políticas de escritura para `authenticated`.

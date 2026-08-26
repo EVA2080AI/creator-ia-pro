@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 import {
   detectIntent,
@@ -237,6 +236,15 @@ IMPORTANTE: El usuario solicita HTML VANILLA (sin React).
         }
       }
 
+      // Instrucciones personalizadas del usuario (antes se recibían y se
+      // descartaban sin usarse — ver docs/INVENTARIO_FUNCIONALIDADES.md G-32).
+      const customInstructions = (options?.preferences ?? [])
+        .map((p) => p.instructions?.trim())
+        .filter((s): s is string => !!s);
+      if (customInstructions.length) {
+        systemPrompt += `\n\n=== INSTRUCCIONES PERSONALIZADAS DEL USUARIO ===\n${customInstructions.join('\n\n')}`;
+      }
+
       // History slice
       const historySlice = convHistory.slice(-BUDGET.maxHistory);
 
@@ -249,36 +257,30 @@ IMPORTANTE: El usuario solicita HTML VANILLA (sin React).
       // Select model
       let targetModel = selectedModel;
       if (hasImage && (selectedModel.includes('deepseek'))) {
-        targetModel = 'google/gemini-2.0-flash-001';
+        targetModel = 'google/gemini-2.5-flash-lite'; // gratis y con visión — ver src/lib/ai/models.ts
       }
 
       setGenPhase('streaming');
       setGenSpecialist(isReasoningMode ? 'architect' : 'frontend');
       onPhaseChange?.('generating', isReasoningMode ? 'architect' : 'frontend');
 
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
+      const res = await fetch('/api/ai/chat', {
         method: 'POST',
         signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.access_token}`,
-          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-        },
+        credentials: 'include', // sesión de better-auth vía cookie httpOnly
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          provider: 'openrouter',
-          path: 'chat/completions',
-          body: {
-            model: targetModel,
-            messages,
-            stream: true,
-            temperature: isChatMode ? 0.7 : 0.3,
-            max_tokens: isChatMode ? BUDGET.maxChatTokens : BUDGET.maxCodeTokens
-          }
+          model: targetModel,
+          messages,
+          temperature: isChatMode ? 0.7 : 0.3,
+          maxTokens: isChatMode ? BUDGET.maxChatTokens : BUDGET.maxCodeTokens
         })
       });
 
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok || res.headers.get('content-type')?.includes('application/json')) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || `Error ${res.status}`);
+      }
 
       // Read stream
       const reader = res.body!.getReader();

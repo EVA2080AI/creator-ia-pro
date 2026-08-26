@@ -100,3 +100,4 @@ vercel --prod
 - [2026-04-18] Hero banner visual en landing
 - [2026-04-18] 6 planes de pricing sincronizados
 - [2026-04-18] Navegación: "Planes" en lugar de "Computo"
+- [2026-08-25] Tablero de tareas Kanban 100% móvil en `/tareas` + correos transaccionales con Resend (edge function `send-email`). Ver `docs/TAREAS_Y_EMAIL.md`

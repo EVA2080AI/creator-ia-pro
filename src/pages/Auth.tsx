@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SEO, seoPresets } from "@/components/SEO";
-import { supabase } from "@/integrations/supabase/client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -27,42 +27,40 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { data: session } = useSession();
 
   const REDIRECT_URL = `${window.location.origin}/dashboard`;
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard");
-    });
-  }, [navigate]);
+    if (session?.user) navigate("/dashboard");
+  }, [session, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
       if (mode === "forgot") {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        const { error } = await authClient.requestPasswordReset({
+          email,
           redirectTo: REDIRECT_URL.replace("/dashboard", "/reset-password"),
         });
-        if (error) throw error;
+        if (error) throw new Error(error.message);
         toast.success("Enlace enviado. Revisa tu correo.");
         setMode("login");
       } else if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        const { error } = await authClient.signIn.email({ email, password });
+        if (error) throw new Error(error.message);
         toast.success("Sesión iniciada correctamente.");
         navigate("/dashboard");
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { error } = await authClient.signUp.email({
           email,
           password,
-          options: {
-            data: { display_name: displayName || email.split("@")[0] },
-            emailRedirectTo: REDIRECT_URL,
-          },
+          name: displayName || email.split("@")[0],
         });
-        if (error) throw error;
-        toast.success("Cuenta creada. Verifica tu correo para continuar.");
+        if (error) throw new Error(error.message);
+        toast.success("Cuenta creada. ¡Bienvenido!");
+        navigate("/dashboard");
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -371,11 +369,8 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await supabase.auth.signInWithOAuth({
-                        provider: "google",
-                        options: { redirectTo: REDIRECT_URL },
-                      });
-                      if (error) toast.error(error.message);
+                      const { error } = await authClient.signIn.social({ provider: "google", callbackURL: "/dashboard" });
+                      if (error) toast.error(error.message || "Google aún no está configurado.");
                       setLoading(false);
                     }}
                   >
@@ -395,11 +390,8 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await supabase.auth.signInWithOAuth({
-                        provider: "apple",
-                        options: { redirectTo: REDIRECT_URL },
-                      });
-                      if (error) toast.error(error.message);
+                      const { error } = await authClient.signIn.social({ provider: "apple", callbackURL: "/dashboard" });
+                      if (error) toast.error(error.message || "Apple aún no está configurado.");
                       setLoading(false);
                     }}
                   >
@@ -416,11 +408,8 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await supabase.auth.signInWithOAuth({
-                        provider: "github",
-                        options: { redirectTo: REDIRECT_URL },
-                      });
-                      if (error) toast.error(error.message);
+                      const { error } = await authClient.signIn.social({ provider: "github", callbackURL: "/dashboard" });
+                      if (error) toast.error(error.message || "GitHub aún no está configurado.");
                       setLoading(false);
                     }}
                   >

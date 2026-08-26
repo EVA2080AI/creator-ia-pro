@@ -10,6 +10,12 @@ export default defineConfig({
     hmr: {
       overlay: false,
     },
+    // En local, las funciones de /api/* las sirve `vercel dev` en otro puerto
+    // (vercel dev no proxea bien los módulos de Vite si sirve el frontend él mismo).
+    // En producción esto no aplica: Vercel sirve el build estático + funciones en el mismo dominio.
+    proxy: {
+      "/api": { target: "http://localhost:3001", changeOrigin: true },
+    },
   },
   plugins: [react()],
   resolve: {

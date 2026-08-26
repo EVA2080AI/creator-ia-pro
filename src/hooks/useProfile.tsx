@@ -1,51 +1,70 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useCallback, useEffect, useState } from "react";
 
-interface Profile {
-  id: string;
-  user_id: string;
-  display_name: string | null;
-  full_name: string | null;
+interface ProfileApiShape {
+  userId: string;
+  displayName: string | null;
+  avatarUrl: string | null;
   email: string;
+  creditsBalance: number;
+  subscriptionTier: string;
+  isAdmin: boolean;
+  createdAt: string;
+}
+
+// Alias en snake_case por compatibilidad con los componentes que aún no se
+// migraron (SidebarGlobal, MobileNav, Dashboard...) — mismo valor, dos nombres,
+// hasta que cada consumidor pase a los campos camelCase de `ProfileApiShape`.
+export interface Profile extends ProfileApiShape {
+  display_name: string | null;
+  avatar_url: string | null;
   credits_balance: number;
   subscription_tier: string;
-  avatar_url: string | null;
-  condominio_id: string | null;
-  telefono: string | null;
+  created_at: string;
+  full_name: string | null;
+}
+
+function withLegacyAliases(p: ProfileApiShape): Profile {
+  return {
+    ...p,
+    display_name: p.displayName,
+    avatar_url: p.avatarUrl,
+    credits_balance: p.creditsBalance,
+    subscription_tier: p.subscriptionTier,
+    created_at: p.createdAt,
+    full_name: p.displayName,
+  };
+}
+
+// La sesión de better-auth vive en una cookie httpOnly — no hace falta
+// adjuntar token, basta con enviar la cookie de origen (same-origin).
+async function fetchProfile(): Promise<Profile | null> {
+  const res = await fetch("/api/profile", { credentials: "include" });
+  if (!res.ok) return null;
+  const json = await res.json();
+  return json.ok ? withLegacyAliases(json.profile as ProfileApiShape) : null;
 }
 
 export function useProfile(userId: string | undefined) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const refreshProfile = useCallback(async () => {
     if (!userId) return;
-
-    const fetchProfile = async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", userId)
-        .single();
-
-      if (!error && data) {
-        setProfile(data as any as Profile);
-      }
-      setLoading(false);
-    };
-
-    fetchProfile();
+    const p = await fetchProfile();
+    if (p) setProfile(p);
   }, [userId]);
 
-  const refreshProfile = async () => {
-    if (!userId) return;
-    const { data } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", userId)
-      .single();
-    if (data) setProfile(data as any as Profile);
-  };
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    fetchProfile().then((p) => {
+      setProfile(p);
+      setLoading(false);
+    });
+  }, [userId]);
 
   return { profile, loading, refreshProfile };
 }

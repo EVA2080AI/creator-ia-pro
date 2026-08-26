@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SEO } from "@/components/SEO";
-import { supabase } from "@/integrations/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,35 +11,29 @@ import { Sparkles, ArrowRight } from "lucide-react";
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [ready, setReady] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
 
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash.includes("type=recovery")) {
-      setReady(true);
-    } else {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) setReady(true);
-        else navigate("/auth");
-      });
-    }
-  }, [navigate]);
+    if (!token) navigate("/auth");
+  }, [token, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!token) return;
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
+    const { error } = await authClient.resetPassword({ newPassword: password, token });
     if (error) {
       toast.error(error.message);
     } else {
       toast.success("¡Contraseña actualizada!");
-      navigate("/dashboard");
+      navigate("/auth");
     }
     setLoading(false);
   };
 
-  if (!ready) return null;
+  if (!token) return null;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background font-sans selection:bg-primary/15">

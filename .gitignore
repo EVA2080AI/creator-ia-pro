@@ -28,3 +28,4 @@ node_modules/
 .env.vercel
 .claude/
 test-qa.mjs
+.env*.local

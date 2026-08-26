@@ -6,7 +6,7 @@ import {
   Coins, LogOut, User, Shield, Zap, Settings, CreditCard, Sparkles,
   PanelLeftClose, PanelLeftOpen, List, Code2,
   Home, LayoutGrid, ShieldCheck, Activity, Bot,
-  Users2, Palette, type LucideIcon
+  Users2, Palette, ListTodo, type LucideIcon
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -49,6 +49,7 @@ interface NavItemDef {
 /** ─── Navigation structure ────────────────────────────────────────────────────── */
 const NAV_MAIN: NavItemDef[] = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
+  { path: '/tareas',       label: 'Tareas',        icon: ListTodo,       minTier: 'free' },
   { path: '/chat',         label: 'Genesis IA',    icon: Brain,          minTier: 'creador' },
   { path: '/code',         label: 'Editor',        icon: Code2,          minTier: 'creador' },
   { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'pro' },

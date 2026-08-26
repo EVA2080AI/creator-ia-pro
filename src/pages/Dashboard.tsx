@@ -7,8 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   Zap, Coins, CreditCard, LayoutGrid, Image,
-  Megaphone, PenTool, MessageSquare, Hash, FileText, FolderPlus,
-  Code2, Brain, Map
+  Megaphone, PenTool, MessageSquare, FileText, FolderPlus,
+  Code2, Brain, Map, ListTodo
 } from "lucide-react";
 import { ProjectCard } from "@/components/dashboard/ProjectCard";
 import { useStudioProjects } from "@/hooks/useStudioProjects";
@@ -215,7 +215,7 @@ export default function Dashboard() {
             { icon: Megaphone, label: "Canvas IA", desc: "Lienzo", path: "/formarketing" },
             { icon: PenTool, label: "Studio", desc: "Herramientas", path: "/tools" },
             { icon: MessageSquare, label: "Chat IA", desc: "Copy", path: "/chat" },
-            { icon: Hash, label: "Hub", desc: "Templates", path: "/hub" },
+            { icon: ListTodo, label: "Tareas", desc: "Kanban", path: "/tareas" },
             { icon: FileText, label: "Espacios", desc: "Archivos", path: "/spaces" },
           ].map((app) => (
             <button key={app.label} onClick={() => navigate(app.path)} className="p-5 bg-white border border-zinc-200 rounded-2xl text-left hover:border-primary transition-all group">
