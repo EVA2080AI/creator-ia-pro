@@ -5,7 +5,7 @@
 // a polling manual si el modelo tarda más.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { getSessionUser, getProfile } from "../_lib/session.js";
-import { spendCredits, refundCredits, getBalance } from "../_lib/credits.js";
+import { spendCredits, refundCredits, getBalance, logSpend } from "../_lib/credits.js";
 import { IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID, canAccessModel, getImageModel } from "../../src/lib/ai/models.js";
 
 interface ImageBody {
@@ -76,6 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const imageUrl = await generateReplicateImage(model.replicateSlug, prompt, aspectRatio, imagePrompt, REPLICATE_API_TOKEN);
+    if (cost > 0) await logSpend(user.userId, cost, `image: ${modelId}`);
     const creditsRemaining = await getBalance(user.userId).catch(() => null);
     res.status(200).json({ ok: true, imageUrl, model: modelId, cost, creditsRemaining });
   } catch (err) {

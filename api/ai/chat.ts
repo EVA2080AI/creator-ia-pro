@@ -9,7 +9,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { eq } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { getSessionUser, getProfile } from "../_lib/session.js";
-import { spendCredits, refundCredits, consumeFreeMessage, FREE_DAILY_MESSAGE_LIMIT } from "../_lib/credits.js";
+import { spendCredits, refundCredits, consumeFreeMessage, logSpend, FREE_DAILY_MESSAGE_LIMIT } from "../_lib/credits.js";
 import { CHAT_MODELS, DEFAULT_MODEL_ID, canAccessModel, getModel } from "../../src/lib/ai/models.js";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
@@ -179,8 +179,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // Cobro sin resultado: reembolsa. Con resultado parcial, se conserva el cobro
   // (igual que en un chat normal: pagas por lo que sí se generó).
-  if (cost > 0 && !sawAnyContent) {
-    await refundCredits(user.userId, cost);
+  if (cost > 0) {
+    if (!sawAnyContent) await refundCredits(user.userId, cost);
+    else await logSpend(user.userId, cost, `chat: ${modelId}`);
   }
 
   try {

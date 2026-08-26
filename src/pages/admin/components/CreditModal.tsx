@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { 
   X, Plus, Minus, RotateCcw, History, Loader2, Coins
@@ -50,11 +49,9 @@ export function CreditModal({
 
   const loadHistory = useCallback(async () => {
     setTxLoading(true);
-    const { data, error } = await (supabase.rpc as any)("admin_get_transactions", {
-      _target_user_id: user.user_id,
-      _limit: 30,
-    });
-    if (!error) setTxs((data as Transaction[]) || []);
+    const res = await fetch(`/api/admin/users/${user.user_id}/transactions`, { credentials: "include" });
+    const data = await res.json().catch(() => null);
+    if (res.ok && data?.ok) setTxs(data.transactions || []);
     setTxLoading(false);
   }, [user.user_id]);
 
@@ -65,28 +62,20 @@ export function CreditModal({
   const runOp = async () => {
     const n = parseInt(amount);
     if (!n || n <= 0) { toast.error("Monto inválido"); return; }
-
-    const fnMap = {
-      add:    "admin_add_credits",
-      deduct: "admin_deduct_credits",
-      refund: "admin_refund_credits",
-    } as const;
-
-    const fn = fnMap[tab as keyof typeof fnMap];
-    if (!fn) return;
+    if (tab === "history") return;
 
     setLoading(true);
-    const { data, error } = await (supabase.rpc as any)(fn, {
-      _target_user_id: user.user_id,
-      _amount: n,
-      _reason: reason || undefined,
+    const res = await fetch(`/api/admin/users/${user.user_id}/credits`, {
+      method: "POST", credentials: "include", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ op: tab, amount: n, reason: reason || undefined }),
     });
+    const data = await res.json().catch(() => null);
 
-    if (error) {
-      toast.error(error.message);
+    if (!res.ok || !data?.ok) {
+      toast.error(data?.error || "Error al procesar la operación");
     } else {
       const opLabels = { add: "Créditos agregados", deduct: "Créditos deducidos", refund: "Reembolso aplicado" };
-      toast.success(`${opLabels[tab as keyof typeof opLabels]} · Nuevo balance: ${(data as number).toLocaleString()}`);
+      toast.success(`${opLabels[tab as keyof typeof opLabels]} · Nuevo balance: ${data.creditsBalance.toLocaleString()}`);
       setAmount("");
       setReason("");
       onDone();

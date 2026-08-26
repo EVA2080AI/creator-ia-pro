@@ -7,6 +7,9 @@ import { Resend } from "resend";
 import { getDb, schema } from "../../db/index.js";
 
 const FREE_CREDITS = 5;
+// Dueño(s) de la plataforma — se promueven a admin automáticamente al crear su
+// perfil, igual que el allowlist ya usado como respaldo en src/pages/Admin.tsx.
+const ADMIN_EMAILS = ["sebastian689@gmail.com"];
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 // En producción usa el dominio estable; en previews, la URL única de ese
@@ -86,6 +89,7 @@ export const auth = betterAuth({
             avatarUrl: createdUser.image ?? null,
             creditsBalance: FREE_CREDITS,
             subscriptionTier: "free",
+            isAdmin: ADMIN_EMAILS.includes(createdUser.email.toLowerCase()),
           }).onConflictDoNothing();
         },
       },

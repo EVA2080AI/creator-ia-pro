@@ -3,7 +3,7 @@
 // soporta de forma interactiva). Mismo comportamiento que la RPC `spend_credits`
 // de Supabase, pero sin depender de una sesión de Postgres persistente.
 import { sql } from "drizzle-orm";
-import { getDb } from "../../db/index.js";
+import { getDb, schema } from "../../db/index.js";
 
 /** Descuenta `amount` créditos si el saldo alcanza. Devuelve el saldo nuevo, o null si no hay saldo suficiente. */
 export async function spendCredits(userId: string, amount: number): Promise<number | null> {
@@ -52,6 +52,19 @@ export async function consumeFreeMessage(userId: string, limit = FREE_DAILY_MESS
     RETURNING free_msg_count
   `);
   return rows.rows[0]?.free_msg_count ?? null;
+}
+
+/** Registra un gasto real de IA (chat/imagen) para auditoría y el panel de analíticas del admin. */
+export async function logSpend(userId: string, amount: number, description: string): Promise<void> {
+  if (amount <= 0) return;
+  const db = getDb();
+  await db.insert(schema.transaction).values({
+    id: crypto.randomUUID(),
+    userId,
+    type: "spend",
+    amount: -amount,
+    description,
+  });
 }
 
 export async function getBalance(userId: string): Promise<number | null> {

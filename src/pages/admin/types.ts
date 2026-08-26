@@ -17,9 +17,11 @@ export interface Transaction {
   created_at: string;
 }
 
+// Debe coincidir con los planes reales de src/pages/Pricing.tsx y PlanTier en src/lib/ai/models.ts.
 export const TIERS: Record<string, { label: string; color: string; icon: string }> = {
   free:      { label: "Free",       color: "#6B7280", icon: "Zap" },
-  starter:   { label: "Starter",    color: "#4ADE80", icon: "Zap" },
-  creator:   { label: "Creator",    color: "#A855F7", icon: "Rocket" },
-  pymes:     { label: "Pymes",      color: "#F59E0B", icon: "Crown" },
+  creador:   { label: "Creador",    color: "#4ADE80", icon: "Zap" },
+  pro:       { label: "Pro",        color: "#A855F7", icon: "Rocket" },
+  agencia:   { label: "Agencia",    color: "#F59E0B", icon: "Crown" },
+  pyme:      { label: "Pyme",       color: "#EC4899", icon: "Crown" },
 };

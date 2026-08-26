@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { 
   Search, Loader2, RefreshCw, Ban, CheckCircle, 
@@ -29,11 +29,12 @@ export function UsersTab({
 
   const handleChangeTier = async (targetUserId: string, newTier: string) => {
     setActionLoading(targetUserId + "-tier");
-    const { error } = await supabase.rpc("admin_update_tier", {
-      _target_user_id: targetUserId,
-      _new_tier: newTier,
+    const res = await fetch(`/api/admin/users/${targetUserId}`, {
+      method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subscriptionTier: newTier }),
     });
-    if (error) toast.error(error.message);
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) toast.error(data?.error || "Error al cambiar el plan");
     else toast.success(`Plan → ${TIERS[newTier]?.label || newTier}`);
     onRefresh();
     setActionLoading(null);
@@ -41,11 +42,12 @@ export function UsersTab({
 
   const handleSuspend = async (targetUserId: string, activate: boolean) => {
     setActionLoading(targetUserId + "-suspend");
-    const { error } = await supabase.rpc("admin_set_user_status", {
-      _target_user_id: targetUserId,
-      _active: activate,
+    const res = await fetch(`/api/admin/users/${targetUserId}`, {
+      method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isActive: activate }),
     });
-    if (error) toast.error(error.message);
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) toast.error(data?.error || "Error al cambiar el estado de la cuenta");
     else toast.success(activate ? "Cuenta activada" : "Cuenta suspendida");
     onRefresh();
     setActionLoading(null);
@@ -53,10 +55,11 @@ export function UsersTab({
 
   const handleResetPassword = async (email: string) => {
     setActionLoading(email + "-reset");
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    const { error } = await authClient.forgetPassword({
+      email,
       redirectTo: `${window.location.origin}/reset-password`,
     });
-    if (error) toast.error(error.message);
+    if (error) toast.error(error.message || "Error al enviar el correo");
     else toast.success(`Email de recuperación enviado`);
     setActionLoading(null);
   };
