@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudioProjects } from "@/hooks/useStudioProjects";
+import { listSpaces, updateSpace, deleteSpace } from "@/lib/spaces";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
@@ -39,9 +40,13 @@ interface UnifiedProject {
 export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const {
+    projects: codeProjects, loading: codeLoading, deleteProject: deleteCodeProject,
+    updateProjectMeta, refetch: refetchCodeProjects,
+  } = useStudioProjects();
 
-  const [spaces, setSpaces] = useState<UnifiedProject[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [flowSpaces, setFlowSpaces] = useState<UnifiedProject[]>([]);
+  const [flowLoading, setFlowLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSpace, setEditingSpace] = useState<UnifiedProject | null>(null);
@@ -56,34 +61,28 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [showBulkConfirm, setShowBulkConfirm] = useState(false);
 
-  const fetchSpaces = useCallback(async () => {
+  const fetchFlowSpaces = useCallback(async () => {
     if (!user) return;
-    setLoading(true);
-    
-    // Fetch both spaces (Flows) and studio_projects (CodeIDE)
-    const [spacesRes, codeRes] = await Promise.all([
-      supabase.from("spaces").select("*").eq("user_id", user.id),
-      supabase.from("studio_projects").select("*").eq("user_id", user.id)
-    ]);
-    
-    if (spacesRes.error) toast.error("Error al cargar flujos");
-    if (codeRes.error) toast.error("Error al cargar desarrollos IDE");
-    
-    const combined: UnifiedProject[] = [
-      ...(spacesRes.data || []).map((s) => ({ ...s, type: 'flow' as const })),
-      ...(codeRes.data || []).map((c) => ({
-         ...c, 
-         type: 'code' as const, 
-         thumbnail_url: null,
-         settings: {}
-      }))
-    ];
-    
-    setSpaces(combined);
-    setLoading(false);
+    setFlowLoading(true);
+    const rows = await listSpaces();
+    setFlowSpaces(rows.map((s): UnifiedProject => ({
+      id: s.id, name: s.name, description: s.description, thumbnail_url: s.thumbnailUrl,
+      created_at: s.createdAt, updated_at: s.updatedAt, type: 'flow', settings: s.settings,
+    })));
+    setFlowLoading(false);
   }, [user]);
 
-  useEffect(() => { if (user) fetchSpaces(); }, [user, fetchSpaces]);
+  useEffect(() => { if (user) fetchFlowSpaces(); }, [user, fetchFlowSpaces]);
+
+  const spaces: UnifiedProject[] = [
+    ...flowSpaces,
+    ...codeProjects.map((c): UnifiedProject => ({
+      id: c.id, name: c.name, description: c.description, thumbnail_url: null,
+      created_at: c.created_at, updated_at: c.updated_at, type: 'code', settings: {},
+    })),
+  ];
+  const loading = flowLoading || codeLoading;
+  const fetchSpaces = useCallback(() => { fetchFlowSpaces(); refetchCodeProjects(); }, [fetchFlowSpaces, refetchCodeProjects]);
 
   const handleOpenEdit = (space: UnifiedProject) => {
     setEditingSpace(space);
@@ -94,23 +93,20 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
   const handleSave = async () => {
     if (!user || !formData.name) return;
     setCreating(true);
-    
+
     try {
       if (editingSpace) {
         // Edit mode
         if (editingSpace.type === 'flow') {
-          const { error } = await supabase.from("spaces").update({
+          const updated = await updateSpace(editingSpace.id, {
             name: formData.name,
             description: formData.description,
             settings: { ...editingSpace.settings, brand_context: formData.description },
-          }).eq("id", editingSpace.id);
-          if (error) throw error;
+          });
+          if (!updated) throw new Error("No se pudo actualizar el flujo");
         } else {
-          const { error } = await supabase.from("studio_projects").update({
-            name: formData.name,
-            description: formData.description,
-          }).eq("id", editingSpace.id);
-          if (error) throw error;
+          const ok = await updateProjectMeta(editingSpace.id, { name: formData.name, description: formData.description });
+          if (!ok) throw new Error("No se pudo actualizar el proyecto");
         }
         toast.success("Proyecto actualizado");
       }
@@ -125,23 +121,15 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
 
   const handleDelete = async (target: { id: string, type: 'flow' | 'code' }) => {
     setDeleting(true);
-    let error;
-    if (target.type === 'flow') {
-      const res = await supabase.from("spaces").delete().eq("id", target.id);
-      error = res.error;
-    } else {
-      const res = await supabase.from("studio_projects").delete().eq("id", target.id);
-      error = res.error;
-    }
-    
+    const ok = target.type === 'flow' ? await deleteSpace(target.id) : await (async () => { await deleteCodeProject(target.id); return true; })();
+
     setDeleting(false);
     setDeleteTarget(null);
-    
-    if (error) {
-      toast.error(error.message);
+
+    if (!ok) {
+      toast.error("No se pudo eliminar el proyecto");
     } else {
-      toast.success("Proyecto eliminado");
-      fetchSpaces();
+      if (target.type === 'flow') { toast.success("Proyecto eliminado"); fetchSpaces(); }
     }
   };
 
@@ -184,12 +172,11 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
 
     try {
       if (flowIds.length > 0) {
-        const { error } = await supabase.from("spaces").delete().in("id", flowIds);
-        if (error) throw error;
+        const results = await Promise.all(flowIds.map((id) => deleteSpace(id)));
+        if (results.some((ok) => !ok)) throw new Error("Algunos flujos no se pudieron eliminar");
       }
       if (codeIds.length > 0) {
-        const { error } = await supabase.from("studio_projects").delete().in("id", codeIds);
-        if (error) throw error;
+        await Promise.all(codeIds.map((id) => deleteCodeProject(id)));
       }
 
       toast.success(`${selectedIds.size} proyectos eliminados correctamente`);

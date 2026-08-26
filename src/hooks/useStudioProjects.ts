@@ -155,6 +155,14 @@ export function useStudioProjects() {
     setActiveProject((prev) => prev?.id === projectId ? { ...prev, name } : prev);
   }, []);
 
+  const updateProjectMeta = useCallback(async (projectId: string, patch: { name?: string; description?: string | null }) => {
+    const res = await api<{ project: ApiProject }>(`/api/projects/${projectId}`, { method: 'PATCH', body: JSON.stringify(patch) });
+    if (!res.ok) { toast.error('Error al actualizar proyecto'); return false; }
+    setProjects((prev) => prev.map((p) => p.id === projectId ? { ...p, ...patch } : p));
+    setActiveProject((prev) => prev?.id === projectId ? { ...prev, ...patch } : prev);
+    return true;
+  }, []);
+
   const deleteProject = useCallback(async (projectId: string) => {
     const res = await api(`/api/projects/${projectId}`, { method: 'DELETE' });
     if (!res.ok) { toast.error('Error al eliminar proyecto'); return; }
@@ -222,7 +230,7 @@ export function useStudioProjects() {
 
   return {
     projects, activeProject, setActiveProject, loading,
-    createProject, updateProjectFiles, renameProject,
+    createProject, updateProjectFiles, renameProject, updateProjectMeta,
     deleteProject, duplicateProject, rollbackFiles, canUndo: !!previousFiles,
     refetch: fetchProjects, getProjectFiles, hardResetProject
   };

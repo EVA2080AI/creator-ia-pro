@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { supabase } from "@/integrations/supabase/client";
+import { listSpaces, createSpace, deleteSpace, type Space } from "@/lib/spaces";
+import { listAssets } from "@/lib/assets";
 import { toast } from "sonner";
 import {
   Zap, Coins, CreditCard, LayoutGrid, Image,
@@ -12,7 +13,6 @@ import {
 } from "lucide-react";
 import { ProjectCard } from "@/components/dashboard/ProjectCard";
 import { useStudioProjects } from "@/hooks/useStudioProjects";
-import { genesisOrchestrator } from "@/services/genesis-orchestrator";
 import { LoadingState } from "@/components/dashboard/LoadingState";
 import { CheckoutBanner } from "@/components/dashboard/CheckoutBanner";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -72,19 +72,23 @@ export default function Dashboard() {
 
     const fetchData = async () => {
       try {
-        const { data: flowSpaces } = await supabase.from("spaces").select("*").order("updated_at", { ascending: false });
-        const formattedFlows: DashboardProject[] = (flowSpaces || []).map((s: any) => ({ ...s, type: 'flow' }));
+        const flowSpaces = await listSpaces();
+        const formattedFlows: DashboardProject[] = flowSpaces.map((s: Space) => ({
+          id: s.id, name: s.name, description: s.description, updated_at: s.updatedAt,
+          created_at: s.createdAt, type: 'flow', thumbnail_url: s.thumbnailUrl, user_id: s.userId,
+          settings: s.settings,
+        }));
         const formattedCode: DashboardProject[] = (studioProjects || []).map((p: any) => ({ ...p, type: 'code', thumbnail_url: null }));
 
-        const allProjects = [...formattedCode, ...formattedFlows].sort((a, b) => 
+        const allProjects = [...formattedCode, ...formattedFlows].sort((a, b) =>
           new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
         );
 
         setSpaces(allProjects);
-        setSpacesCount(flowSpaces?.length || 0);
+        setSpacesCount(flowSpaces.length);
 
-        const { count } = await supabase.from("saved_assets").select("*", { count: 'exact', head: true }).eq("user_id", user.id);
-        setAssetsCount(count || 0);
+        const { total } = await listAssets({ limit: 1 });
+        setAssetsCount(total);
 
         setUsageData([
           { name: "Lun", credits: 12 }, { name: "Mar", credits: 45 }, { name: "Mie", credits: 30 },
@@ -106,14 +110,11 @@ export default function Dashboard() {
 
   const handleCreateSpace = async () => {
     if (!user || !newSpaceName.trim()) return;
-    const { data, error } = await supabase.from("spaces")
-      .insert({ user_id: user.id, name: newSpaceName, description: newSpaceDesc })
-      .select().single();
-    
-    if (error) { toast.error("Error creating space"); return; }
+    const space = await createSpace({ name: newSpaceName, description: newSpaceDesc });
+    if (!space) { toast.error("Error al crear el espacio"); return; }
     toast.success("Espacio creado");
     setIsCreatingSpace(false);
-    navigate("/formarketing?spaceId=" + data.id);
+    navigate("/formarketing?spaceId=" + space.id);
   };
 
   const handleDuplicate = async (e: React.MouseEvent, project: DashboardProject) => {
@@ -122,52 +123,28 @@ export default function Dashboard() {
       const newProj = await duplicateProject(project as any);
       if (newProj) setSpaces(prev => [{ ...newProj, type: 'code', thumbnail_url: null } as DashboardProject, ...prev]);
     } else {
-      const { data, error } = await supabase.from("spaces")
-        .insert({ user_id: user?.id, name: `${project.name} (Copia)`, description: project.description })
-        .select().single();
-      if (error) { toast.error("Error al duplicar"); return; }
-      setSpaces(prev => [{ ...data, type: 'flow' }, ...prev]);
+      const space = await createSpace({ name: `${project.name} (Copia)`, description: project.description ?? undefined });
+      if (!space) { toast.error("Error al duplicar"); return; }
+      setSpaces(prev => [{
+        id: space.id, name: space.name, description: space.description, updated_at: space.updatedAt,
+        created_at: space.createdAt, type: 'flow', thumbnail_url: space.thumbnailUrl, user_id: space.userId,
+      }, ...prev]);
     }
   };
 
   const handleDelete = async (e: React.MouseEvent, project: DashboardProject) => {
     e.stopPropagation();
     if (!window.confirm("¿Seguro que deseas eliminar este proyecto?")) return;
-    if (project.type === 'code') { await deleteStudioProject(project.id); } 
-    else { await supabase.from("spaces").delete().eq("id", project.id); }
+    if (project.type === 'code') { await deleteStudioProject(project.id); }
+    else { await deleteSpace(project.id); }
     setSpaces(prev => prev.filter(p => p.id !== project.id));
     toast.success("Proyecto eliminado");
   };
 
   const handleMapBlueprint = async () => {
-    if (!openingProject) return;
-    try {
-      const blueprintFile = openingProject.files?.['blueprint.json'];
-      if (!blueprintFile) throw new Error("No blueprint found");
-      const blueprint = JSON.parse(blueprintFile.content);
-      const { data: space, error: spaceErr } = await supabase.from('spaces').insert({
-        name: `🗺️ Map: ${openingProject.name}`,
-        user_id: user?.id,
-        settings: { genesis_project_id: openingProject.id }
-      }).select().single();
-      if (spaceErr || !space) throw spaceErr;
-      const { nodes, edges } = genesisOrchestrator.mapBlueprintToCanvasNodes(blueprint, space.id, user?.id || '');
-      
-      // Fix type mismatches for data_payload by casting to any
-      await supabase.from('canvas_nodes').insert(nodes as any);
-      await supabase.from('canvas_nodes').insert({
-        space_id: space.id,
-        user_id: user?.id || '',
-        type: 'flow_metadata',
-        data_payload: { edges } as any,
-        prompt: 'metadata',
-        status: 'completed'
-      } as any);
-      
-      toast.success("Mapa generado");
-      navigate(`/formarketing?spaceId=${space.id}`);
-      setOpeningProject(null);
-    } catch (err) { console.error(err); toast.error("Error al mapear"); }
+    // El mapeo a Canvas IA (canvas_nodes) todavía depende de una tabla que no se
+    // migró a Neon — ver docs/PLAN_REFACTOR_GENESIS.md fase "Fusión Herramientas".
+    toast.info("El mapa estratégico en Canvas IA está temporalmente deshabilitado — la migración de esa parte sigue en curso.");
   };
 
   return (

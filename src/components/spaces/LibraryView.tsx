@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { listSpaces } from "@/lib/spaces";
+import { listAssets, createAsset, updateAsset, deleteAsset, type SavedAsset } from "@/lib/assets";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,18 +17,6 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { DocumentEditor } from "@/components/studio/DocumentEditor";
-
-interface SavedAsset {
-  id: string;
-  asset_url: string;
-  prompt: string | null;
-  type: string;
-  is_favorite: boolean;
-  tags: string[];
-  created_at: string;
-  space_id?: string | null;
-  content?: string | null;
-}
 
 interface Space { id: string; name: string; }
 
@@ -53,23 +42,20 @@ export const LibraryView = () => {
 
   const fetchSpaces = useCallback(async () => {
     if (!user) return;
-    const { data } = await supabase.from("spaces").select("id, name").eq("user_id", user.id);
-    if (data) setSpaces(data);
+    const data = await listSpaces();
+    setSpaces(data.map((s) => ({ id: s.id, name: s.name })));
   }, [user]);
 
   const fetchAssets = useCallback(async (reset = false) => {
     if (!user) return;
     setLoading(true);
     const currentPage = reset ? 0 : page;
-    const from = currentPage * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
     try {
-      let q = supabase.from("saved_assets").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).range(from, to);
-      if (selectedSpace === "none") q = q.is("space_id", null);
-      else if (selectedSpace !== "all") q = q.eq("space_id", selectedSpace);
-      const r = await q;
-      if (r.error) throw r.error;
-      const newData = r.data || [];
+      const { assets: newData } = await listAssets({
+        spaceId: selectedSpace,
+        limit: PAGE_SIZE,
+        offset: currentPage * PAGE_SIZE,
+      });
       setAssets(prev => reset || currentPage === 0 ? newData : [...prev, ...newData]);
       setHasMore(newData.length === PAGE_SIZE);
       if (reset) setPage(0);
@@ -95,14 +81,14 @@ export const LibraryView = () => {
       const domain = new URL(importUrl).hostname;
       const type = importUrl.match(/\.(png|jpg|jpeg|svg|webp|gif)/i)?.[0]?.replace(".", "") || "image";
       const tags = ["curated", domain.split(".")[0], type];
-      const { data, error } = await supabase.from("saved_assets").insert({
-        user_id: user.id, asset_url: importUrl, type,
-        space_id: importSpace && importSpace !== "none_direct" ? importSpace : null,
+      const asset = await createAsset({
+        assetUrl: importUrl, type,
+        spaceId: importSpace && importSpace !== "none_direct" ? importSpace : null,
         tags, prompt: `Importado de ${domain}`,
-      }).select().single();
-      if (error) throw error;
+      });
+      if (!asset) throw new Error("No se pudo importar el recurso");
       toast.success("Recurso importado exitosamente");
-      setAssets([data as unknown as SavedAsset, ...assets]);
+      setAssets([asset, ...assets]);
       setIsImportOpen(false);
       setImportUrl("");
     } catch (err: any) {
@@ -113,14 +99,14 @@ export const LibraryView = () => {
   };
 
   const toggleFav = async (id: string, current: boolean) => {
-    const { error } = await supabase.from("saved_assets").update({ is_favorite: !current }).eq("id", id);
-    if (error) toast.error(error.message);
+    const updated = await updateAsset(id, { isFavorite: !current });
+    if (!updated) toast.error("No se pudo actualizar el favorito");
     else setAssets((prev) => prev.map((a) => (a.id === id ? { ...a, is_favorite: !current } : a)));
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("saved_assets").delete().eq("id", id);
-    if (error) toast.error(error.message);
+    const ok = await deleteAsset(id);
+    if (!ok) toast.error("No se pudo eliminar el activo");
     else { toast.success("Activo eliminado"); setAssets((prev) => prev.filter((a) => a.id !== id)); }
     setDeleteTargetId(null);
   };
@@ -138,8 +124,8 @@ export const LibraryView = () => {
     if (!editingAsset) return;
     setSavingDoc(true);
     try {
-      const { error } = await supabase.from("saved_assets").update({ content }).eq("id", editingAsset.id);
-      if (error) throw error;
+      const updated = await updateAsset(editingAsset.id, { content });
+      if (!updated) throw new Error("No se pudo guardar el documento");
       setAssets((prev) => prev.map((a) => (a.id === editingAsset.id ? { ...a, content } : a)));
       toast.success("Documento guardado");
     } catch (err: any) {

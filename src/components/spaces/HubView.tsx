@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { supabase } from "@/integrations/supabase/client";
+import { createSpace } from "@/lib/spaces";
 import { toast } from "sonner";
 import {
   Megaphone, FileText, Image, Video, Hash, PenTool, Type, Monitor,
@@ -32,70 +32,13 @@ export const HubView = () => {
 
   const handleUseTemplate = async (template: typeof TEMPLATES[0]) => {
     if (!user) return;
+    // El sembrado de nodos del canvas (canvas_nodes) todavía depende de una tabla
+    // que no se migró de Supabase a Neon — ver docs/PLAN_REFACTOR_GENESIS.md
+    // fase "Fusión Herramientas". Por ahora solo se crea el espacio vacío.
+    toast.info("Las plantillas con nodos precargados están temporalmente deshabilitadas — se está migrando esa parte. Se creará un espacio en blanco.");
     try {
-      const { data: space, error } = await supabase
-        .from("spaces")
-        .insert({ user_id: user.id, name: template.title, description: template.description })
-        .select().single();
-      if (error) throw error;
-
-      // Seed canvas nodes from preset
-      if (template.nodes.length > 0) {
-        const nodeRows = template.nodes.map((node: any, i: number) => ({
-          id: crypto.randomUUID(),
-          user_id: user.id,
-          space_id: space.id,
-          type: node.type || "modelView",
-          name: node.data?.title || `Nodo ${i + 1}`,
-          pos_x: 100 + i * 340,
-          pos_y: 220,
-          status: "idle",
-          data_payload: node.data || {},
-          prompt: "",
-        }));
-
-        const { error: nodesError } = await supabase
-          .from("canvas_nodes")
-          .insert(nodeRows);
-
-        if (nodesError) throw nodesError;
-
-        // Reconstruir los edges usando los IDs generados localmente
-        const edges = (template.edges || []).map((edgeInfo, idx) => {
-          const srcNode = nodeRows[edgeInfo.source];
-          const targetNode = nodeRows[edgeInfo.target];
-          if (!srcNode || !targetNode) return null;
-          
-          return {
-            id: `e-${srcNode.id}-${targetNode.id}-${idx}`,
-            source: srcNode.id,
-            target: targetNode.id,
-            sourceHandle: edgeInfo.sourceHandle || 'any-out',
-            targetHandle: edgeInfo.targetHandle || 'any-in',
-            type: 'smoothstep',
-            animated: true,
-            style: { stroke: '#a855f7', strokeWidth: 2 },
-          };
-        }).filter(Boolean);
-
-        if (edges.length > 0) {
-          // Save edges as flow_metadata row
-          // Important: use upsert to avoid duplicates and match the unique index
-          await supabase.from("canvas_nodes").upsert({
-            user_id: user.id,
-            space_id: space.id,
-            type: "flow_metadata",
-            name: "__flow_metadata__",
-            pos_x: 0,
-            pos_y: 0,
-            status: "idle",
-            data_payload: { edges } as any,
-            prompt: "metadata",
-          }, { onConflict: 'space_id,type' });
-        }
-      }
-
-      toast.success(`Plantilla "${template.title}" cargada`);
+      const space = await createSpace({ name: template.title, description: template.description });
+      if (!space) throw new Error("No se pudo crear el espacio");
       navigate(`/studio-flow?spaceId=${space.id}`);
     } catch {
       toast.error("Error al crear espacio desde plantilla");
@@ -200,12 +143,10 @@ export const HubView = () => {
               whileTap={{ scale: 0.97 }}
               aria-label="Crear lienzo en blanco — nuevo proyecto vacío"
               onClick={() => {
-                supabase.from("spaces").insert({ user_id: user?.id || "", name: "Nuevo Proyecto" })
-                  .select().single()
-                  .then(({ data }) => {
-                    if (data) navigate(`/studio-flow?spaceId=${data.id}`);
-                    else navigate("/studio-flow");
-                  });
+                createSpace({ name: "Nuevo Proyecto" }).then((space) => {
+                  if (space) navigate(`/studio-flow?spaceId=${space.id}`);
+                  else navigate("/studio-flow");
+                });
               }}
               className="rounded-[2rem] border border-dashed border-zinc-200 group flex flex-col items-center justify-center py-12 gap-4 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500"
             >
