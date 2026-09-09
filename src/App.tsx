@@ -13,7 +13,6 @@ import { PerformanceMonitor } from "@/components/performance/PerformanceMonitor"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { usePageTracking } from "@/hooks/useAnalytics";
 import { useSession } from "@/lib/auth-client";
-import Docs from "./pages/Docs";
 
 // Redirect /canvas → /studio-flow preserving query params
 const CanvasRedirect = () => {
@@ -79,7 +78,6 @@ const Downloads    = lazy(() => import("./pages/Downloads"));
 const ToolLanding  = lazy(() => import("./pages/ToolLanding"));
 const ProductBacklog = lazy(() => import("./pages/ProductBacklog"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const Documentation  = lazy(() => import("./pages/Documentation"));
 const NotFound      = lazy(() => import("./pages/NotFound"));
 
 // Legal pages
@@ -151,8 +149,11 @@ const App = () => {
                   <Route path="/product-backlog"      element={<ProductBacklog />} />
                   <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
                   <Route path="/reset-password"       element={<ResetPassword />} />
-                  <Route path="/documentation"        element={<Documentation />} />
-                  <Route path="/docs"                 element={<Docs />} />
+                  {/* /documentation y /docs eran dos páginas decorativas distintas sin
+                      contenido real (botones sin onClick, copy de marketing genérico) —
+                      /help ya tenía FAQ funcional de verdad. Consolidadas en una sola. */}
+                  <Route path="/documentation"        element={<Navigate to="/help" replace />} />
+                  <Route path="/docs"                 element={<Navigate to="/help" replace />} />
                   <Route path="/landing-test"         element={<Navigate to="/" replace />} />
 
                   {/* Legal pages */}

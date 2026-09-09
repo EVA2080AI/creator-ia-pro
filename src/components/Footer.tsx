@@ -18,7 +18,7 @@ export function Footer() {
     {
       title: "Soporte",
       links: [
-        { name: "Documentación", path: "/documentation" },
+        { name: "Ayuda y documentación", path: "/help" },
         { name: "Estado del Sistema", path: "/system-status" },
         { name: "Comunidad", path: "https://discord.gg" },
         { name: "Contacto", path: "mailto:hola@creator-ia.com" },

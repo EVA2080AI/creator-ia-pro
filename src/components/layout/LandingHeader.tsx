@@ -34,7 +34,7 @@ export function LandingHeader(): React.ReactElement {
     { name: "Studio", path: "/tools", icon: Image },
     { name: "Canvas IA", path: "/studio-flow", icon: Layers, badge: "Nuevo" },
     { name: "Planes", path: "/pricing", icon: CreditCard },
-    { name: "Docs", path: "/documentation", icon: BookOpen },
+    { name: "Ayuda", path: "/help", icon: BookOpen },
   ];
 
   return (

@@ -62,9 +62,9 @@ const Help = () => {
       category: "Primeros pasos",
     },
     {
-      question: "¿Qué son los Neural Cycles (créditos)?",
+      question: "¿Qué son los créditos?",
       answer:
-        "Son nuestra unidad de cómputo. Cada operación de IA consume créditos según su complejidad: generación de texto (~1-5), imágenes (~10-50), código (~5-20). Los créditos no tienen vencimiento.",
+        "Son nuestra unidad de cómputo. Cada operación de IA consume créditos según el modelo que elijas: los modelos rápidos/gratuitos cuestan 0, los intermedios 1-2, los más avanzados hasta 10. Generar una imagen cuesta 2-4. Las recargas puntuales no vencen nunca.",
       category: "Facturación",
     },
     {
@@ -74,15 +74,15 @@ const Help = () => {
       category: "Facturación",
     },
     {
-      question: "¿Puedo cancelar mi suscripción?",
+      question: "¿Puedo cancelar mi plan?",
       answer:
-        "Sí, puedes cancelar en cualquier momento desde tu perfil. La cancelación es efectiva al final del período de facturación actual. No hay reembolsos por cambio de opinión.",
+        "No hay suscripción que cancelar: cada plan dura 30 días y no se renueva solo (te avisamos por correo antes de que venza con un link para renovar en un clic). Si no renuevas, tu cuenta pasa a Free automáticamente al terminar el período, sin perder tus proyectos.",
       category: "Facturación",
     },
     {
       question: "¿Qué modelos de IA están disponibles?",
       answer:
-        "Ofrecemos GPT-4, Claude 3.5, Gemini Pro, FLUX Pro, Stable Diffusion y más. La disponibilidad varía según tu plan. Los planes superiores incluyen modelos premium.",
+        "Modelos de texto y código (DeepSeek, Gemini, Claude, GPT y otros) según tu plan, con opciones gratuitas disponibles en todos los planes, y modelos de imagen (Flux) para generación visual. El catálogo completo con costos exactos está en /pricing.",
       category: "Técnico",
     },
     {

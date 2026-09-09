@@ -33,7 +33,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
     { id: '4', type: 'page', title: 'Tools', category: 'Pages', icon: Image, action: () => navigate('/tools') },
     { id: '5', type: 'tool', title: 'Generar Imagen', category: 'Tools', icon: Image, action: () => navigate('/tools') },
     { id: '6', type: 'tool', title: 'Generar Código', category: 'Tools', icon: Code, action: () => navigate('/tools') },
-    { id: '7', type: 'page', title: 'Documentación', category: 'Pages', icon: FileText, action: () => navigate('/docs') },
+    { id: '7', type: 'page', title: 'Ayuda y documentación', category: 'Pages', icon: FileText, action: () => navigate('/help') },
     { id: '8', type: 'page', title: 'Pricing', category: 'Pages', icon: Sparkles, action: () => navigate('/pricing') },
     { id: '9', type: 'page', title: 'Tareas', category: 'Pages', icon: ListTodo, action: () => navigate('/tareas') },
   ];

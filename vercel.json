@@ -97,6 +97,16 @@
       "permanent": true
     },
     {
+      "source": "/documentation",
+      "destination": "/help",
+      "permanent": true
+    },
+    {
+      "source": "/docs",
+      "destination": "/help",
+      "permanent": true
+    },
+    {
       "source": "/inicio",
       "destination": "/",
       "permanent": true
