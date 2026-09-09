@@ -14,6 +14,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!user) return;
   const db = getDb();
 
+  try {
   if (req.method === "GET") {
     const rows = await db
       .select()
@@ -74,4 +75,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   res.status(405).json({ ok: false, code: "METHOD_NOT_ALLOWED", error: "Método no permitido" });
+  } catch (err) {
+    console.error("[api/assistants]", err);
+    res.status(500).json({ ok: false, code: "INTERNAL_ERROR", error: "Error al procesar la solicitud. Intenta de nuevo." });
+  }
 }

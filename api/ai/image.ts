@@ -58,7 +58,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cost > 0) {
     const newBalance = await spendCredits(user.userId, cost);
     if (newBalance === null) {
-      res.status(402).json({ ok: false, code: "INSUFFICIENT_CREDITS", error: "No tienes créditos suficientes." });
+      const balance = profile?.creditsBalance ?? 0;
+      res.status(402).json({
+        ok: false,
+        code: "INSUFFICIENT_CREDITS",
+        error: `Te faltan ${cost - balance} créditos (tienes ${balance}, esta imagen cuesta ${cost}).`,
+        required: cost,
+        balance,
+      });
       return;
     }
   }

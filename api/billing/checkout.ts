@@ -28,26 +28,26 @@ const APP_URL = process.env.APP_URL || "https://creator-ia.com";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
-    res.status(405).json({ ok: false, error: "Método no permitido" });
+    res.status(405).json({ ok: false, code: "METHOD_NOT_ALLOWED", error: "Método no permitido" });
     return;
   }
 
   const user = await getSessionUser(req);
   if (!user) {
-    res.status(401).json({ ok: false, error: "Debes iniciar sesión." });
+    res.status(401).json({ ok: false, code: "UNAUTHORIZED", error: "Debes iniciar sesión." });
     return;
   }
 
   const { packId } = req.body as CheckoutBody;
   const amount = packId ? PRICE_MAP[packId] : undefined;
   if (!packId || !amount) {
-    res.status(400).json({ ok: false, error: `Identificador de pack inválido: ${packId}` });
+    res.status(400).json({ ok: false, code: "BAD_REQUEST", error: `Identificador de pack inválido: ${packId}` });
     return;
   }
 
   const BOLD_API_KEY = process.env.BOLD_API_KEY;
   if (!BOLD_API_KEY) {
-    res.status(200).json({ ok: false, error: "Pasarela de pagos no configurada. Contacta soporte." });
+    res.status(200).json({ ok: false, code: "NOT_CONFIGURED", error: "Pasarela de pagos no configurada. Contacta soporte." });
     return;
   }
 
@@ -64,6 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `x-api-key ${BOLD_API_KEY}` },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(10000),
     });
 
     const rawText = await boldRes.text();
@@ -95,7 +96,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     res.status(200).json({ ok: true, url, linkId });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Error al conectar con Bold.";
-    res.status(502).json({ ok: false, error: message });
+    const isTimeout = err instanceof Error && err.name === "TimeoutError";
+    const message = isTimeout ? "Bold tardó demasiado en responder. Intenta de nuevo." : err instanceof Error ? err.message : "Error al conectar con Bold.";
+    res.status(502).json({ ok: false, code: isTimeout ? "TIMEOUT" : "PROVIDER_ERROR", error: message });
   }
 }

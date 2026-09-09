@@ -299,6 +299,7 @@ const Tools = () => {
 
     // ── IMAGE: async ──────────────────────────────────────────────────────────
     setProcessing(true);
+    const loadingToast = toast.loading("Generando imagen — puede tardar hasta un minuto...");
     try {
       const data = await aiService.processAction({
         action: "image", tool: activeTool, prompt: textPrompt,
@@ -314,7 +315,10 @@ const Tools = () => {
       await refreshProfile();
     } catch (err: any) {
       toast.error(err?.message || "Error al procesar. Intenta de nuevo.", { duration: 5000 });
-    } finally { setProcessing(false); }
+    } finally {
+      toast.dismiss(loadingToast);
+      setProcessing(false);
+    }
   }, [user, currentTool, imagePreview, textPrompt, profile, requiredCredits, category, activeTool, activeModel, navigate, refreshProfile]);
 
   const handleSaveToAssets = async () => {

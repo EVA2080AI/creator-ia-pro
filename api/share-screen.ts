@@ -21,7 +21,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const newBalance = await spendCredits(user.userId, COST);
   if (newBalance === null) {
-    res.status(402).json({ ok: false, code: "INSUFFICIENT_CREDITS", error: "Créditos insuficientes." });
+    // COST es 1, así que si spendCredits devolvió null el saldo actual es 0.
+    res.status(402).json({ ok: false, code: "INSUFFICIENT_CREDITS", error: "No tienes créditos. Recarga en Planes para poder ser Host.", required: COST, balance: 0 });
     return;
   }
 
