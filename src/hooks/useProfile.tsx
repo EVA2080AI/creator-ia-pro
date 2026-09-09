@@ -7,6 +7,7 @@ interface ProfileApiShape {
   email: string;
   creditsBalance: number;
   subscriptionTier: string;
+  subscriptionExpiresAt: string | null;
   isAdmin: boolean;
   createdAt: string;
 }

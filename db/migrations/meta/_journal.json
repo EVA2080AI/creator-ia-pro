@@ -22,6 +22,13 @@
       "when": 1788923333530,
       "tag": "0002_secret_bruce_banner",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1788925089731,
+      "tag": "0003_uneven_adam_warlock",
+      "breakpoints": true
     }
   ]
 }

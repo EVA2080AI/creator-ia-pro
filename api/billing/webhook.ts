@@ -3,7 +3,7 @@
 // firma HMAC. Necesita el body crudo tal cual llegó, por eso bodyParser:false.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { eq, and, like } from "drizzle-orm";
+import { eq, and, like, sql } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { addCredits } from "../_lib/credits.js";
 
@@ -99,9 +99,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     await addCredits(tx.userId, creditsToAdd);
 
     if (PLAN_IDS.has(packId)) {
+      // Bold no soporta cobro recurrente automático — cada compra extiende el
+      // vencimiento 30 días desde el mayor entre "ahora" y el vencimiento
+      // actual (si renuevas antes de que venza, no pierdes los días que
+      // quedaban). Ver api/cron/subscription-renewals.ts para el recordatorio.
       await db
         .update(schema.profile)
-        .set({ subscriptionTier: packId, updatedAt: new Date() })
+        .set({
+          subscriptionTier: packId,
+          subscriptionExpiresAt: sql`greatest(${schema.profile.subscriptionExpiresAt}, now()) + interval '30 days'`,
+          renewalReminderSentAt: null,
+          updatedAt: new Date(),
+        })
         .where(eq(schema.profile.userId, tx.userId));
       await db.insert(schema.transaction).values({
         id: crypto.randomUUID(),

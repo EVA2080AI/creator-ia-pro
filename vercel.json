@@ -4,6 +4,12 @@
   "buildCommand": "vite build",
   "installCommand": "npm install",
   "outputDirectory": "dist",
+  "crons": [
+    {
+      "path": "/api/cron/subscription-renewals",
+      "schedule": "0 13 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/auth/:path*",

@@ -158,11 +158,11 @@ const FAQS = [
   },
   {
     question: "¿Cuándo se renuevan mis créditos?",
-    answer: "Por ahora cada plan es una compra única: los créditos se acreditan de inmediato al pagar y no vencen. Cuando se te acaben, vuelves a comprar el plan o una recarga desde esta página — todavía no hay cobro automático mensual."
+    answer: "Tu plan dura 30 días desde que lo compras. Antes de que venza te avisamos por correo con un link para renovarlo en un clic — nunca te cobramos nada automáticamente a la tarjeta, siempre eliges vos cuándo pagar. Los créditos de las recargas puntuales, en cambio, no vencen nunca."
   },
   {
-    question: "¿Puedo cancelar cuando quiera?",
-    answer: "Sí — no hay suscripción que cancelar: cada compra es única, así que simplemente dejas de comprar cuando quieras. No hay contratos mínimos ni penalizaciones."
+    question: "¿Qué pasa si no renuevo a tiempo?",
+    answer: "Nada dramático: tienes unos días de gracia después del vencimiento, y si no renuevas en ese plazo tu cuenta pasa automáticamente al plan Free. Tus proyectos y tu historial quedan intactos — puedes reactivar el plan que quieras cuando quieras, sin perder nada."
   },
   {
     question: "¿Qué pasa si se me acaban los créditos?",

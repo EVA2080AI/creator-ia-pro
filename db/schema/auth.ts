@@ -194,6 +194,14 @@ export const profile = pgTable("profile", {
   avatarUrl: text("avatar_url"),
   creditsBalance: integer("credits_balance").notNull().default(5),
   subscriptionTier: text("subscription_tier").notNull().default("free"),
+  /** Vencimiento del plan pagado — null = sin vencimiento (free, o compra vieja
+   * anterior a este campo, respetada tal cual). Bold no soporta tokenizar
+   * tarjetas ni cobro recurrente automático (confirmado contra su API real),
+   * así que la "renovación" es: recordatorio por correo + link de pago de un
+   * clic antes de vencer — ver api/cron/subscription-renewals.ts. */
+  subscriptionExpiresAt: timestamp("subscription_expires_at"),
+  /** Evita mandar el recordatorio de renovación más de una vez por ciclo. */
+  renewalReminderSentAt: timestamp("renewal_reminder_sent_at"),
   isAdmin: boolean("is_admin").notNull().default(false),
   /** Suspensión de cuenta por un admin — ver api/_lib/session.ts getSessionUser. */
   isActive: boolean("is_active").notNull().default(true),
