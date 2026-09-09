@@ -64,6 +64,8 @@ export default function Dashboard() {
   const [toolData, setToolData] = useState<any[]>([]);
   const [spacesCount, setSpacesCount] = useState(0);
   const [assetsCount, setAssetsCount] = useState(0);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState(false);
 
   const checkoutSuccess = searchParams.get("checkout") === "success";
   const creditsSuccess = searchParams.get("credits") === "success";
@@ -73,6 +75,8 @@ export default function Dashboard() {
     if (!user) return;
 
     const fetchData = async () => {
+      setDataLoading(true);
+      setDataError(false);
       try {
         const flowSpaces = await listSpaces();
         const formattedFlows: DashboardProject[] = flowSpaces.map((s: Space) => ({
@@ -103,12 +107,33 @@ export default function Dashboard() {
           { name: "Canvas", value: 25, color: "bg-emerald-400" },
           { name: "Studio", value: 10, color: "bg-purple-400" },
         ]);
-      } catch (err) { console.error("Dashboard Fetch Error:", err); }
+      } catch (err) {
+        console.error("Dashboard Fetch Error:", err);
+        setDataError(true);
+        toast.error("No se pudo cargar tu panel. Intenta recargar la página.");
+      } finally {
+        setDataLoading(false);
+      }
     };
     fetchData();
   }, [user, studioProjects, profile]);
 
-  if (authLoading) return <LoadingState />;
+  if (authLoading || dataLoading) return <LoadingState />;
+
+  if (dataError) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
+        <p className="text-sm font-semibold text-zinc-600">No se pudo cargar tu panel.</p>
+        <p className="text-xs text-zinc-400">Revisa tu conexión e intenta de nuevo.</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/90 active:scale-95 transition-all"
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
 
   const handleCreateSpace = async () => {
     if (!user || !newSpaceName.trim()) return;
