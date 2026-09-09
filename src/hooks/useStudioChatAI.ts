@@ -10,7 +10,7 @@ import {
   isResponseTruncated,
   extractCompleteXmlFiles
 } from '@/components/studio/chat/utils';
-import { CODE_GEN_SYSTEM, GENESIS_CHAT_SYSTEM, IMAGE_TO_CODE_SYSTEM, REASONING_SYSTEM_PROMPT } from '@/prompts';
+import { CODE_GEN_SYSTEM, GENESIS_CHAT_SYSTEM, ANTIGRAVITY_CHAT_SYSTEM, IMAGE_TO_CODE_SYSTEM, REASONING_SYSTEM_PROMPT } from '@/prompts';
 import type { AgentPhase, AgentSpecialist, CodeGenResult, Message, AgentPreference } from '@/components/studio/chat/types';
 
 export type { AgentPhase, AgentSpecialist };
@@ -241,7 +241,12 @@ export function useStudioChatAI({
       if (isReasoningMode) {
         systemPrompt = REASONING_SYSTEM_PROMPT;
       } else if (isChatMode) {
-        systemPrompt = persona === 'antigravity' ? GENESIS_CHAT_SYSTEM : CODE_GEN_SYSTEM;
+        // Bug real: esto tenía las dos ramas cambiadas — con persona "genesis"
+        // (la default en /chat) caía en CODE_GEN_SYSTEM, el prompt de generación
+        // de código, así que un simple "hola" arrancaba a "desarrollar" en vez
+        // de solo conversar. GENESIS_CHAT_SYSTEM es explícito: "si el usuario
+        // solo saluda... NO generes código — solo conversa".
+        systemPrompt = persona === 'antigravity' ? ANTIGRAVITY_CHAT_SYSTEM : GENESIS_CHAT_SYSTEM;
       } else if (hasImage) {
         systemPrompt = IMAGE_TO_CODE_SYSTEM;
       } else {
