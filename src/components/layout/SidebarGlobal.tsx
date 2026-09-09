@@ -4,7 +4,7 @@ import { useState } from 'react';
 import {
   LayoutTemplate, Brain, FolderOpen, Image, Download,
   Coins, LogOut, User, Shield, Zap, Settings, CreditCard, Sparkles,
-  PanelLeftClose, PanelLeftOpen, List, Code2,
+  PanelLeftClose, PanelLeftOpen, List,
   Home, LayoutGrid, ShieldCheck, Activity,
   Users2, Palette, ListTodo, type LucideIcon
 } from 'lucide-react';
@@ -51,7 +51,6 @@ const NAV_MAIN: NavItemDef[] = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
   { path: '/tareas',       label: 'Tareas',        icon: ListTodo,       minTier: 'free' },
   { path: '/chat',         label: 'Genesis IA',    icon: Brain,          minTier: 'creador' },
-  { path: '/code',         label: 'Editor',        icon: Code2,          minTier: 'creador' },
   { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'pro' },
   { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'pro' },
   { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     minTier: 'free' },

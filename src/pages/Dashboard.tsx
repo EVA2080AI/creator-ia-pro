@@ -5,13 +5,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { listSpaces, createSpace, deleteSpace, type Space } from "@/lib/spaces";
 import { listAssets } from "@/lib/assets";
-import { createCanvasNode, upsertCanvasEdges } from "@/lib/canvas-nodes";
-import { genesisOrchestrator } from "@/services/genesis-orchestrator";
 import { toast } from "sonner";
 import {
   Zap, Coins, CreditCard, LayoutGrid, Image,
-  Megaphone, PenTool, FileText, FolderPlus,
-  Code2, Brain, Map, ListTodo
+  Megaphone, PenTool, FileText, FolderPlus, ListTodo
 } from "lucide-react";
 import { ProjectCard } from "@/components/dashboard/ProjectCard";
 import { useStudioProjects } from "@/hooks/useStudioProjects";
@@ -60,7 +57,6 @@ export default function Dashboard() {
   const [isCreatingSpace, setIsCreatingSpace] = useState(false);
   const [newSpaceName, setNewSpaceName] = useState("");
   const [newSpaceDesc, setNewSpaceDesc] = useState("");
-  const [openingProject, setOpeningProject] = useState<DashboardProject | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
 
   const [usageData, setUsageData] = useState<any[]>([]);
@@ -174,35 +170,6 @@ export default function Dashboard() {
     toast.success("Proyecto eliminado");
   };
 
-  const handleMapBlueprint = async () => {
-    if (!openingProject) return;
-    try {
-      const blueprintFile = openingProject.files?.['blueprint.json'];
-      if (!blueprintFile) throw new Error("No blueprint found");
-      const blueprint = JSON.parse(blueprintFile.content);
-
-      const space = await createSpace({
-        name: `🗺️ Map: ${openingProject.name}`,
-        settings: { genesis_project_id: openingProject.id },
-      });
-      if (!space) throw new Error("No se pudo crear el espacio");
-
-      const { nodes, edges } = genesisOrchestrator.mapBlueprintToCanvasNodes(blueprint, space.id, user?.id || '');
-
-      const created = await Promise.all(nodes.map((n) => createCanvasNode({
-        id: n.id, spaceId: n.space_id, type: n.type, prompt: n.prompt, status: n.status,
-        dataPayload: n.data_payload, posX: n.pos_x, posY: n.pos_y,
-      })));
-      if (created.some((c) => !c)) throw new Error("No se pudieron crear los nodos del mapa");
-
-      if (edges.length > 0) await upsertCanvasEdges(space.id, edges);
-
-      toast.success("Mapa generado");
-      navigate(`/formarketing?spaceId=${space.id}`);
-      setOpeningProject(null);
-    } catch (err) { console.error(err); toast.error("Error al mapear"); }
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Helmet><title>{"Dashboard | Creator IA Pro"}</title></Helmet>
@@ -245,7 +212,6 @@ export default function Dashboard() {
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
             { icon: Zap, label: "Genesis IA", desc: "Builder IA", path: "/chat" },
-            { icon: Code2, label: "Editor", desc: "IDE", path: "/code" },
             { icon: Megaphone, label: "Canvas IA", desc: "Lienzo", path: "/studio-flow" },
             { icon: PenTool, label: "Aplicaciones", desc: "Herramientas", path: "/tools" },
             { icon: ListTodo, label: "Tareas", desc: "Kanban", path: "/tareas" },
@@ -284,7 +250,7 @@ export default function Dashboard() {
                   onDuplicate={(e) => handleDuplicate(e, space)} 
                   onDelete={(e) => handleDelete(e, space)}
                   onClick={() => {
-                    if (space.type === 'code') navigate(`/ide?project=${space.id}`);
+                    if (space.type === 'code') navigate(`/chat?project=${space.id}`);
                     else navigate(`/studio-flow?spaceId=${space.id}`);
                   }}
                 />
@@ -317,46 +283,6 @@ export default function Dashboard() {
             <button onClick={() => setIsCreatingSpace(false)} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">Cancelar</button>
             <button onClick={handleCreateSpace} className="px-6 py-2 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Crear Espacio</button>
           </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={!!openingProject} onOpenChange={open => !open && setOpeningProject(null)}>
-        <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden bg-white rounded-[2.5rem] border-zinc-200">
-          <div className="p-8 space-y-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-400">
-                <Code2 className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">{openingProject?.name}</h3>
-                <p className="text-[10px] text-zinc-400 uppercase font-black tracking-widest">Genesis Studio Project</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <button onClick={() => navigate(`/studio?project=${openingProject?.id}`)} className="flex flex-col items-center gap-3 p-6 border border-zinc-100 bg-zinc-50 rounded-2xl hover:border-primary hover:bg-white transition-all group">
-                <Brain className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Genesis Studio</span>
-              </button>
-              <button onClick={() => navigate(`/code?project=${openingProject?.id}`)} className="flex flex-col items-center gap-3 p-6 border border-zinc-100 bg-zinc-50 rounded-2xl hover:border-emerald-500 hover:bg-white transition-all group">
-                <Code2 className="w-6 h-6 text-emerald-500 group-hover:scale-110 transition-transform" />
-                <span className="text-[10px] font-black uppercase tracking-widest">Editor Pro</span>
-              </button>
-            </div>
-
-            <button
-               className="w-full flex items-center gap-4 p-5 border border-zinc-100 bg-zinc-50 rounded-2xl hover:border-primary hover:bg-white transition-all text-left"
-               onClick={handleMapBlueprint}
-            >
-              <div className="w-10 h-10 rounded-xl bg-white border border-zinc-100 flex items-center justify-center shadow-sm">
-                <Map className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-widest">Mapa Estratégico</p>
-                <p className="text-[10px] text-zinc-400">Generar visualización en el Canvas</p>
-              </div>
-            </button>
-          </div>
         </DialogContent>
       </Dialog>
     </div>

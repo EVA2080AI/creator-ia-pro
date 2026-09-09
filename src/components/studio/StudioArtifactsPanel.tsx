@@ -43,7 +43,6 @@ interface StudioArtifactsPanelProps {
   activeTab?: string;
   agentPhase?: AgentPhase;
   activeSpecialist?: AgentSpecialist;
-  persona?: 'genesis' | 'antigravity';
 }
 
 const TABS: { id: PanelTab; label: string; icon: React.ReactNode }[] = [

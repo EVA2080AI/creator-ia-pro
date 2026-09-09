@@ -20,6 +20,14 @@ const CanvasRedirect = () => {
   return <Navigate to={`/studio-flow${loc.search}`} replace />;
 };
 
+// Redirect legacy Editor aliases (/ide, /code, /code-editor) → /chat preserving
+// query params (?project=). Chat.tsx ya sabe leer ese param — ver fusión real
+// de Genesis IA + Editor, Fase 5.
+const ChatRedirect = () => {
+  const loc = useLocation();
+  return <Navigate to={`/chat${loc.search}`} replace />;
+};
+
 // Global auth session watcher — handles token expiry and forced sign-out
 function AuthWatcher() {
   const navigate = useNavigate();
@@ -98,7 +106,6 @@ const Profile      = lazy(() => import("./pages/Profile"));
 const Chat         = lazy(() => import("./pages/Chat"));
 const ShareScreen  = lazy(() => import("./pages/ShareScreen"));
 const SystemStatus = lazy(() => import("./pages/SystemStatus"));
-const CodeIDE      = lazy(() => import("./pages/CodeIDE"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 const Tasks        = lazy(() => import("./pages/Tasks"));
 const AssistantPage = lazy(() => import("./pages/Assistant"));
@@ -195,15 +202,18 @@ const App = () => {
                     <Route path="/formarketing" element={<Navigate to="/studio-flow" replace />} />
                     <Route path="/profile"      element={<Profile />} />
                     <Route path="/hub"          element={<Navigate to="/spaces" replace />} />
-                    {/* Antigravity se fusionó dentro de Genesis — mismo motor (StudioChat) sin la piel cosmética. */}
+                    {/* Antigravity se fusionó dentro de Genesis de verdad — no solo la ruta,
+                        el prompt separado también se eliminó (ver Fase 5 de la restructuración). */}
                     <Route path="/antigravity"  element={<Navigate to="/chat" replace />} />
                     <Route path="/chat"         element={<Chat />} />
                     <Route path="/sharescreen"  element={<ShareScreen />} />
                     <Route path="/system-status" element={<SystemStatus />} />
                     <Route path="/design-system" element={<DesignSystem />} />
-                    <Route path="/ide"          element={<CodeIDE />} />
-                    <Route path="/code"         element={<CodeIDE />} />
-                    <Route path="/code-editor"  element={<CodeIDE />} />
+                    {/* Editor se fusionó de verdad dentro de Genesis IA — era un subconjunto
+                        de Chat.tsx sin preview ni deploy real. Ver Fase 5 de la restructuración. */}
+                    <Route path="/ide"          element={<ChatRedirect />} />
+                    <Route path="/code"         element={<ChatRedirect />} />
+                    <Route path="/code-editor"  element={<ChatRedirect />} />
                   </Route>
 
                   {/* ── 404 ── */}

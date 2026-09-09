@@ -7,7 +7,7 @@ import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
 import { GENESIS_TEMPLATES, TEMPLATE_CATEGORIES, type TemplateCategory } from '@/data/genesis-templates';
 import JSZip from 'jszip';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Code2, Monitor, Smartphone, Tablet, Plus, Trash2,
   Github, Loader2, FolderOpen, Files, MessageSquare,
@@ -35,6 +35,7 @@ import { useStudioProjects, type StudioFile, type StudioProject } from '@/hooks/
 import { StudioCloud, type SupabaseConfig } from '@/components/studio/StudioCloud';
 import { useProfile } from '@/hooks/useProfile';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { generateProject, downloadBlob, type ProjectType, type ScaffoldOptions } from '@/services/scaffold-service';
@@ -531,6 +532,7 @@ function WelcomeScreen({
 // ─── Genesis IDE ─────────────────────────────────────────────────────────────
 export default function Chat() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, signOut } = useAuth('/auth');
   const { profile } = useProfile(user?.id);
   const {
@@ -538,6 +540,20 @@ export default function Chat() {
     loading, createProject, updateProjectFiles,
     renameProject, deleteProject
   } = useStudioProjects();
+
+  // Deep link (?project=<id>) — usado por el Dashboard y por los alias
+  // legacy de Editor (/code, /ide, /code-editor) al redirigir acá. Solo se
+  // aplica una vez al cargar: no pelea con "volver a Home" más adelante.
+  const appliedUrlProjectRef = useRef(false);
+  useEffect(() => {
+    if (appliedUrlProjectRef.current || loading) return;
+    appliedUrlProjectRef.current = true;
+    const projectId = searchParams.get('project');
+    if (!projectId) return;
+    const match = projects.find(p => p.id === projectId);
+    if (match) setActiveProject(match);
+    else toast.error('Proyecto no encontrado');
+  }, [loading, projects, searchParams, setActiveProject]);
 
   const [selectedFile, setSelectedFile] = useState('App.tsx');
   const [panelView, setPanelView] = useState<PanelView>('preview');
@@ -570,6 +586,9 @@ export default function Chat() {
   const [pendingFile, setPendingFile] = useState<{name: string, content: string} | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
+  const isMobile = useIsMobile();
+  const [mobileTab, setMobileTab] = useState<'chat' | 'code' | 'preview'>('chat');
+  const [mobileFilesOpen, setMobileFilesOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<string>(() => {
     if (typeof window === 'undefined') return DEFAULT_MODEL_ID;
     return window.localStorage.getItem('genesis-selected-model') || DEFAULT_MODEL_ID;
@@ -1083,12 +1102,113 @@ export default function Chat() {
         if (panelView !== 'preview' && panelView !== 'split') {
            setPanelView('preview');
         }
+        if (isMobile) setMobileTab('preview');
       }
     },
     onInitialPromptUsed: () => setPendingPrompt(null),
     onStreamCharsChange: (_chars: number, preview: string) => setStreamPreview(preview),
     onToggleArtifacts: () => setPanelView('artifacts'),
   };
+
+  // ── Mobile (≤767px): un panel a la vez con tab bar inferior, en vez de la
+  // grilla de escritorio (sidebar de chat fijo en 440px + canvas) que no
+  // entra en un viewport angosto. Mismo patrón que ya se probó en
+  // CodeIDE.tsx esta semana (ver .design/briefs/mobile-ide-canvas/),
+  // extendido acá con la pestaña de Preview propia de Genesis. El JSX de
+  // escritorio de abajo no cambia.
+  if (isMobile) {
+    return (
+      <>
+        <Helmet><title>{activeProject.name} | Genesis IA</title></Helmet>
+        <div className="flex flex-col h-full bg-white overflow-hidden text-zinc-800 font-sans">
+          <header className="h-12 shrink-0 border-b border-zinc-100 bg-white flex items-center gap-3 px-3">
+            <button onClick={() => setActiveProject(null)} aria-label="Volver a inicio"
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all shrink-0">
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <span className="text-[13px] font-bold text-zinc-900 truncate flex-1">{activeProject.name}</span>
+            {isGenerating && <span className="text-[10px] font-bold text-primary animate-pulse shrink-0">Generando...</span>}
+          </header>
+
+          <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+            {mobileTab === 'chat' && (
+              <div className="flex-1 overflow-hidden">
+                <IDEErrorBoundary onReset={() => setActiveProject(null)}>
+                  <StudioChat {...chatProps} />
+                </IDEErrorBoundary>
+              </div>
+            )}
+
+            {mobileTab === 'preview' && (
+              <div className="flex-1 overflow-hidden">
+                <StudioPreview
+                  files={projectFiles}
+                  deviceMode="mobile"
+                  onDeviceModeChange={setDeviceMode}
+                  isGenerating={isGenerating}
+                  supabaseConfig={supabaseConfig}
+                  onError={setPreviewError}
+                  viewMode="preview"
+                  onToggleViewMode={() => {}}
+                  isSidebarCollapsed={true}
+                  onToggleSidebar={() => {}}
+                  isFullscreen={false}
+                  onToggleFullscreen={() => {}}
+                />
+              </div>
+            )}
+
+            {mobileTab === 'code' && (
+              <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                <div className="h-9 flex items-center justify-between px-3 border-b border-zinc-200/80 bg-zinc-50 shrink-0">
+                  <span className="text-[11px] font-bold text-zinc-700 truncate">{selectedFile}</span>
+                  <button onClick={() => setMobileFilesOpen(true)} className="text-[10px] font-bold text-primary uppercase tracking-wide">
+                    Archivos
+                  </button>
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <StudioCodeEditor selectedFile={selectedFile} projectFiles={projectFiles} onFilesChange={handleFilesChange} isGenerating={isGenerating} streamPreview={streamPreview} />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="h-14 shrink-0 border-t border-zinc-200 bg-white flex items-stretch" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+            {([
+              { id: 'chat' as const, icon: MessageSquare, label: 'Chat' },
+              { id: 'code' as const, icon: Code2, label: 'Código' },
+              { id: 'preview' as const, icon: Eye, label: 'Preview' },
+            ]).map(({ id, icon: Icon, label }) => (
+              <button
+                key={id}
+                onClick={() => setMobileTab(id)}
+                aria-label={label}
+                aria-pressed={mobileTab === id}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 transition-colors ${mobileTab === id ? 'text-primary' : 'text-zinc-400'}`}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px] font-bold uppercase tracking-wide">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <Sheet open={mobileFilesOpen} onOpenChange={setMobileFilesOpen}>
+          <SheetContent side="bottom" className="h-[70vh] rounded-t-2xl p-0">
+            <div className="h-full overflow-y-auto p-4">
+              <StudioFileTree
+                files={projectFiles}
+                selectedFile={selectedFile}
+                onSelect={(f) => { setSelectedFile(f); setMobileFilesOpen(false); }}
+                onAddFile={handleAddFile}
+                onDeleteFile={handleDeleteFile}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
+      </>
+    );
+  }
 
   return (
     <IDEErrorBoundary onReset={() => setActiveProject(null)}>
@@ -1170,7 +1290,6 @@ export default function Chat() {
                   files={projectFiles}
                   agentPhase={agentPhase}
                   activeSpecialist={activeSpecialist}
-                  persona="genesis"
                 />
               </div>
             )}

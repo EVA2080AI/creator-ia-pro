@@ -40,7 +40,6 @@ interface StudioChatProps {
   onGeneratingChange?: (v: boolean) => void;
   onStreamCharsChange?: (chars: number, preview: string) => void;
   supabaseConfig?: { url: string; anonKey: string } | null;
-  persona?: 'genesis' | 'antigravity';
   activeFile?: string | null;
   previewError?: string | null;
   
@@ -151,7 +150,6 @@ export function StudioChat({
   onGeneratingChange,
   onStreamCharsChange,
   supabaseConfig,
-  persona = 'genesis',
   activeFile,
   previewError,
   projectName = 'Proyecto',
@@ -243,7 +241,6 @@ export function StudioChat({
     projectFiles,
     selectedModel,
     convHistory,
-    persona,
     isArchitectMode,
     activeFile,
     supabaseConfig,
@@ -535,10 +532,9 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
         onDrop={handleDrop} onDragOver={e => e.preventDefault()}>
 
         {messages.map((msg) => (
-          <MessageItem 
-            key={msg.id} 
-            msg={msg} 
-            persona={persona || 'genesis'} 
+          <MessageItem
+            key={msg.id}
+            msg={msg}
             copiedId={copiedId}
             onCopy={handleCopy}
             onRetry={() => { const idx = messages.indexOf(msg); if (idx > 0) handleSend(messages[idx-1].content); }}
