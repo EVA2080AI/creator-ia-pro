@@ -1,6 +1,6 @@
 import { memo, useState, useEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
-import { Video, Trash2, Zap, ChevronDown, ChevronUp, Play, Download, Loader2, Sparkles, Wand2, Image as ImageIcon, Clock, Star, ZapOff } from 'lucide-react';
+import { Video, Trash2, Zap, ChevronDown, ChevronUp, Play, Download, Sparkles, Wand2, Image as ImageIcon, Clock, Star, ZapOff } from 'lucide-react';
 import BaseNode from './BaseNode';
 import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { aiService } from '@/services/ai-service';
@@ -469,27 +469,19 @@ const VideoModelNode = ({ id, data }: { id: string; data: VideoNodeData }) => {
           </div>
         )}
 
-        {/* Generate Button */}
+        {/* Generate Button — generación de video deshabilitada en el backend mientras se migra su motor (ver ai-service.ts handleVideoGen) */}
         <button
           onClick={handleGenerate}
-          disabled={isExecuting || !data.prompt || (currentModel.imageOnly && !data.imageRef)}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white text-xs font-bold uppercase tracking-wider shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled
+          title="La generación de video está temporalmente deshabilitada mientras se migra su motor."
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-white text-xs font-bold uppercase tracking-wider shadow-lg transition-all active:scale-95 opacity-50 cursor-not-allowed"
           style={{
             background: `linear-gradient(135deg, ${currentModel.color}, ${currentModel.color}dd)`,
             boxShadow: `0 4px 14px ${currentModel.color}40`,
           }}
         >
-          {isExecuting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              {steps[stepIndex]}
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4" />
-              Generar Video ({currentModel.credits} créditos)
-            </>
-          )}
+          <Sparkles className="w-4 h-4" />
+          Próximamente — generación de video en migración
         </button>
 
         {/* Progress Steps */}

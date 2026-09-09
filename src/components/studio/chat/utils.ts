@@ -150,7 +150,7 @@ export function extractCompleteXmlFiles(text: string): Record<string, StudioFile
 
   while ((m = re.exec(text)) !== null) {
     let path = m[1].trim();
-    let content = m[2].replace(/^\r?\n/, '').replace(/\s*$/, '');
+    const content = m[2].replace(/^\r?\n/, '').replace(/\s*$/, '');
     path = path.replace(/^\.\//, '').replace(/^\/+/, '');
     if (!path || !content) continue;
     const ext = path.split('.').pop()?.toLowerCase() ?? '';
@@ -452,7 +452,7 @@ export function processFileOperations(
   patchedFiles: string[];
   newFiles: string[];
 } {
-  let result = { ...projectFiles };
+  const result = { ...projectFiles };
   const deletedFiles: string[] = [];
   const newFiles: string[] = [];
 

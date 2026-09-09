@@ -67,9 +67,9 @@ Deno.serve(async (req: Request) => {
       throw new Error("Falta el parámetro tool.");
     }
 
-    let modelSlug = "";
-    let modelVersion = "";
-    let input: Record<string, string | number | boolean | undefined> = {};
+    const modelSlug = "";
+    const modelVersion = "";
+    const input: Record<string, string | number | boolean | undefined> = {};
 
     // ── FAL.AI VIDEO MODEL HANDLERS ─────────────────────────────────────────────
 

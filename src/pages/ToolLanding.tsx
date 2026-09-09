@@ -252,7 +252,7 @@ const ToolLanding = () => {
         tool: tool.id,
         prompt: tryItInput.trim(),
         image: tryItImage || undefined,
-        model: isTextTool ? "gemini-3-flash" : "nano-banana-25"
+        model: isTextTool ? "gemini-3-flash" : "flux-schnell"
       });
 
       if (data?.text) {

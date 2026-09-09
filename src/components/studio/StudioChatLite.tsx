@@ -50,7 +50,7 @@ const SUGGESTED_PROMPTS = [
 
 // Simple syntax highlighting for TypeScript/React
 function highlightCode(line: string): string {
-  let highlighted = line
+  const highlighted = line
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')

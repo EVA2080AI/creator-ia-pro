@@ -189,7 +189,6 @@ export function useUserActivity() {
 
   useEffect(() => {
     let activityTimeout: NodeJS.Timeout;
-    let durationInterval: NodeJS.Timeout;
 
     const updateActivity = () => {
       setIsActive(true);
@@ -205,7 +204,7 @@ export function useUserActivity() {
 
     // Track session duration
     const startTime = Date.now();
-    durationInterval = setInterval(() => {
+    const durationInterval = setInterval(() => {
       setSessionDuration(Date.now() - startTime);
     }, 1000);
 

@@ -483,9 +483,9 @@ serve(async (req: Request) => {
     }
 
     // Route based on tier and model
-    let response: Response | null = null;
-    let providerUsed = '';
-    let errorDetails: string[] = [];
+    const response: Response | null = null;
+    const providerUsed = '';
+    const errorDetails: string[] = [];
 
     // TIER 1: Open Source (default)
     if (tier === 'open-source' || (!explicitPro && !PRO_MODELS.has(model))) {

@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { 
+import {
   ChevronDown, ChevronLeft, Activity, Sparkles, Loader2, RefreshCw, Zap
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -12,7 +11,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import type { StudioFile } from '@/hooks/useStudioProjects';
 import type { Message } from './chat/types';
 import type { UIPlanTask, UIArtifact, UILog } from './StudioArtifactsPanel';
-import { MODEL_COSTS, aiService } from '@/services/ai-service';
 import { useAgentPreferences } from '@/hooks/useAgentPreferences';
 
 // Logic Hooks & Utilities
@@ -181,7 +179,7 @@ export function StudioChat({
   const [pendingImage, setPendingImage] = useState<string | null>(null);
   const [pendingUrl, setPendingUrl] = useState<string | null>(null);
   const [pendingContext, setPendingContext] = useState<{ name: string; content: string } | null>(null);
-  const [selectedModel, setSelectedModel] = useState(initialModel || 'anthropic/claude-sonnet-4-5');
+  const [selectedModel, setSelectedModel] = useState(initialModel || 'anthropic/claude-sonnet-4.5');
   const [isArchitectMode, setIsArchitectMode] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -213,7 +211,7 @@ export function StudioChat({
     setMessages,
     convHistory,
     setConvHistory,
-    saveToSupabase,
+    activeConversationId,
     addLog,
     resetConversation
   } = useStudioChatMessages({
@@ -250,6 +248,8 @@ export function StudioChat({
     activeFile,
     supabaseConfig,
     subscriptionTier,
+    projectId,
+    conversationId: activeConversationId,
     onPhaseChange,
     onStreamCharsChange,
     onGeneratingChange,
@@ -263,34 +263,17 @@ export function StudioChat({
     if (genPhase === 'thinking') setStreamedFiles([]);
   }, [genPhase]);
 
-  // ─── PERSISTENCE Helper ───────────────────────────────────────────────────
-  const saveMessage = useCallback(async (role: 'user' | 'assistant', content: string) => {
-    if (!user) return;
-    saveToSupabase(role, content);
-  }, [user, saveToSupabase]);
+  // ─── PERSISTENCE ──────────────────────────────────────────────────────────
+  // El historial lo persiste el propio /api/ai/chat al final del stream
+  // (projectId + conversationId van en el body). Aquí ya no se guarda nada.
 
   // ─── ACTION: Auto-name project ───────────────────────────────────────────
-  const autoNameProject = useCallback(async (p: string) => {
+  // Local, sin llamada a IA: mismo criterio de título que api/ai/chat.ts
+  // (slice de 60 chars del primer prompt).
+  const autoNameProject = useCallback((p: string) => {
     if (!onAutoName) return;
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-proxy`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
-        body: JSON.stringify({
-          provider: 'openrouter',
-          path: 'chat/completions',
-          body: {
-            model: 'deepseek/deepseek-chat',
-            messages: [{ role: 'user', content: `Give a short 2-4 word project title for: "${p.slice(0, 100)}". Return ONLY the title, no quotes.` }],
-            max_tokens: 30
-          },
-        }),
-      });
-      const data = await res.json();
-      const name = (data?.choices?.[0]?.message?.content ?? '').trim().replace(/^["']|["']$/g, '');
-      if (name) onAutoName(name);
-    } catch { /* auto-naming is non-critical, silently fail */ }
+    const name = p.replace(/\s+/g, ' ').trim().slice(0, 60);
+    if (name) onAutoName(name);
   }, [onAutoName]);
 
   // ─── ACTION: Send message ────────────────────────────────────────────────
@@ -309,8 +292,6 @@ export function StudioChat({
         const assistantMsg: Message = { id: crypto.randomUUID(), role: 'assistant', content: `He abierto **${targetFile}** para ti.`, timestamp: new Date() };
         setMessages(prev => [...prev, userMsg, assistantMsg]);
         setInput('');
-        saveMessage('user', text);
-        saveMessage('assistant', assistantMsg.content);
         return;
       }
     }
@@ -323,8 +304,7 @@ export function StudioChat({
     setMessages(prev => [...prev.filter(m => m.id !== 'welcome'), userMsg]);
     setInput('');
     setPendingImage(null);
-    saveMessage('user', text);
-    
+
     // Reset auto-fix counters on new user message
     if (!text.includes('[AUTO-FIX]')) {
       autoFixCountRef.current = 0;
@@ -332,8 +312,7 @@ export function StudioChat({
     }
 
     const intent = detectIntent(text, !!(pendingImage || pendingContext || pendingUrl));
-    const cost = MODEL_COSTS[selectedModel] || 1;
-    
+
     // logic: Plan if in Architect mode OR if it's a very high-level vision request without "has/haz/crea"
     const shouldPlan = isArchitectMode && (intent === 'codegen' || intent === 'fullstack');
 
@@ -415,13 +394,12 @@ export function StudioChat({
 
       setMessages(prev => [...prev, assistantMsg]);
       setPendingContext(null);
-      saveMessage('assistant', assistantMsg.content);
       addLog("Ciclo completado con éxito.", "success");
 
     } catch (err: any) {
       toast.error(`Error: ${err.message}`);
     }
-  }, [input, isGenerating, user, generateCode, onSelectFile, projectFiles, onCodeGenerated, pendingImage, pendingContext, pendingUrl, selectedModel, isArchitectMode, preferences, saveMessage, addLog, setMessages, autoNameProject, messages.length]);
+  }, [input, isGenerating, user, generateCode, onSelectFile, projectFiles, onCodeGenerated, pendingImage, pendingContext, pendingUrl, selectedModel, isArchitectMode, preferences, addLog, setMessages, autoNameProject, messages.length]);
 
   // ─── INITIAL PROMPT TRIGGER ──────────────────────────────────────────────
   useEffect(() => {
@@ -495,13 +473,17 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archi
   const onAttachUrl = async (url: string) => {
     setIsScraping(true);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scrape-url`, {
+      const res = await fetch('/api/scrape', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session?.access_token}`, 'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url })
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        toast.error(data?.error || 'No se pudo leer esa URL');
+        return;
+      }
       setPendingContext({ name: data.title || url, content: data.content });
       toast.success('Contenido web adjuntado');
     } catch { toast.error('Error al leer URL'); } finally { setIsScraping(false); }

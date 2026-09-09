@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { boldService } from "@/services/billing-service";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
-import { CATEGORY_CONFIG } from "@/lib/models.config";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import React from "react";
@@ -159,11 +158,11 @@ const FAQS = [
   },
   {
     question: "¿Cuándo se renuevan mis créditos?",
-    answer: "Los créditos de tu plan mensual se renuevan automáticamente al inicio de cada mes. Si compras una recarga adicional, esos créditos se acreditan de inmediato y no vencen nunca."
+    answer: "Por ahora cada plan es una compra única: los créditos se acreditan de inmediato al pagar y no vencen. Cuando se te acaben, vuelves a comprar el plan o una recarga desde esta página — todavía no hay cobro automático mensual."
   },
   {
     question: "¿Puedo cancelar cuando quiera?",
-    answer: "Sí, sin compromisos ni penalizaciones. Puedes cancelar o cambiar de plan desde Configuración en cualquier momento. No hay contratos mínimos."
+    answer: "Sí — no hay suscripción que cancelar: cada compra es única, así que simplemente dejas de comprar cuando quieras. No hay contratos mínimos ni penalizaciones."
   },
   {
     question: "¿Qué pasa si se me acaban los créditos?",
@@ -418,7 +417,7 @@ export default function Pricing() {
                       </a>
                     ) : (
                       <button
-                        onClick={() => handleBoldAction(plan.key)}
+                        onClick={() => plan.key === "free" ? navigate(isLoggedIn ? "/chat" : "/auth") : handleBoldAction(plan.key)}
                         disabled={loadingAction === plan.key}
                         className={cn(
                           "w-full py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden group/btn",
@@ -429,7 +428,7 @@ export default function Pricing() {
                           <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                         ) : (
                           <span className="flex items-center justify-center gap-2">
-                            Empezar ahora <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                            {plan.key === "free" ? (isLoggedIn ? "Ir al chat" : "Crear cuenta gratis") : "Empezar ahora"} <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
                           </span>
                         )}
                       </button>
@@ -559,7 +558,7 @@ export default function Pricing() {
                         <div className="text-4xl font-black font-display mb-1">{pack.credits_amount.toLocaleString()}</div>
                         <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Créditos</div>
                       </div>
-                      <div className="text-2xl font-black text-zinc-800 font-display">${pack.price}</div>
+                      <div className="text-2xl font-black text-zinc-800 font-display">{pack.price}</div>
                       <button
                         onClick={() => handleBoldAction(pack.id)}
                         disabled={isLoadingThis}
