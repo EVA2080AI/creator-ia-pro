@@ -636,7 +636,7 @@ export default function Pricing() {
             {[
               { icon: Shield, label: "Pago seguro con Bold" },
               { icon: Lock, label: "Datos protegidos" },
-              { icon: TrendingUp, label: "99.9% disponibilidad" },
+              { icon: TrendingUp, label: "Cancelás cuando quieras" },
               { icon: MessageSquare, label: "Soporte en español" },
             ].map(t => (
               <div key={t.label} className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-200 flex flex-col items-center gap-4 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all cursor-default group">

@@ -88,7 +88,7 @@ const Help = () => {
     {
       question: "¿Mis datos están seguros?",
       answer:
-        "Implementamos encriptación AES-256, cumplimos con la Ley 1581 de Colombia y certificaciones SOC 2. Nunca vendemos tus datos. Ver /privacy y /security.",
+        "Implementamos encriptación AES-256 y cumplimos con la Ley 1581 de Colombia. Nunca vendemos tus datos. Ver /privacy y /security.",
       category: "Seguridad",
     },
     {

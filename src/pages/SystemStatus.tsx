@@ -248,7 +248,7 @@ const SystemStatus = () => {
     error: features.filter((f) => f.status === "error").length,
     untested: features.filter((f) => f.status === "untested").length,
   };
-  const completionPct = 100;
+  const completionPct = features.length > 0 ? Math.round((summary.ok / features.length) * 100) : 0;
 
   if (authLoading || adminLoading) {
     return (
@@ -320,20 +320,20 @@ const SystemStatus = () => {
             </div>
             <div className="text-center mt-2">
                <span className="text-3xl font-black text-primary font-mono">{completionPct}%</span>
-               <p className="text-[10px] text-muted-foreground uppercase">Migration Ready</p>
+               <p className="text-[10px] text-muted-foreground uppercase">Funcionando (de lo probado)</p>
             </div>
           </div>
 
           <div className="lg:col-span-2 rounded-xl border border-white/5 bg-card/60 p-6 backdrop-blur-xl">
              <div className="flex items-center gap-3 mb-6">
                 <Activity className="h-5 w-5 text-primary" />
-                <h3 className="font-bold">Métricas de Estabilidad</h3>
+                <h3 className="font-bold">Resumen de Diagnósticos</h3>
              </div>
              <div className="space-y-4">
                 {[
-                   { label: "Latencia AI Gateway", value: "85ms", status: "Excelente", color: "text-emerald-500" },
-                   { label: "Checkouts Bold", value: "Activo", status: "Nominal", color: "text-primary" },
-                   { label: "Uptime Edge Functions", value: "99.99%", status: "SLA OK", color: "text-gold" }
+                   { label: "Funcionando", value: String(summary.ok), status: summary.ok > 0 ? "OK" : "Sin datos", color: "text-emerald-500" },
+                   { label: "Con advertencias", value: String(summary.warning), status: summary.warning > 0 ? "Revisar" : "Ninguna", color: "text-amber-500" },
+                   { label: "Con errores", value: String(summary.error), status: summary.error > 0 ? "Atender" : "Ninguno", color: summary.error > 0 ? "text-destructive" : "text-muted-foreground" }
                 ].map((m) => (
                    <div key={m.label} className="flex items-center justify-between border-b border-white/5 pb-2">
                       <span className="text-sm text-muted-foreground">{m.label}</span>
