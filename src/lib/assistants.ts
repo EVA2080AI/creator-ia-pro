@@ -89,7 +89,7 @@ export async function deleteAssistant(slug: string): Promise<boolean> {
 export function brandCssVars(brand: AssistantBrand): Record<string, string> {
   return {
     "--a-grad": brand.gradient || "linear-gradient(74deg,#A855F7 0%,#6366F1 100%)",
-    "--a-accent": brand.accent || "#8B5CF6",
+    "--a-accent": brand.accent || "#A855F7",
     "--a-accent-soft": brand.accentSoft || "#F3E8FF",
     "--a-panel": brand.panel || "#F5F5F7",
   };

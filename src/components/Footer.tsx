@@ -9,8 +9,8 @@ export function Footer() {
     {
       title: "Plataforma",
       links: [
-        { name: "Genesis IDE", path: "/chat" },
-        { name: "Studio", path: "/tools" },
+        { name: "Genesis IA", path: "/chat" },
+        { name: "Aplicaciones", path: "/tools" },
         { name: "Canvas IA", path: "/studio-flow" },
         { name: "Precios", path: "/pricing" },
       ]
@@ -44,7 +44,7 @@ export function Footer() {
               <Logo className="h-7 w-auto" />
             </Link>
             <p className="text-zinc-500 text-sm leading-relaxed max-w-xs font-medium">
-              Elevando la ingeniería de software mediante autonomía pura y síntesis inteligente.
+              La plataforma de IA todo-en-uno para crear apps, imágenes y contenido en segundos.
             </p>
             <div className="flex items-center gap-4 text-zinc-400">
               <a href="#" className="hover:text-primary transition-colors"><Twitter className="h-5 w-5" /></a>
@@ -77,16 +77,16 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between pt-10 border-t border-zinc-100 gap-6">
           <p className="text-zinc-400 text-xs font-medium italic">
-            © {currentYear} CREATOR IA PRO · UNIVERSAL ENGINEERING SOVEREIGNTY
+            © {currentYear} Creator IA Pro. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200">
               <Shield className="h-3 w-3 text-emerald-500" />
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">v21.0 Certified</span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">AES-256</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200">
               <Zap className="h-3 w-3 text-amber-500" />
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">99.9% Uptime</span>
+              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Pagos en COP</span>
             </div>
           </div>
         </div>

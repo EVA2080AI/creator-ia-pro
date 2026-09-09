@@ -1,6 +1,6 @@
 /**
- * Genesis — AI Code Builder
- * Genesis IDE: describe → generate → preview → push to GitHub
+ * Genesis IA — AI Code Builder
+ * describe → generate → preview → push to GitHub
  */
 import { useState, useCallback, useEffect, useMemo, useRef, Component, type ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
@@ -48,7 +48,7 @@ class IDEErrorBoundary extends Component<{ children: ReactNode; onReset: () => v
     this.state = { hasError: false };
   }
   static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
-  componentDidCatch(error: Error, info: React.ErrorInfo) { console.error("[Genesis IDE] Render crash:", error, info); }
+  componentDidCatch(error: Error, info: React.ErrorInfo) { console.error("[Genesis IA] Render crash:", error, info); }
   render() {
     if (this.state.hasError) {
       return (
@@ -529,7 +529,7 @@ function WelcomeScreen({
   );
 }
 
-// ─── Genesis IDE ─────────────────────────────────────────────────────────────
+// ─── Genesis IA ──────────────────────────────────────────────────────────────
 export default function Chat() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -1021,7 +1021,7 @@ export default function Chat() {
           <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center animate-spin">
             <Loader2 className="h-6 w-6 text-primary" />
           </div>
-          <span className="text-[12px] text-muted-foreground uppercase tracking-widest font-bold">Genesis IDE</span>
+          <span className="text-[12px] text-muted-foreground uppercase tracking-widest font-bold">Genesis IA</span>
         </div>
       </div>
     );

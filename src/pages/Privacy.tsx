@@ -68,11 +68,9 @@ No usamos tus datos para:
       content: `Tu información se almacena de forma segura:
 
 • Bases de datos encriptadas en reposo y tránsito (AES-256)
-• Servidores ubicados en infraestructura segura (Supabase/Vercel)
-• Backups automatizados diarios con encriptación
+• Servidores ubicados en infraestructura administrada (Neon/Vercel)
+• Recuperación a un punto en el tiempo (point-in-time recovery) vía Neon
 • Acceso restringido solo a personal autorizado
-• Auditorías de seguridad regulares
-• Cumplimiento de estándares SOC 2 Type II
 
 Retención de datos:
 • Datos de cuenta: mientras la cuenta esté activa + 1 año después de eliminación
@@ -86,10 +84,11 @@ Retención de datos:
       content: `No vendemos tu información personal. Solo compartimos datos con:
 
 Proveedores de servicios:
-• Supabase (autenticación y base de datos)
+• Neon (base de datos)
 • Bold.co (procesamiento de pagos)
-• Google Cloud (procesamiento de IA via API)
-• Vercel (hosting y edge functions)
+• OpenRouter y proveedores de modelos de IA (procesamiento de IA vía API)
+• Vercel (hosting y funciones edge)
+• Resend (envío de correos transaccionales)
 
 Cada proveedor está sujeto a acuerdos de confidencialidad y solo tiene acceso a los datos necesarios para su función específica.
 
@@ -205,7 +204,7 @@ Para denuncias sobre protección de datos:
       <SEO
         title="Política de Privacidad"
         description="Política de privacidad de Creator IA Pro. Conoce cómo protegemos tus datos personales y cumplimos con la legislación colombiana."
-        keywords="privacidad, datos personales, protección, Ley 1581, Colombia, GDPR"
+        keywords="privacidad, datos personales, protección, Ley 1581, Colombia"
         canonical="https://creator-ia.com/privacy"
       />
 

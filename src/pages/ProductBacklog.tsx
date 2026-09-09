@@ -112,7 +112,7 @@ interface BacklogItem {
 }
 
 const backlog: BacklogItem[] = [
-  { id: "BL-001", title: "Storage Bucket para imágenes", description: "Migrar de base64/URLs a Supabase Storage para mejor rendimiento y descarga confiable.", priority: "P1", effort: "L", team: "Backend", sprint: "Sprint 5", icon: Shield },
+  { id: "BL-001", title: "Storage Bucket para imágenes", description: "Migrar de base64/URLs a Vercel Blob Storage para mejor rendimiento y descarga confiable.", priority: "P1", effort: "L", team: "Backend", sprint: "Sprint 5", icon: Shield },
   { id: "BL-002", title: "Rate Limiter propio", description: "Implementar rate limiting por usuario (requests/min) para prevenir abuso de la API gratuita.", priority: "P1", effort: "M", team: "Backend", sprint: "Sprint 5", icon: Shield },
   { id: "BL-003", title: "SEO dinámico por página", description: "Meta tags, OG images, sitemap.xml, robots.txt optimizado para cada herramienta.", priority: "P2", effort: "M", team: "Frontend", sprint: "Sprint 6", icon: Globe },
   { id: "BL-004", title: "Edición de perfil completa", description: "UI para cambiar avatar, nombre, email de notificación desde el dashboard.", priority: "P1", effort: "S", team: "Frontend", sprint: "Sprint 5", icon: Users },

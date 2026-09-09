@@ -46,9 +46,9 @@ const Cookies = () => {
 
   const thirdParties = [
     {
-      name: "Supabase",
-      purpose: "Autenticación y base de datos",
-      privacyUrl: "https://supabase.com/privacy"
+      name: "Neon",
+      purpose: "Base de datos",
+      privacyUrl: "https://neon.tech/privacy-policy"
     },
     {
       name: "Vercel",

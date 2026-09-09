@@ -49,7 +49,7 @@ export function SEO({
       {canonical && <link rel="canonical" href={canonical} />}
 
       {/* Theme */}
-      <meta name="theme-color" content="#8B5CF6" />
+      <meta name="theme-color" content="#A855F7" />
     </Helmet>
   );
 }
@@ -92,18 +92,6 @@ export const seoPresets = {
     description: "La página que buscas no existe. Explora Creator IA Pro.",
     noindex: true,
   },
-  documentation: {
-    title: "Documentación — Genesis IDE",
-    description: "Guías técnicas, protocolos y estándares arquitectónicos de Creator IA Pro. Aprende a diseñar, construir y desplegar con la potencia de Genesis.",
-    keywords: "documentación, Genesis IDE, API, guía, tutorial, React, Colombia",
-    ogImage: OG_IMAGES.docs,
-  },
-  docs: {
-    title: "Documentación Neural — Genesis Studio",
-    description: "Documentación técnica de Genesis Studio: Neural Cycles, Studio Flow, despliegues cloud y más.",
-    keywords: "documentación, Neural Cycles, Genesis Studio, API, Colombia",
-    ogImage: OG_IMAGES.docs,
-  },
   downloads: {
     title: "Descargar Creator IA Pro",
     description: "Accede a Creator IA Pro desde cualquier dispositivo. Web app disponible sin instalación. Compatible con Chrome, Safari, Firefox y Edge.",
@@ -123,13 +111,7 @@ export const seoPresets = {
   privacy: {
     title: "Política de Privacidad",
     description: "Política de privacidad de Creator IA Pro. Conoce cómo protegemos tus datos personales y cumplimos con la legislación colombiana.",
-    keywords: "privacidad, datos personales, protección, Ley 1581, Colombia, GDPR",
-    ogImage: OG_IMAGES.legal,
-  },
-  security: {
-    title: "Seguridad",
-    description: "Conoce nuestras medidas de seguridad: encriptación AES-256, autenticación segura, cumplimiento SOC 2 y protección de datos empresarial.",
-    keywords: "seguridad, encriptación, AES-256, SOC 2, protección datos, privacidad",
+    keywords: "privacidad, datos personales, protección, Ley 1581, Colombia",
     ogImage: OG_IMAGES.legal,
   },
   contact: {

@@ -12,75 +12,63 @@ const Security = () => {
   const securityFeatures = [
     {
       icon: Lock,
-      title: "Encriptación de Extremo a Extremo",
-      description: "Todos los datos se transmiten y almacenan con encriptación AES-256. Conexiones SSL/TLS 1.3 obligatorias.",
+      title: "Encriptación en tránsito y en reposo",
+      description: "Datos encriptados con AES-256 en la base de datos. Conexiones siempre por HTTPS/TLS.",
       status: "Activo"
     },
     {
       icon: Key,
-      title: "Autenticación Segura",
-      description: "OAuth 2.0 + JWT con tokens de corta duración. Soporte para MFA (autenticación de dos factores).",
+      title: "Autenticación con sesiones firmadas",
+      description: "Login por email/contraseña o proveedores OAuth, con cookies de sesión firmadas (HMAC). Login social y verificación en dos pasos están en el roadmap.",
       status: "Activo"
     },
     {
       icon: Server,
-      title: "Infraestructura Segura",
-      description: "Servidores en centros de datos con certificación SOC 2 Type II. Redes aisladas y monitoreo 24/7.",
+      title: "Infraestructura administrada",
+      description: "Base de datos en Neon (Postgres administrado) y hosting en Vercel Edge — ambos con su propia infraestructura de red aislada y monitoreo.",
       status: "Activo"
     },
     {
       icon: Shield,
-      title: "Protección contra Amenazas",
-      description: "Detección de intrusiones, protección DDoS, escaneo de vulnerabilidades automatizado.",
+      title: "Headers de seguridad HTTP",
+      description: "X-Content-Type-Options, X-Frame-Options, Referrer-Policy y Permissions-Policy activos en todas las respuestas.",
       status: "Activo"
     },
     {
       icon: FileCheck,
-      title: "Backups y Recuperación",
-      description: "Backups diarios encriptados en múltiples ubicaciones. RTO de 4 horas, RPO de 1 hora.",
+      title: "Backups administrados",
+      description: "Neon ofrece recuperación a un punto en el tiempo (point-in-time recovery) como parte de su servicio de base de datos administrada.",
       status: "Activo"
     },
     {
       icon: AlertTriangle,
-      title: "Respuesta a Incidentes",
-      description: "Equipo de respuesta 24/7. SLA de detección < 15 minutos. Notificación a usuarios en 24 horas.",
+      title: "Webhooks verificados",
+      description: "Los webhooks de pagos (Bold.co) se validan con firma HMAC antes de procesar cualquier evento.",
       status: "Activo"
     }
   ];
 
-  const certifications = [
-    { name: "SOC 2 Type II", description: "Auditoría de controles de seguridad" },
-    { name: "ISO 27001", description: "Gestión de seguridad de la información" },
-    { name: "GDPR Compliant", description: "Reglamento general de protección de datos" },
-    { name: "Ley 1581", description: "Protección de datos personales Colombia" },
+  const compliance = [
+    { name: "Ley 1581 de 2012", description: "Protección de datos personales (Colombia)" },
+    { name: "AES-256", description: "Encriptación de datos en reposo" },
+    { name: "TLS/HTTPS", description: "Encriptación de datos en tránsito" },
   ];
 
   const practices = [
     {
-      title: "Desarrollo Seguro",
+      title: "Desarrollo",
       items: [
-        "Code reviews obligatorios antes de cada deploy",
-        "Escaneo de dependencias vulnerables (Snyk)",
-        "Análisis estático de código (SonarQube)",
-        "Entornos de staging aislados"
+        "CI en cada push: lint, typecheck y tests automáticos antes de cualquier deploy",
+        "Secretos y API keys solo en variables de entorno, nunca en el código",
+        "Despliegue continuo desde la rama principal, sin pasos manuales"
       ]
     },
     {
-      title: "Control de Acceso",
+      title: "Datos y pagos",
       items: [
-        "Principio de mínimo privilegio",
-        "Acceso a producción solo vía VPN",
-        "Rotación de credenciales cada 90 días",
-        "Logs de auditoría de todas las acciones"
-      ]
-    },
-    {
-      title: "Protección de Datos",
-      items: [
-        "Datos sensibles siempre encriptados",
-        "Mascaramiento de datos en logs",
-        "Anonimización de IPs en analytics",
-        "Política de retención estricta"
+        "Créditos y transacciones se registran de forma atómica, con reversión automática si un cobro falla",
+        "Los webhooks de pago verifican firma HMAC antes de acreditar nada",
+        "Nunca vendemos ni compartimos tus datos con terceros para marketing"
       ]
     }
   ];
@@ -89,8 +77,8 @@ const Security = () => {
     <div className="min-h-screen bg-white">
       <SEO
         title="Seguridad — Creator IA Pro"
-        description="Conoce nuestras medidas de seguridad: encriptación AES-256, autenticación segura, cumplimiento SOC 2 y protección de datos empresarial."
-        keywords="seguridad, encriptación, AES-256, SOC 2, protección datos, privacidad"
+        description="Conoce nuestras medidas de seguridad reales: encriptación AES-256, infraestructura administrada y cumplimiento de la Ley 1581 de Colombia."
+        keywords="seguridad, encriptación, AES-256, Ley 1581, protección datos, privacidad"
         canonical="https://creator-ia.com/security"
       />
 
@@ -121,22 +109,22 @@ const Security = () => {
             </div>
 
             <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 italic">
-              Seguridad de Nivel Empresarial
+              Tu información, protegida
             </h1>
 
             <p className="text-xl text-zinc-400 leading-relaxed">
-              Tu información merece la mejor protección. Implementamos los más altos estándares
-              de seguridad para garantizar la confidencialidad e integridad de tus datos.
+              Encriptación real, infraestructura administrada y cumplimiento de la ley colombiana
+              de protección de datos. Sin certificaciones que no tenemos, solo lo que sí hacemos.
             </p>
 
             <div className="flex flex-wrap gap-4 mt-8">
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                <span className="text-sm font-medium text-emerald-400">SOC 2 Type II Certified</span>
+                <span className="text-sm font-medium text-emerald-400">Encriptación AES-256</span>
               </div>
               <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                <span className="text-sm font-medium text-emerald-400">99.99% Uptime</span>
+                <span className="text-sm font-medium text-emerald-400">Cumple Ley 1581 (Colombia)</span>
               </div>
             </div>
           </motion.div>
@@ -190,15 +178,15 @@ const Security = () => {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-2xl font-black text-zinc-900 tracking-tighter mb-3 italic">
-                Certificaciones y Cumplimiento
+                Cumplimiento
               </h2>
               <p className="text-zinc-500">
-                Cumplimos con los estándares internacionales más estrictos
+                No tenemos certificaciones de terceros como SOC 2 o ISO 27001 todavía — esto es lo que sí es real hoy
               </p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {certifications.map((cert, idx) => (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {compliance.map((cert, idx) => (
                 <motion.div
                   key={cert.name}
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -226,11 +214,11 @@ const Security = () => {
                 Prácticas de Seguridad
               </h2>
               <p className="text-zinc-500 max-w-2xl mx-auto">
-                Nuestro equipo sigue rigurosos protocolos de seguridad en cada etapa del desarrollo
+                Cómo protegemos el desarrollo y tus pagos, en concreto
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
               {practices.map((practice, idx) => (
                 <motion.div
                   key={practice.title}
@@ -293,7 +281,7 @@ const Security = () => {
               <ul className="space-y-2 text-sm text-zinc-400">
                 <li>• Email: security@creator-ia.com</li>
                 <li>• Respuesta esperada: 24-48 horas</li>
-                <li>• Reconocimiento en Hall of Fame para reportes válidos</li>
+                <li>• Te avisamos apenas lo revisemos y corrijamos</li>
                 <li>• No realices pruebas que dañen usuarios o infraestructura</li>
               </ul>
             </div>

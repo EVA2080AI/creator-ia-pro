@@ -445,8 +445,8 @@ export default function Index() {
         <link rel="canonical" href="https://creator-ia.com/" />
 
         {/* Additional SEO */}
-        <meta name="theme-color" content="#8B5CF6" />
-        <meta name="msapplication-TileColor" content="#8B5CF6" />
+        <meta name="theme-color" content="#A855F7" />
+        <meta name="msapplication-TileColor" content="#A855F7" />
       </Helmet>
 
       <div className="min-h-screen bg-white text-foreground selection:bg-primary/20 font-sans overflow-x-hidden relative">

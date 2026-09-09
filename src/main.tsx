@@ -33,9 +33,9 @@ window.addEventListener('beforeunload', (e) => {
 if (import.meta.env.DEV) {
   console.log(
     '%c Creator IA Pro ',
-    'background: linear-gradient(135deg, #8B5CF6, #7C3AED); color: white; font-size: 24px; font-weight: bold; padding: 10px 20px; border-radius: 8px;'
+    'background: linear-gradient(135deg, #A855F7, #7C3AED); color: white; font-size: 24px; font-weight: bold; padding: 10px 20px; border-radius: 8px;'
   );
-  console.log('%c Built with ❤️ by EVA2080AI ', 'color: #8B5CF6; font-size: 14px;');
+  console.log('%c Built with ❤️ by EVA2080AI ', 'color: #A855F7; font-size: 14px;');
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
