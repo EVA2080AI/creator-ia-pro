@@ -31,3 +31,4 @@ node_modules/
 test-qa.mjs
 .env*.local
 *.tsbuildinfo
+.env*

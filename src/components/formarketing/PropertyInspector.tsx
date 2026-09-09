@@ -22,19 +22,24 @@ const NODE_TYPE_COLORS: Record<string, string> = {
   antigravityBridge: 'text-zinc-600 bg-zinc-100 border-zinc-200',
 };
 
+// Ids "de vitrina" — ver TEXT_MODEL_MAP/IMAGE_MODEL_MAP en ai-service.ts.
+// Los créditos mostrados aquí son solo estimados de UI (el cobro real y
+// atómico ocurre en el servidor contra src/lib/ai/models.ts); las etiquetas
+// anteriores ("GPT-5 Mini/Image", "Gemini Image/Preview", "Llama 4") no
+// correspondían a los modelos reales detrás de cada id.
 const IMAGE_MODELS = [
-  { id: 'flux-schnell',  label: 'GPT-5 Mini (2cr)' },
-  { id: 'flux-pro',      label: 'GPT-5 Image (4cr)' },
-  { id: 'flux-pro-1.1',  label: 'Gemini Image (4cr)' },
-  { id: 'sdxl',          label: 'Gemini Preview (2cr)' },
+  { id: 'flux-schnell',  label: 'Flux Schnell (2cr)' },
+  { id: 'flux-pro',      label: 'Flux 1.1 Pro (4cr)' },
+  { id: 'flux-pro-1.1',  label: 'Flux 1.1 Pro HD (4cr)' },
+  { id: 'sdxl',          label: 'Flux 1.1 Pro (4cr)' },
 ];
 
 const TEXT_MODELS = [
-  { id: 'deepseek-chat',      label: 'DeepSeek V3 (1cr)' },
-  { id: 'gemini-3-flash',     label: 'Gemini Flash (1cr)' },
-  { id: 'gemini-3.1-pro-low', label: 'Gemini 2.5 Pro (1cr)' },
-  { id: 'claude-3.5-sonnet',  label: 'Claude Sonnet (4cr)' },
-  { id: 'gpt-oss-120b',       label: 'Llama 4 (2cr)' },
+  { id: 'deepseek-chat',      label: 'DeepSeek V3 (0cr)' },
+  { id: 'gemini-3-flash',     label: 'Gemini Flash Lite (0cr)' },
+  { id: 'gemini-3.1-pro-low', label: 'Gemini 2.5 Flash (1cr)' },
+  { id: 'claude-3.5-sonnet',  label: 'Claude Sonnet 4.5 (5cr)' },
+  { id: 'gpt-oss-120b',       label: 'GPT-OSS 120B (0cr)' },
 ];
 
 interface PropertyInspectorProps {

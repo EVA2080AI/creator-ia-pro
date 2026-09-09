@@ -197,10 +197,10 @@ const SystemStatus = () => {
         };
       } else if (feature.action === "test-gateway") {
         try {
-          const data = await aiService.processAction({ 
-            action: "chat", 
-            prompt: "Ping diagnostic check", 
-            model: "gemini-2.0-flash-exp:free" 
+          const data = await aiService.processAction({
+            action: "chat",
+            prompt: "Ping diagnostic check",
+            model: "gemini-3-flash"
           });
           updatedFeatures[idx] = {
             ...updatedFeatures[idx],

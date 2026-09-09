@@ -16,11 +16,15 @@ interface LLMNodeData {
   collapsed?: boolean;
 }
 
+// Ids "de vitrina" — ver TEXT_MODEL_MAP en ai-service.ts para su traducción
+// al catálogo canónico (src/lib/ai/models.ts). Los ids anteriores acá (con
+// guion en vez de punto, "gpt-4o" suelto, sufijo "-preview") no existían en
+// ese mapa: cualquier ejecución con ellos caía en silencio al modelo gratis.
 const LLM_MODELS = [
-  { id: 'anthropic/claude-sonnet-4-5',      name: 'Claude Sonnet 4.5' },
-  { id: 'openai/gpt-4o',                    name: 'GPT-4o' },
-  { id: 'deepseek/deepseek-chat',           name: 'DeepSeek V3' },
-  { id: 'google/gemini-2.5-flash-preview',  name: 'Gemini 2.5 Flash' },
+  { id: 'claude-3.5-sonnet',  name: 'Claude Sonnet 4.5' },
+  { id: 'gpt-oss-120b',       name: 'GPT-OSS 120B' },
+  { id: 'deepseek-chat',      name: 'DeepSeek V3' },
+  { id: 'gemini-3-flash',     name: 'Gemini 2.5 Flash' },
 ];
 
 const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {

@@ -39,9 +39,12 @@ interface ProfileData {
   credits_balance: number | null;
 }
 
-// ─── MODEL MAPS (id interno usado por Tools.tsx/ModelSelector → catálogo real) ─
-// src/lib/ai/models.ts es la fuente de verdad de modelos vivos — este mapa solo
-// traduce los ids "de vitrina" que ya usa la UI de /tools sin tocar esa UI.
+// ─── MODEL MAPS (ids "de vitrina" cortos, usados por los nodos de Canvas IA
+// y por ToolLanding → id real del catálogo canónico src/lib/ai/models.ts,
+// que es la fuente de verdad de modelos vivos y sus créditos). Si agregas un
+// id de vitrina nuevo, el valor DEBE ser un id que exista hoy en CHAT_MODELS/
+// IMAGE_MODELS — si no, /api/ai/chat lo rechaza y cae en silencio al modelo
+// gratis por defecto (ver api/ai/chat.ts getModel()).
 const TEXT_MODEL_MAP: Record<string, string> = {
   "deepseek-chat":       "deepseek/deepseek-chat-v3.1",
   "gemini-3-flash":      "google/gemini-2.5-flash-lite",
@@ -61,41 +64,6 @@ export const IMAGE_MODEL_MAP: Record<string, string> = {
   "flux-realism":  "flux-1.1-pro",
   "ideogram-v2":   "flux-1.1-pro", // Ideogram no está en el catálogo nuevo — mejor alternativa disponible
   "sdxl":          "flux-1.1-pro",
-};
-
-// ─── CREDIT COSTS (solo para mostrar el costo estimado en la UI antes de enviar —
-// el cobro real y atómico ocurre en el servidor, en /api/ai/chat y /api/ai/image) ──
-export const MODEL_COSTS: Record<string, number> = {
-  "anthropic/claude-3-5-haiku-20241022":   1,
-  "openai/gpt-4o-mini":                    1,
-  "meta-llama/llama-3-8b-instruct":        1,
-  "meta-llama/llama-3-70b-instruct":       1,
-  "deepseek/deepseek-chat":                1,
-  "deepseek/deepseek-chat-v3.1":           0,
-  "google/gemini-2.0-flash-001":           1,
-  "google/gemini-2.5-flash-lite":          0,
-  "google/gemini-2.5-flash":               1,
-  "meta-llama/llama-3.3-70b-instruct":     0,
-  "openai/gpt-oss-120b":                   0,
-  "openai/gpt-4.1-mini":                   2,
-  "mistralai/mistral-small-3.1-24b-instruct": 1,
-  "anthropic/claude-3.5-sonnet":           5,
-  "anthropic/claude-3-5-sonnet-20241022":  5,
-  "anthropic/claude-sonnet-4.5":           5,
-  "anthropic/claude-3-opus-20240229":      5,
-  "anthropic/claude-opus-4.5":             10,
-  "anthropic/claude-haiku-4.5":            2,
-  "qwen/qwen3-coder":                      2,
-  "x-ai/grok-4.5":                         6,
-  "deepseek/deepseek-r1":                  3,
-  "google/gemini-2.5-pro-preview-03-25":   3,
-  "mistralai/mistral-large":               3,
-  "black-forest-labs/flux-schnell":        2,
-  "black-forest-labs/flux-1.1-pro":        5,
-  "ideogram-ai/ideogram-v2":               4,
-  "stability-ai/stable-diffusion-3-5-large": 3,
-  "flux-schnell": 2, "flux-pro": 4, "flux-pro-1.1": 4, "flux-realism": 4, "ideogram-v2": 4, "sdxl": 4,
-  "upscale": 3, "background": 1, "enhance": 2, "restore": 3, "variation": 4, "video": 5,
 };
 
 // ─── ERROR CLASSIFIER ─────────────────────────────────────────────────────────
