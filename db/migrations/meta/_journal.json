@@ -15,6 +15,13 @@
       "when": 1788311040000,
       "tag": "0001_genesis_chat_history",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788923333530,
+      "tag": "0002_secret_bruce_banner",
+      "breakpoints": true
     }
   ]
 }
