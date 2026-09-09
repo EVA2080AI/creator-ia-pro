@@ -47,31 +47,9 @@ jobs:
       - name: Run unit tests
         run: npm run test
 
-  deploy-preview:
-    needs: [lint-and-type-check, test]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to Vercel Preview
-        uses: vercel/action-deploy@v1
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-
-  deploy-production:
-    needs: [lint-and-type-check, test]
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy to Vercel Production
-        uses: vercel/action-deploy@v1
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
+  # Sin jobs de deploy: el proyecto de Vercel está conectado por Git
+  # directamente (ver .vercel/project.json) y despliega preview/producción
+  # solo con el push — no hace falta duplicarlo acá. Los dos jobs que había
+  # (deploy-preview/deploy-production) usaban `vercel/action-deploy@v1`, una
+  # Action que no existe en el marketplace; nunca llegaron a desplegar nada,
+  # solo dejaban el pipeline en rojo después de que lint/test pasaran.
