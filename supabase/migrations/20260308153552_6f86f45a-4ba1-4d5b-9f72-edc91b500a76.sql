@@ -1,3 +1,0 @@
-
-ALTER TABLE public.profiles 
-ADD COLUMN subscription_tier text NOT NULL DEFAULT 'free';
