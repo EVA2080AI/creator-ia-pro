@@ -156,7 +156,7 @@ export function FormarketingSidebar({ onAddNode }: FormarketingSidebarProps) {
 
       {/* Slide-in Panel */}
       {menuOpen && (
-        <div className="w-80 flex flex-col bg-zinc-50/50 border-l border-zinc-200/60 overflow-y-auto no-scrollbar animate-in slide-in-from-left duration-200">
+        <div className="w-[calc(100vw-3.5rem)] sm:w-80 flex flex-col bg-zinc-50/50 border-l border-zinc-200/60 overflow-y-auto no-scrollbar animate-in slide-in-from-left duration-200">
           {/* Header */}
           <div className="px-5 pt-5 pb-3 border-b border-zinc-200/60 bg-white/80 backdrop-blur-md">
             <div className="flex items-center justify-between mb-3">

@@ -55,8 +55,8 @@ export function StudioToolbar({
 
   return (
     <TooltipProvider delayDuration={400}>
-      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex items-center bg-white/80 backdrop-blur-2xl border border-zinc-200/80 rounded-2xl p-1.5 shadow-2xl shadow-zinc-200/40 animate-in fade-in zoom-in-95 duration-500 ring-1 ring-black/5">
-        
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex items-center max-w-[calc(100vw-2rem)] overflow-x-auto no-scrollbar bg-white/80 backdrop-blur-2xl border border-zinc-200/80 rounded-2xl p-1.5 shadow-2xl shadow-zinc-200/40 animate-in fade-in zoom-in-95 duration-500 ring-1 ring-black/5">
+
         {/* Section 1: Navigation & Title */}
         <div className="flex items-center gap-3 pl-3 pr-4 border-r border-zinc-100">
           <button

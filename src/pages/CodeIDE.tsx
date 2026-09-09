@@ -9,12 +9,13 @@ import { StudioChat } from '@/components/studio/StudioChat';
 import { StudioFileTree } from '@/components/studio/StudioFileTree';
 import { StudioCodeEditor } from '@/components/studio/StudioCodeEditor';
 import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   PanelLeftClose, PanelLeft, PanelRightClose,
   Loader2, Plus, Code2, List,
   Save, Play, Globe, Github, Sparkles, Bot,
   Search, GitBranch, Package, Settings, User,
-  ChevronRight, ChevronDown, Clock, AlertCircle,
+  ChevronRight, ChevronDown, ChevronLeft, Clock, AlertCircle,
   CheckCircle2, Terminal, MoreHorizontal, UploadCloud
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -35,6 +36,8 @@ export default function CodeIDE() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const projectId = searchParams.get('project');
+  const isMobile = useIsMobile();
+  const [mobileTab, setMobileTab] = useState<'files' | 'editor' | 'chat'>('editor');
 
   // --- Project State ---
   const { 
@@ -222,6 +225,133 @@ export default function CodeIDE() {
   const errorCount = 0;
   const warnCount = 0;
   const language = activeFile?.split('.').pop()?.toUpperCase() ?? 'PLAIN';
+
+  // ── Mobile (≤767px): una vista a la vez con tab bar inferior, en vez de
+  // los 3 paneles simultáneos de desktop (react-resizable-panels no es
+  // táctil y no caben 3 columnas en 375px). Rama de render separada — el
+  // JSX desktop de abajo no cambia. Ver .design/briefs/mobile-ide-canvas/.
+  if (isMobile) {
+    return (
+      <>
+        <Helmet><title>{activeProject.name} | Creator IDE</title></Helmet>
+        <div className="flex flex-col h-full bg-white overflow-hidden text-zinc-800 font-sans">
+          <header className="h-[48px] w-full border-b border-zinc-100 bg-white flex items-center gap-3 px-3 shrink-0">
+            <button onClick={() => navigate('/dashboard')} aria-label="Volver al panel"
+              className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all shrink-0">
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+            <span className="text-[13px] font-bold text-zinc-900 truncate flex-1">{activeProject.name}</span>
+            {isSaving && <span className="text-[10px] font-bold text-zinc-400 animate-pulse shrink-0">Guardando...</span>}
+          </header>
+
+          <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+            {mobileTab === 'files' && (
+              <div className="flex-1 overflow-y-auto">
+                <div className="h-9 px-4 flex items-center justify-between border-b border-zinc-200/60 shrink-0 bg-zinc-50">
+                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">EXPLORADOR</span>
+                  <div className="flex items-center gap-1">
+                    <button onClick={handleCreateNew} aria-label="Nuevo proyecto"
+                      className="p-1.5 rounded hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 transition-all">
+                      <Plus className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => folderInputRef.current?.click()} aria-label="Importar proyecto"
+                      className="p-1.5 rounded hover:bg-zinc-200 text-zinc-400 hover:text-zinc-700 transition-all">
+                      <UploadCloud className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+                <div className="px-1 py-2">
+                  <StudioFileTree
+                    files={activeProject.files}
+                    selectedFile={activeFile || ''}
+                    onSelect={(file) => { setActiveFile(file); setMobileTab('editor'); }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {mobileTab === 'editor' && (
+              <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+                <div className="h-9 flex items-center px-3 border-b border-zinc-200/80 bg-zinc-50 shrink-0">
+                  <span className="text-[11px] font-bold text-zinc-700 truncate">{activeFile || 'Sin archivo seleccionado'}</span>
+                </div>
+                <div className="flex-1 overflow-hidden relative">
+                  {activeFile ? (
+                    <StudioCodeEditor
+                      selectedFile={activeFile}
+                      projectFiles={activeProject.files}
+                      onFilesChange={handleFilesChange}
+                      isGenerating={isGenerating}
+                      streamPreview={streamPreview}
+                    />
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-center px-8 gap-4">
+                      <Code2 className="w-10 h-10 text-zinc-200" />
+                      <div className="space-y-1">
+                        <h2 className="text-sm font-black text-zinc-900 tracking-tight">{activeProject.name}</h2>
+                        <p className="text-xs text-zinc-400">Elige un archivo en la pestaña Archivos para empezar</p>
+                      </div>
+                      <button onClick={() => setMobileTab('files')}
+                        className="px-4 py-2 rounded-xl bg-zinc-900 text-white text-[11px] font-black uppercase tracking-widest">
+                        Ver archivos
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {mobileTab === 'chat' && (
+              <div className="flex-1 overflow-hidden bg-white">
+                <StudioChat
+                  projectId={activeProject.id}
+                  projectFiles={activeProject.files}
+                  onCodeGenerated={handleCodeGenerated}
+                  onGeneratingChange={setIsGenerating}
+                  onStreamCharsChange={(chars, preview) => setStreamPreview(preview)}
+                  persona="antigravity"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* ── Tab bar inferior — reemplaza la Activity Bar + el botón flotante de IA ── */}
+          <div className="h-14 shrink-0 border-t border-zinc-200 bg-white flex items-stretch" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+            {([
+              { id: 'files' as const, icon: List, label: 'Archivos' },
+              { id: 'editor' as const, icon: Code2, label: 'Código' },
+              { id: 'chat' as const, icon: Bot, label: 'IA' },
+            ]).map(({ id, icon: Icon, label }) => (
+              <button
+                key={id}
+                onClick={() => setMobileTab(id)}
+                aria-label={label}
+                aria-pressed={mobileTab === id}
+                className={cn(
+                  "flex-1 flex flex-col items-center justify-center gap-1 transition-colors",
+                  mobileTab === id ? "text-primary" : "text-zinc-400"
+                )}
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-[10px] font-bold uppercase tracking-wide">{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <input
+          type="file"
+          ref={folderInputRef}
+          onChange={handleFolderUpload}
+          className="hidden"
+          /* @ts-expect-error Typescript doesn't strictly know webkitdirectory in standard types */
+          webkitdirectory="true"
+          directory="true"
+          multiple
+        />
+      </>
+    );
+  }
 
   return (
     <>

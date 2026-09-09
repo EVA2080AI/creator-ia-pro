@@ -82,7 +82,7 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
   };
 
   return (
-    <div className="w-[300px] shrink-0 flex flex-col border-l border-zinc-200/60 bg-white/95 backdrop-blur-xl animate-in slide-in-from-right duration-500 overflow-y-auto no-scrollbar shadow-[-20px_0_40px_-20px_rgba(0,0,0,0.05)]">
+    <div className="fixed inset-x-0 bottom-0 z-40 max-h-[70vh] sm:static sm:z-auto sm:max-h-none w-full sm:w-[300px] shrink-0 flex flex-col border-t sm:border-t-0 sm:border-l border-zinc-200/60 bg-white/95 backdrop-blur-xl animate-in slide-in-from-bottom sm:slide-in-from-right duration-500 overflow-y-auto no-scrollbar shadow-[0_-20px_40px_-20px_rgba(0,0,0,0.08)] sm:shadow-[-20px_0_40px_-20px_rgba(0,0,0,0.05)] rounded-t-2xl sm:rounded-none">
 
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100/80 bg-zinc-50/40">
