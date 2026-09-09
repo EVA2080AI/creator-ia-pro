@@ -1,4 +1,3 @@
-import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type LogoSize = "sm" | "md" | "lg";
@@ -26,11 +25,16 @@ export function Logo({ size = "sm", showText = true, showPro = false, className,
       onClick={onClick}
       className={cn("flex items-center gap-2.5 shrink-0", onClick && "group cursor-pointer", className)}
     >
-      {/* Icon badge */}
+      {/* Icon badge — marca propia: anillo abierto ("C" de Creator) con un
+          punto de acento marcando la apertura, en vez del ícono genérico de
+          sparkles que usan la mayoría de productos de IA. */}
       <div
         className={cn("relative rounded-lg flex items-center justify-center shrink-0 bg-primary", s.wrap)}
       >
-        <Sparkles className={cn("text-white", s.icon)} />
+        <svg viewBox="0 0 24 24" fill="none" className={cn("text-white", s.icon)} xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="38 50.3" transform="rotate(-198 12 12)" />
+          <circle cx="17.4" cy="7.2" r="2" fill="currentColor" />
+        </svg>
       </div>
 
       {/* Text */}

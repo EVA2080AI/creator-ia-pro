@@ -9,7 +9,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import {
   ArrowRight, Code2, Image, Zap,
-  CheckCircle2, Layers, MessageSquare, Video,
+  CheckCircle2, Layers, MessageSquare,
   Star, Shield, Users, ChevronRight, Sparkles, Wand2, Check, Bot
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
@@ -33,7 +33,7 @@ const PRODUCTS = [
     color: "#4ADE80",
     cta: "Probar Genesis IA →",
     path: "/chat",
-    features: ["Apps React + TypeScript", "Sitios web completos", "Preview instantáneo", "Claude 4.6 Sonnet"],
+    features: ["Apps React + TypeScript", "Sitios web completos", "Preview instantáneo", "Claude Sonnet 4.5"],
     preview: [
       { label: "App.tsx", lines: 42, active: true },
       { label: "components/Hero.tsx", lines: 28, active: false },
@@ -41,14 +41,14 @@ const PRODUCTS = [
     ],
   },
   {
-    badge: "Studio",
+    badge: "Aplicaciones",
     headline: "Crea imágenes y textos con IA.",
     sub: "Herramientas de imagen (genera, logos, quita fondo, upscale…) y de texto (copy, SEO, redes, ads). Todo inline, sin salir del workspace.",
     icon: Image,
     color: "#00C2FF",
-    cta: "Abrir Studio →",
+    cta: "Abrir Aplicaciones →",
     path: "/tools",
-    features: ["FLUX Pro + SDXL", "Upscale 4K", "Streaming de texto", "Guarda en biblioteca"],
+    features: ["Flux Schnell + Flux Pro", "Upscale 4K", "Streaming de texto", "Guarda en biblioteca"],
     preview: [
       { tool: "Crear imagen", cr: 2, color: "#a855f7" },
       { tool: "Diseñar logo",  cr: 3, color: "#00c2ff" },
@@ -66,9 +66,8 @@ const PLANS = [
     credits: "5 créditos",
     color: "#64748B",
     description: "Para explorar el potencial de la IA",
-    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop",
     badge: "Para empezar",
-    features: ["Genesis IDE básico", "5 créditos totales", "Modelos estándar", "Soporte comunitario"]
+    features: ["Genesis IA básico", "5 créditos totales", "Modelos estándar", "Soporte comunitario"]
   },
   {
     name: "Creador",
@@ -77,8 +76,7 @@ const PLANS = [
     credits: "1.000 créditos",
     color: "#94A3B8",
     description: "Todo lo que necesitas para empezar",
-    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600&h=400&fit=crop",
-    features: ["Genesis IDE completo", "Studio creativo", "1.000 créditos/mes", "Soporte por chat"]
+    features: ["Genesis IA completo", "Aplicaciones creativas", "1.000 créditos/mes", "Soporte por chat"]
   },
   {
     name: "Pro",
@@ -89,8 +87,7 @@ const PLANS = [
     popular: true,
     badge: "Más popular",
     description: "Para creadores que publican a diario",
-    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop",
-    features: ["Modelos premium (GPT-4, Claude)", "3.000 créditos/mes", "Generación prioritaria", "Múltiples chats simultáneos", "Soporte prioritario"]
+    features: ["Modelos premium (Claude, GPT)", "3.000 créditos/mes", "Generación prioritaria", "Múltiples chats simultáneos", "Soporte prioritario"]
   },
   {
     name: "Agencia",
@@ -100,7 +97,6 @@ const PLANS = [
     color: "#F59E0B",
     badge: "Acceso total",
     description: "Ideal para equipos que crean en escala",
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=400&fit=crop",
     features: ["Suite completa: texto, imágenes y código", "8.000 créditos/mes", "Todos los modelos de IA", "Soporte 24/7", "Facturación directa"]
   },
   {
@@ -111,7 +107,6 @@ const PLANS = [
     color: "#10B981",
     badge: "Para negocios",
     description: "IA a escala sin límites para negocios",
-    image: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=600&h=400&fit=crop",
     features: ["20.000 créditos/mes", "Todo del plan Agencia", "Usuarios adicionales del equipo", "Integraciones y API disponibles", "Gerente de cuenta"]
   },
   {
@@ -121,25 +116,25 @@ const PLANS = [
     credits: "Créditos personalizados",
     color: "#A855F7",
     description: "Solución personalizada para grandes organizaciones",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&h=400&fit=crop",
     isContact: true,
     features: ["Volumen de créditos a la medida", "Infraestructura dedicada", "SLA personalizado", "Integración con tus herramientas", "Facturación corporativa NIT"]
   },
 ];
 
 const TRUST = [
-  { icon: Shield,  text: "SSL + datos seguros",     sub: "Supabase + Vercel Edge" },
-  { icon: Zap,     text: "Generación en <30s",      sub: "99.5% uptime" },
+  { icon: Shield,  text: "SSL + datos seguros",     sub: "Neon + Vercel Edge" },
+  { icon: Zap,     text: "Encriptación AES-256",    sub: "Cumple Ley 1581 (Colombia)" },
   { icon: Users,   text: "Sin tarjeta para empezar", sub: "Plan gratuito disponible" },
-  { icon: Star,    text: "Modelos top del mundo",    sub: "Claude · GPT-4o · FLUX" },
+  { icon: Star,    text: "Modelos top del mundo",    sub: "Claude · GPT · Flux" },
 ];
 
-// ─── Stats ───────────────────────────────────────────────────────────────────
+// ─── Highlights ──────────────────────────────────────────────────────────────
+// Hechos reales del producto, no métricas de uso inventadas.
 const STATS = [
-  { value: "50K+", label: "Apps generadas", icon: Code2 },
-  { value: "2M+", label: "Imágenes creadas", icon: Image },
-  { value: "99.5%", label: "Uptime garantizado", icon: Shield },
-  { value: "4.9", label: "Rating promedio", icon: Star },
+  { value: "12+", label: "Herramientas de IA", icon: Wand2 },
+  { value: "3", label: "Formas de crear: Genesis IA, Canvas IA, Aplicaciones", icon: Layers },
+  { value: "5", label: "Créditos gratis para empezar, sin tarjeta", icon: Zap },
+  { value: "AES-256", label: "Encriptación de tus datos", icon: Shield },
 ];
 
 // ─── How it works ────────────────────────────────────────────────────────────
@@ -154,7 +149,7 @@ const HOW_IT_WORKS = [
   {
     step: "02",
     title: "IA genera el código",
-    description: "Genesis IDE construye tu proyecto completo con React, TypeScript y Tailwind en segundos.",
+    description: "Genesis IA construye tu proyecto completo con React, TypeScript y Tailwind en segundos.",
     color: "#6366f1",
     icon: Code2,
   },
@@ -174,53 +169,44 @@ const HOW_IT_WORKS = [
   },
 ];
 
-// ─── Testimonials ────────────────────────────────────────────────────────────
-const TESTIMONIALS = [
+// ─── Por qué elegir Creator IA Pro ─────────────────────────────────────────────
+// Reemplaza testimonios inventados (nombres, empresas y fotos de stock que no
+// corresponden a usuarios reales) por garantías del producto que sí son
+// verificables — principio de diseño honesto (Dieter Rams: "good design is
+// honest"), no prueba social falsa.
+const GUARANTEES = [
   {
-    name: "María García",
-    role: "Diseñadora UX",
-    company: "Agencia Digital MX",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
-    content: "Genesis IDE me ahorra horas de trabajo. Puedo prototipar una idea en minutos y mostrarla al cliente. Es impresionante.",
-    rating: 5,
+    icon: Zap,
+    title: "Empezás gratis, sin tarjeta",
+    content: "5 créditos para probar Genesis IA, Canvas IA y Aplicaciones antes de pagar nada.",
   },
   {
-    name: "Carlos Ruiz",
-    role: "Founder",
-    company: "TechStart",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-    content: "Lancé mi MVP en una semana gracias a Creator IA. Lo que antes tardaba meses, ahora lo hago en días.",
-    rating: 5,
+    icon: Shield,
+    title: "Tus datos, encriptados",
+    content: "Encriptación AES-256 y cumplimiento de la Ley 1581 de Colombia. Nunca vendemos tus datos.",
   },
   {
-    name: "Ana Martínez",
-    role: "Marketing Lead",
-    company: "GrowthLab",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-    content: "Studio es mi herramienta secreta para crear contenido. Las imágenes que genera son de nivel profesional.",
-    rating: 5,
+    icon: CheckCircle2,
+    title: "Sin letra chica",
+    content: "Cada plan dura 30 días, sin renovación automática silenciosa. Te avisamos antes de que venza.",
   },
   {
-    name: "Diego Soto",
-    role: "Desarrollador Fullstack",
-    company: "Freelance",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
-    content: "La calidad del código que genera es sorprendente. TypeScript limpio, buenas prácticas, estructura profesional.",
-    rating: 5,
+    icon: Code2,
+    title: "El código es tuyo",
+    content: "Exportá a ZIP o hacé push directo a GitHub. Nada te ata a la plataforma.",
   },
 ];
 
 const MARQUEE_ITEMS = [
-  { icon: Sparkles, label: "Claude 4.6 Opus" },
-  { icon: Wand2,    label: "FLUX Pro Ultra" },
-  { icon: Code2,    label: "Genesis IDE" },
+  { icon: Sparkles, label: "Claude Opus 4.5" },
+  { icon: Wand2,    label: "Flux 1.1 Pro" },
+  { icon: Code2,    label: "Genesis IA" },
   { icon: Image,    label: "Upscale 4K" },
-  { icon: Layers,   label: "Canvas Editor" },
-  { icon: MessageSquare, label: "GPT-4o" },
-  { icon: Video,    label: "Video IA" },
-  { icon: Zap,      label: "Generación <30s" },
-  { icon: Star,     label: "SDXL Turbo" },
-  { icon: Shield,   label: "E2E Encrypted" },
+  { icon: Layers,   label: "Canvas IA" },
+  { icon: MessageSquare, label: "GPT-4.1 Mini" },
+  { icon: Zap,      label: "Gemini 2.5 Flash" },
+  { icon: Star,     label: "DeepSeek V3.1" },
+  { icon: Shield,   label: "AES-256" },
 ];
 
 // ─── Motion variants ───────────────────────────────────────────────────────────
@@ -377,13 +363,13 @@ function ProductSection({ p, i, navigate }: { p: typeof PRODUCTS[0]; i: number; 
                 <div className="mt-3 flex items-center gap-2">
                   <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary/10 border border-primary/20">
                     <Sparkles className="h-3 w-3 text-primary" />
-                    <span className="text-[9px] font-bold text-primary">Claude 4.6</span>
+                    <span className="text-[9px] font-bold text-primary">Claude Sonnet 4.5</span>
                   </div>
                   <span className="text-[9px] text-zinc-500">Generando App.tsx…</span>
                 </div>
               </div>
             ) : (
-              /* Studio preview */
+              /* Aplicaciones preview */
               <div className="p-5">
                 <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Herramientas disponibles</div>
                 <div className="grid grid-cols-2 gap-2">
@@ -443,7 +429,7 @@ export default function Index() {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://creator-ia.com/" />
         <meta property="og:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
-        <meta property="og:description" content="Plataforma todo-en-uno: Genesis IDE para apps React + Studio para imágenes y texto. Paga en COP con Bold." />
+        <meta property="og:description" content="Plataforma todo-en-uno: Genesis IA para apps React + Aplicaciones para imágenes y texto. Paga en COP con Bold." />
         <meta property="og:image" content="https://creator-ia.com/og-image.jpg" />
         <meta property="og:site_name" content="Creator IA Pro" />
         <meta property="og:locale" content="es_CO" />
@@ -452,7 +438,7 @@ export default function Index() {
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content="https://creator-ia.com/" />
         <meta property="twitter:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
-        <meta property="twitter:description" content="Plataforma todo-en-uno: Genesis IDE para apps React + Studio para imágenes y texto. Paga en COP con Bold." />
+        <meta property="twitter:description" content="Plataforma todo-en-uno: Genesis IA para apps React + Aplicaciones para imágenes y texto. Paga en COP con Bold." />
         <meta property="twitter:image" content="https://creator-ia.com/og-image.jpg" />
 
         {/* Canonical */}
@@ -618,42 +604,6 @@ export default function Index() {
                 ))}
               </motion.div>
 
-              {/* Avatars */}
-              <motion.div
-                variants={fadeUp}
-                initial="hidden"
-                animate="show"
-                custom={0.65}
-                className="flex items-center justify-center gap-4 mt-10"
-              >
-                <div className="flex -space-x-3">
-                  {[
-                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop&crop=face",
-                    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face",
-                    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face",
-                    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face",
-                  ].map((src, i) => (
-                    <motion.img
-                      key={i}
-                      src={src}
-                      alt=""
-                      className="w-10 h-10 rounded-full border-2 border-white shadow-md"
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.7 + i * 0.1, duration: 0.4 }}
-                    />
-                  ))}
-                </div>
-                <div className="text-left">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <p className="text-[11px] text-zinc-500">+50,000 creadores confían en nosotros</p>
-                </div>
-              </motion.div>
-
               {/* Hero Banner - Visual App Preview */}
               <motion.div
                 variants={fadeUp}
@@ -689,7 +639,7 @@ export default function Index() {
                         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                           <span className="text-white font-bold text-sm">C</span>
                         </div>
-                        <span className="text-white font-bold text-sm">Genesis Studio</span>
+                        <span className="text-white font-bold text-sm">Genesis IA</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
@@ -782,7 +732,7 @@ export default function Index() {
                     </div>
                     <div>
                       <div className="text-[10px] text-zinc-500 uppercase tracking-wider">Generación</div>
-                      <div className="text-xs font-bold text-zinc-900">10x más rápida</div>
+                      <div className="text-xs font-bold text-zinc-900">Con preview en vivo</div>
                     </div>
                   </div>
                 </motion.div>
@@ -799,7 +749,7 @@ export default function Index() {
                     </div>
                     <div>
                       <div className="text-[10px] text-zinc-500 uppercase tracking-wider">Modelos</div>
-                      <div className="text-xs font-bold text-zinc-900">GPT-4, Claude, Gemini</div>
+                      <div className="text-xs font-bold text-zinc-900">Claude, GPT, Gemini</div>
                     </div>
                   </div>
                 </motion.div>
@@ -1057,58 +1007,39 @@ export default function Index() {
             </InViewSection>
           </section>
 
-          {/* ── Testimonials ───────────────────────────────────────────── */}
+          {/* ── Por qué elegir ─────────────────────────────────────────── */}
           <section className="px-6 md:px-12 py-24 bg-white border-t border-zinc-200 overflow-hidden">
             <InViewSection className="max-w-6xl mx-auto">
               <div className="text-center mb-16">
                 <motion.div variants={fadeUp} custom={0}>
-                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-600 text-[11px] font-black uppercase tracking-[0.2em] mb-6">
-                    <Star className="h-3 w-3 fill-amber-600" />
-                    Testimonios
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[11px] font-black uppercase tracking-[0.2em] mb-6">
+                    <CheckCircle2 className="h-3 w-3" />
+                    Sin trucos
                   </div>
                 </motion.div>
                 <motion.h2 variants={fadeUp} custom={0.1} className="text-3xl md:text-5xl font-black text-zinc-900 tracking-tight mb-4">
-                  Lo que dicen nuestros <span className="text-primary">creadores</span>
+                  Por qué elegir <span className="text-primary">Creator IA Pro</span>
                 </motion.h2>
                 <motion.p variants={fadeUp} custom={0.2} className="text-zinc-500 text-[15px] max-w-xl mx-auto">
-                  Miles de personas están creando más rápido con Creator IA Pro.
+                  Nada de números inflados. Esto es lo que de verdad obtenés.
                 </motion.p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
-                {TESTIMONIALS.map((testimonial, i) => (
+                {GUARANTEES.map((item, i) => (
                   <motion.div
-                    key={testimonial.name}
+                    key={item.title}
                     variants={cardEntrance}
                     custom={i * 0.1}
                     className="group rounded-2xl bg-zinc-50 border border-zinc-200 p-6 hover:shadow-lg hover:border-zinc-300 transition-all"
                   >
                     <div className="flex items-start gap-4">
-                      <img
-                        src={testimonial.avatar}
-                        alt={testimonial.name}
-                        className="w-14 h-14 rounded-full object-cover border-2 border-white shadow-sm"
-                      />
+                      <div className="w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                        <item.icon className="h-5 w-5 text-primary" />
+                      </div>
                       <div className="flex-1">
-                        <div className="flex items-center gap-1 mb-2">
-                          {[...Array(testimonial.rating)].map((_, r) => (
-                            <Star key={r} className="h-4 w-4 fill-amber-400 text-amber-400" />
-                          ))}
-                        </div>
-                        <p className="text-zinc-700 text-[14px] leading-relaxed mb-4">
-                          "{testimonial.content}"
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="font-bold text-zinc-900 text-[14px]">{testimonial.name}</div>
-                            <div className="text-zinc-500 text-[12px]">{testimonial.role} · {testimonial.company}</div>
-                          </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                              <CheckCircle2 className="h-5 w-5 text-primary" />
-                            </div>
-                          </div>
-                        </div>
+                        <div className="font-bold text-zinc-900 text-[15px] mb-1.5">{item.title}</div>
+                        <p className="text-zinc-600 text-[13.5px] leading-relaxed">{item.content}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -1134,7 +1065,7 @@ export default function Index() {
                     Conecta <span className="text-primary">módulos de IA</span>
                   </motion.h2>
                   <motion.p variants={fadeUp} custom={0.2} className="text-[15px] text-zinc-500 mb-6 leading-relaxed">
-                    Como Freepik AI pero con tus propios nodos. Crea flujos visuales arrastrando módulos: genera imágenes, mejora prompts, escribe copy y exporta todo conectado.
+                    Un lienzo visual donde conectás módulos de IA en vez de repetir el mismo prompt a mano. Crea flujos arrastrando nodos: genera imágenes, mejora prompts, escribe copy y exporta todo conectado.
                   </motion.p>
 
                   {/* Available Nodes */}
@@ -1143,7 +1074,7 @@ export default function Index() {
                     <div className="flex flex-wrap gap-2">
                       {[
                         { label: "Generar imagen", color: "#a855f7" },
-                        { label: "Video IA", color: "#00c2ff" },
+                        { label: "Prompt Builder", color: "#00c2ff" },
                         { label: "Generar copy", color: "#f59e0b" },
                         { label: "LLM", color: "#6366f1" },
                         { label: "Exportar", color: "#10b981" },
@@ -1341,21 +1272,11 @@ export default function Index() {
                         : 'border-zinc-200 bg-white hover:border-zinc-300'
                     }`}
                   >
-                    {/* Plan Image */}
-                    <div className="relative h-40 overflow-hidden">
-                      <motion.img
-                        src={plan.image}
-                        alt={plan.name}
-                        className="w-full h-full object-cover"
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ duration: 0.4 }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
-                      <div className="absolute bottom-3 left-4 right-4">
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-white/90">{plan.name}</p>
-                      </div>
+                    {/* Plan Header — bloque de color + tipografía, sin fotos de stock sin relación con el plan */}
+                    <div className="relative h-24 overflow-hidden flex items-end p-4" style={{ backgroundColor: plan.color }}>
+                      <p className="text-lg font-black uppercase tracking-tight text-white">{plan.name}</p>
                       {plan.badge && (
-                        <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-white text-[9px] font-black uppercase tracking-wider shadow-lg ${plan.popular ? 'bg-primary' : 'bg-zinc-800'}`}>
+                        <div className={`absolute top-3 right-3 px-2.5 py-1 rounded-full text-white text-[9px] font-black uppercase tracking-wider shadow-lg ${plan.popular ? 'bg-primary' : 'bg-black/30'}`}>
                           {plan.badge}
                         </div>
                       )}
@@ -1442,7 +1363,7 @@ export default function Index() {
                 </span>
               </motion.h2>
               <motion.p variants={fadeUp} custom={0.2} className="text-zinc-400 text-[16px] mb-10 leading-relaxed max-w-xl mx-auto">
-                Únete a +50,000 creadores que ya están usando Genesis IDE y Studio para dar vida a sus ideas en minutos, no en días.
+                Genesis IA, Canvas IA y Aplicaciones — todo en un solo lugar, listo para usar hoy.
               </motion.p>
 
               {/* Feature bullets */}
@@ -1482,11 +1403,11 @@ export default function Index() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-zinc-500" />
-                  <span className="text-[12px] text-zinc-500">50K+ usuarios</span>
+                  <span className="text-[12px] text-zinc-500">Pagos en COP</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 text-zinc-500" />
-                  <span className="text-[12px] text-zinc-500">4.9 rating</span>
+                  <span className="text-[12px] text-zinc-500">AES-256</span>
                 </div>
               </motion.div>
             </InViewSection>
@@ -1511,9 +1432,9 @@ export default function Index() {
                   <h4 className="text-white font-bold text-[13px] mb-4">Producto</h4>
                   <ul className="space-y-2">
                     {[
-                      { label: "Genesis IDE", path: "/chat" },
-                      { label: "Studio", path: "/tools" },
-                      { label: "Canvas", path: "/studio-flow" },
+                      { label: "Genesis IA", path: "/chat" },
+                      { label: "Aplicaciones", path: "/tools" },
+                      { label: "Canvas IA", path: "/studio-flow" },
                       { label: "Precios", path: "/pricing" },
                     ].map((item) => (
                       <li key={item.label}>
