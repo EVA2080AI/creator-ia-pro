@@ -10,7 +10,7 @@ import { genesisOrchestrator } from "@/services/genesis-orchestrator";
 import { toast } from "sonner";
 import {
   Zap, Coins, CreditCard, LayoutGrid, Image,
-  Megaphone, PenTool, MessageSquare, FileText, FolderPlus,
+  Megaphone, PenTool, FileText, FolderPlus,
   Code2, Brain, Map, ListTodo
 } from "lucide-react";
 import { ProjectCard } from "@/components/dashboard/ProjectCard";
@@ -19,6 +19,8 @@ import { LoadingState } from "@/components/dashboard/LoadingState";
 import { CheckoutBanner } from "@/components/dashboard/CheckoutBanner";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ChartSection } from "@/components/dashboard/ChartSection";
+import { WelcomeOnboarding } from "@/components/dashboard/WelcomeOnboarding";
+import { hasSeenWelcomeOnboarding } from "@/lib/dashboard-onboarding";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from "@/components/ui/dialog";
@@ -59,7 +61,8 @@ export default function Dashboard() {
   const [newSpaceName, setNewSpaceName] = useState("");
   const [newSpaceDesc, setNewSpaceDesc] = useState("");
   const [openingProject, setOpeningProject] = useState<DashboardProject | null>(null);
-  
+  const [showWelcome, setShowWelcome] = useState(false);
+
   const [usageData, setUsageData] = useState<any[]>([]);
   const [toolData, setToolData] = useState<any[]>([]);
   const [spacesCount, setSpacesCount] = useState(0);
@@ -92,6 +95,9 @@ export default function Dashboard() {
 
         setSpaces(allProjects);
         setSpacesCount(flowSpaces.length);
+        if (allProjects.length === 0 && !hasSeenWelcomeOnboarding()) {
+          setShowWelcome(true);
+        }
 
         const { total } = await listAssets({ limit: 1 });
         setAssetsCount(total);
@@ -141,7 +147,7 @@ export default function Dashboard() {
     if (!space) { toast.error("Error al crear el espacio"); return; }
     toast.success("Espacio creado");
     setIsCreatingSpace(false);
-    navigate("/formarketing?spaceId=" + space.id);
+    navigate("/studio-flow?spaceId=" + space.id);
   };
 
   const handleDuplicate = async (e: React.MouseEvent, project: DashboardProject) => {
@@ -238,10 +244,10 @@ export default function Dashboard() {
         {/* Quick Tools */}
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
-            { icon: Zap, label: "Genesis IDE", desc: "BuilderAI", path: "/chat" },
+            { icon: Zap, label: "Genesis IA", desc: "Builder IA", path: "/chat" },
+            { icon: Code2, label: "Editor", desc: "IDE", path: "/code" },
             { icon: Megaphone, label: "Canvas IA", desc: "Lienzo", path: "/studio-flow" },
-            { icon: PenTool, label: "Studio", desc: "Herramientas", path: "/tools" },
-            { icon: MessageSquare, label: "Chat IA", desc: "Copy", path: "/chat" },
+            { icon: PenTool, label: "Aplicaciones", desc: "Herramientas", path: "/tools" },
             { icon: ListTodo, label: "Tareas", desc: "Kanban", path: "/tareas" },
             { icon: FileText, label: "Espacios", desc: "Archivos", path: "/spaces" },
           ].map((app) => (
@@ -287,6 +293,8 @@ export default function Dashboard() {
           )}
         </section>
       </main>
+
+      {showWelcome && <WelcomeOnboarding onDismiss={() => setShowWelcome(false)} />}
 
       {/* Dialogs */}
       <Dialog open={isCreatingSpace} onOpenChange={setIsCreatingSpace}>
