@@ -7,6 +7,7 @@ export interface AdminUser {
   last_sign_in: string | null;
   subscription_tier: string;
   is_active: boolean;
+  is_admin: boolean;
 }
 
 export interface Transaction {

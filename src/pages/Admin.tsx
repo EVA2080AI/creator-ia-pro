@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { AdminUser } from "./admin/types";
 import { CreditModal } from "./admin/components/CreditModal";
-import { AdminLoginGate } from "./admin/components/AdminLoginGate";
 import { AdminBootstrap } from "./admin/components/AdminBootstrap";
 import { UsersTab } from "./admin/tabs/UsersTab";
 import { RolesTab } from "./admin/tabs/RolesTab";
@@ -202,9 +201,10 @@ const Admin = () => {
               />
             )}
             {activeTab === "roles" && (
-              <RolesTab 
-                users={users} 
-                currentUserEmail={user.email!} 
+              <RolesTab
+                users={users}
+                currentUserEmail={user.email!}
+                onRefresh={fetchUsers}
               />
             )}
             {activeTab === "analytics" && (

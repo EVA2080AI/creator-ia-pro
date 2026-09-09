@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { Shield, RotateCcw, Loader2 } from "lucide-react";
 
@@ -8,18 +8,23 @@ export function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () =
   const [result, setResult] = useState<string | null>(null);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await authClient.signOut({});
     window.location.reload();
   };
 
   const handleBootstrap = async () => {
     setLoading(true);
-    const { data, error } = await supabase.rpc("bootstrap_admin" as any);
-    setLoading(false);
-    if (error) { setResult("error:" + error.message); return; }
-    if (data === "ok") { toast.success("¡Admin activado! Recargando..."); setTimeout(onSuccess, 1200); }
-    else if (data === "admin_exists") setResult("admin_exists");
-    else setResult("error:" + data);
+    try {
+      const res = await fetch("/api/admin/bootstrap", { method: "POST", credentials: "include" });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error(data?.error || `Error ${res.status}`);
+      if (data.result === "ok") { toast.success("¡Admin activado! Recargando..."); setTimeout(onSuccess, 1200); }
+      else setResult("admin_exists");
+    } catch (err: any) {
+      setResult("error:" + (err.message || "Error al activar la cuenta"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,11 +52,9 @@ export function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () =
           <div className="space-y-3 text-left">
             <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 text-xs text-amber-400/80 space-y-2">
               <p className="font-bold text-amber-400">Ya existe un administrador</p>
-              <p>Si eres el propietario del proyecto, ejecuta este SQL en el <a href="https://supabase.com/dashboard/project/zfzkohjdwggctogehlkw/sql/new" target="_blank" rel="noopener noreferrer" className="underline text-amber-300">Editor SQL de Supabase</a> para otorgarte acceso:</p>
+              <p>Pídele a quien ya tiene acceso que te agregue desde la pestaña "Roles" del panel admin, o que corra este SQL contra la base de datos (Neon):</p>
               <pre className="bg-black/40 rounded-xl p-3 text-[10px] text-green-400 font-mono break-all whitespace-pre-wrap select-all">
-{`INSERT INTO public.user_roles (user_id, role)
-VALUES ('${user?.id}', 'admin')
-ON CONFLICT DO NOTHING;`}
+{`UPDATE profile SET is_admin = true WHERE user_id = '${user?.id}';`}
               </pre>
               <p className="text-zinc-400">Tu ID: <span className="text-zinc-500 font-mono select-all">{user?.id}</span></p>
             </div>

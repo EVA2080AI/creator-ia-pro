@@ -3,9 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
-import { supabase } from "@/integrations/supabase/client";
 import { aiService } from "@/services/ai-service";
-import { adminService } from "@/services/billing-service";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -188,12 +186,15 @@ const SystemStatus = () => {
           testResult: `CORS Check: ${res.status} ${res.statusText}`,
         };
       } else if (feature.action === "test-db-read") {
-        const tableName = feature.id.replace("db-", "").replace(/-/g, "_");
-        const { error } = await supabase.from(tableName as any).select("id").limit(1);
+        // Neon/Drizzle no tiene el concepto de "lectura por tabla con RLS" que
+        // tenía Supabase — una sonda de conectividad general contra /api/health
+        // ya cubre lo que esto necesita confirmar hoy.
+        const res = await fetch("/api/health");
+        const data = await res.json().catch(() => null);
         updatedFeatures[idx] = {
           ...updatedFeatures[idx],
-          status: error ? "error" : "ok",
-          testResult: error ? `Error: ${error.message}` : "Lectura OK",
+          status: res.ok && data?.db === "up" ? "ok" : "error",
+          testResult: res.ok && data?.db === "up" ? "Conexión a Neon OK" : `Error: ${data?.error || res.statusText}`,
         };
       } else if (feature.action === "test-gateway") {
         try {

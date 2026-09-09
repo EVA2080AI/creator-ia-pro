@@ -1,17 +1,6 @@
-import { supabase } from "@/integrations/supabase/client";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
-import type { PostgrestResponse } from "@supabase/supabase-js";
-import type { Database } from "@/integrations/supabase/types";
 
 export type CreditPack = (typeof CREDIT_PACKS)[number];
-
-// ─── Custom Types for Missing RPCs ──────────────────────────────────────────
-type SupabaseCustom = {
-  rpc: <T = unknown>(name: string, args: Record<string, unknown>) => Promise<PostgrestResponse<T>>;
-  from: (table: string) => ReturnType<typeof supabase.from>; 
-} & typeof supabase;
-
-const sb = (supabase as unknown) as SupabaseCustom;
 
 /**
  * Billing Service — Credit-Based Economy (Industrial V4.0)
@@ -128,85 +117,5 @@ export const creditService = {
     if (!res.ok) return [];
     const data = await res.json().catch(() => null);
     return (data?.transactions ?? []) as Transaction[];
-  },
-};
-
-// ─── Admin Service ──────────────────────────────────────────────────────────
-
-export const adminService = {
-  async addCredits(targetUserId: string, amount: number, reason?: string) {
-    const { data, error } = await sb.rpc("admin_add_credits", {
-      _target_user_id: targetUserId,
-      _amount: amount,
-      _reason: reason || 'Admin grant',
-    });
-    if (error) throw error;
-    return data;
-  },
-
-  async deductCredits(targetUserId: string, amount: number, reason?: string) {
-    const { data, error } = await sb.rpc("admin_deduct_credits", {
-      _target_user_id: targetUserId,
-      _amount: amount,
-      _reason: reason || 'Admin deduction',
-    });
-    if (error) throw error;
-    return data;
-  },
-
-  async refundCredits(targetUserId: string, amount: number, reason?: string) {
-    const { data, error } = await sb.rpc("admin_refund_credits", {
-      _target_user_id: targetUserId,
-      _amount: amount,
-      _reason: reason || 'Admin refund',
-    });
-    if (error) throw error;
-    return data;
-  },
-
-  async listPlans(): Promise<CreditPlan[]> {
-    try {
-      const { data, error } = await sb
-        .from("plans")
-        .select("*")
-        .order("credits_amount", { ascending: true });
-
-      if (error || !data || (data as any[]).length === 0) {
-        return CREDIT_PLANS;
-      }
-      return data as unknown as CreditPlan[];
-    } catch (e) {
-      console.warn("[Billing] Plans table not available, using defaults.");
-      return CREDIT_PLANS;
-    }
-  },
-
-  async saveSettings(key: string, value: string) {
-    const { data, error } = await supabase.functions.invoke("admin-save-settings", {
-      body: { key, value },
-    });
-    if (error) throw error;
-    return data;
-  },
-
-  async getSettings(): Promise<Record<string, string>> {
-    const { data, error } = await supabase
-      .from("app_settings")
-      .select("key, value");
-
-    if (error) {
-      console.warn("[Admin] Could not fetch settings directly, might be restricted.");
-      return {};
-    }
-
-    const settings: Record<string, string> = {};
-    data?.forEach(item => {
-      try {
-        settings[item.key] = JSON.parse(item.value);
-      } catch {
-        settings[item.key] = item.value;
-      }
-    });
-    return settings;
   },
 };

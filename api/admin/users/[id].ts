@@ -16,7 +16,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!admin) return;
 
   const targetUserId = req.query.id as string;
-  const body = (req.body ?? {}) as { subscriptionTier?: string; isActive?: boolean };
+  const body = (req.body ?? {}) as { subscriptionTier?: string; isActive?: boolean; isAdmin?: boolean };
   const patch: Record<string, unknown> = { updatedAt: new Date() };
 
   if (body.subscriptionTier !== undefined) {
@@ -32,6 +32,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
     patch.isActive = body.isActive;
+  }
+  if (typeof body.isAdmin === "boolean") {
+    if (targetUserId === admin.userId && !body.isAdmin) {
+      res.status(400).json({ ok: false, code: "BAD_REQUEST", error: "No puedes remover tu propio rol de Admin." });
+      return;
+    }
+    patch.isAdmin = body.isAdmin;
   }
 
   const db = getDb();

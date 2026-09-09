@@ -10,7 +10,6 @@ import Peer, { MediaConnection, DataConnection } from "peerjs";
 import { QRCodeSVG } from "qrcode.react";
 import { Monitor, Smartphone, Video, Copy, Maximize2, X, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 
 export default function ShareScreen() {
   const { user, signOut } = useAuth("/auth");
@@ -44,13 +43,9 @@ export default function ShareScreen() {
       return false;
     }
     try {
-      const { error } = await (supabase.rpc as any)("spend_credits", {
-        _amount: 1,
-        _action: "sharescreen",
-        _model: "p2p",
-        _node_id: null,
-      });
-      if (error) throw error;
+      const res = await fetch("/api/share-screen", { method: "POST", credentials: "include" });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) throw new Error(data?.error || `Error ${res.status}`);
       await refreshProfile();
       toast.success("1 Crédito consumido por la sesión P2P");
       return true;
