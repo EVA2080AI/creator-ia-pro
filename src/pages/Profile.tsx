@@ -1,80 +1,103 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { toast } from "sonner";
 import {
-  User, Mail, Shield, Coins, Settings, LogOut, Loader2, Save,
-  Camera, Calendar, CreditCard, ChevronRight, Bell, Check,
-  Image, MessageSquare, Zap, Download
+  User, Mail, Shield, Coins, LogOut, Loader2, Save,
+  Calendar, CreditCard, ChevronRight, Bell, Check,
+  Image, MessageSquare, Zap, Download, Link as LinkIcon
 } from "lucide-react";
+
+interface TransactionRow {
+  id: string;
+  type: string;
+  amount: number;
+  description: string | null;
+  createdAt: string;
+}
+
+const TX_META: Record<string, { label: string; positive: boolean }> = {
+  purchase: { label: "Compra", positive: true },
+  spend: { label: "Uso de IA", positive: false },
+  admin_grant: { label: "Créditos de soporte", positive: true },
+  admin_deduct: { label: "Ajuste de soporte", positive: false },
+  refund: { label: "Reembolso", positive: true },
+  bold_pending: { label: "Pago en proceso", positive: true },
+  bold_approved: { label: "Pago aprobado", positive: true },
+  subscription_change: { label: "Cambio de plan", positive: true },
+};
 
 const Profile = () => {
   const { user, signOut } = useAuth("/auth");
   const navigate = useNavigate();
-  const avatarInputRef = useRef<HTMLInputElement>(null);
-  const [loading, setLoading]               = useState(true);
-  const [saving, setSaving]                 = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [profile, setProfile]               = useState<any>(null);
-  const [fullName, setFullName]             = useState("");
-  const [avatarUrl, setAvatarUrl]           = useState<string | null>(null);
-  const [creditHistory, setCreditHistory]   = useState<any[]>([]);
+  const { profile, loading: loadingProfile, refreshProfile } = useProfile(user?.id);
+  const [saving, setSaving] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [avatarUrlInput, setAvatarUrlInput] = useState("");
+  const [creditHistory, setCreditHistory] = useState<TransactionRow[]>([]);
+
+  useEffect(() => {
+    if (!profile) return;
+    setFullName(profile.displayName ?? "");
+    setAvatarUrlInput(profile.avatarUrl ?? "");
+  }, [profile]);
 
   useEffect(() => {
     if (!user) return;
-    const fetchAll = async () => {
-      const [{ data: prof }, { data: history }] = await Promise.all([
-        supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-        supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(5),
-      ]);
-      if (prof) {
-        setProfile(prof);
-        setFullName(prof.full_name || "");
-        setAvatarUrl(prof.avatar_url || null);
-      }
-      if (history) setCreditHistory(history);
-      setLoading(false);
-    };
-    fetchAll();
+    let cancelled = false;
+    fetch("/api/billing/transactions", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (!cancelled && json?.ok) setCreditHistory((json.transactions ?? []).slice(0, 5));
+      })
+      .catch(() => undefined);
+    return () => { cancelled = true; };
   }, [user]);
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    if (!file.type.startsWith("image/")) { toast.error("Solo se permiten imágenes"); return; }
-    if (file.size > 2 * 1024 * 1024) { toast.error("Máximo 2MB para el avatar"); return; }
-    setUploadingAvatar(true);
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
     try {
-      const ext = file.name.split(".").pop();
-      const filePath = `avatars/${user.id}.${ext}`;
-      const { error: uploadError } = await supabase.storage
-        .from("avatars").upload(filePath, file, { upsert: true, contentType: file.type });
-      if (uploadError) throw uploadError;
-      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      const publicUrl = urlData.publicUrl + `?t=${Date.now()}`;
-      await supabase.from("profiles").update({ avatar_url: publicUrl } as any).eq("user_id", user.id);
-      setAvatarUrl(publicUrl);
-      toast.success("Foto de perfil actualizada");
-    } catch (err: any) {
-      toast.error(err?.message || "Error al subir imagen");
+      const body: Record<string, string> = {};
+      const trimmedName = fullName.trim();
+      const trimmedAvatar = avatarUrlInput.trim();
+      if (trimmedName && trimmedName !== (profile?.displayName ?? "")) body.displayName = trimmedName;
+      if (trimmedAvatar !== (profile?.avatarUrl ?? "")) {
+        if (trimmedAvatar && !/^https?:\/\//.test(trimmedAvatar)) {
+          toast.error("La URL de la foto debe empezar con http:// o https://");
+          setSaving(false);
+          return;
+        }
+        body.avatarUrl = trimmedAvatar;
+      }
+      if (Object.keys(body).length === 0) {
+        toast.info("No hay cambios que guardar");
+        setSaving(false);
+        return;
+      }
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.ok) {
+        toast.error(json?.error || "Error al guardar cambios");
+      } else {
+        toast.success("Perfil actualizado");
+        await refreshProfile();
+      }
+    } catch {
+      toast.error("Error de red al guardar");
     } finally {
-      setUploadingAvatar(false);
-      if (avatarInputRef.current) avatarInputRef.current.value = "";
+      setSaving(false);
     }
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    const { error } = await supabase.from("profiles")
-      .update({ full_name: fullName } as any).eq("user_id", user?.id);
-    if (error) toast.error("Error al guardar cambios");
-    else { toast.success("Perfil actualizado"); setProfile((p: any) => ({ ...p, full_name: fullName })); }
-    setSaving(false);
-  };
-
-  if (loading) {
+  if (loadingProfile && !profile) {
     return (
       <div className="flex h-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -83,8 +106,10 @@ const Profile = () => {
   }
 
   const TIER_LABELS: Record<string, string> = { free: "Free", creador: "Creador", pro: "Pro", agencia: "Agencia", pyme: "Pyme", pymes: "Pymes", admin: "Admin" };
-  const tierLabel = TIER_LABELS[profile?.subscription_tier ?? "free"] ?? "Free";
-  const joinDate = profile?.created_at ? new Date(profile.created_at).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" }) : "—";
+  const tierLabel = TIER_LABELS[profile?.subscriptionTier ?? "free"] ?? "Free";
+  const joinDate = profile?.createdAt
+    ? new Date(profile.createdAt).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })
+    : "—";
 
   return (
     <>
@@ -102,45 +127,21 @@ const Profile = () => {
           <div className="lg:col-span-2 space-y-5">
 
             {/* Identity card */}
-            <div className="rounded-3xl bg-white border border-zinc-200/60 p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20 bg-white/70 backdrop-blur-sm">
+            <div className="rounded-3xl bg-white/70 border border-zinc-200/60 p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20 backdrop-blur-sm">
               <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">Información personal</h2>
 
               {/* Avatar */}
               <div className="flex items-center gap-5 mb-8">
-                <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-                <button
-                  onClick={() => avatarInputRef.current?.click()}
-                  aria-label="Cambiar foto de perfil"
-                  className="relative w-20 h-20 rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200 shrink-0 group"
-                  disabled={uploadingAvatar}
-                >
-                  {uploadingAvatar ? (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                    </div>
-                  ) : avatarUrl ? (
-                    <>
-                      <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Camera className="w-5 h-5 text-zinc-900" />
-                      </div>
-                    </>
+                <div className="w-20 h-20 rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200 shrink-0 flex items-center justify-center">
+                  {profile?.avatarUrl ? (
+                    <img src={profile.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-1">
-                      <User className="w-7 h-7 text-zinc-500" />
-                      <span className="text-[9px] text-zinc-500 font-bold group-hover:text-zinc-400 transition-colors">Subir</span>
-                    </div>
+                    <User className="w-7 h-7 text-zinc-500" />
                   )}
-                </button>
+                </div>
                 <div>
-                  <p className="font-semibold text-zinc-900 text-base">{profile?.full_name || "Sin nombre"}</p>
+                  <p className="font-semibold text-zinc-900 text-base">{profile?.displayName || "Sin nombre"}</p>
                   <p className="text-sm text-zinc-400 mt-0.5">{user?.email}</p>
-                  <button
-                    onClick={() => avatarInputRef.current?.click()}
-                    className="text-xs text-primary hover:text-zinc-900 transition-colors mt-2 font-medium"
-                  >
-                    Cambiar foto
-                  </button>
                 </div>
               </div>
 
@@ -165,6 +166,22 @@ const Profile = () => {
                     className="w-full px-4 py-3 rounded-xl bg-zinc-50/50 border border-zinc-200 focus:border-primary/40 focus:bg-white focus:outline-none text-sm text-zinc-900 placeholder:text-zinc-500 transition-all font-medium"
                   />
                 </div>
+                <div>
+                  <label htmlFor="avatar-url" className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">
+                    Foto de perfil (URL)
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <LinkIcon className="w-4 h-4 text-zinc-400 shrink-0 ml-1" />
+                    <input
+                      id="avatar-url"
+                      type="url"
+                      value={avatarUrlInput}
+                      onChange={(e) => setAvatarUrlInput(e.target.value)}
+                      placeholder="https://ejemplo.com/mi-foto.jpg"
+                      className="w-full px-4 py-3 rounded-xl bg-zinc-50/50 border border-zinc-200 focus:border-primary/40 focus:bg-white focus:outline-none text-sm text-zinc-900 placeholder:text-zinc-500 transition-all font-medium"
+                    />
+                  </div>
+                </div>
                 <div className="flex justify-end">
                   <button
                     onClick={handleSave}
@@ -180,25 +197,28 @@ const Profile = () => {
 
             {/* Recent activity */}
             {creditHistory.length > 0 && (
-              <div className="rounded-3xl bg-white border border-zinc-200/60 p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20 bg-white/70 backdrop-blur-sm">
+              <div className="rounded-3xl bg-white/70 border border-zinc-200/60 p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20 backdrop-blur-sm">
                 <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">Últimas transacciones</h2>
                 <div className="space-y-3">
-                  {creditHistory.map((tx: any) => (
-                    <div key={tx.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-50 transition-colors">
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${tx.amount > 0 ? "bg-green-500/10" : "bg-zinc-100"}`}>
-                        {tx.action === "image" || tx.action === "generate" ? <Image className="w-3.5 h-3.5 text-zinc-400" /> :
-                         tx.action === "chat" ? <MessageSquare className="w-3.5 h-3.5 text-zinc-400" /> :
-                         <Zap className="w-3.5 h-3.5 text-zinc-400" />}
+                  {creditHistory.map((tx) => {
+                    const meta = TX_META[tx.type] ?? { label: tx.type, positive: tx.amount > 0 };
+                    return (
+                      <div key={tx.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-50 transition-colors">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${meta.positive ? "bg-green-500/10" : "bg-zinc-100"}`}>
+                          {tx.type === "spend" && tx.description?.startsWith("image") ? <Image className="w-3.5 h-3.5 text-zinc-400" /> :
+                           tx.type === "spend" ? <MessageSquare className="w-3.5 h-3.5 text-zinc-400" /> :
+                           <Zap className="w-3.5 h-3.5 text-zinc-400" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-zinc-600 truncate">{meta.label}</p>
+                          <p className="text-xs text-zinc-400">{new Date(tx.createdAt).toLocaleDateString("es-ES")}</p>
+                        </div>
+                        <span className={`text-sm font-bold tabular-nums ${meta.positive ? "text-green-400" : "text-zinc-400"}`}>
+                          {tx.amount > 0 ? "+" : ""}{tx.amount}
+                        </span>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-zinc-600 truncate capitalize">{tx.action || "Acción"}</p>
-                        <p className="text-xs text-zinc-400">{new Date(tx.created_at).toLocaleDateString("es-ES")}</p>
-                      </div>
-                      <span className={`text-sm font-bold tabular-nums ${tx.amount > 0 ? "text-green-400" : "text-zinc-400"}`}>
-                        {tx.amount > 0 ? "+" : ""}{tx.amount}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -214,15 +234,15 @@ const Profile = () => {
                 <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Créditos</span>
               </div>
               <div className="mb-6">
-                <span className="text-6xl font-bold tracking-tight tabular-nums">{profile?.credits_balance ?? 0}</span>
+                <span className="text-6xl font-bold tracking-tight tabular-nums">{profile?.creditsBalance ?? 0}</span>
                 <span className="text-sm text-white/60 ml-2 font-medium">disponibles</span>
               </div>
               <button
                 onClick={() => navigate("/pricing")}
                 className="w-full py-3 bg-white/20 text-white rounded-2xl font-bold text-sm hover:bg-white/30 transition-all active:scale-95 flex items-center justify-center gap-2"
               >
-                <Coins className="w-4 h-4" />
-                Recargar créditos
+                <CreditCard className="w-4 h-4" />
+                Ver planes
               </button>
             </div>
 
@@ -243,7 +263,7 @@ const Profile = () => {
                   onClick={() => navigate("/pricing")}
                   className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-primary/10 border border-primary/20 text-primary text-sm font-bold hover:bg-primary/20 transition-all"
                 >
-                  Actualizar a Starter o superior
+                  Mejorar mi plan
                   <ChevronRight className="w-4 h-4" />
                 </button>
               )}

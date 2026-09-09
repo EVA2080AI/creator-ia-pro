@@ -13,7 +13,7 @@ const TIER_CAPS: Record<string, number> = {
   pyme:       20000,
 };
 
-const HIDDEN_PATHS = ['/', '/auth', '/descargar', '/product-backlog', '/reset-password', '/chat', '/formarketing', '/code', '/studio', '/admin'];
+const HIDDEN_PATHS = ['/', '/auth', '/descargar', '/product-backlog', '/reset-password', '/chat', '/studio-flow', '/code', '/ide', '/admin'];
 
 export function CreditProgressBar() {
   const location = useLocation();

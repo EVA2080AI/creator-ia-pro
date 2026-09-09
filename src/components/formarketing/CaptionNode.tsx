@@ -97,7 +97,7 @@ Devuelve SOLO el caption, sin explicaciones.`;
   const currentNetwork = NETWORKS.find(n => n.id === (data.network || 'instagram')) || NETWORKS[0];
   const displayText = streamedText || data.output || '';
 
-  const status: 'idle' | 'generating' | 'done' | 'error' | 'running' = data.status || 'idle';
+  const status: 'idle' | 'generating' | 'done' | 'error' | 'running' | 'bypassed' = data.status || 'idle';
 
   return (
     <BaseNode

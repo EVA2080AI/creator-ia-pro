@@ -9,8 +9,11 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "typecheck:api": "tsc -p tsconfig.api.json",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",
@@ -85,7 +88,6 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
-    "web-vitals": "^5.2.0",
     "ws": "^8.21.3",
     "zod": "^3.25.76",
     "zustand": "^5.0.11"
@@ -111,7 +113,6 @@
     "jsdom": "^20.0.3",
     "playwright": "^1.58.2",
     "postcss": "^8.5.6",
-    "supabase": "^2.84.4",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",

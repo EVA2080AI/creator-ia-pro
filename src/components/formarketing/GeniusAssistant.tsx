@@ -8,7 +8,7 @@ import {
   Paperclip, SquarePen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
+import { CHAT_MODELS as CANON_MODELS, CATEGORY_META, DEFAULT_MODEL_ID } from '@/lib/ai/models';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { toast } from 'sonner';
@@ -31,16 +31,15 @@ interface Conversation {
 }
 
 // ─── Models ──────────────────────────────────────────────────────────────────
-const CHAT_MODELS = [
-  { id: 'gemini-3-flash',      name: 'Gemini 2.0 Flash',  badge: 'Rápido',     cost: 1, color: '#00C2FF', openrouter: 'google/gemini-2.0-flash-001' },
-  { id: 'deepseek-chat',       name: 'DeepSeek V3',       badge: 'Código',     cost: 1, color: '#8AB4F8', openrouter: 'deepseek/deepseek-chat-v3-0324' },
-  { id: 'mistral-small',       name: 'Mistral Small',     badge: 'Privacidad', cost: 1, color: '#FF6B6B', openrouter: 'mistralai/mistral-small-3.1-24b-instruct' },
-  { id: 'gemini-3.1-pro-low',  name: 'Gemini 2.5 Pro',    badge: 'Análisis',   cost: 1, color: '#00E5A0', openrouter: 'google/gemini-2.5-pro-preview-03-25' },
-  { id: 'mistral-large',       name: 'Mistral Large',     badge: 'EU',         cost: 2, color: '#FF9500', openrouter: 'mistralai/mistral-large' },
-  { id: 'claude-3.5-sonnet',   name: 'Claude Sonnet 4.6', badge: 'Creativo',   cost: 4, color: '#8AB4F8', openrouter: 'anthropic/claude-sonnet-4-6' },
-  { id: 'claude-3-opus',       name: 'Claude Opus 4.6',   badge: 'Máximo',     cost: 5, color: '#F59E0B', openrouter: 'anthropic/claude-opus-4-6' },
-  { id: 'gpt-oss-120b',        name: 'Llama 4 Maverick',  badge: 'Open',       cost: 2, color: '#EC4899', openrouter: 'meta-llama/llama-4-maverick' },
-];
+// Derivado del catálogo canónico (src/lib/ai/models.ts) — el mismo que valida
+// tier y cobra créditos en /api/ai/chat. El coste mostrado aquí es el real.
+const CHAT_MODELS = CANON_MODELS.map(m => ({
+  id: m.id,
+  name: m.label,
+  badge: CATEGORY_META[m.category].label,
+  cost: m.credits,
+  color: CATEGORY_META[m.category].color,
+}));
 
 // ─── Personalities ────────────────────────────────────────────────────────────
 const PERSONALITIES = [
@@ -219,12 +218,12 @@ interface GeniusAssistantProps {
 export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusAssistantProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { profile } = useProfile(user?.id);
+  const { profile, refreshProfile } = useProfile(user?.id);
 
   const [sidebarOpen, setSidebarOpen]   = useState(true);
   const [conversations, setConvs]       = useState<Conversation[]>(loadConvs);
   const [activeId, setActiveId]         = useState<string | null>(null);
-  const [model, setModel]               = useState('gemini-3-flash');
+  const [model, setModel]               = useState(DEFAULT_MODEL_ID);
   const [personality, setPersonality]   = useState('assistant');
   const [input, setInput]               = useState('');
   const [streaming, setStreaming]       = useState(false);
@@ -301,58 +300,67 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
     setStreaming(true);
     setStreamText('');
 
-    // Deduct credits
-    try {
-      await (supabase.rpc as any)('spend_credits', { _amount: curModel.cost, _action: 'chat', _model: model, _node_id: null });
-    } catch (e: unknown) {
-      setStreaming(false);
-      toast.error(e instanceof Error ? e.message : 'Créditos insuficientes');
-      return;
-    }
-
-    const msgs = [
-      { role: 'system', content: curPers.prompt },
-      ...prev.map(m => ({ role: m.role, content: m.content })),
-      { role: 'user', content: text },
-    ];
-
+    // Cobro y reembolso atómicos en el servidor (/api/ai/chat) — aquí solo
+    // lectura del stream SSE y manejo de 402/403/429.
     let full = '';
-
-    // Attempt 1: OpenRouter
     try {
-      const { data, error } = await supabase.functions.invoke('ai-proxy', {
-        body: { provider: 'openrouter', path: 'chat/completions',
-          body: { model: curModel.openrouter, messages: msgs, temperature: 0.85, max_tokens: 4096, stream: false } },
+      const res = await fetch('/api/ai/chat', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          messages: [
+            ...prev.map(m => ({ role: m.role, content: m.content })),
+            { role: 'user', content: text },
+          ],
+          systemPrompt: curPers.prompt,
+          temperature: 0.85,
+          maxTokens: 4096,
+        }),
       });
-      if (error) throw new Error(error.message);
-      const t = data?.choices?.[0]?.message?.content;
-      if (t) { full = t; setStreamText(t); }
-    } catch { /* fallback */ }
 
-    // Attempt 2: Gemini
-    if (!full) {
-      try {
-        const geminiMsgs = msgs.filter(m => m.role !== 'system')
-          .map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
-        const { data, error } = await supabase.functions.invoke('ai-proxy', {
-          body: { provider: 'gemini', path: 'models/gemini-1.5-flash:generateContent',
-            body: { contents: geminiMsgs, systemInstruction: { parts: [{ text: msgs[0]?.content ?? '' }] } } },
-        });
-        if (error) throw new Error(error.message);
-        const t = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (t) { full = t; setStreamText(t); }
-      } catch { /* both failed */ }
+      // El servidor responde JSON en errores (401/402/403/429/5xx) y SSE en éxito.
+      if (!res.ok || res.headers.get('content-type')?.includes('application/json')) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.error || `Error ${res.status}`);
+      }
+
+      const reader = res.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? '';
+        for (const line of lines) {
+          if (!line.startsWith('data:')) continue;
+          const payload = line.slice(5).trim();
+          if (!payload || payload === '[DONE]') continue;
+          try {
+            const json = JSON.parse(payload);
+            const delta = json?.choices?.[0]?.delta?.content;
+            if (typeof delta === 'string' && delta.length) {
+              full += delta;
+              setStreamText(full);
+            }
+          } catch { /* fragmento no-JSON */ }
+        }
+      }
+    } catch (e) {
+      // Stream cortado con contenido → se conserva; sin contenido → error honesto.
+      if (!full) {
+        toast.error(e instanceof Error ? e.message : 'No se pudo generar la respuesta');
+        setStreaming(false);
+        setStreamText('');
+        return;
+      }
     }
 
-    // Refund if both failed
-    if (!full) {
-      try {
-        const { data: { user: u } } = await supabase.auth.getUser();
-        if (u) await (supabase.rpc as any)('refund_credits', { _amount: curModel.cost, _user_id: u.id });
-      } catch { /* silent */ }
-      full = '❌ No se pudo conectar con el motor de IA. Verifica tu conexión.';
-      setStreamText(full);
-    }
+    // El saldo puede haber cambiado (cobro en servidor) — refrescar.
+    refreshProfile();
 
     // Auto-open canvas if code detected
     const blocks = extractCode(full);
@@ -363,7 +371,7 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
     setConvs(p => p.map(c => c.id === cId ? { ...c, messages: [...c.messages, aiMsg], updatedAt: Date.now() } : c));
     setStreamText('');
     setStreaming(false);
-  }, [input, streaming, user, activeId, activeConv, model, personality, curModel, curPers, canvas]);
+  }, [input, streaming, user, activeId, activeConv, model, personality, curModel, curPers, canvas, refreshProfile]);
 
   const handleKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }

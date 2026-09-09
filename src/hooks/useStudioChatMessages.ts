@@ -1,8 +1,22 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useState, useCallback, useEffect } from 'react';
 import type { Message } from '@/components/studio/chat/types';
 import type { UIArtifact, UIPlanTask, UILog } from '@/components/studio/StudioArtifactsPanel';
+
+// El servidor persiste la respuesta cruda del modelo (con bloques
+// <file path="...">…</file>). Al recargar, cada bloque se compacta a una
+// referencia legible — el código completo vive en los archivos del proyecto.
+const compactFileBlocks = (raw: string): string =>
+  raw.replace(
+    /<file\s+path\s*=\s*["']([^"']+)["']\s*>[\s\S]*?(?:<\/file>|$)/gi,
+    (_m, path: string) => `\n> 📦 \`${path}\`\n`
+  );
+
+const WELCOME: Message = {
+  id: 'welcome',
+  role: 'assistant',
+  content: '✨ ¡Bienvenido a Génesis! Estoy listo para evolucionar tu visión. ¿Qué construiremos hoy?',
+  timestamp: new Date()
+};
 
 interface UseStudioChatMessagesProps {
   projectId: string | null;
@@ -13,6 +27,10 @@ interface UseStudioChatMessagesProps {
   setLogs: React.Dispatch<React.SetStateAction<UILog[]>>;
 }
 
+// Historial del chat de Genesis: lectura de /api/projects/:id/messages
+// (Drizzle/Neon). La persistencia la hace el propio /api/ai/chat al final del
+// stream — el cliente solo aporta el conversationId (generado aquí si es el
+// primer mensaje del proyecto).
 export function useStudioChatMessages({
   projectId,
   user,
@@ -23,8 +41,6 @@ export function useStudioChatMessages({
   const [messages, setMessages] = useState<Message[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [convHistory, setConvHistory] = useState<Message[]>([]);
-  
-  const initialLoadRef = useRef(false);
 
   const addLog = useCallback((message: string, type: UILog['type'] = 'info') => {
     const newLog: UILog = {
@@ -36,83 +52,44 @@ export function useStudioChatMessages({
     setLogs(prev => [newLog, ...prev]);
   }, [setLogs]);
 
-  const ensureConversation = useCallback(async (pid: string) => {
-    if (!user) return null;
-    try {
-      const { data: existing } = await supabase
-        .from('studio_conversations')
-        .select('id')
-        .eq('project_id', pid)
-        .order('updated_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (existing) return existing.id;
-
-      const { data: created, error } = await supabase
-        .from('studio_conversations')
-        .insert({ project_id: pid, user_id: user.id, title: 'Chat Principal' })
-        .select('id')
-        .single();
-      
-      if (error) throw error;
-      return created.id;
-    } catch (err) {
-      console.error("[useStudioChatMessages] Error ensuring conversation:", err);
-      return null;
-    }
-  }, [user]);
-
-  const saveToSupabase = useCallback(async (role: 'user' | 'assistant', content: string) => {
-    if (!user || !activeConversationId) return;
-    try {
-      await supabase.from('studio_messages').insert({
-        conversation_id: activeConversationId,
-        role,
-        content,
-      });
-    } catch (err) {
-      console.error("[useStudioChatMessages] Error saving message:", err);
-    }
-  }, [user, activeConversationId]);
-
   const loadHistory = useCallback(async () => {
-    if (!projectId || !user) return;
-    
-    const convId = await ensureConversation(projectId);
-    if (!convId) return;
-    setActiveConversationId(convId);
-
-    const { data: history, error } = await supabase
-      .from('studio_messages')
-      .select('*')
-      .eq('conversation_id', convId)
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      console.error("[useStudioChatMessages] Error loading history:", error);
+    if (!projectId || !user) {
+      setMessages([WELCOME]);
+      setConvHistory([]);
+      setActiveConversationId(null);
       return;
     }
+    try {
+      const res = await fetch(`/api/projects/${projectId}/messages`, { credentials: 'include' });
+      const json = await res.json().catch(() => null);
+      if (!res.ok || !json?.ok) {
+        setMessages([WELCOME]);
+        setConvHistory([]);
+        return;
+      }
+      // Primer mensaje del proyecto: el cliente genera el id de conversación
+      // y lo envía en cada llamada a /api/ai/chat (lo crea el servidor).
+      setActiveConversationId(json.conversationId ?? crypto.randomUUID());
 
-    if (history && history.length > 0) {
-      const mapped: Message[] = history.map(m => ({
-        id: m.id,
-        role: m.role as 'user' | 'assistant',
-        content: m.content,
-        timestamp: new Date(m.created_at)
-      }));
-      setMessages(mapped);
-      setConvHistory(mapped.slice(-16));
-    } else {
-      setMessages([{
-        id: 'welcome',
-        role: 'assistant',
-        content: '✨ ¡Bienvenido a Génesis! Estoy listo para evolucionar tu visión. ¿Qué construiremos hoy?',
-        timestamp: new Date()
-      }]);
+      const history: { id: string; role: string; content: string; createdAt: string }[] = json.messages ?? [];
+      if (history.length > 0) {
+        const mapped: Message[] = history.map(m => ({
+          id: m.id,
+          role: m.role === 'user' ? 'user' : 'assistant',
+          content: m.role === 'assistant' ? compactFileBlocks(m.content) : m.content,
+          timestamp: new Date(m.createdAt)
+        }));
+        setMessages(mapped);
+        setConvHistory(mapped.slice(-16));
+      } else {
+        setMessages([WELCOME]);
+        setConvHistory([]);
+      }
+    } catch {
+      setMessages([WELCOME]);
       setConvHistory([]);
     }
-  }, [projectId, user, ensureConversation]);
+  }, [projectId, user]);
 
   // Unified loading effect
   useEffect(() => {
@@ -167,12 +144,7 @@ export function useStudioChatMessages({
   }, [messages, setArtifacts, setTasks]);
 
   const resetConversation = useCallback(() => {
-    setMessages([{
-      id: 'welcome',
-      role: 'assistant',
-      content: '✨ ¡Bienvenido a Génesis! Estoy listo para evolucionar tu visión. ¿Qué construiremos hoy?',
-      timestamp: new Date()
-    }]);
+    setMessages([WELCOME]);
     setConvHistory([]);
   }, []);
 
@@ -182,7 +154,6 @@ export function useStudioChatMessages({
     convHistory,
     setConvHistory,
     activeConversationId,
-    saveToSupabase,
     addLog,
     loadHistory,
     resetConversation

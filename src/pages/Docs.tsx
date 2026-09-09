@@ -130,7 +130,7 @@ const Docs = () => {
           </div>
         </div>
         <div className="flex items-center gap-4">
-           <button onClick={() => navigate('/studio')} className="px-6 py-2 rounded-xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Regresar al Studio</button>
+           <button onClick={() => navigate('/chat')} className="px-6 py-2 rounded-xl bg-white text-black text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Regresar a Genesis</button>
         </div>
       </header>
 

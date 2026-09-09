@@ -86,6 +86,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
+/** Forma mínima de una predicción de Replicate (creación + polling manual). */
+interface ReplicatePrediction {
+  status: string;
+  urls?: { get: string };
+  error?: unknown;
+  output?: string | string[];
+}
+
 async function generateReplicateImage(
   replicateSlug: string,
   prompt: string,
@@ -111,14 +119,14 @@ async function generateReplicateImage(
     throw new Error(`${createRes.status} ${detail.slice(0, 200)}`);
   }
 
-  let prediction = await createRes.json();
+  let prediction = (await createRes.json()) as ReplicatePrediction;
 
   // Si el `wait` síncrono expiró antes de terminar, seguimos con polling manual.
   for (let i = 0; i < 20 && (prediction.status === "starting" || prediction.status === "processing"); i++) {
     await new Promise((r) => setTimeout(r, 2000));
     const pollRes = await fetch(prediction.urls?.get, { headers: { Authorization: `Bearer ${token}` } });
     if (!pollRes.ok) continue;
-    prediction = await pollRes.json();
+    prediction = (await pollRes.json()) as ReplicatePrediction;
   }
 
   if (prediction.status !== "succeeded") {

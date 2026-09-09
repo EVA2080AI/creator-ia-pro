@@ -3,6 +3,19 @@
 Fecha: 2026-08-25 · Referencias de diseño: `~/Desktop/tipos de asistentes de IA/asistente-ia.html` (Mentor IA, estética Gemini) y `GUIA-ASISTENTES-IA.md`.
 Inventario detallado: `docs/INVENTARIO_FUNCIONALIDADES.md`.
 
+## Estado de fases (actualizado 2026-09-08)
+
+| Fase | Estado | Notas |
+|---|---|---|
+| 0. Cimientos | ✅ | Vercel + Neon + Better Auth en prod. OAuth social pendiente de claves (`GOOGLE_CLIENT_ID/SECRET`, Apple, GitHub). |
+| 1. Motor de IA único | ✅ | `/api/ai/chat` con streaming + créditos atómicos + catálogo único (`src/lib/ai/models.ts`). `GeniusAssistant` y `Tools` ya consumen el catálogo canónico. |
+| 2. Genesis UI nueva | ✅ | Layout Mentor IA en `/chat`; `/studio` redirige a `/chat` (301 en `vercel.json`). |
+| 3. Personalización | ✅ | Tablas `assistants`/`organizations` + plantillas; `?assistant=slug` operativo. |
+| 4. Fusión Antigravity | ✅ | `/antigravity` → Genesis; mocks y páginas muertas retiradas (2026-09-08: 28 archivos, ~2.900 líneas). |
+| 5. Fusión Herramientas | ✅ | Imagen vía Replicate (`/api/ai/image`), Tools sobre catálogo canónico, guardado en biblioteca. Lectura de URLs web vía `/api/scrape`. |
+| 6. Migración de datos | ⏳ | Bloqueada: requiere restaurar el proyecto Supabase pausado para el `pg_dump`. |
+| 7. Limpieza y QA final | 🔶 | 35 archivos muertos identificados con 0 referencias vivas (2026-09-08, pendiente ejecutar el borrado); `typecheck:api` + tests + build verdes. Falta: ejecutar el borrado, borrar `@supabase/*` + `supabase/` (6 archivos vivos aún lo usan — ver tabla en `PROXIMOS_PASOS.md`), y el recorrido final de `INVENTARIO_FUNCIONALIDADES.md`. |
+
 ## 1. Objetivo
 
 Un solo producto de IA — **Genesis** — que:

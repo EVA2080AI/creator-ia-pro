@@ -1,6 +1,6 @@
 // Personalización de asistentes de IA — marca, prompt y capacidades por
 // organización (cliente/colegio/empresa) o por usuario individual.
-import { pgTable, text, timestamp, boolean, jsonb, integer, pgEnum, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, jsonb, integer, pgEnum, uniqueIndex, index } from "drizzle-orm/pg-core";
 import { user, organization } from "./auth.js";
 
 export const assistantVisibility = pgEnum("assistant_visibility", ["system", "organization", "private"]);
@@ -58,15 +58,19 @@ export const organizationBranding = pgTable("organization_branding", {
 });
 
 // Conversaciones y mensajes — unifica studio_conversations + studio_messages + historial de Tools.
+// `assistantId` es nullable (migración 0001): los chats de Genesis pertenecen a
+// un proyecto, no a un asistente.
 export const conversation = pgTable("conversation", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  assistantId: text("assistant_id").notNull().references(() => assistant.id, { onDelete: "cascade" }),
+  assistantId: text("assistant_id").references(() => assistant.id, { onDelete: "cascade" }),
   projectId: text("project_id"),
   title: text("title").notNull().default("Nueva conversación"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
-});
+}, (t) => ({
+  projectIdx: index("conversation_project_updated_idx").on(t.projectId, t.updatedAt),
+}));
 
 export const message = pgTable("message", {
   id: text("id").primaryKey(),

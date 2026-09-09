@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { PanelLeft, Monitor, FileCode } from 'lucide-react';
+import { PanelLeft, Monitor, FileCode, Maximize2, Minimize2, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -7,15 +7,21 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 export interface StudioViewToolbarProps {
   viewMode: 'preview' | 'code';
   isSidebarCollapsed: boolean;
+  isFullscreen: boolean;
   onToggleSidebar: () => void;
   onToggleViewMode: (mode: 'preview' | 'code') => void;
+  onToggleFullscreen: () => void;
+  onShare?: () => void;
 }
 
 export function StudioViewToolbar({
   viewMode,
   isSidebarCollapsed,
+  isFullscreen,
   onToggleSidebar,
   onToggleViewMode,
+  onToggleFullscreen,
+  onShare,
 }: StudioViewToolbarProps) {
   // Use explicit return to help the parser
   return (
@@ -64,6 +70,26 @@ export function StudioViewToolbar({
             Código
           </ToggleGroupItem>
         </ToggleGroup>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleFullscreen}
+          title={isFullscreen ? "Salir de pantalla completa" : "Pantalla completa"}
+          className="h-10 w-10 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all rounded-2xl"
+        >
+          {isFullscreen ? <Minimize2 className="h-5 w-5" /> : <Maximize2 className="h-5 w-5" />}
+        </Button>
+        {onShare && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onShare}
+            title="Compartir"
+            className="h-10 w-10 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all rounded-2xl"
+          >
+            <Share2 className="h-5 w-5" />
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -18,11 +18,10 @@ import {
   CheckCircle2, Terminal, MoreHorizontal, UploadCloud
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { 
-  ResizableHandle, 
-  ResizablePanel, 
-  ResizablePanelGroup 
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup
 } from "@/components/ui/resizable";
 import { cn } from '@/lib/utils';
 

@@ -84,7 +84,7 @@ const DataPreviewTooltip = memo(({
 
         {/* Footer */}
         <div className="mt-2 pt-2 border-t border-zinc-700/50 flex items-center justify-between"
-003e
+        >
           <span className="text-[9px] text-zinc-500">
             ID: {nodeId.slice(0, 8)}...
           </span>

@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -6,13 +6,13 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 import { HelmetProvider } from "react-helmet-async";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { PerformanceMonitor } from "@/components/performance/PerformanceMonitor";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { usePageTracking } from "@/hooks/useAnalytics";
+import { useSession } from "@/lib/auth-client";
 import Docs from "./pages/Docs";
 
 // Redirect /canvas → /studio-flow preserving query params
@@ -25,6 +25,9 @@ const CanvasRedirect = () => {
 function AuthWatcher() {
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
+  const { data: session } = useSession();
+  // undefined = aún no observada; null/boolean = estado previo
+  const hadSessionRef = useRef<boolean | undefined>(undefined);
 
   // Track page views for analytics
   usePageTracking();
@@ -39,20 +42,25 @@ function AuthWatcher() {
   ]);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "SIGNED_OUT") {
-        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/inicio", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs", "/cookies"];
-        const isPublic = publicPaths.some(p =>
-          window.location.pathname === p || window.location.pathname.startsWith("/herramienta")
-        );
-        if (!isPublic) {
-          toast.error("Tu sesión expiró. Por favor inicia sesión nuevamente.");
-          navigate("/auth", { replace: true });
-        }
+    const hasSession = !!session;
+    if (hadSessionRef.current === undefined) {
+      // Primera observación: solo registra el estado inicial
+      hadSessionRef.current = hasSession;
+      return;
+    }
+    const wasAuthenticated = hadSessionRef.current;
+    hadSessionRef.current = hasSession;
+    if (wasAuthenticated && !hasSession) {
+      const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs", "/cookies"];
+      const isPublic = publicPaths.some(p =>
+        window.location.pathname === p || window.location.pathname.startsWith("/herramienta")
+      );
+      if (!isPublic) {
+        toast.error("Tu sesión expiró. Por favor inicia sesión nuevamente.");
+        navigate("/auth", { replace: true });
       }
-    });
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    }
+  }, [session, navigate]);
 
   return (
     <>
@@ -66,8 +74,6 @@ function AuthWatcher() {
 // Public
 const Index        = lazy(() => import("./pages/Index"));
 const Auth         = lazy(() => import("./pages/Auth"));
-const HomePage     = lazy(() => import("./pages/Home"));
-const Inicio       = lazy(() => import("./pages/Inicio"));
 const Pricing      = lazy(() => import("./pages/Pricing"));
 const Downloads    = lazy(() => import("./pages/Downloads"));
 const ToolLanding  = lazy(() => import("./pages/ToolLanding"));
@@ -95,23 +101,9 @@ const Chat         = lazy(() => import("./pages/Chat"));
 const ShareScreen  = lazy(() => import("./pages/ShareScreen"));
 const SystemStatus = lazy(() => import("./pages/SystemStatus"));
 const CodeIDE      = lazy(() => import("./pages/CodeIDE"));
-const Studio       = lazy(() => import("./pages/Studio"));
-const StudioLite   = lazy(() => import("./pages/StudioLite"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 const Tasks        = lazy(() => import("./pages/Tasks"));
 const AssistantPage = lazy(() => import("./pages/Assistant"));
-
-// Delicias Colombianas
-const LuminaMenu = lazy(() => import("./pages/LuminaMenu"));
-const LuminaCustomize = lazy(() => import("./pages/LuminaCustomize"));
-const LuminaSummary = lazy(() => import("./pages/LuminaSummary"));
-const ConfirmacionDeEnvio = lazy(() => import("./pages/ConfirmacionDeEnvio"));
-
-// Nebula Finance Ecosystem
-const NebulaDashboard = lazy(() => import("./pages/NebulaDashboard"));
-
-// Alanding Sensilla Ecosystem
-const LandingPage = lazy(() => import("./pages/Landing"));
 
 // Light loading screen — no dark bg
 const LoadingScreen = () => (
@@ -152,6 +144,7 @@ const App = () => {
                   {/* ── Public routes (no AppLayout) ── */}
                   <Route path="/"                     element={<Index />} />
                   <Route path="/home"                 element={<Navigate to="/" replace />} />
+                  <Route path="/inicio"               element={<Navigate to="/" replace />} />
                   <Route path="/auth"                 element={<Auth />} />
                   <Route path="/pricing"              element={<Pricing />} />
                   <Route path="/descargar"            element={<Downloads />} />
@@ -169,15 +162,14 @@ const App = () => {
                   <Route path="/contact"              element={<Contact />} />
                   <Route path="/help"                 element={<Help />} />
                   <Route path="/cookies"              element={<Cookies />} />
-                  
-                  {/* Lumina Bistro Flow */}
-                  <Route path="/menu"              element={<LuminaMenu />} />
-                  <Route path="/customize"         element={<LuminaCustomize />} />
-                  <Route path="/summary"           element={<LuminaSummary />} />
-                  <Route path="/success"           element={<ConfirmacionDeEnvio />} />
 
-                  {/* Nebula Finance Ecosystem */}
-                  {/* Nebula Finance - Coming Soon */}
+                  {/* Demos retiradas (Lumina Bistro) */}
+                  <Route path="/menu"              element={<Navigate to="/" replace />} />
+                  <Route path="/customize"         element={<Navigate to="/" replace />} />
+                  <Route path="/summary"           element={<Navigate to="/" replace />} />
+                  <Route path="/success"           element={<Navigate to="/" replace />} />
+
+                  {/* Nebula Finance — retirado */}
                   <Route path="/nebula"            element={<Navigate to="/dashboard" replace />} />
 
                   {/* Asistentes personalizables — shell propio, sin AppLayout */}
@@ -185,7 +177,7 @@ const App = () => {
 
                   {/* ── Redirects ── */}
                   <Route path="/canvas"  element={<CanvasRedirect />} />
-                  <Route path="/studio"  element={<StudioLite />} />
+                  <Route path="/studio"  element={<Navigate to="/chat" replace />} />
                   <Route path="/genesis" element={<Navigate to="/chat"   replace />} />
 
                   {/* ── Platform routes (wrapped in AppLayout) ── */}
@@ -212,9 +204,6 @@ const App = () => {
                     <Route path="/code"         element={<CodeIDE />} />
                     <Route path="/code-editor"  element={<CodeIDE />} />
                   </Route>
-
-                  {/* ── Landing Page (Public) ── */}
-                  <Route path="/inicio"               element={<Inicio />} />
 
                   {/* ── 404 ── */}
                   <Route path="*" element={<NotFound />} />

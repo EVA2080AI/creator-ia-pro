@@ -1,14 +1,47 @@
 import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Sparkles, ChevronDown, Zap, Eye, DollarSign, Cpu } from 'lucide-react';
+import { Sparkles, ChevronDown, Zap, Eye, DollarSign, Cpu, Image as ImageIcon } from 'lucide-react';
 import { MODELS } from './constants';
+import { IMAGE_MODELS } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Único selector de modelos del producto. Antes había 3 (components/ModelSelector,
+// components/ai/ModelSelector y este) con catálogos hardcodeados divergentes;
+// ahora todos derivan del catálogo canónico src/lib/ai/models.ts.
 interface ModelSelectorProps {
   selectedModel: string;
   onSelect: (modelId: string) => void;
+  /** 'text' = CHAT_MODELS (coste por mensaje) · 'image' = IMAGE_MODELS (Replicate). */
+  models?: 'text' | 'image';
+  /** 'inline' = chip compacto (chat/canvas) · 'full' = botón ancho (panel de Tools). */
+  variant?: 'inline' | 'full';
 }
+
+interface RowModel {
+  id: string;
+  label: string;
+  badge: string;
+  provider: string;
+  description: string;
+  vision: boolean;
+  free: boolean;
+  credits: number;
+}
+
+// IMAGE_MODELS no trae copy de vitrina — se describe aquí, junto al resto del UI.
+const IMAGE_ROWS: RowModel[] = IMAGE_MODELS.map((m) => ({
+  id: m.id,
+  label: m.label,
+  badge: m.credits <= 2 ? 'ECO' : 'PRO',
+  provider: 'Replicate',
+  description: m.supportsImagePrompt
+    ? 'Máxima fidelidad y seguimiento de prompt. Acepta imagen de referencia.'
+    : '4 pasos, ultra rápido. Disponible en todos los planes.',
+  vision: m.supportsImagePrompt,
+  free: false,
+  credits: m.credits,
+}));
 
 const FREE_MODELS = MODELS.filter(m => m.free);
 const PAID_MODELS = MODELS.filter(m => !m.free);
@@ -20,6 +53,7 @@ const PROVIDER_COLORS: Record<string, string> = {
   Meta: 'text-indigo-500',
   Microsoft: 'text-sky-500',
   DeepSeek: 'text-violet-500',
+  Replicate: 'text-teal-500',
 };
 
 function ModelRow({
@@ -27,7 +61,7 @@ function ModelRow({
   isSelected,
   onSelect,
 }: {
-  m: typeof MODELS[0];
+  m: RowModel;
   isSelected: boolean;
   onSelect: () => void;
 }) {
@@ -81,7 +115,7 @@ function ModelRow({
           </span>
           {!m.free && (
             <span className="text-[8px] font-mono text-zinc-400">
-              {m.credits} {m.credits === 1 ? 'crédito' : 'créditos'}/msj
+              {m.credits} {m.credits === 1 ? 'crédito' : 'créditos'}/uso
             </span>
           )}
           {m.free && (
@@ -97,11 +131,12 @@ const DROPDOWN_WIDTH = 416; // matches w-[26rem]
 const DROPDOWN_GAP = 12;    // 0.75rem breathing room
 const VIEWPORT_PADDING = 12;
 
-export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
+export function ModelSelector({ selectedModel, onSelect, models = 'text', variant = 'inline' }: ModelSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const [coords, setCoords] = useState<{ left: number; top: number; maxHeight: number; openUpward: boolean } | null>(null);
-  const currentModel = MODELS.find(m => m.id === selectedModel) ?? MODELS[0];
+  const rows: RowModel[] = models === 'image' ? IMAGE_ROWS : MODELS;
+  const currentModel = rows.find(m => m.id === selectedModel) ?? rows[0];
   const isFree = currentModel.free;
 
   // Position the portal dropdown next to the trigger and decide direction based on viewport space.
@@ -147,34 +182,55 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
 
   return (
     <div className="relative">
-      <button
-        ref={triggerRef}
-        id="model-selector-trigger"
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all duration-200 border group",
-          isOpen
-            ? "bg-white border-zinc-200 shadow-sm"
-            : "border-transparent hover:bg-white hover:border-zinc-200 bg-transparent"
-        )}
-      >
-        {isFree
-          ? <Zap className="h-3 w-3 text-emerald-500 shrink-0" />
-          : <Cpu className="h-3 w-3 text-amber-500 shrink-0" />
-        }
-        <span className={cn(
-          "text-[10px] font-extrabold uppercase tracking-widest whitespace-nowrap leading-none",
-          isOpen ? "text-zinc-900" : "text-zinc-500 group-hover:text-zinc-800"
-        )}>
-          {currentModel.label}
-        </span>
-        {isFree && (
-          <span className="text-[7px] font-black text-emerald-500 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-            FREE
+      {variant === 'full' ? (
+        <button
+          ref={triggerRef}
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "w-full flex items-center justify-between gap-2 px-3 h-11 rounded-xl border transition-all duration-200 group",
+            isOpen
+              ? "bg-white border-zinc-300 shadow-sm"
+              : "bg-zinc-50 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100"
+          )}
+        >
+          <div className="flex flex-col items-start min-w-0">
+            <span className="text-[13px] font-bold text-zinc-900 truncate leading-none">{currentModel.label}</span>
+            <span className="text-[10px] text-zinc-500 mt-0.5 leading-none">
+              {isFree ? 'Sin coste' : `${currentModel.credits} crédito${currentModel.credits > 1 ? 's' : ''}`} · {currentModel.provider}
+            </span>
+          </div>
+          <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 transition-transform duration-200", isOpen ? "rotate-180 text-primary" : "text-zinc-400")} />
+        </button>
+      ) : (
+        <button
+          ref={triggerRef}
+          id="model-selector-trigger"
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all duration-200 border group",
+            isOpen
+              ? "bg-white border-zinc-200 shadow-sm"
+              : "border-transparent hover:bg-white hover:border-zinc-200 bg-transparent"
+          )}
+        >
+          {isFree
+            ? <Zap className="h-3 w-3 text-emerald-500 shrink-0" />
+            : <Cpu className="h-3 w-3 text-amber-500 shrink-0" />
+          }
+          <span className={cn(
+            "text-[10px] font-extrabold uppercase tracking-widest whitespace-nowrap leading-none",
+            isOpen ? "text-zinc-900" : "text-zinc-500 group-hover:text-zinc-800"
+          )}>
+            {currentModel.label}
           </span>
-        )}
-        <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform duration-200", isOpen ? "rotate-180 text-primary" : "text-zinc-400")} />
-      </button>
+          {isFree && (
+            <span className="text-[7px] font-black text-emerald-500 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+              FREE
+            </span>
+          )}
+          <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform duration-200", isOpen ? "rotate-180 text-primary" : "text-zinc-400")} />
+        </button>
+      )}
 
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
@@ -206,59 +262,91 @@ export function ModelSelector({ selectedModel, onSelect }: ModelSelectorProps) {
                 {/* Header */}
                 <div className="px-4 py-3 border-b border-zinc-100 bg-zinc-50 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Seleccionar Modelo</span>
+                    {models === 'image'
+                      ? <ImageIcon className="h-3.5 w-3.5 text-primary" />
+                      : <Sparkles className="h-3.5 w-3.5 text-primary" />}
+                    <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">
+                      {models === 'image' ? 'Seleccionar motor' : 'Seleccionar modelo'}
+                    </span>
                   </div>
-                  <span className="text-[9px] text-zinc-400 font-medium">Créditos por mensaje</span>
+                  <span className="text-[9px] text-zinc-400 font-medium">
+                    {models === 'image' ? 'Créditos por imagen' : 'Créditos por mensaje'}
+                  </span>
                 </div>
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
-                  {/* FREE section */}
-                  <div className="px-3 pt-3 pb-1">
-                    <div className="flex items-center gap-2 mb-2 px-1">
-                      <span className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em]">
-                        ✓ Gratis — Sin coste OpenRouter
-                      </span>
-                      <div className="flex-1 h-px bg-emerald-100" />
+                  {models === 'image' ? (
+                    <div className="px-3 pt-3 pb-3">
+                      <div className="flex items-center gap-2 mb-2 px-1">
+                        <ImageIcon className="h-3 w-3 text-teal-500" />
+                        <span className="text-[9px] font-black text-teal-600 uppercase tracking-[0.2em]">
+                          Motores de imagen — Replicate
+                        </span>
+                        <div className="flex-1 h-px bg-zinc-100" />
+                      </div>
+                      <div className="space-y-0.5">
+                        {IMAGE_ROWS.map(m => (
+                          <ModelRow
+                            key={m.id}
+                            m={m}
+                            isSelected={selectedModel === m.id}
+                            onSelect={() => { onSelect(m.id); setIsOpen(false); }}
+                          />
+                        ))}
+                      </div>
                     </div>
-                    <div className="space-y-0.5">
-                      {FREE_MODELS.map(m => (
-                        <ModelRow
-                          key={m.id}
-                          m={m}
-                          isSelected={selectedModel === m.id}
-                          onSelect={() => { onSelect(m.id); setIsOpen(false); }}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      {/* FREE section */}
+                      <div className="px-3 pt-3 pb-1">
+                        <div className="flex items-center gap-2 mb-2 px-1">
+                          <span className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em]">
+                            ✓ Gratis — Sin coste OpenRouter
+                          </span>
+                          <div className="flex-1 h-px bg-emerald-100" />
+                        </div>
+                        <div className="space-y-0.5">
+                          {FREE_MODELS.map(m => (
+                            <ModelRow
+                              key={m.id}
+                              m={m}
+                              isSelected={selectedModel === m.id}
+                              onSelect={() => { onSelect(m.id); setIsOpen(false); }}
+                            />
+                          ))}
+                        </div>
+                      </div>
 
-                  {/* PAID section */}
-                  <div className="px-3 pt-2 pb-3">
-                    <div className="flex items-center gap-2 mb-2 px-1">
-                      <DollarSign className="h-3 w-3 text-amber-500" />
-                      <span className="text-[9px] font-black text-amber-600 uppercase tracking-[0.2em]">
-                        Premium — Consume créditos OpenRouter
-                      </span>
-                      <div className="flex-1 h-px bg-amber-100" />
-                    </div>
-                    <div className="space-y-0.5">
-                      {PAID_MODELS.map(m => (
-                        <ModelRow
-                          key={m.id}
-                          m={m}
-                          isSelected={selectedModel === m.id}
-                          onSelect={() => { onSelect(m.id); setIsOpen(false); }}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                      {/* PAID section */}
+                      <div className="px-3 pt-2 pb-3">
+                        <div className="flex items-center gap-2 mb-2 px-1">
+                          <DollarSign className="h-3 w-3 text-amber-500" />
+                          <span className="text-[9px] font-black text-amber-600 uppercase tracking-[0.2em]">
+                            Premium — Consume créditos OpenRouter
+                          </span>
+                          <div className="flex-1 h-px bg-amber-100" />
+                        </div>
+                        <div className="space-y-0.5">
+                          {PAID_MODELS.map(m => (
+                            <ModelRow
+                              key={m.id}
+                              m={m}
+                              isSelected={selectedModel === m.id}
+                              onSelect={() => { onSelect(m.id); setIsOpen(false); }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Footer */}
                 <div className="px-4 py-2.5 border-t border-zinc-100 bg-zinc-50 shrink-0">
                   <p className="text-[9px] text-zinc-400 text-center">
-                    💡 Por defecto <strong className="text-amber-600">Claude Sonnet 4.5</strong> (pro) o <strong className="text-emerald-600">Gemini 2.0 Flash</strong> (gratis)
+                    {models === 'image'
+                      ? <>💡 Por defecto <strong className="text-teal-600">Flux Schnell</strong> — rápido y disponible en todos los planes</>
+                      : <>💡 Por defecto <strong className="text-amber-600">Claude Sonnet 4.5</strong> (pro) o <strong className="text-emerald-600">Gemini 2.5 Flash Lite</strong> (gratis)</>}
                   </p>
                 </div>
               </motion.div>

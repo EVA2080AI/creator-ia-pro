@@ -17,7 +17,7 @@ interface BaseNodeProps {
   nodeId: string;
   type: string;
   title?: string;
-  status?: 'idle' | 'loading' | 'executing' | 'ready' | 'error' | 'done' | 'running' | 'bypassed';
+  status?: 'idle' | 'loading' | 'executing' | 'ready' | 'error' | 'done' | 'running' | 'generating' | 'bypassed';
   error?: string;
   onDelete?: () => void;
   onExecute?: () => void;
@@ -57,11 +57,11 @@ const BaseNode = memo(({
   const [showPreview, setShowPreview] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const meta = NODE_META[type];
-  const isExecuting = status === 'executing' || status === 'running';
+  const isExecuting = status === 'executing' || status === 'running' || status === 'generating';
   const isError = status === 'error';
   const isReady = status === 'ready' || status === 'done';
   const isBypassed = status === 'bypassed';
-  const hasOutput = outputData && (isReady || status === 'done') && !isBypassed;
+  const hasOutput = outputData && isReady && !isBypassed;
 
   const handleToggleCollapsed = () => {
     setIsCollapsed(!isCollapsed);
@@ -338,7 +338,7 @@ const BaseNode = memo(({
       <ContextMenuTrigger asChild>
         {nodeContent}
       </ContextMenuTrigger>
-      <ContextMenuContent className="w-48" align="end" alignOffset={-10}>
+      <ContextMenuContent className="w-48">
         <ContextMenuItem
           onClick={handleExecuteUpstream}
           disabled={!executeUpstream || isUpstreamExecuting}

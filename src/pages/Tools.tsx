@@ -13,7 +13,8 @@ import {
   BookmarkPlus, CheckCircle2, Lock, Palette, ShoppingBag, User,
   ChevronDown, Check, SlidersHorizontal,
 } from "lucide-react";
-import { ModelSelector, AVAILABLE_MODELS } from "@/components/ModelSelector";
+import { ModelSelector } from "@/components/studio/chat/ModelSelector";
+import { DEFAULT_MODEL_ID, DEFAULT_IMAGE_MODEL_ID, getModel, getImageModel } from "@/lib/ai/models";
 import { createAsset } from "@/lib/assets";
 import { cn } from "@/lib/utils";
 
@@ -177,8 +178,8 @@ const Tools = () => {
   const [savedAsset, setSavedAsset]           = useState(false);
   const [textPrompt, setTextPrompt]           = useState("");
   const [aspectRatio, setAspectRatio]         = useState(ASPECT_RATIOS[0]);
-  const [selectedImageModel, setSelectedImageModel] = useState("flux-schnell");
-  const [selectedTextModel,  setSelectedTextModel]  = useState("deepseek-chat");
+  const [selectedImageModel, setSelectedImageModel] = useState(DEFAULT_IMAGE_MODEL_ID);
+  const [selectedTextModel,  setSelectedTextModel]  = useState(DEFAULT_MODEL_ID);
   const [showSettings, setShowSettings]       = useState(false);
   const resultRef  = useRef<HTMLDivElement>(null);
   const fileRef    = useRef<HTMLInputElement>(null);
@@ -204,13 +205,17 @@ const Tools = () => {
   const currentTool     = tools.find((t) => t.id === activeTool)!;
   const filteredTools   = tools.filter((t) => t.category === category);
   const activeModel     = category === "image" ? selectedImageModel : selectedTextModel;
-  const modelObj        = AVAILABLE_MODELS.find((m) => m.id === activeModel) || AVAILABLE_MODELS[0];
-  const requiredCredits = category === "image" ? currentTool.credits : modelObj.tokenCost;
+  // Coste según el catálogo canónico (src/lib/ai/models.ts) — el mismo que
+  // cobra el servidor en /api/ai/chat y /api/ai/image. Los `credits` de cada
+  // tool son solo copy de vitrina.
+  const requiredCredits = category === "image"
+    ? getImageModel(selectedImageModel).credits
+    : getModel(selectedTextModel).credits;
   const isRunning       = processing || streaming;
   const styleList       = activeTool === "logo" ? LOGO_STYLES : IMAGE_STYLES;
 
-  const imageModelObj = AVAILABLE_MODELS.find(m => m.id === selectedImageModel) ?? AVAILABLE_MODELS[0];
-  const textModelObj  = AVAILABLE_MODELS.find(m => m.id === selectedTextModel) ?? AVAILABLE_MODELS[0];
+  const imageModelObj = getImageModel(selectedImageModel);
+  const textModelObj  = getModel(selectedTextModel);
   const activeModelObj = category === "image" ? imageModelObj : textModelObj;
 
   const switchTool = (tool: Tool) => {
@@ -349,7 +354,7 @@ const Tools = () => {
     if (processing) {
       return (
         <ProcessingCanvas
-          modelName={activeModelObj.name}
+          modelName={activeModelObj.label}
           modelColor={category === "image" ? "#4ADE80" : "#00C2FF"}
           category={category}
         />
@@ -613,7 +618,7 @@ const Tools = () => {
                       : "border-white/60 bg-white/70 text-zinc-600 hover:text-zinc-900 hover:bg-white"
                   )}>
                   <Sparkles className="h-3 w-3" />
-                  {imageModelObj.name}
+                  {imageModelObj.label}
                   <ChevronDown className={cn("h-3 w-3 transition-transform", showSettings && "rotate-180")} />
                 </button>
               </div>
@@ -626,7 +631,7 @@ const Tools = () => {
                     : "border-white/60 bg-white/70 text-zinc-600 hover:text-zinc-900 hover:bg-white"
                 )}>
                 <Sparkles className="h-3 w-3" />
-                {textModelObj.name}
+                {textModelObj.label}
                 <ChevronDown className={cn("h-3 w-3 transition-transform", showSettings && "rotate-180")} />
               </button>
             ) : null}
@@ -661,13 +666,13 @@ const Tools = () => {
               {category === "image" && !currentTool.needsUpload && (
                 <div className="space-y-1.5">
                   <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Motor de imagen</p>
-                  <ModelSelector selectedModelId={selectedImageModel} onModelChange={setSelectedImageModel} filterType="image" />
+                  <ModelSelector selectedModel={selectedImageModel} onSelect={setSelectedImageModel} models="image" variant="full" />
                 </div>
               )}
               {category === "text" && (
                 <div className="space-y-1.5">
                   <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Modelo de IA</p>
-                  <ModelSelector selectedModelId={selectedTextModel} onModelChange={setSelectedTextModel} filterType="text" />
+                  <ModelSelector selectedModel={selectedTextModel} onSelect={setSelectedTextModel} models="text" variant="full" />
                 </div>
               )}
               {(activeTool === "generate" || activeTool === "logo") && (

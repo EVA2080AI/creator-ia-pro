@@ -24,6 +24,9 @@ interface UseStudioChatAIProps {
   activeFile?: string | null;
   supabaseConfig?: { url: string; anonKey: string } | null;
   subscriptionTier?: 'free' | 'pro' | 'admin' | null;
+  /** Proyecto de Genesis + conversación activa — el servidor persiste el historial. */
+  projectId?: string | null;
+  conversationId?: string | null;
   onPhaseChange?: (phase: AgentPhase, specialist?: AgentSpecialist) => void;
   onStreamCharsChange?: (chars: number, preview: string) => void;
   onGeneratingChange?: (v: boolean) => void;
@@ -40,6 +43,8 @@ export function useStudioChatAI({
   activeFile,
   supabaseConfig,
   subscriptionTier = 'free',
+  projectId,
+  conversationId,
   onPhaseChange,
   onStreamCharsChange,
   onGeneratingChange,
@@ -316,7 +321,9 @@ IMPORTANTE: El usuario solicita HTML VANILLA (sin React).
           model: targetModel,
           messages,
           temperature: isChatMode ? 0.7 : 0.3,
-          maxTokens: isChatMode ? BUDGET.maxChatTokens : BUDGET.maxCodeTokens
+          maxTokens: isChatMode ? BUDGET.maxChatTokens : BUDGET.maxCodeTokens,
+          ...(projectId ? { projectId } : {}),
+          ...(conversationId ? { conversationId } : {})
         })
       });
 

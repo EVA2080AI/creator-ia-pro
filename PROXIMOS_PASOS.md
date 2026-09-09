@@ -22,7 +22,7 @@ No se aplicó ningún fix — todo lo de abajo está pendiente.
 
 7. **`src/pages/Chat.tsx:579`** — condición de carrera entre dos `useEffect`: un usuario free con 0 créditos nunca recibe el modelo gratuito por defecto porque el efecto que persiste el modelo actual en `localStorage` corre antes que el efecto que decide el downgrade.
 
-8. **`src/components/studio/StudioChat.tsx:490`** — llamada a `/functions/v1/scrape-url`, función que no existe (confirmado 404 en vivo). La función de "pegar una URL y que la IA la lea" falla silenciosamente siempre.
+8. ~~**`src/components/studio/StudioChat.tsx:490`** — llamada a `/functions/v1/scrape-url`, función que no existe (confirmado 404 en vivo). La función de "pegar una URL y que la IA la lea" falla silenciosamente siempre.~~ **FIX 2026-09-08:** reemplazada por `api/scrape.ts` (Vercel Function con guard SSRF, límite de 512 KB / 15.000 chars y timeout de 10 s) llamada desde StudioChat como `/api/scrape`.
 
 9. **`src/prompts/genesis-prompts.ts:23`** — la regla 5 pide declarar dependencias npm nuevas en un JSON con clave `"newDeps"` que ningún parser del código lee; se pierde silenciosamente y el archivo generado que la importe rompe en el preview.
 
@@ -73,3 +73,45 @@ Verificado con pruebas reales contra `creator-ia.com` (no solo en local):
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` (y equivalentes de Apple/GitHub) → para que los botones de login social funcionen. Callback: `https://creator-ia.com/api/auth/callback/google`.
 
 ⏳ **Todavía en Supabase (siguiente bloque):** Antigravity, Herramientas (imagen/texto), Canvas IA, Biblioteca de assets, panel de Admin más allá del flag `isAdmin`, y la fusión visual de todo dentro de Genesis con personalización por organización. Plan completo en `docs/PLAN_REFACTOR_GENESIS.md`.
+
+## 🆕 2026-09-08 — Última milla de la migración: limpieza de código muerto + historial de chat de Genesis
+
+Trabajo post-26-ago revisado, completado y verificado (tests 29/29 ✅). Pendiente de commit + deploy.
+
+**Nuevo en backend (Vercel Functions):**
+- `api/scrape.ts` — lectura server-side de URLs para adjuntar al chat (**arregla el ítem 🟡 #8**). Guard SSRF (rechaza IPs privadas/loopback/metadata cloud en cada salto de redirect), solo http/https, máx 512 KB → 15.000 chars, timeout 10 s.
+- `api/projects/[id]/messages.ts` — historial de chat de un proyecto de Genesis (última conversación + mensajes, doble verificación de propiedad).
+- `api/profile.ts` — `PATCH` para editar displayName/avatarUrl.
+- `api/ai/chat.ts` — persiste la conversación aunque no haya asistente (chats de Genesis se archivan por `projectId`, validando que el proyecto sea del usuario). Con asistente o sin proyecto (Tools, nodos sueltos) no archiva.
+
+**Migración de BD (`db/migrations/0001_genesis_chat_history.sql`):** `conversation.assistant_id` pasa a ser nullable + índice `(project_id, updated_at)`. ⚠️ Aplicar a Neon con `drizzle-kit push` si aún no se aplicó.
+
+**Frontend:**
+- Historial de chat de Genesis ya no pasa por Supabase: lectura desde `/api/projects/:id/messages`, persistencia desde el propio `/api/ai/chat` al final del stream. Al recargar, los bloques `<file>` se compactan a referencias legibles.
+- `GeniusAssistant` (formarketing) migrado de las edge functions `ai-proxy` de Supabase a `/api/ai/chat` con cobro/reembolso atómico en servidor; modelos derivados del catálogo canónico.
+- `Tools.tsx` usa el catálogo canónico (`src/lib/ai/models.ts`) para costes reales de créditos.
+- `Profile.tsx` reescrito sobre `useProfile` + `PATCH /api/profile`; sin Supabase.
+- Watcher de sesión en `App.tsx` migrado de `supabase.auth.onAuthStateChange` a la sesión de better-auth (solo navega a `/auth` cuando una sesión activa se pierde, no en carga inicial).
+- Rutas retiradas con redirect 301 en `vercel.json`: `/studio`→`/chat`, `/inicio`→`/`, `/menu`/`/customize`/`/summary`/`/success`→`/` (demos Lumina retiradas).
+- `StudioViewToolbar` con botones de pantalla completa y compartir.
+- Tests de `useAuth` reescritos para better-auth (los viejos mock-eaban Supabase y fallaban fuera de un `<Router>`).
+- Fix en `UsersTab`: `resetPassword` → `requestPasswordReset` (el primero es el paso de "poner nueva contraseña", no el de enviar el correo).
+
+**Limpieza (fase 7 del plan): 35 archivos muertos identificados con 0 referencias vivas** (~3.400 líneas), listos para `git rm`: páginas sin ruta (`Studio`, `Studio.old`, `StudioLite`, `Home`, `Inicio`, `Landing`, `NebulaDashboard`, 4 de Lumina), hooks/stores de la era Supabase (`useGenesisUnified`, `useGenesisLite`, `useFeatureFlags`, `useAIProvider`, `useDatabase`, `useVirtualFS`, `useSubscription`, `useSimpleCodeGen`, `src/stores/` completo, `src/store/useCanvasStore`, `ai-cache`, `multi-agent-orchestrator`, `serviceWorker`), y componentes huérfanos (`components/ai/ModelSelector`, `admin/HealthDashboard`, `studio/PluginManager`, `studio/StudioAITools`, `components/canvas/` completo). Todos los errores de `tsc -b` están en estos archivos: al borrarlos el typecheck queda limpio. ⚠️ **La eliminación quedó pendiente de ejecutar** (bloqueo temporal del entorno, no del proyecto).
+
+**CI:** `npm run typecheck` y `typecheck:api` (nuevo `tsconfig.api.json` para `api/`+`db/`) en el workflow; job de E2E de Playwright retirado del pipeline de deploy.
+
+**Sigue pendiente (sin cambios):** claves OAuth de Google/Apple/GitHub en Vercel, migración de datos de Supabase (fase 6, requiere restaurar el proyecto pausado), `TAVILY_API_KEY`, y la fusión visual restante dentro de Genesis (`docs/PLAN_REFACTOR_GENESIS.md`).
+
+**⚠️ Nuevo hallazgo (2026-09-08): Supabase vivo en páginas con ruta.** Al auditar `import ... from '@/integrations/supabase/client'` quedan 6 archivos **alcanzables por el usuario** que siguen llamando al Supabase muerto (todo lo que tocan falla en silencio o con error):
+
+| Archivo | Qué rompe | Migración necesaria |
+|---|---|---|
+| `src/pages/admin/components/AdminLoginGate.tsx` | Puerta de login del Admin usa `supabase.auth.signInWithPassword` — el Admin queda bloqueado si esta puerta es obligatoria. | Usar la sesión better-auth + flag `isAdmin` (ya migrado en `/api/admin/*`). |
+| `src/pages/admin/components/AdminBootstrap.tsx` | Bootstrap de admin vía RPC `bootstrap_admin` de Supabase. | Endpoint `/api/admin/bootstrap` con chequeo de owner. |
+| `src/pages/admin/tabs/RolesTab.tsx` | Gestión de roles llama a tablas Supabase. | Endpoint Drizzle sobre `organization_members`. |
+| `src/pages/ShareScreen.tsx:47` | "Share screen" cobra créditos con RPC `spend_credits` de Supabase. | Reusar `spendCredits` de `api/_lib/credits.ts` vía un endpoint nuevo. |
+| `src/pages/SystemStatus.tsx:192` | Sonda de salud contra tablas Supabase (como diagnóstico, reporta "down" — es lo correcto mientras siga muerto, pero hay que actualizarla al cortar Supabase). | Sonda contra `/api/health` + Neon. |
+| `src/services/billing-service.ts` | `boldService`/`creditService` mezclan `supabase.functions.invoke` y `.from()` (usado por `StudioDeploy` y `useStudioActions`). | Revisar qué partes siguen vivas tras el fix de checkout del 26-ago; migrar las que falten a `/api/billing/*`. |
+
+Además, `useAgentPreferences` (instrucciones por especialista de Génesis) leía la tabla muerta `agent_preferences` — **migrado a localStorage** (misma interfaz) para que StudioChat y AgentSettingsModal vuelvan a guardar de verdad. Persistencia multi-dispositivo: pendiente tabla Drizzle + `/api/preferences`.

@@ -1,10 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 import type { AgentSpecialist, AgentPreference } from '@/components/studio/chat/types';
 export type { AgentSpecialist, AgentPreference };
+
+// Antes persistía en la tabla `agent_preferences` de Supabase (hoy pausado e
+// irrecuperable) — ahora en localStorage, con la misma forma de datos para que
+// StudioChat (inyección de instrucciones en el system prompt) y
+// AgentSettingsModal sigan funcionando sin cambios. Pendiente: tabla Drizzle +
+// endpoint /api/preferences si se quiere persistencia entre dispositivos.
+const STORAGE_PREFIX = 'creatoria:agent-preferences:';
+
+function readStored(userId: string): AgentPreference[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_PREFIX + userId);
+    return raw ? (JSON.parse(raw) as AgentPreference[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeStored(userId: string, prefs: AgentPreference[]) {
+  try {
+    localStorage.setItem(STORAGE_PREFIX + userId, JSON.stringify(prefs));
+  } catch {
+    // localStorage lleno o bloqueado — las preferencias solo viven en memoria
+  }
+}
 
 export function useAgentPreferences() {
   const { user } = useAuth();
@@ -13,44 +36,20 @@ export function useAgentPreferences() {
 
   const fetchPreferences = useCallback(async () => {
     if (!user) return;
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('agent_preferences')
-        .select('agent_id, instructions, settings')
-        .eq('user_id', user.id);
-
-      if (error) throw error;
-      setPreferences(data || []);
-    } catch (err: any) {
-      console.error('[useAgentPreferences] Error fetching:', err);
-    } finally {
-      setLoading(false);
-    }
+    setPreferences(readStored(user.id));
+    setLoading(false);
   }, [user]);
 
-  const updatePreference = useCallback(async (agentId: AgentSpecialist, instructions: string, settings: any = {}) => {
+  const updatePreference = useCallback(async (agentId: AgentSpecialist, instructions: string, _settings: any = {}) => {
     if (!user) return;
-    try {
-      const { error } = await (supabase as any)
-        .from('agent_preferences')
-        .upsert({
-          user_id: user.id,
-          agent_id: agentId,
-          instructions,
-          settings,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id, agent_id' });
-
-      if (error) throw error;
-      
-      toast.success(`Preferencias para ${agentId.toUpperCase()} guardadas`);
-      await fetchPreferences();
-    } catch (err: any) {
-      toast.error('Error al guardar preferencias');
-      console.error('[useAgentPreferences] Error updating:', err);
-    }
-  }, [user, fetchPreferences]);
+    const next = [
+      ...readStored(user.id).filter((p) => p.agent_id !== agentId),
+      { agent_id: agentId, instructions },
+    ];
+    writeStored(user.id, next);
+    setPreferences(next);
+    toast.success(`Preferencias para ${agentId.toUpperCase()} guardadas`);
+  }, [user]);
 
   useEffect(() => {
     fetchPreferences();

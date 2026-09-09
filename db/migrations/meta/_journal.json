@@ -8,6 +8,13 @@
       "when": 1787709093755,
       "tag": "0000_premium_vulture",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788311040000,
+      "tag": "0001_genesis_chat_history",
+      "breakpoints": true
     }
   ]
 }

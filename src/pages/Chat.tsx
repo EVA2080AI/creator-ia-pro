@@ -34,7 +34,6 @@ import { DEFAULT_MODEL_ID } from '@/lib/ai/models';
 import { useStudioProjects, type StudioFile, type StudioProject } from '@/hooks/useStudioProjects';
 import { StudioCloud, type SupabaseConfig } from '@/components/studio/StudioCloud';
 import { useProfile } from '@/hooks/useProfile';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';

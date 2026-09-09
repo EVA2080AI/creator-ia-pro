@@ -10,8 +10,8 @@ export function Footer() {
       title: "Plataforma",
       links: [
         { name: "Genesis IDE", path: "/chat" },
-        { name: "Studio Flow", path: "/studio" },
-        { name: "Canvas IA", path: "/formarketing" },
+        { name: "Studio", path: "/tools" },
+        { name: "Canvas IA", path: "/studio-flow" },
         { name: "Precios", path: "/pricing" },
       ]
     },

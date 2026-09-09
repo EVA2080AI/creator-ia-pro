@@ -15,17 +15,6 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 }
 
-// Web Vitals reporting
-if ('web-vitals' in window) {
-  import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-    getCLS(console.log);
-    getFID(console.log);
-    getFCP(console.log);
-    getLCP(console.log);
-    getTTFB(console.log);
-  });
-}
-
 // Prevent accidental navigation with unsaved changes
 let hasUnsavedChanges = false;
 

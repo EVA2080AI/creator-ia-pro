@@ -55,7 +55,7 @@ export function UsersTab({
 
   const handleResetPassword = async (email: string) => {
     setActionLoading(email + "-reset");
-    const { error } = await authClient.forgetPassword({
+    const { error } = await authClient.requestPasswordReset({
       email,
       redirectTo: `${window.location.origin}/reset-password`,
     });

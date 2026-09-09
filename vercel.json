@@ -84,6 +84,36 @@
       "source": "/formarketing",
       "destination": "/studio-flow",
       "permanent": true
+    },
+    {
+      "source": "/studio",
+      "destination": "/chat",
+      "permanent": true
+    },
+    {
+      "source": "/inicio",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/menu",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/customize",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/summary",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/success",
+      "destination": "/",
+      "permanent": true
     }
   ]
 }

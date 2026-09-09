@@ -1,7 +1,6 @@
 import { memo, useState, useCallback, useEffect } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Rocket, Shield, Globe, ExternalLink, Zap, Braces, RefreshCcw, CheckCircle2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { NodeNextAction } from './NodeNextAction';
 

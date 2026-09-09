@@ -43,11 +43,11 @@ const PRODUCTS = [
   {
     badge: "Studio",
     headline: "Crea imágenes y textos con IA.",
-    sub: "8 herramientas de imagen (genera, mejora, upscale, quita fondo, restaura…) y 4 de texto (copy, SEO, redes, ads). Todo inline, sin salir del workspace.",
+    sub: "Herramientas de imagen (genera, logos, quita fondo, upscale…) y de texto (copy, SEO, redes, ads). Todo inline, sin salir del workspace.",
     icon: Image,
     color: "#00C2FF",
     cta: "Abrir Studio →",
-    path: "/studio",
+    path: "/tools",
     features: ["FLUX Pro + SDXL", "Upscale 4K", "Streaming de texto", "Guarda en biblioteca"],
     preview: [
       { tool: "Crear imagen", cr: 2, color: "#a855f7" },
@@ -1512,8 +1512,8 @@ export default function Index() {
                   <ul className="space-y-2">
                     {[
                       { label: "Genesis IDE", path: "/chat" },
-                      { label: "Studio", path: "/studio" },
-                      { label: "Canvas", path: "/formarketing" },
+                      { label: "Studio", path: "/tools" },
+                      { label: "Canvas", path: "/studio-flow" },
                       { label: "Precios", path: "/pricing" },
                     ].map((item) => (
                       <li key={item.label}>
