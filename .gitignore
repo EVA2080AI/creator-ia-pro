@@ -32,3 +32,4 @@ test-qa.mjs
 .env*.local
 *.tsbuildinfo
 .env*
+cdp_api_key.json
