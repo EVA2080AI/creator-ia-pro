@@ -62,10 +62,14 @@ const NAV_SYSTEM: NavItemDef[] = [
   { path: '/admin',          label: 'Usuarios',         icon: Users2,      minTier: 'admin', tab: 'usuarios' },
   { path: '/design-system',  label: 'Sistema de Diseño', icon: Palette,   minTier: 'admin' },
   { path: '/system-status',  label: 'Estatus',          icon: Activity,    minTier: 'admin' },
-  { path: '/product-backlog', label: 'Roadmap',         icon: List,        minTier: 'free' },
 ];
 
+// Roadmap es pública (minTier: 'free') — va en NAV_BOTTOM, no en NAV_SYSTEM,
+// porque ese bloque solo se renderiza para admins (ver `{isAdmin && (...)}`
+// más abajo). Estaba mal ubicada: los usuarios normales nunca la veían en
+// el sidebar aunque la ruta siempre estuvo disponible para todos.
 const NAV_BOTTOM = [
+  { path: '/product-backlog', label: 'Roadmap',    icon: List },
   { path: '/profile',         label: 'Perfil',      icon: User },
   { path: '/pricing',         label: 'Planes',      icon: CreditCard },
   { path: '/descargar',       label: 'Descargar',   icon: Download },

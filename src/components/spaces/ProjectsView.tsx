@@ -428,7 +428,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
                 <div className="flex items-center gap-3 min-w-0 pr-4">
                   <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-zinc-50 border border-zinc-200 transition-colors ${isCode ? 'group-hover:border-emerald-500/30 group-hover:bg-emerald-500/10' : 'group-hover:border-primary/30 group-hover:bg-primary/10'}`}>
                     {space.thumbnail_url
-                      ? <img src={space.thumbnail_url} className="w-full h-full object-cover rounded-xl" />
+                      ? <img src={space.thumbnail_url} alt="" className="w-full h-full object-cover rounded-xl" />
                       : isCode ? <Code2 className="h-3.5 w-3.5 text-zinc-500 group-hover:text-emerald-600" /> : <BookOpen className="h-3.5 w-3.5 text-zinc-500 group-hover:text-primary" />
                     }
                   </div>

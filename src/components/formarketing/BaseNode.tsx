@@ -153,6 +153,7 @@ const BaseNode = memo(({
             onClick={handleToggleCollapsed}
             className="p-1.5 hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600 rounded-lg transition-colors"
             title={isCollapsed ? 'Expandir' : 'Contraer'}
+            aria-label={isCollapsed ? 'Expandir nodo' : 'Contraer nodo'}
           >
             {isCollapsed ? (
               <Maximize2 className="w-3.5 h-3.5" />
@@ -171,6 +172,7 @@ const BaseNode = memo(({
                   : 'hover:bg-zinc-100 text-zinc-400 hover:text-zinc-600'
               }`}
               title={isBypassed ? 'Reactivar nodo' : 'Bypass (desactivar)'}
+              aria-label={isBypassed ? 'Reactivar nodo' : 'Desactivar nodo (bypass)'}
             >
               {isBypassed ? (
                 <PowerOff className="w-3.5 h-3.5" />
@@ -186,6 +188,7 @@ const BaseNode = memo(({
               onClick={onExecute}
               className="p-1.5 hover:bg-primary/10 text-zinc-400 hover:text-primary rounded-lg transition-colors"
               title="Ejecutar nodo"
+              aria-label="Ejecutar nodo"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
             </button>
@@ -202,6 +205,7 @@ const BaseNode = memo(({
               onClick={onDelete}
               className="p-1.5 hover:bg-red-50 text-zinc-400 hover:text-red-500 rounded-lg transition-colors"
               title="Eliminar nodo"
+              aria-label="Eliminar nodo"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>

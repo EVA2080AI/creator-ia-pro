@@ -59,8 +59,9 @@ export function StudioToolbar({
         
         {/* Section 1: Navigation & Title */}
         <div className="flex items-center gap-3 pl-3 pr-4 border-r border-zinc-100">
-          <button 
+          <button
             onClick={onBack}
+            aria-label="Volver"
             className="group flex h-8 w-8 items-center justify-center rounded-xl hover:bg-zinc-100 transition-all active:scale-95 border border-transparent hover:border-zinc-200/60"
           >
             <ArrowLeft className="h-4 w-4 text-zinc-500 group-hover:text-zinc-900" />
@@ -79,8 +80,9 @@ export function StudioToolbar({
         <ButtonGroup>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
+              <button
                 onClick={onAddNode}
+                aria-label="Nuevo nodo"
                 className="flex h-9 px-3 items-center gap-2 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 transition-all active:scale-95 shadow-lg shadow-zinc-900/10 font-display text-[11px] font-black uppercase tracking-widest"
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -92,8 +94,9 @@ export function StudioToolbar({
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
+              <button
                 onClick={onOpenTemplates}
+                aria-label="Plantillas Pro"
                 className="group flex h-9 w-9 items-center justify-center rounded-xl text-zinc-500 hover:bg-zinc-100 hover:text-primary transition-all border border-transparent hover:border-zinc-200/60"
               >
                 <Sparkles className="h-4 w-4 group-hover:scale-110 transition-transform" />
@@ -109,9 +112,10 @@ export function StudioToolbar({
         <ButtonGroup>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
+              <button
                 disabled={!canUndo}
                 onClick={onUndo}
+                aria-label="Deshacer"
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-xl transition-all border border-transparent",
                   canUndo ? "text-zinc-600 hover:bg-zinc-100 hover:border-zinc-200/60 hover:text-zinc-900" : "text-zinc-200 cursor-not-allowed"
@@ -125,9 +129,10 @@ export function StudioToolbar({
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
+              <button
                 disabled={!canRedo}
                 onClick={onRedo}
+                aria-label="Rehacer"
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-xl transition-all border border-transparent",
                   canRedo ? "text-zinc-600 hover:bg-zinc-100 hover:border-zinc-200/60 hover:text-zinc-900" : "text-zinc-200 cursor-not-allowed"
@@ -146,8 +151,10 @@ export function StudioToolbar({
         <ButtonGroup>
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
+              <button
                 onClick={onToggleSnap}
+                aria-label="Ajustar a la rejilla"
+                aria-pressed={snapEnabled}
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-xl transition-all border",
                   snapEnabled 
@@ -163,8 +170,9 @@ export function StudioToolbar({
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
+              <button
                 onClick={onLayout}
+                aria-label="Organizar nodos automáticamente"
                 className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-all border border-transparent hover:border-zinc-200/60"
               >
                 <LayoutDashboard className="h-4 w-4" />
@@ -175,8 +183,9 @@ export function StudioToolbar({
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
+              <button
                 onClick={onClear}
+                aria-label="Limpiar todo el lienzo"
                 className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:bg-rose-50 hover:text-rose-500 transition-all border border-transparent hover:border-rose-200/40"
               >
                 <Trash2 className="h-4 w-4" />
@@ -192,8 +201,9 @@ export function StudioToolbar({
         <ButtonGroup className="pr-1 gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <button 
+              <button
                 onClick={onExport}
+                aria-label="Exportar resultados"
                 className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-all border border-transparent hover:border-zinc-200/60"
               >
                 <Download className="h-4 w-4" />
