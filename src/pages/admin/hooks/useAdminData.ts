@@ -38,6 +38,9 @@ export function useAdminAnalytics(isAdmin: boolean, activeTab: string) {
   const [data, setData] = useState<{
     totalSpend: number;
     recentUsers: number;
+    totalUsers: number;
+    payingUsers: number;
+    conversionRate: number;
     toolUsage: { name: string; count: number; color: string }[];
     dailyCredits: { name: string; credits: number }[];
   } | null>(null);
@@ -46,7 +49,7 @@ export function useAdminAnalytics(isAdmin: boolean, activeTab: string) {
   const fetchAnalytics = useCallback(async () => {
     if (!isAdmin) return;
     setLoading(true);
-    const res = await api<{ totalSpend: number; recentUsers: number; toolUsage: any[]; dailyCredits: any[] }>("/api/admin/stats");
+    const res = await api<{ totalSpend: number; recentUsers: number; totalUsers: number; payingUsers: number; conversionRate: number; toolUsage: any[]; dailyCredits: any[] }>("/api/admin/stats");
     if (res.ok) setData(res.data!);
     setLoading(false);
   }, [isAdmin]);

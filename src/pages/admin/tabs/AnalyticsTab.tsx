@@ -3,6 +3,9 @@ import { TrendingUp, Users2, Layers, Zap, Loader2, BarChart2, Activity } from "l
 interface AnalyticsData {
   totalSpend: number;
   recentUsers: number;
+  totalUsers: number;
+  payingUsers: number;
+  conversionRate: number;
   toolUsage: { name: string; count: number; color: string }[];
   dailyCredits: { name: string; credits: number }[];
 }
@@ -38,7 +41,7 @@ export function AnalyticsTab({
             {data.totalSpend.toLocaleString()}
           </h3>
           <p className="text-[10px] text-zinc-400 mt-2 font-medium flex items-center gap-1">
-            <TrendingUp className="h-3 w-3 text-emerald-500" /> +12.4% vs mes anterior
+            <TrendingUp className="h-3 w-3 text-zinc-300" /> Últimos 30 días
           </p>
         </div>
 
@@ -61,21 +64,21 @@ export function AnalyticsTab({
           </div>
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-1">Tasa de Conversión</p>
           <h3 className="text-3xl font-black text-zinc-900 font-mono tracking-tighter">
-            4.2%
+            {data.conversionRate}%
           </h3>
           <p className="text-[10px] text-zinc-400 mt-2 font-medium flex items-center gap-1">
-            Free to Paid (Creator +)
+            Free a plan pago
           </p>
         </div>
 
         <div className="rounded-3xl border border-zinc-100 bg-zinc-900 p-6 shadow-xl overflow-hidden relative group">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-transparent pointer-events-none" />
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400/60 mb-1">Retención Semanal</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400/60 mb-1">Usuarios de Pago</p>
           <h3 className="text-3xl font-black text-white font-mono tracking-tighter">
-            86%
+            {data.payingUsers.toLocaleString()}
           </h3>
           <p className="text-[10px] text-zinc-500 mt-2 font-medium flex items-center gap-1">
-            Usuarios recurrentes activos
+            de {data.totalUsers.toLocaleString()} usuarios totales
           </p>
         </div>
       </div>

@@ -508,7 +508,7 @@ const Tools = () => {
           <div className="flex items-center gap-2.5">
             <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
             <p className="text-[10px] font-black uppercase tracking-[0.35em] text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500 font-display">
-              Studio Tools
+              Aplicaciones
             </p>
           </div>
         </div>
