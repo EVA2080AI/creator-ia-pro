@@ -42,15 +42,17 @@ Ver `.design/tokens/index.css` para variables CSS completas.
 
 ```css
 /* Primary */
---color-primary-500: #8B5CF6;
+--primary: 271 91% 65%; /* #A855F7 */
 
 /* Spacing (8pt) */
 --space-4: 1rem; /* 16px */
 
 /* Typography */
---font-family-display: 'Cal Sans', sans-serif;
+--font-family-display: 'Outfit', sans-serif;
 --font-size-base: 0.9375rem; /* 15px */
 ```
+
+Modo oscuro: no implementado a nivel de app (sin `prefers-color-scheme`/toggle `.dark`) — solo existen superficies oscuras puntuales del Studio/Genesis (`--sov-*`). Ver la nota completa al tope de `.design/tokens/index.css`.
 
 ## Stack Técnico
 

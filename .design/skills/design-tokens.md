@@ -1,19 +1,21 @@
 # /design-tokens
 
-Sistema completo de tokens.
+Sistema completo de tokens. Valores reconciliados 2026-09-09 contra
+`src/index.css` (la fuente de verdad viva) — ver la nota completa al
+tope de `.design/tokens/index.css` para el detalle de qué cambió y por qué.
 
 ## Tokens Base
 
 ### Colores
 
 ```css
-/* Primary */
---primary: #8B5CF6;
---primary-50: #F5F3FF;
---primary-100: #EDE9FE;
---primary-500: #8B5CF6;
---primary-600: #7C3AED;
---primary-900: #4C1D95;
+/* Primary — verificado contra src/index.css (--primary: 271 91% 65%) */
+--primary: #A855F7;
+--primary-50: #FAF5FF;
+--primary-100: #F3E8FF;
+--primary-500: #A855F7;
+--primary-600: #9333EA;
+--primary-900: #581C87;
 
 /* Neutrals */
 --zinc-50: #FAFAFA;
@@ -39,7 +41,7 @@ Sistema completo de tokens.
 /* Font Family */
 --font-sans: 'Inter', system-ui, sans-serif;
 --font-mono: 'JetBrains Mono', monospace;
---font-display: 'Cal Sans', 'Inter', sans-serif;
+--font-display: 'Outfit', 'Inter', sans-serif;
 
 /* Sizes */
 --text-xs: 0.75rem;    /* 12px */

@@ -1,7 +1,25 @@
 /**
  * Creator IA Pro — Design Tokens
  * Philosophy: Dieter Rams + Swiss
- * Generated: 2026-04-18
+ * Generado: 2026-04-18 · Reconciliado contra el CSS real: 2026-09-09
+ *
+ * IMPORTANTE: este archivo nunca se importa en `src/` — es documentación,
+ * no CSS que corre en producción. La fuente de verdad viva es
+ * `src/index.css`. Las secciones de color primitivo y tokens semánticos de
+ * abajo fueron reescritas para reflejar exactamente lo que `src/index.css`
+ * define hoy (mismos nombres de variable, mismos valores HSL) — antes
+ * documentaban un morado distinto (#8B5CF6 vs. el #A855F7 real) y una capa
+ * semántica con nombres que no existen en el código. El resto de este
+ * archivo (spacing, radius, shadows, animación, z-index) es una escala de
+ * referencia razonable que no está definida como custom properties en
+ * `src/index.css` pero tampoco la contradice.
+ *
+ * `docs/creatorstyle2026.md` ("Onyx-Glass", fondo #0b0c10, acento
+ * #0066FF) es un sistema propuesto que **no se implementó** — cero
+ * referencias en `src/`. Lo más parecido que sí existe en vivo son las
+ * "Studio dark surfaces" documentadas más abajo (`--sov-*`, utilidades
+ * `.aether-glass-dark`), con valores distintos a los de ese doc. Tratar
+ * `creatorstyle2026.md` como propuesta histórica, no como sistema activo.
  */
 
 :root {
@@ -9,18 +27,23 @@
      COLOR PRIMITIVE
      ───────────────────────────────────────────────────────── */
 
-  /* Primary (Purple) */
-  --color-primary-50: #F5F3FF;
-  --color-primary-100: #EDE9FE;
-  --color-primary-200: #DDD6FE;
-  --color-primary-300: #C4B5FD;
-  --color-primary-400: #A78BFA;
-  --color-primary-500: #8B5CF6;
-  --color-primary-600: #7C3AED;
-  --color-primary-700: #6D28D9;
-  --color-primary-800: #5B21B6;
-  --color-primary-900: #4C1D95;
-  --color-primary-950: #2E1065;
+  /* Primary (Purple) — -500 verificado contra src/index.css
+     (--primary: 271 91% 65% = #A855F7). Coincide exacto con la paleta
+     "purple" estándar de Tailwind, así que el resto de la escala (50-950,
+     no definida como custom property propia en src/index.css) es la
+     misma paleta Tailwind — es lo que ya usan las clases `purple-*`
+     esparcidas por el código, no un valor inventado. */
+  --color-primary-50: #FAF5FF;
+  --color-primary-100: #F3E8FF;
+  --color-primary-200: #E9D5FF;
+  --color-primary-300: #D8B4FE;
+  --color-primary-400: #C084FC;
+  --color-primary-500: #A855F7;
+  --color-primary-600: #9333EA;
+  --color-primary-700: #7E22CE;
+  --color-primary-800: #6B21A8;
+  --color-primary-900: #581C87;
+  --color-primary-950: #3B0764;
 
   /* Neutrals (Zinc) */
   --color-zinc-50: #FAFAFA;
@@ -166,65 +189,85 @@
 }
 
 /* ─────────────────────────────────────────────────────────
-   SEMANTIC TOKENS (Theme)
+   SEMANTIC TOKENS (Theme) — copia exacta de src/index.css
+   Formato HSL "H S% L%" (sin hsl(), para poder envolver en
+   hsl(var(--x)) o hsl(var(--x) / <alpha>) igual que el código real).
    ───────────────────────────────────────────────────────── */
 
 :root {
-  /* Background */
-  --bg-primary: var(--color-zinc-50);
-  --bg-secondary: var(--color-zinc-100);
-  --bg-tertiary: var(--color-zinc-200);
-  --bg-inverse: var(--color-zinc-900);
-  --bg-overlay: rgba(0, 0, 0, 0.5);
+  /* Core */
+  --background: 0 0% 99%;              /* #FCFCFC */
+  --foreground: 240 10% 6%;            /* #0E0E12 */
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 6%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 6%;
 
-  /* Text */
-  --text-primary: var(--color-zinc-900);
-  --text-secondary: var(--color-zinc-600);
-  --text-tertiary: var(--color-zinc-500);
-  --text-inverse: var(--color-zinc-50);
-  --text-brand: var(--color-primary-600);
+  /* Brand */
+  --primary: 271 91% 65%;              /* #A855F7 */
+  --primary-foreground: 0 0% 100%;
 
-  /* Border */
-  --border-default: var(--color-zinc-200);
-  --border-strong: var(--color-zinc-300);
-  --border-subtle: var(--color-zinc-100);
-  --border-inverse: var(--color-zinc-700);
+  /* Surfaces */
+  --secondary: 240 5% 96%;             /* #F3F3F5 */
+  --secondary-foreground: 240 10% 6%;
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 50%;      /* #7D7D85 */
+  --accent: 271 91% 97%;
+  --accent-foreground: 271 91% 45%;
 
-  /* Interactive */
-  --interactive-default: var(--color-zinc-900);
-  --interactive-hover: var(--color-zinc-800);
-  --interactive-active: var(--color-zinc-950);
-  --interactive-brand: var(--color-primary-600);
-  --interactive-brand-hover: var(--color-primary-700);
+  /* Utility */
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 240 6% 90%;                /* #E3E3E8 */
+  --input: 240 6% 90%;
+  --ring: 271 91% 65%;
+  --radius: 0.875rem;
 
-  /* Surface */
-  --surface-default: white;
-  --surface-elevated: white;
-  --surface-sunken: var(--color-zinc-100);
+  /* Sidebar */
+  --sidebar-background: 240 5% 98%;
+  --sidebar-foreground: 240 5% 40%;
+  --sidebar-primary: 271 91% 65%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 5% 94%;
+  --sidebar-accent-foreground: 240 10% 6%;
+  --sidebar-border: 240 6% 90%;
+  --sidebar-ring: 271 91% 65%;
+
+  /* Canvas (React Flow / Canvas IA) */
+  --canvas-bg: 210 20% 98%;
+  --canvas-grid: 210 16% 87%;
+
+  /* Surface / Text / Border (nombres alternos usados en algunos componentes) */
+  --surface-primary: 0 0% 100%;
+  --surface-secondary: 240 5% 96%;
+  --text-primary: 240 10% 6%;
+  --text-secondary: 240 4% 40%;
+  --text-tertiary: 240 4% 60%;
+  --border-subtle: 240 6% 94%;
+  --border-default: 240 6% 90%;
+
+  /* Estado */
+  --success: 142 71% 45%;
+  --warning: 38 92% 50%;
 }
 
-/* Dark Mode */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-primary: var(--color-zinc-950);
-    --bg-secondary: var(--color-zinc-900);
-    --bg-tertiary: var(--color-zinc-800);
-    --bg-inverse: var(--color-zinc-50);
+/* ─────────────────────────────────────────────────────────
+   MODO OSCURO — NO implementado hoy a nivel de app.
+   No hay `@media (prefers-color-scheme: dark)` ni toggle de clase
+   `.dark` en src/index.css: toda la superficie clara ("Lumina") es
+   fija. Lo único oscuro que existe en vivo son paneles puntuales del
+   Studio/Genesis (no un theme completo, no responde a la preferencia
+   del sistema ni a un switch de usuario):
 
-    --text-primary: var(--color-zinc-50);
-    --text-secondary: var(--color-zinc-400);
-    --text-tertiary: var(--color-zinc-500);
-    --text-inverse: var(--color-zinc-900);
+     --sov-bg: 240 10% 4%;        (#0A0A0C, fondo panel Studio)
+     --sov-border: rgba(255,255,255,0.08);
+     --interactive-blue: 215 90% 76%;  (#8AB4F8, acento Studio)
 
-    --border-default: var(--color-zinc-800);
-    --border-strong: var(--color-zinc-700);
-    --border-subtle: var(--color-zinc-900);
-
-    --surface-default: var(--color-zinc-900);
-    --surface-elevated: var(--color-zinc-800);
-    --surface-sunken: var(--color-zinc-950);
-  }
-}
+   más las utilidades `.aether-glass-dark`, `.aether-sov-glass`,
+   `.glass-panel` (glassmorphism oscuro) definidas en src/index.css.
+   Si se implementa dark mode real para toda la app, es trabajo nuevo,
+   no algo que ya exista y solo falte documentar.
+   ───────────────────────────────────────────────────────── */
 
 /* ─────────────────────────────────────────────────────────
    UTILITY CLASSES (Optional)

@@ -1,3 +1,11 @@
+> ⚠️ **Propuesta histórica, no implementada.** Verificado 2026-09-09: cero
+> referencias a estos tokens (`#0b0c10`, `#0066FF`, etc.) en `src/`. El
+> sistema que sí corre en producción es `src/index.css` (documentado en
+> `.design/tokens/index.css`), con una capa de superficies oscuras propia
+> para el Studio/Genesis (`--sov-*`, valores distintos a los de acá). Si
+> se retoma esta propuesta, hay que reconciliarla contra esas superficies
+> reales en vez de introducir una tercera paleta oscura.
+
 # creatorstyle2026 (Onyx/Glass)
 ## Design System Documentation
 
