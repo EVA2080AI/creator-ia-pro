@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { motion } from "framer-motion";
-import { TrendingUp, Activity, Sparkles } from "lucide-react";
+import { Activity, Sparkles } from "lucide-react";
 
 interface ChartSectionProps {
   usageData: any[];
@@ -40,12 +40,8 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
             </div>
             <div>
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actividad de la Cuenta</h3>
-              <p className="text-[15px] font-bold text-zinc-900 mt-0.5 tracking-tight">Evolución de uso en el mes</p>
+              <p className="text-[15px] font-bold text-zinc-900 mt-0.5 tracking-tight">Créditos gastados en los últimos 7 días</p>
             </div>
-          </div>
-          <div className="hidden sm:flex items-center gap-2 rounded-xl bg-emerald-50 px-3.5 py-2 border border-emerald-100 shadow-sm">
-            <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
-            <span className="text-xs font-bold text-emerald-600">+14% vs mes anterior</span>
           </div>
         </div>
 
@@ -140,7 +136,7 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
                   <span className="text-[13px] font-bold text-zinc-400 group-hover/item:text-white transition-colors">{tool.name}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black text-white">{tool.value}</span>
-                    <span className="text-[10px] font-medium text-zinc-600 uppercase tracking-wider">usos</span>
+                    <span className="text-[10px] font-medium text-zinc-600 uppercase tracking-wider">créditos</span>
                   </div>
                 </div>
                 

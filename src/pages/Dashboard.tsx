@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { listSpaces, createSpace, deleteSpace, type Space } from "@/lib/spaces";
 import { listAssets } from "@/lib/assets";
+import { listTransactions, weeklySpend, toolBreakdown } from "@/lib/transactions";
 import { toast } from "sonner";
 import {
   Zap, Coins, CreditCard, LayoutGrid, Image,
@@ -98,17 +99,9 @@ export default function Dashboard() {
         const { total } = await listAssets({ limit: 1 });
         setAssetsCount(total);
 
-        setUsageData([
-          { name: "Lun", credits: 12 }, { name: "Mar", credits: 45 }, { name: "Mie", credits: 30 },
-          { name: "Jue", credits: 89 }, { name: "Vie", credits: 56 }, { name: "Sab", credits: 110 },
-          { name: "Dom", credits: 80 },
-        ]);
-
-        setToolData([
-          { name: "Genesis", value: 65, color: "bg-primary" },
-          { name: "Canvas", value: 25, color: "bg-emerald-400" },
-          { name: "Studio", value: 10, color: "bg-purple-400" },
-        ]);
+        const transactions = await listTransactions();
+        setUsageData(weeklySpend(transactions));
+        setToolData(toolBreakdown(transactions));
       } catch (err) {
         console.error("Dashboard Fetch Error:", err);
         setDataError(true);
