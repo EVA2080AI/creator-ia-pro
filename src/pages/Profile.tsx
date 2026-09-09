@@ -107,6 +107,9 @@ const Profile = () => {
 
   const TIER_LABELS: Record<string, string> = { free: "Free", creador: "Creador", pro: "Pro", agencia: "Agencia", pyme: "Pyme", pymes: "Pymes", admin: "Admin" };
   const tierLabel = TIER_LABELS[profile?.subscriptionTier ?? "free"] ?? "Free";
+  const renewsLabel = profile?.subscriptionExpiresAt
+    ? new Date(profile.subscriptionExpiresAt).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })
+    : null;
   const joinDate = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })
     : "—";
@@ -255,9 +258,20 @@ const Profile = () => {
                 </div>
                 <div>
                   <p className="font-bold text-zinc-900">{tierLabel}</p>
-                  <p className="text-xs text-zinc-400">Plan activo</p>
+                  <p className="text-xs text-zinc-400">
+                    {renewsLabel ? `Se renueva el ${renewsLabel}` : "Plan activo"}
+                  </p>
                 </div>
               </div>
+              {renewsLabel && (
+                <button
+                  onClick={() => navigate("/pricing")}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-sm font-bold hover:bg-zinc-200 transition-all"
+                >
+                  Renovar ahora
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              )}
               {tierLabel === "Free" && (
                 <button
                   onClick={() => navigate("/pricing")}

@@ -82,43 +82,43 @@ const SystemStatus = () => {
     },
     {
       id: "ef-bold-checkout",
-      name: "Bold Link Generator",
+      name: "Bold Link Generator (/api/billing/checkout)",
       category: "Servicios Centralizados",
-      status: "ok",
+      status: "untested",
       details: "Genera links de pago dinámicos con Bold.co.",
-      apiNeeded: "BOLD_API_KEY (Supabase Secret) ✅",
+      apiNeeded: "BOLD_API_KEY (Vercel env var)",
       action: "test-cors",
     },
     {
       id: "ef-ai-proxy",
-      name: "AI Proxy (Hardened)",
+      name: "AI Chat (/api/ai/chat)",
       category: "Servicios Centralizados",
-      status: "ok",
-      details: "Proxy seguro con verificación JWT y saldo de créditos.",
+      status: "untested",
+      details: "Streaming de chat con better-auth y cobro de créditos atómico.",
       action: "test-cors",
     },
     {
       id: "ef-bold-webhook",
-      name: "Bold Webhook",
+      name: "Bold Webhook (/api/billing/webhook)",
       category: "Integraciones",
-      status: "warning",
-      details: "Procesa pagos aprobados y asigna créditos. Requiere validación HMAC.",
+      status: "untested",
+      details: "Procesa pagos aprobados y asigna créditos. Validación HMAC vía BOLD_WEBHOOK_SECRET.",
       action: "test-cors",
     },
     {
       id: "db-profiles",
-      name: "Tabla profiles",
+      name: "Neon — conexión (perfil/créditos)",
       category: "Base de Datos",
       status: "untested",
-      details: "user_id, credits_balance, subscription_tier.",
+      details: "profile: user_id, credits_balance, subscription_tier. Drizzle/Neon no tiene RLS por tabla para probar cada una por separado — esto confirma que la base de datos responde.",
       action: "test-db-read",
     },
     {
       id: "db-transactions",
-      name: "Tabla transactions",
+      name: "Neon — conexión (transacciones)",
       category: "Base de Datos",
       status: "untested",
-      details: "Registro de débitos/créditos. Inmutable.",
+      details: "transaction: registro de débitos/créditos, inmutable.",
       action: "test-db-read",
     },
     {
@@ -169,21 +169,24 @@ const SystemStatus = () => {
 
     try {
       if (feature.action === "test-cors") {
-        const fnMap: Record<string, string> = {
-          "ef-bold-checkout": "bold-checkout",
-          "ef-bold-webhook": "bold-webhook",
-          "ef-ai-proxy": "ai-proxy",
-          "ef-admin-save-settings": "admin-save-settings",
+        // Las funciones de Supabase (ai-proxy, bold-checkout, bold-webhook) ya
+        // no existen — cada una tiene su reemplazo directo en /api/*. La sonda
+        // manda un POST vacío sin sesión: cualquiera de estos endpoints
+        // rechaza esa llamada ANTES de tocar créditos, Bold o la base de
+        // datos (401/400/405), así que confirma que el endpoint está vivo sin
+        // efectos secundarios reales.
+        const endpointMap: Record<string, string> = {
+          "ef-bold-checkout": "/api/billing/checkout",
+          "ef-bold-webhook": "/api/billing/webhook",
+          "ef-ai-proxy": "/api/ai/chat",
         };
-        const actualName = fnMap[feature.id] || feature.id.replace("ef-", "");
-        const res = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/${actualName}`,
-          { method: "OPTIONS" }
-        );
+        const endpoint = endpointMap[feature.id];
+        const res = await fetch(endpoint, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+        const isAlive = res.status === 401 || res.status === 400 || res.status === 200;
         updatedFeatures[idx] = {
           ...updatedFeatures[idx],
-          status: res.ok ? "ok" : "warning",
-          testResult: `CORS Check: ${res.status} ${res.statusText}`,
+          status: isAlive ? "ok" : "warning",
+          testResult: `${endpoint}: ${res.status} ${res.statusText}`,
         };
       } else if (feature.action === "test-db-read") {
         // Neon/Drizzle no tiene el concepto de "lectura por tabla con RLS" que
