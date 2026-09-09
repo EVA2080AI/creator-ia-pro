@@ -538,7 +538,7 @@ export default function Index() {
                 >
                   <Sparkles className="h-4 w-4 text-primary" />
                 </motion.span>
-                Genesis IDE · Studio · V21.0
+                Genesis IA · Aplicaciones · V21.0
               </motion.div>
 
               {/* Main Headline */}
@@ -565,7 +565,7 @@ export default function Index() {
                 custom={0.35}
                 className="text-[clamp(1rem,2vw,1.25rem)] text-zinc-500 max-w-2xl mx-auto leading-relaxed mb-10"
               >
-                Genesis IDE convierte tus ideas en apps React completas. Studio genera imágenes, logos y textos.
+                Genesis IA convierte tus ideas en apps React completas. Aplicaciones: imágenes, logos y textos generados al instante.
                 <span className="text-zinc-900 font-semibold"> Todo en uno.</span>
               </motion.p>
 

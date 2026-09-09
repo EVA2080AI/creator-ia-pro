@@ -43,8 +43,8 @@ const CHAT_MODELS = CANON_MODELS.map(m => ({
 
 // ─── Personalities ────────────────────────────────────────────────────────────
 const PERSONALITIES = [
-  { id: 'assistant',  name: 'Antigravity',          icon: Bot,       color: 'text-zinc-600',    bg: 'bg-zinc-100',
-    prompt: 'Eres Antigravity, un asistente de IA de alto rendimiento. Responde con precisión, claridad y valor. Usa markdown cuando sea útil.' },
+  { id: 'assistant',  name: 'Asistente General',    icon: Bot,       color: 'text-zinc-600',    bg: 'bg-zinc-100',
+    prompt: 'Eres un asistente de IA de alto rendimiento. Responde con precisión, claridad y valor. Usa markdown cuando sea útil.' },
   { id: 'code',       name: 'Code Assistant',       icon: Code2,     color: 'text-sky-500',     bg: 'bg-sky-50',
     prompt: 'Eres un desarrollador Full-Stack Senior experto. Generas código limpio, moderno con TypeScript, React y Tailwind CSS. SIEMPRE envuelves código en bloques con lenguaje especificado (```tsx, ```html, etc).' },
   { id: 'marketing',  name: 'Marketing Expert',     icon: Megaphone, color: 'text-rose-500',    bg: 'bg-rose-50',
@@ -570,7 +570,7 @@ export const GeniusAssistant = ({ onAction, embedded = false, onClose }: GeniusA
                 </div>
                 <h1 className="text-[26px] font-black text-zinc-900 tracking-tight mb-3">
                   {personality === 'assistant'
-                    ? <>Hola, soy <span style={{ color: curModel.color }}>Antigravity</span></>
+                    ? <>Hola, soy tu <span style={{ color: curModel.color }}>asistente</span></>
                     : curPers.name}
                 </h1>
                 <p className="text-[14px] text-zinc-500 max-w-sm leading-relaxed mb-10 font-medium">

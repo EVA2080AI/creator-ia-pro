@@ -72,12 +72,12 @@ const SystemStatus = () => {
   const getFeatureList = (): Feature[] => [
     {
       id: "srv-ai-engine",
-      name: "Antigravity Engine (V4.0 💎)",
+      name: "Motor de IA Multi-Modelo (V4.0 💎)",
       category: "Servicios Centralizados",
       status: "ok",
       details: "Motor de IA multi-modelo con failover inteligente. Primario: OpenRouter. Respaldo: Gemini 2.0 Flash.",
       apiNeeded: "VITE_OPENROUTER_API_KEY, VITE_GEMINI_API_KEY ✅",
-      costNote: "Antigravity Tiered Logic activa.",
+      costNote: "Lógica de niveles por modelo activa.",
       action: "test-gateway",
     },
     {
@@ -140,7 +140,7 @@ const SystemStatus = () => {
       name: "Auth Industrial",
       category: "Frontend",
       status: "ok",
-      details: "Login/Registro Supabase.",
+      details: "Login/Registro con better-auth (Neon).",
     },
     {
       id: "fe-pricing",

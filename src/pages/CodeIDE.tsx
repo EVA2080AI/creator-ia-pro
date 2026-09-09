@@ -599,7 +599,7 @@ export default function CodeIDE() {
                         <Sparkles className="h-3 w-3 text-primary" />
                       </div>
                       <span className="text-[11px] font-black uppercase tracking-widest">
-                        {showChat ? 'Cerrar IA' : 'Antigravity'}
+                        {showChat ? 'Cerrar IA' : 'Asistente IA'}
                       </span>
                       <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                     </button>
@@ -608,7 +608,7 @@ export default function CodeIDE() {
               </ResizablePanel>
 
 
-              {/* ════════════════════ ANTIGRAVITY AI PANEL ════════════════════ */}
+              {/* ════════════════════ ASISTENTE IA PANEL ════════════════════ */}
               {showChat && (
                 <>
                   <ResizableHandle withHandle className="bg-transparent border-none w-1 hover:bg-primary/20 transition-colors" />
@@ -621,7 +621,7 @@ export default function CodeIDE() {
                           <div className="flex h-5 w-5 items-center justify-center rounded bg-primary/10 border border-primary/20">
                             <Bot className="w-3 h-3 text-primary" />
                           </div>
-                          <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">ANTIGRAVITY IA</span>
+                          <span className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">ASISTENTE IA</span>
                         </div>
                         <button onClick={() => setShowChat(false)}
                           className="p-1 hover:bg-zinc-100 rounded text-zinc-400 hover:text-zinc-700 transition-all">

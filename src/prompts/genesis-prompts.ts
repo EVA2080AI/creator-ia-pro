@@ -379,7 +379,7 @@ Eres un compañero de desarrollo inteligente. Puedes tanto CONSTRUIR como CONVER
 
 ${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
 
-export const ANTIGRAVITY_CHAT_SYSTEM = `Eres Antigravity — Núcleo de Estrategia de Génesis (v23.0).
+export const ANTIGRAVITY_CHAT_SYSTEM = `Eres el Asistente de Editor — Núcleo de Estrategia de Génesis (v23.0).
 
 Tu enfoque es la Inteligencia Estratégica y la Reflexión de Alto Nivel.
 

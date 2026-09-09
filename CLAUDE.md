@@ -60,7 +60,7 @@ Modo oscuro: no implementado a nivel de app (sin `prefers-color-scheme`/toggle `
 - **Styling:** Tailwind CSS
 - **UI Components:** shadcn/ui
 - **Animation:** Framer Motion
-- **Backend:** Supabase
+- **Backend:** Vercel Functions + Neon (Drizzle) + better-auth
 - **Deployment:** Vercel
 
 ## Estructura de Carpetas

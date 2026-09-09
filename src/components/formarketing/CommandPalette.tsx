@@ -47,7 +47,7 @@ const CATEGORIES: Category[] = [
       { label: 'Layout Architect', icon: LayoutGrid,    type: 'layoutBuilder',      color: '#94a3b8', description: 'Estructura el árbol visual de interfaces generadas' },
       { label: 'Campaign Manager', icon: Share2,        type: 'campaignManager',    color: '#f87171', description: 'Orquesta y distribuye en canales de Paid Media' },
       { label: 'Módulo Export',    icon: FileOutput,    type: 'exportNode',         color: '#34d399', description: 'Empaqueta y expone endpoints finales del nodo' },
-      { label: 'Antigravity Core', icon: Rocket,        type: 'antigravityBridge',  color: '#a1a1aa', description: 'Puente directo con la unidad inteligente y memoria' },
+      { label: 'Puente de Referencia', icon: Rocket,    type: 'antigravityBridge',  color: '#a1a1aa', description: 'Clona el diseño y la marca de un sitio de referencia' },
     ],
   },
 ];

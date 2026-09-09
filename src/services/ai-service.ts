@@ -117,7 +117,7 @@ export const aiService = {
     const orModel = TEXT_MODEL_MAP[model] ?? model;
     let systemPrompt = persona === "genesis"
       ? "Eres Genesis AI, arquitecto de producto senior. Responde en español, directo y accionable."
-      : "Eres Antigravity, núcleo de inteligencia estratégica de Creator IA Pro. Responde en español, directo y accionable.";
+      : "Eres el Asistente de Editor, núcleo de inteligencia estratégica de Creator IA Pro. Responde en español, directo y accionable.";
     if (action === "ui") {
       systemPrompt += `\n\nEres un experto UX/UI. Genera SOLO JSON válido: { "ui": { "title": "string", "description": "string", "components": [...] }, "device": "mobile|tablet|desktop" }. Sin markdown.`;
     }
@@ -180,7 +180,7 @@ export const aiService = {
     const userTier = profile?.subscription_tier?.toUpperCase() ?? "FREE";
 
     const TOOL_PROMPTS: Record<string, string> = {
-      chat: `Eres Antigravity, IA de nivel Senior en estrategia digital. PLAN: ${userTier}. Responde de forma directa, estructurada y en español.`,
+      chat: `Eres el Asistente de Creator IA Pro, IA de nivel Senior en estrategia digital. PLAN: ${userTier}. Responde de forma directa, estructurada y en español.`,
       copywriter: `Eres un copywriter de clase mundial especializado en marketing y ventas. PLAN: ${userTier}. Escribe copy persuasivo, emocional y orientado a conversión. Usa frameworks como AIDA, PAS o FAB según el contexto. Sé directo, impactante y creativo. Responde en español.`,
       social: `Eres un estratega de redes sociales con experiencia en marcas de alto crecimiento. PLAN: ${userTier}. Genera contenido viral, ideas de posts, hooks atractivos y calendarios de contenido. Adapta el tono a cada plataforma (Instagram, LinkedIn, TikTok, X). Incluye emojis cuando sea apropiado. Responde en español.`,
       blog: `Eres un redactor SEO experto con experiencia en content marketing. PLAN: ${userTier}. Escribe artículos completos, bien estructurados con H2/H3, optimizados para motores de búsqueda. Incluye introducción enganchante, desarrollo rico en valor y conclusión con CTA. Usa bullet points y listas cuando mejore la lectura. Responde en español.`,

@@ -14,9 +14,10 @@ import { Logo } from "@/components/Logo";
 import { motion } from "framer-motion";
 
 const features = [
-  { icon: Code2, text: "Genesis IDE — genera apps React completas con IA" },
-  { icon: Image, text: "Studio — imágenes, logos, videos y más" },
-  { icon: Wand2, text: "Canvas creativo — flujos de producción visuales" },
+  { icon: Code2, text: "Genesis IA — genera apps React completas con IA" },
+  { icon: FileText, text: "Editor — IDE completo para tus proyectos de código" },
+  { icon: Image, text: "Aplicaciones — imágenes, logos, videos y más" },
+  { icon: Wand2, text: "Canvas IA — flujos de producción visuales" },
 ];
 
 const Auth = () => {

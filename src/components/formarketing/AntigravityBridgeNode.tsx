@@ -40,7 +40,7 @@ const AntigravityBridgeNode = ({ id, data }: { id: string, data: AntigravityBrid
 
   const handleClone = async () => {
     if (!url) {
-      toast.error("Ingresa una URL de referencia para Antigravity");
+      toast.error("Ingresa una URL de referencia");
       return;
     }
     
@@ -54,9 +54,9 @@ const AntigravityBridgeNode = ({ id, data }: { id: string, data: AntigravityBrid
         return { project: 'nexus_clone_' + Math.random().toString(36).slice(2, 7) };
       },
       {
-        loading: 'Antigravity: Escaneando ecosistema de referencia...',
+        loading: 'Escaneando ecosistema de referencia...',
         success: (res) => `Ecosistema clonado correctamente: ${res.project}. Generando JSON de Brand Context...`,
-        error: 'Error en la conexión con el motor Antigravity',
+        error: 'Error en la conexión con el puente de referencia',
       }
     );
   };

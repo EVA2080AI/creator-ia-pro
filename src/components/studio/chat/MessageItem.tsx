@@ -108,7 +108,7 @@ export function MessageItem({
           ? "flex flex-col items-end gap-1.5 mb-5"
           : "flex flex-col items-start gap-3 mb-6"
       )}
-      aria-label={isUser ? "Tu mensaje" : `Mensaje de ${persona === 'antigravity' ? 'Antigravity' : 'Génesis'}`}
+      aria-label={isUser ? "Tu mensaje" : `Mensaje de ${persona === 'antigravity' ? 'Asistente' : 'Génesis'}`}
     >
 
       {/* ── USER BUBBLE ──────────────────────────────────────── */}
@@ -137,7 +137,7 @@ export function MessageItem({
             <Sparkles className="h-3 w-3 text-primary" />
           </div>
           <span className="text-[11.5px] font-bold text-zinc-800 tracking-tight">
-            {persona === 'antigravity' ? 'Antigravity AI' : 'Génesis AI'}
+            {persona === 'antigravity' ? 'Asistente AI' : 'Génesis AI'}
           </span>
           <span className="px-1.5 py-0.5 rounded-md bg-primary/8 border border-primary/15 text-[9px] font-bold text-primary uppercase tracking-wider">
             V21

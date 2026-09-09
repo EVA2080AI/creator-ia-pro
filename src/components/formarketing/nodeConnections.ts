@@ -174,9 +174,9 @@ export const NODE_META: Record<string, NodeMeta> = {
 
   // Bridge nodes - connect to external systems
   antigravityBridge: {
-    label: 'Antigravity Bridge',
+    label: 'Puente de Referencia',
     emoji: '🌉',
-    description: 'Conecta con Antigravity para publicación multiplataforma',
+    description: 'Clona el diseño y la marca de un sitio de referencia para usarlos en tu flujo',
     inputHandles: [
       { id: 'any-in', dataType: 'any', label: 'Contenido', description: 'Lo que quieres publicar', required: true },
     ],

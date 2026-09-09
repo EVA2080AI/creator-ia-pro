@@ -10,7 +10,7 @@ const NODE_TYPE_LABELS: Record<string, string> = {
   videoModel: 'Generar video',
   layoutBuilder: 'Diseño / Layout',
   campaignManager: 'Gestor de campaña',
-  antigravityBridge: 'Conector de nodos',
+  antigravityBridge: 'Puente de Referencia',
 };
 
 const NODE_TYPE_COLORS: Record<string, string> = {
