@@ -27,7 +27,7 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="lg:col-span-2 p-8 bg-white/70 backdrop-blur-xl border border-zinc-200/60 rounded-[2.5rem] shadow-sm relative overflow-hidden group"
+        className="lg:col-span-2 p-8 bg-white/70 backdrop-blur-xl border border-stone-200/60 rounded-[2.5rem] shadow-sm relative overflow-hidden group"
       >
         {/* Ambient glow in corner */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -z-10 group-hover:bg-primary/10 transition-colors duration-700" />
@@ -35,12 +35,12 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-[1.25rem] bg-zinc-100 border border-zinc-200/80 text-zinc-600 shadow-sm">
+            <div className="flex h-12 w-12 items-center justify-center rounded-[1.25rem] bg-stone-100 border border-stone-200/80 text-stone-600 shadow-sm">
                <Activity className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Actividad de la Cuenta</h3>
-              <p className="text-[15px] font-bold text-zinc-900 mt-0.5 tracking-tight">Créditos gastados en los últimos 7 días</p>
+              <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Actividad de la Cuenta</h3>
+              <p className="text-[15px] font-bold text-stone-900 mt-0.5 tracking-tight">Créditos gastados en los últimos 7 días</p>
             </div>
           </div>
         </div>
@@ -55,30 +55,30 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
                   <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f4f4f5" />
-              <XAxis 
-                dataKey="name" 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 700 }}
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f4" />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#a8a29e', fontSize: 10, fontWeight: 700 }}
                 dy={10}
               />
-              <YAxis 
-                axisLine={false} 
-                tickLine={false} 
-                tick={{ fill: '#a1a1aa', fontSize: 10, fontWeight: 700 }}
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#a8a29e', fontSize: 10, fontWeight: 700 }}
               />
-              <Tooltip 
-                contentStyle={{ 
-                  borderRadius: '1.25rem', 
-                  border: '1px solid #e4e4e7', 
+              <Tooltip
+                contentStyle={{
+                  borderRadius: '1.25rem',
+                  border: '1px solid #e7e5e4',
                   boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
                   padding: '12px 16px',
                   fontWeight: 600,
                   backgroundColor: 'rgba(255, 255, 255, 0.9)',
                   backdropFilter: 'blur(8px)'
                 }}
-                itemStyle={{ color: '#18181b', fontWeight: '900', fontSize: '14px' }}
+                itemStyle={{ color: '#1c1917', fontWeight: '900', fontSize: '14px' }}
                 animationDuration={200}
                 cursor={{ stroke: '#8b5cf6', strokeWidth: 1, strokeDasharray: '4 4' }}
               />
@@ -103,26 +103,26 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-        className="p-8 bg-zinc-950 rounded-[2.5rem] text-white shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col group border border-zinc-800/80"
+        className="p-8 bg-stone-950 rounded-[2.5rem] text-white shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col group border border-stone-800/80"
       >
         {/* Subtle dynamic glow */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-primary/10 to-transparent blur-[100px] -z-10 group-hover:from-primary/20 transition-all duration-1000 rotate-12" />
         
         {/* Header */}
         <div className="flex items-center gap-4 mb-8 relative z-10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-[1.25rem] bg-zinc-900/80 border border-zinc-800 text-primary shadow-inner">
+          <div className="flex h-12 w-12 items-center justify-center rounded-[1.25rem] bg-stone-900/80 border border-stone-800 text-primary shadow-inner">
              <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Top Herramientas</h3>
-            <p className="text-[15px] font-bold text-zinc-100 mt-0.5 tracking-tight">Uso por módulo</p>
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-500">Top Herramientas</h3>
+            <p className="text-[15px] font-bold text-stone-100 mt-0.5 tracking-tight">Uso por módulo</p>
           </div>
         </div>
 
         {/* Progress Bars */}
         <div className="space-y-7 flex-1 justify-center flex flex-col relative z-10 mt-2">
           {safeToolData.length === 0 ? (
-            <div className="text-center text-zinc-500 text-sm font-medium">No hay datos disponibles</div>
+            <div className="text-center text-stone-500 text-sm font-medium">No hay datos disponibles</div>
           ) : (
             safeToolData.map((tool, index) => (
               <motion.div 
@@ -133,15 +133,15 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
                 className="group/item flex flex-col gap-2.5"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-bold text-zinc-400 group-hover/item:text-white transition-colors">{tool.name}</span>
+                  <span className="text-[13px] font-bold text-stone-400 group-hover/item:text-white transition-colors">{tool.name}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black text-white">{tool.value}</span>
-                    <span className="text-[10px] font-medium text-zinc-600 uppercase tracking-wider">créditos</span>
+                    <span className="text-[10px] font-medium text-stone-600 uppercase tracking-wider">créditos</span>
                   </div>
                 </div>
                 
                 {/* Track */}
-                <div className="h-2.5 w-full bg-zinc-900 rounded-full overflow-hidden border border-zinc-800/80 relative shadow-inner">
+                <div className="h-2.5 w-full bg-stone-900 rounded-full overflow-hidden border border-stone-800/80 relative shadow-inner">
                   {/* Animated Bar */}
                   <motion.div 
                     initial={{ width: 0 }}

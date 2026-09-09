@@ -72,10 +72,10 @@ export function WelcomeOnboarding({ onDismiss }: { onDismiss: () => void }) {
 
         <div className="relative z-10">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-black text-zinc-900 tracking-tight mb-2">
+            <h2 className="text-3xl font-black text-stone-900 tracking-tight mb-2">
               Bienvenido a Creator IA Pro
             </h2>
-            <p className="text-sm text-zinc-500 font-medium max-w-md mx-auto leading-relaxed">
+            <p className="text-sm text-stone-500 font-medium max-w-md mx-auto leading-relaxed">
               Tenés 4 superficies distintas para crear con IA. Elegí por dónde empezar —
               podés cambiar de una a otra cuando quieras desde el menú.
             </p>
@@ -86,17 +86,17 @@ export function WelcomeOnboarding({ onDismiss }: { onDismiss: () => void }) {
               <button
                 key={opt.title}
                 onClick={() => choose(opt.path)}
-                className="group flex items-start gap-3 p-5 rounded-2xl border border-zinc-200 bg-white text-left hover:border-primary/40 hover:shadow-lg transition-all active:scale-[0.98]"
+                className="group flex items-start gap-3 p-5 rounded-2xl border border-stone-200 bg-white text-left hover:border-primary/40 hover:shadow-lg transition-all active:scale-[0.98]"
               >
                 <div className={`w-10 h-10 rounded-xl border flex items-center justify-center shrink-0 ${opt.bg}`}>
                   <opt.icon className={`w-5 h-5 ${opt.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-black text-zinc-900">{opt.title}</p>
-                    <ArrowRight className="w-3.5 h-3.5 text-zinc-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                    <p className="text-sm font-black text-stone-900">{opt.title}</p>
+                    <ArrowRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
                   </div>
-                  <p className="text-xs text-zinc-500 leading-relaxed mt-1">{opt.desc}</p>
+                  <p className="text-xs text-stone-500 leading-relaxed mt-1">{opt.desc}</p>
                 </div>
               </button>
             ))}
@@ -105,7 +105,7 @@ export function WelcomeOnboarding({ onDismiss }: { onDismiss: () => void }) {
           <div className="text-center">
             <button
               onClick={dismiss}
-              className="text-xs font-medium text-zinc-400 hover:text-zinc-700 transition-colors"
+              className="text-xs font-medium text-stone-400 hover:text-stone-700 transition-colors"
             >
               Prefiero explorar por mi cuenta
             </button>
