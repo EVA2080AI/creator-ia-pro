@@ -51,8 +51,8 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
             <AreaChart data={usageData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="colorUsagePremium" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.25}/>
-                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0}/>
+                  <stop offset="5%" stopColor="#1c1917" stopOpacity={0.25}/>
+                  <stop offset="95%" stopColor="#1c1917" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f4" />
@@ -80,16 +80,16 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
                 }}
                 itemStyle={{ color: '#1c1917', fontWeight: '900', fontSize: '14px' }}
                 animationDuration={200}
-                cursor={{ stroke: '#8b5cf6', strokeWidth: 1, strokeDasharray: '4 4' }}
+                cursor={{ stroke: '#1c1917', strokeWidth: 1, strokeDasharray: '4 4' }}
               />
               <Area 
                 type="monotone" 
                 dataKey="credits" 
-                stroke="#8b5cf6" 
+                stroke="#1c1917" 
                 strokeWidth={3} 
                 fillOpacity={1} 
                 fill="url(#colorUsagePremium)" 
-                activeDot={{ r: 6, strokeWidth: 3, fill: '#fff', stroke: '#8b5cf6' }}
+                activeDot={{ r: 6, strokeWidth: 3, fill: '#fff', stroke: '#1c1917' }}
               />
             </AreaChart>
           </ResponsiveContainer>
