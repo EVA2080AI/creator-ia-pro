@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Code2, FileCode2, Layers, Image, ArrowRight } from "lucide-react";
+import { Code2, Layers, ArrowRight } from "lucide-react";
 import { markWelcomeOnboardingSeen } from "@/lib/dashboard-onboarding";
 
 interface IntentOption {
@@ -12,22 +12,17 @@ interface IntentOption {
   bg: string;
 }
 
+// Editor y Aplicaciones ya no son opciones propias: Editor se fusionó dentro
+// de Basalt IA (Fase 5) y Aplicaciones también (panel "Herramientas" dentro
+// del workspace de Basalt) — quedan 2 formas reales de crear, no 4.
 const INTENT_OPTIONS: IntentOption[] = [
   {
     icon: Code2,
     title: "Basalt IA",
-    desc: "Describe una idea y genera una app React completa, con preview en vivo.",
+    desc: "Describe una idea y genera una app React completa, con preview en vivo. También incluye herramientas directas de imágenes, logos y copys.",
     path: "/chat",
     color: "text-primary",
     bg: "bg-primary/10 border-primary/20",
-  },
-  {
-    icon: FileCode2,
-    title: "Editor",
-    desc: "Un IDE completo para escribir y editar código con ayuda de IA.",
-    path: "/code",
-    color: "text-emerald-500",
-    bg: "bg-emerald-50 border-emerald-100",
   },
   {
     icon: Layers,
@@ -36,14 +31,6 @@ const INTENT_OPTIONS: IntentOption[] = [
     path: "/studio-flow",
     color: "text-blue-500",
     bg: "bg-blue-50 border-blue-100",
-  },
-  {
-    icon: Image,
-    title: "Aplicaciones",
-    desc: "Herramientas directas: imágenes, logos, copys y más, sin flujo.",
-    path: "/tools",
-    color: "text-rose-500",
-    bg: "bg-rose-50 border-rose-100",
   },
 ];
 
@@ -76,7 +63,7 @@ export function WelcomeOnboarding({ onDismiss }: { onDismiss: () => void }) {
               Bienvenido a Creator IA Pro
             </h2>
             <p className="text-sm text-stone-500 font-medium max-w-md mx-auto leading-relaxed">
-              Tenés 4 superficies distintas para crear con IA. Elegí por dónde empezar —
+              Tenés 2 formas de crear con IA. Elegí por dónde empezar —
               podés cambiar de una a otra cuando quieras desde el menú.
             </p>
           </div>

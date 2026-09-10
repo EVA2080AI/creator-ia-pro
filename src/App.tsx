@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 import { HelmetProvider } from "react-helmet-async";
@@ -26,6 +26,25 @@ const CanvasRedirect = () => {
 const ChatRedirect = () => {
   const loc = useLocation();
   return <Navigate to={`/chat${loc.search}`} replace />;
+};
+
+// Redirect /tools y /apps/:appId → /chat?panel=tools, preservando el ?tool=
+// seleccionado (o resolviéndolo desde :appId) — Aplicaciones se fusionó de
+// verdad dentro de Basalt como panel "Herramientas", mismo patrón que la
+// fusión de Editor en Fase 5. El componente Tools sigue existiendo, ahora
+// embebido dentro de Chat.tsx en vez de tener su propia ruta.
+const APP_ID_TO_TOOL: Record<string, string> = {
+  copywriter: "copywriter", logo: "logo", social: "social",
+  blog: "blog", ads: "ads", enhance: "enhance",
+  "remove-bg": "background", style: "style", upscale: "upscale", product: "product",
+};
+const ToolsRedirect = () => {
+  const loc = useLocation();
+  const { appId } = useParams();
+  const params = new URLSearchParams(loc.search);
+  params.set("panel", "tools");
+  if (appId && APP_ID_TO_TOOL[appId]) params.set("tool", APP_ID_TO_TOOL[appId]);
+  return <Navigate to={`/chat?${params.toString()}`} replace />;
 };
 
 // Global auth session watcher — handles token expiry and forced sign-out
@@ -99,7 +118,6 @@ const Cookies       = lazy(() => import("./pages/Cookies"));
 // Auth — rendered inside AppLayout
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
 const Spaces       = lazy(() => import("./pages/Spaces"));
-const Tools        = lazy(() => import("./pages/Tools"));
 const Admin        = lazy(() => import("./pages/Admin"));
 const Formarketing = lazy(() => import("./pages/Formarketing"));
 const Profile      = lazy(() => import("./pages/Profile"));
@@ -195,8 +213,10 @@ const App = () => {
                     <Route path="/tareas"       element={<Tasks />} />
                     <Route path="/tasks"        element={<Navigate to="/tareas" replace />} />
                     <Route path="/assets"       element={<Navigate to="/spaces" replace />} />
-                    <Route path="/tools"        element={<Tools />} />
-                    <Route path="/apps/:appId"  element={<Tools />} />
+                    {/* Aplicaciones se fusionó de verdad dentro de Basalt como panel
+                        "Herramientas" — ver Tools.tsx embebido en Chat.tsx. */}
+                    <Route path="/tools"        element={<ToolsRedirect />} />
+                    <Route path="/apps/:appId"  element={<ToolsRedirect />} />
                     <Route path="/admin"        element={<Admin />} />
                     <Route path="/studio-flow"  element={<Formarketing />} />
                     <Route path="/formarketing" element={<Navigate to="/studio-flow" replace />} />

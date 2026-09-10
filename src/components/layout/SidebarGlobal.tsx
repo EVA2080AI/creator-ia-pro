@@ -5,7 +5,7 @@ import {
   LayoutTemplate, Brain, FolderOpen, Image, Download,
   Coins, LogOut, User, Shield, Zap, Settings, CreditCard, Sparkles,
   PanelLeftClose, PanelLeftOpen, List,
-  Home, LayoutGrid, ShieldCheck, Activity,
+  Home, ShieldCheck, Activity,
   Users2, Palette, ListTodo, type LucideIcon
 } from 'lucide-react';
 
@@ -47,13 +47,19 @@ interface NavItemDef {
 }
 
 /** ─── Navigation structure ────────────────────────────────────────────────────── */
+// Aplicaciones se fusionó de verdad dentro de Basalt (panel "Herramientas" en
+// Chat.tsx) — ya no tiene entrada propia. Basalt baja de minTier 'creador' a
+// 'free' para no paywallear ese panel: las herramientas gratis que ya
+// ofrecía Aplicaciones (ej. gemini-flash-image, minTier 'free' en
+// src/lib/ai/models.ts) siguen siendo gratis, el gate real de créditos/tier
+// por modelo no cambia — esto solo afecta si el link del sidebar es
+// clickeable o muestra el toast de upsell.
 const NAV_MAIN: NavItemDef[] = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
   { path: '/tareas',       label: 'Tareas',        icon: ListTodo,       minTier: 'free' },
-  { path: '/chat',         label: 'Basalt IA',     icon: Brain,          minTier: 'creador' },
+  { path: '/chat',         label: 'Basalt IA',     icon: Brain,          minTier: 'free' },
   { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'pro' },
   { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'pro' },
-  { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     minTier: 'free' },
 ];
 
 const NAV_SYSTEM: NavItemDef[] = [

@@ -7,16 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
-  ArrowRight, Mail, Eye, EyeOff, User, Image,
-  FileText, Wand2, Loader2, Lock, Check, Code2
+  ArrowRight, Mail, Eye, EyeOff, User,
+  Wand2, Loader2, Lock, Check, Code2
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { motion } from "framer-motion";
 
+// Editor se fusionó dentro de Basalt IA (Fase 5) y Aplicaciones también
+// (panel "Herramientas" en el workspace de Basalt) — 2 items reales, no 4.
 const features = [
-  { icon: Code2, text: "Basalt IA — genera apps React completas con IA" },
-  { icon: FileText, text: "Editor — IDE completo para tus proyectos de código" },
-  { icon: Image, text: "Aplicaciones — imágenes, logos, videos y más" },
+  { icon: Code2, text: "Basalt IA — apps React completas + imágenes, logos y textos con IA" },
   { icon: Wand2, text: "Canvas IA — flujos de producción visuales" },
 ];
 

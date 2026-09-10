@@ -41,19 +41,19 @@ const PRODUCTS = [
     ],
   },
   {
-    badge: "Aplicaciones",
-    headline: "Crea imágenes y textos con IA.",
-    sub: "Herramientas de imagen (genera, logos, transfiere estilo, mockups de producto) y de texto (copy, SEO, redes, ads). Todo inline, sin salir del workspace.",
-    icon: Image,
-    color: "#00C2FF",
-    cta: "Abrir Aplicaciones →",
-    path: "/tools",
-    features: ["Genera imágenes con IA", "Diseña logos y estilos", "Streaming de texto", "Guarda en biblioteca"],
+    badge: "Canvas IA",
+    headline: "Conecta nodos de IA en un lienzo visual.",
+    sub: "Arma flujos de varios pasos conectando nodos de texto, imagen y video — cada nodo llama al mismo motor de IA que Basalt, encadenado paso a paso. Ideal para producir varias piezas de una campaña sin repetir el proceso manualmente.",
+    icon: Layers,
+    color: "#8B5CF6",
+    cta: "Abrir Canvas IA →",
+    path: "/studio-flow",
+    features: ["Lienzo de nodos drag & drop", "Encadena texto, imagen y video", "Reutilizable para campañas", "Export del flujo completo"],
     preview: [
-      { tool: "Crear imagen", cr: 2, color: "#a855f7" },
-      { tool: "Diseñar logo",  cr: 3, color: "#00c2ff" },
-      { tool: "Quitar fondo",  cr: 1, color: "#34d399" },
-      { tool: "Copywriting",   cr: 1, color: "#f43f5e" },
+      { tool: "Texto / Persona",  cr: "Genera copy", color: "#3B82F6" },
+      { tool: "Generar imagen",   cr: "Genera imagen", color: "#a855f7" },
+      { tool: "Generar video",    cr: "Genera video", color: "#3B82F6" },
+      { tool: "Diseño / Layout",  cr: "Arma layout", color: "#10B981" },
     ],
   },
 ];
@@ -132,7 +132,7 @@ const TRUST = [
 // Hechos reales del producto, no métricas de uso inventadas.
 const STATS = [
   { value: "12+", label: "Herramientas de IA", icon: Wand2 },
-  { value: "3", label: "Formas de crear: Basalt IA, Canvas IA, Aplicaciones", icon: Layers },
+  { value: "2", label: "Formas de crear: Basalt IA (apps, imágenes y texto) y Canvas IA", icon: Layers },
   { value: "5", label: "Créditos gratis para empezar, sin tarjeta", icon: Zap },
   { value: "AES-256", label: "Encriptación de tus datos", icon: Shield },
 ];
@@ -178,7 +178,7 @@ const GUARANTEES = [
   {
     icon: Zap,
     title: "Empezás gratis, sin tarjeta",
-    content: "5 créditos para probar Basalt IA, Canvas IA y Aplicaciones antes de pagar nada.",
+    content: "5 créditos para probar Basalt IA y Canvas IA antes de pagar nada.",
   },
   {
     icon: Shield,
@@ -319,7 +319,7 @@ function ProductSection({ p, i, navigate }: { p: typeof PRODUCTS[0]; i: number; 
         >
           <div className="rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-md shadow-zinc-100">
             {i === 0 ? (
-              /* Genesis preview */
+              /* Basalt preview */
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="flex gap-1">
@@ -369,9 +369,9 @@ function ProductSection({ p, i, navigate }: { p: typeof PRODUCTS[0]; i: number; 
                 </div>
               </div>
             ) : (
-              /* Aplicaciones preview */
+              /* Canvas IA preview */
               <div className="p-5">
-                <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Herramientas disponibles</div>
+                <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Nodos disponibles</div>
                 <div className="grid grid-cols-2 gap-2">
                   {(p.preview as any[]).map((t: any, ti: number) => (
                     <motion.div
@@ -386,7 +386,7 @@ function ProductSection({ p, i, navigate }: { p: typeof PRODUCTS[0]; i: number; 
                       </div>
                       <div>
                         <div className="text-[9px] font-bold text-zinc-600">{t.tool}</div>
-                        <div className="text-[8px] text-zinc-500">{t.cr} crédito{t.cr > 1 ? 's' : ''}</div>
+                        <div className="text-[8px] text-zinc-500">{t.cr}</div>
                       </div>
                     </motion.div>
                   ))}
@@ -429,7 +429,7 @@ export default function Index() {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://creator-ia.com/" />
         <meta property="og:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
-        <meta property="og:description" content="Plataforma todo-en-uno: Basalt IA para apps React + Aplicaciones para imágenes y texto. Paga en COP con Bold." />
+        <meta property="og:description" content="Plataforma todo-en-uno: Basalt IA para apps, imágenes y texto + Canvas IA para flujos visuales. Paga en COP con Bold." />
         <meta property="og:image" content="https://creator-ia.com/og-image.jpg" />
         <meta property="og:site_name" content="Creator IA Pro" />
         <meta property="og:locale" content="es_CO" />
@@ -438,7 +438,7 @@ export default function Index() {
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content="https://creator-ia.com/" />
         <meta property="twitter:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
-        <meta property="twitter:description" content="Plataforma todo-en-uno: Basalt IA para apps React + Aplicaciones para imágenes y texto. Paga en COP con Bold." />
+        <meta property="twitter:description" content="Plataforma todo-en-uno: Basalt IA para apps, imágenes y texto + Canvas IA para flujos visuales. Paga en COP con Bold." />
         <meta property="twitter:image" content="https://creator-ia.com/og-image.jpg" />
 
         {/* Canonical */}
@@ -524,7 +524,7 @@ export default function Index() {
                 >
                   <Sparkles className="h-4 w-4 text-primary" />
                 </motion.span>
-                Basalt IA · Aplicaciones · V21.0
+                Basalt IA · Canvas IA · V21.0
               </motion.div>
 
               {/* Main Headline */}
@@ -551,7 +551,7 @@ export default function Index() {
                 custom={0.35}
                 className="text-[clamp(1rem,2vw,1.25rem)] text-zinc-500 max-w-2xl mx-auto leading-relaxed mb-10"
               >
-                Basalt IA convierte tus ideas en apps React completas. Aplicaciones: imágenes, logos y textos generados al instante.
+                Basalt IA convierte tus ideas en apps React completas — e incluye herramientas directas de imágenes, logos y textos.
                 <span className="text-zinc-900 font-semibold"> Todo en uno.</span>
               </motion.p>
 
@@ -1363,7 +1363,7 @@ export default function Index() {
                 </span>
               </motion.h2>
               <motion.p variants={fadeUp} custom={0.2} className="text-zinc-400 text-[16px] mb-10 leading-relaxed max-w-xl mx-auto">
-                Basalt IA, Canvas IA y Aplicaciones — todo en un solo lugar, listo para usar hoy.
+                Basalt IA y Canvas IA — todo en un solo lugar, listo para usar hoy.
               </motion.p>
 
               {/* Feature bullets */}
@@ -1433,7 +1433,6 @@ export default function Index() {
                   <ul className="space-y-2">
                     {[
                       { label: "Basalt IA", path: "/chat" },
-                      { label: "Aplicaciones", path: "/tools" },
                       { label: "Canvas IA", path: "/studio-flow" },
                       { label: "Precios", path: "/pricing" },
                     ].map((item) => (

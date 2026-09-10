@@ -17,7 +17,7 @@ import {
   MoreHorizontal, Globe, BarChart2, Columns, Cloud,
   Map, ArrowUp, ArrowRight, Layers, X, ArrowLeft,
   PanelLeft, PanelLeftClose, Phone, RefreshCw, Database,
-  AlertTriangle, FileCode2, Atom,
+  AlertTriangle, FileCode2, Atom, LayoutGrid,
 } from 'lucide-react';
 
 type BuildMode = 'react' | 'html';
@@ -40,6 +40,7 @@ import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { generateProject, downloadBlob, type ProjectType, type ScaffoldOptions } from '@/services/scaffold-service';
 import { StudioDeploy } from '@/components/studio/StudioDeploy';
+import ToolsPanel from '@/pages/Tools';
 
 // ─── IDE Error Boundary ──────────────────────────────────────────────────────
 class IDEErrorBoundary extends Component<{ children: ReactNode; onReset: () => void }, { hasError: boolean; error?: Error }> {
@@ -67,7 +68,7 @@ class IDEErrorBoundary extends Component<{ children: ReactNode; onReset: () => v
 }
 
 type DeviceMode = 'desktop' | 'tablet' | 'mobile';
-type PanelView = 'code' | 'preview' | 'split' | 'files' | 'history' | 'sitemap' | 'artifacts';
+type PanelView = 'code' | 'preview' | 'split' | 'files' | 'history' | 'sitemap' | 'artifacts' | 'tools';
 type LeftTab = 'chat' | 'files' | 'projects' | 'github' | 'history' | 'cloud';
 
 interface Snapshot {
@@ -119,16 +120,17 @@ interface WelcomeScreenProps {
   selectedModel: string;
   onModelSelect: (model: string) => void;
   subscriptionTier?: string;
+  onOpenTools: () => void;
 }
 
 // Plan credit limits for bar calculation
 const PLAN_CREDITS: Record<string, number> = { free: 5, creador: 1000, pro: 3000, agencia: 8000, pyme: 20000, pymes: 20000 };
 
-function WelcomeScreen({ 
-  onPrompt, onCreateProject, creating, projects, onSelectProject, onDeleteProject, 
-  displayName, onOpenSearch, onMic, isListening, 
+function WelcomeScreen({
+  onPrompt, onCreateProject, creating, projects, onSelectProject, onDeleteProject,
+  displayName, onOpenSearch, onMic, isListening,
   onFileSelect, pendingFile, onRemoveFile,
-  selectedModel, onModelSelect, subscriptionTier = 'free'
+  selectedModel, onModelSelect, subscriptionTier = 'free', onOpenTools
 }: WelcomeScreenProps) {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
@@ -337,6 +339,13 @@ function WelcomeScreen({
                       </button>
                     );
                   })}
+                  <button
+                    onClick={onOpenTools}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-[12px] font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+                  >
+                    <LayoutGrid className="w-4 h-4 text-zinc-400" />
+                    <span>Herramientas</span>
+                  </button>
                </nav>
 
                <div className="mt-auto px-2 pb-4">
@@ -587,8 +596,25 @@ export default function Chat() {
   const [isListening, setIsListening] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const isMobile = useIsMobile();
-  const [mobileTab, setMobileTab] = useState<'chat' | 'code' | 'preview'>('chat');
+  const [mobileTab, setMobileTab] = useState<'chat' | 'code' | 'preview' | 'tools'>('chat');
   const [mobileFilesOpen, setMobileFilesOpen] = useState(false);
+
+  // Herramientas (ex-Aplicaciones, fusionada de verdad acá) — independiente
+  // de si hay un proyecto de código activo, igual que la vieja /tools nunca
+  // requirió un proyecto. Por eso NO usa panelView (que solo existe dentro
+  // del workspace de un proyecto): toolsOpen se revisa antes que todo lo
+  // demás en el render de más abajo.
+  const [toolsOpen, setToolsOpen] = useState(false);
+
+  // Deep link (?panel=tools[&tool=<id>]) — usado por los alias legacy de
+  // Aplicaciones (/tools, /apps/:appId) al redirigir acá vía ToolsRedirect en
+  // App.tsx. El ?tool= lo lee el propio panel <ToolsPanel> con su searchParams.
+  const appliedUrlPanelRef = useRef(false);
+  useEffect(() => {
+    if (appliedUrlPanelRef.current) return;
+    appliedUrlPanelRef.current = true;
+    if (searchParams.get('panel') === 'tools') setToolsOpen(true);
+  }, [searchParams]);
   const [selectedModel, setSelectedModel] = useState<string>(() => {
     if (typeof window === 'undefined') return DEFAULT_MODEL_ID;
     return window.localStorage.getItem('genesis-selected-model') || DEFAULT_MODEL_ID;
@@ -1014,6 +1040,27 @@ export default function Chat() {
     await deleteProject(projectId);
   }, [deleteProject]);
 
+  // Herramientas (ex-Aplicaciones) — funciona sin proyecto activo, así que se
+  // revisa antes que el loading/welcome de abajo (que sí dependen de un
+  // proyecto de código). Helmet propio para no heredar el título de Basalt.
+  if (toolsOpen) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <Helmet><title>Herramientas | Basalt IA — Creator IA Pro</title></Helmet>
+        <header className="h-12 shrink-0 border-b border-zinc-100 bg-white flex items-center gap-3 px-3">
+          <button onClick={() => setToolsOpen(false)} aria-label="Volver a Basalt"
+            className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all shrink-0">
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <span className="text-[13px] font-bold text-zinc-900 truncate flex-1">Herramientas</span>
+        </header>
+        <div className="flex-1 overflow-hidden">
+          <ToolsPanel />
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center bg-background">
@@ -1048,9 +1095,10 @@ export default function Chat() {
             selectedModel={selectedModel}
             onModelSelect={setSelectedModel}
             subscriptionTier={profile?.subscription_tier ?? 'free'}
+            onOpenTools={() => setToolsOpen(true)}
           />
-          <input 
-            type="file" 
+          <input
+            type="file"
             id="welcome-file-input" 
             className="hidden" 
             accept=".txt,.js,.ts,.tsx,.css,.html,.json,.md,.py,.go,.sh,.sql,.yaml,.yml"
@@ -1171,6 +1219,12 @@ export default function Chat() {
                 </div>
               </div>
             )}
+
+            {mobileTab === 'tools' && (
+              <div className="flex-1 overflow-hidden">
+                <ToolsPanel />
+              </div>
+            )}
           </div>
 
           <div className="h-14 shrink-0 border-t border-zinc-200 bg-white flex items-stretch" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
@@ -1178,6 +1232,7 @@ export default function Chat() {
               { id: 'chat' as const, icon: MessageSquare, label: 'Chat' },
               { id: 'code' as const, icon: Code2, label: 'Código' },
               { id: 'preview' as const, icon: Eye, label: 'Preview' },
+              { id: 'tools' as const, icon: LayoutGrid, label: 'Apps' },
             ]).map(({ id, icon: Icon, label }) => (
               <button
                 key={id}
@@ -1291,6 +1346,11 @@ export default function Chat() {
                   agentPhase={agentPhase}
                   activeSpecialist={activeSpecialist}
                 />
+              </div>
+            )}
+            {panelView === 'tools' && (
+              <div className="flex-1 overflow-hidden">
+                <ToolsPanel />
               </div>
             )}
           </IDEErrorBoundary>

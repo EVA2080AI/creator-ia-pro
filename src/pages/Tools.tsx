@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { Button } from "@/components/ui/button";
@@ -159,9 +158,14 @@ function ImageWithFallback({ src, onRetry }: { src: string; onRetry: () => void 
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Panel "Herramientas" — embebido dentro del workspace de Basalt (Chat.tsx),
+// ya no tiene ruta propia (/tools y /apps/:appId redirigen a /chat?panel=tools
+// vía ToolsRedirect en App.tsx). El padre (Chat.tsx) ya resolvió auth y título
+// de página antes de montar este panel, así que acá no se repite ninguno de
+// los dos. Sigue leyendo sus propios searchParams (?tool=) — funciona igual
+// aunque la URL real ahora sea /chat en vez de /tools.
 const Tools = () => {
-  const { user, signOut, loading: authLoading } = useAuth("/auth");
+  const { user } = useAuth();
   const { profile, refreshProfile } = useProfile(user?.id);
   const navigate = useNavigate();
   const { appId } = useParams();
@@ -485,21 +489,11 @@ const Tools = () => {
     );
   };
 
-  if (authLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-background">
-        <div className="w-12 h-12 rounded-2xl border-2 border-zinc-200 border-t-primary animate-spin" />
-      </div>
-    );
-  }
-
   const imageTools = tools.filter(t => t.category === "image");
   const textTools  = tools.filter(t => t.category === "text");
 
   return (
     <div className="flex h-full w-full text-zinc-900 font-sans overflow-hidden genesis-panel-background">
-      <Helmet><title>Herramientas IA | Creator IA Pro</title></Helmet>
-
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <aside className="hidden md:flex w-[280px] shrink-0 flex-col border-r border-white/30 aether-glass shadow-[1px_0_30px_rgba(0,0,0,0.03)] overflow-hidden relative z-20">
 

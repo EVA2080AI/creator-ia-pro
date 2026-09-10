@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, X, Sparkles, Code2, Image,
+  Menu, X, Sparkles, Code2,
   CreditCard, BookOpen, ArrowRight, Layers, type LucideIcon
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
@@ -31,7 +31,6 @@ export function LandingHeader(): React.ReactElement {
 
   const NAV_LINKS: NavLink[] = [
     { name: "Basalt IA", path: "/chat", icon: Code2 },
-    { name: "Aplicaciones", path: "/tools", icon: Image },
     { name: "Canvas IA", path: "/studio-flow", icon: Layers, badge: "Nuevo" },
     { name: "Planes", path: "/pricing", icon: CreditCard },
     { name: "Ayuda", path: "/help", icon: BookOpen },

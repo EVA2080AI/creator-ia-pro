@@ -58,7 +58,7 @@ const Help = () => {
     {
       question: "¿Cómo empiezo a usar Creator IA Pro?",
       answer:
-        "Crea una cuenta gratuita en /auth y recibe 5 créditos para explorar. Desde el Dashboard, accede a Basalt IA para crear apps o Aplicaciones para imágenes y texto.",
+        "Crea una cuenta gratuita en /auth y recibe 5 créditos para explorar. Desde el Dashboard, accede a Basalt IA para crear apps y generar imágenes o texto, o a Canvas IA para armar flujos visuales.",
       category: "Primeros pasos",
     },
     {

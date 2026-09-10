@@ -10,7 +10,6 @@ export function Footer() {
       title: "Plataforma",
       links: [
         { name: "Basalt IA", path: "/chat" },
-        { name: "Aplicaciones", path: "/tools" },
         { name: "Canvas IA", path: "/studio-flow" },
         { name: "Precios", path: "/pricing" },
       ]

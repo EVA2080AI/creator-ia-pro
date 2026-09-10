@@ -1,11 +1,11 @@
 import {
   Globe, FileText, Code, Zap, Github, Share2,
-  Monitor, Tablet, Smartphone, ChevronLeft
+  Monitor, Tablet, Smartphone, ChevronLeft, LayoutGrid
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
-export type ViewMode = 'preview' | 'code' | 'artifacts' | 'files' | 'cloud' | 'nexus' | 'analytics';
+export type ViewMode = 'preview' | 'code' | 'artifacts' | 'files' | 'tools' | 'cloud' | 'nexus' | 'analytics';
 export type DeviceMode = 'desktop' | 'tablet' | 'mobile';
 
 interface StudioTopbarProps {
@@ -61,6 +61,7 @@ export function StudioTopbar({
           <ViewToggle label="Code" icon={<Code className="w-3.5 h-3.5" />} active={viewMode === 'code'} onClick={() => onViewModeChange('code')} />
           <ViewToggle label="Consola" icon={<Zap className="w-3.5 h-3.5" />} active={viewMode === 'artifacts'} onClick={() => onViewModeChange('artifacts')} />
           <ViewToggle icon={<FileText className="w-3.5 h-3.5" />} active={viewMode === 'files'} onClick={() => onViewModeChange('files')} />
+          <ViewToggle label="Apps" icon={<LayoutGrid className="w-3.5 h-3.5" />} active={viewMode === 'tools'} onClick={() => onViewModeChange('tools')} />
         </div>
 
         {viewMode === 'preview' && (
