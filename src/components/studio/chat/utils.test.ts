@@ -26,3 +26,16 @@ describe("detectIntent — preguntas genuinas van a chat, no a codegen", () => {
     expect(detectIntent("agrega un botón azul al hero")).toBe("codegen");
   });
 });
+
+describe("detectIntent — pedidos de video (sin proveedor conectado todavía)", () => {
+  it("reconoce un pedido de video en vez de dejarlo caer en chat/codegen sin aviso", () => {
+    expect(detectIntent("hazme un video de un atardecer en la playa")).toBe("video");
+    expect(detectIntent("genera un video corto para mi producto")).toBe("video");
+  });
+
+  it("no confunde un componente de video con un pedido de generar video", () => {
+    // "video" como parte de un pedido de app/componente sigue siendo codegen,
+    // igual que wantsImageGeneration ya excluye "imagen de fondo" en un hero.
+    expect(detectIntent("crea un componente con un reproductor de video para el dashboard")).not.toBe("video");
+  });
+});

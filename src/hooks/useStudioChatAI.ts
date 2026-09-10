@@ -161,6 +161,26 @@ export function useStudioChatAI({
       }
     }
 
+    // Generación de video — no hay proveedor conectado todavía (Replicate sin
+    // saldo, OpenRouter sin ningún modelo de salida de video — verificado en
+    // vivo). Sin este branch, pedir un video caía en 'chat' o 'codegen' sin
+    // aviso: el usuario no se enteraba de que la función no existe. Responde
+    // directo, sin gastar créditos ni tirar un error feo en el chat.
+    if (intent === 'video') {
+      setIsGenerating(false);
+      onGeneratingChange?.(false);
+      setGenPhase('idle');
+      onPhaseChange?.('idle', 'none');
+      return {
+        files: {},
+        explanation: 'La generación de video todavía no está disponible — no tengo un proveedor conectado para eso ahora mismo. Puedo generar imágenes o construir la app mientras tanto, avisame qué necesitás.',
+        isChatOnly: true,
+        stack: [],
+        deps: [],
+        suggestions: [],
+      };
+    }
+
     // Handle reset
     if (wantsProjectReset(prompt)) {
       setIsGenerating(false);

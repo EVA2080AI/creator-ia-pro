@@ -94,11 +94,19 @@ async function exportZip(files: Record<string, StudioFile>, projectName: string)
   URL.revokeObjectURL(url);
 }
 
-// ─── Starter prompts / Templates ────────────────────────────────────────────
-// Legacy quick prompts kept for backward compatibility in future quick-chips
-const STARTER_PROMPTS = [
-  { label: 'Landing page',  emoji: '🚀', prompt: 'Crea una landing page moderna con hero section animado, sección de features con iconos, testimonios y footer. Diseño oscuro con gradientes morados.' },
-  { label: 'Login / Auth',  emoji: '🔐', prompt: 'Crea un sistema de login y registro con formularios validados, estados de error, y diseño moderno con glassmorphism.' },
+// ─── Ejemplos de capacidad — el input de abajo decía "Describe qué quieres
+// construir" y el saludo era "¿Listo para construir?", los dos framings
+// exclusivamente de build. Basalt ya soporta conversar (detectIntent → chat)
+// y generar imágenes inline (detectIntent → image, ver useStudioChatAI.ts)
+// desde el mismo chat, pero nada en la UI lo comunicaba — el usuario no
+// tenía forma de saber que podía simplemente preguntar o pedir una imagen
+// acá mismo. Estos chips muestran el rango real (build / imagen / consulta)
+// tocando el input, no lo envían solos — son ejemplo de fraseo, no demos
+// enlatadas. Reemplaza el STARTER_PROMPTS viejo que nunca se renderizaba.
+const CAPABILITY_EXAMPLES = [
+  { label: 'Crear una app',  emoji: '🚀', prompt: 'Crea una landing page moderna con hero section animado, sección de features con iconos, testimonios y footer.' },
+  { label: 'Generar una imagen', emoji: '🎨', prompt: 'Genera una imagen de ' },
+  { label: 'Solo preguntar', emoji: '💬', prompt: '¿Qué stack me recomendás para ' },
 ];
 
 type WelcomeTab = 'conversations' | 'templates';
@@ -171,7 +179,7 @@ function WelcomeScreen({
     // handled by parent Chat onDrop wrapper to allow full folder drops
   };
 
-  const greeting = displayName ? `¿Listo para construir, ${displayName.split(' ')[0]}?` : '¿Listo para construir?';
+  const greeting = displayName ? `¿En qué te ayudo, ${displayName.split(' ')[0]}?` : '¿En qué te ayudo?';
 
   return (
     <div className="flex h-full overflow-hidden"
@@ -380,11 +388,12 @@ function WelcomeScreen({
               )}
               
               <textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onInput={handleTextareaInput}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
-                placeholder="Describe qué quieres construir..."
+                placeholder="Preguntame algo, pedime una app, una imagen..."
                 className={`w-full bg-transparent pr-32 pb-14 text-[16px] font-medium text-zinc-800 placeholder:text-zinc-400 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px] ${pendingFile ? 'pt-14 pl-5' : 'pt-5 pl-14'}`}
                 rows={1}
                 style={{ overflowY: 'hidden' }}
@@ -461,6 +470,21 @@ function WelcomeScreen({
                   'text-violet-600'
                 }`}>Plan {subscriptionTier}</span>
               </div>
+            </div>
+
+            {/* Ejemplos de capacidad — tocan el input, no lo envían */}
+            <div className="flex items-center gap-2 mt-3 px-2 flex-wrap">
+              {CAPABILITY_EXAMPLES.map(ex => (
+                <button
+                  key={ex.label}
+                  type="button"
+                  onClick={() => { setInput(ex.prompt); textareaRef.current?.focus(); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/70 border border-zinc-200 backdrop-blur-sm shadow-sm text-[11px] font-medium text-zinc-500 hover:text-zinc-900 hover:bg-white transition-all"
+                >
+                  <span>{ex.emoji}</span>
+                  {ex.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>

@@ -32,7 +32,7 @@ export function wantsVanillaHtml(text: string): boolean {
   return vanillaKeywords.some(k => p.includes(k));
 }
 
-export type ChatIntent = 'chat' | 'codegen' | 'fullstack' | 'vanilla-html' | 'html-import' | 'reasoning' | 'image';
+export type ChatIntent = 'chat' | 'codegen' | 'fullstack' | 'vanilla-html' | 'html-import' | 'reasoning' | 'image' | 'video';
 
 // Sustantivos que indican que el usuario quiere una imagen (no un componente que
 // use una imagen — por eso se combinan con un verbo de creación, igual que
@@ -62,6 +62,22 @@ function wantsImageGeneration(p: string): boolean {
   return hasCreationVerb || hasImagePreposition;
 }
 
+// 2026-09-10: no hay ningún proveedor de video conectado (ni Replicate —
+// sin saldo, ver src/lib/ai/models.ts — ni OpenRouter, que no ofrece ni un
+// solo modelo con output de video en /api/v1/models, verificado en vivo).
+// Sin esta detección, pedir un video en el chat de Basalt caía en 'chat' o
+// 'codegen' sin ningún aviso — el usuario no se enteraba de que la función
+// no existe todavía. Con esto, useStudioChatAI responde con un mensaje claro
+// en vez de fingir que no escuchó el pedido.
+const VIDEO_NOUNS = ['video', 'vídeo', 'videos', 'vídeos', 'clip', 'reel', 'animación', 'animacion'];
+function wantsVideoGeneration(p: string): boolean {
+  if (!VIDEO_NOUNS.some((n) => p.includes(n))) return false;
+  if (CODE_CONTEXT_EXCLUSIONS.some((k) => p.includes(k))) return false;
+  const hasCreationVerb = IMAGE_CREATION_VERBS.some((v) => p.includes(v));
+  const hasVideoPreposition = /\b(video|vídeo|clip|reel|animaci[oó]n)\s+(de|para)\b/.test(p);
+  return hasCreationVerb || hasVideoPreposition;
+}
+
 export function detectIntent(prompt: string, _hasContext?: boolean): ChatIntent {
   let p = prompt.toLowerCase().trim();
 
@@ -69,7 +85,10 @@ export function detectIntent(prompt: string, _hasContext?: boolean): ChatIntent 
   p = p.replace(/apagina/g, 'pagina').replace(/asuna/g, 'una')
        .replace(/hasme/g, 'hazme').replace(/has un/g, 'haz un').replace(/has una/g, 'haz una');
 
-  // Generación de imagen — se revisa temprano para que no caiga en codegen genérico.
+  // Generación de imagen/video — se revisan temprano para que no caigan en
+  // codegen genérico. Video primero: "genera un video de X" también contiene
+  // señales que wantsImageGeneration podría, en teoría, no distinguir.
+  if (wantsVideoGeneration(p)) return 'video';
   if (wantsImageGeneration(p)) return 'image';
 
   // Check for reasoning mode - user wants Genesis to think first

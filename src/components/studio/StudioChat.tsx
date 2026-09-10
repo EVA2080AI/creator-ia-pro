@@ -339,7 +339,7 @@ export function StudioChat({
           timestamp: new Date(),
           type: 'reasoning'
         };
-      } else if ((shouldPlan || isArchitectMode) && result.isChatOnly && !result.blob) {
+      } else if ((shouldPlan || isArchitectMode) && intent !== 'video' && result.isChatOnly && !result.blob) {
         assistantMsg = { id: crypto.randomUUID(), role: 'assistant', content: result.explanation || result.text, timestamp: new Date(), type: 'plan', planStatus: 'pending', originalPrompt: text };
       } else if (result.isChatOnly) {
         const content = result.text || result.explanation;
