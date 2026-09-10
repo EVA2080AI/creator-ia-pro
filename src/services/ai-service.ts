@@ -57,13 +57,17 @@ const TEXT_MODEL_MAP: Record<string, string> = {
   "mistral-small":       "google/gemini-2.5-flash-lite",
 };
 
+// 2026-09-09: Flux/Replicate sin saldo (ver nota en src/lib/ai/models.ts) —
+// todos los ids "de vitrina" legacy caen ahora al único modelo activo
+// (OpenRouter). Se conservan las keys para no romper llamadores viejos que
+// todavía manden estos ids cortos.
 export const IMAGE_MODEL_MAP: Record<string, string> = {
-  "flux-schnell":  "flux-schnell",
-  "flux-pro":      "flux-1.1-pro",
-  "flux-pro-1.1":  "flux-1.1-pro",
-  "flux-realism":  "flux-1.1-pro",
-  "ideogram-v2":   "flux-1.1-pro", // Ideogram no está en el catálogo nuevo — mejor alternativa disponible
-  "sdxl":          "flux-1.1-pro",
+  "flux-schnell":  "gemini-flash-image",
+  "flux-pro":      "gemini-flash-image",
+  "flux-pro-1.1":  "gemini-flash-image",
+  "flux-realism":  "gemini-flash-image",
+  "ideogram-v2":   "gemini-flash-image",
+  "sdxl":          "gemini-flash-image",
 };
 
 // ─── ERROR CLASSIFIER ─────────────────────────────────────────────────────────
@@ -156,7 +160,7 @@ export const aiService = {
       finalPrompt = prompt || `Apply ${tool} transformation to this image, masterpiece, best quality`;
     }
 
-    const imageModel = IMAGE_MODEL_MAP[model] ?? "flux-schnell";
+    const imageModel = IMAGE_MODEL_MAP[model] ?? "gemini-flash-image";
     const aspectRatio = toAspectRatio(width, height);
 
     const res = await fetch("/api/ai/image", {

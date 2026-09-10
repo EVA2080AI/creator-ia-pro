@@ -92,7 +92,7 @@ describe("aiService — Image Generation", () => {
     await aiService.processAction({ action: "image", prompt: "logo", model: "flux-pro-1.1" });
 
     const sentBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-    expect(sentBody.model).toBe("flux-1.1-pro");
+    expect(sentBody.model).toBe("gemini-flash-image");
   });
 
   it("appends logo style modifiers for the logo tool", async () => {

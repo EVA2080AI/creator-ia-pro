@@ -1,8 +1,7 @@
-// Generación de imágenes — Replicate (flux). Mismo patrón que api/ai/chat.ts:
+// Generación de imágenes — OpenRouter (proveedor activo) + Replicate (rama
+// existente, en pausa desde que esa cuenta se quedó sin saldo — ver el
+// comentario en src/lib/ai/models.ts). Mismo patrón que api/ai/chat.ts:
 // sesión → plan → cobro atómico de créditos ANTES de generar → reembolso si falla.
-// Puerto de supabase/functions/ai-proxy/index.ts (generateReplicateImage), que ya
-// estaba probado en producción: predicción síncrona (`Prefer: wait=60`) con fallback
-// a polling manual si el modelo tarda más.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { getSessionUser, getProfile } from "../_lib/session.js";
 import { spendCredits, refundCredits, getBalance, logSpend } from "../_lib/credits.js";
@@ -70,19 +69,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
-  if (!REPLICATE_API_TOKEN) {
+  const apiKeyEnvVar = model.provider === "openrouter" ? "OPENROUTER_API_KEY" : "REPLICATE_API_TOKEN";
+  const apiKey = process.env[apiKeyEnvVar];
+  if (!apiKey) {
     if (cost > 0) await refundCredits(user.userId, cost);
     res.status(200).json({
       ok: false,
       code: "NOT_CONFIGURED",
-      error: "La generación de imágenes no está configurada. Agrega REPLICATE_API_TOKEN en Vercel.",
+      error: `La generación de imágenes no está configurada. Agrega ${apiKeyEnvVar} en Vercel.`,
     });
     return;
   }
 
   try {
-    const imageUrl = await generateReplicateImage(model.replicateSlug, prompt, aspectRatio, imagePrompt, REPLICATE_API_TOKEN);
+    const imageUrl = model.provider === "openrouter"
+      ? await generateOpenRouterImage(model.openrouterSlug!, prompt, aspectRatio, imagePrompt, apiKey)
+      : await generateReplicateImage(model.replicateSlug!, prompt, aspectRatio, imagePrompt, apiKey);
     if (cost > 0) await logSpend(user.userId, cost, `image: ${modelId}`);
     const creditsRemaining = await getBalance(user.userId).catch(() => null);
     res.status(200).json({ ok: true, imageUrl, model: modelId, cost, creditsRemaining });
@@ -91,6 +93,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const message = err instanceof Error ? err.message : "Error al generar la imagen.";
     res.status(502).json({ ok: false, code: "PROVIDER_ERROR", error: message.slice(0, 300) });
   }
+}
+
+/** Forma mínima de una respuesta de la Image API de OpenRouter (POST /api/v1/images). */
+interface OpenRouterImageResponse {
+  data?: { b64_json?: string; url?: string; media_type?: string }[];
+  error?: { message?: string };
+}
+
+async function generateOpenRouterImage(
+  openrouterSlug: string,
+  prompt: string,
+  aspectRatio: string,
+  imagePrompt: string | undefined,
+  token: string,
+): Promise<string> {
+  const body: Record<string, unknown> = { model: openrouterSlug, prompt, n: 1, aspect_ratio: aspectRatio };
+  if (imagePrompt) body.input_references = [imagePrompt];
+
+  const res = await fetch("https://openrouter.ai/api/v1/images", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  const data = (await res.json().catch(() => null)) as OpenRouterImageResponse | null;
+  if (!res.ok || !data) {
+    throw new Error(data?.error?.message || `${res.status} ${res.statusText}`);
+  }
+
+  const item = data.data?.[0];
+  if (item?.url) return item.url;
+  if (item?.b64_json) return `data:${item.media_type || "image/png"};base64,${item.b64_json}`;
+  throw new Error("sin imagen en la respuesta de OpenRouter");
 }
 
 /** Forma mínima de una predicción de Replicate (creación + polling manual). */

@@ -197,10 +197,23 @@ export function isKnownModel(id: string): boolean {
   return CHAT_MODELS.some((m) => m.id === id);
 }
 
-// ── Modelos de imagen (Replicate; ver /api/ai/image) ─────────────────────────
+// ── Modelos de imagen (ver /api/ai/image) ─────────────────────────────────────
+// 2026-09-09: la cuenta de Replicate se quedó sin saldo ("Insufficient
+// credit" — verificado en vivo contra la API real de Replicate con el mismo
+// token que usa producción), así que Flux Schnell/1.1 Pro dejaban de
+// funcionar para cualquier usuario. Se reemplaza por generación de imágenes
+// vía OpenRouter (la cuenta que sí está paga), que desde 2026 tiene una API
+// de imágenes real (`POST /api/v1/images`) — verificado en vivo con una
+// generación real antes de conectarlo acá. Si se vuelve a cargar saldo en
+// Replicate, los modelos Flux se pueden reactivar con `provider: "replicate"`
+// (la rama de código sigue existiendo en api/ai/image.ts).
 export interface ImageModelDef {
   id: string;
-  replicateSlug: string;
+  provider: "replicate" | "openrouter";
+  /** Slug del modelo en Replicate (`owner/name`) — solo si provider === "replicate". */
+  replicateSlug?: string;
+  /** ID del modelo en OpenRouter (`provider/model`) — solo si provider === "openrouter". */
+  openrouterSlug?: string;
   label: string;
   credits: number;
   minTier: PlanTier;
@@ -209,19 +222,12 @@ export interface ImageModelDef {
 
 export const IMAGE_MODELS: ImageModelDef[] = [
   {
-    id: "flux-schnell",
-    replicateSlug: "black-forest-labs/flux-schnell",
-    label: "Flux Schnell",
-    credits: 2,
+    id: "gemini-flash-image",
+    provider: "openrouter",
+    openrouterSlug: "google/gemini-2.5-flash-image",
+    label: "Gemini Flash Image",
+    credits: 3,
     minTier: "free",
-    supportsImagePrompt: false,
-  },
-  {
-    id: "flux-1.1-pro",
-    replicateSlug: "black-forest-labs/flux-1.1-pro",
-    label: "Flux 1.1 Pro",
-    credits: 4,
-    minTier: "creador",
     supportsImagePrompt: true,
   },
 ];

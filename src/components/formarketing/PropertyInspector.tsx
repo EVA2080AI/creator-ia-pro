@@ -24,14 +24,11 @@ const NODE_TYPE_COLORS: Record<string, string> = {
 
 // Ids "de vitrina" — ver TEXT_MODEL_MAP/IMAGE_MODEL_MAP en ai-service.ts.
 // Los créditos mostrados aquí son solo estimados de UI (el cobro real y
-// atómico ocurre en el servidor contra src/lib/ai/models.ts); las etiquetas
-// anteriores ("GPT-5 Mini/Image", "Gemini Image/Preview", "Llama 4") no
-// correspondían a los modelos reales detrás de cada id.
+// atómico ocurre en el servidor contra src/lib/ai/models.ts). 2026-09-09:
+// Flux/Replicate sin saldo — único modelo de imagen activo es OpenRouter
+// (ver nota en src/lib/ai/models.ts).
 const IMAGE_MODELS = [
-  { id: 'flux-schnell',  label: 'Flux Schnell (2cr)' },
-  { id: 'flux-pro',      label: 'Flux 1.1 Pro (4cr)' },
-  { id: 'flux-pro-1.1',  label: 'Flux 1.1 Pro HD (4cr)' },
-  { id: 'sdxl',          label: 'Flux 1.1 Pro (4cr)' },
+  { id: 'flux-schnell', label: 'Gemini Flash Image (3cr)' },
 ];
 
 const TEXT_MODELS = [
