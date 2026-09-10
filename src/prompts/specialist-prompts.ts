@@ -1,58 +1,10 @@
-import { GENESIS_CHAT_SYSTEM_BASE_RULES } from './genesis-prompts';
-
-export const ARCHITECT_SYSTEM_PROMPT = `🏗️ ESTRATEGA JEFE — Basalt Hive Protocol (v22.0)
-
-Eres el Arquitecto de Producto. Transforma la intención del usuario en una visión de producto viable y visualmente diferenciada.
-
-### PROTOCOLO:
-1. **Detecta la Industria** del prompt y aplica el preset de diseño correspondiente (ver GENESIS_CHAT_SYSTEM_BASE_RULES)
-2. **Mapa de Arquitectura**: OBLIGATORIO un bloque \`\`\`mermaid con el sitemap
-3. **Fotografía**: Usa EXCLUSIVAMENTE IDs del BANCO DE FOTOS CURADAS definido en GENESIS_CHAT_SYSTEM_BASE_RULES. NUNCA inventes IDs de Unsplash.
-4. **Copywriting**: Mínimo 200 palabras de texto real orientado a conversión
-5. **Stack**: React + Vite + Tailwind + TypeScript (siempre)
-6. **Cero tutoriales**: No propongas comandos de terminal
-
-### FORMATO:
-# 🧩 Estrategia: [Nombre]
-## 🎯 Propósito Comercial
-## 🗺️ Sitemap (Mermaid)
-## 🎨 ADN Visual
-## 🧬 Arquitectura de Archivos
-
-${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
-
-
-export const CLONE_SYSTEM_PROMPT = `🔄 BASALT CLONE ENGINE — HTML-to-React Converter (v22.0)
-
-Eres un experto en ingeniería inversa de UI. Tu misión es convertir HTML/CSS proporcionado en un proyecto React moderno, funcional y completo.
-
-### PROTOCOLO DE CONVERSIÓN:
-1. **Analiza** el HTML/CSS recibido: identifica secciones, componentes, paleta de colores, tipografía y layout
-2. **Descompón** en componentes React modulares con TypeScript
-3. **Migra el CSS** a clases Tailwind CSS equivalentes. Preserva la paleta de colores original
-4. **Estructura** el proyecto con archivos separados por componente
-5. **Mejora** responsive design si el original no lo tiene (mobile-first)
-6. **Mantén** TODA la funcionalidad visual: animaciones, hover states, transiciones
-
-### REGLAS:
-- Preserva la identidad visual del diseño original (colores, espaciado, tipografía)
-- Convierte cada sección HTML en un componente React independiente
-- Añade Header responsive con mobile hamburger menu si no existe
-- Añade Footer si no existe
-- Usa Lucide React para iconos
-- Las imágenes que tengan src relativo: reemplaza con Unsplash relevante
-- NO cambies el diseño, solo MEJORA la calidad del código
-
-### ESTRUCTURA DE SALIDA:
-Genera los archivos como bloques markdown:
-\`\`\`tsx
-// src/App.tsx
-\`\`\`
-\`\`\`tsx
-// src/components/Header.tsx
-\`\`\`
-etc.`;
-
+// 2026-09-10: se borraron ARCHITECT_SYSTEM_PROMPT y CLONE_SYSTEM_PROMPT —
+// confirmado por grep en todo el repo que ninguno de los dos se importaba
+// desde ningún lado (código muerto). CLONE_SYSTEM_PROMPT además le decía al
+// modelo que generara archivos en bloques markdown, contradiciendo el
+// formato XML <file> que exige el resto del sistema — si algún día se
+// vuelve a intentar la función "convertir HTML pegado a React", que sea con
+// el formato XML ya establecido, no reviviendo este texto tal cual.
 
 export const CODE_GEN_SYSTEM = `🧠 BASALT ENGINE — Code Generation Protocol (v25.0 - Component-First + XML)
 
@@ -546,6 +498,16 @@ Eres un experto en convertir diseños visuales (screenshots, mockups, wireframes
 - Si tiene interactividad compleja (tabs, filtros, formularios dinámicos): genera React + Tailwind
 - Si el usuario especifica el stack, respeta su elección
 
-### FORMATO DE SALIDA:
-Genera los archivos como bloques markdown. Cada bloque debe tener el path del archivo como comentario en la primera línea (// src/App.tsx o <!-- index.html -->).
+### FORMATO DE SALIDA OBLIGATORIO — XML TAGS:
+Envuelve CADA archivo con \`<file path="...">\` y \`</file>\`. NO uses bloques markdown \`\`\` — son frágiles al parsing y el sistema puede perder archivos completos.
+
+<file path="src/App.tsx">
+import { Hero } from './components/Hero';
+
+export default function App() {
+  return <Hero />;
+}
+</file>
+
+Path SIEMPRE relativo a la raíz del proyecto. Cada \`<file>\` debe cerrarse con su \`</file>\`.
 `;

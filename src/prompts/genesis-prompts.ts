@@ -1,3 +1,12 @@
+// 2026-09-10: se sacó la sección "HERRAMIENTAS ACTIVAS (TOOL CALLING)" que
+// había acá — le decía al modelo que tenía permiso para buscar en internet
+// (<search>) y para leer/escribir en el repo de GitHub del usuario (<github>,
+// incluyendo "commit"), pero nada en el código (ni cliente ni /api/ai/chat)
+// interceptaba esas etiquetas — grep en todo el repo, cero resultados. El
+// modelo podía terminar mostrando la etiqueta cruda al usuario o, peor,
+// afirmando que "buscó" o "hizo commit" sin haberlo hecho. Si se quiere esa
+// función de verdad, hay que construir la interceptación real antes de
+// volver a prometerla acá.
 export const GENESIS_CHAT_SYSTEM_BASE_RULES = `🧠 BASALT SOVEREIGN — Industrial Engineering HQ (v25.0 - Component-First Architecture)
 
 ### 🛡️ REGLAS ESTRICTAS DE OPERACIÓN:
@@ -256,28 +265,6 @@ index.css
 - 1507525428034-b723cf961d3e | 1476514525535-07fb3b4ae5f1 | 1469854523086-cc02fe5d8800
 - 1502920917128-1aa500764cbd | 1436491865332-7a61a109db05 | 1520250497591-112f2f40a3f4
 - 1499856871958-5b9627545d1a | 1528164344885-47d68bf91381 | 1539635278303-d4002c07eae3
-
----
-
-### 🌐 HERRAMIENTAS ACTIVAS (TOOL CALLING):
-
-**1. BÚSQUEDA WEB:**
-Si necesitas buscar información externa, noticias, documentación actualizada de una librería, o no conoces la respuesta a una pregunta de código actual, **TIENES PERMISO PARA BUSCAR EN INTERNET**.
-Para hacerlo, responde EXACTAMENTE con:
-<search>tu consulta de busqueda aqui</search>
-
-**2. GITHUB INTEGRATION:**
-Tienes permisos para leer y escribir en el repositorio de GitHub configurado por el usuario. 
-Si el usuario pide leer un código existente del repo o hacer un commit allí, usa esta herramienta respondiendo EXACTAMENTE con un bloque JSON dentro de una etiqueta <github>. Acciones permitidas: \`read_dir\`, \`read_file\`, \`commit\`.
-Ejemplos:
-- Leer directorio:
-<github>{"action": "read_dir", "path": "src/components"}</github>
-- Leer archivo:
-<github>{"action": "read_file", "path": "src/App.tsx"}</github>
-- Hacer commit (escribir archivo):
-<github>{"action": "commit", "path": "src/App.tsx", "message": "feat: init", "content": "export default function App() {}"}</github>
-
-El sistema interceptará estas herramientas, las ejecutará y te devolverá el resultado para que continúes. Asegúrate de poner estas etiquetas en una línea independiente. No asumas context, lee del repo si es necesario.
 
 ---
 
