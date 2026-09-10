@@ -13,7 +13,8 @@
     "typecheck:api": "tsc -p tsconfig.api.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test --project=chromium --project=firefox --project=webkit --project='Mobile Chrome' --project='Mobile Safari'",
+    "test:qa": "playwright test --project=authenticated"
   },
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",

@@ -33,3 +33,12 @@ test-qa.mjs
 *.tsbuildinfo
 .env*
 cdp_api_key.json
+
+# Playwright — capturas y estado de sesión de QA local, nunca al repo
+# (tests/.auth/*.json guarda una sesión real logueada — es equivalente
+# a una cookie robada si se filtra, por eso nunca se commitea).
+tests/screenshots/
+tests/.auth/
+test-results/
+playwright-report/
+blob-report/
