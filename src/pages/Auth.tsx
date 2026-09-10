@@ -112,7 +112,7 @@ const Auth = () => {
               <motion.div
                 animate={{ scale: [1, 1.4, 1], opacity: [0.7, 1, 0.7] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(168,85,247,0.8)]"
+                className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]"
               />
               <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] font-display">
                 Plataforma de IA generativa

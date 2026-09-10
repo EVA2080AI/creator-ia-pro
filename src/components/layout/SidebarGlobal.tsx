@@ -202,7 +202,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           <div className="mt-8 mb-4 px-3 space-y-4 animate-in fade-in slide-in-from-left-4 duration-500">
             {(globalExpanded || isMobile) && (
               <div className="px-1 py-1.5">
-                <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10 shadow-[0_0_8px_rgba(168,85,247,0.1)]">
+                <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em] bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10 shadow-[0_0_8px_rgba(var(--primary-rgb),0.1)]">
                   {workspaceTitle || 'Herramientas'}
                 </span>
               </div>
@@ -307,7 +307,7 @@ function NavItem({
       className={cn(
         'group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold outline-none relative overflow-hidden',
         expanded ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
-        active ? 'bg-primary/5 text-primary border border-primary/10 shadow-[0_4px_20px_-4px_rgba(168,85,247,0.1)]' : 'bg-transparent text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50/80 border border-transparent',
+        active ? 'bg-primary/5 text-primary border border-primary/10 shadow-[0_4px_20px_-4px_rgba(var(--primary-rgb),0.12)]' : 'bg-transparent text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50/80 border border-transparent',
         className
       )}
     >
@@ -321,7 +321,7 @@ function NavItem({
         </span>
       )}
       {active && expanded && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-gradient-to-b from-primary to-blue-500 shadow-[2px_0_8px_rgba(168,85,247,0.5)]" />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full bg-primary shadow-[2px_0_8px_rgba(var(--primary-rgb),0.35)]" />
       )}
     </button>
   );

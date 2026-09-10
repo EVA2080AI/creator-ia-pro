@@ -471,7 +471,7 @@ const Tools = () => {
         <div className="relative aether-iridescent">
           <div className="absolute inset-0 blur-3xl rounded-full bg-primary/20 animate-pulse" />
           <div className="relative w-20 h-20 rounded-[1.5rem] aether-glass border border-white/60 flex items-center justify-center shadow-brand">
-            <currentTool.icon className={cn("h-10 w-10 text-primary drop-shadow-[0_0_15px_rgba(168,85,247,0.4)]")} />
+            <currentTool.icon className={cn("h-10 w-10 text-primary drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.4)]")} />
           </div>
         </div>
         <div>
@@ -506,7 +506,7 @@ const Tools = () => {
         {/* Sidebar header */}
         <div className="px-5 pt-7 pb-4 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]" />
             <p className="text-[10px] font-black uppercase tracking-[0.35em] text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-500 font-display">
               Aplicaciones
             </p>
@@ -549,7 +549,7 @@ const Tools = () => {
                   </p>
                 </div>
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full bg-gradient-to-b from-primary to-blue-500 shadow-[2px_0_8px_rgba(168,85,247,0.5)]" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full bg-primary shadow-[2px_0_8px_rgba(var(--primary-rgb),0.35)]" />
                 )}
               </button>
             );
@@ -588,7 +588,7 @@ const Tools = () => {
                   </p>
                 </div>
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full bg-gradient-to-b from-primary to-blue-500 shadow-[2px_0_8px_rgba(168,85,247,0.5)]" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 rounded-r-full bg-primary shadow-[2px_0_8px_rgba(var(--primary-rgb),0.35)]" />
                 )}
               </button>
             );

@@ -52,7 +52,7 @@ export const TaskCard = memo(function TaskCard({
       aria-label={`${task.title} · ${STATUS_META[task.status].label}`}
       className={cn(
         "group relative bg-white border border-zinc-200 rounded-2xl p-3.5 md:p-4 text-left select-none cursor-pointer transition-all",
-        "shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-primary/40 hover:shadow-[0_8px_24px_-10px_rgba(168,85,247,0.3)] active:scale-[0.99]",
+        "shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-primary/40 hover:shadow-[0_8px_24px_-10px_rgba(var(--primary-rgb),0.3)] active:scale-[0.99]",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
         dragging && "opacity-40",
         done && "bg-zinc-50/70"

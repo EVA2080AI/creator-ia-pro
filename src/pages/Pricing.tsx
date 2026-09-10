@@ -351,10 +351,10 @@ export default function Pricing() {
                     whileHover={{ y: -6 }}
                     className={cn(
                       "relative group rounded-[2rem] border p-6 flex flex-col transition-all duration-500 overflow-hidden",
-                      isPopular 
-                        ? "bg-zinc-50 border-primary/40 shadow-[0_20px_80px_-15px_rgba(168,85,247,0.15)]" 
+                      isPopular
+                        ? "bg-zinc-50 border-primary/40 shadow-[0_20px_80px_-15px_rgba(var(--primary-rgb),0.15)]"
                         : isContact
-                        ? "bg-gradient-to-br from-primary/5 to-purple-500/5 border-primary/20"
+                        ? "bg-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20"
                         : "bg-zinc-50 border-zinc-200"
                     )}
                   >

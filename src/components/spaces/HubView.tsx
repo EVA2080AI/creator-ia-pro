@@ -176,7 +176,7 @@ export const HubView = () => {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.4, delay: 0.3 }}
-              whileHover={{ scale: 1.03, borderColor: "rgba(168,85,247,0.3)" }}
+              whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               aria-label="Crear lienzo en blanco — nuevo proyecto vacío"
               onClick={() => {

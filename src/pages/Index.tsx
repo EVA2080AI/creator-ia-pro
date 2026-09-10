@@ -43,12 +43,12 @@ const PRODUCTS = [
   {
     badge: "Aplicaciones",
     headline: "Crea imágenes y textos con IA.",
-    sub: "Herramientas de imagen (genera, logos, quita fondo, upscale…) y de texto (copy, SEO, redes, ads). Todo inline, sin salir del workspace.",
+    sub: "Herramientas de imagen (genera, logos, transfiere estilo, mockups de producto) y de texto (copy, SEO, redes, ads). Todo inline, sin salir del workspace.",
     icon: Image,
     color: "#00C2FF",
     cta: "Abrir Aplicaciones →",
     path: "/tools",
-    features: ["Flux Schnell + Flux Pro", "Upscale 4K", "Streaming de texto", "Guarda en biblioteca"],
+    features: ["Genera imágenes con IA", "Diseña logos y estilos", "Streaming de texto", "Guarda en biblioteca"],
     preview: [
       { tool: "Crear imagen", cr: 2, color: "#a855f7" },
       { tool: "Diseñar logo",  cr: 3, color: "#00c2ff" },
@@ -199,9 +199,9 @@ const GUARANTEES = [
 
 const MARQUEE_ITEMS = [
   { icon: Sparkles, label: "Claude Opus 4.5" },
-  { icon: Wand2,    label: "Flux 1.1 Pro" },
+  { icon: Wand2,    label: "Gemini Flash Image" },
   { icon: Code2,    label: "Genesis IA" },
-  { icon: Image,    label: "Upscale 4K" },
+  { icon: Image,    label: "Diseño de logos" },
   { icon: Layers,   label: "Canvas IA" },
   { icon: MessageSquare, label: "GPT-4.1 Mini" },
   { icon: Zap,      label: "Gemini 2.5 Flash" },
@@ -565,7 +565,7 @@ export default function Index() {
               >
                 <motion.button
                   onClick={() => navigate("/auth")}
-                  whileHover={{ scale: 1.03, boxShadow: "0 20px 40px -10px rgba(168,85,247,0.4)" }}
+                  whileHover={{ scale: 1.03, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.35)" }}
                   whileTap={{ scale: 0.98 }}
                   className="group flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-zinc-900 to-zinc-800 text-white text-[15px] font-black hover:from-zinc-800 hover:to-zinc-700 transition-all shadow-xl"
                 >
@@ -1379,7 +1379,7 @@ export default function Index() {
               <motion.div variants={fadeUp} custom={0.4} className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <motion.button
                   onClick={() => navigate("/auth")}
-                  whileHover={{ scale: 1.03, boxShadow: "0 20px 40px -10px rgba(168,85,247,0.4)" }}
+                  whileHover={{ scale: 1.03, boxShadow: "0 20px 40px -10px rgba(0,0,0,0.35)" }}
                   whileTap={{ scale: 0.98 }}
                   className="flex items-center gap-2.5 px-10 py-4 rounded-full bg-white text-zinc-900 text-[15px] font-black hover:bg-zinc-100 transition-all shadow-xl"
                 >

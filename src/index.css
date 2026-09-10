@@ -22,9 +22,17 @@
     --popover-foreground: 240 10% 6%;
 
     /* ── Brand ─────────────────────────────── */
-    --primary:         271 91% 65%;       /* #A855F7 brand purple */
+    /* 2026-09-10: pedido explícito del usuario — UI más neutra. El morado
+       de marca (#A855F7) deja de ser el color dominante de la interfaz
+       (botones, foco, hover) y pasa a acento puntual y opt-in (.shadow-brand,
+       logo, mesh de fondo de Genesis IA/Canvas IA — sin tocar, tienen su
+       propia identidad ya documentada en .design/skills/frontend-design.md).
+       El color dominante ahora es un neutro casi-negro (zinc-900 de shadcn),
+       igual que Linear/Vercel/Stripe — que es literalmente lo que el
+       comentario de cabecera de este archivo ya decía perseguir. */
+    --primary:         240 5.9% 10%;      /* #18181B neutral, ex #A855F7 */
     --primary-foreground: 0 0% 100%;
-    --primary-rgb:     168, 85, 247;      /* RGB for rgba() usage */
+    --primary-rgb:     24, 24, 27;        /* RGB for rgba() usage */
 
     /* ── Surfaces ──────────────────────────── */
     --secondary:       240 5% 96%;        /* #F3F3F5 */
@@ -33,8 +41,8 @@
     --muted:           240 5% 96%;
     --muted-foreground: 240 4% 50%;       /* #7D7D85 */
 
-    --accent:          271 91% 97%;
-    --accent-foreground: 271 91% 45%;
+    --accent:          240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
 
     /* ── Utility ───────────────────────────── */
     --destructive:     0 84% 60%;
@@ -42,18 +50,18 @@
 
     --border:          240 6% 90%;        /* #E3E3E8 */
     --input:           240 6% 90%;
-    --ring:            271 91% 65%;
+    --ring:            240 5.9% 10%;
     --radius:          0.875rem;
 
     /* ── Sidebar ───────────────────────────── */
     --sidebar-background:          240 5% 98%;
     --sidebar-foreground:          240 5% 40%;
-    --sidebar-primary:             271 91% 65%;
+    --sidebar-primary:             240 5.9% 10%;
     --sidebar-primary-foreground:  0 0% 100%;
     --sidebar-accent:              240 5% 94%;
     --sidebar-accent-foreground:   240 10% 6%;
     --sidebar-border:              240 6% 90%;
-    --sidebar-ring:                271 91% 65%;
+    --sidebar-ring:                240 5.9% 10%;
 
     /* ── Canvas v2.0 — light canvas ───────── */
     --canvas-bg:        210 20% 98%;       /* #F8FAFC */
@@ -182,7 +190,7 @@
   p { line-height: 1.65; }
 
   *::selection {
-    background: rgba(168, 85, 247, 0.15);
+    background: rgba(var(--primary-rgb), 0.15);
     color: hsl(var(--foreground));
   }
 }

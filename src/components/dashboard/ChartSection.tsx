@@ -147,9 +147,9 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
                     initial={{ width: 0 }}
                     animate={{ width: `${(tool.value / maxToolValue) * 100}%` }}
                     transition={{ duration: 1.2, delay: 0.4 + (index * 0.1), ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-purple-400 rounded-full"
-                    style={{ 
-                      boxShadow: '0 0 12px 0px rgba(168,85,247,0.4)',
+                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-stone-300 to-white rounded-full"
+                    style={{
+                      boxShadow: '0 0 12px 0px rgba(255,255,255,0.35)',
                     }}
                   />
                 </div>

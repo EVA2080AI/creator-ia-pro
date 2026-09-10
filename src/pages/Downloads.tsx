@@ -40,7 +40,7 @@ const Downloads = () => {
         {/* Single CTA card */}
         <div className="w-full max-w-2xl bg-white/80 backdrop-blur-md rounded-[2.5rem] border border-zinc-200/60 p-10 hover:border-primary/20 hover:shadow-xl transition-all duration-500 group shadow-sm">
           <div className="flex flex-col items-center text-center gap-6">
-            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 border border-primary/20 group-hover:scale-105 transition-transform shadow-[0_8px_16px_-4px_rgba(168,85,247,0.15)]">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary/10 border border-primary/20 group-hover:scale-105 transition-transform shadow-[0_8px_16px_-4px_rgba(var(--primary-rgb),0.15)]">
               <Globe className="h-9 w-9 text-primary" />
             </div>
             <div>
