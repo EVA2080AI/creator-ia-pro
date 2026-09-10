@@ -249,8 +249,15 @@ export function useStudioChatAI({
         systemPrompt = CODE_GEN_SYSTEM;
       }
 
-      // Add context for code generation (but not for reasoning mode)
-      if (!isChatMode && !isReasoningMode && projectContext) {
+      // El contexto del proyecto (nombres de archivo + contenido del archivo
+      // activo, ya acotado por BUDGET.maxSnapshotChars) se suma también en
+      // modo conversación: GENESIS_CHAT_SYSTEM le pide explícitamente
+      // "sugerí mejoras al proyecto actual si hay uno abierto", pero antes
+      // solo llegaba en modo codegen — el chat literalmente no podía ver los
+      // archivos sobre los que se supone que opina. Reasoning mode queda
+      // afuera a propósito: es la fase de planificación pura antes de tocar
+      // código real.
+      if (!isReasoningMode && projectContext) {
         systemPrompt += `\n\n${projectContext}`;
       }
 
