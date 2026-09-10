@@ -13,7 +13,7 @@ import {
   Github, Loader2, FolderOpen, Files, MessageSquare,
   Pencil, UploadCloud, Zap, Sparkles, Search, Star,
   User, Paperclip, Mic, Send, LayoutTemplate,
-  Clock, ChevronDown, Eye, History, Download, RotateCcw,
+  ChevronDown, Eye, History, Download, RotateCcw,
   MoreHorizontal, Globe, BarChart2, Columns, Cloud,
   Map, ArrowUp, ArrowRight, Layers, X, ArrowLeft,
   PanelLeft, PanelLeftClose, Phone, RefreshCw, Database,
@@ -101,7 +101,7 @@ const STARTER_PROMPTS = [
   { label: 'Login / Auth',  emoji: '🔐', prompt: 'Crea un sistema de login y registro con formularios validados, estados de error, y diseño moderno con glassmorphism.' },
 ];
 
-type WelcomeTab = 'projects' | 'recents' | 'templates';
+type WelcomeTab = 'conversations' | 'templates';
 
 interface WelcomeScreenProps {
   onPrompt: (prompt: string, opts?: { mode?: BuildMode }) => void;
@@ -134,7 +134,7 @@ function WelcomeScreen({
 }: WelcomeScreenProps) {
   const navigate = useNavigate();
   const [input, setInput] = useState('');
-  const [activeTab, setActiveTab] = useState<WelcomeTab>('projects');
+  const [activeTab, setActiveTab] = useState<WelcomeTab>('conversations');
   const [search, setSearch] = useState('');
   const [templateCategory, setTemplateCategory] = useState<TemplateCategory | 'all'>('all');
   const [templateSearch, setTemplateSearch] = useState('');
@@ -162,9 +162,9 @@ function WelcomeScreen({
     if (text) onPrompt(text, { mode: buildMode });
   };
 
-  const filteredProjects = projects.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProjects = [...projects]
+    .filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => new Date(b.updated_at ?? b.created_at ?? 0).getTime() - new Date(a.updated_at ?? a.created_at ?? 0).getTime());
   
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
@@ -174,9 +174,166 @@ function WelcomeScreen({
   const greeting = displayName ? `¿Listo para construir, ${displayName.split(' ')[0]}?` : '¿Listo para construir?';
 
   return (
-    <div className="flex h-full overflow-hidden" 
+    <div className="flex h-full overflow-hidden"
       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
+
+      {/* ── Conversaciones — sidebar persistente, reemplaza el viejo panel
+          flotante de abajo (pedido del usuario: "quita eso de proyecto, eso
+          puede estar como conversaciones al lado izquierdo"). Cada
+          "conversación" es hoy el mismo objeto que un proyecto de código —
+          no hay un modelo de datos separado — así que esto es una
+          reetiquetada + reubicación real, no una feature nueva. ── */}
+      <aside className="w-[280px] shrink-0 h-full border-r border-zinc-100 bg-white/60 backdrop-blur-xl flex flex-col relative z-30">
+        <div className="p-4 border-b border-zinc-100 shrink-0 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[13px] font-bold text-zinc-900">Conversaciones</span>
+            <button
+              onClick={onCreateProject}
+              aria-label="Nueva conversación"
+              title="Nueva conversación"
+              className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar conversación..."
+              className="w-full pl-8 pr-3 py-1.5 text-[12px] rounded-lg border border-zinc-200 bg-zinc-50 focus:outline-none focus:border-primary/40 text-zinc-700 placeholder:text-zinc-400"
+            />
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setActiveTab(t => t === 'templates' ? 'conversations' : 'templates')}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
+                activeTab === 'templates' ? 'bg-primary/10 text-primary' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
+              }`}
+            >
+              <LayoutTemplate className="w-3.5 h-3.5" />
+              Plantillas
+            </button>
+            <button
+              onClick={onOpenTools}
+              className="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-lg text-[11px] font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-all"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Herramientas
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto custom-scrollbar px-2 py-2">
+          {activeTab === 'conversations' && (
+            <div className="space-y-0.5">
+              {filteredProjects.map(p => (
+                <button key={p.id} onClick={() => onSelectProject(p)}
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left hover:bg-zinc-100 transition-all group relative">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                    <MessageSquare className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-medium text-zinc-700 group-hover:text-zinc-900 truncate">{p.name}</p>
+                    <p className="text-[10px] text-zinc-400">
+                      {new Date(p.updated_at ?? p.created_at ?? Date.now()).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                    </p>
+                  </div>
+                  <Trash2
+                    className="h-3.5 w-3.5 shrink-0 opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 transition-all"
+                    onClick={(e) => onDeleteProject(p.id, e)}
+                  />
+                </button>
+              ))}
+              {filteredProjects.length === 0 && (
+                <div className="flex flex-col items-center gap-3 py-10 opacity-40 px-4 text-center">
+                  <MessageSquare className="h-7 w-7 text-zinc-300" />
+                  <p className="text-[11px] text-zinc-500 font-medium">
+                    {search ? 'Ninguna conversación coincide' : 'Empezá una conversación nueva arriba'}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'templates' && (
+            <div className="space-y-3">
+              <div className="relative px-0.5">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+                <input
+                  value={templateSearch}
+                  onChange={e => setTemplateSearch(e.target.value)}
+                  placeholder="Buscar plantillas..."
+                  className="w-full pl-8 pr-3 py-1.5 text-[12px] rounded-lg border border-zinc-200 bg-zinc-50 focus:outline-none focus:border-primary/40 text-zinc-700 placeholder:text-zinc-400"
+                />
+              </div>
+              <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide px-0.5">
+                <button
+                  onClick={() => setTemplateCategory('all')}
+                  className={`shrink-0 px-2.5 py-1 rounded-lg text-[10.5px] font-medium transition-all border ${
+                    templateCategory === 'all'
+                      ? 'bg-zinc-900 text-white border-zinc-900'
+                      : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
+                  }`}
+                >
+                  Todos
+                </button>
+                {TEMPLATE_CATEGORIES.slice(0, 4).map(cat => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setTemplateCategory(cat.id)}
+                    className={`shrink-0 px-2.5 py-1 rounded-lg text-[10.5px] font-medium transition-all border ${
+                      templateCategory === cat.id
+                        ? 'bg-zinc-900 text-white border-zinc-900'
+                        : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
+                    }`}
+                  >
+                    {cat.emoji} {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              {(() => {
+                const filtered = GENESIS_TEMPLATES.filter(t => {
+                  const matchCat = templateCategory === 'all' || t.category === templateCategory;
+                  const q = templateSearch.toLowerCase();
+                  const matchSearch = !q || t.label.toLowerCase().includes(q) || t.description.toLowerCase().includes(q) || t.tags.some(tag => tag.includes(q));
+                  return matchCat && matchSearch;
+                });
+
+                if (filtered.length === 0) return (
+                  <div className="flex flex-col items-center gap-3 py-8 text-center opacity-60">
+                    <span className="text-2xl">🔍</span>
+                    <p className="text-[11px] text-zinc-400 font-medium">Sin resultados</p>
+                  </div>
+                );
+
+                return (
+                  <div className="space-y-1.5 px-0.5">
+                    {filtered.map(t => (
+                      <button
+                        key={t.id}
+                        onClick={() => handleSubmit(t.prompt)}
+                        className="group w-full flex flex-col gap-1 p-2.5 rounded-xl text-left hover:bg-zinc-100 transition-all"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-base shrink-0">{t.emoji}</span>
+                          <p className="text-[12px] font-medium text-zinc-900 truncate">{t.label}</p>
+                        </div>
+                        <p className="text-[10.5px] text-zinc-500 leading-relaxed line-clamp-2 pl-6">{t.description}</p>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </div>
+      </aside>
 
       {/* ── Main Area ─────────────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden relative bg-transparent">
@@ -195,7 +352,7 @@ function WelcomeScreen({
         <div className="absolute inset-0 overflow-hidden pointer-events-none genesis-panel-background mask-radial-faded" />
 
         {/* Centered content */}
-        <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-40 pb-32 pointer-events-none">
+        <div className="flex-1 flex flex-col items-center justify-center px-8 relative z-40 pointer-events-none">
           <h1 className="text-[32px] md:text-[42px] font-bold text-zinc-900 tracking-tight mb-10 text-center leading-tight pointer-events-auto">
             {greeting}
           </h1>
@@ -308,231 +465,6 @@ function WelcomeScreen({
           </div>
         </div>
 
-        {/* Bottom Panel — Premium Aether */}
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center px-4 w-full h-[260px]">
-          <div className="w-full max-w-5xl rounded-t-[2rem] overflow-hidden flex relative z-30 aether-glass border-t border-white/60 shadow-[0_-20px_60px_rgba(0,0,0,0.04)] backdrop-blur-3xl">
-
-            {/* Side Navigation — Slimmer */}
-            <aside className="w-[160px] border-r border-zinc-100 bg-zinc-50/30 flex flex-col pt-6 px-3 shrink-0">
-               <div className="px-2 mb-4">
-                 <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Navegación</h3>
-               </div>
-               
-               <nav className="space-y-0.5">
-                  {[
-                    { id: 'projects', label: 'Mis proyectos', icon: FolderOpen },
-                    { id: 'recents', label: 'Recientes', icon: Clock },
-                    { id: 'templates', label: 'Plantillas', icon: LayoutTemplate }
-                  ].map(tab => {
-                    const Icon = tab.icon;
-                    const isActive = activeTab === tab.id;
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id as WelcomeTab)}
-                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-[12px] font-medium ${
-                          isActive ? 'bg-primary/10 text-primary' : 'text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900'
-                        }`}
-                      >
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-zinc-400'}`} />
-                        <span>{tab.label}</span>
-                      </button>
-                    );
-                  })}
-                  <button
-                    onClick={onOpenTools}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all text-[12px] font-medium text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
-                  >
-                    <LayoutGrid className="w-4 h-4 text-zinc-400" />
-                    <span>Herramientas</span>
-                  </button>
-               </nav>
-
-               <div className="mt-auto px-2 pb-4">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-100/50">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <p className="text-[10px] font-medium text-zinc-500">Basalt Pro Activo</p>
-                  </div>
-               </div>
-            </aside>
-
-            {/* Main Content Area */}
-            <main className="flex-1 flex flex-col min-w-0 bg-transparent">
-               {/* Action Header */}
-               <div className="flex items-center justify-between px-6 pt-6 pb-4 shrink-0">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-[16px] font-bold text-zinc-900">
-                      {activeTab === 'projects' ? 'Mis Proyectos' : activeTab === 'recents' ? 'Recientes' : 'Plantillas'}
-                    </h2>
-                    <span className="text-[11px] text-zinc-400">
-                      {activeTab === 'projects' ? filteredProjects.length : activeTab === 'recents' ? projects.length : GENESIS_TEMPLATES.length}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={() => document.getElementById('welcome-folder-input')?.click()}
-                    className="flex items-center gap-2 px-3 h-8 rounded-lg bg-zinc-900 text-white text-[11px] font-medium hover:bg-zinc-800 transition-colors"
-                  >
-                    <UploadCloud className="w-4 h-4" />
-                    Importar
-                  </button>
-               </div>
-
-               {/* Tab content area */}
-               <div className="px-6 pb-6 flex-1 overflow-y-auto custom-scrollbar">
-                  {activeTab === 'projects' && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {filteredProjects.map(p => (
-                        <button key={p.id} onClick={() => onSelectProject(p)}
-                          className="flex flex-col gap-2 p-3 rounded-[1.25rem] text-left border border-white/60 bg-white/50 backdrop-blur-sm hover:bg-white/80 hover:shadow-md transition-all duration-300 group relative">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-                            <Code2 className="h-3.5 w-3.5 text-primary" />
-                          </div>
-                          <p className="text-[12px] font-medium text-zinc-700 group-hover:text-zinc-900 truncate">{p.name}</p>
-                          <Trash2 
-                            className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all" 
-                            onClick={(e) => onDeleteProject(p.id, e)}
-                          />
-                        </button>
-                      ))}
-                      {filteredProjects.length === 0 && (
-                        <div className="col-span-full flex flex-col items-center gap-3 py-10 opacity-40">
-                          <Plus className="h-8 w-8 text-zinc-300" />
-                          <p className="text-[12px] text-zinc-500 font-medium text-center">No hay proyectos que coincidan</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {activeTab === 'recents' && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {[...projects]
-                        .sort((a, b) => new Date(b.updated_at ?? b.created_at ?? 0).getTime() - new Date(a.updated_at ?? a.created_at ?? 0).getTime())
-                        .slice(0, 10)
-                        .map(p => (
-                            <button key={p.id} onClick={() => onSelectProject(p)}
-                              className="flex flex-col gap-2 p-3 rounded-[1.25rem] text-left border border-white/60 bg-white/50 backdrop-blur-sm hover:bg-white/80 hover:shadow-md transition-all duration-300 group relative">
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
-                              <Clock className="h-3.5 w-3.5 text-primary" />
-                            </div>
-                            <p className="text-[12px] font-medium text-zinc-700 group-hover:text-zinc-900 truncate">{p.name}</p>
-                            <p className="text-[10px] text-zinc-400">
-                              {new Date(p.updated_at ?? p.created_at ?? Date.now()).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
-                            </p>
-                            <Trash2 
-                              className="absolute right-4 top-4 h-3.5 w-3.5 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all" 
-                              onClick={(e) => onDeleteProject(p.id, e)}
-                            />
-                          </button>
-                        ))
-                      }
-                      {projects.length === 0 && (
-                        <div className="col-span-full flex flex-col items-center gap-3 py-6">
-                          <span className="text-4xl">🕒</span>
-                          <p className="text-[13px] text-zinc-500">Tus proyectos recientes aparecerán aquí</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {activeTab === 'templates' && (
-                    <div className="space-y-4">
-                      {/* Template Search + Category Filter */}
-                      <div className="flex flex-col sm:flex-row gap-2 mb-2">
-                        <div className="relative flex-1">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
-                          <input
-                            value={templateSearch}
-                            onChange={e => setTemplateSearch(e.target.value)}
-                            placeholder="Buscar plantillas..."
-                            className="w-full pl-9 pr-4 py-2 text-[12px] rounded-lg border border-zinc-200 bg-zinc-50 focus:outline-none focus:border-primary/40 text-zinc-700 placeholder:text-zinc-400"
-                          />
-                        </div>
-                        <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-hide">
-                          <button
-                            onClick={() => setTemplateCategory('all')}
-                            className={`shrink-0 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all border ${
-                              templateCategory === 'all'
-                                ? 'bg-zinc-900 text-white border-zinc-900'
-                                : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
-                            }`}
-                          >
-                            Todos
-                          </button>
-                          {TEMPLATE_CATEGORIES.slice(0, 4).map(cat => (
-                            <button
-                              key={cat.id}
-                              onClick={() => setTemplateCategory(cat.id)}
-                              className={`shrink-0 px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all border ${
-                                templateCategory === cat.id
-                                  ? 'bg-zinc-900 text-white border-zinc-900'
-                                  : 'bg-white text-zinc-500 border-zinc-200 hover:border-zinc-300'
-                              }`}
-                        >
-                          <span>{cat.emoji}</span>
-                          {cat.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Template Grid */}
-                  {(() => {
-                    const filtered = GENESIS_TEMPLATES.filter(t => {
-                      const matchCat = templateCategory === 'all' || t.category === templateCategory;
-                      const q = templateSearch.toLowerCase();
-                      const matchSearch = !q || t.label.toLowerCase().includes(q) || t.description.toLowerCase().includes(q) || t.tags.some(tag => tag.includes(q));
-                      return matchCat && matchSearch;
-                    });
-
-                    if (filtered.length === 0) return (
-                      <div className="flex flex-col items-center gap-3 py-8 text-center">
-                        <span className="text-3xl">🔍</span>
-                        <p className="text-[13px] text-zinc-400 font-medium">No se encontraron templates para tu búsqueda</p>
-                      </div>
-                    );
-
-                    return (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {filtered.map(t => {
-                          const cat = TEMPLATE_CATEGORIES.find(c => c.id === t.category);
-                          const complexityColors = {
-                            basic: 'bg-emerald-50 text-emerald-600',
-                            medium: 'bg-amber-50 text-amber-600',
-                            advanced: 'bg-red-50 text-red-600',
-                          };
-                          return (
-                            <button
-                              key={t.id}
-                              onClick={() => handleSubmit(t.prompt)}
-                              className="group flex flex-col gap-2 p-3 rounded-[1.25rem] text-left border border-white/60 bg-white/50 backdrop-blur-sm hover:bg-white/80 hover:shadow-md transition-all duration-300 relative overflow-hidden"
-                            >
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-lg">{t.emoji}</span>
-                                  <div>
-                                    <p className="text-[13px] font-medium text-zinc-900">{t.label}</p>
-                                    <span className="text-[10px] text-zinc-400">{cat?.label}</span>
-                                  </div>
-                                </div>
-                                <span className={`shrink-0 text-[9px] font-medium px-2 py-0.5 rounded ${complexityColors[t.complexity]}`}>
-                                  {t.complexity === 'basic' ? 'Simple' : t.complexity === 'medium' ? 'Medio' : 'Avanzado'}
-                                </span>
-                              </div>
-
-                              <p className="text-[11px] text-zinc-500 leading-relaxed">{t.description}</p>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    );
-                    })()}
-                  </div>
-                )}
-              </div>
-            </main>
-          </div>
-        </div>
       </div>
     </div>
   );
