@@ -115,7 +115,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
         "HTTP-Referer": "https://creator-ia.com",
-        "X-Title": "Creator IA Pro - Genesis",
+        "X-Title": "Creator IA Pro - Basalt",
       },
       body: JSON.stringify({
         model: modelId,

@@ -50,7 +50,7 @@ interface NavItemDef {
 const NAV_MAIN: NavItemDef[] = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
   { path: '/tareas',       label: 'Tareas',        icon: ListTodo,       minTier: 'free' },
-  { path: '/chat',         label: 'Genesis IA',    icon: Brain,          minTier: 'creador' },
+  { path: '/chat',         label: 'Basalt IA',     icon: Brain,          minTier: 'creador' },
   { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'pro' },
   { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'pro' },
   { path: '/tools',        label: 'Aplicaciones',  icon: LayoutGrid,     minTier: 'free' },

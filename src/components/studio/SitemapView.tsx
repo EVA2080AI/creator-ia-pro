@@ -94,7 +94,7 @@ export function SitemapView({ files, onSelectFile }: SitemapViewProps) {
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl" style={{ background: 'rgba(var(--interactive-blue-rgb),0.06)', border: '1px solid rgba(var(--interactive-blue-rgb),0.12)' }}>
                 <Globe className="h-4 w-4 text-interactive/50" />
                 <p className="text-[11px] text-white/40">
-                  Proyecto single-page. Pide a Genesis: <em>"Convierte esto en un sitio multi-página"</em>
+                  Proyecto single-page. Pide a Basalt: <em>"Convierte esto en un sitio multi-página"</em>
                 </p>
               </div>
             ) : (

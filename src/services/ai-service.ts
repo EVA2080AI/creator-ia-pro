@@ -120,7 +120,7 @@ export const aiService = {
   async handleTextGen(action: string, prompt: string, model: string, _profile?: ProfileData | null, persona: string = "antigravity"): Promise<AIResponse> {
     const orModel = TEXT_MODEL_MAP[model] ?? model;
     let systemPrompt = persona === "genesis"
-      ? "Eres Genesis AI, arquitecto de producto senior. Responde en español, directo y accionable."
+      ? "Eres Basalt AI, arquitecto de producto senior. Responde en español, directo y accionable."
       : "Eres el Asistente de Editor, núcleo de inteligencia estratégica de Creator IA Pro. Responde en español, directo y accionable.";
     if (action === "ui") {
       systemPrompt += `\n\nEres un experto UX/UI. Genera SOLO JSON válido: { "ui": { "title": "string", "description": "string", "components": [...] }, "device": "mobile|tablet|desktop" }. Sin markdown.`;

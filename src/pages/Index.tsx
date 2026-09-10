@@ -26,12 +26,12 @@ import {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const PRODUCTS = [
   {
-    badge: "Genesis IA",
+    badge: "Basalt IA",
     headline: "Crea apps y sitios web en segundos.",
-    sub: "Describe tu app o sitio web y Genesis lo construye completo: React, TypeScript, Tailwind, APIs y más. Previsualización en tiempo real, push a GitHub integrado.",
+    sub: "Describe tu app o sitio web y Basalt lo construye completo: React, TypeScript, Tailwind, APIs y más. Previsualización en tiempo real, push a GitHub integrado.",
     icon: Code2,
     color: "#4ADE80",
-    cta: "Probar Genesis IA →",
+    cta: "Probar Basalt IA →",
     path: "/chat",
     features: ["Apps React + TypeScript", "Sitios web completos", "Preview instantáneo", "Claude Sonnet 4.5"],
     preview: [
@@ -67,7 +67,7 @@ const PLANS = [
     color: "#64748B",
     description: "Para explorar el potencial de la IA",
     badge: "Para empezar",
-    features: ["Genesis IA básico", "5 créditos totales", "Modelos estándar", "Soporte comunitario"]
+    features: ["Basalt IA básico", "5 créditos totales", "Modelos estándar", "Soporte comunitario"]
   },
   {
     name: "Creador",
@@ -76,7 +76,7 @@ const PLANS = [
     credits: "1.000 créditos",
     color: "#94A3B8",
     description: "Todo lo que necesitas para empezar",
-    features: ["Genesis IA completo", "Aplicaciones creativas", "1.000 créditos/mes", "Soporte por chat"]
+    features: ["Basalt IA completo", "Aplicaciones creativas", "1.000 créditos/mes", "Soporte por chat"]
   },
   {
     name: "Pro",
@@ -132,7 +132,7 @@ const TRUST = [
 // Hechos reales del producto, no métricas de uso inventadas.
 const STATS = [
   { value: "12+", label: "Herramientas de IA", icon: Wand2 },
-  { value: "3", label: "Formas de crear: Genesis IA, Canvas IA, Aplicaciones", icon: Layers },
+  { value: "3", label: "Formas de crear: Basalt IA, Canvas IA, Aplicaciones", icon: Layers },
   { value: "5", label: "Créditos gratis para empezar, sin tarjeta", icon: Zap },
   { value: "AES-256", label: "Encriptación de tus datos", icon: Shield },
 ];
@@ -149,7 +149,7 @@ const HOW_IT_WORKS = [
   {
     step: "02",
     title: "IA genera el código",
-    description: "Genesis IA construye tu proyecto completo con React, TypeScript y Tailwind en segundos.",
+    description: "Basalt IA construye tu proyecto completo con React, TypeScript y Tailwind en segundos.",
     color: "#6366f1",
     icon: Code2,
   },
@@ -178,7 +178,7 @@ const GUARANTEES = [
   {
     icon: Zap,
     title: "Empezás gratis, sin tarjeta",
-    content: "5 créditos para probar Genesis IA, Canvas IA y Aplicaciones antes de pagar nada.",
+    content: "5 créditos para probar Basalt IA, Canvas IA y Aplicaciones antes de pagar nada.",
   },
   {
     icon: Shield,
@@ -200,7 +200,7 @@ const GUARANTEES = [
 const MARQUEE_ITEMS = [
   { icon: Sparkles, label: "Claude Opus 4.5" },
   { icon: Wand2,    label: "Gemini Flash Image" },
-  { icon: Code2,    label: "Genesis IA" },
+  { icon: Code2,    label: "Basalt IA" },
   { icon: Image,    label: "Diseño de logos" },
   { icon: Layers,   label: "Canvas IA" },
   { icon: MessageSquare, label: "GPT-4.1 Mini" },
@@ -429,7 +429,7 @@ export default function Index() {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://creator-ia.com/" />
         <meta property="og:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
-        <meta property="og:description" content="Plataforma todo-en-uno: Genesis IA para apps React + Aplicaciones para imágenes y texto. Paga en COP con Bold." />
+        <meta property="og:description" content="Plataforma todo-en-uno: Basalt IA para apps React + Aplicaciones para imágenes y texto. Paga en COP con Bold." />
         <meta property="og:image" content="https://creator-ia.com/og-image.jpg" />
         <meta property="og:site_name" content="Creator IA Pro" />
         <meta property="og:locale" content="es_CO" />
@@ -438,7 +438,7 @@ export default function Index() {
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content="https://creator-ia.com/" />
         <meta property="twitter:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
-        <meta property="twitter:description" content="Plataforma todo-en-uno: Genesis IA para apps React + Aplicaciones para imágenes y texto. Paga en COP con Bold." />
+        <meta property="twitter:description" content="Plataforma todo-en-uno: Basalt IA para apps React + Aplicaciones para imágenes y texto. Paga en COP con Bold." />
         <meta property="twitter:image" content="https://creator-ia.com/og-image.jpg" />
 
         {/* Canonical */}
@@ -524,7 +524,7 @@ export default function Index() {
                 >
                   <Sparkles className="h-4 w-4 text-primary" />
                 </motion.span>
-                Genesis IA · Aplicaciones · V21.0
+                Basalt IA · Aplicaciones · V21.0
               </motion.div>
 
               {/* Main Headline */}
@@ -551,7 +551,7 @@ export default function Index() {
                 custom={0.35}
                 className="text-[clamp(1rem,2vw,1.25rem)] text-zinc-500 max-w-2xl mx-auto leading-relaxed mb-10"
               >
-                Genesis IA convierte tus ideas en apps React completas. Aplicaciones: imágenes, logos y textos generados al instante.
+                Basalt IA convierte tus ideas en apps React completas. Aplicaciones: imágenes, logos y textos generados al instante.
                 <span className="text-zinc-900 font-semibold"> Todo en uno.</span>
               </motion.p>
 
@@ -639,7 +639,7 @@ export default function Index() {
                         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                           <span className="text-white font-bold text-sm">C</span>
                         </div>
-                        <span className="text-white font-bold text-sm">Genesis IA</span>
+                        <span className="text-white font-bold text-sm">Basalt IA</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="px-2 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
@@ -1363,7 +1363,7 @@ export default function Index() {
                 </span>
               </motion.h2>
               <motion.p variants={fadeUp} custom={0.2} className="text-zinc-400 text-[16px] mb-10 leading-relaxed max-w-xl mx-auto">
-                Genesis IA, Canvas IA y Aplicaciones — todo en un solo lugar, listo para usar hoy.
+                Basalt IA, Canvas IA y Aplicaciones — todo en un solo lugar, listo para usar hoy.
               </motion.p>
 
               {/* Feature bullets */}
@@ -1432,7 +1432,7 @@ export default function Index() {
                   <h4 className="text-white font-bold text-[13px] mb-4">Producto</h4>
                   <ul className="space-y-2">
                     {[
-                      { label: "Genesis IA", path: "/chat" },
+                      { label: "Basalt IA", path: "/chat" },
                       { label: "Aplicaciones", path: "/tools" },
                       { label: "Canvas IA", path: "/studio-flow" },
                       { label: "Precios", path: "/pricing" },

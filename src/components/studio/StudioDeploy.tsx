@@ -74,7 +74,7 @@ export function StudioDeploy({ onClose, files, projectName, onLog }: StudioDeplo
       toast.success("¡Desplegado con éxito!");
     } catch (err: any) {
       console.warn("Real deployment failed, falling back to cinematic simulation", err);
-      onLog?.('Error en despliegue real (Token no configurado). Iniciando simulación cinemática Genesis...', 'error');
+      onLog?.('Error en despliegue real (Token no configurado). Iniciando simulación cinemática Basalt...', 'error');
       
       // Simulation fallback if no token
       await runSimulation(100, 2000);
@@ -100,7 +100,7 @@ export function StudioDeploy({ onClose, files, projectName, onLog }: StudioDeplo
           </div>
           <div>
             <h2 className="text-sm font-black text-white uppercase tracking-widest">Publicar en la Red</h2>
-            <p className="text-[10px] text-white/40 font-bold uppercase tracking-tighter">Genesis Production Engine</p>
+            <p className="text-[10px] text-white/40 font-bold uppercase tracking-tighter">Basalt Production Engine</p>
           </div>
         </div>
         <button onClick={onClose} className="p-2 rounded-xl hover:bg-white/5 text-white/30 transition-all">
@@ -126,7 +126,7 @@ export function StudioDeploy({ onClose, files, projectName, onLog }: StudioDeplo
               </div>
               <h3 className="text-lg font-bold text-white mb-2">¿Listo para lanzar tu creación?</h3>
               <p className="text-sm text-zinc-400 text-center max-w-sm mb-8 font-medium">
-                Genesis empaquetará tu código y lo desplegará en una infraestructura global de alta velocidad.
+                Basalt empaquetará tu código y lo desplegará en una infraestructura global de alta velocidad.
               </p>
               <button 
                 onClick={handleStartDeploy}

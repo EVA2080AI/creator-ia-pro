@@ -1,5 +1,5 @@
 /**
- * Genesis IA — AI Code Builder
+ * Basalt IA — AI Code Builder
  * describe → generate → preview → push to GitHub
  */
 import { useState, useCallback, useEffect, useMemo, useRef, Component, type ReactNode } from 'react';
@@ -48,7 +48,7 @@ class IDEErrorBoundary extends Component<{ children: ReactNode; onReset: () => v
     this.state = { hasError: false };
   }
   static getDerivedStateFromError(error: Error) { return { hasError: true, error }; }
-  componentDidCatch(error: Error, info: React.ErrorInfo) { console.error("[Genesis IA] Render crash:", error, info); }
+  componentDidCatch(error: Error, info: React.ErrorInfo) { console.error("[Basalt IA] Render crash:", error, info); }
   render() {
     if (this.state.hasError) {
       return (
@@ -57,7 +57,7 @@ class IDEErrorBoundary extends Component<{ children: ReactNode; onReset: () => v
           <h2 className="text-lg font-bold">Error en el IDE</h2>
           <p className="text-sm text-muted-foreground max-w-md">{this.state.error?.message || 'Ocurrió un error al cargar el proyecto.'}</p>
           <button onClick={() => { this.setState({ hasError: false }); this.props.onReset(); }} className="px-6 py-2 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
-            Volver a Genesis Home
+            Volver a Basalt Home
           </button>
         </div>
       );
@@ -185,7 +185,7 @@ function WelcomeScreen({
              <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
                 <Sparkles className="w-3.5 h-3.5 text-white" />
              </div>
-             <span className="text-[13px] font-bold text-zinc-800">Genesis</span>
+             <span className="text-[13px] font-bold text-zinc-800">Basalt</span>
           </div>
         </header>
 
@@ -342,7 +342,7 @@ function WelcomeScreen({
                <div className="mt-auto px-2 pb-4">
                   <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-zinc-100/50">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <p className="text-[10px] font-medium text-zinc-500">Genesis Pro Activo</p>
+                    <p className="text-[10px] font-medium text-zinc-500">Basalt Pro Activo</p>
                   </div>
                </div>
             </aside>
@@ -529,7 +529,7 @@ function WelcomeScreen({
   );
 }
 
-// ─── Genesis IA ──────────────────────────────────────────────────────────────
+// ─── Basalt IA ───────────────────────────────────────────────────────────────
 export default function Chat() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -639,10 +639,10 @@ export default function Chat() {
 
   useEffect(() => {
     if (activeProject) {
-      console.log("[Genesis] Entering IDE for project:", activeProject.id, activeProject.name);
+      console.log("[Basalt] Entering IDE for project:", activeProject.id, activeProject.name);
       localStorage.setItem('genesis-last-project', activeProject.id);
     } else {
-      console.log("[Genesis] Project cleared (returning to Home)");
+      console.log("[Basalt] Project cleared (returning to Home)");
     }
   }, [activeProject?.id]);
 
@@ -752,7 +752,7 @@ export default function Chat() {
     let projectName = namingWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
     if (!projectName || projectName.length < 3) {
-      projectName = 'Nuevo Proyecto Genesis';
+      projectName = 'Nuevo Proyecto Basalt';
     } else if (projectName.length > 40) {
       projectName = projectName.slice(0, 37) + '...';
     }
@@ -991,7 +991,7 @@ export default function Chat() {
         const pushRes = await fetch(`https://api.github.com/repos/${owner}/${repoName}/contents/${filename}`, {
           method: 'PUT',
           headers: { Authorization: `token ${githubToken}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
-          body: JSON.stringify({ message: `feat: update ${filename} via Genesis`, content, ...(sha ? { sha } : {}) }),
+          body: JSON.stringify({ message: `feat: update ${filename} via Basalt`, content, ...(sha ? { sha } : {}) }),
         });
         if (!pushRes.ok) throw new Error(filename);
       };
@@ -1021,7 +1021,7 @@ export default function Chat() {
           <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center animate-spin">
             <Loader2 className="h-6 w-6 text-primary" />
           </div>
-          <span className="text-[12px] text-muted-foreground uppercase tracking-widest font-bold">Genesis IA</span>
+          <span className="text-[12px] text-muted-foreground uppercase tracking-widest font-bold">Basalt IA</span>
         </div>
       </div>
     );
@@ -1119,7 +1119,7 @@ export default function Chat() {
   if (isMobile) {
     return (
       <>
-        <Helmet><title>{activeProject.name} | Genesis IA</title></Helmet>
+        <Helmet><title>{activeProject.name} | Basalt IA</title></Helmet>
         <div className="flex flex-col h-full bg-white overflow-hidden text-zinc-800 font-sans">
           <header className="h-12 shrink-0 border-b border-zinc-100 bg-white flex items-center gap-3 px-3">
             <button onClick={() => setActiveProject(null)} aria-label="Volver a inicio"
@@ -1216,7 +1216,7 @@ export default function Chat() {
       onDrop={handleWorkspaceDrop}
       onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
     >
-      <Helmet><title>Genesis IA | Creator IA Pro</title></Helmet>
+      <Helmet><title>Basalt IA | Creator IA Pro</title></Helmet>
 
       {/* ── Topbar ── */}
       <StudioTopbar

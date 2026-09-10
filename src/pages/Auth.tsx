@@ -14,7 +14,7 @@ import { Logo } from "@/components/Logo";
 import { motion } from "framer-motion";
 
 const features = [
-  { icon: Code2, text: "Genesis IA — genera apps React completas con IA" },
+  { icon: Code2, text: "Basalt IA — genera apps React completas con IA" },
   { icon: FileText, text: "Editor — IDE completo para tus proyectos de código" },
   { icon: Image, text: "Aplicaciones — imágenes, logos, videos y más" },
   { icon: Wand2, text: "Canvas IA — flujos de producción visuales" },

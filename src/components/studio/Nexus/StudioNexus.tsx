@@ -54,7 +54,7 @@ export function StudioNexus({ currentProject, allProjects }: StudioNexusProps) {
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-2">
             <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Genesis Nexus</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Basalt Nexus</span>
           </div>
           <h1 className="text-3xl font-black tracking-tighter uppercase">Arquitectura Conectada</h1>
           <p className="text-sm text-zinc-500 font-medium max-w-lg">

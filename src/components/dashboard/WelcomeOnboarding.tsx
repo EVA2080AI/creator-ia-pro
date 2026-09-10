@@ -15,7 +15,7 @@ interface IntentOption {
 const INTENT_OPTIONS: IntentOption[] = [
   {
     icon: Code2,
-    title: "Genesis IA",
+    title: "Basalt IA",
     desc: "Describe una idea y genera una app React completa, con preview en vivo.",
     path: "/chat",
     color: "text-primary",

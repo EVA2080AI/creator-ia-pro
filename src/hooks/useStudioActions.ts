@@ -127,7 +127,7 @@ export function useStudioActions(): UseStudioActionsReturn {
         const pushRes = await fetch(`https://api.github.com/repos/${owner}/${repoName}/contents/${filename}`, {
           method: 'PUT',
           headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json', Accept: 'application/vnd.github.v3+json' },
-          body: JSON.stringify({ message: `feat: update ${filename} via Genesis`, content, ...(sha ? { sha } : {}) }),
+          body: JSON.stringify({ message: `feat: update ${filename} via Basalt`, content, ...(sha ? { sha } : {}) }),
         });
         if (!pushRes.ok) throw new Error(filename);
       };

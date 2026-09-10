@@ -69,7 +69,7 @@ export const Mermaid: React.FC<MermaidProps> = ({ chart, id = 'mermaid-chart', c
         console.error('Mermaid rendering failed:', err);
         // Only show error in console during development, silent in UI if it's junk content
         // Or show a very subtle indicator
-        setError('Error en la sintaxis del diagrama. Solicita a Genesis que lo regenere.');
+        setError('Error en la sintaxis del diagrama. Solicita a Basalt que lo regenere.');
       }
     };
 
@@ -86,7 +86,7 @@ export const Mermaid: React.FC<MermaidProps> = ({ chart, id = 'mermaid-chart', c
         <div className="space-y-2">
            <h4 className="text-[13px] font-black text-zinc-900 uppercase tracking-tighter">Procesando Arquitectura...</h4>
            <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest leading-relaxed max-w-[240px] mx-auto">
-             Genesis está refinando el diagrama sitemap. Solicita "Regenerar Blueprint" si esta vista persiste.
+             Basalt está refinando el diagrama sitemap. Solicita "Regenerar Blueprint" si esta vista persiste.
            </p>
         </div>
         <div className="flex gap-1">

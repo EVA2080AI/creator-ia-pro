@@ -101,7 +101,7 @@ export function AgentSettingsModal({ isOpen, onClose, agentId, agentName }: Agen
           <div className="bg-blue-500/5 border border-blue-500/10 rounded-2xl p-4 flex gap-4">
             <Info className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
             <p className="text-[11px] text-blue-400 leading-relaxed font-medium">
-              Define instrucciones persistentes para este agente. Genesis consultará esta memoria antes de generar código para asegurar que se ajusta a tus estándares de diseño y arquitectura.
+              Define instrucciones persistentes para este agente. Basalt consultará esta memoria antes de generar código para asegurar que se ajusta a tus estándares de diseño y arquitectura.
             </p>
           </div>
 

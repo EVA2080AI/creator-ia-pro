@@ -47,7 +47,7 @@ export const IndustrialSection: React.FC = () => {
                 <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
                   <div className="h-full w-[45%] bg-blue-600 shadow-lg shadow-blue-600/20" />
                 </div>
-                <p className="text-[11px] text-white/50 leading-relaxed italic">"Génesis está analizando las dependencias críticas antes de proceder a la construcción."</p>
+                <p className="text-[11px] text-white/50 leading-relaxed italic">"Basalt está analizando las dependencias críticas antes de proceder a la construcción."</p>
               </div>
             </div>
           </div>

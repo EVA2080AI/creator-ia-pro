@@ -23,7 +23,7 @@ export class GenesisOrchestrator {
    * Phase 1: Architecting — Generate the Blueprint
    */
   async architectProject(prompt: string, type: ProjectType): Promise<ProjectBlueprint> {
-    const architectPrompt = `# ROLE: Architect — Genesis V16.0
+    const architectPrompt = `# ROLE: Architect — Basalt V16.0
 Analyze the user prompt and generate an INDUSTRIAL BLUEPRINT for a web project.
 Return ONLY JSON.
 
@@ -58,7 +58,7 @@ ${prompt}
       return JSON.parse(blueprintText);
     } catch (e) {
       console.error("[GenesisOrchestrator] Failed to parse blueprint:", e);
-      throw new Error("Genesis no pudo consolidar la arquitectura inicial. Intenta un prompt detallado.");
+      throw new Error("Basalt no pudo consolidar la arquitectura inicial. Intenta un prompt detallado.");
     }
   }
 
@@ -66,7 +66,7 @@ ${prompt}
    * Phase 2: Synthesis — Generate individual file contents based on Blueprint
    */
   async synthesizeFile(blueprint: ProjectBlueprint, filePath: string, context: string): Promise<string> {
-    const synthesisPrompt = `# ROLE: Senior Engineer — Genesis Synthesis V16.0
+    const synthesisPrompt = `# ROLE: Senior Engineer — Basalt Synthesis V16.0
 Write the FULL code for the file: ${filePath}
 Project: ${blueprint.projectName} (${blueprint.niche})
 Tech Stack: ${blueprint.techStack.framework}
@@ -77,7 +77,7 @@ ${JSON.stringify(blueprint)}
 # FILE CONTEXT / PURPOSE:
 ${context}
 
-# CODING STANDARDS (Genesis Synthesis V16.0):
+# CODING STANDARDS (Basalt Synthesis V16.0):
 - Use Tailwind CSS with Aether V9.0 iridescent styles.
 - Use Framer Motion for premium micro-animations.
 - High-fidelity components only. No placeholders or empty divs.

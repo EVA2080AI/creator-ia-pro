@@ -32,7 +32,7 @@ export const ChatSection: React.FC = () => {
               <div className="h-6 w-6 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/20">
                 <Sparkles className="h-3.5 w-3.5" />
               </div>
-              <span className="text-[10px] font-black uppercase text-zinc-900 tracking-widest">Genesis IA</span>
+              <span className="text-[10px] font-black uppercase text-zinc-900 tracking-widest">Basalt IA</span>
             </div>
             <div className="bg-white border border-zinc-200 px-6 py-4 rounded-2xl rounded-tl-none shadow-sm max-w-[90%] space-y-4 animate-in fade-in slide-in-from-left-4 duration-500">
               <div className="space-y-2">

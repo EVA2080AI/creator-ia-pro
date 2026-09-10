@@ -122,7 +122,7 @@ export function useStudioProjects() {
         method: 'PATCH',
         body: JSON.stringify({ files: activeProject.files }),
       });
-      if (res.ok) console.log(`💾 Genesis Auto-save: ${activeProject.name}`);
+      if (res.ok) console.log(`💾 Basalt Auto-save: ${activeProject.name}`);
       else console.error('Auto-save failed:', res.error);
     }, 3000);
 

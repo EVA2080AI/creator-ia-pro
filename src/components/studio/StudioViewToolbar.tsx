@@ -43,7 +43,7 @@ export function StudioViewToolbar({
         </Button>
         <div className="w-[1px] h-5 bg-zinc-100 mx-1" />
         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.4em] select-none">
-          Génesis Studio <span className="text-zinc-200 mx-2">{'\u002F'}</span> <span className="text-primary font-black">v21.0</span>
+          Basalt Studio <span className="text-zinc-200 mx-2">{'\u002F'}</span> <span className="text-primary font-black">v21.0</span>
         </span>
       </div>
 

@@ -120,7 +120,7 @@ export default function App() {
         code: `export default function App() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-zinc-50">
-      <h1 className="text-2xl font-bold text-zinc-900">Genesis Studio</h1>
+      <h1 className="text-2xl font-bold text-zinc-900">Basalt Studio</h1>
     </div>
   );
 }`,
@@ -199,7 +199,7 @@ if (root) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Genesis Studio</title>
+    <title>Basalt Studio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>

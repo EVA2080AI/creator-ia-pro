@@ -60,7 +60,7 @@ export function ProjectCard({ project, onClick, onDuplicate, onDelete }: Project
         <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/80 backdrop-blur-md border border-black/[0.03] flex items-center gap-1.5 shadow-sm">
           <div className={cn("w-1 h-1 rounded-full animate-pulse", isCode ? "bg-emerald-500" : "bg-primary")} />
           <span className="text-[8px] font-black uppercase tracking-widest text-stone-900">
-            {isCode ? 'Genesis App' : 'Canvas IA'}
+            {isCode ? 'Basalt App' : 'Canvas IA'}
           </span>
         </div>
       </div>

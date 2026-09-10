@@ -25,7 +25,7 @@ export function AutoFixAlert({ runtimeError, isGenerating, onClear, onApply }: A
             </div>
             <div>
               <h4 className="text-[11px] font-black uppercase tracking-widest text-rose-900">Señal de Error Detectada</h4>
-              <p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Génesis Engine está listo para intervenir</p>
+              <p className="text-[9px] font-bold text-rose-400 uppercase tracking-widest">Basalt Engine está listo para intervenir</p>
             </div>
           </div>
           <div className="rounded-2xl bg-white/50 p-4 border border-rose-100">

@@ -63,7 +63,7 @@ export function StudioFloatingToolbar({
             ? "bg-zinc-900 text-white shadow-lg shadow-zinc-200" 
             : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100"
         )}
-        title="Alternar Chat Génesis"
+        title="Alternar Chat Basalt"
       >
         <MessageSquare className="w-4 h-4" />
       </button>

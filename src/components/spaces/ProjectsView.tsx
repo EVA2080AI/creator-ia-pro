@@ -650,7 +650,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
                 <Brain className="w-7 h-7" />
               </div>
               <div className="space-y-1.5">
-                <p className="text-[13px] font-black text-zinc-900 tracking-tight">Génesis IA</p>
+                <p className="text-[13px] font-black text-zinc-900 tracking-tight">Basalt IA</p>
                 <p className="text-[10px] text-zinc-500 font-medium leading-relaxed opacity-80">Evoluciona tu app con lenguaje natural y ayuda inteligente.</p>
               </div>
             </button>

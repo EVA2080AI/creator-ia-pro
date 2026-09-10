@@ -16,7 +16,7 @@ interface CredentialRef {
 // chat de IA y el resto de /api/* leen process.env.* directo en Vercel. Guardar acá
 // no tenía ningún efecto real, así que se dejó de mostrar como editable.
 const CREDENTIAL_REFS: CredentialRef[] = [
-  { envKey: "OPENROUTER_API_KEY", service: "OpenRouter", name: "Motor de chat / Genesis", icon: Zap, color: "text-amber-500" },
+  { envKey: "OPENROUTER_API_KEY", service: "OpenRouter", name: "Motor de chat / Basalt", icon: Zap, color: "text-amber-500" },
   { envKey: "REPLICATE_API_TOKEN", service: "Replicate", name: "Generación de imágenes", icon: Zap, color: "text-amber-500" },
   { envKey: "DATABASE_URL", service: "Neon", name: "Base de datos (Postgres)", icon: Database, color: "text-emerald-500" },
   { envKey: "BOLD_API_KEY / BOLD_WEBHOOK_SECRET", service: "Bold.co", name: "Cobro de créditos y planes", icon: Shield, color: "text-indigo-500" },

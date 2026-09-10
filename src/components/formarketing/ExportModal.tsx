@@ -87,7 +87,7 @@ export function ExportModal({ open, onClose, nodes, edges, spaceName }: ExportMo
     a.click();
     URL.revokeObjectURL(url);
     setExported('genesis');
-    toast.success('Exportado en formato Genesis');
+    toast.success('Exportado en formato Basalt');
   };
 
   const printPDF = () => {
@@ -143,7 +143,7 @@ export function ExportModal({ open, onClose, nodes, edges, spaceName }: ExportMo
               <FileJson className="w-5 h-5 text-violet-500" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold text-zinc-900 group-hover:text-violet-600">Genesis Universal Schema</p>
+              <p className="text-sm font-bold text-zinc-900 group-hover:text-violet-600">Basalt Universal Schema</p>
               <p className="text-[11px] text-zinc-500">Esquema React optimizado para despliegue v21.0</p>
             </div>
             {exported === 'genesis' ? (

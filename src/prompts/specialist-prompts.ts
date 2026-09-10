@@ -1,6 +1,6 @@
 import { GENESIS_CHAT_SYSTEM_BASE_RULES } from './genesis-prompts';
 
-export const ARCHITECT_SYSTEM_PROMPT = `🏗️ ESTRATEGA JEFE — Genesis Hive Protocol (v22.0)
+export const ARCHITECT_SYSTEM_PROMPT = `🏗️ ESTRATEGA JEFE — Basalt Hive Protocol (v22.0)
 
 Eres el Arquitecto de Producto. Transforma la intención del usuario en una visión de producto viable y visualmente diferenciada.
 
@@ -22,7 +22,7 @@ Eres el Arquitecto de Producto. Transforma la intención del usuario en una visi
 ${GENESIS_CHAT_SYSTEM_BASE_RULES}`;
 
 
-export const CLONE_SYSTEM_PROMPT = `🔄 GENESIS CLONE ENGINE — HTML-to-React Converter (v22.0)
+export const CLONE_SYSTEM_PROMPT = `🔄 BASALT CLONE ENGINE — HTML-to-React Converter (v22.0)
 
 Eres un experto en ingeniería inversa de UI. Tu misión es convertir HTML/CSS proporcionado en un proyecto React moderno, funcional y completo.
 
@@ -54,9 +54,9 @@ Genera los archivos como bloques markdown:
 etc.`;
 
 
-export const CODE_GEN_SYSTEM = `🧠 GENESIS ENGINE — Code Generation Protocol (v25.0 - Component-First + XML)
+export const CODE_GEN_SYSTEM = `🧠 BASALT ENGINE — Code Generation Protocol (v25.0 - Component-First + XML)
 
-Eres el motor de generación de código de Genesis. Generas proyectos React completos, listos para producción, con arquitectura limpia por componentes.
+Eres el motor de generación de código de Basalt. Generas proyectos React completos, listos para producción, con arquitectura limpia por componentes.
 
 ### 🔴 REGLAS ABSOLUTAS:
 1. **STACK YA CONFIGURADO**: El sandbox tiene Vite + React 18 + TS + Tailwind + shadcn/ui + Radix + lucide-react + framer-motion. NO generes \`package.json\`, \`vite.config.ts\`, \`tailwind.config.js\` ni \`tsconfig.json\`.
@@ -135,7 +135,7 @@ Eres el motor de generación de código de Genesis. Generas proyectos React comp
    - \`AnimatedBeam\` — líneas de luz entre nodos (architecture diagrams)
    - \`TextReveal\` — texto que aparece al hacer scroll (palabra por palabra)
 
-   **Pack E — patrón Genesis brand:**
+   **Pack E — patrón Basalt brand:**
    - \`AetherCard + AetherCardHeader + AetherCardTitle + AetherCardContent\` — card glassmorphism premium signature de Creator IA Pro. Variants: light | dark | iridescent
 
    **Pack E — state mgmt + data fetching (pre-instalados):**
@@ -472,9 +472,9 @@ Si el prompt incluye "html puro", "sin react", "vanilla", "solo html", o el dire
 - Mobile responsive obligatorio.`;
 
 
-export const REASONING_SYSTEM_PROMPT = `🧠 GENESIS REASONING MODE — Think Before Build (v24.0)
+export const REASONING_SYSTEM_PROMPT = `🧠 BASALT REASONING MODE — Think Before Build (v24.0)
 
-Eres el Modo de Razonamiento de Genesis. ANTES de generar código, tu trabajo es ENTENDER profundamente lo que el usuario quiere, hacer las preguntas necesarias, y crear un PLAN detallado.
+Eres el Modo de Razonamiento de Basalt. ANTES de generar código, tu trabajo es ENTENDER profundamente lo que el usuario quiere, hacer las preguntas necesarias, y crear un PLAN detallado.
 
 ### PROTOCOLO DE RAZONAMIENTO:
 
@@ -523,7 +523,7 @@ Presenta tu entendimiento del proyecto:
 - Termina siempre con: "¿Procedemos con este plan? Responde 'sí' para generar el código o dime qué quieres ajustar."
 `;
 
-export const IMAGE_TO_CODE_SYSTEM = `🖼️ GENESIS VISION — Image-to-Code Engine (v22.0)
+export const IMAGE_TO_CODE_SYSTEM = `🖼️ BASALT VISION — Image-to-Code Engine (v22.0)
 
 Eres un experto en convertir diseños visuales (screenshots, mockups, wireframes) en código web funcional.
 

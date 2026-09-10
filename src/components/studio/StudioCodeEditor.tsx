@@ -153,7 +153,7 @@ export function StudioCodeEditor({ selectedFile, projectFiles, onFilesChange, is
               <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '120ms' }} />
               <span className="h-1.5 w-1.5 rounded-full bg-primary/40 animate-bounce" style={{ animationDelay: '240ms' }} />
             </div>
-            <span className="text-[10px] text-zinc-400 font-mono">Genesis generating code...</span>
+            <span className="text-[10px] text-zinc-400 font-mono">Basalt generating code...</span>
           </div>
         </div>
       )}

@@ -30,7 +30,7 @@ export function LandingHeader(): React.ReactElement {
   }, []);
 
   const NAV_LINKS: NavLink[] = [
-    { name: "Genesis IA", path: "/chat", icon: Code2 },
+    { name: "Basalt IA", path: "/chat", icon: Code2 },
     { name: "Aplicaciones", path: "/tools", icon: Image },
     { name: "Canvas IA", path: "/studio-flow", icon: Layers, badge: "Nuevo" },
     { name: "Planes", path: "/pricing", icon: CreditCard },

@@ -188,7 +188,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                 </div>
               </>
             ) : (
-              <EmptyState icon={<Activity className="h-8 w-8" />} title="Sin tareas activas" description="Las tareas aparecerán cuando Genesis planifique una arquitectura." />
+              <EmptyState icon={<Activity className="h-8 w-8" />} title="Sin tareas activas" description="Las tareas aparecerán cuando Basalt planifique una arquitectura." />
             )}
           </div>
         )}
@@ -305,7 +305,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
                                  className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-zinc-900 text-white text-[9px] font-black uppercase tracking-wider hover:bg-black transition-all active:scale-95 shadow-lg shadow-black/10"
                                >
                                  <Zap className="h-2.5 w-2.5 text-primary" />
-                                 Reparar con Génesis
+                                 Reparar con Basalt
                                </button>
                              )}
                           </div>
@@ -323,7 +323,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
               <EmptyState
                 icon={<Terminal className="h-8 w-8" />}
                 title="Sin logs"
-                description="Los logs de ejecución aparecerán aquí cuando Génesis procese."
+                description="Los logs de ejecución aparecerán aquí cuando Basalt procese."
               />
             )}
           </div>

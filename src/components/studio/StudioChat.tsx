@@ -510,7 +510,7 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve CADA arch
   return (
     <aside 
       className="flex flex-1 min-h-0 h-full w-full flex-col relative bg-white/40 backdrop-blur-3xl selection:bg-primary/20 overflow-hidden"
-      aria-label="Panel de Chat Génesis"
+      aria-label="Panel de Chat Basalt"
     >
       {/* Structural Neural Overlays */}
       <div className="absolute inset-0 neural-mesh opacity-[0.06] pointer-events-none" />
@@ -594,7 +594,7 @@ Analiza si hay imports rotos, typos o variables no definidas. Devuelve CADA arch
                 <div className="h-6 w-6 rounded-lg bg-zinc-900 flex items-center justify-center shrink-0">
                   <Sparkles className="h-3 w-3 text-white" />
                 </div>
-                <span className="text-[11.5px] font-black text-zinc-900 uppercase italic tracking-tighter">Génesis Engine</span>
+                <span className="text-[11.5px] font-black text-zinc-900 uppercase italic tracking-tighter">Basalt Engine</span>
                 {genPhase === 'streaming' && (
                   <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
                     <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />

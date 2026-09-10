@@ -19,7 +19,7 @@ interface BlueprintProjectNodeProps {
 }
 
 export const BlueprintProjectNode = memo(({ id: _id, data }: BlueprintProjectNodeProps) => {
-  const name = data.projectName || data.title || 'Genesis Project';
+  const name = data.projectName || data.title || 'Basalt Project';
   const palette = data.colorPalette;
 
   return (

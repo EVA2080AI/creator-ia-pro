@@ -204,7 +204,7 @@ export default function Dashboard() {
         {/* Quick Tools */}
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
-            { icon: Zap, label: "Genesis IA", desc: "Builder IA", path: "/chat" },
+            { icon: Zap, label: "Basalt IA", desc: "Builder IA", path: "/chat" },
             { icon: Megaphone, label: "Canvas IA", desc: "Lienzo", path: "/studio-flow" },
             { icon: PenTool, label: "Aplicaciones", desc: "Herramientas", path: "/tools" },
             { icon: ListTodo, label: "Tareas", desc: "Kanban", path: "/tareas" },

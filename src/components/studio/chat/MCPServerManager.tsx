@@ -59,7 +59,7 @@ export function MCPServerManager() {
       <div>
         <h3 className="text-[13px] font-bold text-white/80 mb-0.5">Model Context Protocol (MCP)</h3>
         <p className="text-[11px] text-white/40 leading-relaxed max-w-sm">
-          Conecta Génesis con tus servidores privados. Permite a la IA interactuar con bases de datos internas, Slack, Notion o APIs corporativas.
+          Conecta Basalt con tus servidores privados. Permite a la IA interactuar con bases de datos internas, Slack, Notion o APIs corporativas.
         </p>
       </div>
 

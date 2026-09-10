@@ -14,7 +14,7 @@ const compactFileBlocks = (raw: string): string =>
 const WELCOME: Message = {
   id: 'welcome',
   role: 'assistant',
-  content: '✨ ¡Bienvenido a Génesis! Estoy listo para evolucionar tu visión. ¿Qué construiremos hoy?',
+  content: '✨ ¡Bienvenido a Basalt! Estoy listo para evolucionar tu visión. ¿Qué construiremos hoy?',
   timestamp: new Date()
 };
 
