@@ -581,6 +581,16 @@ export function injectDependenciesIntoPackageJson(
 export function isResponseTruncated(text: string): boolean {
   if (!text || text.length < 100) return false;
 
+  // Formato principal (XML `<file path="...">...</file>`, ver
+  // GENESIS_CHAT_SYSTEM_BASE_RULES): un <file> abierto sin su cierre es la
+  // señal más directa y confiable de truncamiento — las heurísticas de abajo
+  // (contar ``` y llaves) se escribieron para el formato markdown viejo y
+  // casi nunca disparan con XML, que es el formato que el modelo usa en
+  // la mayoría de las respuestas reales.
+  const openFileTags = (text.match(/<file\s+path\s*=/gi) || []).length;
+  const closeFileTags = (text.match(/<\/file>/gi) || []).length;
+  if (openFileTags > closeFileTags) return true;
+
   // Count code blocks
   const openCodeBlocks = (text.match(/```[a-z]*/gi) || []).length;
   const closeCodeBlocks = (text.match(/```\s*(?:\n|$)/gm) || []).length;

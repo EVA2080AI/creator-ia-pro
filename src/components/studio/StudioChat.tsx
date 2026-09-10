@@ -454,7 +454,7 @@ ${probFile ? `- Archivo detectado como origen: @${probFile}` : ''}
 - Archivo activo: @${activeFile || 'App.tsx'}
 - Punto de entrada: @App.tsx
 
-Analiza si hay imports rotos, typos o variables no definidas. Devuelve los archivos corregidos como bloques markdown.`;
+Analiza si hay imports rotos, typos o variables no definidas. Devuelve CADA archivo corregido completo envuelto en <file path="...">...</file> — NO uses bloques markdown \`\`\`, eso rompe el parser que aplica los cambios.`;
 
       if (error.toLowerCase().includes('could not find module') || error.toLowerCase().includes('cannot find module')) {
         fixPrompt += `\n\nIMPORTANTE: El error indica que falta un módulo o archivo local. REVISA los imports en @App.tsx y ASEGÚRATE de crear cualquier archivo que falte.`;
