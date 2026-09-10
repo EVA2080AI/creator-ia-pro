@@ -91,6 +91,29 @@ export function detectIntent(prompt: string, _hasContext?: boolean): ChatIntent 
     return 'codegen';
   }
 
+  // Preguntas genuinas ("¿qué...", "¿cómo...", "¿cuál...") piden opinión o
+  // consejo, no una acción — van a MODO CONVERSACIÓN aunque contengan una
+  // palabra de TECH_KEYWORDS por casualidad de substring. Bug real
+  // verificado en vivo: "¿qué le mejorarías a este proyecto?" contiene
+  // "mejora" dentro de "mejorarías" y sin este check terminaba
+  // reescribiendo el código del proyecto sin que el usuario lo pidiera.
+  // Excepción: si la pregunta trae un verbo de creación/modificación real
+  // ("¿puedes crear...", "¿podrías agregar...") sigue siendo una acción
+  // pedida cortésmente, no una consulta — se deja pasar a la clasificación normal.
+  const QUESTION_STARTERS = [
+    'que ', 'qué ', 'como ', 'cómo ', 'cual ', 'cuál ', 'cuales ', 'cuáles ',
+    'quien ', 'quién ', 'donde ', 'dónde ', 'cuando ', 'cuándo ', 'cuanto ', 'cuánto ',
+    'por que ', 'por qué ', 'what ', 'how ', 'why ', 'which ', 'who ', 'where ', 'when ',
+  ];
+  const isQuestion = p.includes('¿') || p.endsWith('?') || QUESTION_STARTERS.some(q => p.startsWith(q));
+  const ACTION_VERBS_IN_QUESTION = [
+    'crea', 'creame', 'créame', 'haz', 'hazme', 'genera', 'generame', 'genérame',
+    'diseña', 'monta', 'build', 'make', 'create', 'modifica', 'modificar', 'cambia',
+    'agrega', 'agregar', 'quita', 'quitar', 'elimina', 'eliminar', 'arregla',
+    'corrige', 'corregir', 'implementa', 'implementar', 'convierte', 'convertir',
+  ];
+  if (isQuestion && !ACTION_VERBS_IN_QUESTION.some(v => p.includes(v))) return 'chat';
+
   // Check for greetings/simple chat
   if (GREETINGS.includes(p)) return 'chat';
   if (p.length < 5 && !TECH_KEYWORDS.some(k => p.includes(k))) return 'chat';
