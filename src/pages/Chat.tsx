@@ -170,7 +170,11 @@ function WelcomeScreen({
 
   const handleSubmit = (val?: string) => {
     const text = (val ?? input).trim();
-    if (text) onPrompt(text, { mode: buildMode });
+    // Una imagen sin texto es un pedido válido ("replicá este mockup") — no
+    // solo texto no vacío. Sin este OR, el botón de enviar podía quedar
+    // deshabilitado y el clic no hacía nada con una imagen adjunta y el
+    // campo de texto vacío.
+    if (text || pendingImage) onPrompt(text, { mode: buildMode });
   };
 
   const filteredProjects = [...projects]
@@ -423,10 +427,10 @@ function WelcomeScreen({
                 </button>
                 <button
                   onClick={() => handleSubmit()}
-                  disabled={!input.trim() || creating}
+                  disabled={(!input.trim() && !pendingImage) || creating}
                   aria-label="Enviar prompt y crear proyecto"
                   className="flex items-center justify-center h-10 w-10 rounded-full text-white disabled:opacity-30 transition-all active:scale-95 shadow-brand"
-                  style={{ background: input.trim() && !creating ? 'linear-gradient(135deg, hsl(var(--primary)), #2563eb)' : 'hsl(var(--border))' }}
+                  style={{ background: (input.trim() || pendingImage) && !creating ? 'linear-gradient(135deg, hsl(var(--primary)), #2563eb)' : 'hsl(var(--border))' }}
                 >
                   {creating ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" /> : <ArrowUp className="h-5 w-5" aria-hidden="true" />}
                 </button>
