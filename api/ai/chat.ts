@@ -11,12 +11,23 @@ import { getDb, schema } from "../../db/index.js";
 import { getSessionUser, getProfile } from "../_lib/session.js";
 import { spendCredits, refundCredits, consumeFreeMessage, logSpend, FREE_DAILY_MESSAGE_LIMIT } from "../_lib/credits.js";
 import { CHAT_MODELS, DEFAULT_MODEL_ID, canAccessModel, getModel } from "../../src/lib/ai/models.js";
+import { tavilySearch, WEB_SEARCH_TOOL } from "../_lib/search.js";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+// 1 crédito — mismo orden de magnitud que los modelos de chat más baratos
+// (ver src/lib/ai/models.ts). Se cobra SOLO si el modelo de verdad decide
+// buscar (tool_choice:"auto" — puede que nunca la use), nunca por adelantado.
+const SEARCH_TOOL_COST = 1;
+// Una búsqueda suma latencia real (Tavily + un segundo stream completo de
+// OpenRouter) — sin esto, el timeout implícito de Vercel podría cortar la
+// respuesta a mitad de la vuelta de tool-calling.
+export const config = { maxDuration: 60 };
 
 interface ChatMessage {
-  role: "user" | "assistant" | "system";
-  content: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
+  role: "user" | "assistant" | "system" | "tool";
+  content: string | Array<{ type: string; text?: string; image_url?: { url: string } }> | null;
+  tool_calls?: { id: string; type: "function"; function: { name: string; arguments: string } }[];
+  tool_call_id?: string;
 }
 
 interface ChatBody {
@@ -107,9 +118,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ? [{ role: "system", content: body.systemPrompt }, ...body.messages]
     : body.messages;
 
-  let upstream: Response;
-  try {
-    upstream = await fetch(OPENROUTER_URL, {
+  const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
+
+  const callOpenRouter = (msgs: ChatMessage[], withTools: boolean) =>
+    fetch(OPENROUTER_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -119,12 +131,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       body: JSON.stringify({
         model: modelId,
-        messages,
+        messages: msgs,
         stream: true,
+        // El modelo decide solo si busca (tool_choice:"auto") — el prompt
+        // (GENESIS_CHAT_SYSTEM_BASE_RULES / CODE_GEN_SYSTEM) le dice cuándo
+        // tiene sentido. En la segunda vuelta (después del resultado de la
+        // búsqueda) no se ofrece de nuevo — fuerza una respuesta final en
+        // vez de encadenar búsquedas.
+        ...(withTools ? { tools: [WEB_SEARCH_TOOL], tool_choice: "auto" } : {}),
         ...(typeof body.temperature === "number" ? { temperature: body.temperature } : {}),
         ...(typeof body.maxTokens === "number" ? { max_tokens: body.maxTokens } : {}),
       }),
     });
+
+  let upstream: Response;
+  try {
+    upstream = await callOpenRouter(messages, true);
   } catch {
     if (cost > 0) await refundCredits(user.userId, cost);
     res.status(502).json({ ok: false, code: "PROVIDER_ERROR", error: "No se pudo contactar al proveedor de IA." });
@@ -149,39 +171,136 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("X-Model-Used", modelId);
   res.setHeader("X-Credits-Charged", String(cost));
 
-  const reader = upstream.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
+  interface StreamResult {
+    full: string;
+    sawAnyContent: boolean;
+    finishReason: string | null;
+    toolCall: { id: string; name: string; argsText: string } | null;
+  }
+
+  // Lee un stream SSE de OpenRouter, reenvía cada chunk crudo al cliente
+  // (comportamiento sin cambios) y ADEMÁS acumula tool_calls/finish_reason —
+  // necesario para saber si hay que pausar y ejecutar una búsqueda.
+  async function streamAndCollect(upstreamRes: Response): Promise<StreamResult> {
+    const reader = upstreamRes.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let full = "";
+    let sawAnyContent = false;
+    let finishReason: string | null = null;
+    let toolCallId: string | undefined;
+    let toolCallName: string | undefined;
+    let toolArgsText = "";
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        buffer += chunk;
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data:")) continue;
+          const payload = line.slice(5).trim();
+          if (!payload || payload === "[DONE]") continue;
+          try {
+            const json = JSON.parse(payload);
+            const choice = json.choices?.[0];
+            const delta = choice?.delta;
+            const contentDelta = delta?.content;
+            if (typeof contentDelta === "string" && contentDelta.length) {
+              full += contentDelta;
+              sawAnyContent = true;
+            }
+            const tc = delta?.tool_calls?.[0];
+            if (tc) {
+              if (tc.id) toolCallId = tc.id;
+              if (tc.function?.name) toolCallName = tc.function.name;
+              if (typeof tc.function?.arguments === "string") toolArgsText += tc.function.arguments;
+            }
+            if (choice?.finish_reason) finishReason = choice.finish_reason;
+          } catch {
+            /* fragmento no-JSON, se ignora */
+          }
+        }
+        res.write(chunk);
+      }
+    } catch {
+      /* stream cortado — se conserva lo acumulado en `full` */
+    }
+
+    return {
+      full,
+      sawAnyContent,
+      finishReason,
+      toolCall: toolCallId && toolCallName ? { id: toolCallId, name: toolCallName, argsText: toolArgsText } : null,
+    };
+  }
+
   let full = "";
   let sawAnyContent = false;
+  let searchCreditCharged = false;
 
   try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      buffer += chunk;
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
-      for (const line of lines) {
-        if (!line.startsWith("data:")) continue;
-        const payload = line.slice(5).trim();
-        if (!payload || payload === "[DONE]") continue;
-        try {
-          const json = JSON.parse(payload);
-          const delta = json.choices?.[0]?.delta?.content;
-          if (typeof delta === "string" && delta.length) {
-            full += delta;
-            sawAnyContent = true;
+    const first = await streamAndCollect(upstream);
+    full = first.full;
+    sawAnyContent = first.sawAnyContent;
+
+    if (first.finishReason === "tool_calls" && first.toolCall?.name === "web_search") {
+      let searchQuery = "";
+      try {
+        searchQuery = String(JSON.parse(first.toolCall.argsText || "{}").query || "");
+      } catch {
+        /* argumentos truncados o inválidos — se trata como consulta vacía */
+      }
+
+      let toolResultContent: string;
+      if (!searchQuery) {
+        toolResultContent = JSON.stringify({ results: [], note: "consulta vacía, no se pudo buscar" });
+      } else if (!TAVILY_API_KEY) {
+        toolResultContent = JSON.stringify({ results: [], note: "búsqueda no configurada en este momento" });
+      } else {
+        const newBalance = await spendCredits(user.userId, SEARCH_TOOL_COST);
+        if (newBalance === null) {
+          toolResultContent = JSON.stringify({ results: [], note: "créditos insuficientes para buscar" });
+        } else {
+          searchCreditCharged = true;
+          try {
+            const results = await tavilySearch(searchQuery, TAVILY_API_KEY);
+            toolResultContent = JSON.stringify({ query: searchQuery, results });
+          } catch {
+            await refundCredits(user.userId, SEARCH_TOOL_COST);
+            searchCreditCharged = false;
+            toolResultContent = JSON.stringify({ query: searchQuery, results: [], note: "búsqueda no disponible en este momento" });
           }
-        } catch {
-          /* fragmento no-JSON, se ignora */
         }
       }
-      res.write(chunk);
+
+      const followUpMessages: ChatMessage[] = [
+        ...messages,
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [{ id: first.toolCall.id, type: "function", function: { name: "web_search", arguments: first.toolCall.argsText } }],
+        },
+        { role: "tool", tool_call_id: first.toolCall.id, content: toolResultContent },
+      ];
+
+      try {
+        const upstream2 = await callOpenRouter(followUpMessages, false);
+        if (upstream2.ok && upstream2.body) {
+          const second = await streamAndCollect(upstream2);
+          full += second.full;
+          sawAnyContent = sawAnyContent || second.sawAnyContent;
+        }
+      } catch {
+        /* la primera respuesta ya se streameó — si la segunda vuelta falla,
+           el usuario se queda con lo que ya vio en vez de perder todo. */
+      }
+
+      if (searchCreditCharged) await logSpend(user.userId, SEARCH_TOOL_COST, `search: ${searchQuery.slice(0, 60)}`);
     }
-  } catch {
-    /* stream cortado — se conserva lo acumulado en `full` */
   } finally {
     res.end();
   }
