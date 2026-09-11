@@ -125,6 +125,8 @@ interface WelcomeScreenProps {
   onFileSelect?: (file: File) => void;
   pendingFile?: { name: string } | null;
   onRemoveFile?: () => void;
+  pendingImage?: string | null;
+  onRemoveImage?: () => void;
   selectedModel: string;
   onModelSelect: (model: string) => void;
   subscriptionTier?: string;
@@ -138,6 +140,7 @@ function WelcomeScreen({
   onPrompt, onCreateProject, creating, projects, onSelectProject, onDeleteProject,
   displayName, onOpenSearch, onMic, isListening,
   onFileSelect, pendingFile, onRemoveFile,
+  pendingImage, onRemoveImage,
   selectedModel, onModelSelect, subscriptionTier = 'free', onOpenTools
 }: WelcomeScreenProps) {
   const navigate = useNavigate();
@@ -174,10 +177,6 @@ function WelcomeScreen({
     .filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => new Date(b.updated_at ?? b.created_at ?? 0).getTime() - new Date(a.updated_at ?? a.created_at ?? 0).getTime());
   
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    // handled by parent Chat onDrop wrapper to allow full folder drops
-  };
 
   const greeting = displayName ? `¿En qué te ayudo, ${displayName.split(' ')[0]}?` : '¿En qué te ayudo?';
 
@@ -386,15 +385,32 @@ function WelcomeScreen({
                   </button>
                 </div>
               )}
-              
+
+              {/* Image chip — mockup/screenshot adjunto, mismo pipeline de
+                  imagen-a-código que ya usa StudioChat dentro de un proyecto */}
+              {pendingImage && (
+                <div className="absolute top-4 left-14 flex items-center gap-2 px-2 py-1 rounded-md bg-zinc-100 border border-zinc-200 animate-in fade-in zoom-in duration-200 z-30">
+                  <img src={pendingImage} alt="Imagen adjunta" className="h-5 w-5 rounded object-cover" />
+                  <span className="text-[10px] font-bold text-zinc-600">Imagen adjunta</span>
+                  <button onClick={(e) => { e.stopPropagation(); onRemoveImage?.(); }} className="text-zinc-400 hover:text-zinc-900 p-0.5 rounded hover:bg-zinc-200">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+
               <textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onInput={handleTextareaInput}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); } }}
+                onPaste={(e) => {
+                  const item = Array.from(e.clipboardData.items).find(i => i.type.startsWith('image/'));
+                  const file = item?.getAsFile();
+                  if (file) { e.preventDefault(); onFileSelect?.(file); }
+                }}
                 placeholder="Preguntame algo, pedime una app, una imagen..."
-                className={`w-full bg-transparent pr-32 pb-14 text-[16px] font-medium text-zinc-800 placeholder:text-zinc-400 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px] ${pendingFile ? 'pt-14 pl-5' : 'pt-5 pl-14'}`}
+                className={`w-full bg-transparent pr-32 pb-14 text-[16px] font-medium text-zinc-800 placeholder:text-zinc-400 outline-none resize-none leading-relaxed min-h-[72px] max-h-[200px] ${(pendingFile || pendingImage) ? 'pt-14 pl-5' : 'pt-5 pl-14'}`}
                 rows={1}
                 style={{ overflowY: 'hidden' }}
               />
@@ -538,6 +554,13 @@ export default function Chat() {
   const [pushingGithub, setPushingGithub] = useState(false);
   const [creatingWithPrompt, setCreatingWithPrompt] = useState(false);
   const [pendingPrompt, setPendingPrompt] = useState<string | null>(null);
+  // Imagen adjunta desde el Welcome screen (antes de crear el proyecto) y su
+  // equivalente "pendiente de primer uso" una vez el proyecto ya existe — ver
+  // Fase 1A del plan de brechas: el pipeline de imagen-a-código ya funcionaba
+  // (IMAGE_TO_CODE_SYSTEM) pero el Welcome screen no tenía forma de llegar
+  // hasta ahí, solo texto.
+  const [pendingImage, setPendingImage] = useState<string | null>(null);
+  const [pendingPromptImage, setPendingPromptImage] = useState<string | null>(null);
   const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [supabaseConfig, setSupabaseConfig] = useState<SupabaseConfig | null>(null);
   const [moreOpen, setMoreOpen] = useState(false);
@@ -674,8 +697,10 @@ export default function Chat() {
     const p = (prompt || "").toLowerCase().trim();
     const GREETINGS = ['hola', 'hi', 'hello', 'buenos dias', 'buenas tardes', 'buenas noches', 'saludos', 'hey', 'buenas'];
 
-    // 1. Detect simple greetings to avoid "hola" projects
-    if (GREETINGS.includes(p) || p.length < 3) {
+    // 1. Detect simple greetings to avoid "hola" projects — pero no si hay
+    // una imagen adjunta: subir un mockup sin escribir nada es un pedido
+    // válido ("Replica este diseño"), no un saludo vacío.
+    if (!pendingImage && (GREETINGS.includes(p) || p.length < 3)) {
       toast("¡Hola! 👋 ¿Qué quieres construir hoy? Describe tu idea para empezar.");
       return;
     }
@@ -734,7 +759,7 @@ export default function Chat() {
     let projectName = namingWords.map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
     if (!projectName || projectName.length < 3) {
-      projectName = 'Nuevo Proyecto Basalt';
+      projectName = pendingImage ? 'Proyecto desde imagen' : 'Nuevo Proyecto Basalt';
     } else if (projectName.length > 40) {
       projectName = projectName.slice(0, 37) + '...';
     }
@@ -743,13 +768,29 @@ export default function Chat() {
     if (project) {
       setActiveProject(project);
       setPendingPrompt(finalPrompt);
+      setPendingPromptImage(pendingImage);
       setPendingFile(null);
+      setPendingImage(null);
     }
     setCreatingWithPrompt(false);
   };
 
 
   const handleFileSelect = (file: File) => {
+    // Antes esto leía TODO como texto, incluidas imágenes — un mockup
+    // arrastrado terminaba como bytes binarios corruptos metidos en el
+    // prompt. Se separa por tipo: imagen → pendingImage (data URI, mismo
+    // pipeline que ya usa StudioChat dentro de un proyecto activo),
+    // cualquier otra cosa → pendingFile (texto), como antes.
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPendingImage(e.target?.result as string);
+        toast.success(`Imagen "${file.name}" cargada.`);
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
@@ -1032,7 +1073,10 @@ export default function Chat() {
 
   if (!activeProject) {
     return (
-      <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex flex-col h-full overflow-hidden"
+        onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+        onDrop={handleWorkspaceDrop}
+      >
         <div className="flex-1 overflow-hidden">
           <WelcomeScreen
             onPrompt={handleWelcomePrompt}
@@ -1048,6 +1092,8 @@ export default function Chat() {
             onFileSelect={handleFileSelect}
             pendingFile={pendingFile}
             onRemoveFile={() => setPendingFile(null)}
+            pendingImage={pendingImage}
+            onRemoveImage={() => setPendingImage(null)}
             selectedModel={selectedModel}
             onModelSelect={setSelectedModel}
             subscriptionTier={profile?.subscription_tier ?? 'free'}
@@ -1055,9 +1101,9 @@ export default function Chat() {
           />
           <input
             type="file"
-            id="welcome-file-input" 
-            className="hidden" 
-            accept=".txt,.js,.ts,.tsx,.css,.html,.json,.md,.py,.go,.sh,.sql,.yaml,.yml"
+            id="welcome-file-input"
+            className="hidden"
+            accept=".txt,.js,.ts,.tsx,.css,.html,.json,.md,.py,.go,.sh,.sql,.yaml,.yml,.png,.jpg,.jpeg,.webp,.gif"
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) handleFileSelect(file);
@@ -1088,6 +1134,7 @@ export default function Chat() {
     projectFiles,
     onCodeGenerated: handleCodeGenerated,
     initialPrompt: pendingPrompt,
+    initialImage: pendingPromptImage,
     initialModel: selectedModel,
     onGeneratingChange: setIsGenerating,
     supabaseConfig,
@@ -1109,7 +1156,7 @@ export default function Chat() {
         if (isMobile) setMobileTab('preview');
       }
     },
-    onInitialPromptUsed: () => setPendingPrompt(null),
+    onInitialPromptUsed: () => { setPendingPrompt(null); setPendingPromptImage(null); },
     onStreamCharsChange: (_chars: number, preview: string) => setStreamPreview(preview),
     onToggleArtifacts: () => setPanelView('artifacts'),
   };

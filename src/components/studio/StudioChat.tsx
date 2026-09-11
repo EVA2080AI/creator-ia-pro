@@ -34,6 +34,8 @@ interface StudioChatProps {
   onCodeGenerated: (files: Record<string, StudioFile>) => void;
   onNewConversation?: () => void;
   initialPrompt?: string | null;
+  /** Data URI de una imagen adjunta al crear el proyecto desde el Welcome screen (mockup → código). */
+  initialImage?: string | null;
   initialModel?: string;
   onInitialPromptUsed?: () => void;
   onAutoName?: (name: string) => void;
@@ -144,6 +146,7 @@ export function StudioChat({
   onCodeGenerated,
   onNewConversation,
   initialPrompt,
+  initialImage,
   initialModel,
   onInitialPromptUsed,
   onAutoName,
@@ -274,9 +277,15 @@ export function StudioChat({
   }, [onAutoName]);
 
   // ─── ACTION: Send message ────────────────────────────────────────────────
-  const handleSend = useCallback(async (override?: string) => {
+  const handleSend = useCallback(async (override?: string, imageOverride?: string) => {
     let text = (override || input).trim();
     if (isGenerating || !user) return;
+    // imageOverride existe para el primer mensaje de un proyecto recién creado
+    // con una imagen adjunta (ver initialImage más abajo) — no se puede usar
+    // setPendingImage() + handleSend() en el mismo tick porque el estado no se
+    // actualiza a tiempo (closure obsoleto), así que la imagen viaja como
+    // parámetro directo en ese caso puntual.
+    const imageToUse = imageOverride ?? pendingImage;
 
     // Early Navigation Intent
     const navMatch = text.toLowerCase().match(/(?:abre|abrir|open|show|view|file|archivo|ver)\s+([\w./\-]+(?:\.\w+)?)/i);
@@ -297,7 +306,7 @@ export function StudioChat({
       text = `[CONTEXTO: ${pendingContext.name}]\n\`\`\`\n${pendingContext.content}\n\`\`\`\n\n${text || "Analiza esto."}`;
     }
 
-    const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text, timestamp: new Date(), imagePreview: pendingImage ?? undefined };
+    const userMsg: Message = { id: crypto.randomUUID(), role: 'user', content: text, timestamp: new Date(), imagePreview: imageToUse ?? undefined };
     setMessages(prev => [...prev.filter(m => m.id !== 'welcome'), userMsg]);
     setInput('');
     setPendingImage(null);
@@ -308,7 +317,7 @@ export function StudioChat({
       lastAutoFixError.current = '';
     }
 
-    const intent = detectIntent(text, !!(pendingImage || pendingContext || pendingUrl));
+    const intent = detectIntent(text, !!(imageToUse || pendingContext || pendingUrl));
 
     // logic: Plan if in Architect mode OR if it's a very high-level vision request without "has/haz/crea"
     const shouldPlan = isArchitectMode && (intent === 'codegen' || intent === 'fullstack');
@@ -316,7 +325,7 @@ export function StudioChat({
     try {
       addLog(`Iniciando ciclo: ${intent}...`);
       
-      const result = await generateCode(text, { pendingImage, pendingUrl, preferences }) as any;
+      const result = await generateCode(text, { pendingImage: imageToUse, pendingUrl, preferences }) as any;
       if (!result) { addLog("Error en el motor.", "error"); return; }
 
       let assistantMsg: Message;
@@ -404,11 +413,11 @@ export function StudioChat({
       // Only fire when chat only has the welcome message (all messages have id 'welcome')
       if (messages.every(m => m.id === 'welcome')) {
         initialPromptTriggered.current = true;
-        handleSend(initialPrompt);
+        handleSend(initialPrompt, initialImage ?? undefined);
         onInitialPromptUsed?.();
       }
     }
-  }, [initialPrompt, messages, isGenerating, handleSend, onInitialPromptUsed]);
+  }, [initialPrompt, initialImage, messages, isGenerating, handleSend, onInitialPromptUsed]);
 
   // ─── AUTO-FIX Logic ───────────────────────────────────────────────────────
   useEffect(() => {

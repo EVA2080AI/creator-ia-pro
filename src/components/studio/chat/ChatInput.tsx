@@ -148,6 +148,16 @@ export function ChatInput({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Las imágenes tenían un límite y una lista de extensiones separados —
+    // .png/.jpg nunca estaban en allowedExtensions, así que "Adjuntar" para
+    // un mockup fallaba siempre con "Tipo de archivo no permitido", aunque
+    // onAttachFile ya sabía enrutar una imagen a pendingImage correctamente.
+    if (file.type.startsWith('image/')) {
+      if (file.size > 10 * 1024 * 1024) { toast.error(`"${file.name}" es demasiado grande (máx 10MB)`); return; }
+      onAttachFile(file);
+      e.target.value = '';
+      return;
+    }
     const allowedExtensions = ['.txt', '.js', '.ts', '.tsx', '.css', '.html', '.json', '.md', '.sql'];
     const extension = file.name.slice((file.name.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
     if (file.size > 2 * 1024 * 1024) { toast.error(`"${file.name}" es demasiado grande (máx 2MB)`); return; }
@@ -361,6 +371,11 @@ export function ChatInput({
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
+                onPaste={(e) => {
+                  const item = Array.from(e.clipboardData.items).find(i => i.type.startsWith('image/'));
+                  const file = item?.getAsFile();
+                  if (file) { e.preventDefault(); onAttachFile(file); }
+                }}
                 placeholder={
                   isArchitectMode
                     ? "Describe la arquitectura a planificar..."
@@ -518,7 +533,7 @@ export function ChatInput({
         ref={fileInputRef}
         type="file"
         className="hidden"
-        accept=".txt,.js,.ts,.tsx,.css,.html,.json,.md,.sql"
+        accept=".txt,.js,.ts,.tsx,.css,.html,.json,.md,.sql,.png,.jpg,.jpeg,.webp,.gif"
         onChange={handleFileChange}
         aria-hidden="true"
       />
