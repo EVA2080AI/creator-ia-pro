@@ -1,10 +1,14 @@
-// Basalt conversacional — asistente tipo Gemini en /a/basalt.
+// Basalt conversacional — asistente tipo Gemini en /a/basalt. Único punto de
+// entrada del producto: pedidos de construir apps/páginas/dashboards se
+// responden con código EN EL MISMO CHAT (ver sección 5 del SYSTEM_PROMPT),
+// sin redirigir a ningún motor/IDE aparte — pedido directo del usuario,
+// 2026-09-29: "no quiero que esté embebido, quítalo, vamos a usar solo
+// Basalt" (revirtiendo un intento anterior de embeber Chat.tsx acá mismo).
 //
 // Vive en el cliente (no en la tabla `assistant`) para no depender de un seed
 // en la base: la persona, las tarjetas de bienvenida y la memoria se definen
-// aquí. La memoria y el historial se guardan en localStorage por usuario, así
-// que persisten entre sesiones en el mismo navegador (sincronizar con la base
-// es el siguiente paso).
+// aquí. El historial y la memoria se guardan en la base de datos (ver
+// /api/basalt/*), no en localStorage.
 import type { Assistant } from "@/lib/assistants";
 import { DEFAULT_MODEL_ID } from "@/lib/ai/models";
 
@@ -35,7 +39,10 @@ Cuando expliques cómo crear un agente, da: objetivo, instrucciones del sistema 
 4. ENSEÑAR Y PROMPTING
 Eres un buen profesor: explicas con ejemplos, analogías y ejercicios. Enseñas prompt engineering (rol, contexto, tarea, formato, ejemplos, restricciones; cadena de pensamiento; few-shot; iteración) y mejoras prompts del usuario mostrando "antes / después" y por qué.
 
-5. EL PROGRAMA QUE DICTA EL USUARIO
+5. CONSTRUIR APPS, PÁGINAS WEB Y DASHBOARDS
+Cuando te pidan construir una app, página web, landing, dashboard o similar, hazlo tú mismo en el chat: entrega el código completo y listo para copiar en uno o varios bloques de código markdown (\`\`\`tsx, \`\`\`html, etc.), con nombre de archivo en un comentario en la primera línea si son varios. Prioriza React + Tailwind si no te dicen lo contrario; para algo simple, un solo archivo HTML autocontenido también sirve. No hay una herramienta aparte para esto — todo pasa por acá, igual que el resto de lo que haces.
+
+6. EL PROGRAMA QUE DICTA EL USUARIO
 El usuario dicta un programa de IA para ejecutivos y profesionales de negocio, con este cronograma:
 - Viernes 16 de octubre (6:00–10:00 p. m., 4 h): Módulo 1 · Trabajar con IA como profesional de negocios.
 - Sábado 17 de octubre (8:00 a. m.–2:00 p. m., 6 h): Módulo 2 · IA para investigar, analizar y construir estrategia (5 h) + apertura del Módulo 3 (1 h).
@@ -194,19 +201,6 @@ export function parseBasaltReply(text: string) {
   // Mientras llega el stream, esconde una etiqueta que todavía no se cerró.
   visible = visible.replace(/<(memoria|imagen)[^]*$/i, "");
   return { visible: visible.trim(), memories, images };
-}
-
-// ─── Detección: "esto es un pedido de construir una app/web" ────────────────
-// El creador de apps ya no es un producto aparte — vive dentro de Basalt.
-// Si el mensaje pide claramente construir algo (verbo + sustantivo de app/web),
-// Basalt lo manda al motor de construcción (StudioChat en /chat) en vez de
-// responder por texto. Todo lo demás (marketing, piezas, agentes, charla)
-// se queda conversando aquí.
-const BUILD_VERBS = /\b(crea|cr[eé]ame|constru(?:ye|ime)|constr[uú]yeme|hazme|dise[ñn]a(?:me)?|desarrolla(?:me)?|monta(?:me)?|arma(?:me)?|genera(?:me)?)\b/i;
-const BUILD_NOUNS = /\b(app|aplicaci[oó]n|p[aá]gina(?:\s*web)?|sitio(?:\s*web)?|landing(?:\s*page)?|tienda(?:\s*online)?|e-?commerce|dashboard|formulario|blog|portafolio|portfolio|webapp|web\s*app|crm|saas)\b/i;
-
-export function isAppBuildRequest(text: string): boolean {
-  return BUILD_VERBS.test(text) && BUILD_NOUNS.test(text);
 }
 
 export function buildSystemPrompt(memory: string[]) {

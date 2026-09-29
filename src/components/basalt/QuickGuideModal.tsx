@@ -10,7 +10,7 @@ const STEPS = [
   {
     icon: Users,
     title: "Expertos",
-    desc: "En el menú tienes asistentes especializados por área (marketing, legal, etc.) — mismo chat, enfoque distinto según lo que necesites.",
+    desc: "En el menú tienes Expertos especializados por área (marketing, legal, etc.) — mismo chat, enfoque distinto según lo que necesites.",
   },
   {
     icon: Brain,

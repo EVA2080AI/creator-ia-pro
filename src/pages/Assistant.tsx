@@ -219,7 +219,7 @@ export default function AssistantPage() {
     <div className="asst-app" data-asst-theme={theme} style={cssVars as React.CSSProperties}>
       <Helmet><title>{assistant.name} | Creator IA Pro</title></Helmet>
 
-      <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Asistentes">
+      <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Expertos">
         <div className="asst-side-top">
           <Logo size="sm" showText onClick={() => go("/a/basalt")} />
           <button className="asst-icon-btn" onClick={() => go("/a/basalt")} aria-label="Volver a Basalt" title="Volver a Basalt" style={{ display: "flex", alignItems: "center", width: "auto", gap: 6, padding: "0 10px" }}>
@@ -231,7 +231,7 @@ export default function AssistantPage() {
           <Plus className="w-4 h-4" /> Nuevo chat
         </button>
 
-        <div className="asst-switcher-label">Asistentes</div>
+        <div className="asst-switcher-label">Expertos</div>
         {assistants.map((a) => (
           <button
             key={a.slug}
