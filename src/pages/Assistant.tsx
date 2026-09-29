@@ -93,6 +93,14 @@ export default function AssistantPage() {
     }
   };
 
+  // Cierra el drawer móvil al navegar — varios botones del sidebar llamaban
+  // a navigate() directo y dejaban el drawer abierto tapando la pantalla
+  // tras el salto (auditoría UX 2026-09-29).
+  const go = (path: string) => {
+    navigate(path);
+    setSidebarOpen(false);
+  };
+
   const sendPrompt = useCallback(async (prompt: string) => {
     const text = prompt.trim();
     if (!text || generating || !assistant) return;
@@ -213,8 +221,8 @@ export default function AssistantPage() {
 
       <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Asistentes">
         <div className="asst-side-top">
-          <Logo size="sm" showText onClick={() => navigate("/a/basalt")} />
-          <button className="asst-icon-btn" onClick={() => navigate("/a/basalt")} aria-label="Volver a Basalt" title="Volver a Basalt" style={{ display: "flex", alignItems: "center", width: "auto", gap: 6, padding: "0 10px" }}>
+          <Logo size="sm" showText onClick={() => go("/a/basalt")} />
+          <button className="asst-icon-btn" onClick={() => go("/a/basalt")} aria-label="Volver a Basalt" title="Volver a Basalt" style={{ display: "flex", alignItems: "center", width: "auto", gap: 6, padding: "0 10px" }}>
             <ArrowLeft className="w-4 h-4" />
             <span style={{ fontSize: 12, fontWeight: 700 }}>Basalt</span>
           </button>
@@ -236,17 +244,17 @@ export default function AssistantPage() {
         ))}
 
         <div className="asst-switcher-label">Plataforma</div>
-        <button className="asst-side-link" onClick={() => navigate("/tasks")}>
+        <button className="asst-side-link" onClick={() => go("/tasks")}>
           <ListTodo className="w-4 h-4" /> Tareas
         </button>
-        <button className="asst-side-link" onClick={() => navigate("/spaces")}>
+        <button className="asst-side-link" onClick={() => go("/spaces")}>
           <FolderOpen className="w-4 h-4" /> Proyectos
         </button>
-        <button className="asst-side-link" onClick={() => navigate("/profile")}>
+        <button className="asst-side-link" onClick={() => go("/profile")}>
           <User className="w-4 h-4" /> Perfil
         </button>
         {isAdmin && (
-          <button className="asst-side-link" onClick={() => navigate("/admin")}>
+          <button className="asst-side-link" onClick={() => go("/admin")}>
             <ShieldCheck className="w-4 h-4" /> Panel Admin
           </button>
         )}

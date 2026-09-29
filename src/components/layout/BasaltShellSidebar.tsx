@@ -127,7 +127,7 @@ export function BasaltShellSidebar({
               lado del que "volver" (pedido directo del usuario, viendo la
               UI). El panel de métricas pasa a la sección Plataforma, como
               un destino más, no como una flecha ambigua arriba. */}
-          <Logo size="sm" showText onClick={() => navigate("/a/basalt")} />
+          <Logo size="sm" showText onClick={() => go("/a/basalt")} />
         </div>
         <button className="asst-new-chat" onClick={handleNewChat}>
           <Plus className="w-4 h-4" /> Nuevo chat

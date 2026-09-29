@@ -473,8 +473,13 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
       )}
 
       {/* ── Bulk Actions Floating Toolbar ──────────────────────────────────────── */}
+      {/* Centrada respecto al viewport completo en mobile (el sidebar de
+          Basalt es un drawer off-canvas ahí), pero en desktop el sidebar
+          ocupa 264px reales de layout — sin el offset queda descentrada
+          hacia la izquierda (auditoría UX 2026-09-29, ya no colapsa como el
+          sidebar viejo, así que el desfase es constante y corregible). */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-8 duration-500">
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 md:left-[calc(50%+132px)] z-50 animate-in slide-in-from-bottom-8 duration-500">
           <div className="flex items-center gap-6 px-8 py-5 bg-card border border-border rounded-[2.5rem] shadow-[0_30px_90px_rgba(0,0,0,0.15)] backdrop-blur-3xl">
             <div className="flex items-center gap-4 border-r border-border pr-6 mr-1">
               <div className="h-10 w-10 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg">
