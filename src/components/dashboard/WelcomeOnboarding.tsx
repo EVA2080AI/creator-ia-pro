@@ -63,8 +63,8 @@ export function WelcomeOnboarding({ onDismiss }: { onDismiss: () => void }) {
               Bienvenido a Creator IA Pro
             </h2>
             <p className="text-sm text-muted-foreground font-medium max-w-md mx-auto leading-relaxed">
-              Tenés 2 formas de crear con IA. Elegí por dónde empezar —
-              podés cambiar de una a otra cuando quieras desde el menú.
+              Basalt es tu punto de partida: conversás con él para todo, incluyendo
+              construir apps y sitios. Elegí por dónde empezar.
             </p>
           </div>
 

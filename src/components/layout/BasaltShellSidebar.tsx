@@ -2,12 +2,13 @@ import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction
 import { useNavigate } from "react-router-dom";
 import {
   Plus, Minus, Scale, BarChart3, ListTodo, FolderOpen, User, ShieldCheck,
-  Sun, Moon, LogOut, Bug,
+  Sun, Moon, LogOut, Bug, HelpCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Logo } from "@/components/Logo";
 import { ReportModal } from "@/components/tickets/ReportModal";
+import { QuickGuideModal } from "@/components/basalt/QuickGuideModal";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -33,6 +34,10 @@ export interface BasaltShellSidebarProps {
   /** Slot para contenido específico de Basalt.tsx que va DESPUÉS de
    *  "Expertos" y antes de "Plataforma" (hoy: "Conversaciones"). */
   extraNav?: ReactNode;
+  /** true la primera vez que un usuario nuevo entra a /a/basalt (calculado
+   *  una sola vez en Basalt.tsx con hasSeenBasaltGuide()) — abre la guía
+   *  rápida automáticamente sin que el usuario tenga que buscarla. */
+  autoOpenGuide?: boolean;
 }
 
 /**
@@ -45,14 +50,20 @@ export interface BasaltShellSidebarProps {
  * vía `beforeExperts`/`extraNav` en sus posiciones originales exactas.
  */
 export function BasaltShellSidebar({
-  activePath, sidebarOpen, setSidebarOpen, theme, setTheme, onNewChat, beforeExperts, extraNav,
+  activePath, sidebarOpen, setSidebarOpen, theme, setTheme, onNewChat, beforeExperts, extraNav, autoOpenGuide,
 }: BasaltShellSidebarProps) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin(user?.id);
   const [showReport, setShowReport] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   const [experts, setExperts] = useState<Assistant[]>([]);
   const [expertsExpanded, setExpertsExpanded] = useState(false);
+
+  useEffect(() => {
+    if (autoOpenGuide) setShowGuide(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoOpenGuide]);
 
   useEffect(() => {
     // "genesis" era Basalt-como-constructor — redundante ahora que Basalt lo
@@ -144,6 +155,9 @@ export function BasaltShellSidebar({
         {isAdmin && platform("/admin", "Panel Admin", ShieldCheck)}
 
         <div className="asst-side-bottom">
+          <button className="asst-side-link" onClick={() => setShowGuide(true)}>
+            <HelpCircle className="w-4 h-4" /> Guía rápida
+          </button>
           <button className="asst-side-link" onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}>
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {theme === "dark" ? "Tema claro" : "Tema oscuro"}
@@ -168,6 +182,7 @@ export function BasaltShellSidebar({
             </DropdownMenuContent>
           </DropdownMenu>
           <ReportModal open={showReport} onClose={() => setShowReport(false)} />
+          <QuickGuideModal open={showGuide} onClose={() => setShowGuide(false)} />
         </div>
       </nav>
       <div className={`asst-backdrop ${sidebarOpen ? "show" : ""}`} onClick={() => setSidebarOpen(false)} />

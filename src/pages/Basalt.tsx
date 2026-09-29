@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
+import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
 import { CHAT_MODELS } from "@/lib/ai/models";
@@ -40,6 +41,9 @@ export default function BasaltPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [model, setModel] = useState(readModel);
+  // Se calcula una sola vez al montar: si cambia durante la sesión (al cerrar
+  // la guía) no debe reabrirse solo por un re-render.
+  const [autoGuide] = useState(() => !hasSeenBasaltGuide());
 
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
   const [messages, setMessages] = useState<StoredMsg[]>([]);
@@ -269,6 +273,7 @@ export default function BasaltPage() {
         theme={theme}
         setTheme={setTheme}
         onNewChat={newChat}
+        autoOpenGuide={autoGuide}
         beforeExperts={
           <>
             <button className="asst-side-link" onClick={() => setShowMemory((v) => !v)}>
