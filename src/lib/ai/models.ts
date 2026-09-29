@@ -4,14 +4,18 @@
 // distintos. Importado tanto por el frontend como por /api/ai/chat.
 //
 // IDs verificados en vivo contra https://openrouter.ai/api/v1/models el
-// 2026-08-26. Los que estaban en uso y resultaron NO existir ya (ver
-// docs/INVENTARIO_FUNCIONALIDADES.md G-11, T-17): google/gemini-2.0-flash-001,
-// google/gemini-2.0-flash-lite-001, anthropic/claude-3.5-sonnet,
-// anthropic/claude-sonnet-4-5, anthropic/claude-sonnet-4-6,
-// anthropic/claude-3-opus(-20240229), anthropic/claude-opus-4-6,
-// google/gemini-pro-1.5, google/gemini-2.5-pro-preview-03-25.
+// 2026-08-26 (catálogo base) y otra pasada el 2026-09-29 (modelos de texto,
+// código e imagen agregados a pedido del usuario — "necesito que puedas
+// poner mas modelos, de texto codigo, imagen"). Los que estaban en uso y
+// resultaron NO existir ya (ver docs/INVENTARIO_FUNCIONALIDADES.md G-11,
+// T-17): google/gemini-2.0-flash-001, google/gemini-2.0-flash-lite-001,
+// anthropic/claude-3.5-sonnet, anthropic/claude-sonnet-4-5,
+// anthropic/claude-sonnet-4-6, anthropic/claude-3-opus(-20240229),
+// anthropic/claude-opus-4-6, google/gemini-pro-1.5,
+// google/gemini-2.5-pro-preview-03-25.
 
 export type ModelCategory = "eco" | "pro" | "ultra";
+export const CATEGORY_ORDER: ModelCategory[] = ["eco", "pro", "ultra"];
 export type PlanTier = "free" | "creador" | "pro" | "agencia" | "pyme";
 
 export interface ModelDef {
@@ -99,6 +103,18 @@ export const CHAT_MODELS: ModelDef[] = [
     vision: false,
     free: true,
   },
+  {
+    id: "google/gemma-4-31b-it:free",
+    label: "Gemma 4 31B",
+    provider: "Google",
+    description: "Modelo gratuito de Google, multimodal, ideal para chat general sin coste.",
+    category: "eco",
+    credits: 0,
+    minTier: "free",
+    context: "256K tokens",
+    vision: true,
+    free: true,
+  },
   // ── Pro — requiere plan Creador+ ────────────────────────────────────────
   {
     id: "google/gemini-2.5-flash",
@@ -148,6 +164,78 @@ export const CHAT_MODELS: ModelDef[] = [
     vision: true,
     free: false,
   },
+  {
+    id: "deepseek/deepseek-v3.2",
+    label: "DeepSeek V3.2",
+    provider: "DeepSeek",
+    description: "Sucesor de V3.1, extremadamente económico y potente para texto general.",
+    category: "pro",
+    credits: 1,
+    minTier: "creador",
+    context: "160K tokens",
+    vision: false,
+    free: false,
+  },
+  {
+    id: "openai/gpt-5-mini",
+    label: "GPT-5 Mini",
+    provider: "OpenAI",
+    description: "Equilibrio ideal entre costo y calidad para chat cotidiano, con visión.",
+    category: "pro",
+    credits: 2,
+    minTier: "creador",
+    context: "400K tokens",
+    vision: true,
+    free: false,
+  },
+  {
+    id: "mistralai/mistral-medium-3.1",
+    label: "Mistral Medium 3.1",
+    provider: "Mistral",
+    description: "Modelo versátil de Mistral con buen desempeño en conversación y visión.",
+    category: "pro",
+    credits: 2,
+    minTier: "creador",
+    context: "128K tokens",
+    vision: true,
+    free: false,
+  },
+  {
+    id: "mistralai/codestral-2508",
+    label: "Codestral 2508",
+    provider: "Mistral",
+    description: "Especializado en autocompletado, corrección de errores y código de baja latencia.",
+    category: "pro",
+    credits: 1,
+    minTier: "creador",
+    context: "256K tokens",
+    vision: false,
+    free: false,
+  },
+  {
+    id: "openai/gpt-5.1-codex-mini",
+    label: "GPT-5.1 Codex Mini",
+    provider: "OpenAI",
+    description: "Versión ligera de GPT-5.1-Codex, pensada para tareas de programación rápidas.",
+    category: "pro",
+    credits: 2,
+    minTier: "creador",
+    context: "400K tokens",
+    vision: true,
+    free: false,
+  },
+  {
+    id: "moonshotai/kimi-k2.7-code",
+    label: "Kimi K2.7 Code",
+    provider: "Moonshot AI",
+    description: "Enfocado en completar tareas de programación de extremo a extremo, contexto largo.",
+    category: "pro",
+    credits: 2,
+    minTier: "creador",
+    context: "256K tokens",
+    vision: true,
+    free: false,
+  },
   // ── Ultra — máximo razonamiento, requiere Pro+ ──────────────────────────
   {
     id: "anthropic/claude-sonnet-4.5",
@@ -185,6 +273,42 @@ export const CHAT_MODELS: ModelDef[] = [
     vision: true,
     free: false,
   },
+  {
+    id: "x-ai/grok-4.7",
+    label: "Grok 4.7",
+    provider: "xAI",
+    description: "Última versión de Grok, conversación avanzada y multimodal.",
+    category: "ultra",
+    credits: 6,
+    minTier: "pro",
+    context: "500K tokens",
+    vision: true,
+    free: false,
+  },
+  {
+    id: "qwen/qwen3-max",
+    label: "Qwen3 Max",
+    provider: "Qwen",
+    description: "Modelo insignia de Alibaba, gran capacidad de razonamiento en texto.",
+    category: "ultra",
+    credits: 5,
+    minTier: "pro",
+    context: "256K tokens",
+    vision: false,
+    free: false,
+  },
+  {
+    id: "qwen/qwen3-coder-plus",
+    label: "Qwen3 Coder Plus",
+    provider: "Qwen",
+    description: "Flagship de Qwen para codificación autónoma, 1M de tokens de contexto.",
+    category: "ultra",
+    credits: 5,
+    minTier: "pro",
+    context: "1M tokens",
+    vision: false,
+    free: false,
+  },
 ];
 
 export const DEFAULT_MODEL_ID = CHAT_MODELS[0].id; // google/gemini-2.5-flash-lite — gratis, disponible en todos los planes
@@ -215,6 +339,10 @@ export interface ImageModelDef {
   /** ID del modelo en OpenRouter (`provider/model`) — solo si provider === "openrouter". */
   openrouterSlug?: string;
   label: string;
+  /** Nombre de vitrina de la empresa detrás del modelo (Google, OpenAI, etc.) — para mostrar en el selector, distinto de `provider` (que es la API que lo sirve). */
+  providerLabel: string;
+  /** Una frase corta que distinga a este motor de los demás — el selector (ModelSelector.tsx) ya no la genera sola. */
+  description: string;
   credits: number;
   minTier: PlanTier;
   supportsImagePrompt: boolean; // acepta imagen de referencia (estilo, mockup)
@@ -226,8 +354,59 @@ export const IMAGE_MODELS: ImageModelDef[] = [
     provider: "openrouter",
     openrouterSlug: "google/gemini-2.5-flash-image",
     label: "Gemini Flash Image",
+    providerLabel: "Google",
+    description: "Rápido y disponible en el plan gratuito. Buen punto de partida para cualquier imagen.",
     credits: 3,
     minTier: "free",
+    supportsImagePrompt: true,
+  },
+  // Los 4 siguientes se agregaron el 2026-09-29 (pedido: "revisa los
+  // creadores de imagen... revisa la lista") — IDs verificados en vivo
+  // contra GET /api/v1/images/models de OpenRouter (el catálogo que
+  // realmente acepta POST /api/v1/images, distinto del catálogo general de
+  // /api/v1/models — varios de estos ni aparecen ahí).
+  {
+    id: "gemini-3-pro-image",
+    provider: "openrouter",
+    openrouterSlug: "google/gemini-3-pro-image",
+    label: "Nano Banana Pro",
+    providerLabel: "Google",
+    description: "El motor de imagen más avanzado de Google: edición fiel a la referencia, hasta 14 imágenes de referencia.",
+    credits: 5,
+    minTier: "creador",
+    supportsImagePrompt: true,
+  },
+  {
+    id: "gpt-image-1",
+    provider: "openrouter",
+    openrouterSlug: "openai/gpt-image-1",
+    label: "GPT Image 1",
+    providerLabel: "OpenAI",
+    description: "Texto legible dentro de la imagen y fondos transparentes. Ideal para piezas con tipografía.",
+    credits: 5,
+    minTier: "creador",
+    supportsImagePrompt: true,
+  },
+  {
+    id: "flux-2-pro",
+    provider: "openrouter",
+    openrouterSlug: "black-forest-labs/flux.2-pro",
+    label: "FLUX.2 Pro",
+    providerLabel: "Black Forest Labs",
+    description: "Calidad visual de frontera y consistencia de estilo/personaje entre generaciones.",
+    credits: 4,
+    minTier: "creador",
+    supportsImagePrompt: true,
+  },
+  {
+    id: "seedream-4.5",
+    provider: "openrouter",
+    openrouterSlug: "bytedance-seed/seedream-4.5",
+    label: "Seedream 4.5",
+    providerLabel: "ByteDance",
+    description: "Edición muy consistente y buena preservación de detalles del sujeto entre variaciones.",
+    credits: 4,
+    minTier: "creador",
     supportsImagePrompt: true,
   },
 ];

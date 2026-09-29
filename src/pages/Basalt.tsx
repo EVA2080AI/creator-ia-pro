@@ -13,7 +13,7 @@ import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
-import { CHAT_MODELS } from "@/lib/ai/models";
+import { CHAT_MODELS, CATEGORY_ORDER, CATEGORY_META } from "@/lib/ai/models";
 import {
   BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply,
   loadConversations, saveConversation, deleteConversation, loadMemory, saveMemory,
@@ -391,10 +391,14 @@ export default function BasaltPage() {
             aria-label="Modelo"
             className="asst-model-select"
           >
-            {CHAT_MODELS.map((m) => (
-              <option key={m.id} value={m.id}>
-                {m.label} {m.free ? "· gratis" : `· ${m.credits} cr`}
-              </option>
+            {CATEGORY_ORDER.map((cat) => (
+              <optgroup key={cat} label={CATEGORY_META[cat].label}>
+                {CHAT_MODELS.filter((m) => m.category === cat).map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.label} {m.free ? "· gratis" : `· ${m.credits} cr`}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </header>

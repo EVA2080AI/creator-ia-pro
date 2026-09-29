@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { ArrowLeft, Scale, Send, Square, Trophy, Loader2, Plus, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { mdToHtml } from "@/lib/markdown";
-import { CHAT_MODELS, getModel } from "@/lib/ai/models";
+import { CHAT_MODELS, getModel, CATEGORY_ORDER, CATEGORY_META } from "@/lib/ai/models";
 import "./Assistant.css";
 
 // Arena IA: el mismo prompt a varios modelos en paralelo para comparar
@@ -148,8 +148,12 @@ export default function ArenaPage() {
                     onChange={(e) => patch(i, { model: e.target.value, text: "", status: "idle" })}
                     className="min-w-0 flex-1 rounded-lg bg-muted px-2 py-1.5 text-[12px] font-bold text-foreground outline-none"
                   >
-                    {CHAT_MODELS.map((cm) => (
-                      <option key={cm.id} value={cm.id}>{cm.label} {cm.free ? "· gratis" : `· ${cm.credits} cr`}</option>
+                    {CATEGORY_ORDER.map((cat) => (
+                      <optgroup key={cat} label={CATEGORY_META[cat].label}>
+                        {CHAT_MODELS.filter((cm) => cm.category === cat).map((cm) => (
+                          <option key={cm.id} value={cm.id}>{cm.label} {cm.free ? "· gratis" : `· ${cm.credits} cr`}</option>
+                        ))}
+                      </optgroup>
                     ))}
                   </select>
                   {lanes.length > 2 && !running && (

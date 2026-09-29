@@ -29,15 +29,12 @@ interface RowModel {
   credits: number;
 }
 
-// IMAGE_MODELS no trae copy de vitrina — se describe aquí, junto al resto del UI.
 const IMAGE_ROWS: RowModel[] = IMAGE_MODELS.map((m) => ({
   id: m.id,
   label: m.label,
-  badge: m.credits <= 2 ? 'ECO' : 'PRO',
-  provider: 'Replicate',
-  description: m.supportsImagePrompt
-    ? 'Máxima fidelidad y seguimiento de prompt. Acepta imagen de referencia.'
-    : '4 pasos, ultra rápido. Disponible en todos los planes.',
+  badge: m.credits <= 3 ? 'ECO' : 'PRO',
+  provider: m.providerLabel,
+  description: m.description,
   vision: m.supportsImagePrompt,
   free: false,
   credits: m.credits,
@@ -54,6 +51,12 @@ const PROVIDER_COLORS: Record<string, string> = {
   Microsoft: 'text-sky-500',
   DeepSeek: 'text-violet-500',
   Replicate: 'text-teal-500',
+  Mistral: 'text-orange-500',
+  'Moonshot AI': 'text-pink-500',
+  Qwen: 'text-fuchsia-500',
+  xAI: 'text-zinc-500',
+  'Black Forest Labs': 'text-rose-500',
+  ByteDance: 'text-cyan-500',
 };
 
 function ModelRow({
