@@ -245,6 +245,12 @@ const App = () => {
                     <Route path="/assets"       element={<Navigate to="/spaces" replace />} />
                     <Route path="/profile"      element={<Profile />} />
                     <Route path="/hub"          element={<Navigate to="/spaces" replace />} />
+                    {/* ShareScreen es una herramienta independiente (P2P, sin relación
+                        con Admin) — a diferencia de /system-status y /design-system,
+                        que quedan agrupados con Admin bajo "Sistema" en el shell legado,
+                        migrarla sola no genera un salto de shell entre páginas que van
+                        juntas (auditoría UX 2026-09-29). */}
+                    <Route path="/sharescreen"  element={<ShareScreen />} />
                   </Route>
 
                   {/* ── Platform routes (wrapped in AppLayout) ── */}
@@ -259,7 +265,6 @@ const App = () => {
                     {/* Antigravity se fusionó dentro de Genesis de verdad — no solo la ruta,
                         el prompt separado también se eliminó (ver Fase 5 de la restructuración). */}
                     <Route path="/antigravity"  element={<Navigate to="/a/basalt" replace />} />
-                    <Route path="/sharescreen"  element={<ShareScreen />} />
                     <Route path="/system-status" element={<SystemStatus />} />
                     <Route path="/design-system" element={<DesignSystem />} />
                     {/* Editor se fusionó de verdad dentro de Genesis IA — era un subconjunto

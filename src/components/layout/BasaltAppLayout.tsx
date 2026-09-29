@@ -15,6 +15,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/assets": "Proyectos",
   "/hub": "Proyectos",
   "/profile": "Perfil",
+  "/sharescreen": "ShareScreen",
 };
 
 /**

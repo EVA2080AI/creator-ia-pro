@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -8,14 +7,13 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import Peer, { MediaConnection, DataConnection } from "peerjs";
 import { QRCodeSVG } from "qrcode.react";
-import { Monitor, Smartphone, Video, Copy, Maximize2, X, ArrowLeft } from "lucide-react";
+import { Monitor, Smartphone, Video, Copy, Maximize2, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function ShareScreen() {
-  const { user, signOut } = useAuth("/auth");
+  const { user } = useAuth("/auth");
   const { profile, refreshProfile } = useProfile(user?.id);
-  const navigate = useNavigate();
-  
+
   const [mode, setMode] = useState<"host" | "viewer" | null>(null);
   const [peerId, setPeerId] = useState<string>("");
   const [targetId, setTargetId] = useState<string>("");
@@ -169,15 +167,13 @@ export default function ShareScreen() {
       <Helmet><title>ShareScreen | Creator IA Pro</title></Helmet>
       
       <div className="mx-auto max-w-4xl px-4 py-8">
-        <div className="mb-6 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/dashboard")} aria-label="volver" className="hover:bg-white/5 rounded-xl text-slate-400 hover:text-foreground">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="space-y-1">
-             <Badge className="bg-[var(--brand)]/10 text-[var(--brand)] border-transparent font-black px-3 py-0.5 rounded-full text-[9px] tracking-widest uppercase mb-1">p2p_nexus_v8.0</Badge>
-             <h1 className="text-4xl font-black tracking-tighter text-foreground">sharescreen_<span className="text-[var(--brand)]">pro</span></h1>
-             <p className="text-sm font-bold text-slate-400 lowercase">extiende tu espacio de trabajo a cualquier dispositivo p2p</p>
-          </div>
+        {/* Sin botón de "volver" propio — vive dentro del shell de Basalt
+            ahora, la navegación es la sidebar compartida, igual que
+            Dashboard/Tareas/Proyectos/Perfil (auditoría UX 2026-09-29). */}
+        <div className="mb-6 space-y-1">
+          <Badge className="bg-[var(--brand)]/10 text-[var(--brand)] border-transparent font-black px-3 py-0.5 rounded-full text-[9px] tracking-widest uppercase mb-1">p2p_nexus_v8.0</Badge>
+          <h1 className="text-4xl font-black tracking-tighter text-foreground">sharescreen_<span className="text-[var(--brand)]">pro</span></h1>
+          <p className="text-sm font-bold text-slate-400 lowercase">extiende tu espacio de trabajo a cualquier dispositivo p2p</p>
         </div>
 
         {/* MODO SELECTOR */}
