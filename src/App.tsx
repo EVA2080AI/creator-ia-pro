@@ -64,7 +64,7 @@ function AuthWatcher() {
     { key: 'k', meta: true, handler: () => setSearchOpen(true) },
     { key: 'p', meta: true, shift: true, handler: () => navigate('/profile') },
     { key: 'd', meta: true, shift: true, handler: () => navigate('/dashboard') },
-    { key: 't', meta: true, shift: true, handler: () => navigate('/tareas') },
+    { key: 't', meta: true, shift: true, handler: () => navigate('/tasks') },
     { key: 'h', meta: true, shift: true, handler: () => navigate('/help') },
   ]);
 
@@ -205,7 +205,10 @@ const App = () => {
                   {/* Asistentes personalizables — shell propio, sin AppLayout */}
                   <Route path="/a/basalt" element={<BasaltPage />} />
                   <Route path="/basalt"   element={<Navigate to="/a/basalt" replace />} />
-                  <Route path="/arena"    element={<ArenaPage />} />
+                  {/* Arena vive bajo el mismo prefijo /a/ que Basalt y los Expertos — es
+                      la misma familia de producto (auditoría de IA, 2026-09-28). */}
+                  <Route path="/a/arena" element={<ArenaPage />} />
+                  <Route path="/arena"   element={<Navigate to="/a/arena" replace />} />
                   <Route path="/a/:slug" element={<AssistantPage />} />
 
                   {/* ── Redirects ── */}
@@ -217,8 +220,11 @@ const App = () => {
                   <Route element={<AppLayout />}>
                     <Route path="/dashboard"    element={<Dashboard />} />
                     <Route path="/spaces"       element={<Spaces />} />
-                    <Route path="/tareas"       element={<Tasks />} />
-                    <Route path="/tasks"        element={<Navigate to="/tareas" replace />} />
+                    {/* /tasks es la canónica ahora — /tareas era la única URL logueada
+                        del sitio en español sin razón de SEO (privada, disallow en
+                        robots.txt); auditoría de IA, 2026-09-28. */}
+                    <Route path="/tasks"        element={<Tasks />} />
+                    <Route path="/tareas"       element={<Navigate to="/tasks" replace />} />
                     <Route path="/assets"       element={<Navigate to="/spaces" replace />} />
                     {/* Aplicaciones se fusionó de verdad dentro de Basalt como panel
                         "Herramientas" — ver Tools.tsx embebido en Chat.tsx. */}
