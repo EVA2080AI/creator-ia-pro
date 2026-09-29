@@ -190,7 +190,7 @@ export default function AssistantPage() {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-white text-center px-6">
         <p className="text-sm text-zinc-500">No encontramos este asistente.</p>
-        <button onClick={() => navigate("/dashboard")} className="text-sm font-bold text-primary underline">Volver al inicio</button>
+        <button onClick={() => navigate("/a/basalt")} className="text-sm font-bold text-primary underline">Volver al inicio</button>
       </div>
     );
   }
@@ -201,7 +201,7 @@ export default function AssistantPage() {
 
       <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Asistentes">
         <div className="asst-side-top">
-          <button className="asst-icon-btn" onClick={() => navigate("/dashboard")} aria-label="Volver al inicio">
+          <button className="asst-icon-btn" onClick={() => navigate("/a/basalt")} aria-label="Volver al inicio">
             <ArrowLeft className="w-4 h-4" />
           </button>
         </div>

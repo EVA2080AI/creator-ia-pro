@@ -6,7 +6,7 @@ import {
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { brandCssVars } from "@/lib/assistants";
+import { brandCssVars, listAssistants, type Assistant } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
 import { CHAT_MODELS } from "@/lib/ai/models";
 import {
@@ -45,6 +45,7 @@ export default function BasaltPage() {
   const [conversations, setConversations] = useState<StoredConversation[]>([]);
   const [memory, setMemory] = useState<string[]>([]);
   const [showMemory, setShowMemory] = useState(false);
+  const [experts, setExperts] = useState<Assistant[]>([]);
 
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -58,6 +59,9 @@ export default function BasaltPage() {
     if (!userId) return;
     setConversations(loadConversations(userId));
     setMemory(loadMemory(userId));
+    // "genesis" era Basalt-como-constructor — redundante ahora que Basalt lo
+    // absorbió; el resto son los expertos por área (marketing, legal, etc.).
+    listAssistants().then((all) => setExperts(all.filter((a) => a.slug !== "genesis")));
   }, [userId]);
 
   useEffect(() => {
@@ -291,6 +295,20 @@ export default function BasaltPage() {
               </div>
             ))}
           </div>
+        )}
+
+        {experts.length > 0 && (
+          <>
+            <div className="asst-switcher-label">Expertos</div>
+            <div style={{ maxHeight: 180, overflowY: "auto" }}>
+              {experts.map((a) => (
+                <button key={a.slug} className="asst-switch-item" onClick={() => navigate(`/a/${a.slug}`)} title={a.tagline || a.name}>
+                  <span className="asst-switch-dot" style={{ background: a.brand.accent || "var(--asst-txt-3)" }} />
+                  {a.name}
+                </button>
+              ))}
+            </div>
+          </>
         )}
 
         <div className="asst-switcher-label">Conversaciones</div>

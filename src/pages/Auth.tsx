@@ -30,10 +30,10 @@ const Auth = () => {
   const navigate = useNavigate();
   const { data: session } = useSession();
 
-  const REDIRECT_URL = `${window.location.origin}/dashboard`;
-
+  // Punto de entrada tras iniciar sesión: el chat de Basalt (como Gemini/ChatGPT),
+  // no el dashboard de métricas — eso queda como vista secundaria (⌘⇧D).
   useEffect(() => {
-    if (session?.user) navigate("/dashboard");
+    if (session?.user) navigate("/a/basalt");
   }, [session, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,7 +43,7 @@ const Auth = () => {
       if (mode === "forgot") {
         const { error } = await authClient.requestPasswordReset({
           email,
-          redirectTo: REDIRECT_URL.replace("/dashboard", "/reset-password"),
+          redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw new Error(error.message);
         toast.success("Enlace enviado. Revisa tu correo.");
@@ -52,7 +52,7 @@ const Auth = () => {
         const { error } = await authClient.signIn.email({ email, password });
         if (error) throw new Error(error.message);
         toast.success("Sesión iniciada correctamente.");
-        navigate("/dashboard");
+        navigate("/a/basalt");
       } else {
         const { error } = await authClient.signUp.email({
           email,
@@ -61,7 +61,7 @@ const Auth = () => {
         });
         if (error) throw new Error(error.message);
         toast.success("Cuenta creada. ¡Bienvenido!");
-        navigate("/dashboard");
+        navigate("/a/basalt");
       }
     } catch (error: any) {
       toast.error(error.message);
@@ -370,7 +370,7 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await authClient.signIn.social({ provider: "google", callbackURL: "/dashboard" });
+                      const { error } = await authClient.signIn.social({ provider: "google", callbackURL: "/a/basalt" });
                       if (error) toast.error(error.message || "Google aún no está configurado.");
                       setLoading(false);
                     }}
@@ -391,7 +391,7 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await authClient.signIn.social({ provider: "apple", callbackURL: "/dashboard" });
+                      const { error } = await authClient.signIn.social({ provider: "apple", callbackURL: "/a/basalt" });
                       if (error) toast.error(error.message || "Apple aún no está configurado.");
                       setLoading(false);
                     }}
@@ -409,7 +409,7 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await authClient.signIn.social({ provider: "github", callbackURL: "/dashboard" });
+                      const { error } = await authClient.signIn.social({ provider: "github", callbackURL: "/a/basalt" });
                       if (error) toast.error(error.message || "GitHub aún no está configurado.");
                       setLoading(false);
                     }}

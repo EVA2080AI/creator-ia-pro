@@ -413,7 +413,7 @@ export default function Index() {
   const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (!authLoading && user) navigate("/dashboard");
+    if (!authLoading && user) navigate("/a/basalt");
   }, [authLoading, user, navigate]);
 
   return (
