@@ -178,7 +178,7 @@ export default function Tasks() {
 
   if (authLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div className="flex h-full w-full items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -190,7 +190,11 @@ export default function Tasks() {
     <>
       <Helmet><title>Tareas | Creator IA Pro</title></Helmet>
 
-      <div className="max-w-[1240px] mx-auto px-4 md:px-8 pt-16 md:pt-8 pb-32 md:pb-16 font-sans">
+      {/* pt-16 en mobile compensaba el botón hamburguesa flotante del shell
+          viejo (AppLayout) — en BasaltAppLayout el topbar (.asst-topbar) ya
+          está en el flujo normal, así que ese espacio ahora quedaba vacío
+          (QA post-migración, 2026-09-29). */}
+      <div className="max-w-[1240px] mx-auto px-4 md:px-8 pt-4 md:pt-8 pb-32 md:pb-16 font-sans">
         {/* Encabezado */}
         <header className="mb-5 md:mb-8 flex items-end justify-between gap-4">
           <div className="space-y-2 min-w-0">

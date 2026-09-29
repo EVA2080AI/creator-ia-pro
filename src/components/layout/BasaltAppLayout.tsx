@@ -9,7 +9,10 @@ import "@/pages/Assistant.css";
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "Panel de métricas",
   "/tasks": "Tareas",
+  "/tareas": "Tareas",
   "/spaces": "Proyectos",
+  "/assets": "Proyectos",
+  "/hub": "Proyectos",
   "/profile": "Perfil",
 };
 
