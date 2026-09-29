@@ -255,7 +255,7 @@ export default function AssistantPage() {
 
       <main className="asst-main">
         <header className="asst-topbar">
-          <button className="asst-icon-btn md:hidden" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú" style={{ display: sidebarOpen ? "none" : undefined }}>
+          <button className="asst-icon-btn asst-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú" style={{ display: sidebarOpen ? "none" : undefined }}>
             <Menu className="w-4 h-4" />
           </button>
           <div className="asst-brand-name">{assistant.name}</div>

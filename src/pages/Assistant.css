@@ -47,6 +47,13 @@ html[data-asst-theme="dark"] .asst-app {
   color: var(--asst-txt-2); flex: none; transition: background 0.15s; border: none; background: none; cursor: pointer;
 }
 .asst-icon-btn:hover { background: var(--asst-panel-2); }
+/* El botón de abrir el sidebar solo tiene sentido en mobile (ahí es un
+   drawer); en desktop el sidebar ya está siempre visible. Se hace acá y no
+   con la utilidad md:hidden de Tailwind porque Assistant.css se concatena
+   DESPUÉS de las utilidades en el bundle final — misma especificidad,
+   pero por orden de cascada .asst-icon-btn{display:grid} le ganaba. */
+.asst-menu-btn { display: none; }
+@media (max-width: 768px) { .asst-menu-btn { display: grid; } }
 .asst-new-chat {
   display: flex; align-items: center; gap: 10px; margin: 2px 4px 18px; padding: 10px 16px 10px 12px;
   border-radius: 24px; width: max-content; background: var(--asst-panel-2); color: var(--asst-txt-2);
