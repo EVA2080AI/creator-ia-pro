@@ -15,7 +15,7 @@ import { CHAT_MODELS } from "@/lib/ai/models";
 import {
   BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply, isAppBuildRequest,
   loadConversations, saveConversation, deleteConversation, loadMemory, saveMemory,
-  type StoredConversation, type StoredMsg,
+  migrateLegacyLocalStorage, type StoredConversation, type StoredMsg,
 } from "@/lib/basalt";
 import "./Assistant.css";
 
@@ -78,8 +78,10 @@ export default function BasaltPage() {
 
   useEffect(() => {
     if (!userId) return;
-    void loadConversations(userId).then(setConversations);
-    void loadMemory(userId).then(setMemory);
+    void migrateLegacyLocalStorage(userId).then(() => {
+      void loadConversations(userId).then(setConversations);
+      void loadMemory(userId).then(setMemory);
+    });
   }, [userId]);
 
   useEffect(() => {

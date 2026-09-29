@@ -116,6 +116,33 @@ async function apiJson<T>(path: string, init?: RequestInit): Promise<{ ok: boole
   }
 }
 
+// Migración de una sola vez: sube lo que haya en el localStorage viejo
+// (basalt:convs:<userId> / basalt:memory:<userId>, de antes de esta
+// migración a base de datos) al servidor, para no dejar a usuarios que ya
+// tenían historial viendo la lista vacía de golpe. No borra el localStorage
+// viejo (queda inerte, de respaldo) — solo marca que ya se intentó, para no
+// repetirlo en cada carga.
+export async function migrateLegacyLocalStorage(userId: string): Promise<void> {
+  if (!userId) return;
+  const flagKey = `basalt:migrated:${userId}`;
+  try {
+    if (localStorage.getItem(flagKey)) return;
+    const rawConvs = localStorage.getItem(`basalt:convs:${userId}`);
+    const rawMemory = localStorage.getItem(`basalt:memory:${userId}`);
+    localStorage.setItem(flagKey, "1");
+    if (rawConvs) {
+      const convs = JSON.parse(rawConvs) as StoredConversation[];
+      for (const conv of convs) await saveConversation(userId, conv);
+    }
+    if (rawMemory) {
+      const facts = JSON.parse(rawMemory) as string[];
+      if (facts.length) await saveMemory(userId, facts);
+    }
+  } catch {
+    /* localStorage bloqueado o datos corruptos — no hay nada que migrar */
+  }
+}
+
 export async function loadConversations(userId: string): Promise<StoredConversation[]> {
   if (!userId) return [];
   const res = await apiJson<{ conversations: StoredConversation[] }>("/api/basalt/conversations");
