@@ -125,4 +125,12 @@
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+
+  <!-- Roadmap — pública, ver SidebarGlobal.tsx (NAV_BOTTOM) -->
+  <url>
+    <loc>https://creator-ia.com/product-backlog</loc>
+    <lastmod>2026-09-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
 </urlset>

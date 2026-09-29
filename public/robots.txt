@@ -26,9 +26,33 @@ Sitemap: https://creator-ia.com/sitemap.xml
 Disallow: /admin
 Disallow: /system-status
 Disallow: /sharescreen
-Disallow: /product-backlog
 Disallow: /design-system
 Disallow: /nebula
+
+# Disallow rutas que exigen sesión — no aportan nada indexadas (Google nunca
+# pasa de /auth) y diluyen el rastreo de las páginas públicas reales.
+Disallow: /a/
+Disallow: /arena
+Disallow: /dashboard
+Disallow: /chat
+Disallow: /spaces
+Disallow: /tareas
+Disallow: /tasks
+Disallow: /profile
+Disallow: /studio-flow
+Disallow: /formarketing
+Disallow: /canvas
+Disallow: /assets
+Disallow: /tools
+Disallow: /apps/
+Disallow: /hub
+Disallow: /ide
+Disallow: /code
+Disallow: /code-editor
+Disallow: /antigravity
+Disallow: /studio
+Disallow: /genesis
+Disallow: /basalt
 
 # Disallow auth callbacks (optional)
 Disallow: /auth/callback

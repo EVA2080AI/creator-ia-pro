@@ -10,11 +10,15 @@ const Formarketing = lazy(() => import("./Formarketing"));
 // Ruta /studio-flow: canvas real si está liberado (o para admins), si no la
 // pantalla de "Próximamente". Ver src/lib/features.ts.
 export default function CanvasGate() {
-  const { user } = useAuth();
-  const { isAdmin, loading } = useAdmin(user?.id);
+  // Como el resto de rutas de AppLayout — sin esto, un visitante sin cuenta
+  // veía el chrome real de la app (SidebarGlobal con Dashboard, Admin, etc.)
+  // sin haberse logueado nunca.
+  const { user, loading: authLoading } = useAuth("/auth");
+  const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
 
+  if (authLoading || !user) return null;
   if (CANVAS_ENABLED || isAdmin) return <Formarketing />;
-  if (loading) return null;
+  if (adminLoading) return null;
   return <CanvasComingSoon />;
 }
 
