@@ -2,19 +2,24 @@ import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction
 import { useNavigate } from "react-router-dom";
 import {
   Plus, Minus, Scale, BarChart3, ListTodo, FolderOpen, User, ShieldCheck,
-  Sun, Moon, LogOut, Bug, HelpCircle,
+  Sun, Moon, LogOut, Bug, HelpCircle, Settings, Activity, LifeBuoy, CreditCard,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useProfile } from "@/hooks/useProfile";
 import { Logo } from "@/components/Logo";
 import { ReportModal } from "@/components/tickets/ReportModal";
 import { QuickGuideModal } from "@/components/basalt/QuickGuideModal";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { listAssistants, type Assistant } from "@/lib/assistants";
 
 const EXPERTS_COLLAPSED_COUNT = 5;
+
+// Mismo mapa que Profile.tsx (TIER_LABELS) — se duplica acá porque es un
+// objeto de 7 entradas, no amerita un módulo compartido.
+const TIER_LABELS: Record<string, string> = { free: "Free", creador: "Creador", pro: "Pro", agencia: "Agencia", pyme: "Pyme", pymes: "Pymes", admin: "Admin" };
 
 export interface BasaltShellSidebarProps {
   /** Ruta actual — resalta el ítem de "Plataforma" correspondiente. Un
@@ -55,6 +60,7 @@ export function BasaltShellSidebar({
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin(user?.id);
+  const { profile } = useProfile(user?.id);
   const [showReport, setShowReport] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [experts, setExperts] = useState<Assistant[]>([]);
@@ -164,18 +170,43 @@ export function BasaltShellSidebar({
           </button>
           {/* "Reportar" era un botón flotante suelto encima de todo — ahora
               es una opción que se despliega desde la cuenta (auditoría UX,
-              mismo patrón que el menú de cuenta de Claude). */}
+              mismo patrón que el menú de cuenta de Claude/Gemini: email
+              arriba, Configuración/Uso/Ayuda, planes, y cerrar sesión). */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="asst-side-link">
-                <User className="w-4 h-4" /> Cuenta
+              <button className="asst-side-link" style={{ gap: 8 }}>
+                <User className="w-4 h-4 shrink-0" />
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0, flex: "0 1 auto" }}>
+                  {profile?.displayName || user?.email?.split("@")[0] || "Cuenta"}
+                </span>
+                <span style={{ color: "var(--asst-txt-3)", flexShrink: 0 }}>
+                  · {TIER_LABELS[profile?.subscriptionTier ?? "free"] ?? "Free"}
+                </span>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" side="top" className="w-56 p-1.5 rounded-2xl shadow-2xl">
+            <DropdownMenuContent align="start" side="top" className="w-64 p-1.5 rounded-2xl shadow-2xl">
+              <DropdownMenuLabel className="px-3 py-1.5 text-[12px] font-normal truncate" style={{ color: "var(--asst-txt-3)" }}>
+                {user?.email}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => go("/profile")}>
+                <Settings className="w-4 h-4" /> Configuración
+              </DropdownMenuItem>
+              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => go("/dashboard")}>
+                <Activity className="w-4 h-4" /> Uso
+              </DropdownMenuItem>
+              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => go("/help")}>
+                <LifeBuoy className="w-4 h-4" /> Obtener ayuda
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => go("/pricing")}>
+                <CreditCard className="w-4 h-4" /> Ver todos los planes
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="my-1" />
               <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => setShowReport(true)}>
                 <Bug className="w-4 h-4" /> Reportar un error o mejora
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="my-1.5" />
+              <DropdownMenuSeparator className="my-1" />
               <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer text-rose-500 focus:text-rose-500" onClick={() => signOut()}>
                 <LogOut className="w-4 h-4" /> Cerrar sesión
               </DropdownMenuItem>
