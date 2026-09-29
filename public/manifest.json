@@ -41,7 +41,7 @@
       "name": "Tareas",
       "short_name": "Tareas",
       "description": "Tablero de tareas (Kanban)",
-      "url": "/tareas",
+      "url": "/tasks",
       "icons": [
         {
           "src": "/favicon.svg",

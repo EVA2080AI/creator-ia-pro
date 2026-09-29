@@ -10,11 +10,14 @@ const breakpoints = [
 
 const pages = [
   { path: '/dashboard', name: 'dashboard' },
+  { path: '/a/basalt', name: 'basalt' },
+  { path: '/a/arena', name: 'arena-ia' },
+  { path: '/a/marketing', name: 'experto-marketing' },
   { path: '/chat', name: 'genesis-ia' },
   { path: '/studio-flow', name: 'canvas-ia' },
   { path: '/tools', name: 'aplicaciones' },
   { path: '/spaces', name: 'espacios' },
-  { path: '/tareas', name: 'tareas' },
+  { path: '/tasks', name: 'tareas' },
   { path: '/profile', name: 'perfil' },
 ];
 

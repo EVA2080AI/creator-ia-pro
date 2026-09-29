@@ -40,7 +40,10 @@ export function Logo({ size = "sm", showText = true, showPro = false, className,
       {/* Text */}
       {showText && (
         <div className="hidden sm:flex flex-col leading-none">
-          <span className={cn("font-black text-zinc-900 dark:text-zinc-50 tracking-tight font-display uppercase", s.text)}>
+          {/* logo-wordmark: selector estable para overrides externos (ver
+              Assistant.css) — no depender de que esta combinación exacta de
+              clases utilitarias se mantenga si este componente cambia. */}
+          <span className={cn("logo-wordmark font-black text-zinc-900 dark:text-zinc-50 tracking-tight font-display uppercase", s.text)}>
             Creator{" "}
             <span className="text-primary">IA</span>
             {showPro && (

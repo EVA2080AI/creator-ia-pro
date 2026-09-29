@@ -52,11 +52,12 @@
    (marca a la izquierda, ícono a la derecha), sin agregar un toggle de
    colapso nuevo (ver plan "curried-orbiting-island"). */
 .asst-side-top .asst-icon-btn { margin-left: auto; }
-/* Logo.tsx usa text-zinc-900 fijo para el wordmark — en el tema oscuro
-   propio de Basalt (data-asst-theme="dark") el fondo es casi negro y ese
-   texto quedaría invisible. Solo se toca acá, no en Logo.tsx (se usa fijo
-   en el resto de la app fuera de este sistema de temas). */
-.asst-app[data-asst-theme="dark"] .asst-side-top .font-display.uppercase { color: var(--asst-txt); }
+/* El wordmark de Logo.tsx ya tiene su propio dark:text-zinc-50 para el modo
+   oscuro app-wide (clase "dark" en <html>), pero el tema oscuro propio de
+   Basalt es un sistema aparte (data-asst-theme, sin esa clase) — sin este
+   override, "Creator IA" queda invisible sobre el fondo casi negro de acá.
+   Selector estable vía .logo-wordmark (ver Logo.tsx), no clases utilitarias. */
+.asst-app[data-asst-theme="dark"] .asst-side-top .logo-wordmark { color: var(--asst-txt); }
 .asst-icon-btn {
   width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
   color: var(--asst-txt-2); flex: none; transition: background 0.15s; border: none; background: none; cursor: pointer;
