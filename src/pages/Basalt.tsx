@@ -18,6 +18,7 @@ import {
   loadConversations, saveConversation, deleteConversation, loadMemory, saveMemory,
   migrateLegacyLocalStorage, type StoredConversation, type StoredMsg,
 } from "@/lib/basalt";
+import { createAsset, getAssetsByIds } from "@/lib/assets";
 import "./Assistant.css";
 
 const ICONS: Record<string, typeof LayoutTemplate> = {
@@ -104,7 +105,13 @@ export default function BasaltPage() {
         });
         const body = await res.json().catch(() => null);
         if (!res.ok || !body?.ok) return { ...img, error: body?.error || `Error ${res.status}` };
-        return { ...img, url: body.imageUrl as string };
+        const url = body.imageUrl as string;
+        // Se sube a /api/assets (misma tabla que "Mis Activos") para que
+        // sobreviva a un reload — ver el comentario en saveConversation()
+        // (src/lib/basalt.ts) sobre por qué la url pesada no se guarda tal
+        // cual en el historial de la conversación.
+        const asset = await createAsset({ assetUrl: url, type: "image", prompt: img.prompt, tags: ["basalt-chat"] });
+        return { ...img, url, assetId: asset?.id };
       } catch (e) {
         return { ...img, error: e instanceof Error ? e.message : "No se pudo generar la imagen." };
       }
@@ -112,6 +119,36 @@ export default function BasaltPage() {
     const final = base.map((m) => (m.id === msgId ? { ...m, images: results } : m));
     setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, images: results } : m)));
     return final;
+  }, []);
+
+  // Al reabrir una conversación, las imágenes que sobrevivieron solo traen
+  // assetId (su url pesada se sacó del historial al guardar — ver
+  // saveConversation). Se resuelven en un solo pedido por lote y se
+  // mezclan por m.id, así que si el usuario ya cambió de conversación para
+  // cuando esto resuelve, el merge simplemente no encuentra nada que tocar.
+  const rehydrateImages = useCallback(async (msgs: StoredMsg[]) => {
+    const ids = Array.from(new Set(
+      msgs.flatMap((m) => m.images ?? [])
+        .filter((img) => !img.url && !img.error && img.assetId)
+        .map((img) => img.assetId!)
+    ));
+    if (!ids.length) return;
+    const assets = await getAssetsByIds(ids);
+    const byId = new Map(assets.map((a) => [a.id, a.asset_url]));
+    setMessages((prev) => prev.map((m) => (
+      !m.images?.some((img) => img.assetId && !img.url && !img.error)
+        ? m
+        : {
+            ...m,
+            images: m.images!.map((img) => {
+              if (img.url || img.error || !img.assetId) return img;
+              const url = byId.get(img.assetId);
+              return url
+                ? { ...img, url }
+                : { ...img, error: "Esta imagen no quedó guardada en el historial. Pídesela de nuevo si la necesitas." };
+            }),
+          }
+    )));
   }, []);
 
   const sendPrompt = useCallback(async (prompt: string) => {
@@ -244,6 +281,7 @@ export default function BasaltPage() {
     setError(null);
     setSidebarOpen(false);
     requestAnimationFrame(stickToBottom);
+    void rehydrateImages(c.messages);
   };
 
   const removeConversation = (id: string) => {

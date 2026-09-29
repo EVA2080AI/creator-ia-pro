@@ -1,6 +1,6 @@
 // Biblioteca de assets guardados — reemplaza `supabase.from("saved_assets")`.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { and, eq, isNull, desc, count } from "drizzle-orm";
+import { and, eq, isNull, desc, count, inArray } from "drizzle-orm";
 import { getDb, schema } from "../db/index.js";
 import { requireUser } from "./_lib/require-user.js";
 
@@ -13,7 +13,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
   if (req.method === "GET") {
-    const { spaceId, favoriteOnly, limit, offset } = req.query as Record<string, string | undefined>;
+    const { spaceId, favoriteOnly, limit, offset, ids } = req.query as Record<string, string | undefined>;
+
+    // Usado para rehidratar imágenes generadas en el chat de Basalt/Expertos
+    // (ver src/lib/basalt.ts) — el historial de conversación solo guarda el
+    // assetId, no la url pesada, así que al reabrir una conversación se piden
+    // acá las urls reales de un lote puntual de assets en vez de paginar.
+    if (ids) {
+      const idList = ids.split(",").map((s) => s.trim()).filter(Boolean).slice(0, 50);
+      if (!idList.length) { res.status(200).json({ ok: true, assets: [], total: 0 }); return; }
+      const rows = await db.select().from(schema.savedAsset)
+        .where(and(eq(schema.savedAsset.userId, user.userId), inArray(schema.savedAsset.id, idList)));
+      res.status(200).json({ ok: true, assets: rows, total: rows.length });
+      return;
+    }
+
     const take = Math.min(parseInt(limit || "24", 10) || 24, PAGE_SIZE_MAX);
     const skip = Math.max(parseInt(offset || "0", 10) || 0, 0);
 

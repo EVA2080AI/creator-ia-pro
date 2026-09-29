@@ -22,9 +22,10 @@ const SYSTEM_PROMPT = `Eres Basalt, el asistente de Creator IA. Conversas en esp
 - Copywriting, guiones para reels/TikTok, campañas, brief creativos, manual de marca, tono de voz, calendario editorial, email marketing, SEO básico, pauta digital (Meta Ads, Google Ads).
 
 2. PIEZAS GRÁFICAS
-Cuando el usuario pida una imagen, pieza gráfica, post, banner, flyer o logo, primero explica en 1-2 frases la idea creativa y luego incluye UNA etiqueta así (el sistema generará la imagen automáticamente):
+Cuando el usuario pida una imagen, pieza gráfica, post, banner, flyer, logo o mockup de producto, primero explica en 1-2 frases la idea creativa y luego incluye UNA etiqueta así (el sistema generará la imagen automáticamente):
 <imagen formato="1:1">descripción visual detallada en inglés: sujeto, composición, estilo, colores, iluminación, texto corto si aplica</imagen>
-Formatos válidos: 1:1 (post), 9:16 (historia/reel), 16:9 (banner/YouTube), 3:2, 2:3. Máximo 2 etiquetas por respuesta.
+Formatos válidos: 1:1 (post), 9:16 (historia/reel), 16:9 (banner/YouTube), 3:2, 2:3. Máximo 2 etiquetas por respuesta. Esta misma etiqueta sirve para logos (describí estilo, tipografía y colores de marca) y mockups de producto (describí el producto y la escena) — es el mismo generador, solo cambia qué tan detallado sea el prompt.
+Esta ventana de chat todavía no acepta que el usuario suba una foto propia. Si piden transformar una imagen que ya tienen (quitar fondo, mejorar calidad, restaurar, transferir el estilo de una foto suya), decíselo con naturalidad — no inventes que sí podés — y mandalos a Herramientas (/tools), donde vive esa función.
 
 3. AGENTES DE IA Y HERRAMIENTAS
 Eres experto en diseñar y construir agentes y asistentes, y lo enseñas paso a paso:
@@ -43,6 +44,7 @@ Eres un buen profesor: explicas con ejemplos, analogías y ejercicios. Enseñas 
 Sabés desarrollar de verdad. Cuando te pidan construir una página, un sitio, una landing, un dashboard, o un sistema con lógica real (reservas, cotizaciones, catálogos, calendarios, formularios con validación, calculadoras, etc.), hacelo vos mismo en el chat — nunca digas que no podés o que hace falta otra herramienta:
 - Entregá el código COMPLETO y listo para copiar/pegar y usar, en uno o varios bloques de código markdown (\`\`\`html, \`\`\`css, \`\`\`js, \`\`\`tsx, etc.), con el nombre de archivo en un comentario en la primera línea si son varios.
 - Para algo que el usuario vaya a abrir directo en el navegador (una landing, un formulario de reservas, un catálogo), preferí UN SOLO archivo HTML autocontenido con el CSS en un \`<style>\` y el JavaScript en un \`<script>\` al final — que funcione de una sola vez, sin instalar nada.
+- SIEMPRE diseñá con un sistema de diseño de verdad — nunca entregues HTML con el estilo por defecto del navegador, eso no es terminar el trabajo. Al principio del \`<style>\`, definí variables CSS en \`:root\` (colores de fondo/texto/marca, un radio de borde, una escala de espaciado en múltiplos de 4-8px) y usalas en todo el documento en vez de valores sueltos repetidos. Elegí una paleta de 2-3 colores coherente con el rubro o la marca que te pidan (o una paleta neutra y elegante si no especifican nada), una tipografía con jerarquía clara entre títulos y texto (una sola familia bien elegida — cargala de Google Fonts con \`<link>\` si hace falta), estados \`:hover\`/\`:focus\` en botones y links, y que se vea bien en mobile (meta viewport + media queries, mobile-first). El resultado tiene que parecer diseñado por un estudio, no una plantilla sin terminar.
 - Los sistemas con "lógica" (reservas, cotizaciones, calendarios) tienen que funcionar de verdad en el navegador: validá el formulario, calculá lo que haya que calcular, mostrá el resultado o la confirmación en la misma página, y usá \`localStorage\` si hace falta que los datos sobrevivan a recargar la página. No entregues solo el HTML estático sin la lógica.
 - Si te piden algo más grande (una app con varias pantallas, rutas, backend), usá React + Tailwind en vez de HTML plano, y explicá en 1-2 frases cómo se usa (ej. "pegá esto en App.tsx de un proyecto Vite").
 - No hay una herramienta aparte para esto — todo pasa por acá, igual que el resto de lo que haces.
@@ -91,7 +93,7 @@ export interface StoredMsg {
   id: string;
   role: "user" | "model";
   text: string;
-  images?: { prompt: string; format: string; url?: string; error?: string }[];
+  images?: { prompt: string; format: string; url?: string; error?: string; assetId?: string }[];
 }
 
 export interface StoredConversation {
@@ -149,19 +151,22 @@ export async function migrateLegacyLocalStorage(userId: string): Promise<void> {
 
 // Una imagen sin url NI error es, en memoria durante una conversación en
 // vivo, "todavía generándose" (el render de Basalt lo muestra con spinner).
-// Pero una conversación CARGADA de la base de datos nunca está en vivo —
-// si llegó así, es porque saveConversation() le quitó la url (data: URI, no
-// se guarda) y quedó sin marcar: el spinner quedaba infinito al reabrirla
-// (reportado por un usuario real, 2026-09-29). Filas viejas guardadas antes
-// del fix en saveConversation también quedan cubiertas acá, sin necesidad
-// de tocar la base de datos.
+// Pero una conversación CARGADA de la base de datos nunca está en vivo — si
+// llegó así sin url ni error, es una de dos: (a) tiene assetId → se subió a
+// /api/assets al generarla (ver generateImages en Basalt.tsx) y falta
+// rehidratar su url real, algo que openConversation() resuelve aparte
+// (getAssetsByIds) — se deja tal cual para que el spinner dure lo que tarda
+// esa rehidratación; (b) sin assetId → fila vieja de antes de esa migración,
+// o falló la subida a assets — ahí sí se marca como no recuperable, porque
+// si no el spinner queda infinito al reabrirla (reportado por un usuario
+// real, 2026-09-29).
 function markStaleImages(conv: StoredConversation): StoredConversation {
   return {
     ...conv,
     messages: conv.messages.map((m) => ({
       ...m,
       images: m.images?.map((img) =>
-        !img.url && !img.error
+        !img.url && !img.error && !img.assetId
           ? { ...img, error: "Esta imagen no quedó guardada en el historial. Pídesela de nuevo si la necesitas." }
           : img
       ),
@@ -182,12 +187,13 @@ export async function loadConversations(userId: string, assistantSlug?: string):
 export async function saveConversation(userId: string, conv: StoredConversation, assistantSlug?: string) {
   if (!userId) return;
   // Las imágenes generadas llegan como data: URI pesadas (base64 inline, no
-  // una URL alojada — ver api/ai/image.ts) — no se guardan en el historial
-  // para no reventar el tamaño de la fila. Sin marcar `error`, un mensaje
-  // así quedaba con url:undefined y error:undefined, que el render de
-  // Basalt/Expertos interpreta como "todavía generando" — spinner infinito
-  // al reabrir la conversación, aunque la imagen sí se haya generado en su
-  // momento (reportado por un usuario real, 2026-09-29).
+  // una URL alojada — ver api/ai/image.ts). Guardarlas así en el historial
+  // reventaría el tamaño de la fila (GET /api/basalt/conversations trae las
+  // 50 conversaciones completas de una). generateImages() (Basalt.tsx) ya
+  // las sube aparte a /api/assets (misma tabla que "Mis Activos") y adjunta
+  // `assetId` — acá solo se saca la url pesada, dejando el assetId como
+  // referencia para rehidratarla al reabrir (ver openConversation). Si no
+  // hay assetId (falló esa subida), se cae al aviso de siempre.
   const slim: StoredConversation & { assistantSlug?: string } = {
     ...conv,
     assistantSlug,
@@ -195,7 +201,9 @@ export async function saveConversation(userId: string, conv: StoredConversation,
       ...m,
       images: m.images?.map((img) =>
         img.url?.startsWith("data:")
-          ? { ...img, url: undefined, error: "Esta imagen no quedó guardada en el historial. Pídesela de nuevo si la necesitas." }
+          ? img.assetId
+            ? { ...img, url: undefined }
+            : { ...img, url: undefined, error: "Esta imagen no quedó guardada en el historial. Pídesela de nuevo si la necesitas." }
           : img
       ),
     })),

@@ -67,6 +67,12 @@ export async function createAsset(input: { assetUrl: string; prompt?: string; ty
   return res.ok ? fromApi(res.data!.asset) : null;
 }
 
+export async function getAssetsByIds(ids: string[]): Promise<SavedAsset[]> {
+  if (!ids.length) return [];
+  const res = await api<{ assets: ApiAsset[] }>(`/api/assets?ids=${encodeURIComponent(ids.join(","))}`);
+  return res.ok ? res.data!.assets.map(fromApi) : [];
+}
+
 export async function updateAsset(id: string, patch: { isFavorite?: boolean; content?: string; tags?: string[]; spaceId?: string | null }): Promise<SavedAsset | null> {
   const res = await api<{ asset: ApiAsset }>(`/api/assets/${id}`, { method: "PATCH", body: JSON.stringify(patch) });
   return res.ok ? fromApi(res.data!.asset) : null;

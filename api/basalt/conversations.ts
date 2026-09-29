@@ -20,6 +20,8 @@ const IMAGE_SCHEMA = z.object({
   format: z.string(),
   url: z.string().optional(),
   error: z.string().optional(),
+  /** id en saved_asset — para rehidratar la url real sin guardarla acá (ver src/lib/basalt.ts). */
+  assetId: z.string().optional(),
 });
 
 const MSG_SCHEMA = z.object({
