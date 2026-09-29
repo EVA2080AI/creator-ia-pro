@@ -38,10 +38,10 @@ export function TaskSheet(props: TaskSheetProps) {
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange} shouldScaleBackground={false}>
-        <DrawerContent className="max-h-[92vh] rounded-t-[2rem] border-zinc-200 focus:outline-none">
+        <DrawerContent className="max-h-[92vh] rounded-t-[2rem] border-border focus:outline-none">
           <div className="overflow-y-auto overscroll-contain px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-            <DrawerTitle className="mt-2 text-lg font-black tracking-tight text-zinc-900">{title}</DrawerTitle>
-            <DrawerDescription className="mb-4 text-[12px] text-zinc-500">{description}</DrawerDescription>
+            <DrawerTitle className="mt-2 text-lg font-black tracking-tight text-foreground">{title}</DrawerTitle>
+            <DrawerDescription className="mb-4 text-[12px] text-muted-foreground">{description}</DrawerDescription>
             {open && <TaskForm {...props} onClose={() => onOpenChange(false)} />}
           </div>
         </DrawerContent>
@@ -51,10 +51,10 @@ export function TaskSheet(props: TaskSheetProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[540px] rounded-[2rem] border-zinc-200 p-0 overflow-hidden gap-0">
+      <DialogContent className="sm:max-w-[540px] rounded-[2rem] border-border p-0 overflow-hidden gap-0">
         <div className="max-h-[85vh] overflow-y-auto px-7 pt-7 pb-7">
-          <DialogTitle className="text-xl font-black tracking-tight text-zinc-900">{title}</DialogTitle>
-          <DialogDescription className="mb-5 text-[12px] text-zinc-500">{description}</DialogDescription>
+          <DialogTitle className="text-xl font-black tracking-tight text-foreground">{title}</DialogTitle>
+          <DialogDescription className="mb-5 text-[12px] text-muted-foreground">{description}</DialogDescription>
           {open && <TaskForm {...props} onClose={() => onOpenChange(false)} />}
         </div>
       </DialogContent>
@@ -63,8 +63,8 @@ export function TaskSheet(props: TaskSheetProps) {
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const inputCls = "w-full h-12 rounded-xl border border-zinc-200 bg-white px-4 text-base md:text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all";
-const labelCls = "block text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1.5";
+const inputCls = "w-full h-12 rounded-xl border border-border bg-card px-4 text-base md:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all";
+const labelCls = "block text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1.5";
 
 function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, onShare, onClose }: TaskSheetProps & { onClose: () => void }) {
   const [title, setTitle] = useState(task?.title ?? "");
@@ -188,7 +188,7 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
         <label htmlFor="task-due" className={labelCls}>Fecha límite</label>
         <div className="flex items-center gap-2">
           <div className="relative flex-1">
-            <CalendarDays className="w-4 h-4 text-zinc-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <CalendarDays className="w-4 h-4 text-muted-foreground absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               id="task-due"
               type="date"
@@ -202,7 +202,7 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
               type="button"
               onClick={() => setDueDate("")}
               aria-label="Quitar fecha"
-              className="w-12 h-12 shrink-0 rounded-xl border border-zinc-200 flex items-center justify-center text-zinc-400 hover:text-zinc-900 transition-colors"
+              className="w-12 h-12 shrink-0 rounded-xl border border-border flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -216,7 +216,7 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
               onClick={() => setDueDate(q.value)}
               className={cn(
                 "px-3 h-9 rounded-lg text-[11px] font-bold border transition-all",
-                dueDate === q.value ? "bg-zinc-900 text-white border-zinc-900" : "bg-white border-zinc-200 text-zinc-600 hover:border-zinc-400"
+                dueDate === q.value ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border text-muted-foreground hover:border-muted-foreground/40"
               )}
             >
               {q.label}
@@ -225,13 +225,13 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
         </div>
       </div>
 
-      <label className="flex items-center gap-3 p-4 rounded-2xl border border-zinc-200 bg-zinc-50/60 cursor-pointer">
-        <span className="w-9 h-9 rounded-xl bg-white border border-zinc-200 flex items-center justify-center text-primary shrink-0">
+      <label className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-muted/50 cursor-pointer">
+        <span className="w-9 h-9 rounded-xl bg-card border border-border flex items-center justify-center text-primary shrink-0">
           <Mail className="w-4 h-4" />
         </span>
         <span className="flex-1 min-w-0">
-          <span className="block text-[13px] font-bold text-zinc-900">Avisarme por correo</span>
-          <span className="block text-[11px] text-zinc-500 leading-snug">
+          <span className="block text-[13px] font-bold text-foreground">Avisarme por correo</span>
+          <span className="block text-[11px] text-muted-foreground leading-snug">
             Confirmación al crear, recordatorio al vencer y aviso al completar{userEmail ? ` → ${userEmail}` : ""}.
           </span>
         </span>
@@ -246,7 +246,7 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
             disabled={deleting}
             className={cn(
               "h-12 sm:h-11 px-4 rounded-xl text-[11px] font-black uppercase tracking-widest inline-flex items-center justify-center gap-2 transition-all",
-              confirmDelete ? "bg-rose-600 text-white hover:bg-rose-700" : "text-rose-500 hover:bg-rose-50"
+              confirmDelete ? "bg-rose-600 text-white hover:bg-rose-700" : "text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10"
             )}
           >
             {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -254,13 +254,13 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
           </button>
         )}
         <div className="flex-1" />
-        <button type="button" onClick={onClose} className="h-12 sm:h-11 px-4 rounded-xl text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 transition-colors">
+        <button type="button" onClick={onClose} className="h-12 sm:h-11 px-4 rounded-xl text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
           Cancelar
         </button>
         <button
           type="submit"
           disabled={saving}
-          className="h-12 sm:h-11 px-6 rounded-xl bg-zinc-900 text-white text-[11px] font-black uppercase tracking-widest shadow-lg shadow-zinc-900/10 hover:bg-zinc-800 active:scale-[0.98] disabled:opacity-60 inline-flex items-center justify-center gap-2 transition-all"
+          className="h-12 sm:h-11 px-6 rounded-xl bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-widest shadow-lg shadow-primary/10 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60 inline-flex items-center justify-center gap-2 transition-all"
         >
           {saving && <Loader2 className="w-4 h-4 animate-spin" />}
           {mode === "create" ? "Crear tarea" : "Guardar"}
@@ -268,14 +268,14 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
       </div>
 
       {mode === "edit" && task && onShare && (
-        <div className="border-t border-zinc-100 pt-5">
+        <div className="border-t border-border pt-5">
           <button type="button" onClick={() => setShareOpen((o) => !o)} aria-expanded={shareOpen} className="w-full flex items-center gap-3 text-left">
             <span className="w-9 h-9 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center text-primary shrink-0">
               <Send className="w-4 h-4" />
             </span>
             <span className="flex-1 min-w-0">
-              <span className="block text-[13px] font-bold text-zinc-900">Enviar por correo</span>
-              <span className="block text-[11px] text-zinc-500">Comparte esta tarea con quien quieras.</span>
+              <span className="block text-[13px] font-bold text-foreground">Enviar por correo</span>
+              <span className="block text-[11px] text-muted-foreground">Comparte esta tarea con quien quieras.</span>
             </span>
             <span className="text-[10px] font-black uppercase tracking-widest text-primary">{shareOpen ? "Cerrar" : "Abrir"}</span>
           </button>
@@ -304,7 +304,7 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
                 type="button"
                 onClick={handleShare}
                 disabled={sharing}
-                className="w-full h-12 sm:h-11 rounded-xl bg-primary text-white text-[11px] font-black uppercase tracking-widest inline-flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60 transition-all"
+                className="w-full h-12 sm:h-11 rounded-xl bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-widest inline-flex items-center justify-center gap-2 hover:bg-primary/90 active:scale-[0.98] disabled:opacity-60 transition-all"
               >
                 {sharing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 Enviar tarea
@@ -319,7 +319,7 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
 
 function ChipGroup<T extends string>({ value, onChange, options }: { value: T; onChange: (v: T) => void; options: { value: T; label: string; dot?: string }[] }) {
   return (
-    <div role="radiogroup" className="flex gap-1 p-1 rounded-xl bg-zinc-100/80 border border-zinc-200/60">
+    <div role="radiogroup" className="flex gap-1 p-1 rounded-xl bg-muted/80 border border-border/60">
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -331,7 +331,7 @@ function ChipGroup<T extends string>({ value, onChange, options }: { value: T; o
             onClick={() => onChange(o.value)}
             className={cn(
               "flex-1 h-10 rounded-lg text-[11px] font-bold inline-flex items-center justify-center gap-1.5 transition-all",
-              active ? "bg-white text-zinc-900 shadow-sm border border-zinc-200/60" : "text-zinc-500 hover:text-zinc-800"
+              active ? "bg-card text-foreground shadow-sm border border-border/60" : "text-muted-foreground hover:text-foreground"
             )}
           >
             {o.dot && <span className={cn("w-1.5 h-1.5 rounded-full", o.dot)} />}

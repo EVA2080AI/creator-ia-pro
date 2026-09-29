@@ -16,9 +16,9 @@ export function CheckoutBanner({ checkoutSuccess, balance, onAction }: BannerPro
       </div>
       <div>
         <p className="text-[13px] font-black">{checkoutSuccess ? '¡Suscripción activada!' : '¡Créditos añadidos!'}</p>
-        <p className="text-[11px] text-stone-500">{balance.toLocaleString()} créditos disponibles</p>
+        <p className="text-[11px] text-muted-foreground">{balance.toLocaleString()} créditos disponibles</p>
       </div>
-      <button onClick={onAction} className="ml-auto px-4 py-2 rounded-xl bg-primary text-white text-[11px] font-black uppercase tracking-widest">
+      <button onClick={onAction} className="ml-auto px-4 py-2 rounded-xl bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-widest">
         Ir a Basalt
       </button>
     </div>

@@ -2,7 +2,8 @@ import type { Config } from "tailwindcss";
 import animate from "tailwindcss-animate";
 
 export default {
-  // Dark mode intentionally disabled — LUMINA v2.0 is light-only
+  // App-wide dark mode via `.dark` class on <html> — see src/hooks/useTheme.tsx
+  darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
   theme: {

@@ -99,7 +99,7 @@ export const HubView = () => {
                   transition={{ repeat: Infinity, duration: 2 }}
                   className="w-1.5 h-1.5 rounded-full bg-primary"
                 />
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] font-display">Hub de Plantillas</span>
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0, y: 24 }}
@@ -113,7 +113,7 @@ export const HubView = () => {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.45, delay: 0.2 }}
-                className="text-sm text-zinc-400 font-medium"
+                className="text-sm text-muted-foreground font-medium"
               >
                 {TEMPLATES.length} plantillas profesionales &mdash; 1 clic para abrir en el Studio.
               </motion.p>
@@ -124,7 +124,7 @@ export const HubView = () => {
               transition={{ duration: 0.4, delay: 0.3 }}
               className="flex items-center gap-3 shrink-0"
             >
-              <div className="px-4 py-2 rounded-xl bg-zinc-100 border border-zinc-200 text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-display">
+              <div className="px-4 py-2 rounded-xl bg-muted border border-border text-[10px] font-bold text-muted-foreground uppercase tracking-widest font-display">
                 {filtered.length} resultados
               </div>
             </motion.div>
@@ -140,8 +140,8 @@ export const HubView = () => {
                   onClick={() => setCategory(cat)}
                   className={`px-5 py-2.5 rounded-2xl text-[10px] font-bold whitespace-nowrap transition-all duration-300 font-display uppercase tracking-widest ${
                     category === cat
-                      ? "bg-primary text-white shadow-sm"
-                      : "bg-zinc-50 border border-zinc-200 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100"
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
                   {cat}
@@ -157,14 +157,14 @@ export const HubView = () => {
             {/* Search Input */}
             <div className="relative w-full md:w-72 shrink-0">
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-zinc-400" />
+                <Search className="h-4 w-4 text-muted-foreground" />
               </div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar plantillas..."
-                className="w-full pl-9 pr-4 py-2.5 bg-zinc-50 border border-zinc-200 rounded-2xl text-[12px] font-medium text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all font-display"
+                className="w-full pl-9 pr-4 py-2.5 bg-muted/50 border border-border rounded-2xl text-[12px] font-medium text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all font-display"
               />
             </div>
           </div>
@@ -185,18 +185,18 @@ export const HubView = () => {
                   else navigate("/studio-flow");
                 });
               }}
-              className="rounded-[2rem] border border-dashed border-zinc-200 group flex flex-col items-center justify-center py-12 gap-4 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500"
+              className="rounded-[2rem] border border-dashed border-border group flex flex-col items-center justify-center py-12 gap-4 hover:border-primary/30 hover:bg-primary/5 transition-all duration-500"
             >
               <motion.div
                 animate={{ y: [0, -4, 0] }}
                 transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-                className="w-12 h-12 rounded-2xl bg-zinc-100 border border-dashed border-zinc-200 flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/30 transition-all"
+                className="w-12 h-12 rounded-2xl bg-muted border border-dashed border-border flex items-center justify-center group-hover:bg-primary/10 group-hover:border-primary/30 transition-all"
               >
-                <Plus className="w-5 h-5 text-zinc-500 group-hover:text-primary transition-colors" />
+                <Plus className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
               </motion.div>
               <div className="text-center space-y-1">
-                <p className="text-xs font-bold text-zinc-400 group-hover:text-zinc-900 transition-colors uppercase tracking-widest font-display">Lienzo en Blanco</p>
-                <p className="text-[10px] text-zinc-500 font-display uppercase tracking-[0.15em]">Empieza desde cero</p>
+                <p className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest font-display">Lienzo en Blanco</p>
+                <p className="text-[10px] text-muted-foreground font-display uppercase tracking-[0.15em]">Empieza desde cero</p>
               </div>
             </motion.button>
 
@@ -207,13 +207,15 @@ export const HubView = () => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.4, delay: 0.35 + idx * 0.04, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ y: -5 }}
-                className="rounded-[2rem] border border-zinc-200 group flex flex-col gap-5 p-6 transition-all duration-300 overflow-hidden relative"
+                className="rounded-[2rem] border border-border group flex flex-col gap-5 p-6 transition-all duration-300 overflow-hidden relative"
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLElement).style.borderColor = `${template.color}30`;
                   (e.currentTarget as HTMLElement).style.boxShadow = `0 0 32px ${template.color}12`;
                 }}
                 onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = 'rgb(228,228,231)';
+                  // Reset to '' (not a hardcoded light-mode rgb) so the
+                  // border-border class takes back over in both themes.
+                  (e.currentTarget as HTMLElement).style.borderColor = '';
                   (e.currentTarget as HTMLElement).style.boxShadow = '';
                 }}
               >
@@ -245,22 +247,22 @@ export const HubView = () => {
 
                 {/* Content */}
                 <div className="flex-1 space-y-2">
-                  <h3 className="text-sm font-bold text-zinc-900 leading-tight font-display tracking-tight">{template.title}</h3>
-                  <p className="text-[11px] text-zinc-400 leading-relaxed truncate-2">{template.description}</p>
+                  <h3 className="text-sm font-bold text-foreground leading-tight font-display tracking-tight">{template.title}</h3>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed truncate-2">{template.description}</p>
                 </div>
 
                 {/* Tags */}
                 <div className="flex gap-1.5 flex-wrap">
                   {template.tags.map(tag => (
-                    <span key={tag} className="text-[9px] px-2.5 py-1 rounded-full bg-zinc-50 border border-zinc-200 text-zinc-400 font-bold uppercase tracking-widest font-display">
+                    <span key={tag} className="text-[9px] px-2.5 py-1 rounded-full bg-muted/50 border border-border text-muted-foreground font-bold uppercase tracking-widest font-display">
                       {tag}
                     </span>
                   ))}
                 </div>
 
                 {/* Footer — Tailwind UI divider + action pattern */}
-                <div className="flex items-center justify-between pt-3 border-t border-zinc-200">
-                  <span className="text-[10px] text-zinc-400 font-bold font-display uppercase tracking-widest">{template.nodes?.length || 0} nodos</span>
+                <div className="flex items-center justify-between pt-3 border-t border-border">
+                  <span className="text-[10px] text-muted-foreground font-bold font-display uppercase tracking-widest">{template.nodes?.length || 0} nodos</span>
                   <button
                     onClick={() => handleUseTemplate(template)}
                     aria-label={`Usar plantilla: ${template.title}`}
@@ -284,7 +286,7 @@ export const HubView = () => {
             );})}
           </div>
 
-          <p className="text-center text-[10px] text-zinc-400 mt-12 font-bold uppercase tracking-[0.3em] font-display">
+          <p className="text-center text-[10px] text-muted-foreground mt-12 font-bold uppercase tracking-[0.3em] font-display">
             {TEMPLATES.length} plantillas disponibles · Más con cada actualización
           </p>
     </div>

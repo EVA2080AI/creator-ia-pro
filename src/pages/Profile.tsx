@@ -121,8 +121,8 @@ const Profile = () => {
       <div className="max-w-5xl mx-auto px-6 py-10 pb-20">
         {/* Header */}
         <div className="mb-10">
-          <p className="text-xs text-zinc-400 uppercase tracking-widest font-bold mb-2">Mi cuenta</p>
-          <h1 className="text-4xl font-bold text-zinc-900 tracking-tight">Perfil</h1>
+          <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-2">Mi cuenta</p>
+          <h1 className="text-4xl font-bold text-foreground tracking-tight">Perfil</h1>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -130,58 +130,58 @@ const Profile = () => {
           <div className="lg:col-span-2 space-y-5">
 
             {/* Identity card */}
-            <div className="rounded-3xl bg-white/70 border border-zinc-200/60 p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20 backdrop-blur-sm">
-              <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">Información personal</h2>
+            <div className="rounded-3xl bg-card/70 border border-border/60 p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20 backdrop-blur-sm">
+              <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6">Información personal</h2>
 
               {/* Avatar */}
               <div className="flex items-center gap-5 mb-8">
-                <div className="w-20 h-20 rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-200 shrink-0 flex items-center justify-center">
+                <div className="w-20 h-20 rounded-2xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center">
                   {profile?.avatarUrl ? (
                     <img src={profile.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <User className="w-7 h-7 text-zinc-500" />
+                    <User className="w-7 h-7 text-muted-foreground" />
                   )}
                 </div>
                 <div>
-                  <p className="font-semibold text-zinc-900 text-base">{profile?.displayName || "Sin nombre"}</p>
-                  <p className="text-sm text-zinc-400 mt-0.5">{user?.email}</p>
+                  <p className="font-semibold text-foreground text-base">{profile?.displayName || "Sin nombre"}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5">{user?.email}</p>
                 </div>
               </div>
 
               {/* Fields */}
               <div className="space-y-5">
                 <div>
-                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Correo electrónico</label>
-                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-50 border border-zinc-200">
-                    <Mail className="w-4 h-4 text-zinc-500 shrink-0" />
-                    <span className="text-sm text-zinc-400">{user?.email}</span>
+                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Correo electrónico</label>
+                  <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/50 border border-border">
+                    <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-muted-foreground">{user?.email}</span>
                     <span className="ml-auto text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Verificado</span>
                   </div>
                 </div>
                 <div>
-                  <label htmlFor="full-name" className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">Nombre completo</label>
+                  <label htmlFor="full-name" className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Nombre completo</label>
                   <input
                     id="full-name"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Tu nombre..."
-                    className="w-full px-4 py-3 rounded-xl bg-zinc-50/50 border border-zinc-200 focus:border-primary/40 focus:bg-white focus:outline-none text-sm text-zinc-900 placeholder:text-zinc-500 transition-all font-medium"
+                    className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary/40 focus:bg-card focus:outline-none text-sm text-foreground placeholder:text-muted-foreground transition-all font-medium"
                   />
                 </div>
                 <div>
-                  <label htmlFor="avatar-url" className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2">
+                  <label htmlFor="avatar-url" className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">
                     Foto de perfil (URL)
                   </label>
                   <div className="flex items-center gap-2">
-                    <LinkIcon className="w-4 h-4 text-zinc-400 shrink-0 ml-1" />
+                    <LinkIcon className="w-4 h-4 text-muted-foreground shrink-0 ml-1" />
                     <input
                       id="avatar-url"
                       type="url"
                       value={avatarUrlInput}
                       onChange={(e) => setAvatarUrlInput(e.target.value)}
                       placeholder="https://ejemplo.com/mi-foto.jpg"
-                      className="w-full px-4 py-3 rounded-xl bg-zinc-50/50 border border-zinc-200 focus:border-primary/40 focus:bg-white focus:outline-none text-sm text-zinc-900 placeholder:text-zinc-500 transition-all font-medium"
+                      className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary/40 focus:bg-card focus:outline-none text-sm text-foreground placeholder:text-muted-foreground transition-all font-medium"
                     />
                   </div>
                 </div>
@@ -189,7 +189,7 @@ const Profile = () => {
                   <button
                     onClick={handleSave}
                     disabled={saving}
-                    className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50"
+                    className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-50"
                   >
                     {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                     Guardar cambios
@@ -200,23 +200,23 @@ const Profile = () => {
 
             {/* Recent activity */}
             {creditHistory.length > 0 && (
-              <div className="rounded-3xl bg-white/70 border border-zinc-200/60 p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20 backdrop-blur-sm">
-                <h2 className="text-sm font-bold text-zinc-400 uppercase tracking-widest mb-6">Últimas transacciones</h2>
+              <div className="rounded-3xl bg-card/70 border border-border/60 p-8 shadow-sm transition-all hover:shadow-md hover:border-primary/20 backdrop-blur-sm">
+                <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6">Últimas transacciones</h2>
                 <div className="space-y-3">
                   {creditHistory.map((tx) => {
                     const meta = TX_META[tx.type] ?? { label: tx.type, positive: tx.amount > 0 };
                     return (
-                      <div key={tx.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-zinc-50 transition-colors">
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${meta.positive ? "bg-green-500/10" : "bg-zinc-100"}`}>
-                          {tx.type === "spend" && tx.description?.startsWith("image") ? <Image className="w-3.5 h-3.5 text-zinc-400" /> :
-                           tx.type === "spend" ? <MessageSquare className="w-3.5 h-3.5 text-zinc-400" /> :
-                           <Zap className="w-3.5 h-3.5 text-zinc-400" />}
+                      <div key={tx.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${meta.positive ? "bg-green-500/10" : "bg-muted"}`}>
+                          {tx.type === "spend" && tx.description?.startsWith("image") ? <Image className="w-3.5 h-3.5 text-muted-foreground" /> :
+                           tx.type === "spend" ? <MessageSquare className="w-3.5 h-3.5 text-muted-foreground" /> :
+                           <Zap className="w-3.5 h-3.5 text-muted-foreground" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-zinc-600 truncate">{meta.label}</p>
-                          <p className="text-xs text-zinc-400">{new Date(tx.createdAt).toLocaleDateString("es-ES")}</p>
+                          <p className="text-sm font-medium text-muted-foreground truncate">{meta.label}</p>
+                          <p className="text-xs text-muted-foreground">{new Date(tx.createdAt).toLocaleDateString("es-ES")}</p>
                         </div>
-                        <span className={`text-sm font-bold tabular-nums ${meta.positive ? "text-green-400" : "text-zinc-400"}`}>
+                        <span className={`text-sm font-bold tabular-nums ${meta.positive ? "text-green-400" : "text-muted-foreground"}`}>
                           {tx.amount > 0 ? "+" : ""}{tx.amount}
                         </span>
                       </div>
@@ -231,18 +231,18 @@ const Profile = () => {
           <div className="space-y-5">
 
             {/* Credits card */}
-            <div className="rounded-3xl bg-primary text-white p-8">
+            <div className="rounded-3xl bg-primary text-primary-foreground p-8">
               <div className="flex items-center justify-between mb-4">
-                <Coins className="w-7 h-7 text-white/50" />
-                <span className="text-xs font-bold text-white/60 uppercase tracking-widest">Créditos</span>
+                <Coins className="w-7 h-7 text-primary-foreground/50" />
+                <span className="text-xs font-bold text-primary-foreground/60 uppercase tracking-widest">Créditos</span>
               </div>
               <div className="mb-6">
                 <span className="text-6xl font-bold tracking-tight tabular-nums">{profile?.creditsBalance ?? 0}</span>
-                <span className="text-sm text-white/60 ml-2 font-medium">disponibles</span>
+                <span className="text-sm text-primary-foreground/60 ml-2 font-medium">disponibles</span>
               </div>
               <button
                 onClick={() => navigate("/pricing")}
-                className="w-full py-3 bg-white/20 text-white rounded-2xl font-bold text-sm hover:bg-white/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+                className="w-full py-3 bg-primary-foreground/20 text-primary-foreground rounded-2xl font-bold text-sm hover:bg-primary-foreground/30 transition-all active:scale-95 flex items-center justify-center gap-2"
               >
                 <CreditCard className="w-4 h-4" />
                 Ver planes
@@ -250,15 +250,15 @@ const Profile = () => {
             </div>
 
             {/* Plan card */}
-            <div className="rounded-3xl bg-zinc-50 border border-zinc-200 p-6 space-y-4">
-              <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Plan actual</h2>
+            <div className="rounded-3xl bg-muted/50 border border-border p-6 space-y-4">
+              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Plan actual</h2>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-bold text-zinc-900">{tierLabel}</p>
-                  <p className="text-xs text-zinc-400">
+                  <p className="font-bold text-foreground">{tierLabel}</p>
+                  <p className="text-xs text-muted-foreground">
                     {renewsLabel ? `Se renueva el ${renewsLabel}` : "Plan activo"}
                   </p>
                 </div>
@@ -266,7 +266,7 @@ const Profile = () => {
               {renewsLabel && (
                 <button
                   onClick={() => navigate("/pricing")}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-zinc-100 border border-zinc-200 text-zinc-600 text-sm font-bold hover:bg-zinc-200 transition-all"
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-muted border border-border text-muted-foreground text-sm font-bold hover:bg-accent transition-all"
                 >
                   Renovar ahora
                   <ChevronRight className="w-4 h-4" />
@@ -284,27 +284,27 @@ const Profile = () => {
             </div>
 
             {/* Account info */}
-            <div className="rounded-3xl bg-zinc-50 border border-zinc-200 p-6 space-y-4">
-              <h2 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Detalles de cuenta</h2>
+            <div className="rounded-3xl bg-muted/50 border border-border p-6 space-y-4">
+              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Detalles de cuenta</h2>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <Calendar className="w-4 h-4 text-zinc-500 shrink-0" />
+                  <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div>
-                    <p className="text-xs text-zinc-400">Miembro desde</p>
-                    <p className="text-sm font-medium text-zinc-600">{joinDate}</p>
+                    <p className="text-xs text-muted-foreground">Miembro desde</p>
+                    <p className="text-sm font-medium text-muted-foreground">{joinDate}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Bell className="w-4 h-4 text-zinc-500 shrink-0" />
+                  <Bell className="w-4 h-4 text-muted-foreground shrink-0" />
                   <div>
-                    <p className="text-xs text-zinc-400">Notificaciones</p>
-                    <p className="text-sm font-medium text-zinc-600">Activas</p>
+                    <p className="text-xs text-muted-foreground">Notificaciones</p>
+                    <p className="text-sm font-medium text-muted-foreground">Activas</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <Check className="w-4 h-4 text-green-400/50 shrink-0" />
                   <div>
-                    <p className="text-xs text-zinc-400">Email verificado</p>
+                    <p className="text-xs text-muted-foreground">Email verificado</p>
                     <p className="text-sm font-medium text-green-400/70">Confirmado</p>
                   </div>
                 </div>
@@ -314,19 +314,19 @@ const Profile = () => {
             {/* Download app */}
             <button
               onClick={() => navigate("/descargar")}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-zinc-50 border border-zinc-200 text-sm font-medium text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 transition-all"
+              className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-muted/50 border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
             >
               <div className="flex items-center gap-3">
                 <Download className="w-4 h-4 text-primary/60" />
                 Descargar App
               </div>
-              <ChevronRight className="w-4 h-4 text-zinc-500" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
             </button>
 
             {/* Sign out */}
             <button
               onClick={signOut}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-zinc-200 text-sm font-medium text-zinc-400 hover:text-rose-400 hover:border-rose-500/20 hover:bg-rose-500/5 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-border text-sm font-medium text-muted-foreground hover:text-rose-400 hover:border-rose-500/20 hover:bg-rose-500/5 transition-all"
             >
               <LogOut className="w-4 h-4" />
               Cerrar sesión

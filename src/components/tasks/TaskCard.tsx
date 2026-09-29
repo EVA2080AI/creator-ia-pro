@@ -51,11 +51,11 @@ export const TaskCard = memo(function TaskCard({
       onKeyDown={handleKey}
       aria-label={`${task.title} · ${STATUS_META[task.status].label}`}
       className={cn(
-        "group relative bg-white border border-zinc-200 rounded-2xl p-3.5 md:p-4 text-left select-none cursor-pointer transition-all",
+        "group relative bg-card border border-border rounded-2xl p-3.5 md:p-4 text-left select-none cursor-pointer transition-all",
         "shadow-[0_1px_2px_rgba(0,0,0,0.03)] hover:border-primary/40 hover:shadow-[0_8px_24px_-10px_rgba(var(--primary-rgb),0.3)] active:scale-[0.99]",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
         dragging && "opacity-40",
-        done && "bg-zinc-50/70"
+        done && "bg-muted/50"
       )}
     >
       <div className="flex items-start gap-2.5">
@@ -70,7 +70,7 @@ export const TaskCard = memo(function TaskCard({
           <span
             className={cn(
               "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
-              done ? "bg-emerald-500 border-emerald-500 text-white" : "border-zinc-300 text-transparent hover:border-emerald-500 hover:text-emerald-500"
+              done ? "bg-emerald-500 border-emerald-500 text-white" : "border-muted-foreground/40 text-transparent hover:border-emerald-500 hover:text-emerald-500"
             )}
           >
             <Check className="w-3.5 h-3.5" strokeWidth={3} />
@@ -78,11 +78,11 @@ export const TaskCard = memo(function TaskCard({
         </button>
 
         <div className="flex-1 min-w-0">
-          <p className={cn("text-[14px] font-bold leading-snug text-zinc-900 break-words", done && "line-through text-zinc-400")}>
+          <p className={cn("text-[14px] font-bold leading-snug text-foreground break-words", done && "line-through text-muted-foreground")}>
             {task.title}
           </p>
           {task.description && (
-            <p className="mt-1 text-[12px] text-zinc-500 leading-relaxed line-clamp-2 whitespace-pre-line">{task.description}</p>
+            <p className="mt-1 text-[12px] text-muted-foreground leading-relaxed line-clamp-2 whitespace-pre-line">{task.description}</p>
           )}
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
             <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-wider", priority.chip)}>
@@ -93,9 +93,9 @@ export const TaskCard = memo(function TaskCard({
               <span
                 className={cn(
                   "inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-wider",
-                  overdue ? "bg-rose-50 text-rose-600 border-rose-200"
-                    : dueToday && !done ? "bg-amber-50 text-amber-700 border-amber-200"
-                    : "bg-zinc-50 text-zinc-500 border-zinc-200"
+                  overdue ? "bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/30"
+                    : dueToday && !done ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30"
+                    : "bg-muted text-muted-foreground border-border"
                 )}
               >
                 <CalendarDays className="w-3 h-3" />
@@ -111,7 +111,7 @@ export const TaskCard = memo(function TaskCard({
         </div>
 
         {draggable && (
-          <GripVertical className="w-4 h-4 mt-0.5 shrink-0 text-zinc-300 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden />
+          <GripVertical className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden />
         )}
       </div>
 
@@ -136,8 +136,8 @@ function MoveButton({ icon: Icon, target, onClick, iconRight = false }: { icon: 
       className={cn(
         "flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 h-10 md:h-8 px-3 rounded-xl border text-[11px] font-bold transition-all",
         target
-          ? "bg-white border-zinc-200 text-zinc-600 hover:border-zinc-900 hover:text-zinc-900 active:scale-95"
-          : "border-zinc-100 text-zinc-300 cursor-not-allowed"
+          ? "bg-card border-border text-muted-foreground hover:border-foreground hover:text-foreground active:scale-95"
+          : "border-border text-muted-foreground cursor-not-allowed"
       )}
     >
       {!iconRight && <Icon className="w-3.5 h-3.5" />}

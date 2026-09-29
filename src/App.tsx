@@ -14,6 +14,7 @@ import { PerformanceMonitor } from "@/components/performance/PerformanceMonitor"
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { usePageTracking } from "@/hooks/useAnalytics";
 import { useSession } from "@/lib/auth-client";
+import { ThemeProvider } from "@/hooks/useTheme";
 
 // Redirect /canvas → /studio-flow preserving query params
 const CanvasRedirect = () => {
@@ -131,9 +132,8 @@ const AssistantPage = lazy(() => import("./pages/Assistant"));
 const BasaltPage    = lazy(() => import("./pages/Basalt"));
 const ArenaPage     = lazy(() => import("./pages/Arena"));
 
-// Light loading screen — no dark bg
 const LoadingScreen = () => (
-  <div className="flex h-screen w-screen items-center justify-center bg-white" role="status" aria-live="polite">
+  <div className="flex h-screen w-screen items-center justify-center bg-background" role="status" aria-live="polite">
     <div className="relative">
       <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full animate-pulse" />
       <Loader2 className="relative h-9 w-9 animate-spin text-primary" />
@@ -161,6 +161,7 @@ const App = () => {
     <HelmetProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
           <TooltipProvider>
             <Toaster />
             <BrowserRouter>
@@ -255,6 +256,7 @@ const App = () => {
               </Suspense>
             </BrowserRouter>
           </TooltipProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </HelmetProvider>

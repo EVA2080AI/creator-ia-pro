@@ -125,11 +125,11 @@ export default function Dashboard() {
   if (dataError) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4 px-6 text-center">
-        <p className="text-sm font-semibold text-stone-600">No se pudo cargar tu panel.</p>
-        <p className="text-xs text-stone-400">Revisa tu conexión e intenta de nuevo.</p>
+        <p className="text-sm font-semibold text-foreground">No se pudo cargar tu panel.</p>
+        <p className="text-xs text-muted-foreground">Revisa tu conexión e intenta de nuevo.</p>
         <button
           onClick={() => window.location.reload()}
-          className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-white hover:bg-primary/90 active:scale-95 transition-all"
+          className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all"
         >
           Reintentar
         </button>
@@ -189,7 +189,7 @@ export default function Dashboard() {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span className="text-[11px] text-stone-400 font-bold uppercase tracking-wider">Sistema Activo</span>
+              <span className="text-[11px] text-muted-foreground font-bold uppercase tracking-wider">Sistema Activo</span>
             </div>
             <h1 className="text-3xl font-black tracking-tight">
               Hola, <span className="text-primary">{profile?.full_name?.split(' ')[0] || 'Creator'}</span>
@@ -212,17 +212,17 @@ export default function Dashboard() {
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
             { icon: Zap, label: "Basalt IA", desc: "Asistente", path: "/a/basalt" },
-            { icon: Zap, label: "Arena IA", desc: "Compara modelos", path: "/arena" },
+            { icon: Zap, label: "Arena IA", desc: "Compara modelos", path: "/a/arena" },
             { icon: Megaphone, label: "Canvas IA", desc: "Próximamente", path: "/studio-flow" },
-            { icon: ListTodo, label: "Tareas", desc: "Kanban", path: "/tareas" },
+            { icon: ListTodo, label: "Tareas", desc: "Kanban", path: "/tasks" },
             { icon: FileText, label: "Espacios", desc: "Archivos", path: "/spaces" },
           ].map((app) => (
-            <button key={app.label} onClick={() => navigate(app.path)} className="p-5 bg-white border border-stone-200 rounded-2xl text-left hover:border-primary transition-all group">
-              <div className={"w-10 h-10 rounded-xl bg-stone-50 flex items-center justify-center mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-all"}>
+            <button key={app.label} onClick={() => navigate(app.path)} className="p-5 bg-card border border-border rounded-2xl text-left hover:border-primary transition-all group">
+              <div className={"w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-all"}>
                 <app.icon className="w-5 h-5" />
               </div>
-              <p className="text-[13px] font-black text-stone-900">{app.label}</p>
-              <p className="text-[9px] text-stone-400 uppercase mt-1">{app.desc}</p>
+              <p className="text-[13px] font-black text-foreground">{app.label}</p>
+              <p className="text-[9px] text-muted-foreground uppercase mt-1">{app.desc}</p>
             </button>
           ))}
         </section>
@@ -230,16 +230,16 @@ export default function Dashboard() {
         {/* Projects Section */}
         <section className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-[11px] font-black uppercase tracking-[0.4em] text-stone-500">Mis Proyectos</h2>
-            <button onClick={() => setIsCreatingSpace(true)} className="bg-stone-900 text-white px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-stone-800 transition-all shadow-lg shadow-stone-200">
+            <h2 className="text-[11px] font-black uppercase tracking-[0.4em] text-muted-foreground">Mis Proyectos</h2>
+            <button onClick={() => setIsCreatingSpace(true)} className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/10">
               + Nuevo Proyecto
             </button>
           </div>
-          
+
           {spaces.length === 0 ? (
-            <div className={"p-20 border-2 border-dashed border-stone-200 rounded-[2.5rem] text-center bg-stone-50/50"}>
-              <FolderPlus className="w-12 h-12 text-stone-300 mx-auto mb-4" />
-              <p className="text-sm text-stone-400 font-bold uppercase tracking-widest">Crea tu primer espacio para comenzar</p>
+            <div className={"p-20 border-2 border-dashed border-border rounded-[2.5rem] text-center bg-muted/50"}>
+              <FolderPlus className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">Crea tu primer espacio para comenzar</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -264,24 +264,24 @@ export default function Dashboard() {
 
       {/* Dialogs */}
       <Dialog open={isCreatingSpace} onOpenChange={setIsCreatingSpace}>
-        <DialogContent className="rounded-[2rem] border-stone-200">
+        <DialogContent className="rounded-[2rem] border-border">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">Nuevo Espacio de Trabajo</DialogTitle>
             <DialogDescription>Asigna un nombre a tu nuevo lienzo estratégico.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-stone-400">Nombre</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Nombre</Label>
               <Input value={newSpaceName} onChange={e => setNewSpaceName(e.target.value)} placeholder="Campaña 2025" className="rounded-xl" />
             </div>
             <div className="space-y-2">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-stone-400">Descripción</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Descripción</Label>
               <Input value={newSpaceDesc} onChange={e => setNewSpaceDesc(e.target.value)} placeholder="Opcional..." className="rounded-xl" />
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <button onClick={() => setIsCreatingSpace(false)} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-stone-400">Cancelar</button>
-            <button onClick={handleCreateSpace} className="px-6 py-2 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest">Crear Espacio</button>
+            <button onClick={() => setIsCreatingSpace(false)} className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground">Cancelar</button>
+            <button onClick={handleCreateSpace} className="px-6 py-2 bg-primary text-primary-foreground rounded-xl text-[10px] font-black uppercase tracking-widest">Crear Espacio</button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

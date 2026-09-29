@@ -6,7 +6,7 @@ import {
   Coins, LogOut, User, Shield, Zap, Settings, CreditCard, Sparkles,
   PanelLeftClose, PanelLeftOpen, List,
   Home, ShieldCheck, Activity,
-  Users2, Palette, ListTodo, Scale, Code2, type LucideIcon
+  Users2, Palette, ListTodo, Scale, Code2, Sun, Moon, type LucideIcon
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -16,6 +16,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useSidebarV2 } from '@/hooks/useSidebarV2';
 import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
+import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 import { CANVAS_ENABLED } from '@/lib/features';
 
@@ -31,13 +32,13 @@ const TIER_LEVELS: Record<string, number> = {
 };
 
 const TIER_CONFIG: Record<string, { label: string, color: string, bg: string }> = {
-  'creador': { label: 'CREADOR', color: 'text-blue-500',    bg: 'bg-blue-50/80' },
-  'pro':     { label: 'PRO',     color: 'text-violet-500',  bg: 'bg-violet-50/80' },
-  'agencia': { label: 'AGENCIA', color: 'text-amber-600',   bg: 'bg-amber-50/80' },
-  'pyme':    { label: 'PYME',    color: 'text-emerald-600', bg: 'bg-emerald-50/80' },
-  'pymes':   { label: 'PYMES',   color: 'text-emerald-600', bg: 'bg-emerald-50/80' },
-  'admin':   { label: 'ADMIN',   color: 'text-red-500',     bg: 'bg-red-50/80' },
-  'soon':    { label: 'PRONTO',  color: 'text-zinc-500',    bg: 'bg-zinc-100/80' },
+  'creador': { label: 'CREADOR', color: 'text-blue-500 dark:text-blue-400',       bg: 'bg-blue-50/80 dark:bg-blue-500/10' },
+  'pro':     { label: 'PRO',     color: 'text-violet-500 dark:text-violet-400',   bg: 'bg-violet-50/80 dark:bg-violet-500/10' },
+  'agencia': { label: 'AGENCIA', color: 'text-amber-600 dark:text-amber-400',     bg: 'bg-amber-50/80 dark:bg-amber-500/10' },
+  'pyme':    { label: 'PYME',    color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-500/10' },
+  'pymes':   { label: 'PYMES',   color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-500/10' },
+  'admin':   { label: 'ADMIN',   color: 'text-red-500 dark:text-red-400',         bg: 'bg-red-50/80 dark:bg-red-500/10' },
+  'soon':    { label: 'PRONTO',  color: 'text-muted-foreground', bg: 'bg-muted' },
 };
 
 interface NavItemDef {
@@ -58,9 +59,9 @@ interface NavItemDef {
 // clickeable o muestra el toast de upsell.
 const NAV_MAIN: NavItemDef[] = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
-  { path: '/tareas',       label: 'Tareas',        icon: ListTodo,       minTier: 'free' },
+  { path: '/tasks',        label: 'Tareas',        icon: ListTodo,       minTier: 'free' },
   { path: '/a/basalt',     label: 'Basalt IA',     icon: Brain,          minTier: 'free' },
-  { path: '/arena',        label: 'Arena IA',      icon: Scale,          minTier: 'free' },
+  { path: '/a/arena',      label: 'Arena IA',      icon: Scale,          minTier: 'free' },
   { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: CANVAS_ENABLED ? 'pro' : 'soon' },
   { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'pro' },
 ];
@@ -91,6 +92,8 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const { isAdmin } = useAdmin(user?.id);
   const { globalExpanded, toggleGlobal } = useSidebarV2();
   const { groups, workspaceTitle } = useWorkspaceActions();
+  const { resolvedTheme, setTheme } = useTheme();
+  const toggleTheme = () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
 
   const userTier = profile?.subscription_tier?.toLowerCase() ?? 'free';
   const userTierLevel = TIER_LEVELS[userTier] || 0;
@@ -138,13 +141,13 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
       transition={{ duration: 0.35, ease: [0.32, 0.72, 0, 1] }}
       className={cn(
         "relative z-20 h-screen flex flex-col shrink-0 overflow-hidden",
-        isMobile ? "w-full bg-white border-r-0" : "hidden md:flex border-r border-zinc-100 bg-white/60 backdrop-blur-md shadow-[1px_0_20px_rgba(0,0,0,0.02)]"
+        isMobile ? "w-full bg-background border-r-0" : "hidden md:flex border-r border-border bg-background/60 backdrop-blur-md shadow-[1px_0_20px_rgba(0,0,0,0.02)]"
       )}
       style={{ width: isMobile ? 240 : W }}
       aria-label="Navegación principal"
     >
       <div className="flex h-[60px] items-center gap-3 px-3 shrink-0 uppercase tracking-tighter relative">
-        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-200/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
         <AnimatePresence mode="wait">
           {(globalExpanded || isMobile) ? (
             <motion.div key="expanded" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 min-w-0 pl-1">
@@ -157,7 +160,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           )}
         </AnimatePresence>
         {!isMobile && (
-          <button onClick={toggleGlobal} className="ml-auto p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all shrink-0">
+          <button onClick={toggleGlobal} className="ml-auto p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all shrink-0">
             {globalExpanded ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeftOpen className="w-4 h-4" />}
           </button>
         )}
@@ -167,7 +170,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
         <div className="px-3 space-y-1 mb-6">
           {(globalExpanded || isMobile) && (
             <div className="pt-3 pb-1 mb-1 px-1">
-              <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-zinc-400">
+              <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
                 Principal
               </span>
             </div>
@@ -231,12 +234,12 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
                       className={cn(
                         'group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold outline-none',
                         (globalExpanded || isMobile) ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
-                        action.active ? 'bg-zinc-900 text-white shadow-lg' : 'text-zinc-500 hover:text-zinc-900',
+                        action.active ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground',
                         action.variant === 'primary' && !action.active && 'bg-primary/5 text-primary border border-primary/20',
                         action.disabled && 'opacity-30 cursor-not-allowed'
                       )}
                     >
-                      <action.icon className={cn('shrink-0 w-4 h-4', action.active ? 'text-white' : (action.variant === 'primary' ? 'text-primary' : 'text-zinc-400 group-hover:text-zinc-600'))} />
+                      <action.icon className={cn('shrink-0 w-4 h-4', action.active ? 'text-primary-foreground' : (action.variant === 'primary' ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'))} />
                       {(globalExpanded || isMobile) && <span className="truncate flex-1 text-left">{action.label}</span>}
                     </button>
                   ))}
@@ -247,54 +250,70 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
         )}
 
         {(globalExpanded || isMobile) && profile && (
-          <div className="mx-4 mt-8 p-4 rounded-2xl bg-zinc-50/50 border border-zinc-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden relative group">
+          <div className="mx-4 mt-8 p-4 rounded-2xl bg-muted/50 border border-border shadow-[0_2px_10px_rgba(0,0,0,0.02)] overflow-hidden relative group">
             <div className="flex items-center justify-between mb-3 relative z-10">
-              <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em]">Créditos</span>
+              <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em]">Créditos</span>
             </div>
-            <div className="flex items-center gap-2 relative z-10 w-max bg-white/80 px-2 py-1 rounded-xl shadow-sm border border-zinc-100">
+            <div className="flex items-center gap-2 relative z-10 w-max bg-card/80 px-2 py-1 rounded-xl shadow-sm border border-border">
                <Coins className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-               <span className="text-[13px] font-black text-zinc-800 tabular-nums">{profile.credits_balance?.toLocaleString() ?? '0'}</span>
+               <span className="text-[13px] font-black text-foreground tabular-nums">{profile.credits_balance?.toLocaleString() ?? '0'}</span>
             </div>
           </div>
         )}
       </nav>
 
       <div className="shrink-0 p-3 space-y-1 relative">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-zinc-200/50 to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
         {NAV_BOTTOM.map((item) => (
           <button
             key={item.path}
             onClick={() => handleNav(item.path)}
             title={!(globalExpanded || isMobile) ? item.label : undefined}
             aria-label={item.label}
-            className={cn('group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold text-zinc-400 hover:text-zinc-800 hover:bg-zinc-50', (globalExpanded || isMobile) ? 'gap-3 px-4 py-2.5' : 'gap-0 px-0 py-2.5 justify-center')}
+            className={cn('group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold text-muted-foreground hover:text-foreground hover:bg-muted', (globalExpanded || isMobile) ? 'gap-3 px-4 py-2.5' : 'gap-0 px-0 py-2.5 justify-center')}
           >
             <item.icon className="shrink-0 w-4 h-4 transition-transform group-hover:scale-105" />
             {(globalExpanded || isMobile) && <span className="truncate flex-1 text-left leading-none mt-0.5">{item.label}</span>}
           </button>
         ))}
 
-        <div className={cn('flex items-center gap-2 rounded-2xl mt-3 transition-all cursor-pointer group hover:bg-zinc-50', (globalExpanded || isMobile) ? 'p-2' : 'p-2 justify-center')} onClick={() => navigate('/profile')}>
+        <button
+          onClick={toggleTheme}
+          title={!(globalExpanded || isMobile) ? (resolvedTheme === 'dark' ? 'Modo claro' : 'Modo oscuro') : undefined}
+          aria-label={resolvedTheme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          className={cn('group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold text-muted-foreground hover:text-foreground hover:bg-muted', (globalExpanded || isMobile) ? 'gap-3 px-4 py-2.5' : 'gap-0 px-0 py-2.5 justify-center')}
+        >
+          {resolvedTheme === 'dark'
+            ? <Sun className="shrink-0 w-4 h-4 transition-transform group-hover:scale-105" />
+            : <Moon className="shrink-0 w-4 h-4 transition-transform group-hover:scale-105" />}
+          {(globalExpanded || isMobile) && (
+            <span className="truncate flex-1 text-left leading-none mt-0.5">
+              {resolvedTheme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+            </span>
+          )}
+        </button>
+
+        <div className={cn('flex items-center gap-2 rounded-2xl mt-3 transition-all cursor-pointer group hover:bg-muted', (globalExpanded || isMobile) ? 'p-2' : 'p-2 justify-center')} onClick={() => navigate('/profile')}>
           {user ? (
             <>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-white border border-zinc-200 shadow-sm transition-transform group-hover:scale-95">
-                {profile?.avatar_url ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" /> : <User className="w-4 h-4 text-zinc-300" />}
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-muted border border-border shadow-sm transition-transform group-hover:scale-95">
+                {profile?.avatar_url ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" /> : <User className="w-4 h-4 text-muted-foreground" />}
               </div>
               {(globalExpanded || isMobile) && (
                 <div className="flex-1 min-w-0 px-1">
-                  <p className="text-[12px] font-black text-zinc-900 truncate leading-none transition-colors">{profile?.display_name || user.email?.split('@')[0]}</p>
-                  <p className="text-[9px] font-bold text-zinc-400 truncate uppercase tracking-widest mt-1.5">{profile?.subscription_tier || 'Free'}</p>
+                  <p className="text-[12px] font-black text-foreground truncate leading-none transition-colors">{profile?.display_name || user.email?.split('@')[0]}</p>
+                  <p className="text-[9px] font-bold text-muted-foreground truncate uppercase tracking-widest mt-1.5">{profile?.subscription_tier || 'Free'}</p>
                 </div>
               )}
               {(globalExpanded || isMobile) && (
-                <button onClick={(e) => { e.stopPropagation(); handleSignOut(); }} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-2 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50/80 transition-all"><LogOut className="w-4 h-4" /></button>
+                <button onClick={(e) => { e.stopPropagation(); handleSignOut(); }} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-2 rounded-xl text-muted-foreground hover:text-rose-500 hover:bg-rose-50/80 dark:hover:bg-rose-500/10 transition-all"><LogOut className="w-4 h-4" /></button>
               )}
               {!(globalExpanded || isMobile) && (
-                 <button onClick={(e) => { e.stopPropagation(); handleSignOut(); }} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-2 rounded-xl text-zinc-300 hover:text-rose-500 hover:bg-rose-50/80 transition-all absolute -top-10 right-2 shadow-sm bg-white border border-zinc-100 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"><LogOut className="w-4 h-4" /></button>
+                 <button onClick={(e) => { e.stopPropagation(); handleSignOut(); }} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-2 rounded-xl text-muted-foreground hover:text-rose-500 hover:bg-rose-50/80 dark:hover:bg-rose-500/10 transition-all absolute -top-10 right-2 shadow-sm bg-card border border-border opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"><LogOut className="w-4 h-4" /></button>
               )}
             </>
           ) : (
-             <button onClick={() => navigate('/auth')} className={cn('flex items-center gap-2 text-zinc-500 hover:text-zinc-900 px-3 py-2 w-full', !(globalExpanded || isMobile) && 'justify-center')}>
+             <button onClick={() => navigate('/auth')} className={cn('flex items-center gap-2 text-muted-foreground hover:text-foreground px-3 py-2 w-full', !(globalExpanded || isMobile) && 'justify-center')}>
               <User className="w-4 h-4" />
               {(globalExpanded || isMobile) && <span className="text-xs font-bold font-black">LOGIN</span>}
             </button>
@@ -320,11 +339,11 @@ function NavItem({
       className={cn(
         'group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold outline-none relative overflow-hidden',
         expanded ? 'gap-3 px-3 py-2.5' : 'gap-0 px-0 py-2.5 justify-center',
-        active ? 'bg-primary/5 text-primary border border-primary/10 shadow-[0_4px_20px_-4px_rgba(var(--primary-rgb),0.12)]' : 'bg-transparent text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50/80 border border-transparent',
+        active ? 'bg-primary/5 text-primary border border-primary/10 shadow-[0_4px_20px_-4px_rgba(var(--primary-rgb),0.12)]' : 'bg-transparent text-muted-foreground hover:text-foreground hover:bg-muted/80 border border-transparent',
         className
       )}
     >
-      <Icon className={cn('shrink-0 transition-transform duration-300', expanded ? 'w-4 h-4' : 'w-5 h-5', active ? 'text-primary scale-105' : 'text-zinc-400 group-hover:scale-105 group-hover:text-zinc-600')} />
+      <Icon className={cn('shrink-0 transition-transform duration-300', expanded ? 'w-4 h-4' : 'w-5 h-5', active ? 'text-primary scale-105' : 'text-muted-foreground group-hover:scale-105 group-hover:text-foreground')} />
       {expanded && (
         <span className="truncate flex-1 text-left flex items-center justify-between gap-2 mt-0.5 leading-none">
           {label}

@@ -92,26 +92,26 @@ export function CreditModal({
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-background/80 backdrop-blur-md p-4">
-      <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-background/50 backdrop-blur-2xl shadow-2xl shadow-black/50">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-background/50 backdrop-blur-2xl shadow-2xl shadow-black/50">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-200 p-5">
+        <div className="flex items-center justify-between border-b border-border p-5">
           <div>
-            <p className="font-semibold text-zinc-900">{user.display_name || user.email}</p>
-            <p className="text-xs text-zinc-400 font-mono">{user.email}</p>
+            <p className="font-semibold text-foreground">{user.display_name || user.email}</p>
+            <p className="text-xs text-muted-foreground font-mono">{user.email}</p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 rounded-lg bg-zinc-50 px-3 py-1.5">
+            <div className="flex items-center gap-1.5 rounded-lg bg-muted/50 px-3 py-1.5">
               <Coins className="h-3.5 w-3.5 text-amber-400" />
-              <span className="text-sm font-bold text-zinc-900 font-mono">{user.credits_balance.toLocaleString()}</span>
+              <span className="text-sm font-bold text-foreground font-mono">{user.credits_balance.toLocaleString()}</span>
             </div>
-            <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors">
+            <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               <X className="h-4 w-4" />
             </button>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-zinc-200">
+        <div className="flex border-b border-border">
           {TABS.map((t) => {
             const Icon = t.icon;
             const isActive = tab === t.key;
@@ -134,7 +134,7 @@ export function CreditModal({
           {tab !== "history" ? (
             <div className="space-y-4">
               <div>
-                <label htmlFor="admin-credits" className="mb-1.5 block text-xs text-zinc-500">Créditos</label>
+                <label htmlFor="admin-credits" className="mb-1.5 block text-xs text-muted-foreground">Créditos</label>
                 <input
                   id="admin-credits"
                   type="number"
@@ -142,12 +142,12 @@ export function CreditModal({
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder={tab === "add" ? "Ej: 50000" : "Ej: 1000"}
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-300 transition-colors"
+                  className="w-full rounded-xl border border-border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-ring transition-colors"
                 />
               </div>
               <div>
-                <label htmlFor="admin-reason" className="mb-1.5 block text-xs text-zinc-500">
-                  Razón {tab !== "refund" && <span className="text-zinc-500">(opcional)</span>}
+                <label htmlFor="admin-reason" className="mb-1.5 block text-xs text-muted-foreground">
+                  Razón {tab !== "refund" && <span className="text-muted-foreground">(opcional)</span>}
                 </label>
                 <input
                   id="admin-reason"
@@ -155,7 +155,7 @@ export function CreditModal({
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder={tab === "refund" ? "Motivo del reembolso" : "Descripción (opcional)"}
-                  className="w-full rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-2.5 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-300 transition-colors"
+                  className="w-full rounded-xl border border-border bg-muted/50 px-4 py-2.5 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-ring transition-colors"
                 />
               </div>
               <button
@@ -176,23 +176,23 @@ export function CreditModal({
             <div className="space-y-2 max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-white/10">
               {txLoading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-5 w-5 animate-spin text-zinc-400" />
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
               ) : txs.length === 0 ? (
-                <p className="py-8 text-center text-sm text-zinc-400">Sin transacciones</p>
+                <p className="py-8 text-center text-sm text-muted-foreground">Sin transacciones</p>
               ) : (
                 txs.map((tx) => {
                   const meta = TX_TYPE_LABELS[tx.type] || { label: tx.type, color: "#6B7280" };
                   return (
-                    <div key={tx.id} className="flex items-center justify-between rounded-xl bg-zinc-50 p-3">
+                    <div key={tx.id} className="flex items-center justify-between rounded-xl bg-muted/50 p-3">
                       <div className="min-w-0">
                         <span className="inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ background: meta.color + "15", color: meta.color }}>
                           {meta.label}
                         </span>
                         {tx.description && (
-                          <p className="mt-0.5 truncate text-xs text-zinc-400">{tx.description}</p>
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">{tx.description}</p>
                         )}
-                        <p className="text-[10px] text-zinc-500">{new Date(tx.created_at).toLocaleString()}</p>
+                        <p className="text-[10px] text-muted-foreground">{new Date(tx.created_at).toLocaleString()}</p>
                       </div>
                       <span className="ml-3 font-mono text-sm font-bold" style={{ color: tx.amount >= 0 ? "#A855F7" : "#EF4444" }}>
                         {tx.amount >= 0 ? "+" : ""}{tx.amount.toLocaleString()}

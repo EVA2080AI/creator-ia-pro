@@ -76,11 +76,11 @@ const Auth = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-background bg-grid-white/[0.02] font-sans selection:bg-primary/15 selection:text-zinc-900 overflow-hidden">
+    <div className="flex min-h-screen bg-background bg-grid-white/[0.02] font-sans selection:bg-primary/15 selection:text-foreground overflow-hidden">
       <SEO {...seoPresets.auth} />
 
       {/* Left Panel — Value Prop */}
-      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between px-16 py-16 relative overflow-hidden bg-zinc-50 border-r border-zinc-200">
+      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between px-16 py-16 relative overflow-hidden bg-muted/50 border-r border-border">
         {/* Animated glows */}
          <div className="pointer-events-none absolute inset-0">
           <motion.div
@@ -119,7 +119,7 @@ const Auth = () => {
                 transition={{ repeat: Infinity, duration: 2 }}
                 className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary-rgb),0.8)]"
               />
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] font-display">
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em] font-display">
                 Plataforma de IA generativa
               </span>
             </motion.div>
@@ -127,7 +127,7 @@ const Auth = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="text-5xl xl:text-6xl font-bold text-zinc-900 leading-[1.05] tracking-tight font-display"
+              className="text-5xl xl:text-6xl font-bold text-foreground leading-[1.05] tracking-tight font-display"
             >
               Crea con IA.<br />
               <span className="bg-gradient-to-r from-primary to-primary bg-clip-text text-transparent">
@@ -138,7 +138,7 @@ const Auth = () => {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.35 }}
-              className="text-zinc-400 text-base max-w-xs leading-relaxed font-medium"
+              className="text-muted-foreground text-base max-w-xs leading-relaxed font-medium"
             >
               Imágenes, textos, videos, logos y más — todo en un solo lugar, con la IA más avanzada.
             </motion.p>
@@ -156,11 +156,11 @@ const Auth = () => {
               >
                 <motion.div
                   whileHover={{ scale: 1.1 }}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-100 border border-zinc-200 shrink-0"
+                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted border border-border shrink-0"
                 >
-                  <f.icon className="h-4.5 w-4.5 text-zinc-400" />
+                  <f.icon className="h-4.5 w-4.5 text-muted-foreground" />
                 </motion.div>
-                <span className="text-sm font-medium text-zinc-400">{f.text}</span>
+                <span className="text-sm font-medium text-muted-foreground">{f.text}</span>
                 <Check className="h-4 w-4 text-primary ml-auto shrink-0 opacity-50" />
               </motion.div>
             ))}
@@ -179,10 +179,10 @@ const Auth = () => {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ duration: 0.4, delay: 0.7 + i * 0.08 }}
                 whileHover={{ y: -3 }}
-                className="rounded-2xl border border-zinc-200 bg-white/40 backdrop-blur-sm p-4 text-center shadow-sm hover:shadow-md hover:border-primary/20 transition-all"
+                className="rounded-2xl border border-border bg-card/40 backdrop-blur-sm p-4 text-center shadow-sm hover:shadow-md hover:border-primary/20 transition-all"
               >
-                <p className="text-2xl font-bold text-zinc-900 font-display">{s.value}</p>
-                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">{s.label}</p>
+                <p className="text-2xl font-bold text-foreground font-display">{s.value}</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">{s.label}</p>
               </motion.div>
             ))}
           </div>
@@ -199,7 +199,7 @@ const Auth = () => {
             queda NADA de contexto del producto antes del formulario sin esto. */}
         <div className="absolute top-8 left-1/2 w-full max-w-[340px] -translate-x-1/2 px-6 text-center lg:hidden">
           <Logo size="sm" showText showPro onClick={() => navigate("/")} className="justify-center" />
-          <p className="mt-3 text-[13px] font-medium leading-snug text-zinc-400">
+          <p className="mt-3 text-[13px] font-medium leading-snug text-muted-foreground">
             Basalt IA convierte tus ideas en apps, imágenes y textos — todo en una sola conversación.
           </p>
         </div>
@@ -211,18 +211,18 @@ const Auth = () => {
           className="relative z-10 w-full max-w-[420px]"
         >
           {/* Form Card */}
-          <div className="rounded-[2.5rem] border border-zinc-200 bg-white p-10 shadow-xl shadow-zinc-200 relative overflow-hidden">
+          <div className="rounded-[2.5rem] border border-border bg-card p-10 shadow-xl shadow-black/5 relative overflow-hidden">
 
             {/* Header */}
             <div className="mb-8">
-              <h2 className="text-2xl font-bold text-zinc-900 tracking-tight font-display">
+              <h2 className="text-2xl font-bold text-foreground tracking-tight font-display">
                 {mode === "login"
                   ? "Iniciar sesión"
                   : mode === "signup"
                   ? "Crear cuenta gratis"
                   : "Recuperar contraseña"}
               </h2>
-              <p className="mt-1.5 text-sm text-zinc-400 font-medium">
+              <p className="mt-1.5 text-sm text-muted-foreground font-medium">
                 {mode === "login"
                   ? "Bienvenido de vuelta"
                   : mode === "signup"
@@ -235,11 +235,11 @@ const Auth = () => {
               {/* Name (signup only) */}
               {mode === "signup" && (
                 <div className="space-y-2">
-                  <Label htmlFor="displayName" className="text-zinc-400 text-xs font-semibold ml-1">
+                  <Label htmlFor="displayName" className="text-muted-foreground text-xs font-semibold ml-1">
                     Tu nombre
                   </Label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                    <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                     <Input
                       id="displayName"
                       type="text"
@@ -247,7 +247,7 @@ const Auth = () => {
                       onChange={(e) => setDisplayName(e.target.value)}
                       placeholder="¿Cómo te llamas?"
                       autoComplete="name"
-                      className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-500 transition-all focus:ring-0 focus:bg-zinc-100"
+                      className="bg-muted/50 border-border focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:ring-0 focus:bg-muted"
                     />
                   </div>
                 </div>
@@ -255,11 +255,11 @@ const Auth = () => {
 
               {/* Email */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-zinc-400 text-xs font-semibold ml-1">
+                <Label htmlFor="email" className="text-muted-foreground text-xs font-semibold ml-1">
                   Correo electrónico
                 </Label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                  <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                   <Input
                     id="email"
                     type="email"
@@ -268,7 +268,7 @@ const Auth = () => {
                     placeholder="tu@correo.com"
                     required
                     autoComplete="email"
-                    className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-zinc-900 placeholder:text-zinc-500 transition-all focus:ring-0 focus:bg-zinc-100"
+                    className="bg-muted/50 border-border focus:border-primary/40 rounded-2xl pl-11 h-12 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:ring-0 focus:bg-muted"
                   />
                 </div>
               </div>
@@ -277,21 +277,21 @@ const Auth = () => {
               {mode !== "forgot" && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between ml-1 pr-1">
-                    <Label htmlFor="password" className="text-zinc-400 text-xs font-semibold">
+                    <Label htmlFor="password" className="text-muted-foreground text-xs font-semibold">
                       Contraseña
                     </Label>
                     {mode === "login" && (
                       <button
                         type="button"
                         onClick={() => setMode("forgot")}
-                        className="text-xs text-zinc-500 hover:text-primary transition-colors font-medium"
+                        className="text-xs text-muted-foreground hover:text-primary transition-colors font-medium"
                       >
                         ¿Olvidaste tu contraseña?
                       </button>
                     )}
                   </div>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 pointer-events-none" />
+                    <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
@@ -301,19 +301,19 @@ const Auth = () => {
                       required
                       minLength={6}
                       autoComplete={mode === "login" ? "current-password" : "new-password"}
-                      className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-zinc-900 placeholder:text-zinc-500 transition-all focus:ring-0 focus:bg-zinc-100"
+                      className="bg-muted/50 border-border focus:border-primary/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:ring-0 focus:bg-muted"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
                       aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-500 transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground transition-colors"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                     </button>
                   </div>
                   {mode === "signup" && (
-                    <p className="text-[11px] text-zinc-500 ml-1">
+                    <p className="text-[11px] text-muted-foreground ml-1">
                       Usa al menos 6 caracteres.
                     </p>
                   )}
@@ -324,7 +324,7 @@ const Auth = () => {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-12 bg-primary text-white hover:bg-primary/90 rounded-2xl gap-3 font-bold text-sm tracking-tight transition-all active:scale-[0.98] disabled:opacity-50 mt-2"
+                className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl gap-3 font-bold text-sm tracking-tight transition-all active:scale-[0.98] disabled:opacity-50 mt-2"
               >
                 {loading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -346,9 +346,9 @@ const Auth = () => {
               <div className="mt-8 space-y-5 relative z-10">
                 <div className="relative flex items-center justify-center">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-zinc-200" />
+                    <div className="w-full border-t border-border" />
                   </div>
-                  <span className="relative bg-white px-4 text-[11px] text-zinc-400 font-medium">
+                  <span className="relative bg-card px-4 text-[11px] text-muted-foreground font-medium">
                     o continúa con
                   </span>
                 </div>
@@ -357,7 +357,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-11 gap-3 border-zinc-200 bg-zinc-50 hover:bg-zinc-100 hover:border-white/15 rounded-xl text-sm font-semibold text-zinc-400 hover:text-zinc-900 transition-all active:scale-[0.98]"
+                    className="h-11 gap-3 border-border bg-muted/50 hover:bg-muted hover:border-border rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground transition-all active:scale-[0.98]"
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
@@ -378,7 +378,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-11 gap-3 border-zinc-200 bg-zinc-50 hover:bg-zinc-100 hover:border-white/15 rounded-xl text-sm font-semibold text-zinc-400 hover:text-zinc-900 transition-all active:scale-[0.98]"
+                    className="h-11 gap-3 border-border bg-muted/50 hover:bg-muted hover:border-border rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground transition-all active:scale-[0.98]"
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
@@ -396,7 +396,7 @@ const Auth = () => {
                   <Button
                     type="button"
                     variant="outline"
-                    className="h-11 gap-3 border-zinc-200 bg-zinc-50 hover:bg-zinc-100 hover:border-white/15 rounded-xl text-sm font-semibold text-zinc-400 hover:text-zinc-900 transition-all active:scale-[0.98]"
+                    className="h-11 gap-3 border-border bg-muted/50 hover:bg-muted hover:border-border rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground transition-all active:scale-[0.98]"
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
@@ -420,17 +420,17 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => setMode("login")}
-                  className="text-sm font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 >
                   ← Volver al inicio de sesión
                 </button>
               ) : (
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-muted-foreground">
                   {mode === "login" ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"}{" "}
                   <button
                     type="button"
                     onClick={() => setMode(mode === "login" ? "signup" : "login")}
-                    className="font-semibold text-zinc-500 hover:text-primary transition-colors underline underline-offset-2"
+                    className="font-semibold text-muted-foreground hover:text-primary transition-colors underline underline-offset-2"
                   >
                     {mode === "login" ? "Regístrate gratis" : "Inicia sesión"}
                   </button>
@@ -446,7 +446,7 @@ const Auth = () => {
           <div className="mt-6 text-center">
             <button
               onClick={() => navigate("/pricing")}
-              className="text-xs font-medium text-zinc-500 hover:text-zinc-400 transition-colors"
+              className="text-xs font-medium text-muted-foreground hover:text-muted-foreground transition-colors"
             >
               Ver planes y precios →
             </button>
@@ -454,13 +454,13 @@ const Auth = () => {
 
           {/* Aviso legal — visible en mobile y desktop (antes solo vivía en el
               panel izquierdo, hidden lg:flex, así que en celular nunca se veía). */}
-          <p className="mt-4 text-center text-[11px] font-medium leading-relaxed text-zinc-400">
+          <p className="mt-4 text-center text-[11px] font-medium leading-relaxed text-muted-foreground">
             Al registrarte aceptas nuestros{" "}
-            <button type="button" onClick={() => navigate("/terms")} className="underline underline-offset-2 hover:text-zinc-600 transition-colors">
+            <button type="button" onClick={() => navigate("/terms")} className="underline underline-offset-2 hover:text-foreground transition-colors">
               Términos de servicio
             </button>{" "}
             y{" "}
-            <button type="button" onClick={() => navigate("/privacy")} className="underline underline-offset-2 hover:text-zinc-600 transition-colors">
+            <button type="button" onClick={() => navigate("/privacy")} className="underline underline-offset-2 hover:text-foreground transition-colors">
               Política de privacidad
             </button>.
           </p>

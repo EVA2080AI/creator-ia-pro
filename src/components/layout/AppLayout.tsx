@@ -13,7 +13,7 @@ import { Menu } from 'lucide-react';
  */
 export function AppLayout() {
   return (
-    <div className="flex h-screen w-full bg-white font-sans overflow-hidden">
+    <div className="flex h-screen w-full bg-background font-sans overflow-hidden">
       {/* ── Desktop Sidebar ── */}
       <SidebarGlobal />
 
@@ -22,8 +22,8 @@ export function AppLayout() {
         <div className="md:hidden fixed top-4 left-4 z-[60]">
           <Sheet>
             <SheetTrigger asChild>
-              <button 
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-white/80 backdrop-blur-md border border-zinc-200/60 shadow-lg text-zinc-600 hover:text-zinc-900 active:scale-90 transition-all"
+              <button
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-background/80 backdrop-blur-md border border-border shadow-lg text-muted-foreground hover:text-foreground active:scale-90 transition-all"
                 aria-label="Abrir menú"
               >
                 <Menu className="w-5 h-5" strokeWidth={2.5} />

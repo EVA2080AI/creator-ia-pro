@@ -55,7 +55,7 @@ const Admin = () => {
   if (authLoading || adminLoading) {
     return (
       <div className="flex h-full items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-zinc-300" />
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -123,36 +123,36 @@ const Admin = () => {
   ] as const;
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-background flex flex-col font-sans">
       <Helmet>
         <title>Admin Panel | Platform Operations</title>
       </Helmet>
 
       {/* ── Navbar ── */}
-      <header className="h-[60px] border-b border-zinc-200 bg-white/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
+      <header className="h-[60px] border-b border-border bg-background/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200">
+          <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/10">
             <Shield className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-sm font-black text-zinc-900 tracking-tight leading-none uppercase">Ecosistema Creator</h1>
-            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mt-0.5">Operaciones Industriales</p>
+            <h1 className="text-sm font-black text-foreground tracking-tight leading-none uppercase">Ecosistema Creator</h1>
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-0.5">Operaciones Industriales</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="hidden md:flex items-center gap-6 mr-6">
             <div className="text-right">
-              <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Estado Núcleo</p>
+              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Estado Núcleo</p>
               <div className="flex items-center gap-1.5 justify-end">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-600">Sistemas Operativos</span>
+                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Sistemas Operativos</span>
               </div>
             </div>
           </div>
-          <button 
+          <button
             onClick={() => signOut()}
-            className="h-9 px-4 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-all flex items-center gap-2 text-xs font-bold"
+            className="h-9 px-4 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all flex items-center gap-2 text-xs font-bold"
           >
             Cerrar Sesión
             <LogOut className="h-3.5 w-3.5" />
@@ -164,7 +164,7 @@ const Admin = () => {
       <div className="flex-1 flex flex-col md:flex-row max-w-[1600px] mx-auto w-full p-4 md:p-8 gap-8">
         {/* Sidebar Navigation */}
         <aside className="w-full md:w-[260px] space-y-1">
-          <p className="px-4 text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4">Módulos de Gestión</p>
+          <p className="px-4 text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Módulos de Gestión</p>
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
@@ -174,19 +174,19 @@ const Admin = () => {
                 onClick={() => handleTabChange(tab.id)}
                 className={cn(
                   "w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all group",
-                  active 
-                    ? "bg-white border-zinc-200 shadow-sm text-zinc-900 border" 
-                    : "text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
+                  active
+                    ? "bg-card border-border shadow-sm text-foreground border"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
                 <div className={cn(
                   "h-8 w-8 rounded-lg flex items-center justify-center transition-all",
-                  active ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-400 group-hover:bg-zinc-200"
+                  active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-accent"
                 )}>
                   <Icon className="h-4 w-4" />
                 </div>
                 {tab.label}
-                {active && <ChevronRight className="ml-auto h-4 w-4 text-zinc-300" />}
+                {active && <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />}
               </button>
             );
           })}

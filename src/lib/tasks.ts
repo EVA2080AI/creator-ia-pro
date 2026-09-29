@@ -45,7 +45,7 @@ export const STATUS_META: Record<TaskStatus, { label: string; short: string; dot
     label: "Por hacer",
     short: "Por hacer",
     dot: "bg-zinc-400",
-    badge: "bg-zinc-100 text-zinc-600",
+    badge: "bg-muted text-muted-foreground",
     empty: "Nada pendiente. Crea tu primera tarea.",
   },
   in_progress: {
@@ -59,7 +59,7 @@ export const STATUS_META: Record<TaskStatus, { label: string; short: string; dot
     label: "Hecho",
     short: "Hecho",
     dot: "bg-emerald-500",
-    badge: "bg-emerald-50 text-emerald-600",
+    badge: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
     empty: "Aún no completas tareas. ¡Tú puedes!",
   },
 };
@@ -67,9 +67,9 @@ export const STATUS_META: Record<TaskStatus, { label: string; short: string; dot
 export const TASK_PRIORITIES: TaskPriority[] = ["low", "medium", "high"];
 
 export const PRIORITY_META: Record<TaskPriority, { label: string; dot: string; chip: string }> = {
-  low:    { label: "Baja",  dot: "bg-emerald-500", chip: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  medium: { label: "Media", dot: "bg-amber-500",   chip: "bg-amber-50 text-amber-700 border-amber-200" },
-  high:   { label: "Alta",  dot: "bg-rose-500",    chip: "bg-rose-50 text-rose-700 border-rose-200" },
+  low:    { label: "Baja",  dot: "bg-emerald-500", chip: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30" },
+  medium: { label: "Media", dot: "bg-amber-500",   chip: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30" },
+  high:   { label: "Alta",  dot: "bg-rose-500",    chip: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/30" },
 };
 
 // ─── Navegación entre columnas ────────────────────────────────────────────────

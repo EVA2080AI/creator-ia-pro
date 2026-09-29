@@ -52,45 +52,45 @@ export function RolesTab({ users, currentUserEmail, onRefresh }: {
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+        <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
         <input
           placeholder="Buscar usuario..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-300 transition-colors"
+          className="w-full rounded-xl border border-border bg-muted/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder-muted-foreground outline-none focus:border-ring transition-colors"
         />
       </div>
 
-      <div className="rounded-2xl border border-zinc-200 overflow-hidden">
-        <div className="grid grid-cols-[1fr_auto] gap-4 px-5 py-3 bg-zinc-50 border-b border-zinc-200 text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400">
+      <div className="rounded-2xl border border-border overflow-hidden">
+        <div className="grid grid-cols-[1fr_auto] gap-4 px-5 py-3 bg-muted/50 border-b border-border text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">
           <span>Usuario</span>
           <span style={{ color: '#EF4444' }}>Admin</span>
         </div>
-        <div className="divide-y divide-zinc-100">
+        <div className="divide-y divide-border">
           {filtered.map(u => {
             const isCurrentUser = u.email === currentUserEmail;
             const initials = (u.display_name || u.email || '?')[0].toUpperCase();
             const busy = busyUserId === u.user_id;
             const cantRevoke = isCurrentUser && u.is_admin;
             return (
-              <div key={u.user_id} className={`grid grid-cols-[1fr_auto] gap-4 items-center px-5 py-3.5 hover:bg-zinc-50/50 transition-colors ${isCurrentUser ? 'bg-blue-50/30' : ''}`}>
+              <div key={u.user_id} className={`grid grid-cols-[1fr_auto] gap-4 items-center px-5 py-3.5 hover:bg-muted/50 transition-colors ${isCurrentUser ? 'bg-blue-50/30 dark:bg-blue-500/10' : ''}`}>
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="h-8 w-8 shrink-0 rounded-lg bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-600">
+                  <div className="h-8 w-8 shrink-0 rounded-lg bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
                     {initials}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-zinc-900 truncate">
+                    <p className="text-sm font-semibold text-foreground truncate">
                       {u.display_name || u.email}
-                      {isCurrentUser && <span className="ml-2 text-[9px] font-black text-blue-400 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded-full">TÚ</span>}
+                      {isCurrentUser && <span className="ml-2 text-[9px] font-black text-blue-400 bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/30 px-1.5 py-0.5 rounded-full">TÚ</span>}
                     </p>
-                    <p className="text-[10px] text-zinc-400 font-mono truncate">{u.email}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono truncate">{u.email}</p>
                   </div>
                 </div>
                 <button disabled={busy || cantRevoke}
                   onClick={() => handleToggleAdmin(u.user_id, u.is_admin)}
                   title={cantRevoke ? 'No puedes remover tu propio rol de Admin' : (u.is_admin ? 'Remover Admin' : 'Asignar Admin')}
                   className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all border disabled:cursor-not-allowed ${
-                    u.is_admin ? 'border-current shadow-sm' : 'border-zinc-200 text-zinc-300 hover:border-zinc-300'
+                    u.is_admin ? 'border-current shadow-sm' : 'border-border text-muted-foreground hover:border-ring'
                   } ${cantRevoke ? 'opacity-50' : ''}`}
                   style={u.is_admin ? { background: '#EF444415', color: '#EF4444', borderColor: '#EF444440' } : {}}
                 >
@@ -100,7 +100,7 @@ export function RolesTab({ users, currentUserEmail, onRefresh }: {
             );
           })}
         </div>
-        {filtered.length === 0 && <div className="py-12 text-center text-sm text-zinc-400">Sin usuarios</div>}
+        {filtered.length === 0 && <div className="py-12 text-center text-sm text-muted-foreground">Sin usuarios</div>}
       </div>
     </div>
   );

@@ -29,21 +29,21 @@ export function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () =
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-3xl border border-zinc-200 bg-background/50 backdrop-blur-2xl p-10 text-center space-y-6 shadow-2xl shadow-black/50">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border border-zinc-200 mx-auto">
-          <Shield className="h-8 w-8 text-zinc-900" />
+      <div className="w-full max-w-md rounded-3xl border border-border bg-background/50 backdrop-blur-2xl p-10 text-center space-y-6 shadow-2xl shadow-black/50">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted border border-border mx-auto">
+          <Shield className="h-8 w-8 text-foreground" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Panel Admin</h1>
-          <p className="text-sm text-zinc-400 mt-2">
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Panel Admin</h1>
+          <p className="text-sm text-muted-foreground mt-2">
             Tu cuenta aún no tiene el rol de administrador.
           </p>
-          <p className="text-xs text-zinc-500 mt-1 font-mono">{user?.email}</p>
+          <p className="text-xs text-muted-foreground mt-1 font-mono">{user?.email}</p>
         </div>
 
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-400 text-xs hover:text-zinc-500 hover:bg-zinc-100 transition-all"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-muted/50 border border-border text-muted-foreground text-xs hover:text-foreground hover:bg-muted transition-all"
         >
           Cambiar cuenta
         </button>
@@ -56,11 +56,11 @@ export function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () =
               <pre className="bg-black/40 rounded-xl p-3 text-[10px] text-green-400 font-mono break-all whitespace-pre-wrap select-all">
 {`UPDATE profile SET is_admin = true WHERE user_id = '${user?.id}';`}
               </pre>
-              <p className="text-zinc-400">Tu ID: <span className="text-zinc-500 font-mono select-all">{user?.id}</span></p>
+              <p className="text-muted-foreground">Tu ID: <span className="text-muted-foreground font-mono select-all">{user?.id}</span></p>
             </div>
             <button
               onClick={onSuccess}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-zinc-100 border border-zinc-200 text-zinc-500 font-semibold text-sm hover:bg-zinc-100 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-muted border border-border text-muted-foreground font-semibold text-sm hover:bg-muted transition-all"
             >
               <RotateCcw className="h-4 w-4" /> Ya lo hice — Recargar
             </button>

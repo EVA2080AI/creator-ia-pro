@@ -196,12 +196,12 @@ export default function Tasks() {
           <div className="space-y-2 min-w-0">
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.25em] font-display">Productividad</span>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.25em] font-display">Productividad</span>
             </div>
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight font-display text-zinc-900 leading-none">
+            <h1 className="text-3xl md:text-5xl font-bold tracking-tight font-display text-foreground leading-none">
               Tus <span className="text-primary italic font-medium pr-1">Tareas</span>
             </h1>
-            <p className="text-[12px] md:text-[13px] text-zinc-500 font-medium leading-relaxed">
+            <p className="text-[12px] md:text-[13px] text-muted-foreground font-medium leading-relaxed">
               {tasks.length === 0 ? (
                 "Un tablero simple: por hacer, en progreso y hecho."
               ) : (
@@ -219,14 +219,14 @@ export default function Tasks() {
               type="button"
               onClick={() => void refresh()}
               aria-label="Actualizar"
-              className="w-11 h-11 rounded-2xl border border-zinc-200 bg-white text-zinc-400 hover:text-zinc-900 flex items-center justify-center transition-all"
+              className="w-11 h-11 rounded-2xl border border-border bg-card text-muted-foreground hover:text-foreground flex items-center justify-center transition-all"
             >
               <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
             </button>
             <button
               type="button"
               onClick={() => openCreate("todo")}
-              className="flex items-center gap-3 px-6 h-12 bg-zinc-900 text-white rounded-2xl text-[11px] font-black uppercase tracking-widest transition-transform active:scale-95 shadow-lg shadow-zinc-900/10 hover:bg-zinc-800 font-display"
+              className="flex items-center gap-3 px-6 h-12 bg-primary text-primary-foreground rounded-2xl text-[11px] font-black uppercase tracking-widest transition-transform active:scale-95 shadow-lg shadow-primary/10 hover:bg-primary/90 font-display"
             >
               <Plus className="h-4 w-4" />
               <span>Nueva tarea</span>
@@ -237,13 +237,13 @@ export default function Tasks() {
         {loading ? (
           <div className="grid md:grid-cols-3 gap-4">
             {TASK_STATUSES.map((s) => (
-              <div key={s} className="h-[260px] md:h-[60vh] rounded-[1.75rem] bg-zinc-100/70 animate-pulse" />
+              <div key={s} className="h-[260px] md:h-[60vh] rounded-[1.75rem] bg-muted/70 animate-pulse" />
             ))}
           </div>
         ) : isMobile ? (
           <>
             {/* Selector de columna */}
-            <div role="tablist" aria-label="Columnas" className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-white border border-zinc-200/70 shadow-[0_8px_30px_-14px_rgba(0,0,0,0.18)] mb-4">
+            <div role="tablist" aria-label="Columnas" className="grid grid-cols-3 gap-1 p-1 rounded-2xl bg-card border border-border/70 shadow-[0_8px_30px_-14px_rgba(0,0,0,0.18)] mb-4">
               {TASK_STATUSES.map((s) => {
                 const isActive = s === active;
                 return (
@@ -255,12 +255,12 @@ export default function Tasks() {
                     onClick={() => goTo(s)}
                     className={cn(
                       "h-11 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all",
-                      isActive ? "bg-zinc-900 text-white shadow-md" : "text-zinc-500 active:bg-zinc-100"
+                      isActive ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground active:bg-muted"
                     )}
                   >
-                    <span className={cn("w-1.5 h-1.5 rounded-full", isActive ? "bg-white/80" : STATUS_META[s].dot)} />
+                    <span className={cn("w-1.5 h-1.5 rounded-full", isActive ? "bg-primary-foreground/80" : STATUS_META[s].dot)} />
                     {STATUS_META[s].short}
-                    <span className={cn("px-1.5 py-0.5 rounded-md text-[10px] tabular-nums", isActive ? "bg-white/15 text-white" : "bg-zinc-100 text-zinc-500")}>
+                    <span className={cn("px-1.5 py-0.5 rounded-md text-[10px] tabular-nums", isActive ? "bg-primary-foreground/15 text-primary-foreground" : "bg-muted text-muted-foreground")}>
                       {grouped[s].length}
                     </span>
                   </button>
@@ -291,12 +291,12 @@ export default function Tasks() {
                 <button
                   type="button"
                   onClick={() => setClearOpen(true)}
-                  className="mt-3 w-full h-11 rounded-2xl border border-zinc-200 bg-white text-[11px] font-black uppercase tracking-widest text-zinc-500 active:bg-rose-50 active:text-rose-500 transition-colors"
+                  className="mt-3 w-full h-11 rounded-2xl border border-border bg-card text-[11px] font-black uppercase tracking-widest text-muted-foreground active:bg-rose-50 active:text-rose-500 transition-colors"
                 >
                   Limpiar completadas
                 </button>
               )}
-              <p className="mt-3 text-center text-[10px] text-zinc-400 font-medium">
+              <p className="mt-3 text-center text-[10px] text-muted-foreground font-medium">
                 Desliza para cambiar de columna · Toca una tarea para editarla
               </p>
             </div>
@@ -324,7 +324,7 @@ export default function Tasks() {
           type="button"
           onClick={() => openCreate(active)}
           aria-label="Nueva tarea"
-          className="md:hidden fixed right-4 z-40 w-14 h-14 rounded-full bg-zinc-900 text-white shadow-[0_12px_30px_-8px_rgba(0,0,0,0.45)] flex items-center justify-center active:scale-95 transition-transform"
+          className="md:hidden fixed right-4 z-40 w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-[0_12px_30px_-8px_rgba(0,0,0,0.45)] flex items-center justify-center active:scale-95 transition-transform"
           style={{ bottom: "calc(1.25rem + env(safe-area-inset-bottom))" }}
         >
           <Plus className="w-6 h-6" strokeWidth={2.5} />
@@ -344,7 +344,7 @@ export default function Tasks() {
       />
 
       <AlertDialog open={clearOpen} onOpenChange={setClearOpen}>
-        <AlertDialogContent className="rounded-[2rem] border-zinc-200 max-w-[calc(100vw-2rem)] sm:max-w-md">
+        <AlertDialogContent className="rounded-[2rem] border-border max-w-[calc(100vw-2rem)] sm:max-w-md">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-lg font-black tracking-tight">¿Eliminar las tareas completadas?</AlertDialogTitle>
             <AlertDialogDescription>

@@ -145,21 +145,21 @@ export const LibraryView = () => {
     <>
       <div className="mb-8 flex flex-col sm:flex-row items-center gap-4">
         <div className="relative flex-1 w-full group">
-          <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400 group-focus-within:text-primary transition-colors" />
+          <Search className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <Input
             placeholder="Buscar por prompt, estilo o tags..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-zinc-50 border-zinc-200 pl-14 rounded-2xl h-14 text-zinc-900 placeholder:text-zinc-400 focus:border-primary/40 focus:ring-0 font-medium transition-all"
+            className="bg-muted/50 border-border pl-14 rounded-2xl h-14 text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:ring-0 font-medium transition-all"
           />
         </div>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <Select value={selectedSpace} onValueChange={setSelectedSpace}>
-            <SelectTrigger className="w-full sm:w-[200px] rounded-2xl bg-zinc-50 border-zinc-200 h-14 text-xs font-bold text-zinc-500 focus:ring-0 font-display uppercase tracking-widest">
-              <Layers className="mr-2 h-4 w-4 text-zinc-400" />
+            <SelectTrigger className="w-full sm:w-[200px] rounded-2xl bg-muted/50 border-border h-14 text-xs font-bold text-muted-foreground focus:ring-0 font-display uppercase tracking-widest">
+              <Layers className="mr-2 h-4 w-4 text-muted-foreground" />
               <SelectValue placeholder="Todos los spaces" />
             </SelectTrigger>
-            <SelectContent className="rounded-2xl border-zinc-200 bg-white text-zinc-900">
+            <SelectContent className="rounded-2xl border-border bg-popover text-foreground">
               <SelectItem value="all" className="text-xs font-bold uppercase tracking-widest font-display">Todos</SelectItem>
               <SelectItem value="none" className="text-xs font-bold uppercase tracking-widest font-display">Sin Space</SelectItem>
               {spaces.map(s => (
@@ -171,16 +171,16 @@ export const LibraryView = () => {
             onClick={() => setFilterFav(!filterFav)}
             className={`h-14 px-6 rounded-2xl text-xs font-bold uppercase tracking-widest font-display transition-all duration-300 flex items-center gap-2 ${
               filterFav
-                ? "bg-primary text-white shadow-sm"
-                : "bg-zinc-50 border border-zinc-200 text-zinc-500 hover:text-zinc-700 hover:bg-zinc-100"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted"
             }`}
           >
-            <Star className={`h-4 w-4 ${filterFav ? "fill-white" : ""}`} />
+            <Star className={`h-4 w-4 ${filterFav ? "fill-primary-foreground" : ""}`} />
             Favoritos
           </button>
           <button
             onClick={() => setIsImportOpen(true)}
-            className="h-14 w-14 flex items-center justify-center rounded-2xl bg-zinc-900 text-white hover:bg-zinc-800 transition-colors shadow-sm ml-2"
+            className="h-14 w-14 flex items-center justify-center rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm ml-2"
             title="Importar un recurso manual"
           >
             <Plus className="h-5 w-5" />
@@ -193,12 +193,12 @@ export const LibraryView = () => {
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="flex h-64 flex-col items-center justify-center gap-4 border border-dashed border-zinc-200/60 rounded-3xl bg-zinc-50/50">
-          <Ghost className="h-10 w-10 text-zinc-300" />
-          <p className="text-lg font-bold text-zinc-400 font-display tracking-tight">
+        <div className="flex h-64 flex-col items-center justify-center gap-4 border border-dashed border-border/60 rounded-3xl bg-muted/50">
+          <Ghost className="h-10 w-10 text-muted-foreground" />
+          <p className="text-lg font-bold text-muted-foreground font-display tracking-tight">
             {search || filterFav ? "Sin resultados" : "Tu biblioteca está vacía"}
           </p>
-          <p className="text-[13px] text-zinc-400 font-medium">
+          <p className="text-[13px] text-muted-foreground font-medium">
             {search || filterFav ? "Prueba otros filtros" : "Las imágenes generadas en el canvas se guardan aquí"}
           </p>
         </div>
@@ -207,9 +207,9 @@ export const LibraryView = () => {
           {filtered.map((asset) => (
             <div
               key={asset.id}
-              className="group relative overflow-hidden rounded-[2rem] border border-zinc-200 bg-white shadow-sm transition-all hover:border-primary/30 hover:-translate-y-1.5 hover:shadow-md duration-300"
+              className="group relative overflow-hidden rounded-[2rem] border border-border bg-card shadow-sm transition-all hover:border-primary/30 hover:-translate-y-1.5 hover:shadow-md duration-300"
             >
-              <div className="aspect-square relative overflow-hidden bg-zinc-50 border-b border-zinc-100 flex items-center justify-center p-6">
+              <div className="aspect-square relative overflow-hidden bg-muted border-b border-border flex items-center justify-center p-6">
                 {asset.type === "document" ? (
                   <div className="w-full h-full bg-white rounded-xl shadow-sm border border-zinc-200 p-4 overflow-hidden relative">
                     <div className="text-[10px] text-zinc-400 font-mono leading-relaxed line-clamp-6 opacity-70">
@@ -283,7 +283,7 @@ export const LibraryView = () => {
         <div className="flex justify-center mt-10">
           <button
             onClick={() => setPage(p => p + 1)}
-            className="px-10 py-4 rounded-2xl border border-zinc-200 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 hover:border-zinc-300 transition-all font-display bg-white shadow-sm"
+            className="px-10 py-4 rounded-2xl border border-border text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-all font-display bg-card shadow-sm"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cargar más"}
           </button>
@@ -292,18 +292,18 @@ export const LibraryView = () => {
 
       {/* Delete Dialog */}
       <Dialog open={!!deleteTargetId} onOpenChange={(o) => !o && setDeleteTargetId(null)}>
-        <DialogContent className="bg-white border-zinc-200 sm:max-w-[380px] rounded-[3rem] p-10 shadow-xl shadow-zinc-200">
+        <DialogContent className="bg-card border-border sm:max-w-[380px] rounded-[3rem] p-10 shadow-xl shadow-black/5">
           <DialogHeader>
             <div className="h-14 w-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-6">
               <Trash2 className="h-7 w-7 text-rose-400" />
             </div>
-            <DialogTitle className="text-2xl font-bold text-zinc-900 tracking-tight font-display">Eliminar activo</DialogTitle>
-            <DialogDescription className="text-zinc-500 font-medium leading-relaxed mt-2">
+            <DialogTitle className="text-2xl font-bold text-foreground tracking-tight font-display">Eliminar activo</DialogTitle>
+            <DialogDescription className="text-muted-foreground font-medium leading-relaxed mt-2">
               Esta acción no se puede deshacer. Se eliminará permanentemente de tu biblioteca.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-4 mt-8">
-            <button onClick={() => setDeleteTargetId(null)} className="flex-1 px-6 py-4 rounded-2xl border border-zinc-200 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 transition-all font-display bg-white">
+            <button onClick={() => setDeleteTargetId(null)} className="flex-1 px-6 py-4 rounded-2xl border border-border text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-all font-display bg-card">
               Cancelar
             </button>
             <button onClick={() => deleteTargetId && handleDelete(deleteTargetId)} className="flex-1 px-6 py-4 bg-rose-500 text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-rose-400 active:scale-95 transition-all font-display">
@@ -315,38 +315,38 @@ export const LibraryView = () => {
 
       {/* Import */}
       <Dialog open={isImportOpen} onOpenChange={setIsImportOpen}>
-        <DialogContent className="bg-white border-zinc-200 sm:max-w-[440px] rounded-[3rem] p-12 shadow-xl shadow-zinc-200">
+        <DialogContent className="bg-card border-border sm:max-w-[440px] rounded-[3rem] p-12 shadow-xl shadow-black/5">
           <DialogHeader>
-            <div className="h-14 w-14 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-6">
-              <Link className="h-7 w-7 text-white" />
+            <div className="h-14 w-14 rounded-2xl bg-primary flex items-center justify-center mb-6">
+              <Link className="h-7 w-7 text-primary-foreground" />
             </div>
-            <DialogTitle className="text-3xl font-bold text-zinc-900 tracking-tight font-display">
+            <DialogTitle className="text-3xl font-bold text-foreground tracking-tight font-display">
               Importar Activo
             </DialogTitle>
-            <DialogDescription className="text-zinc-500 font-medium leading-relaxed mt-2">
+            <DialogDescription className="text-muted-foreground font-medium leading-relaxed mt-2">
               Pega una URL externa para guardarla en tu biblioteca y usarla más tarde en tus flujos.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-6 py-6">
             <div className="space-y-3">
-              <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 ml-1 font-display">URL directa</Label>
+              <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground ml-1 font-display">URL directa</Label>
               <div className="relative">
-                <Link className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                <Link className="absolute left-5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={importUrl}
                   onChange={(e) => setImportUrl(e.target.value)}
                   placeholder="https://.../img.png"
-                  className="pl-14 rounded-2xl border-zinc-200 bg-zinc-50 h-14 text-zinc-900 placeholder:text-zinc-400 focus:border-primary/40 focus:ring-0 font-medium"
+                  className="pl-14 rounded-2xl border-border bg-muted/50 h-14 text-foreground placeholder:text-muted-foreground focus:border-primary/40 focus:ring-0 font-medium"
                 />
               </div>
             </div>
             <div className="space-y-3">
-              <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 ml-1 font-display">Etiquetar Space (Opcional)</Label>
+              <Label className="text-[10px] uppercase tracking-[0.2em] font-bold text-muted-foreground ml-1 font-display">Etiquetar Space (Opcional)</Label>
               <Select value={importSpace} onValueChange={setImportSpace}>
-                <SelectTrigger className="rounded-2xl border-zinc-200 bg-zinc-50 h-14 focus:ring-0 font-bold text-zinc-500 text-xs font-display uppercase tracking-widest">
+                <SelectTrigger className="rounded-2xl border-border bg-muted/50 h-14 focus:ring-0 font-bold text-muted-foreground text-xs font-display uppercase tracking-widest">
                   <SelectValue placeholder="Ninguno" />
                 </SelectTrigger>
-                <SelectContent className="rounded-2xl border-zinc-200 bg-white text-zinc-900">
+                <SelectContent className="rounded-2xl border-border bg-popover text-foreground">
                   <SelectItem value="none_direct" className="text-xs font-bold uppercase tracking-widest font-display">Ninguno</SelectItem>
                   {spaces.map(s => (
                     <SelectItem key={s.id} value={s.id} className="text-xs font-bold font-display">{s.name}</SelectItem>
@@ -358,14 +358,14 @@ export const LibraryView = () => {
           <DialogFooter className="gap-4 mt-2">
             <button
               onClick={() => setIsImportOpen(false)}
-              className="flex-1 px-6 py-4 rounded-2xl border border-zinc-200 text-xs font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-all font-display bg-white"
+              className="flex-1 px-6 py-4 rounded-2xl border border-border text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted transition-all font-display bg-card"
             >
               Cancelar
             </button>
             <button
               onClick={handleImport}
               disabled={importing || !importUrl}
-              className="flex-[1.5] flex items-center justify-center gap-3 px-8 py-4 bg-zinc-900 text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-zinc-800 active:scale-95 transition-all disabled:opacity-40 font-display"
+              className="flex-[1.5] flex items-center justify-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-primary/90 active:scale-95 transition-all disabled:opacity-40 font-display"
             >
               {importing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               Guardar

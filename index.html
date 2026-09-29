@@ -27,6 +27,21 @@
     <meta name="twitter:image" content="https://creator-ia.com/og-image.svg" />
     <!-- Canonical URL -->
     <link rel="canonical" href="https://creator-ia.com" />
+    <!-- Apply dark mode class before first paint to avoid a light-mode flash.
+         Mirrors the logic in src/hooks/useTheme.tsx (localStorage key "theme",
+         values "light" | "dark" | "system", default "system"). -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var isDark = stored === 'dark' || (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+            document.documentElement.style.colorScheme = 'dark';
+          }
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

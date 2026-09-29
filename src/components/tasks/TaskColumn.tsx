@@ -37,7 +37,7 @@ export function TaskColumn({ status, tasks, showHeader = true, onAdd, onOpen, on
       onDragLeave={dnd ? (e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setOver(false); } : undefined}
       onDrop={dnd ? (e) => { setOver(false); dnd.onDrop(e, status, null); } : undefined}
       className={cn(
-        "flex flex-col rounded-[1.75rem] bg-zinc-50/70 border border-zinc-200/60 transition-colors",
+        "flex flex-col rounded-[1.75rem] bg-muted/50 border border-border/60 transition-colors",
         "min-h-[260px] md:min-h-[60vh] md:max-h-[calc(100vh-200px)]",
         over && "border-primary/40 bg-primary/5",
         className
@@ -46,7 +46,7 @@ export function TaskColumn({ status, tasks, showHeader = true, onAdd, onOpen, on
       {showHeader && (
         <header className="flex items-center gap-2 px-4 pt-4 pb-2 shrink-0">
           <span className={cn("w-2 h-2 rounded-full", meta.dot)} />
-          <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-600">{meta.label}</h2>
+          <h2 className="text-[11px] font-black uppercase tracking-[0.2em] text-muted-foreground">{meta.label}</h2>
           <span className={cn("ml-1 px-2 py-0.5 rounded-full text-[10px] font-bold tabular-nums", meta.badge)}>{tasks.length}</span>
           <div className="ml-auto flex items-center gap-1">
             {status === "done" && onClearDone && tasks.length > 0 && (
@@ -55,7 +55,7 @@ export function TaskColumn({ status, tasks, showHeader = true, onAdd, onOpen, on
                 onClick={onClearDone}
                 title="Limpiar completadas"
                 aria-label="Limpiar tareas completadas"
-                className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-400 hover:text-rose-500 hover:bg-rose-50 transition-all"
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
@@ -64,7 +64,7 @@ export function TaskColumn({ status, tasks, showHeader = true, onAdd, onOpen, on
               type="button"
               onClick={() => onAdd(status)}
               aria-label={`Nueva tarea en ${meta.label}`}
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-zinc-400 hover:text-zinc-900 hover:bg-white hover:shadow-sm transition-all"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-card hover:shadow-sm transition-all"
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -77,10 +77,10 @@ export function TaskColumn({ status, tasks, showHeader = true, onAdd, onOpen, on
           <button
             type="button"
             onClick={() => onAdd(status)}
-            className="w-full min-h-[200px] flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-zinc-200 px-6 text-center hover:border-primary/40 hover:bg-white/60 transition-all"
+            className="w-full min-h-[200px] flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border px-6 text-center hover:border-primary/40 hover:bg-card/60 transition-all"
           >
-            <Inbox className="w-7 h-7 text-zinc-300" />
-            <p className="text-[12px] text-zinc-400 font-medium leading-relaxed">{meta.empty}</p>
+            <Inbox className="w-7 h-7 text-muted-foreground" />
+            <p className="text-[12px] text-muted-foreground font-medium leading-relaxed">{meta.empty}</p>
             <span className="text-[10px] font-black uppercase tracking-widest text-primary">+ Agregar tarea</span>
           </button>
         ) : (
