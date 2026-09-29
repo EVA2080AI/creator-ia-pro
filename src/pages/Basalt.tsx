@@ -13,7 +13,7 @@ import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
-import { CHAT_MODELS, CATEGORY_ORDER, CATEGORY_META } from "@/lib/ai/models";
+import { CHAT_MODELS, CATEGORY_ORDER, CATEGORY_META, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID } from "@/lib/ai/models";
 import {
   BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply,
   loadConversations, saveConversation, deleteConversation, loadMemory, saveMemory,
@@ -27,6 +27,7 @@ const ICONS: Record<string, typeof LayoutTemplate> = {
 };
 
 const MODEL_KEY = "basalt:model";
+const IMAGE_MODEL_KEY = "basalt:image-model";
 
 function readModel() {
   try {
@@ -34,6 +35,14 @@ function readModel() {
     if (m && CHAT_MODELS.some((x) => x.id === m)) return m;
   } catch { /* sin storage */ }
   return A.defaultModel;
+}
+
+function readImageModel() {
+  try {
+    const m = localStorage.getItem(IMAGE_MODEL_KEY);
+    if (m && IMAGE_MODELS.some((x) => x.id === m)) return m;
+  } catch { /* sin storage */ }
+  return DEFAULT_IMAGE_MODEL_ID;
 }
 
 export default function BasaltPage() {
@@ -46,6 +55,7 @@ export default function BasaltPage() {
   // de tema, desincronizado del toggle global — auditoría UX 2026-09-29).
   const { resolvedTheme: theme, setTheme } = useTheme();
   const [model, setModel] = useState(readModel);
+  const [imageModel, setImageModel] = useState(readImageModel);
   // Se calcula una sola vez al montar: si cambia durante la sesión (al cerrar
   // la guía) no debe reabrirse solo por un re-render.
   const [autoGuide] = useState(() => !hasSeenBasaltGuide());
@@ -80,6 +90,10 @@ export default function BasaltPage() {
     try { localStorage.setItem(MODEL_KEY, model); } catch { /* sin storage */ }
   }, [model]);
 
+  useEffect(() => {
+    try { localStorage.setItem(IMAGE_MODEL_KEY, imageModel); } catch { /* sin storage */ }
+  }, [imageModel]);
+
   const stickToBottom = useCallback(() => {
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
@@ -103,7 +117,7 @@ export default function BasaltPage() {
           method: "POST",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: img.prompt, aspectRatio: img.format }),
+          body: JSON.stringify({ prompt: img.prompt, aspectRatio: img.format, model: imageModel }),
         });
         const body = await res.json().catch(() => null);
         if (!res.ok || !body?.ok) return { ...img, error: body?.error || `Error ${res.status}` };
@@ -121,7 +135,7 @@ export default function BasaltPage() {
     const final = base.map((m) => (m.id === msgId ? { ...m, images: results } : m));
     setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, images: results } : m)));
     return final;
-  }, []);
+  }, [imageModel]);
 
   // Al reabrir una conversación, las imágenes que sobrevivieron solo traen
   // assetId (su url pesada se sacó del historial al guardar — ver
@@ -399,6 +413,23 @@ export default function BasaltPage() {
                   </option>
                 ))}
               </optgroup>
+            ))}
+          </select>
+          {/* Motor de imagen — separado del selector de texto porque Basalt
+              decide solo cuándo generar una imagen (etiqueta <imagen>, ver
+              SYSTEM_PROMPT); esto solo fija CON QUÉ motor la genera cuando
+              eso pase. Agregado junto con los 4 motores nuevos del catálogo
+              (2026-09-29) — sin esto quedaban en /lib/ai/models.ts sin
+              ninguna forma de elegirlos, ver [[basalt-vision]]. */}
+          <select
+            value={imageModel}
+            onChange={(e) => setImageModel(e.target.value)}
+            aria-label="Motor de imagen"
+            className="asst-model-select asst-image-model-select"
+            title="Motor de imagen"
+          >
+            {IMAGE_MODELS.map((m) => (
+              <option key={m.id} value={m.id}>🖼️ {m.label} · {m.credits} cr</option>
             ))}
           </select>
         </header>

@@ -117,6 +117,10 @@
   margin-left: auto; background: var(--asst-panel); color: var(--asst-txt-2); border: 1px solid var(--asst-border);
   border-radius: 10px; padding: 6px 8px; font-size: 12px; font-weight: 600; max-width: 200px; flex: none;
 }
+/* El selector de motor de imagen va justo después del de texto — sin su
+   propio margin-left:auto (ya cumple ese rol el primero) y más angosto,
+   porque sus labels son más cortos. */
+.asst-image-model-select { margin-left: 0; max-width: 150px; }
 
 .asst-scroller { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
 /* Contenedor de scroll para BasaltAppLayout.tsx (Dashboard/Tasks/Spaces/
