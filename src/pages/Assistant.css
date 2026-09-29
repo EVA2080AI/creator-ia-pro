@@ -78,6 +78,14 @@
 .asst-new-chat:hover { filter: brightness(0.97); }
 
 .asst-switcher-label { font-size: 11px; font-weight: 700; color: var(--asst-txt-3); text-transform: uppercase; letter-spacing: 0.1em; padding: 8px 12px 6px; }
+/* Encabezado de acordeón (ej. "Expertos") — mismo look que un
+   .asst-switcher-label estático, pero clickeable con chevron a la derecha. */
+.asst-accordion-toggle {
+  display: flex; align-items: center; justify-content: space-between; width: 100%;
+  background: none; border: none; cursor: pointer; border-radius: 10px;
+}
+.asst-accordion-toggle:hover { color: var(--asst-txt-2); }
+.asst-accordion-toggle svg { flex: none; }
 .asst-switch-item {
   display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 12px; border-radius: 16px;
   background: none; border: none; text-align: left; cursor: pointer; color: var(--asst-txt-2); font-size: 13px; font-weight: 600;

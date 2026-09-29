@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Plus, Send, Square, Sun, Moon, ArrowLeft, Loader2,
+  Menu, Plus, Send, Square, Sun, Moon, ArrowLeft, Loader2, Trash2, MessageSquare,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Scale, Dice5, Wallet, Sparkles, Bot,
   ListTodo, FolderOpen, User, LogOut, ShieldCheck, Bug,
 } from "lucide-react";
@@ -11,6 +11,7 @@ import { useAdmin } from "@/hooks/useAdmin";
 import { useTheme } from "@/hooks/useTheme";
 import { Logo } from "@/components/Logo";
 import { ReportModal } from "@/components/tickets/ReportModal";
+import { ExpertsAccordion } from "@/components/layout/ExpertsAccordion";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -18,14 +19,12 @@ import {
   listAssistants, getAssistant, brandCssVars,
   type Assistant, type AssistantWelcomeCard,
 } from "@/lib/assistants";
+import {
+  loadConversations, saveConversation, deleteConversation, migrateLegacyLocalStorage,
+  type StoredConversation, type StoredMsg,
+} from "@/lib/basalt";
 import { mdToHtml } from "@/lib/markdown";
 import "./Assistant.css";
-
-interface ChatMsg {
-  id: string;
-  role: "user" | "model";
-  text: string;
-}
 
 const ICONS: Record<string, typeof LayoutTemplate> = {
   layout: LayoutTemplate,
@@ -58,26 +57,42 @@ export default function AssistantPage() {
   // peleando con la preferencia del usuario (auditoría UX 2026-09-29).
   const { resolvedTheme: theme, setTheme } = useTheme();
 
-  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
+  const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [messages, setMessages] = useState<StoredMsg[]>([]);
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const userId = user?.id ?? "";
 
   useEffect(() => {
-    listAssistants().then(setAssistants);
+    // "genesis" era Basalt-como-constructor — redundante ahora que Basalt lo
+    // absorbió; mismo filtro que BasaltShellSidebar (homologado 2026-09-29).
+    listAssistants().then((all) => setAssistants(all.filter((a) => a.slug !== "genesis")));
   }, []);
 
   useEffect(() => {
     setLoadingAssistant(true);
     setMessages([]);
+    setConvId(crypto.randomUUID());
     setError(null);
     getAssistant(slug).then((a) => {
       setAssistant(a);
       setLoadingAssistant(false);
     });
   }, [slug]);
+
+  // Historial propio por Experto — mismo mecanismo que Basalt (homologado
+  // 2026-09-29: "los expertos... deben tener también persistir sus chat"),
+  // separado por assistantSlug en la misma tabla.
+  useEffect(() => {
+    if (!userId) return;
+    void migrateLegacyLocalStorage(userId).then(() => {
+      void loadConversations(userId, slug).then(setConversations);
+    });
+  }, [userId, slug]);
 
   const stickToBottom = useCallback(() => {
     const el = scrollerRef.current;
@@ -101,11 +116,35 @@ export default function AssistantPage() {
     setSidebarOpen(false);
   };
 
+  const newChat = () => {
+    abortRef.current?.abort();
+    setConvId(crypto.randomUUID());
+    setMessages([]);
+    setError(null);
+    setSidebarOpen(false);
+  };
+
+  const openConversation = (c: StoredConversation) => {
+    abortRef.current?.abort();
+    setConvId(c.id);
+    setMessages(c.messages);
+    setError(null);
+    setSidebarOpen(false);
+    requestAnimationFrame(stickToBottom);
+  };
+
+  const removeConversation = (id: string) => {
+    void deleteConversation(userId, id)
+      .then(() => loadConversations(userId, slug))
+      .then(setConversations);
+    if (id === convId) newChat();
+  };
+
   const sendPrompt = useCallback(async (prompt: string) => {
     const text = prompt.trim();
     if (!text || generating || !assistant) return;
 
-    const userMsg: ChatMsg = { id: crypto.randomUUID(), role: "user", text };
+    const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
     const history = [...messages, userMsg];
     setMessages(history);
     setInput("");
@@ -174,6 +213,11 @@ export default function AssistantPage() {
       if (!acc.trim()) {
         setMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
         setError("El modelo no devolvió texto. Prueba a reformular la pregunta.");
+      } else if (userId) {
+        const final: StoredMsg[] = [...history, { id: modelMsgId, role: "model", text: acc }];
+        void saveConversation(userId, { id: convId, title: text.slice(0, 60), updatedAt: Date.now(), messages: final }, slug)
+          .then(() => loadConversations(userId, slug))
+          .then(setConversations);
       }
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") {
@@ -187,7 +231,7 @@ export default function AssistantPage() {
       abortRef.current = null;
       stickToBottom();
     }
-  }, [assistant, generating, messages, stickToBottom]);
+  }, [assistant, generating, messages, stickToBottom, userId, convId, slug]);
 
   const handleStop = () => abortRef.current?.abort();
 
@@ -227,21 +271,26 @@ export default function AssistantPage() {
             <span style={{ fontSize: 12, fontWeight: 700 }}>Basalt</span>
           </button>
         </div>
-        <button className="asst-new-chat" onClick={() => { setMessages([]); setSidebarOpen(false); }}>
+        <button className="asst-new-chat" onClick={newChat}>
           <Plus className="w-4 h-4" /> Nuevo chat
         </button>
 
-        <div className="asst-switcher-label">Expertos</div>
-        {assistants.map((a) => (
-          <button
-            key={a.slug}
-            className={`asst-switch-item ${a.slug === slug ? "active" : ""}`}
-            onClick={() => handleSwitchAssistant(a)}
-          >
-            <span className="asst-switch-dot" style={a.slug === slug ? undefined : { background: "var(--asst-txt-3)" }} />
-            {a.name}
-          </button>
-        ))}
+        <ExpertsAccordion experts={assistants} activeSlug={slug} onSelect={handleSwitchAssistant} />
+
+        <div className="asst-switcher-label">Conversaciones</div>
+        <div>
+          {conversations.map((c) => (
+            <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
+              <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
+                <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
+              </button>
+              <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
 
         <div className="asst-switcher-label">Plataforma</div>
         <button className="asst-side-link" onClick={() => go("/tasks")}>

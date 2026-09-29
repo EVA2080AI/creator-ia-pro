@@ -150,18 +150,23 @@ export async function migrateLegacyLocalStorage(userId: string): Promise<void> {
   }
 }
 
-export async function loadConversations(userId: string): Promise<StoredConversation[]> {
+// assistantSlug: sin valor = chat de Basalt; con valor = chat de ese Experto
+// (cada Experto tiene su propio historial separado, homologado con Basalt —
+// mismo mecanismo, 2026-09-29).
+export async function loadConversations(userId: string, assistantSlug?: string): Promise<StoredConversation[]> {
   if (!userId) return [];
-  const res = await apiJson<{ conversations: StoredConversation[] }>("/api/basalt/conversations");
+  const qs = assistantSlug ? `?assistant=${encodeURIComponent(assistantSlug)}` : "";
+  const res = await apiJson<{ conversations: StoredConversation[] }>(`/api/basalt/conversations${qs}`);
   return res.ok ? res.data!.conversations : [];
 }
 
-export async function saveConversation(userId: string, conv: StoredConversation) {
+export async function saveConversation(userId: string, conv: StoredConversation, assistantSlug?: string) {
   if (!userId) return;
   // Las imágenes generadas llegan como data: URI pesadas — no se guardan en
   // el historial para no reventar el tamaño de la fila.
-  const slim: StoredConversation = {
+  const slim: StoredConversation & { assistantSlug?: string } = {
     ...conv,
+    assistantSlug,
     messages: conv.messages.map((m) => ({
       ...m,
       images: m.images?.map((img) => ({ ...img, url: img.url?.startsWith("data:") ? undefined : img.url })),

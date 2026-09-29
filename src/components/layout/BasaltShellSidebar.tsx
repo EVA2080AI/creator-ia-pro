@@ -1,7 +1,7 @@
 import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus, Minus, Scale, BarChart3, ListTodo, FolderOpen, User, ShieldCheck,
+  Plus, Scale, BarChart3, ListTodo, FolderOpen, User, ShieldCheck,
   Sun, Moon, LogOut, Bug, HelpCircle, Settings, Activity, LifeBuoy, CreditCard,
   LayoutTemplate,
 } from "lucide-react";
@@ -12,13 +12,12 @@ import { useProfile } from "@/hooks/useProfile";
 import { Logo } from "@/components/Logo";
 import { ReportModal } from "@/components/tickets/ReportModal";
 import { QuickGuideModal } from "@/components/basalt/QuickGuideModal";
+import { ExpertsAccordion } from "./ExpertsAccordion";
 import { CANVAS_ENABLED } from "@/lib/features";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { listAssistants, type Assistant } from "@/lib/assistants";
-
-const EXPERTS_COLLAPSED_COUNT = 5;
 
 // Mismo mapa que Profile.tsx (TIER_LABELS) — se duplica acá porque es un
 // objeto de 7 entradas, no amerita un módulo compartido.
@@ -69,7 +68,6 @@ export function BasaltShellSidebar({
   const [showReport, setShowReport] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [experts, setExperts] = useState<Assistant[]>([]);
-  const [expertsExpanded, setExpertsExpanded] = useState(false);
 
   useEffect(() => {
     if (autoOpenGuide) setShowGuide(true);
@@ -145,34 +143,7 @@ export function BasaltShellSidebar({
 
         {beforeExperts}
 
-        {experts.length > 0 && (
-          <>
-            <div className="asst-switcher-label">Expertos</div>
-            <div>
-              {(expertsExpanded ? experts : experts.slice(0, EXPERTS_COLLAPSED_COUNT)).map((a) => (
-                <button
-                  key={a.slug}
-                  className="asst-switch-item"
-                  onClick={() => go(`/a/${a.slug}`)}
-                  title={a.tagline || a.name}
-                >
-                  <span className="asst-switch-dot" style={{ background: a.brand.accent || "var(--asst-txt-3)" }} />
-                  {a.name}
-                </button>
-              ))}
-              {experts.length > EXPERTS_COLLAPSED_COUNT && (
-                <button
-                  className="asst-side-link"
-                  onClick={() => setExpertsExpanded((v) => !v)}
-                  style={{ color: "var(--asst-txt-3)", fontSize: 12 }}
-                >
-                  {expertsExpanded ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-                  {expertsExpanded ? "Ver menos" : `Ver ${experts.length - EXPERTS_COLLAPSED_COUNT} más`}
-                </button>
-              )}
-            </div>
-          </>
-        )}
+        <ExpertsAccordion experts={experts} onSelect={(a) => go(`/a/${a.slug}`)} />
 
         {extraNav}
 
