@@ -22,19 +22,22 @@ const CanvasRedirect = () => {
   return <Navigate to={`/studio-flow${loc.search}`} replace />;
 };
 
-// Redirect legacy Editor aliases (/ide, /code, /code-editor) → /chat preserving
-// query params (?project=). Chat.tsx ya sabe leer ese param — ver fusión real
-// de Genesis IA + Editor, Fase 5.
+// Redirect legacy Editor aliases (/ide, /code, /code-editor) → /a/basalt
+// preservando query params (?project=). El constructor de apps ya no es una
+// pantalla aparte (/chat) — se embebe dentro del shell de Basalt, que sabe
+// activar ese modo si detecta ?project=/?panel=/?prompt= al montar (ver
+// Basalt.tsx). Fusión real de Genesis IA + Editor, Fase 5; /chat eliminado
+// como destino propio, 2026-09-29.
 const ChatRedirect = () => {
   const loc = useLocation();
-  return <Navigate to={`/chat${loc.search}`} replace />;
+  return <Navigate to={`/a/basalt${loc.search}`} replace />;
 };
 
-// Redirect /tools y /apps/:appId → /chat?panel=tools, preservando el ?tool=
-// seleccionado (o resolviéndolo desde :appId) — Aplicaciones se fusionó de
-// verdad dentro de Basalt como panel "Herramientas", mismo patrón que la
-// fusión de Editor en Fase 5. El componente Tools sigue existiendo, ahora
-// embebido dentro de Chat.tsx en vez de tener su propia ruta.
+// Redirect /tools y /apps/:appId → /a/basalt?panel=tools, preservando el
+// ?tool= seleccionado (o resolviéndolo desde :appId) — Aplicaciones se
+// fusionó de verdad dentro de Basalt como panel "Herramientas", mismo
+// patrón que la fusión de Editor en Fase 5. El componente Tools sigue
+// existiendo, embebido dentro del constructor de Basalt.
 const APP_ID_TO_TOOL: Record<string, string> = {
   copywriter: "copywriter", logo: "logo", social: "social",
   blog: "blog", ads: "ads", enhance: "enhance",
@@ -46,7 +49,17 @@ const ToolsRedirect = () => {
   const params = new URLSearchParams(loc.search);
   params.set("panel", "tools");
   if (appId && APP_ID_TO_TOOL[appId]) params.set("tool", APP_ID_TO_TOOL[appId]);
-  return <Navigate to={`/chat?${params.toString()}`} replace />;
+  return <Navigate to={`/a/basalt?${params.toString()}`} replace />;
+};
+
+// /chat ya no es una pantalla separada — todo lo que hacía (construir apps,
+// panel de Herramientas, proyectos) vive embebido dentro de /a/basalt
+// (pedido directo del usuario, 2026-09-29: "/chat bórralo es obsoleto").
+// Preserva la query string para no perder ?prompt=/?project=/?panel= de
+// links viejos.
+const BasaltBuildRedirect = () => {
+  const loc = useLocation();
+  return <Navigate to={`/a/basalt${loc.search}`} replace />;
 };
 
 // Global auth session watcher — handles token expiry and forced sign-out
@@ -123,7 +136,6 @@ const Spaces       = lazy(() => import("./pages/Spaces"));
 const Admin        = lazy(() => import("./pages/Admin"));
 const CanvasGate   = lazy(() => import("./pages/CanvasComingSoon"));
 const Profile      = lazy(() => import("./pages/Profile"));
-const Chat         = lazy(() => import("./pages/Chat"));
 const ShareScreen  = lazy(() => import("./pages/ShareScreen"));
 const SystemStatus = lazy(() => import("./pages/SystemStatus"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
@@ -213,8 +225,9 @@ const App = () => {
 
                   {/* ── Redirects ── */}
                   <Route path="/canvas"  element={<CanvasRedirect />} />
-                  <Route path="/studio"  element={<Navigate to="/chat" replace />} />
-                  <Route path="/genesis" element={<Navigate to="/chat"   replace />} />
+                  <Route path="/studio"  element={<Navigate to="/a/basalt" replace />} />
+                  <Route path="/genesis" element={<Navigate to="/a/basalt" replace />} />
+                  <Route path="/chat"    element={<BasaltBuildRedirect />} />
 
                   {/* ── Platform routes que viven DENTRO del shell de Basalt ──
                       Panel de métricas, Tareas, Proyectos y Perfil son ahora
@@ -245,8 +258,7 @@ const App = () => {
                     <Route path="/formarketing" element={<Navigate to="/studio-flow" replace />} />
                     {/* Antigravity se fusionó dentro de Genesis de verdad — no solo la ruta,
                         el prompt separado también se eliminó (ver Fase 5 de la restructuración). */}
-                    <Route path="/antigravity"  element={<Navigate to="/chat" replace />} />
-                    <Route path="/chat"         element={<Chat />} />
+                    <Route path="/antigravity"  element={<Navigate to="/a/basalt" replace />} />
                     <Route path="/sharescreen"  element={<ShareScreen />} />
                     <Route path="/system-status" element={<SystemStatus />} />
                     <Route path="/design-system" element={<DesignSystem />} />

@@ -146,7 +146,7 @@ export function useStudioActions(): UseStudioActionsReturn {
   }, []);
 
   // ── Navigation ─────────────────────────────────────────────────────────────
-  const goToProjects = useCallback(() => navigate('/chat'), [navigate]);
+  const goToProjects = useCallback(() => navigate('/a/basalt'), [navigate]);
   const goToPricing = useCallback(() => navigate('/pricing'), [navigate]);
   const goToAdmin = useCallback(() => navigate('/admin'), [navigate]);
 

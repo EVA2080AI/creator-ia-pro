@@ -87,7 +87,7 @@ export default function AssistantPage() {
   const handleSwitchAssistant = (target: Assistant) => {
     setSidebarOpen(false);
     if (target.capabilities.code) {
-      navigate("/chat");
+      navigate("/a/basalt");
     } else {
       navigate(`/a/${target.slug}`);
     }

@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState, lazy, Suspense } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Send, Square, Loader2, Trash2, Brain, Scale,
+  Menu, Send, Square, Loader2, Trash2, Brain, Scale, ArrowLeft,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +19,16 @@ import {
 } from "@/lib/basalt";
 import "./Assistant.css";
 
+// El constructor de apps (antes /chat, pantalla separada) se embebe dentro
+// del propio shell de Basalt en vez de navegar afuera — pedido directo del
+// usuario: "quiero que Basalt pueda crear apps, páginas web, dashboard...
+// /chat bórralo es obsoleto" (2026-09-29). Se sigue reutilizando el mismo
+// componente Chat sin tocar su lógica interna: ya sabe leer ?prompt= de la
+// URL para auto-crear el proyecto (lo usaba /chat?prompt=), y como
+// useSearchParams lee la URL actual sin importar la ruta, funciona igual
+// acá montado dentro de /a/basalt.
+const Chat = lazy(() => import("./Chat"));
+
 const ICONS: Record<string, typeof LayoutTemplate> = {
   layout: LayoutTemplate, image: ImageIcon, pen: PenLine, chart: BarChart3, compare: Scale, dice: Dice5,
 };
@@ -34,12 +44,15 @@ function readModel() {
 }
 
 export default function BasaltPage() {
-  const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth("/auth");
   const userId = user?.id ?? "";
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Prompt activo del constructor de apps embebido — null significa chat
+  // normal de Basalt. Se sale de este modo sin perder la conversación de
+  // Basalt (newChat() también lo resetea, ver abajo).
+  const [buildMode, setBuildMode] = useState(false);
   // Un solo tema para toda la app (antes Basalt tenía su propio estado local
   // de tema, desincronizado del toggle global — auditoría UX 2026-09-29).
   const { resolvedTheme: theme, setTheme } = useTheme();
@@ -60,6 +73,7 @@ export default function BasaltPage() {
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const autoSentRef = useRef(false);
+  const buildEntryRef = useRef(false);
   const lastPromptRef = useRef("");
 
   useEffect(() => {
@@ -109,11 +123,13 @@ export default function BasaltPage() {
     const text = prompt.trim();
     if (!text || generating) return;
 
-    // El creador de apps vive dentro de Basalt: si el pedido es claramente
-    // construir una app/web, se manda al motor de construcción (StudioChat)
-    // en vez de responder por texto.
+    // El creador de apps vive DENTRO de Basalt: si el pedido es claramente
+    // construir una app/web, se embebe el motor de construcción (antes
+    // /chat, pantalla aparte) en el propio shell en vez de navegar afuera.
+    // ?prompt= es el mismo contrato que Chat.tsx ya sabe leer.
     if (isAppBuildRequest(text)) {
-      navigate(`/chat?prompt=${encodeURIComponent(text)}`);
+      setParams({ prompt: text }, { replace: true });
+      setBuildMode(true);
       return;
     }
 
@@ -217,7 +233,7 @@ export default function BasaltPage() {
       stickToBottom();
     }
     persist(convId, final);
-  }, [generating, messages, model, memory, userId, convId, stickToBottom, generateImages, persist, navigate]);
+  }, [generating, messages, model, memory, userId, convId, stickToBottom, generateImages, persist, setParams]);
 
   // /a/basalt?q=... (desde /chat o el dashboard) envía el primer mensaje solo.
   useEffect(() => {
@@ -228,12 +244,29 @@ export default function BasaltPage() {
     void sendPrompt(q);
   }, [params, authLoading, userId, sendPrompt, setParams]);
 
+  // Entrada directa al constructor embebido — enlaces viejos a /chat, /tools,
+  // /apps/:id, /ide, /code, /studio, etc. ahora redirigen acá conservando su
+  // query string (?prompt=/?project=/?panel=), que Chat.tsx ya sabe leer.
+  useEffect(() => {
+    if (buildEntryRef.current) return;
+    if (params.get("prompt") || params.get("project") || params.get("panel")) {
+      buildEntryRef.current = true;
+      setBuildMode(true);
+    }
+  }, [params]);
+
   const newChat = () => {
     abortRef.current?.abort();
     setConvId(crypto.randomUUID());
     setMessages([]);
     setError(null);
     setSidebarOpen(false);
+    exitBuildMode();
+  };
+
+  const exitBuildMode = () => {
+    setBuildMode(false);
+    setParams({}, { replace: true });
   };
 
   const openConversation = (c: StoredConversation) => {
@@ -320,6 +353,30 @@ export default function BasaltPage() {
       />
 
       <main className="asst-main">
+        {buildMode ? (
+          <>
+            <header className="asst-topbar">
+              <button className="asst-icon-btn asst-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú" style={{ display: sidebarOpen ? "none" : undefined }}>
+                <Menu className="w-4 h-4" />
+              </button>
+              <button className="asst-icon-btn" onClick={exitBuildMode} aria-label="Volver al chat" title="Volver al chat" style={{ display: "flex", alignItems: "center", width: "auto", gap: 6, padding: "0 10px" }}>
+                <ArrowLeft className="w-4 h-4" />
+                <span style={{ fontSize: 12, fontWeight: 700 }}>Volver al chat</span>
+              </button>
+              <div className="asst-brand-name">Constructor</div>
+            </header>
+            <div style={{ flex: 1, minHeight: 0, display: "flex" }}>
+              <Suspense fallback={
+                <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--asst-txt-3)" }} />
+                </div>
+              }>
+                <Chat />
+              </Suspense>
+            </div>
+          </>
+        ) : (
+        <>
         <header className="asst-topbar">
           <button className="asst-icon-btn asst-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú" style={{ display: sidebarOpen ? "none" : undefined }}>
             <Menu className="w-4 h-4" />
@@ -430,6 +487,8 @@ export default function BasaltPage() {
           </div>
           <p className="asst-disclaimer">Basalt puede cometer errores. Verifica la información importante.</p>
         </form>
+        </>
+        )}
       </main>
     </div>
   );

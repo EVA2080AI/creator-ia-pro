@@ -29,7 +29,7 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
   const searchData: SearchResult[] = [
     { id: '1', type: 'page', title: 'Basalt IA', category: 'Pages', icon: MessageSquare, action: () => navigate('/a/basalt') },
     { id: '2', type: 'page', title: 'Arena IA', category: 'Pages', icon: Sparkles, action: () => navigate('/a/arena') },
-    { id: '3', type: 'page', title: 'Constructor de apps', category: 'Pages', icon: Code, action: () => navigate('/chat') },
+    { id: '3', type: 'page', title: 'Constructor de apps', category: 'Pages', icon: Code, action: () => navigate('/a/basalt') },
     { id: '4', type: 'page', title: 'Herramientas', category: 'Pages', icon: Image, action: () => navigate('/chat?panel=tools') },
     { id: '5', type: 'tool', title: 'Generar Imagen', category: 'Tools', icon: Image, action: () => navigate('/chat?panel=tools&tool=generate') },
     { id: '6', type: 'page', title: 'Dashboard', category: 'Pages', icon: Folder, action: () => navigate('/dashboard') },
