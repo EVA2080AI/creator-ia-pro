@@ -2,18 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Plus, Minus, Send, Square, Sun, Moon, Loader2, Trash2, Brain, Scale,
+  Menu, Send, Square, Loader2, Trash2, Brain, Scale,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
-  ListTodo, FolderOpen, User, LogOut, ShieldCheck, Bug,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useAdmin } from "@/hooks/useAdmin";
-import { Logo } from "@/components/Logo";
-import { ReportModal } from "@/components/tickets/ReportModal";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import { brandCssVars, listAssistants, type Assistant } from "@/lib/assistants";
+import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
+import { brandCssVars } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
 import { CHAT_MODELS } from "@/lib/ai/models";
 import {
@@ -28,7 +22,6 @@ const ICONS: Record<string, typeof LayoutTemplate> = {
 };
 
 const MODEL_KEY = "basalt:model";
-const EXPERTS_COLLAPSED_COUNT = 5;
 
 function readModel() {
   try {
@@ -41,8 +34,7 @@ function readModel() {
 export default function BasaltPage() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const { user, loading: authLoading, signOut } = useAuth("/auth");
-  const { isAdmin } = useAdmin(user?.id);
+  const { user, loading: authLoading } = useAuth("/auth");
   const userId = user?.id ?? "";
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -54,9 +46,6 @@ export default function BasaltPage() {
   const [conversations, setConversations] = useState<StoredConversation[]>([]);
   const [memory, setMemory] = useState<string[]>([]);
   const [showMemory, setShowMemory] = useState(false);
-  const [showReport, setShowReport] = useState(false);
-  const [experts, setExperts] = useState<Assistant[]>([]);
-  const [expertsExpanded, setExpertsExpanded] = useState(false);
 
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -70,9 +59,6 @@ export default function BasaltPage() {
     if (!userId) return;
     setConversations(loadConversations(userId));
     setMemory(loadMemory(userId));
-    // "genesis" era Basalt-como-constructor — redundante ahora que Basalt lo
-    // absorbió; el resto son los expertos por área (marketing, legal, etc.).
-    listAssistants().then((all) => setExperts(all.filter((a) => a.slug !== "genesis")));
   }, [userId]);
 
   useEffect(() => {
@@ -276,126 +262,54 @@ export default function BasaltPage() {
     <div className="asst-app" data-asst-theme={theme} style={brandCssVars(A.brand) as React.CSSProperties}>
       <Helmet><title>Basalt | Creator IA Pro</title></Helmet>
 
-      <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Basalt">
-        <div className="asst-side-top">
-          {/* Basalt YA es el inicio — sin flecha de "volver", no hay ningún
-              lado del que "volver" (pedido directo del usuario, viendo la
-              UI). El panel de métricas pasa a la sección Plataforma, como
-              un destino más, no como una flecha ambigua arriba. */}
-          <Logo size="sm" showText onClick={() => navigate("/a/basalt")} />
-        </div>
-        <button className="asst-new-chat" onClick={newChat}>
-          <Plus className="w-4 h-4" /> Nuevo chat
-        </button>
-
-        <button className="asst-side-link" onClick={() => navigate("/a/arena")}>
-          <Scale className="w-4 h-4" /> Arena IA
-        </button>
-        <button className="asst-side-link" onClick={() => setShowMemory((v) => !v)}>
-          <Brain className="w-4 h-4" /> Memoria ({memory.length})
-        </button>
-
-        {showMemory && (
-          <div style={{ padding: "4px 8px 8px", fontSize: 12, color: "var(--asst-txt-2)" }}>
-            {memory.length === 0 ? (
-              <p style={{ padding: "4px 6px" }}>Aún no recuerdo nada. Cuéntame de ti o de tu empresa.</p>
-            ) : memory.map((m) => (
-              <div key={m} style={{ display: "flex", gap: 6, alignItems: "flex-start", padding: "4px 6px" }}>
-                <span style={{ flex: 1 }}>{m}</span>
-                <button onClick={() => removeMemory(m)} aria-label="Olvidar" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--asst-txt-3)" }}>
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {experts.length > 0 && (
+      <BasaltShellSidebar
+        activePath=""
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        theme={theme}
+        setTheme={setTheme}
+        onNewChat={newChat}
+        beforeExperts={
           <>
-            <div className="asst-switcher-label">Expertos</div>
-            <div>
-              {(expertsExpanded ? experts : experts.slice(0, EXPERTS_COLLAPSED_COUNT)).map((a) => (
-                <button key={a.slug} className="asst-switch-item" onClick={() => navigate(`/a/${a.slug}`)} title={a.tagline || a.name}>
-                  <span className="asst-switch-dot" style={{ background: a.brand.accent || "var(--asst-txt-3)" }} />
-                  {a.name}
-                </button>
+            <button className="asst-side-link" onClick={() => setShowMemory((v) => !v)}>
+              <Brain className="w-4 h-4" /> Memoria ({memory.length})
+            </button>
+
+            {showMemory && (
+              <div style={{ padding: "4px 8px 8px", fontSize: 12, color: "var(--asst-txt-2)" }}>
+                {memory.length === 0 ? (
+                  <p style={{ padding: "4px 6px" }}>Aún no recuerdo nada. Cuéntame de ti o de tu empresa.</p>
+                ) : memory.map((m) => (
+                  <div key={m} style={{ display: "flex", gap: 6, alignItems: "flex-start", padding: "4px 6px" }}>
+                    <span style={{ flex: 1 }}>{m}</span>
+                    <button onClick={() => removeMemory(m)} aria-label="Olvidar" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--asst-txt-3)" }}>
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        }
+        extraNav={
+          <>
+            <div className="asst-switcher-label">Conversaciones</div>
+            <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+              {conversations.map((c) => (
+                <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
+                  <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
+                    <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
+                  </button>
+                  <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               ))}
-              {experts.length > EXPERTS_COLLAPSED_COUNT && (
-                <button
-                  className="asst-side-link"
-                  onClick={() => setExpertsExpanded((v) => !v)}
-                  style={{ color: "var(--asst-txt-3)", fontSize: 12 }}
-                >
-                  {expertsExpanded ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-                  {expertsExpanded ? "Ver menos" : `Ver ${experts.length - EXPERTS_COLLAPSED_COUNT} más`}
-                </button>
-              )}
             </div>
           </>
-        )}
-
-        <div className="asst-switcher-label">Conversaciones</div>
-        <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
-          {conversations.map((c) => (
-            <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
-              <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
-                <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-              </button>
-              <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div className="asst-switcher-label">Plataforma</div>
-        <button className="asst-side-link" onClick={() => navigate("/dashboard")}>
-          <BarChart3 className="w-4 h-4" /> Panel de métricas
-        </button>
-        <button className="asst-side-link" onClick={() => navigate("/tasks")}>
-          <ListTodo className="w-4 h-4" /> Tareas
-        </button>
-        <button className="asst-side-link" onClick={() => navigate("/spaces")}>
-          <FolderOpen className="w-4 h-4" /> Proyectos
-        </button>
-        <button className="asst-side-link" onClick={() => navigate("/profile")}>
-          <User className="w-4 h-4" /> Perfil
-        </button>
-        {isAdmin && (
-          <button className="asst-side-link" onClick={() => navigate("/admin")}>
-            <ShieldCheck className="w-4 h-4" /> Panel Admin
-          </button>
-        )}
-
-        <div className="asst-side-bottom">
-          <button className="asst-side-link" onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}>
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            {theme === "dark" ? "Tema claro" : "Tema oscuro"}
-          </button>
-          {/* "Reportar" era un botón flotante suelto encima de todo — ahora
-              es una opción que se despliega desde la cuenta (auditoría UX,
-              mismo patrón que el menú de cuenta de Claude). */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="asst-side-link">
-                <User className="w-4 h-4" /> Cuenta
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" side="top" className="w-56 p-1.5 rounded-2xl shadow-2xl">
-              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => setShowReport(true)}>
-                <Bug className="w-4 h-4" /> Reportar un error o mejora
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="my-1.5" />
-              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer text-rose-500 focus:text-rose-500" onClick={() => signOut()}>
-                <LogOut className="w-4 h-4" /> Cerrar sesión
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <ReportModal open={showReport} onClose={() => setShowReport(false)} />
-        </div>
-      </nav>
-      <div className={`asst-backdrop ${sidebarOpen ? "show" : ""}`} onClick={() => setSidebarOpen(false)} />
+        }
+      />
 
       <main className="asst-main">
         <header className="asst-topbar">

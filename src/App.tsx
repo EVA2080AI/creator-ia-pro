@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { HelmetProvider } from "react-helmet-async";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { BasaltAppLayout } from "@/components/layout/BasaltAppLayout";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { PerformanceMonitor } from "@/components/performance/PerformanceMonitor";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -215,8 +216,12 @@ const App = () => {
                   <Route path="/studio"  element={<Navigate to="/chat" replace />} />
                   <Route path="/genesis" element={<Navigate to="/chat"   replace />} />
 
-                  {/* ── Platform routes (wrapped in AppLayout) ── */}
-                  <Route element={<AppLayout />}>
+                  {/* ── Platform routes que viven DENTRO del shell de Basalt ──
+                      Panel de métricas, Tareas, Proyectos y Perfil son ahora
+                      "un destino más" del sidebar de Basalt, no un producto
+                      aparte con su propio shell (auditoría UX, 2026-09-28:
+                      "todo debe estar dentro de basalt no afuera"). */}
+                  <Route element={<BasaltAppLayout />}>
                     <Route path="/dashboard"    element={<Dashboard />} />
                     <Route path="/spaces"       element={<Spaces />} />
                     {/* /tasks es la canónica ahora — /tareas era la única URL logueada
@@ -225,6 +230,12 @@ const App = () => {
                     <Route path="/tasks"        element={<Tasks />} />
                     <Route path="/tareas"       element={<Navigate to="/tasks" replace />} />
                     <Route path="/assets"       element={<Navigate to="/spaces" replace />} />
+                    <Route path="/profile"      element={<Profile />} />
+                    <Route path="/hub"          element={<Navigate to="/spaces" replace />} />
+                  </Route>
+
+                  {/* ── Platform routes (wrapped in AppLayout) ── */}
+                  <Route element={<AppLayout />}>
                     {/* Aplicaciones se fusionó de verdad dentro de Basalt como panel
                         "Herramientas" — ver Tools.tsx embebido en Chat.tsx. */}
                     <Route path="/tools"        element={<ToolsRedirect />} />
@@ -232,8 +243,6 @@ const App = () => {
                     <Route path="/admin"        element={<Admin />} />
                     <Route path="/studio-flow"  element={<CanvasGate />} />
                     <Route path="/formarketing" element={<Navigate to="/studio-flow" replace />} />
-                    <Route path="/profile"      element={<Profile />} />
-                    <Route path="/hub"          element={<Navigate to="/spaces" replace />} />
                     {/* Antigravity se fusionó dentro de Genesis de verdad — no solo la ruta,
                         el prompt separado también se eliminó (ver Fase 5 de la restructuración). */}
                     <Route path="/antigravity"  element={<Navigate to="/chat" replace />} />

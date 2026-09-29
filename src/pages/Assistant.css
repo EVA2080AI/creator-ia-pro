@@ -93,6 +93,10 @@
   color: var(--asst-txt-2); font-size: 13px; font-weight: 600; text-align: left; cursor: pointer; transition: background 0.15s;
 }
 .asst-side-link:hover { background: var(--asst-panel-2); }
+/* Resalta el destino de "Plataforma" (Panel de métricas/Tareas/Proyectos/
+   Perfil) correspondiente a la página actual — mismo tratamiento visual que
+   .asst-switch-item.active, ver BasaltShellSidebar.tsx. */
+.asst-side-link.active { background: var(--a-accent-soft, #f3e8ff); color: var(--a-accent, #8b5cf6); }
 
 .asst-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); z-index: 40; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
 .asst-backdrop.show { opacity: 1; pointer-events: auto; }
@@ -107,6 +111,10 @@
 }
 
 .asst-scroller { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
+/* Contenedor de scroll para BasaltAppLayout.tsx (Dashboard/Tasks/Spaces/
+   Perfil dentro del shell de Basalt) — equivalente a .asst-scroller pero sin
+   scroll-behavior:smooth, que no pinta acá al no ser un hilo de chat. */
+.asst-shell-scroller { flex: 1; overflow-y: auto; }
 .asst-thread { max-width: 780px; margin: 0 auto; padding: 8px 20px 24px; display: flex; flex-direction: column; gap: 22px; }
 
 .asst-welcome { max-width: 780px; margin: 0 auto; padding: 6vh 20px 24px; }
