@@ -704,8 +704,11 @@ export default function Chat() {
     // 1. Detect simple greetings to avoid "hola" projects — pero no si hay
     // una imagen adjunta: subir un mockup sin escribir nada es un pedido
     // válido ("Replica este diseño"), no un saludo vacío.
-    if (!pendingImage && (GREETINGS.includes(p) || p.length < 3)) {
-      toast("¡Hola! 👋 ¿Qué quieres construir hoy? Describe tu idea para empezar.");
+    // Saludos y preguntas van a Basalt conversacional (/a/basalt) en vez de
+    // crear un proyecto de app.
+    const QUESTION_START = /^(qu[eé]|c[oó]mo|por\s?qu[eé]|cu[aá]l|cu[aá]ndo|d[oó]nde|qui[eé]n|expl[ií]ca|ens[eé][ñn]a|ay[uú]da|dime|necesito un plan|plan de|parrilla)/;
+    if (!pendingImage && !pendingFile && (GREETINGS.includes(p) || p.length < 3 || p.endsWith('?') || p.startsWith('¿') || QUESTION_START.test(p))) {
+      navigate(`/a/basalt?q=${encodeURIComponent(prompt.trim() || 'Hola')}`);
       return;
     }
 

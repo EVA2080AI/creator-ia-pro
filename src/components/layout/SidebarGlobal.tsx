@@ -6,7 +6,7 @@ import {
   Coins, LogOut, User, Shield, Zap, Settings, CreditCard, Sparkles,
   PanelLeftClose, PanelLeftOpen, List,
   Home, ShieldCheck, Activity,
-  Users2, Palette, ListTodo, type LucideIcon
+  Users2, Palette, ListTodo, Scale, Code2, type LucideIcon
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -17,6 +17,7 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { useSidebarV2 } from '@/hooks/useSidebarV2';
 import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
 import { toast } from 'sonner';
+import { CANVAS_ENABLED } from '@/lib/features';
 
 /** ─── Tier Hierarchy ────────────────────────────────────────────────────────── */
 const TIER_LEVELS: Record<string, number> = {
@@ -36,6 +37,7 @@ const TIER_CONFIG: Record<string, { label: string, color: string, bg: string }> 
   'pyme':    { label: 'PYME',    color: 'text-emerald-600', bg: 'bg-emerald-50/80' },
   'pymes':   { label: 'PYMES',   color: 'text-emerald-600', bg: 'bg-emerald-50/80' },
   'admin':   { label: 'ADMIN',   color: 'text-red-500',     bg: 'bg-red-50/80' },
+  'soon':    { label: 'PRONTO',  color: 'text-zinc-500',    bg: 'bg-zinc-100/80' },
 };
 
 interface NavItemDef {
@@ -57,8 +59,10 @@ interface NavItemDef {
 const NAV_MAIN: NavItemDef[] = [
   { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
   { path: '/tareas',       label: 'Tareas',        icon: ListTodo,       minTier: 'free' },
-  { path: '/chat',         label: 'Basalt IA',     icon: Brain,          minTier: 'free' },
-  { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: 'pro' },
+  { path: '/a/basalt',     label: 'Basalt IA',     icon: Brain,          minTier: 'free' },
+  { path: '/arena',        label: 'Arena IA',      icon: Scale,          minTier: 'free' },
+  { path: '/chat',         label: 'Crear apps',    icon: Code2,          minTier: 'free' },
+  { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: CANVAS_ENABLED ? 'pro' : 'soon' },
   { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'pro' },
 ];
 
@@ -102,6 +106,10 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
     const isPublic = ['/pricing', '/descargar', '/product-backlog'].includes(path);
     if (!user && !isPublic) {
       navigate('/auth');
+      return;
+    }
+    if (minTier === 'soon' && !isAdmin) {
+      toast(`${label} — Próximamente`, { description: 'Estamos terminando esta función. Te avisaremos cuando esté lista.' });
       return;
     }
     const requiredLevel = TIER_LEVELS[minTier] || 0;

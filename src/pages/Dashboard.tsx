@@ -204,8 +204,10 @@ export default function Dashboard() {
         {/* Quick Tools */}
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
-            { icon: Zap, label: "Basalt IA", desc: "Apps + Herramientas", path: "/chat" },
-            { icon: Megaphone, label: "Canvas IA", desc: "Lienzo", path: "/studio-flow" },
+            { icon: Zap, label: "Basalt IA", desc: "Asistente", path: "/a/basalt" },
+            { icon: Zap, label: "Arena IA", desc: "Compara modelos", path: "/arena" },
+            { icon: Zap, label: "Crear apps", desc: "Apps + Herramientas", path: "/chat" },
+            { icon: Megaphone, label: "Canvas IA", desc: "Próximamente", path: "/studio-flow" },
             { icon: ListTodo, label: "Tareas", desc: "Kanban", path: "/tareas" },
             { icon: FileText, label: "Espacios", desc: "Archivos", path: "/spaces" },
           ].map((app) => (

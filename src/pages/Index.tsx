@@ -46,7 +46,7 @@ const PRODUCTS = [
     sub: "Arma flujos de varios pasos conectando nodos de texto, imagen y video — cada nodo llama al mismo motor de IA que Basalt, encadenado paso a paso. Ideal para producir varias piezas de una campaña sin repetir el proceso manualmente.",
     icon: Layers,
     color: "#8B5CF6",
-    cta: "Abrir Canvas IA →",
+    cta: "Próximamente",
     path: "/studio-flow",
     features: ["Lienzo de nodos drag & drop", "Encadena texto, imagen y video", "Reutilizable para campañas", "Export del flujo completo"],
     preview: [
@@ -132,7 +132,7 @@ const TRUST = [
 // Hechos reales del producto, no métricas de uso inventadas.
 const STATS = [
   { value: "12+", label: "Herramientas de IA", icon: Wand2 },
-  { value: "2", label: "Formas de crear: Basalt IA (apps, imágenes y texto) y Canvas IA", icon: Layers },
+  { value: "1", label: "Asistente para crear apps, imágenes y texto: Basalt IA", icon: Layers },
   { value: "5", label: "Créditos gratis para empezar, sin tarjeta", icon: Zap },
   { value: "AES-256", label: "Encriptación de tus datos", icon: Shield },
 ];
@@ -1058,7 +1058,7 @@ export default function Index() {
                   <motion.div variants={fadeUp} custom={0}>
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-black uppercase tracking-[0.2em] mb-6">
                       <Layers className="h-3.5 w-3.5" />
-                      Canvas IA
+                      Canvas IA · Próximamente
                     </div>
                   </motion.div>
                   <motion.h2 variants={fadeUp} custom={0.1} className="text-3xl md:text-5xl font-black text-zinc-900 tracking-tight mb-4">
@@ -1124,7 +1124,7 @@ export default function Index() {
                       className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-bold text-[14px] hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25"
                     >
                       <Layers className="h-4 w-4" />
-                      Abrir Canvas IA
+                      Próximamente
                     </motion.button>
                     <button
                       onClick={() => navigate("/hub")}

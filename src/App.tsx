@@ -119,7 +119,7 @@ const Cookies       = lazy(() => import("./pages/Cookies"));
 const Dashboard    = lazy(() => import("./pages/Dashboard"));
 const Spaces       = lazy(() => import("./pages/Spaces"));
 const Admin        = lazy(() => import("./pages/Admin"));
-const Formarketing = lazy(() => import("./pages/Formarketing"));
+const CanvasGate   = lazy(() => import("./pages/CanvasComingSoon"));
 const Profile      = lazy(() => import("./pages/Profile"));
 const Chat         = lazy(() => import("./pages/Chat"));
 const ShareScreen  = lazy(() => import("./pages/ShareScreen"));
@@ -127,6 +127,8 @@ const SystemStatus = lazy(() => import("./pages/SystemStatus"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 const Tasks        = lazy(() => import("./pages/Tasks"));
 const AssistantPage = lazy(() => import("./pages/Assistant"));
+const BasaltPage    = lazy(() => import("./pages/Basalt"));
+const ArenaPage     = lazy(() => import("./pages/Arena"));
 
 // Light loading screen — no dark bg
 const LoadingScreen = () => (
@@ -199,6 +201,9 @@ const App = () => {
                   <Route path="/nebula"            element={<Navigate to="/dashboard" replace />} />
 
                   {/* Asistentes personalizables — shell propio, sin AppLayout */}
+                  <Route path="/a/basalt" element={<BasaltPage />} />
+                  <Route path="/basalt"   element={<Navigate to="/a/basalt" replace />} />
+                  <Route path="/arena"    element={<ArenaPage />} />
                   <Route path="/a/:slug" element={<AssistantPage />} />
 
                   {/* ── Redirects ── */}
@@ -218,7 +223,7 @@ const App = () => {
                     <Route path="/tools"        element={<ToolsRedirect />} />
                     <Route path="/apps/:appId"  element={<ToolsRedirect />} />
                     <Route path="/admin"        element={<Admin />} />
-                    <Route path="/studio-flow"  element={<Formarketing />} />
+                    <Route path="/studio-flow"  element={<CanvasGate />} />
                     <Route path="/formarketing" element={<Navigate to="/studio-flow" replace />} />
                     <Route path="/profile"      element={<Profile />} />
                     <Route path="/hub"          element={<Navigate to="/spaces" replace />} />

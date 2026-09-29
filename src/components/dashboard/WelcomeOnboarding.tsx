@@ -27,7 +27,7 @@ const INTENT_OPTIONS: IntentOption[] = [
   {
     icon: Layers,
     title: "Canvas IA",
-    desc: "Arma un flujo visual conectando nodos de IA paso a paso.",
+    desc: "Próximamente: editor visual para diseñar tus piezas gráficas.",
     path: "/studio-flow",
     color: "text-blue-500",
     bg: "bg-blue-50 border-blue-100",
