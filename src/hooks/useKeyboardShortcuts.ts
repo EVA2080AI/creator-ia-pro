@@ -14,7 +14,15 @@ export interface ShortcutConfig {
 export function useKeyboardShortcuts(shortcuts: ShortcutConfig[]) {
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
+      // e.key puede faltar si algo (una extensión, un evento sintético mal
+      // formado) dispara "keydown" sin pasar por un KeyboardEvent real —
+      // reproducido en vivo (TypeError: Cannot read properties of undefined
+      // (reading 'toLowerCase')), y como este listener es global (montado
+      // una sola vez en App.tsx para toda la app) tumbaba el manejo de
+      // teclado del resto de la sesión, no solo el de este atajo.
+      if (!e.key) return;
       shortcuts.forEach((shortcut) => {
+        if (!shortcut.key) return;
         const keyMatch = e.key.toLowerCase() === shortcut.key.toLowerCase();
         const ctrlMatch = !!shortcut.ctrl === e.ctrlKey;
         const shiftMatch = !!shortcut.shift === e.shiftKey;

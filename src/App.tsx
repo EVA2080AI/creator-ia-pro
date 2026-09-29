@@ -13,7 +13,7 @@ import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { PerformanceMonitor } from "@/components/performance/PerformanceMonitor";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { usePageTracking } from "@/hooks/useAnalytics";
-import { useSession } from "@/lib/auth-client";
+import { authClient, useSession } from "@/lib/auth-client";
 import { ThemeProvider } from "@/hooks/useTheme";
 
 // Redirect /canvas → /studio-flow preserving query params
@@ -92,14 +92,26 @@ function AuthWatcher() {
     const wasAuthenticated = hadSessionRef.current;
     hadSessionRef.current = hasSession;
     if (wasAuthenticated && !hasSession) {
-      const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs", "/cookies"];
-      const isPublic = publicPaths.some(p =>
-        window.location.pathname === p || window.location.pathname.startsWith("/herramienta")
-      );
-      if (!isPublic) {
-        toast.error("Tu sesión expiró. Por favor inicia sesión nuevamente.");
-        navigate("/auth", { replace: true });
-      }
+      // useSession() (better-auth) puede devolver data:null por un instante
+      // durante una revalidación en segundo plano o un blip de red, no solo
+      // por un logout real. Sin re-confirmar esto con una llamada directa,
+      // ese falso positivo sacaba al usuario a /auth a mitad de una
+      // conversación, perdiendo lo que estuviera escribiendo — reproducido
+      // en vivo y coincide con un reporte real ("escribe y se reinicia",
+      // 2026-09-29). Si la re-confirmación falla (red caída de verdad) se
+      // opta por NO navegar — quedarse en la pantalla es menos disruptivo
+      // que un falso "tu sesión expiró".
+      authClient.getSession({ query: {} }).then(({ data }) => {
+        if (data) { hadSessionRef.current = true; return; }
+        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs", "/cookies"];
+        const isPublic = publicPaths.some(p =>
+          window.location.pathname === p || window.location.pathname.startsWith("/herramienta")
+        );
+        if (!isPublic) {
+          toast.error("Tu sesión expiró. Por favor inicia sesión nuevamente.");
+          navigate("/auth", { replace: true });
+        }
+      }).catch(() => { /* red caída — no se navega, ver comentario arriba */ });
     }
   }, [session, navigate]);
 
