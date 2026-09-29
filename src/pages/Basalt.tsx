@@ -6,6 +6,7 @@ import {
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTheme } from "@/hooks/useTheme";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
@@ -39,7 +40,9 @@ export default function BasaltPage() {
   const userId = user?.id ?? "";
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  // Un solo tema para toda la app (antes Basalt tenía su propio estado local
+  // de tema, desincronizado del toggle global — auditoría UX 2026-09-29).
+  const { resolvedTheme: theme, setTheme } = useTheme();
   const [model, setModel] = useState(readModel);
   // Se calcula una sola vez al montar: si cambia durante la sesión (al cerrar
   // la guía) no debe reabrirse solo por un re-render.

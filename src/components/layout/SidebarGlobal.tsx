@@ -2,11 +2,11 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import {
-  LayoutTemplate, Brain, FolderOpen, Image, Download,
+  LayoutTemplate, Brain, Image, Download,
   Coins, LogOut, User, Shield, Zap, Settings, CreditCard, Sparkles,
   PanelLeftClose, PanelLeftOpen, List, Bug,
-  Home, ShieldCheck, Activity,
-  Users2, Palette, ListTodo, Scale, Code2, type LucideIcon
+  ShieldCheck, Activity,
+  Users2, Palette, Scale, Code2, type LucideIcon
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -60,13 +60,17 @@ interface NavItemDef {
 // src/lib/ai/models.ts) siguen siendo gratis, el gate real de créditos/tier
 // por modelo no cambia — esto solo afecta si el link del sidebar es
 // clickeable o muestra el toast de upsell.
+//
+// Inicio/Tareas/Proyectos/Perfil YA NO están acá (auditoría UX 2026-09-29):
+// esas páginas se migraron al shell de Basalt (BasaltAppLayout), así que
+// clickearlas desde este menú viejo saltaba de golpe a un shell totalmente
+// distinto, sin transición, reseteando el tema — la misma fragmentación que
+// la migración buscaba resolver. Siguen a un click de distancia: Basalt IA
+// (abajo) → sección "Plataforma" de su propio sidebar.
 const NAV_MAIN: NavItemDef[] = [
-  { path: '/dashboard',    label: 'Inicio',        icon: Home,           minTier: 'free' },
-  { path: '/tasks',        label: 'Tareas',        icon: ListTodo,       minTier: 'free' },
   { path: '/a/basalt',     label: 'Basalt IA',     icon: Brain,          minTier: 'free' },
   { path: '/a/arena',      label: 'Arena IA',      icon: Scale,          minTier: 'free' },
   { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: CANVAS_ENABLED ? 'pro' : 'soon' },
-  { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'pro' },
 ];
 
 const NAV_SYSTEM: NavItemDef[] = [
@@ -82,7 +86,6 @@ const NAV_SYSTEM: NavItemDef[] = [
 // el sidebar aunque la ruta siempre estuvo disponible para todos.
 const NAV_BOTTOM = [
   { path: '/product-backlog', label: 'Roadmap',    icon: List },
-  { path: '/profile',         label: 'Perfil',      icon: User },
   { path: '/pricing',         label: 'Planes',      icon: CreditCard },
   { path: '/descargar',       label: 'Descargar',   icon: Download },
 ];
@@ -103,7 +106,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const isActive = (path?: string) => {
     if (!path) return false;
     const cleanPath = path.split('?')[0];
-    return location.pathname === cleanPath || (cleanPath !== '/dashboard' && location.pathname.startsWith(cleanPath));
+    return location.pathname === cleanPath || location.pathname.startsWith(cleanPath);
   };
 
   const handleNav = (path: string, minTier = 'free', label = '', tab?: string) => {
@@ -300,9 +303,6 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" side="top" className="w-56 p-1.5 rounded-2xl bg-popover/95 backdrop-blur-xl border-border shadow-2xl">
-              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => navigate('/profile')}>
-                <User className="w-4 h-4" /> Perfil
-              </DropdownMenuItem>
               <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => setShowReport(true)}>
                 <Bug className="w-4 h-4" /> Reportar un error o mejora
               </DropdownMenuItem>

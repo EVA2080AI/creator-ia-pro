@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useTheme } from "@/hooks/useTheme";
 import { Logo } from "@/components/Logo";
 import { ReportModal } from "@/components/tickets/ReportModal";
 import {
@@ -52,7 +53,10 @@ export default function AssistantPage() {
   const [loadingAssistant, setLoadingAssistant] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showReport, setShowReport] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  // Mismo tema global que el resto de la app — antes cada Experto tenía su
+  // propio estado de tema local, y hasta forzaba oscuro según brand.theme,
+  // peleando con la preferencia del usuario (auditoría UX 2026-09-29).
+  const { resolvedTheme: theme, setTheme } = useTheme();
 
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [input, setInput] = useState("");
@@ -72,7 +76,6 @@ export default function AssistantPage() {
     getAssistant(slug).then((a) => {
       setAssistant(a);
       setLoadingAssistant(false);
-      if (a?.brand.theme === "dark") setTheme("dark");
     });
   }, [slug]);
 
@@ -249,7 +252,7 @@ export default function AssistantPage() {
         )}
 
         <div className="asst-side-bottom">
-          <button className="asst-side-link" onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}>
+          <button className="asst-side-link" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {theme === "dark" ? "Tema claro" : "Tema oscuro"}
           </button>

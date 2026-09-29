@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { BasaltShellSidebar } from "./BasaltShellSidebar";
+import { useTheme } from "@/hooks/useTheme";
 import { BASALT_ASSISTANT as A } from "@/lib/basalt";
 import { brandCssVars } from "@/lib/assistants";
 import "@/pages/Assistant.css";
@@ -30,7 +31,10 @@ const PAGE_TITLES: Record<string, string> = {
 export function BasaltAppLayout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  // Mismo tema global que el resto de la app (antes: estado local propio,
+  // desincronizado del toggle de Basalt y del de Perfil — auditoría UX
+  // 2026-09-29, "el menú de cuenta se ve oscuro sobre una página clara").
+  const { resolvedTheme: theme, setTheme } = useTheme();
 
   const title = PAGE_TITLES[location.pathname] ?? "Creator IA Pro";
 

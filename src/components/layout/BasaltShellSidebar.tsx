@@ -3,13 +3,16 @@ import { useNavigate } from "react-router-dom";
 import {
   Plus, Minus, Scale, BarChart3, ListTodo, FolderOpen, User, ShieldCheck,
   Sun, Moon, LogOut, Bug, HelpCircle, Settings, Activity, LifeBuoy, CreditCard,
+  LayoutTemplate,
 } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useProfile } from "@/hooks/useProfile";
 import { Logo } from "@/components/Logo";
 import { ReportModal } from "@/components/tickets/ReportModal";
 import { QuickGuideModal } from "@/components/basalt/QuickGuideModal";
+import { CANVAS_ENABLED } from "@/lib/features";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
@@ -28,7 +31,9 @@ export interface BasaltShellSidebarProps {
   sidebarOpen: boolean;
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
   theme: "light" | "dark";
-  setTheme: Dispatch<SetStateAction<"light" | "dark">>;
+  /** Plano — el único tema es el global (useTheme()), así que basta con el
+   *  valor destino, no un updater funcional tipo Dispatch. */
+  setTheme: (next: "light" | "dark") => void;
   /** "Nuevo chat" por defecto navega a /a/basalt (no hay chat propio en estas
    *  páginas). Basalt.tsx pasa su propio reset de conversación acá. */
   onNewChat?: () => void;
@@ -88,6 +93,18 @@ export function BasaltShellSidebar({
     setSidebarOpen(false);
   };
 
+  // Mismo gate y mismo mensaje que SidebarGlobal para Canvas IA — antes esto
+  // no aparecía en ningún lado del shell nuevo de Basalt (auditoría UX
+  // 2026-09-29: WelcomeOnboarding lo mencionaba pero no había forma de
+  // encontrarlo).
+  const handleCanvasClick = () => {
+    if (!CANVAS_ENABLED && !isAdmin) {
+      toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
+      return;
+    }
+    go("/studio-flow");
+  };
+
   const platform = (path: string, label: string, Icon: typeof BarChart3) => {
     const active = activePath === path;
     return (
@@ -118,6 +135,12 @@ export function BasaltShellSidebar({
 
         <button className="asst-side-link" onClick={() => go("/a/arena")}>
           <Scale className="w-4 h-4" /> Arena IA
+        </button>
+        <button className="asst-side-link" onClick={handleCanvasClick}>
+          <LayoutTemplate className="w-4 h-4" /> Canvas IA
+          {!CANVAS_ENABLED && !isAdmin && (
+            <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, color: "var(--asst-txt-3)" }}>Pronto</span>
+          )}
         </button>
 
         {beforeExperts}
@@ -164,7 +187,7 @@ export function BasaltShellSidebar({
           <button className="asst-side-link" onClick={() => setShowGuide(true)}>
             <HelpCircle className="w-4 h-4" /> Guía rápida
           </button>
-          <button className="asst-side-link" onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}>
+          <button className="asst-side-link" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {theme === "dark" ? "Tema claro" : "Tema oscuro"}
           </button>
