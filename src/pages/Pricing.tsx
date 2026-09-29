@@ -417,7 +417,7 @@ export default function Pricing() {
                       </a>
                     ) : (
                       <button
-                        onClick={() => plan.key === "free" ? navigate(isLoggedIn ? "/a/basalt" : "/auth") : handleBoldAction(plan.key)}
+                        onClick={() => plan.key === "free" ? navigate(isLoggedIn ? "/a/basalt" : "/auth?mode=signup") : handleBoldAction(plan.key)}
                         disabled={loadingAction === plan.key}
                         className={cn(
                           "w-full py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden group/btn",
@@ -428,7 +428,7 @@ export default function Pricing() {
                           <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                         ) : (
                           <span className="flex items-center justify-center gap-2">
-                            {plan.key === "free" ? (isLoggedIn ? "Ir al chat" : "Crear cuenta gratis") : "Empezar ahora"} <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                            {plan.key === "free" ? (isLoggedIn ? "Ir a Basalt" : "Crear cuenta gratis") : "Empezar ahora"} <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1 transition-transform" />
                           </span>
                         )}
                       </button>

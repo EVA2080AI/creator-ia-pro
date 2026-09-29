@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { SEO, seoPresets } from "@/components/SEO";
 import { authClient, useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -17,11 +17,16 @@ import { motion } from "framer-motion";
 // (panel "Herramientas" en el workspace de Basalt) — 2 items reales, no 4.
 const features = [
   { icon: Code2, text: "Basalt IA — apps React completas + imágenes, logos y textos con IA" },
-  { icon: Wand2, text: "Canvas IA — flujos de producción visuales" },
+  { icon: Wand2, text: "Canvas IA — flujos de producción visuales (Próximamente)" },
 ];
 
 const Auth = () => {
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+  const [searchParams] = useSearchParams();
+  // /auth?mode=signup (usado por el CTA "Crear cuenta gratis" de Pricing) abre
+  // directo el formulario de registro en vez de caer siempre en login.
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">(
+    searchParams.get("mode") === "signup" ? "signup" : "login"
+  );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -64,7 +69,7 @@ const Auth = () => {
         navigate("/a/basalt");
       }
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || "Algo salió mal. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -165,8 +170,8 @@ const Auth = () => {
           <div className="grid grid-cols-3 gap-4 pt-4">
             {[
               { value: "12+", label: "Herramientas" },
-              { value: "$69K", label: "COP/mes" },
-              { value: "4.6", label: "Claude" },
+              { value: "5", label: "Créditos gratis" },
+              { value: "AES-256", label: "Encriptación" },
             ].map((s, i) => (
                <motion.div
                 key={s.label}
@@ -183,34 +188,20 @@ const Auth = () => {
           </div>
         </div>
 
-        {/* Bottom */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 1 }}
-          className="relative z-10"
-        >
-          <p className="text-[11px] font-medium text-zinc-500 leading-relaxed">
-            Al registrarte aceptas nuestros{" "}
-            <span className="underline underline-offset-2 cursor-pointer hover:text-zinc-400 transition-colors">
-              Términos de servicio
-            </span>{" "}
-            y{" "}
-            <span className="underline underline-offset-2 cursor-pointer hover:text-zinc-400 transition-colors">
-              Política de privacidad
-            </span>.
-          </p>
-        </motion.div>
-
         {/* Grain */}
         <div className="absolute inset-0 opacity-[0.015] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay" />
       </div>
 
       {/* Right Panel — Form */}
       <div className="flex flex-1 items-center justify-center px-6 py-12 relative">
-        {/* Mobile logo */}
-        <div className="absolute top-8 left-1/2 -translate-x-1/2 lg:hidden">
-          <Logo size="sm" showText showPro onClick={() => navigate("/")} />
+        {/* Mobile logo + propuesta de valor — el panel de la izquierda (headline,
+            features, stats) es hidden lg:flex, así que en celular/tablet no
+            queda NADA de contexto del producto antes del formulario sin esto. */}
+        <div className="absolute top-8 left-1/2 w-full max-w-[340px] -translate-x-1/2 px-6 text-center lg:hidden">
+          <Logo size="sm" showText showPro onClick={() => navigate("/")} className="justify-center" />
+          <p className="mt-3 text-[13px] font-medium leading-snug text-zinc-400">
+            Basalt IA convierte tus ideas en apps, imágenes y textos — todo en una sola conversación.
+          </p>
         </div>
 
         <motion.div
@@ -235,8 +226,8 @@ const Auth = () => {
                 {mode === "login"
                   ? "Bienvenido de vuelta"
                   : mode === "signup"
-                  ? "Empieza con 10 créditos gratis, sin tarjeta"
-                  : "Te enviamos un enlace a tu correo"}
+                  ? "Empieza con 5 créditos gratis, sin tarjeta"
+                  : "Ingresa tu correo y te enviaremos un enlace"}
               </p>
             </div>
 
@@ -414,7 +405,9 @@ const Auth = () => {
                       setLoading(false);
                     }}
                   >
-                    <Code2 className="h-4 w-4" />
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 .5C5.73.5.5 5.73.5 12c0 5.09 3.29 9.4 7.86 10.93.57.1.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.72.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.17 0 1.56-.01 2.82-.01 3.2 0 .3.21.66.8.55A11.5 11.5 0 0 0 23.5 12c0-6.27-5.23-11.5-11.5-11.5Z" />
+                    </svg>
                     <span className="hidden sm:inline">GitHub</span>
                   </Button>
                 </div>
@@ -458,6 +451,19 @@ const Auth = () => {
               Ver planes y precios →
             </button>
           </div>
+
+          {/* Aviso legal — visible en mobile y desktop (antes solo vivía en el
+              panel izquierdo, hidden lg:flex, así que en celular nunca se veía). */}
+          <p className="mt-4 text-center text-[11px] font-medium leading-relaxed text-zinc-400">
+            Al registrarte aceptas nuestros{" "}
+            <button type="button" onClick={() => navigate("/terms")} className="underline underline-offset-2 hover:text-zinc-600 transition-colors">
+              Términos de servicio
+            </button>{" "}
+            y{" "}
+            <button type="button" onClick={() => navigate("/privacy")} className="underline underline-offset-2 hover:text-zinc-600 transition-colors">
+              Política de privacidad
+            </button>.
+          </p>
         </motion.div>
 
         {/* Background glow */}

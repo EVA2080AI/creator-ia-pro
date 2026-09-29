@@ -27,15 +27,17 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
 
   // Mock search data - in production this would search actual data
   const searchData: SearchResult[] = [
-    { id: '1', type: 'page', title: 'Dashboard', category: 'Pages', icon: Folder, action: () => navigate('/dashboard') },
-    { id: '2', type: 'page', title: 'Studio Flow', category: 'Pages', icon: Sparkles, action: () => navigate('/studio-flow') },
-    { id: '3', type: 'page', title: 'Basalt IA', category: 'Pages', icon: MessageSquare, action: () => navigate('/chat') },
+    { id: '1', type: 'page', title: 'Basalt IA', category: 'Pages', icon: MessageSquare, action: () => navigate('/a/basalt') },
+    { id: '2', type: 'page', title: 'Arena IA', category: 'Pages', icon: Sparkles, action: () => navigate('/arena') },
+    { id: '3', type: 'page', title: 'Constructor de apps', category: 'Pages', icon: Code, action: () => navigate('/chat') },
     { id: '4', type: 'page', title: 'Herramientas', category: 'Pages', icon: Image, action: () => navigate('/chat?panel=tools') },
     { id: '5', type: 'tool', title: 'Generar Imagen', category: 'Tools', icon: Image, action: () => navigate('/chat?panel=tools&tool=generate') },
-    { id: '6', type: 'tool', title: 'Generar Código', category: 'Tools', icon: Code, action: () => navigate('/chat') },
-    { id: '7', type: 'page', title: 'Ayuda y documentación', category: 'Pages', icon: FileText, action: () => navigate('/help') },
-    { id: '8', type: 'page', title: 'Pricing', category: 'Pages', icon: Sparkles, action: () => navigate('/pricing') },
-    { id: '9', type: 'page', title: 'Tareas', category: 'Pages', icon: ListTodo, action: () => navigate('/tareas') },
+    { id: '6', type: 'page', title: 'Dashboard', category: 'Pages', icon: Folder, action: () => navigate('/dashboard') },
+    { id: '7', type: 'page', title: 'Proyectos', category: 'Pages', icon: Folder, action: () => navigate('/spaces') },
+    { id: '8', type: 'page', title: 'Tareas', category: 'Pages', icon: ListTodo, action: () => navigate('/tareas') },
+    { id: '9', type: 'page', title: 'Perfil', category: 'Pages', icon: Sparkles, action: () => navigate('/profile') },
+    { id: '10', type: 'page', title: 'Ayuda y documentación', category: 'Pages', icon: FileText, action: () => navigate('/help') },
+    { id: '11', type: 'page', title: 'Planes y precios', category: 'Pages', icon: Sparkles, action: () => navigate('/pricing') },
   ];
 
   useEffect(() => {

@@ -39,10 +39,17 @@ interface DashboardProject {
   settings?: any;
 }
 
+// Mismos tiers vigentes que src/components/layout/SidebarGlobal.tsx
+// (TIER_CONFIG) — antes solo tenía free/pro/elite y cualquier otro plan
+// (creador, agencia, pyme) caía al fallback "Gratis" pese a ser de pago.
 const TIER_LABELS: Record<string, string> = {
   free: "Gratis",
+  creador: "Creador",
   pro: "Pro",
-  elite: "Elite",
+  agencia: "Agencia",
+  pyme: "Pyme",
+  pymes: "Pyme",
+  admin: "Admin",
 };
 
 // --- Main Dashboard ---
@@ -175,7 +182,7 @@ export default function Dashboard() {
               checkoutSuccess={checkoutSuccess} 
               creditsSuccess={creditsSuccess} 
               balance={profile?.credits_balance ?? 0}
-              onAction={() => navigate('/chat')}
+              onAction={() => navigate('/a/basalt')}
             />
           )}
 

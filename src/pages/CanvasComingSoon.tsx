@@ -37,7 +37,7 @@ function CanvasComingSoon() {
         </p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <button
-            onClick={() => navigate("/chat")}
+            onClick={() => navigate("/a/basalt")}
             className="flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-[13px] font-bold text-white hover:bg-primary/90"
           >
             <Brain className="h-4 w-4" />

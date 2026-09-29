@@ -4,8 +4,10 @@ import { Helmet } from "react-helmet-async";
 import {
   Menu, Plus, Minus, Send, Square, Sun, Moon, ArrowLeft, Loader2, Trash2, Brain, Scale,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
+  ListTodo, FolderOpen, User, LogOut, ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 import { brandCssVars, listAssistants, type Assistant } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
 import { CHAT_MODELS } from "@/lib/ai/models";
@@ -34,7 +36,8 @@ function readModel() {
 export default function BasaltPage() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const { user, loading: authLoading } = useAuth("/auth");
+  const { user, loading: authLoading, signOut } = useAuth("/auth");
+  const { isAdmin } = useAdmin(user?.id);
   const userId = user?.id ?? "";
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -269,7 +272,9 @@ export default function BasaltPage() {
 
       <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Basalt">
         <div className="asst-side-top">
-          <button className="asst-icon-btn" onClick={() => navigate("/dashboard")} aria-label="Volver al inicio">
+          {/* Basalt YA es el inicio — esta flecha va al panel de métricas
+              secundario, no "de vuelta" a ningún lado (ver auditoría UX). */}
+          <button className="asst-icon-btn" onClick={() => navigate("/dashboard")} aria-label="Ver panel de métricas" title="Panel de métricas">
             <ArrowLeft className="w-4 h-4" />
           </button>
         </div>
@@ -338,10 +343,29 @@ export default function BasaltPage() {
           ))}
         </div>
 
+        <div className="asst-switcher-label">Plataforma</div>
+        <button className="asst-side-link" onClick={() => navigate("/tareas")}>
+          <ListTodo className="w-4 h-4" /> Tareas
+        </button>
+        <button className="asst-side-link" onClick={() => navigate("/spaces")}>
+          <FolderOpen className="w-4 h-4" /> Proyectos
+        </button>
+        <button className="asst-side-link" onClick={() => navigate("/profile")}>
+          <User className="w-4 h-4" /> Perfil
+        </button>
+        {isAdmin && (
+          <button className="asst-side-link" onClick={() => navigate("/admin")}>
+            <ShieldCheck className="w-4 h-4" /> Panel Admin
+          </button>
+        )}
+
         <div className="asst-side-bottom">
           <button className="asst-side-link" onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}>
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {theme === "dark" ? "Tema claro" : "Tema oscuro"}
+          </button>
+          <button className="asst-side-link" onClick={() => signOut()}>
+            <LogOut className="w-4 h-4" /> Cerrar sesión
           </button>
         </div>
       </nav>

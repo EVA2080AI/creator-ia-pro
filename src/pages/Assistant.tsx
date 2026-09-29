@@ -4,8 +4,10 @@ import { Helmet } from "react-helmet-async";
 import {
   Menu, Plus, Send, Square, Sun, Moon, ArrowLeft, Loader2,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Scale, Dice5, Wallet, Sparkles, Bot,
+  ListTodo, FolderOpen, User, LogOut, ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
 import {
   listAssistants, getAssistant, brandCssVars,
   type Assistant, type AssistantWelcomeCard,
@@ -37,7 +39,8 @@ function CardIcon({ name }: { name?: string }) {
 export default function AssistantPage() {
   const { slug = "mentor" } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth("/auth");
+  const { user, loading: authLoading, signOut } = useAuth("/auth");
+  const { isAdmin } = useAdmin(user?.id);
 
   const [assistants, setAssistants] = useState<Assistant[]>([]);
   const [assistant, setAssistant] = useState<Assistant | null>(null);
@@ -201,8 +204,9 @@ export default function AssistantPage() {
 
       <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Asistentes">
         <div className="asst-side-top">
-          <button className="asst-icon-btn" onClick={() => navigate("/a/basalt")} aria-label="Volver al inicio">
+          <button className="asst-icon-btn" onClick={() => navigate("/a/basalt")} aria-label="Volver a Basalt" title="Volver a Basalt" style={{ display: "flex", alignItems: "center", width: "auto", gap: 6, padding: "0 10px" }}>
             <ArrowLeft className="w-4 h-4" />
+            <span style={{ fontSize: 12, fontWeight: 700 }}>Basalt</span>
           </button>
         </div>
         <button className="asst-new-chat" onClick={() => { setMessages([]); setSidebarOpen(false); }}>
@@ -221,10 +225,29 @@ export default function AssistantPage() {
           </button>
         ))}
 
+        <div className="asst-switcher-label">Plataforma</div>
+        <button className="asst-side-link" onClick={() => navigate("/tareas")}>
+          <ListTodo className="w-4 h-4" /> Tareas
+        </button>
+        <button className="asst-side-link" onClick={() => navigate("/spaces")}>
+          <FolderOpen className="w-4 h-4" /> Proyectos
+        </button>
+        <button className="asst-side-link" onClick={() => navigate("/profile")}>
+          <User className="w-4 h-4" /> Perfil
+        </button>
+        {isAdmin && (
+          <button className="asst-side-link" onClick={() => navigate("/admin")}>
+            <ShieldCheck className="w-4 h-4" /> Panel Admin
+          </button>
+        )}
+
         <div className="asst-side-bottom">
           <button className="asst-side-link" onClick={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}>
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {theme === "dark" ? "Tema claro" : "Tema oscuro"}
+          </button>
+          <button className="asst-side-link" onClick={() => signOut()}>
+            <LogOut className="w-4 h-4" /> Cerrar sesión
           </button>
         </div>
       </nav>

@@ -145,11 +145,17 @@ export function LandingHeader(): React.ReactElement {
                 );
               })}
               <hr className="border-zinc-100" />
-              <button 
-                onClick={() => navigate("/auth")}
+              <button
+                onClick={() => navigate("/auth?mode=signup")}
                 className="w-full py-4 bg-zinc-950 text-white rounded-2xl font-black uppercase tracking-widest italic"
               >
                 Comenzar Ahora
+              </button>
+              <button
+                onClick={() => navigate("/auth")}
+                className="w-full py-3 text-center text-[13px] font-bold text-zinc-500"
+              >
+                ¿Ya tienes cuenta? Ingresar
               </button>
             </motion.div>
           )}

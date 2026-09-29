@@ -57,7 +57,9 @@ export function ReportButton() {
         onClick={() => setOpen(true)}
         aria-label="Reportar un error o mejora"
         title="Reportar un error o mejora"
-        className="fixed bottom-5 right-5 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-zinc-900 text-white shadow-lg shadow-zinc-900/20 transition-transform hover:scale-105 active:scale-95"
+        // bottom-left, no bottom-right: ahí es donde ya viven el botón de
+        // enviar del chat (Basalt/Experts) y el FAB "+ Nueva tarea" (Tareas).
+        className="fixed bottom-5 left-5 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-zinc-900 text-white shadow-lg shadow-zinc-900/20 transition-transform hover:scale-105 active:scale-95"
       >
         <Bug className="h-4.5 w-4.5" />
       </button>
