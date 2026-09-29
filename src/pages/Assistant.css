@@ -6,6 +6,10 @@
   background: var(--asst-bg, #fff);
   color: var(--asst-txt, #1f1f1f);
   font-family: var(--asst-font, "Inter", system-ui, sans-serif);
+  /* index.html tiene viewport-fit=cover — sin este padding, el área del
+     notch/status bar queda sin pintar y se ve como una franja oscura encima
+     de todo (reportado en iPhone). El fondo de .asst-app ahora la cubre. */
+  padding-top: env(safe-area-inset-top);
 }
 html[data-asst-theme="dark"] .asst-app {
   --asst-bg: #131314;
@@ -159,7 +163,7 @@ html[data-asst-theme="dark"] .asst-app {
 }
 .asst-err button { border: 1px solid currentColor; border-radius: 14px; padding: 4px 12px; font-size: 12px; font-weight: 600; color: inherit; background: none; cursor: pointer; }
 
-.asst-composer { flex: none; max-width: 780px; width: 100%; margin: 0 auto; padding: 6px 20px 10px; }
+.asst-composer { flex: none; max-width: 780px; width: 100%; margin: 0 auto; padding: 6px 20px calc(10px + env(safe-area-inset-bottom)); }
 .asst-pill { display: flex; align-items: flex-end; gap: 6px; background: var(--asst-panel); border-radius: 28px; padding: 8px 8px 8px 20px; transition: box-shadow 0.2s; }
 .asst-pill:focus-within { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 14px rgba(0, 0, 0, 0.06); }
 .asst-pill textarea {
@@ -176,7 +180,9 @@ html[data-asst-theme="dark"] .asst-app {
 .asst-disclaimer { text-align: center; font-size: 11px; color: var(--asst-txt-3); padding: 8px 16px 4px; }
 
 @media (max-width: 768px) {
-  .asst-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 50; margin-left: -280px; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2); width: 260px; max-width: 84vw; }
+  /* position:fixed la saca del flujo de .asst-app, así que necesita su
+     propio padding para el notch (el padding-top de .asst-app no le llega). */
+  .asst-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 50; margin-left: -280px; box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2); width: 260px; max-width: 84vw; padding-top: calc(12px + env(safe-area-inset-top)); }
   .asst-sidebar.open { margin-left: 0; }
   .asst-thread, .asst-welcome { padding-left: 16px; padding-right: 16px; }
   .asst-composer { padding-left: 12px; padding-right: 12px; }
