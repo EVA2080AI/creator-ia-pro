@@ -7,7 +7,7 @@ import {
   Shield, Users, Loader2, Zap, Settings, 
   BarChart2, Activity, Rocket, Image, Video, 
   Code2, FileText, Globe, DollarSign, LogOut,
-  ChevronRight, LayoutDashboard, Database, KeyRound
+  ChevronRight, LayoutDashboard, Database, KeyRound, Ticket
 } from "lucide-react";
 import { AdminUser } from "./admin/types";
 import { CreditModal } from "./admin/components/CreditModal";
@@ -17,6 +17,7 @@ import { RolesTab } from "./admin/tabs/RolesTab";
 import { AnalyticsTab } from "./admin/tabs/AnalyticsTab";
 import { SettingsTab } from "./admin/tabs/SettingsTab";
 import { CredentialsTab } from "./admin/tabs/CredentialsTab";
+import { TicketsTab } from "./admin/tabs/TicketsTab";
 import { useAdminData, useAdminAnalytics } from "./admin/hooks/useAdminData";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +26,7 @@ const Admin = () => {
   const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<"users" | "roles" | "analytics" | "overview" | "settings" | "credentials">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "roles" | "analytics" | "overview" | "settings" | "credentials" | "tickets">("users");
   const [creditModalUser, setCreditModalUser] = useState<AdminUser | null>(null);
 
   const { users, loadingUsers, fetchUsers } = useAdminData(!!isAdmin);
@@ -40,12 +41,13 @@ const Admin = () => {
     else if (tab === "analytics") setActiveTab("analytics");
     else if (tab === "config") setActiveTab("settings");
     else if (tab === "credenciales") setActiveTab("credentials");
+    else if (tab === "tickets") setActiveTab("tickets");
   }, []);
 
   const handleTabChange = (tab: typeof activeTab) => {
     setActiveTab(tab);
     const searchParams = new URLSearchParams(window.location.search);
-    const tabMap = { users: "usuarios", roles: "roles", analytics: "analytics", settings: "config", overview: "overview", credentials: "credenciales" };
+    const tabMap = { users: "usuarios", roles: "roles", analytics: "analytics", settings: "config", overview: "overview", credentials: "credenciales", tickets: "tickets" };
     searchParams.set("tab", tabMap[tab]);
     window.history.replaceState(null, "", `${window.location.pathname}?${searchParams.toString()}`);
   };
@@ -116,6 +118,7 @@ const Admin = () => {
     { id: "roles", label: "Seguridad", icon: Shield },
     { id: "analytics", label: "Métricas", icon: BarChart2 },
     { id: "credentials", label: "Credenciales", icon: KeyRound },
+    { id: "tickets", label: "Tickets", icon: Ticket },
     { id: "settings", label: "Infraestructura", icon: Settings },
   ] as const;
 
@@ -214,6 +217,9 @@ const Admin = () => {
             )}
             {activeTab === "credentials" && (
               <CredentialsTab />
+            )}
+            {activeTab === "tickets" && (
+              <TicketsTab />
             )}
             {activeTab === "settings" && (
               <SettingsTab 

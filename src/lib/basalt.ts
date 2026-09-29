@@ -56,6 +56,7 @@ export const BASALT_ASSISTANT: Assistant = {
     title: "Hola, soy Basalt",
     subtitle: "Conversa conmigo, crea planes de mercadeo, parrillas de contenido, piezas gráficas y agentes de IA.",
     cards: [
+      { label: "Construir una app o web", icon: "layout", prompt: "Constrúyeme una landing page para mi negocio." },
       { label: "Plan de mercadeo", icon: "chart", prompt: "Ayúdame a crear un plan de mercadeo para mi negocio. Hazme primero las preguntas clave que necesitas." },
       { label: "Parrilla de contenido", icon: "layout", prompt: "Crea una parrilla de contenido de un mes para Instagram, Facebook y LinkedIn de una empresa de consultoría en seguridad y salud en el trabajo (HSE)." },
       { label: "Pieza gráfica", icon: "image", prompt: "Diseña una pieza gráfica para Instagram que promocione un taller de cultura de seguridad (HSE) para empresas." },
@@ -151,6 +152,19 @@ export function parseBasaltReply(text: string) {
   // Mientras llega el stream, esconde una etiqueta que todavía no se cerró.
   visible = visible.replace(/<(memoria|imagen)[^]*$/i, "");
   return { visible: visible.trim(), memories, images };
+}
+
+// ─── Detección: "esto es un pedido de construir una app/web" ────────────────
+// El creador de apps ya no es un producto aparte — vive dentro de Basalt.
+// Si el mensaje pide claramente construir algo (verbo + sustantivo de app/web),
+// Basalt lo manda al motor de construcción (StudioChat en /chat) en vez de
+// responder por texto. Todo lo demás (marketing, piezas, agentes, charla)
+// se queda conversando aquí.
+const BUILD_VERBS = /\b(crea|cr[eé]ame|constru(?:ye|ime)|constr[uú]yeme|hazme|dise[ñn]a(?:me)?|desarrolla(?:me)?|monta(?:me)?|arma(?:me)?|genera(?:me)?)\b/i;
+const BUILD_NOUNS = /\b(app|aplicaci[oó]n|p[aá]gina(?:\s*web)?|sitio(?:\s*web)?|landing(?:\s*page)?|tienda(?:\s*online)?|e-?commerce|dashboard|formulario|blog|portafolio|portfolio|webapp|web\s*app|crm|saas)\b/i;
+
+export function isAppBuildRequest(text: string): boolean {
+  return BUILD_VERBS.test(text) && BUILD_NOUNS.test(text);
 }
 
 export function buildSystemPrompt(memory: string[]) {

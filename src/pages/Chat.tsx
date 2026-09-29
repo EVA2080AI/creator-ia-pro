@@ -517,7 +517,7 @@ function WelcomeScreen({
 // ─── Basalt IA ───────────────────────────────────────────────────────────────
 export default function Chat() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, signOut } = useAuth('/auth');
   const { profile } = useProfile(user?.id);
   const {
@@ -782,6 +782,20 @@ export default function Chat() {
     setCreatingWithPrompt(false);
   };
 
+
+  // Deep link (?prompt=<texto>) — lo usa Basalt (/a/basalt) cuando detecta un
+  // pedido de construir una app/web: crea el proyecto automáticamente al
+  // cargar, en vez de que el usuario tenga que volver a escribirlo aquí.
+  const appliedUrlPromptRef = useRef(false);
+  useEffect(() => {
+    if (appliedUrlPromptRef.current) return;
+    const urlPrompt = searchParams.get('prompt');
+    if (!urlPrompt) return;
+    appliedUrlPromptRef.current = true;
+    setSearchParams((prev) => { prev.delete('prompt'); return prev; }, { replace: true });
+    void handleWelcomePrompt(urlPrompt);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   const handleFileSelect = (file: File) => {
     // Antes esto leía TODO como texto, incluidas imágenes — un mockup

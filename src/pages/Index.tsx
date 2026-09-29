@@ -32,7 +32,7 @@ const PRODUCTS = [
     icon: Code2,
     color: "#4ADE80",
     cta: "Probar Basalt IA →",
-    path: "/chat",
+    path: "/a/basalt",
     features: ["Apps React + TypeScript", "Sitios web completos", "Preview instantáneo", "Claude Sonnet 4.5"],
     preview: [
       { label: "App.tsx", lines: 42, active: true },
@@ -1432,7 +1432,7 @@ export default function Index() {
                   <h4 className="text-white font-bold text-[13px] mb-4">Producto</h4>
                   <ul className="space-y-2">
                     {[
-                      { label: "Basalt IA", path: "/chat" },
+                      { label: "Basalt IA", path: "/a/basalt" },
                       { label: "Canvas IA", path: "/studio-flow" },
                       { label: "Precios", path: "/pricing" },
                     ].map((item) => (

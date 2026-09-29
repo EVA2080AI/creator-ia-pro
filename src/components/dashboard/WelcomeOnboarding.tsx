@@ -19,8 +19,8 @@ const INTENT_OPTIONS: IntentOption[] = [
   {
     icon: Code2,
     title: "Basalt IA",
-    desc: "Describe una idea y genera una app React completa, con preview en vivo. También incluye herramientas directas de imágenes, logos y copys.",
-    path: "/chat",
+    desc: "Convérsale: te ayuda con marketing, imágenes, agentes de IA y también construye tu app o landing completa.",
+    path: "/a/basalt",
     color: "text-primary",
     bg: "bg-primary/10 border-primary/20",
   },

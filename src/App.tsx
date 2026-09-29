@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { HelmetProvider } from "react-helmet-async";
 import { toast } from "sonner";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ReportButton } from "@/components/tickets/ReportButton";
 import { GlobalSearch } from "@/components/search/GlobalSearch";
 import { PerformanceMonitor } from "@/components/performance/PerformanceMonitor";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -164,6 +165,7 @@ const App = () => {
             <Toaster />
             <BrowserRouter>
               <AuthWatcher />
+              <ReportButton />
               <Suspense fallback={<LoadingScreen />}>
                 <Routes>
                   {/* ── Public routes (no AppLayout) ── */}

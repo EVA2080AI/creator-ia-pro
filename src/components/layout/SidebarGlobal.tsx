@@ -61,7 +61,6 @@ const NAV_MAIN: NavItemDef[] = [
   { path: '/tareas',       label: 'Tareas',        icon: ListTodo,       minTier: 'free' },
   { path: '/a/basalt',     label: 'Basalt IA',     icon: Brain,          minTier: 'free' },
   { path: '/arena',        label: 'Arena IA',      icon: Scale,          minTier: 'free' },
-  { path: '/chat',         label: 'Crear apps',    icon: Code2,          minTier: 'free' },
   { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: CANVAS_ENABLED ? 'pro' : 'soon' },
   { path: '/spaces',       label: 'Proyectos',     icon: FolderOpen,     minTier: 'pro' },
 ];

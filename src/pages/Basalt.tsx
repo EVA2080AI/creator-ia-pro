@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Plus, Send, Square, Sun, Moon, ArrowLeft, Loader2, Trash2, Brain, Scale, Code2,
+  Menu, Plus, Send, Square, Sun, Moon, ArrowLeft, Loader2, Trash2, Brain, Scale,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,7 +10,7 @@ import { brandCssVars } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
 import { CHAT_MODELS } from "@/lib/ai/models";
 import {
-  BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply,
+  BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply, isAppBuildRequest,
   loadConversations, saveConversation, deleteConversation, loadMemory, saveMemory,
   type StoredConversation, type StoredMsg,
 } from "@/lib/basalt";
@@ -100,6 +100,14 @@ export default function BasaltPage() {
   const sendPrompt = useCallback(async (prompt: string) => {
     const text = prompt.trim();
     if (!text || generating) return;
+
+    // El creador de apps vive dentro de Basalt: si el pedido es claramente
+    // construir una app/web, se manda al motor de construcción (StudioChat)
+    // en vez de responder por texto.
+    if (isAppBuildRequest(text)) {
+      navigate(`/chat?prompt=${encodeURIComponent(text)}`);
+      return;
+    }
 
     lastPromptRef.current = text;
     const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
@@ -201,7 +209,7 @@ export default function BasaltPage() {
       stickToBottom();
     }
     persist(convId, final);
-  }, [generating, messages, model, memory, userId, convId, stickToBottom, generateImages, persist]);
+  }, [generating, messages, model, memory, userId, convId, stickToBottom, generateImages, persist, navigate]);
 
   // /a/basalt?q=... (desde /chat o el dashboard) envía el primer mensaje solo.
   useEffect(() => {
@@ -265,9 +273,6 @@ export default function BasaltPage() {
 
         <button className="asst-side-link" onClick={() => navigate("/arena")}>
           <Scale className="w-4 h-4" /> Arena IA
-        </button>
-        <button className="asst-side-link" onClick={() => navigate("/chat")}>
-          <Code2 className="w-4 h-4" /> Crear una app
         </button>
         <button className="asst-side-link" onClick={() => setShowMemory((v) => !v)}>
           <Brain className="w-4 h-4" /> Memoria ({memory.length})

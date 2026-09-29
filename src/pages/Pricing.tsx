@@ -417,7 +417,7 @@ export default function Pricing() {
                       </a>
                     ) : (
                       <button
-                        onClick={() => plan.key === "free" ? navigate(isLoggedIn ? "/chat" : "/auth") : handleBoldAction(plan.key)}
+                        onClick={() => plan.key === "free" ? navigate(isLoggedIn ? "/a/basalt" : "/auth") : handleBoldAction(plan.key)}
                         disabled={loadingAction === plan.key}
                         className={cn(
                           "w-full py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden group/btn",
