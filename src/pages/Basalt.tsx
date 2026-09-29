@@ -381,7 +381,7 @@ export default function BasaltPage() {
             value={model}
             onChange={(e) => setModel(e.target.value)}
             aria-label="Modelo"
-            style={{ marginLeft: "auto", background: "var(--asst-panel)", color: "var(--asst-txt-2)", border: "1px solid var(--asst-border)", borderRadius: 10, padding: "6px 8px", fontSize: 12, fontWeight: 600, maxWidth: 200 }}
+            className="asst-model-select"
           >
             {CHAT_MODELS.map((m) => (
               <option key={m.id} value={m.id}>

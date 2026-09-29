@@ -38,7 +38,7 @@ const Auth = () => {
   // Punto de entrada tras iniciar sesión: el chat de Basalt (como Gemini/ChatGPT),
   // no el dashboard de métricas — eso queda como vista secundaria (⌘⇧D).
   useEffect(() => {
-    if (session?.user) navigate("/a/basalt");
+    if (session?.user) navigate("/a/basalt", { replace: true });
   }, [session, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,7 +57,7 @@ const Auth = () => {
         const { error } = await authClient.signIn.email({ email, password });
         if (error) throw new Error(error.message);
         toast.success("Sesión iniciada correctamente.");
-        navigate("/a/basalt");
+        navigate("/a/basalt", { replace: true });
       } else {
         const { error } = await authClient.signUp.email({
           email,
@@ -66,7 +66,7 @@ const Auth = () => {
         });
         if (error) throw new Error(error.message);
         toast.success("Cuenta creada. ¡Bienvenido!");
-        navigate("/a/basalt");
+        navigate("/a/basalt", { replace: true });
       }
     } catch (error: any) {
       toast.error(error.message || "Algo salió mal. Intenta de nuevo.");

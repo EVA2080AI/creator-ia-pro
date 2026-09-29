@@ -413,8 +413,15 @@ export default function Index() {
   const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
-    if (!authLoading && user) navigate("/a/basalt");
+    if (!authLoading && user) navigate("/a/basalt", { replace: true });
   }, [authLoading, user, navigate]);
+
+  // Basalt es el índice para cualquiera con sesión — no dejamos que la landing
+  // completa (animaciones, mockups, etc.) llegue a pintarse ni un frame antes
+  // de saltar, para que se sienta como "esta es la pantalla", no un redirect.
+  if (authLoading || user) {
+    return <div className="h-screen w-screen bg-white" />;
+  }
 
   return (
     <>
