@@ -50,6 +50,10 @@ export default function BasaltPage() {
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
   const [messages, setMessages] = useState<StoredMsg[]>([]);
   const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  // Sin esto, "Conversaciones" se ve igual vacía mientras carga que cuando
+  // de verdad no hay ninguna — se lee como sección rota (auditoría UX
+  // 2026-09-29), a diferencia de "Memoria" que sí distingue los dos casos.
+  const [conversationsLoading, setConversationsLoading] = useState(true);
   const [memory, setMemory] = useState<string[]>([]);
   const [showMemory, setShowMemory] = useState(false);
 
@@ -64,7 +68,7 @@ export default function BasaltPage() {
   useEffect(() => {
     if (!userId) return;
     void migrateLegacyLocalStorage(userId).then(() => {
-      void loadConversations(userId).then(setConversations);
+      void loadConversations(userId).then((c) => { setConversations(c); setConversationsLoading(false); });
       void loadMemory(userId).then(setMemory);
     });
   }, [userId]);
@@ -253,9 +257,12 @@ export default function BasaltPage() {
   };
 
   if (authLoading) {
+    // bg-white fijo sin dark: — antes de que monte .asst-app no hay
+    // data-asst-theme, así que usa la clase .dark global (Tailwind) en vez
+    // del atributo propio de Basalt (auditoría UX 2026-09-29).
     return (
-      <div className="flex h-screen items-center justify-center bg-white">
-        <Loader2 className="h-7 w-7 animate-spin text-zinc-300" />
+      <div className="flex h-screen items-center justify-center bg-white dark:bg-[#131314]">
+        <Loader2 className="h-7 w-7 animate-spin text-zinc-300 dark:text-zinc-600" />
       </div>
     );
   }
@@ -305,17 +312,25 @@ export default function BasaltPage() {
                 scrollea completo (overflow-y:auto), como la lista de
                 Expertos — no hace falta un scroll anidado acá. */}
             <div>
-              {conversations.map((c) => (
-                <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
-                  <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
-                    <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-                  </button>
-                  <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+              {conversationsLoading ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando…
                 </div>
-              ))}
+              ) : conversations.length === 0 ? (
+                <p style={{ padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>Todavía no hay conversaciones guardadas.</p>
+              ) : (
+                conversations.map((c) => (
+                  <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
+                    <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
+                      <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
+                    </button>
+                    <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
           </>
         }

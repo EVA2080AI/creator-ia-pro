@@ -313,9 +313,12 @@ const Profile = () => {
               </div>
             </div>
 
-            {/* Preferencias — el toggle de modo oscuro vivía en el sidebar
-                principal, compitiendo con la navegación; es una preferencia
-                de cuenta, así que se movió acá (auditoría UX). */}
+            {/* Preferencias — el toggle de modo oscuro se sacó del
+                SidebarGlobal viejo, donde competía con la navegación
+                (auditoría UX). Sigue existiendo también en el pie del
+                sidebar de Basalt (BasaltShellSidebar) como acceso rápido —
+                mismo estado global (useTheme), duplicado a propósito: acá
+                vive la preferencia "de verdad", allá el atajo. */}
             <div className="rounded-3xl bg-muted/50 border border-border p-6 space-y-4">
               <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Preferencias</h2>
               <button

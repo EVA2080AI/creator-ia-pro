@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useAdmin } from "@/hooks/useAdmin";
+import { CANVAS_ENABLED } from "@/lib/features";
 import { listSpaces, createSpace, deleteSpace, type Space } from "@/lib/spaces";
 import { listAssets } from "@/lib/assets";
 import { listTransactions, weeklySpend, toolBreakdown } from "@/lib/transactions";
@@ -59,6 +61,12 @@ export default function Dashboard() {
   const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { profile } = useProfile(user?.id);
+  const { isAdmin } = useAdmin(user?.id);
+  // Canvas IA está detrás de un flag apagado — sin este chequeo, crear/abrir
+  // un espacio "flow" desde acá crea filas reales en Postgres (space +
+  // canvas_node) que terminan en un callejón sin salida ("Próximamente"),
+  // ensuciando la base para cada intento (auditoría UX 2026-09-29).
+  const canvasToast = () => toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
   const { projects: studioProjects, deleteProject: deleteStudioProject, duplicateProject } = useStudioProjects();
   
   const [spaces, setSpaces] = useState<DashboardProject[]>([]);
@@ -139,6 +147,11 @@ export default function Dashboard() {
 
   const handleCreateSpace = async () => {
     if (!user || !newSpaceName.trim()) return;
+    if (!CANVAS_ENABLED && !isAdmin) {
+      setIsCreatingSpace(false);
+      canvasToast();
+      return;
+    }
     const space = await createSpace({ name: newSpaceName, description: newSpaceDesc });
     if (!space) { toast.error("Error al crear el espacio"); return; }
     toast.success("Espacio creado");
@@ -152,6 +165,7 @@ export default function Dashboard() {
       const newProj = await duplicateProject(project as any);
       if (newProj) setSpaces(prev => [{ ...newProj, type: 'code', thumbnail_url: null } as DashboardProject, ...prev]);
     } else {
+      if (!CANVAS_ENABLED && !isAdmin) { canvasToast(); return; }
       const space = await createSpace({ name: `${project.name} (Copia)`, description: project.description ?? undefined });
       if (!space) { toast.error("Error al duplicar"); return; }
       setSpaces(prev => [{
@@ -217,7 +231,11 @@ export default function Dashboard() {
             { icon: ListTodo, label: "Tareas", desc: "Kanban", path: "/tasks" },
             { icon: FileText, label: "Espacios", desc: "Archivos", path: "/spaces" },
           ].map((app) => (
-            <button key={app.label} onClick={() => navigate(app.path)} className="p-5 bg-card border border-border rounded-2xl text-left hover:border-primary transition-all group">
+            <button
+              key={app.label}
+              onClick={() => (app.path === "/studio-flow" && !CANVAS_ENABLED && !isAdmin ? canvasToast() : navigate(app.path))}
+              className="p-5 bg-card border border-border rounded-2xl text-left hover:border-primary transition-all group"
+            >
               <div className={"w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-all"}>
                 <app.icon className="w-5 h-5" />
               </div>
@@ -250,7 +268,7 @@ export default function Dashboard() {
                   onDuplicate={(e) => handleDuplicate(e, space)} 
                   onDelete={(e) => handleDelete(e, space)}
                   onClick={() => {
-                    if (space.type === 'code') navigate(`/chat?project=${space.id}`);
+                    if (space.type === 'code') navigate(`/a/basalt?project=${space.id}`);
                     else navigate(`/studio-flow?spaceId=${space.id}`);
                   }}
                 />

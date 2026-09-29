@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
+import { CANVAS_ENABLED } from "@/lib/features";
 import { useStudioProjects } from "@/hooks/useStudioProjects";
 import { listSpaces, updateSpace, deleteSpace } from "@/lib/spaces";
 import { toast } from "sonner";
@@ -39,7 +41,18 @@ interface UnifiedProject {
 
 export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => {
   const { user } = useAuth();
+  const { isAdmin } = useAdmin(user?.id);
   const navigate = useNavigate();
+
+  // Mismo toast que ya usa el sidebar de Basalt para Canvas IA (apagado por
+  // flag) en vez de navegar a un callejón sin salida (auditoría UX 2026-09-29).
+  const goToCanvas = () => {
+    if (!CANVAS_ENABLED && !isAdmin) {
+      toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
+      return;
+    }
+    navigate("/studio-flow");
+  };
   const {
     projects: codeProjects, loading: codeLoading, deleteProject: deleteCodeProject,
     updateProjectMeta, refetch: refetchCodeProjects,
@@ -142,10 +155,9 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
       navigate(`/studio-flow?spaceId=${space.id}`);
     } else {
       // "Code Editor" ya no existe como interfaz separada — se fusionó
-      // dentro de Basalt IA (Fase 5 de la restructuración). Antes esto abría
-      // un diálogo "Basalt IA vs Code Editor" cuya segunda opción navegaba a
-      // /code, que ya solo redirige de vuelta a /chat — una elección falsa.
-      navigate(`/chat?project=${space.id}`);
+      // dentro de Basalt IA (Fase 5 de la restructuración), que hoy vive
+      // directo en /a/basalt (el propio /chat solo redirige para allá).
+      navigate(`/a/basalt?project=${space.id}`);
     }
   };
 
@@ -305,7 +317,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
               <button onClick={onOpenCreate} className="flex items-center gap-2 px-4 py-2 border border-primary/30 rounded-xl bg-primary/5 hover:bg-primary/10 text-xs font-bold text-primary transition-all font-display shadow-sm">
                 <LayoutTemplate className="h-3.5 w-3.5" /> Explorar Hub (Plantillas)
               </button>
-              <button onClick={() => navigate('/studio-flow')} className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl bg-card hover:bg-muted text-xs font-bold text-foreground transition-all font-display shadow-sm">
+              <button onClick={goToCanvas} className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl bg-card hover:bg-muted text-xs font-bold text-foreground transition-all font-display shadow-sm">
                 <Plus className="h-3.5 w-3.5" /> Lienzo en Blanco
               </button>
             </div>

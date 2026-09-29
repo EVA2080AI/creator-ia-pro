@@ -151,7 +151,14 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
       style={{ width: isMobile ? 240 : W }}
       aria-label="Navegación principal"
     >
-      <div className="flex h-[60px] items-center gap-3 px-3 shrink-0 uppercase tracking-tighter relative">
+      {/* El Sheet mobile (AppLayout.tsx) arranca en el borde real del
+          viewport (top:0), sin el padding-top que sí tiene el drawer de
+          Basalt para el notch/status bar — mismo bug ya resuelto ahí,
+          reabierto acá (auditoría UX 2026-09-29). */}
+      <div
+        className="flex h-[60px] items-center gap-3 px-3 shrink-0 uppercase tracking-tighter relative"
+        style={isMobile ? { paddingTop: "env(safe-area-inset-top)", height: "calc(60px + env(safe-area-inset-top))" } : undefined}
+      >
         <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-border/50 to-transparent" />
         <AnimatePresence mode="wait">
           {(globalExpanded || isMobile) ? (

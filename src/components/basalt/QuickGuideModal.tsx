@@ -1,11 +1,11 @@
-import { X, MessageSquare, Users, Brain, Scale, LayoutGrid } from "lucide-react";
+import { X, MessageSquare, Users, Brain, Scale, LayoutGrid, LayoutTemplate } from "lucide-react";
 import { markBasaltGuideSeen } from "@/lib/basalt-guide";
 
 const STEPS = [
   {
     icon: MessageSquare,
     title: "Conversa como con Gemini o ChatGPT",
-    desc: "Escríbele lo que necesites: dudas, ideas, planes. Si le pides una app o un sitio web, también te la construye completa.",
+    desc: "Escríbele lo que necesites: dudas, ideas, planes. Si le pides una app o un sitio web, te da el código listo para copiar, ahí mismo en el chat.",
   },
   {
     icon: Users,
@@ -14,8 +14,8 @@ const STEPS = [
   },
   {
     icon: Brain,
-    title: "Memoria",
-    desc: "Basalt recuerda datos que le cuentas entre conversaciones — tu marca, tu negocio, tus preferencias — para no repetírselos cada vez.",
+    title: "Memoria y tus conversaciones",
+    desc: "Basalt recuerda datos que le cuentas (tu marca, tu negocio, tus preferencias) y tus conversaciones quedan guardadas — las ves en \"Conversaciones\" del menú, aunque cambies de dispositivo.",
   },
   {
     icon: Scale,
@@ -23,9 +23,14 @@ const STEPS = [
     desc: "Compara varios modelos de IA respondiendo la misma pregunta, lado a lado, para elegir el que mejor te sirva.",
   },
   {
+    icon: LayoutTemplate,
+    title: "Canvas IA",
+    desc: "Editor visual para piezas gráficas — todavía en construcción, lo ves en el menú marcado como \"Pronto\".",
+  },
+  {
     icon: LayoutGrid,
-    title: "Tareas, Proyectos y Perfil",
-    desc: "Viven en la misma barra lateral, sección \"Plataforma\" — sin salir de Basalt para ir de un lado a otro.",
+    title: "Tareas, Proyectos, Perfil y tu cuenta",
+    desc: "Viven en la misma barra lateral, sección \"Plataforma\" — sin salir de Basalt. Tu plan y configuración están en el botón con tu nombre, abajo del todo.",
   },
 ];
 

@@ -59,6 +59,7 @@ export default function AssistantPage() {
 
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
   const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
   const [messages, setMessages] = useState<StoredMsg[]>([]);
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -89,8 +90,9 @@ export default function AssistantPage() {
   // separado por assistantSlug en la misma tabla.
   useEffect(() => {
     if (!userId) return;
+    setConversationsLoading(true);
     void migrateLegacyLocalStorage(userId).then(() => {
-      void loadConversations(userId, slug).then(setConversations);
+      void loadConversations(userId, slug).then((c) => { setConversations(c); setConversationsLoading(false); });
     });
   }, [userId, slug]);
 
@@ -244,16 +246,16 @@ export default function AssistantPage() {
 
   if (authLoading || loadingAssistant) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white">
-        <Loader2 className="h-7 w-7 animate-spin text-zinc-300" />
+      <div className="flex h-screen items-center justify-center bg-white dark:bg-[#131314]">
+        <Loader2 className="h-7 w-7 animate-spin text-zinc-300 dark:text-zinc-600" />
       </div>
     );
   }
 
   if (!assistant) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-white text-center px-6">
-        <p className="text-sm text-zinc-500">No encontramos este asistente.</p>
+      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-white dark:bg-[#131314] text-center px-6">
+        <p className="text-sm text-zinc-500 dark:text-zinc-400">No encontramos este asistente.</p>
         <button onClick={() => navigate("/a/basalt")} className="text-sm font-bold text-primary underline">Volver al inicio</button>
       </div>
     );
@@ -279,17 +281,25 @@ export default function AssistantPage() {
 
         <div className="asst-switcher-label">Conversaciones</div>
         <div>
-          {conversations.map((c) => (
-            <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
-              <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
-                <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-              </button>
-              <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+          {conversationsLoading ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando…
             </div>
-          ))}
+          ) : conversations.length === 0 ? (
+            <p style={{ padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>Todavía no hay conversaciones guardadas.</p>
+          ) : (
+            conversations.map((c) => (
+              <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
+                <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
+                  <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
+                </button>
+                <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="asst-switcher-label">Plataforma</div>

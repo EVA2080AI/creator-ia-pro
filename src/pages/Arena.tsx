@@ -94,25 +94,25 @@ export default function ArenaPage() {
   };
 
   if (authLoading) {
-    return <div className="flex h-screen items-center justify-center bg-white"><Loader2 className="h-7 w-7 animate-spin text-zinc-300" /></div>;
+    return <div className="flex h-screen items-center justify-center bg-background"><Loader2 className="h-7 w-7 animate-spin text-muted-foreground" /></div>;
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-background">
       <Helmet><title>Arena IA | Creator IA Pro</title></Helmet>
-      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-zinc-200 bg-white/90 px-4 py-3 backdrop-blur">
-        <button onClick={() => navigate("/a/basalt")} className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100" aria-label="Volver a Basalt">
+      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
+        <button onClick={() => navigate("/a/basalt")} className="rounded-lg p-2 text-muted-foreground hover:bg-muted" aria-label="Volver a Basalt">
           <ArrowLeft className="h-4 w-4" />
         </button>
         <Scale className="h-5 w-5 text-primary" />
-        <h1 className="font-display text-lg font-black text-zinc-900">Arena IA</h1>
-        <span className="hidden text-[12px] text-zinc-500 sm:inline">Compara modelos con el mismo prompt y vota el mejor</span>
+        <h1 className="font-display text-lg font-black text-foreground">Arena IA</h1>
+        <span className="hidden text-[12px] text-muted-foreground sm:inline">Compara modelos con el mismo prompt y vota el mejor</span>
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-6">
         <form
           onSubmit={(e) => { e.preventDefault(); run(); }}
-          className="mb-6 flex items-end gap-2 rounded-2xl border border-zinc-200 bg-white p-3 shadow-sm"
+          className="mb-6 flex items-end gap-2 rounded-2xl border border-border bg-card p-3 shadow-sm"
         >
           <textarea
             rows={2}
@@ -133,48 +133,48 @@ export default function ArenaPage() {
           )}
         </form>
 
-        {askedPrompt && <p className="mb-3 text-[13px] text-zinc-500">Prompt: <span className="font-semibold text-zinc-800">{askedPrompt}</span></p>}
+        {askedPrompt && <p className="mb-3 text-[13px] text-muted-foreground">Prompt: <span className="font-semibold text-foreground">{askedPrompt}</span></p>}
 
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(280px, 1fr))` }}>
           {lanes.map((lane, i) => {
             const m = getModel(lane.model);
             const isWinner = winner === lane.model;
             return (
-              <section key={i} className={`flex flex-col rounded-2xl border bg-white ${isWinner ? "border-amber-400 ring-2 ring-amber-200" : "border-zinc-200"}`}>
-                <div className="flex items-center gap-2 border-b border-zinc-100 px-3 py-2">
+              <section key={i} className={`flex flex-col rounded-2xl border bg-card ${isWinner ? "border-amber-400 ring-2 ring-amber-200" : "border-border"}`}>
+                <div className="flex items-center gap-2 border-b border-border px-3 py-2">
                   <select
                     value={lane.model}
                     disabled={running}
                     onChange={(e) => patch(i, { model: e.target.value, text: "", status: "idle" })}
-                    className="min-w-0 flex-1 rounded-lg bg-zinc-50 px-2 py-1.5 text-[12px] font-bold text-zinc-700 outline-none"
+                    className="min-w-0 flex-1 rounded-lg bg-muted px-2 py-1.5 text-[12px] font-bold text-foreground outline-none"
                   >
                     {CHAT_MODELS.map((cm) => (
                       <option key={cm.id} value={cm.id}>{cm.label} {cm.free ? "· gratis" : `· ${cm.credits} cr`}</option>
                     ))}
                   </select>
                   {lanes.length > 2 && !running && (
-                    <button onClick={() => setLanes((prev) => prev.filter((_, k) => k !== i))} className="rounded p-1 text-zinc-400 hover:text-zinc-700" aria-label="Quitar modelo">
+                    <button onClick={() => setLanes((prev) => prev.filter((_, k) => k !== i))} className="rounded p-1 text-muted-foreground hover:text-foreground" aria-label="Quitar modelo">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   )}
                 </div>
                 <div className="asst-md min-h-[220px] flex-1 overflow-auto px-4 py-3 text-[14px]" style={{ maxHeight: "60vh" }}>
                   {lane.status === "error" ? (
-                    <p className="text-[13px] text-red-600">{lane.error}</p>
+                    <p className="text-[13px] text-red-600 dark:text-red-400">{lane.error}</p>
                   ) : lane.text ? (
                     <div dangerouslySetInnerHTML={{ __html: mdToHtml(lane.text) }} />
                   ) : lane.status === "streaming" ? (
-                    <div className="flex items-center gap-2 text-[12px] text-zinc-400"><Loader2 className="h-4 w-4 animate-spin" /> Pensando…</div>
+                    <div className="flex items-center gap-2 text-[12px] text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin" /> Pensando…</div>
                   ) : (
-                    <p className="text-[12px] text-zinc-400">{m.provider} · {m.description}</p>
+                    <p className="text-[12px] text-muted-foreground">{m.provider} · {m.description}</p>
                   )}
                 </div>
-                <div className="flex items-center justify-between border-t border-zinc-100 px-3 py-2 text-[11px] text-zinc-400">
+                <div className="flex items-center justify-between border-t border-border px-3 py-2 text-[11px] text-muted-foreground">
                   <span>{lane.ms ? `${(lane.ms / 1000).toFixed(1)} s` : ""}</span>
                   <button
                     disabled={lane.status !== "done" || running}
                     onClick={() => setWinner(lane.model)}
-                    className={`flex items-center gap-1 rounded-lg px-2.5 py-1 font-bold disabled:opacity-30 ${isWinner ? "bg-amber-100 text-amber-700" : "text-zinc-600 hover:bg-zinc-100"}`}
+                    className={`flex items-center gap-1 rounded-lg px-2.5 py-1 font-bold disabled:opacity-30 ${isWinner ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400" : "text-muted-foreground hover:bg-muted"}`}
                   >
                     <Trophy className="h-3.5 w-3.5" /> {isWinner ? "Ganador" : "Votar"}
                   </button>
@@ -185,7 +185,7 @@ export default function ArenaPage() {
           {lanes.length < 4 && !running && (
             <button
               onClick={() => setLanes((prev) => [...prev, { model: CHAT_MODELS.find((m) => !prev.some((l) => l.model === m.id))?.id ?? CHAT_MODELS[0].id, text: "", status: "idle" }])}
-              className="flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-zinc-200 text-[13px] font-bold text-zinc-400 hover:border-primary hover:text-primary"
+              className="flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border text-[13px] font-bold text-muted-foreground hover:border-primary hover:text-primary"
             >
               <Plus className="h-5 w-5" /> Agregar modelo
             </button>

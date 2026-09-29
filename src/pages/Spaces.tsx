@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
-import { FolderOpen, Image as ImageIcon, Plus, LayoutTemplate, Code2, Sparkles, Wand2 } from "lucide-react";
+import { FolderOpen, Image as ImageIcon, Plus, LayoutTemplate, Code2, Sparkles } from "lucide-react";
 import { ProjectsView } from "@/components/spaces/ProjectsView";
 import { LibraryView } from "@/components/spaces/LibraryView";
 import { HubView } from "@/components/spaces/HubView";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
+import { CANVAS_ENABLED } from "@/lib/features";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 import {
@@ -13,9 +16,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const Spaces = () => {
-  const { loading: authLoading } = useAuth("/auth");
+  const { user, loading: authLoading } = useAuth("/auth");
+  const { isAdmin } = useAdmin(user?.id);
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'projects' | 'library' | 'hub'>('projects');
+
+  // Canvas IA está apagado por flag — "Flujo en Blanco" no crea nada en la
+  // base (solo navega sin spaceId), pero igual es un callejón sin salida;
+  // mismo toast que ya usa el sidebar de Basalt en vez de navegar en falso
+  // (auditoría UX 2026-09-29).
+  const goToCanvas = () => {
+    if (!CANVAS_ENABLED && !isAdmin) {
+      toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
+      return;
+    }
+    navigate("/studio-flow");
+  };
 
   if (authLoading) {
     return (
@@ -72,18 +88,13 @@ const Spaces = () => {
                 <div className="p-2 pb-1">
                   <span className="text-[9px] font-black tracking-widest uppercase text-muted-foreground font-display">Crear Recurso</span>
                 </div>
-                <DropdownMenuItem className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-muted focus:bg-primary/10 focus:text-primary transition-all font-display text-muted-foreground mb-0.5">
-                  <Wand2 className="h-4 w-4 mr-3 opacity-60" /> 
-                  Flujo desde IA
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-muted my-1 mx-2" />
                 <DropdownMenuItem className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-muted focus:bg-primary/10 focus:text-primary transition-all font-display text-muted-foreground mb-0.5"
                   onClick={() => setActiveTab('hub')}>
                   <Sparkles className="h-4 w-4 mr-3 opacity-60 text-primary" /> 
                   Hub de Plantillas
                 </DropdownMenuItem>
                 <DropdownMenuItem className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-muted focus:bg-primary/10 focus:text-primary transition-all font-display text-muted-foreground mb-0.5"
-                  onClick={() => navigate('/studio-flow')}>
+                  onClick={goToCanvas}>
                   <LayoutTemplate className="h-4 w-4 mr-3 opacity-60" /> 
                   Flujo en Blanco
                 </DropdownMenuItem>

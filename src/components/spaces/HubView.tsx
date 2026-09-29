@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { motion, useInView } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useAdmin } from "@/hooks/useAdmin";
+import { CANVAS_ENABLED } from "@/lib/features";
 import { createSpace } from "@/lib/spaces";
 import { createCanvasNode, upsertCanvasEdges } from "@/lib/canvas-nodes";
 import { toast } from "sonner";
@@ -20,6 +22,7 @@ const NEW_TEMPLATE_IDS = new Set(TEMPLATES.slice(-5).map(t => t.id));
 export const HubView = () => {
   const { user, signOut } = useAuth("/auth");
   const { profile } = useProfile(user?.id);
+  const { isAdmin } = useAdmin(user?.id);
   const navigate = useNavigate();
   const [category, setCategory] = useState(TEMPLATE_CATEGORIES[0]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,6 +36,14 @@ export const HubView = () => {
 
   const handleUseTemplate = async (template: typeof TEMPLATES[0]) => {
     if (!user) return;
+    // Canvas IA está apagado por flag — sin este chequeo, "usar plantilla"
+    // crea un espacio + nodos + edges reales en Postgres y después manda a
+    // un callejón sin salida ("Próximamente"), dejando basura en la base
+    // por cada intento (auditoría UX 2026-09-29).
+    if (!CANVAS_ENABLED && !isAdmin) {
+      toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
+      return;
+    }
     try {
       const space = await createSpace({ name: template.title, description: template.description });
       if (!space) throw new Error("No se pudo crear el espacio");

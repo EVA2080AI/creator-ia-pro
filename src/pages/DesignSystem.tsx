@@ -32,7 +32,7 @@ export default function DesignSystem() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex">
+    <div className="min-h-screen bg-background flex">
       <Helmet>
         <title>Aether V8.0 | Design System</title>
       </Helmet>
@@ -41,7 +41,7 @@ export default function DesignSystem() {
       <DesignSidebar activeSection={activeSection} onSectionClick={scrollTo} />
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 min-w-0 bg-white">
+      <main className="flex-1 min-w-0 bg-background">
         
         {/* Hero Section */}
         <DesignHero />
@@ -61,53 +61,53 @@ export default function DesignSystem() {
         </div>
 
         {/* Footer Section */}
-        <footer className="px-8 lg:px-20 py-20 bg-zinc-50 border-t border-zinc-200">
+        <footer className="px-8 lg:px-20 py-20 bg-muted/50 border-t border-border">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-12 text-center md:text-left">
             <div className="space-y-4">
               <div className="flex items-center gap-3 justify-center md:justify-start">
-                <div className="h-8 w-8 rounded-xl bg-zinc-900 flex items-center justify-center text-white">
+                <div className="h-8 w-8 rounded-xl bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center text-white dark:text-zinc-900">
                   <Zap className="h-4 w-4" />
                 </div>
-                <span className="text-xl font-black text-zinc-900 tracking-tight">Creator IA Pro</span>
+                <span className="text-xl font-black text-foreground tracking-tight">Creator IA Pro</span>
               </div>
-              <p className="text-sm text-zinc-500 font-medium max-w-sm">
+              <p className="text-sm text-muted-foreground font-medium max-w-sm">
                 Diseñado para fundadores, ingenieros y mentes creativas del mañana.
               </p>
             </div>
-            
+
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-12">
               <div className="space-y-6">
-                <h5 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Recursos</h5>
+                <h5 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Recursos</h5>
                 <ul className="space-y-3">
-                  <li><a href="#" className="text-sm font-bold text-zinc-600 hover:text-blue-600 transition-colors flex items-center gap-1">Docs <ArrowUpRight className="h-3 w-3" /></a></li>
-                  <li><a href="#" className="text-sm font-bold text-zinc-600 hover:text-blue-600 transition-colors flex items-center gap-1">Github <Github className="h-3 w-3" /></a></li>
-                  <li><a href="#" className="text-sm font-bold text-zinc-600 hover:text-blue-600 transition-colors flex items-center gap-1">Figma <Figma className="h-3 w-3" /></a></li>
+                  <li><a href="#" className="text-sm font-bold text-foreground/80 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1">Docs <ArrowUpRight className="h-3 w-3" /></a></li>
+                  <li><a href="#" className="text-sm font-bold text-foreground/80 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1">Github <Github className="h-3 w-3" /></a></li>
+                  <li><a href="#" className="text-sm font-bold text-foreground/80 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1">Figma <Figma className="h-3 w-3" /></a></li>
                 </ul>
               </div>
               <div className="space-y-6">
-                <h5 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Legal</h5>
+                <h5 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Legal</h5>
                 <ul className="space-y-3">
-                  <li><a href="#" className="text-sm font-bold text-zinc-600 hover:text-blue-600 transition-colors">Privacidad</a></li>
-                  <li><a href="#" className="text-sm font-bold text-zinc-600 hover:text-blue-600 transition-colors">Términos</a></li>
-                  <li><a href="#" className="text-sm font-bold text-zinc-600 hover:text-blue-600 transition-colors">Licencia</a></li>
+                  <li><a href="#" className="text-sm font-bold text-foreground/80 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Privacidad</a></li>
+                  <li><a href="#" className="text-sm font-bold text-foreground/80 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Términos</a></li>
+                  <li><a href="#" className="text-sm font-bold text-foreground/80 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Licencia</a></li>
                 </ul>
               </div>
               <div className="space-y-6 hidden sm:block">
-                <h5 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Comunidad</h5>
+                <h5 className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Comunidad</h5>
                 <ul className="space-y-3">
-                  <li><a href="#" className="text-sm font-bold text-zinc-600 hover:text-blue-600 transition-colors">Discord</a></li>
-                  <li><a href="#" className="text-sm font-bold text-zinc-600 hover:text-blue-600 transition-colors">Twitter</a></li>
+                  <li><a href="#" className="text-sm font-bold text-foreground/80 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Discord</a></li>
+                  <li><a href="#" className="text-sm font-bold text-foreground/80 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Twitter</a></li>
                 </ul>
               </div>
             </div>
           </div>
-          <div className="mt-20 pt-10 border-t border-zinc-200 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">© 2026 Creator IA Pro · Proudly built with Aether</p>
-            <div className="flex items-center gap-2 text-zinc-300">
+          <div className="mt-20 pt-10 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">© 2026 Creator IA Pro · Proudly built with Aether</p>
+            <div className="flex items-center gap-2 text-muted-foreground/60">
               <Box className="h-4 w-4" />
-              <div className="h-4 w-[1px] bg-zinc-200" />
+              <div className="h-4 w-[1px] bg-border" />
               <Layers className="h-4 w-4" />
-              <div className="h-4 w-[1px] bg-zinc-200" />
+              <div className="h-4 w-[1px] bg-border" />
               <Zap className="h-4 w-4" />
             </div>
           </div>

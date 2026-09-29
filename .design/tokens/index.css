@@ -252,12 +252,15 @@
 }
 
 /* ─────────────────────────────────────────────────────────
-   MODO OSCURO — NO implementado hoy a nivel de app.
-   No hay `@media (prefers-color-scheme: dark)` ni toggle de clase
-   `.dark` en src/index.css: toda la superficie clara ("Lumina") es
-   fija. Lo único oscuro que existe en vivo son paneles puntuales del
-   Studio/Genesis (no un theme completo, no responde a la preferencia
-   del sistema ni a un switch de usuario):
+   MODO OSCURO — implementado a nivel de app desde 2026-09-29.
+   `src/hooks/useTheme.tsx` (ThemeProvider/useTheme) toggla la clase
+   `.dark` en <html> según preferencia guardada o `prefers-color-scheme`
+   del sistema; el bloque `.dark { ... }` de src/index.css redefine los
+   tokens semánticos de arriba para ese modo. El toggle vive en Perfil
+   ("Preferencias") y en el pie del sidebar de Basalt.
+
+   Aparte de eso siguen existiendo los paneles puntuales oscuros del
+   Studio/Genesis, sin relación con el theme de toda la app:
 
      --sov-bg: 240 10% 4%;        (#0A0A0C, fondo panel Studio)
      --sov-border: rgba(255,255,255,0.08);
@@ -265,8 +268,6 @@
 
    más las utilidades `.aether-glass-dark`, `.aether-sov-glass`,
    `.glass-panel` (glassmorphism oscuro) definidas en src/index.css.
-   Si se implementa dark mode real para toda la app, es trabajo nuevo,
-   no algo que ya exista y solo falte documentar.
    ───────────────────────────────────────────────────────── */
 
 /* ─────────────────────────────────────────────────────────

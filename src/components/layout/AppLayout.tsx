@@ -19,7 +19,10 @@ export function AppLayout() {
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* ── Mobile Floating Trigger (Headerless Design) ── */}
-        <div className="md:hidden fixed top-4 left-4 z-[60]">
+        {/* top-4 fijo queda debajo del notch/status bar en iPhone — mismo
+            bug que ya se arregló en el drawer de Basalt, reabierto acá
+            (auditoría UX 2026-09-29). */}
+        <div className="md:hidden fixed left-4 z-[60]" style={{ top: "calc(1rem + env(safe-area-inset-top))" }}>
           <Sheet>
             <SheetTrigger asChild>
               <button

@@ -1133,8 +1133,12 @@ export default function Index() {
                       <Layers className="h-4 w-4" />
                       Próximamente
                     </motion.button>
+                    {/* /hub exige sesión (vive dentro de BasaltAppLayout) —
+                        antes mandaba a un visitante sin cuenta por
+                        /hub→/spaces→login, un salto extra de redirects
+                        (auditoría UX 2026-09-29). Directo a /auth. */}
                     <button
-                      onClick={() => navigate("/hub")}
+                      onClick={() => navigate("/auth")}
                       className="flex items-center gap-2 text-[14px] text-zinc-500 hover:text-zinc-900 transition-colors font-medium"
                     >
                       Ver templates <ArrowRight className="h-4 w-4" />

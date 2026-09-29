@@ -52,7 +52,7 @@ Ver `.design/tokens/index.css` para variables CSS completas.
 --font-size-base: 0.9375rem; /* 15px */
 ```
 
-Modo oscuro: no implementado a nivel de app (sin `prefers-color-scheme`/toggle `.dark`) — solo existen superficies oscuras puntuales del Studio/Genesis (`--sov-*`). Ver la nota completa al tope de `.design/tokens/index.css`.
+Modo oscuro: implementado a nivel de app desde 2026-09-29 (`src/hooks/useTheme.tsx`, toggle `.dark` en `<html>`, respeta `prefers-color-scheme`). Toggle en Perfil y en el sidebar de Basalt. Ver la nota completa al tope de `.design/tokens/index.css`.
 
 ## Stack Técnico
 
