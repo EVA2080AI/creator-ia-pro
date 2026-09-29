@@ -2,21 +2,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Plus, Send, Square, Sun, Moon, ArrowLeft, Loader2, Trash2, MessageSquare,
+  Menu, Send, Square, Loader2, Trash2, MessageSquare,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Scale, Dice5, Wallet, Sparkles, Bot,
-  ListTodo, FolderOpen, User, LogOut, ShieldCheck, Bug,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useAdmin } from "@/hooks/useAdmin";
 import { useTheme } from "@/hooks/useTheme";
-import { Logo } from "@/components/Logo";
-import { ReportModal } from "@/components/tickets/ReportModal";
-import { ExpertsAccordion } from "@/components/layout/ExpertsAccordion";
+import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
+import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
-import {
-  listAssistants, getAssistant, brandCssVars,
+  getAssistant, brandCssVars,
   type Assistant, type AssistantWelcomeCard,
 } from "@/lib/assistants";
 import {
@@ -25,6 +19,12 @@ import {
 } from "@/lib/basalt";
 import { mdToHtml } from "@/lib/markdown";
 import "./Assistant.css";
+
+// Homologado con Basalt.tsx (auditoría UX 2026-09-29: "los expertos...
+// deben ser un solo nombre" + "deben tener también persistir sus chat") —
+// usa el MISMO BasaltShellSidebar en vez de un <nav> propio armado a mano,
+// que había divergido en silencio: menú de Cuenta pelado, sin Guía rápida,
+// sin Arena IA/Canvas IA, sin selector de modelo, historial sin truncar.
 
 const ICONS: Record<string, typeof LayoutTemplate> = {
   layout: LayoutTemplate,
@@ -44,18 +44,19 @@ function CardIcon({ name }: { name?: string }) {
 export default function AssistantPage() {
   const { slug = "mentor" } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { user, loading: authLoading, signOut } = useAuth("/auth");
-  const { isAdmin } = useAdmin(user?.id);
+  const { user, loading: authLoading } = useAuth("/auth");
 
-  const [assistants, setAssistants] = useState<Assistant[]>([]);
   const [assistant, setAssistant] = useState<Assistant | null>(null);
   const [loadingAssistant, setLoadingAssistant] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showReport, setShowReport] = useState(false);
   // Mismo tema global que el resto de la app — antes cada Experto tenía su
   // propio estado de tema local, y hasta forzaba oscuro según brand.theme,
   // peleando con la preferencia del usuario (auditoría UX 2026-09-29).
   const { resolvedTheme: theme, setTheme } = useTheme();
+  // Se calcula una sola vez al montar — mismo mecanismo que Basalt.tsx, por
+  // si el primer contacto de un usuario nuevo es un link directo a un
+  // Experto en vez de /a/basalt.
+  const [autoGuide] = useState(() => !hasSeenBasaltGuide());
 
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
   const [conversations, setConversations] = useState<StoredConversation[]>([]);
@@ -69,12 +70,6 @@ export default function AssistantPage() {
   const userId = user?.id ?? "";
 
   useEffect(() => {
-    // "genesis" era Basalt-como-constructor — redundante ahora que Basalt lo
-    // absorbió; mismo filtro que BasaltShellSidebar (homologado 2026-09-29).
-    listAssistants().then((all) => setAssistants(all.filter((a) => a.slug !== "genesis")));
-  }, []);
-
-  useEffect(() => {
     setLoadingAssistant(true);
     setMessages([]);
     setConvId(crypto.randomUUID());
@@ -86,8 +81,7 @@ export default function AssistantPage() {
   }, [slug]);
 
   // Historial propio por Experto — mismo mecanismo que Basalt (homologado
-  // 2026-09-29: "los expertos... deben tener también persistir sus chat"),
-  // separado por assistantSlug en la misma tabla.
+  // 2026-09-29), separado por assistantSlug en la misma tabla.
   useEffect(() => {
     if (!userId) return;
     setConversationsLoading(true);
@@ -100,23 +94,6 @@ export default function AssistantPage() {
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, []);
-
-  const handleSwitchAssistant = (target: Assistant) => {
-    setSidebarOpen(false);
-    if (target.capabilities.code) {
-      navigate("/a/basalt");
-    } else {
-      navigate(`/a/${target.slug}`);
-    }
-  };
-
-  // Cierra el drawer móvil al navegar — varios botones del sidebar llamaban
-  // a navigate() directo y dejaban el drawer abierto tapando la pantalla
-  // tras el salto (auditoría UX 2026-09-29).
-  const go = (path: string) => {
-    navigate(path);
-    setSidebarOpen(false);
-  };
 
   const newChat = () => {
     abortRef.current?.abort();
@@ -167,7 +144,10 @@ export default function AssistantPage() {
         body: JSON.stringify({
           model: assistant.defaultModel,
           systemPrompt: assistant.persona.systemPrompt || undefined,
-          messages: history.map((m) => ({ role: m.role === "model" ? "assistant" : "user", content: m.text })),
+          // Mismo tope que Basalt.tsx — sin esto, una conversación larga con
+          // un Experto arriesga pegar contra el límite de contexto del
+          // modelo (auditoría UX 2026-09-29).
+          messages: history.slice(-20).map((m) => ({ role: m.role === "model" ? "assistant" : "user", content: m.text })),
           assistantId: assistant.id,
           temperature: 0.7,
         }),
@@ -265,87 +245,41 @@ export default function AssistantPage() {
     <div className="asst-app" data-asst-theme={theme} style={cssVars as React.CSSProperties}>
       <Helmet><title>{assistant.name} | Creator IA Pro</title></Helmet>
 
-      <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Expertos">
-        <div className="asst-side-top">
-          <Logo size="sm" showText onClick={() => go("/a/basalt")} />
-          <button className="asst-icon-btn" onClick={() => go("/a/basalt")} aria-label="Volver a Basalt" title="Volver a Basalt" style={{ display: "flex", alignItems: "center", width: "auto", gap: 6, padding: "0 10px" }}>
-            <ArrowLeft className="w-4 h-4" />
-            <span style={{ fontSize: 12, fontWeight: 700 }}>Basalt</span>
-          </button>
-        </div>
-        <button className="asst-new-chat" onClick={newChat}>
-          <Plus className="w-4 h-4" /> Nuevo chat
-        </button>
-
-        <ExpertsAccordion experts={assistants} activeSlug={slug} onSelect={handleSwitchAssistant} />
-
-        <div className="asst-switcher-label">Conversaciones</div>
-        <div>
-          {conversationsLoading ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>
-              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando…
+      <BasaltShellSidebar
+        activePath=""
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+        theme={theme}
+        setTheme={setTheme}
+        onNewChat={newChat}
+        autoOpenGuide={autoGuide}
+        extraNav={
+          <>
+            <div className="asst-switcher-label">Conversaciones</div>
+            <div>
+              {conversationsLoading ? (
+                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando…
+                </div>
+              ) : conversations.length === 0 ? (
+                <p style={{ padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>Todavía no hay conversaciones guardadas.</p>
+              ) : (
+                conversations.map((c) => (
+                  <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
+                    <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
+                      <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
+                    </button>
+                    <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))
+              )}
             </div>
-          ) : conversations.length === 0 ? (
-            <p style={{ padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>Todavía no hay conversaciones guardadas.</p>
-          ) : (
-            conversations.map((c) => (
-              <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
-                <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
-                  <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-                </button>
-                <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="asst-switcher-label">Plataforma</div>
-        <button className="asst-side-link" onClick={() => go("/tasks")}>
-          <ListTodo className="w-4 h-4" /> Tareas
-        </button>
-        <button className="asst-side-link" onClick={() => go("/spaces")}>
-          <FolderOpen className="w-4 h-4" /> Proyectos
-        </button>
-        <button className="asst-side-link" onClick={() => go("/profile")}>
-          <User className="w-4 h-4" /> Perfil
-        </button>
-        {isAdmin && (
-          <button className="asst-side-link" onClick={() => go("/admin")}>
-            <ShieldCheck className="w-4 h-4" /> Panel Admin
-          </button>
-        )}
-
-        <div className="asst-side-bottom">
-          <button className="asst-side-link" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-            {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            {theme === "dark" ? "Tema claro" : "Tema oscuro"}
-          </button>
-          {/* "Reportar" era un botón flotante suelto encima de todo — ahora
-              es una opción que se despliega desde la cuenta (auditoría UX,
-              mismo patrón que el menú de cuenta de Claude). */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="asst-side-link">
-                <User className="w-4 h-4" /> Cuenta
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" side="top" className="w-56 p-1.5 rounded-2xl shadow-2xl">
-              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => setShowReport(true)}>
-                <Bug className="w-4 h-4" /> Reportar un error o mejora
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="my-1.5" />
-              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer text-rose-500 focus:text-rose-500" onClick={() => signOut()}>
-                <LogOut className="w-4 h-4" /> Cerrar sesión
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <ReportModal open={showReport} onClose={() => setShowReport(false)} />
-        </div>
-      </nav>
-      <div className={`asst-backdrop ${sidebarOpen ? "show" : ""}`} onClick={() => setSidebarOpen(false)} />
+          </>
+        }
+      />
 
       <main className="asst-main">
         <header className="asst-topbar">
