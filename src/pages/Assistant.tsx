@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { Logo } from "@/components/Logo";
 import {
   listAssistants, getAssistant, brandCssVars,
   type Assistant, type AssistantWelcomeCard,
@@ -204,6 +205,7 @@ export default function AssistantPage() {
 
       <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Asistentes">
         <div className="asst-side-top">
+          <Logo size="sm" showText onClick={() => navigate("/a/basalt")} />
           <button className="asst-icon-btn" onClick={() => navigate("/a/basalt")} aria-label="Volver a Basalt" title="Volver a Basalt" style={{ display: "flex", alignItems: "center", width: "auto", gap: 6, padding: "0 10px" }}>
             <ArrowLeft className="w-4 h-4" />
             <span style={{ fontSize: 12, fontWeight: 700 }}>Basalt</span>

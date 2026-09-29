@@ -42,6 +42,16 @@ html[data-asst-theme="dark"] .asst-app {
 }
 .asst-sidebar.hidden { margin-left: -264px; }
 .asst-side-top { display: flex; align-items: center; gap: 8px; padding: 4px 4px 14px; }
+/* Logo al inicio (izquierda); el botón de icono (volver / métricas) se ancla
+   al final de la fila con margin-left:auto — mismo patrón visual que Gemini
+   (marca a la izquierda, ícono a la derecha), sin agregar un toggle de
+   colapso nuevo (ver plan "curried-orbiting-island"). */
+.asst-side-top .asst-icon-btn { margin-left: auto; }
+/* Logo.tsx usa text-zinc-900 fijo para el wordmark — en el tema oscuro
+   propio de Basalt (data-asst-theme="dark") el fondo es casi negro y ese
+   texto quedaría invisible. Solo se toca acá, no en Logo.tsx (se usa fijo
+   en el resto de la app fuera de este sistema de temas). */
+html[data-asst-theme="dark"] .asst-side-top .font-display.uppercase { color: var(--asst-txt); }
 .asst-icon-btn {
   width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
   color: var(--asst-txt-2); flex: none; transition: background 0.15s; border: none; background: none; cursor: pointer;

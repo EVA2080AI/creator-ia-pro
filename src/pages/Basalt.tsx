@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { Logo } from "@/components/Logo";
 import { brandCssVars, listAssistants, type Assistant } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
 import { CHAT_MODELS } from "@/lib/ai/models";
@@ -272,6 +273,7 @@ export default function BasaltPage() {
 
       <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Basalt">
         <div className="asst-side-top">
+          <Logo size="sm" showText onClick={() => navigate("/a/basalt")} />
           {/* Basalt YA es el inicio — esta flecha va al panel de métricas
               secundario, no "de vuelta" a ningún lado (ver auditoría UX). */}
           <button className="asst-icon-btn" onClick={() => navigate("/dashboard")} aria-label="Ver panel de métricas" title="Panel de métricas">
