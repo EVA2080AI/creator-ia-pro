@@ -9,7 +9,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { and, eq } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { getSessionUser, getProfile } from "../_lib/session.js";
-import { spendCredits, refundCredits, consumeFreeMessage, logSpend, FREE_DAILY_MESSAGE_LIMIT } from "../_lib/credits.js";
+import { spendCredits, refundCredits, consumeFreeMessage, logSpend, FREE_DAILY_MESSAGE_LIMIT, FREE_LIMIT_EXEMPT_EMAILS } from "../_lib/credits.js";
 import { CHAT_MODELS, DEFAULT_MODEL_ID, canAccessModel, getModel } from "../../src/lib/ai/models.js";
 import { tavilySearch, WEB_SEARCH_TOOL } from "../_lib/search.js";
 
@@ -89,7 +89,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
       return;
     }
-  } else {
+  } else if (!FREE_LIMIT_EXEMPT_EMAILS.has(user.email ?? "")) {
     // Modelos eco (0 créditos) sí cuestan dinero real en OpenRouter — sin este tope,
     // el costo por usuario/plan free no tiene límite mientras el ingreso es cero.
     const newCount = await consumeFreeMessage(user.userId);

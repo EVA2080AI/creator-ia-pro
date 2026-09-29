@@ -339,7 +339,14 @@ export default function BasaltPage() {
         extraNav={
           <>
             <div className="asst-switcher-label">Conversaciones</div>
-            <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+            {/* Antes tenía flex:1 — .asst-side-bottom (más abajo) usa
+                margin-top:auto en el mismo flex column, y le ganaba todo el
+                espacio a este contenedor dejándolo en 0px de alto (nunca se
+                notó porque esta cuenta no tenía conversaciones guardadas
+                hasta la migración a base de datos, 2026-09-29). El nav ya
+                scrollea completo (overflow-y:auto), como la lista de
+                Expertos — no hace falta un scroll anidado acá. */}
+            <div>
               {conversations.map((c) => (
                 <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
                   <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
