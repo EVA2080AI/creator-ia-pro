@@ -143,7 +143,7 @@ export const DocumentEditor = ({ initialContent, onSave, onClose, title = "Docum
           <button
             onClick={() => onSave(editor.getHTML())}
             disabled={isSaving}
-            className="h-10 px-5 rounded-xl bg-primary text-white text-[13px] font-bold shadow-sm transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-95 flex items-center gap-2"
+            className="h-10 px-5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold shadow-sm transition-all hover:bg-primary/90 hover:scale-[1.02] active:scale-95 flex items-center gap-2"
           >
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {isSaving ? 'Guardando...' : 'Guardar'}

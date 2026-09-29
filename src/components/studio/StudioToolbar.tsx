@@ -219,7 +219,7 @@ export function StudioToolbar({
               "flex items-center gap-2.5 h-9 px-4 rounded-xl transition-all active:scale-95 shadow-lg font-display text-[11px] font-black uppercase tracking-widest",
               execStatus === 'running' 
                 ? "bg-primary/20 text-primary cursor-wait animate-pulse" 
-                : "bg-primary text-white hover:bg-primary/90 shadow-primary/20"
+                : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20"
             )}
           >
              {execStatus === 'running' ? (

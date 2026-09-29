@@ -6,7 +6,7 @@ import {
   Coins, LogOut, User, Shield, Zap, Settings, CreditCard, Sparkles,
   PanelLeftClose, PanelLeftOpen, List,
   Home, ShieldCheck, Activity,
-  Users2, Palette, ListTodo, Scale, Code2, Sun, Moon, type LucideIcon
+  Users2, Palette, ListTodo, Scale, Code2, type LucideIcon
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -16,7 +16,6 @@ import { useProfile } from '@/hooks/useProfile';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useSidebarV2 } from '@/hooks/useSidebarV2';
 import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
-import { useTheme } from '@/hooks/useTheme';
 import { toast } from 'sonner';
 import { CANVAS_ENABLED } from '@/lib/features';
 
@@ -92,8 +91,6 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const { isAdmin } = useAdmin(user?.id);
   const { globalExpanded, toggleGlobal } = useSidebarV2();
   const { groups, workspaceTitle } = useWorkspaceActions();
-  const { resolvedTheme, setTheme } = useTheme();
-  const toggleTheme = () => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
 
   const userTier = profile?.subscription_tier?.toLowerCase() ?? 'free';
   const userTierLevel = TIER_LEVELS[userTier] || 0;
@@ -277,22 +274,8 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           </button>
         ))}
 
-        <button
-          onClick={toggleTheme}
-          title={!(globalExpanded || isMobile) ? (resolvedTheme === 'dark' ? 'Modo claro' : 'Modo oscuro') : undefined}
-          aria-label={resolvedTheme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
-          className={cn('group w-full flex items-center rounded-2xl transition-all duration-300 text-[12px] font-bold text-muted-foreground hover:text-foreground hover:bg-muted', (globalExpanded || isMobile) ? 'gap-3 px-4 py-2.5' : 'gap-0 px-0 py-2.5 justify-center')}
-        >
-          {resolvedTheme === 'dark'
-            ? <Sun className="shrink-0 w-4 h-4 transition-transform group-hover:scale-105" />
-            : <Moon className="shrink-0 w-4 h-4 transition-transform group-hover:scale-105" />}
-          {(globalExpanded || isMobile) && (
-            <span className="truncate flex-1 text-left leading-none mt-0.5">
-              {resolvedTheme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
-            </span>
-          )}
-        </button>
-
+        {/* "Modo oscuro" vivía acá antes — es una preferencia de cuenta, no
+            un destino de navegación; se movió a /profile (auditoría UX). */}
         <div className={cn('flex items-center gap-2 rounded-2xl mt-3 transition-all cursor-pointer group hover:bg-muted', (globalExpanded || isMobile) ? 'p-2' : 'p-2 justify-center')} onClick={() => navigate('/profile')}>
           {user ? (
             <>

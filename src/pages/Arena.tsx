@@ -127,7 +127,7 @@ export default function ArenaPage() {
               <Square className="h-3.5 w-3.5" /> Detener
             </button>
           ) : (
-            <button type="submit" disabled={!prompt.trim()} className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-white disabled:opacity-40">
+            <button type="submit" disabled={!prompt.trim()} className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-primary-foreground disabled:opacity-40">
               <Send className="h-4 w-4" /> Comparar
             </button>
           )}

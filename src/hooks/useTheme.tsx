@@ -44,6 +44,11 @@ function applyThemeClass(resolved: 'light' | 'dark') {
   const root = document.documentElement;
   root.classList.toggle('dark', resolved === 'dark');
   root.style.colorScheme = resolved;
+  // theme-color de index.html es estático (#ffffff) — sin esto, el status
+  // bar de iOS/Android queda claro mientras el resto de la app ya es
+  // oscura (mismo tipo de costura visible que el fix del notch de Basalt).
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', resolved === 'dark' ? '#0d0d0f' : '#ffffff');
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

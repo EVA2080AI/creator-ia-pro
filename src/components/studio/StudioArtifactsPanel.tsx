@@ -125,7 +125,7 @@ export const StudioArtifactsPanel: React.FC<StudioArtifactsPanelProps> = ({
             {t.icon}
             {t.label}
             {t.id === 'tasks' && tasks.length > 0 && (
-              <span className={cn("text-[8px] px-1.5 py-0.5 rounded-full ml-1 font-black", tab === t.id ? "bg-primary text-white" : "bg-zinc-100 text-zinc-500")}>
+              <span className={cn("text-[8px] px-1.5 py-0.5 rounded-full ml-1 font-black", tab === t.id ? "bg-primary text-primary-foreground" : "bg-zinc-100 text-zinc-500")}>
                 {tasks.length}
               </span>
             )}

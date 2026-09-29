@@ -57,7 +57,7 @@ class IDEErrorBoundary extends Component<{ children: ReactNode; onReset: () => v
           <AlertTriangle className="h-10 w-10 text-destructive" />
           <h2 className="text-lg font-bold">Error en el IDE</h2>
           <p className="text-sm text-muted-foreground max-w-md">{this.state.error?.message || 'Ocurrió un error al cargar el proyecto.'}</p>
-          <button onClick={() => { this.setState({ hasError: false }); this.props.onReset(); }} className="px-6 py-2 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 transition-colors">
+          <button onClick={() => { this.setState({ hasError: false }); this.props.onReset(); }} className="px-6 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 transition-colors">
             Volver a Basalt Home
           </button>
         </div>

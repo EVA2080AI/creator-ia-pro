@@ -31,7 +31,7 @@ export function Logo({ size = "sm", showText = true, showPro = false, className,
       <div
         className={cn("relative rounded-lg flex items-center justify-center shrink-0 bg-primary", s.wrap)}
       >
-        <svg viewBox="0 0 24 24" fill="none" className={cn("text-white", s.icon)} xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 24 24" fill="none" className={cn("text-primary-foreground", s.icon)} xmlns="http://www.w3.org/2000/svg">
           <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeDasharray="38 50.3" transform="rotate(-198 12 12)" />
           <circle cx="17.4" cy="7.2" r="2" fill="currentColor" />
         </svg>
@@ -40,7 +40,7 @@ export function Logo({ size = "sm", showText = true, showPro = false, className,
       {/* Text */}
       {showText && (
         <div className="hidden sm:flex flex-col leading-none">
-          <span className={cn("font-black text-zinc-900 tracking-tight font-display uppercase", s.text)}>
+          <span className={cn("font-black text-zinc-900 dark:text-zinc-50 tracking-tight font-display uppercase", s.text)}>
             Creator{" "}
             <span className="text-primary">IA</span>
             {showPro && (

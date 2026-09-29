@@ -51,6 +51,11 @@ export function ReportButton() {
   // No estorba dentro del builder de apps (preview a pantalla completa).
   if (location.pathname.startsWith("/chat")) return null;
 
+  // Basalt/Arena/Expertos tienen su propio composer/acciones pegados abajo
+  // (auditoría UX) — el botón se sube por encima de esa franja ahí; en el
+  // resto de la app, solo respeta el safe-area del home indicator (iPhone).
+  const isChatShell = location.pathname.startsWith("/a/") || location.pathname === "/basalt";
+
   return (
     <>
       <button
@@ -59,7 +64,8 @@ export function ReportButton() {
         title="Reportar un error o mejora"
         // bottom-left, no bottom-right: ahí es donde ya viven el botón de
         // enviar del chat (Basalt/Experts) y el FAB "+ Nueva tarea" (Tareas).
-        className="fixed bottom-5 left-5 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-zinc-900 text-white shadow-lg shadow-zinc-900/20 transition-transform hover:scale-105 active:scale-95"
+        className="fixed left-5 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-zinc-900 text-white shadow-lg shadow-zinc-900/20 transition-transform hover:scale-105 active:scale-95"
+        style={{ bottom: isChatShell ? "calc(88px + env(safe-area-inset-bottom))" : "calc(20px + env(safe-area-inset-bottom))" }}
       >
         <Bug className="h-4.5 w-4.5" />
       </button>

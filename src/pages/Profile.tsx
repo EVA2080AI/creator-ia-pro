@@ -3,11 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useTheme } from "@/hooks/useTheme";
 import { toast } from "sonner";
 import {
   User, Mail, Shield, Coins, LogOut, Loader2, Save,
   Calendar, CreditCard, ChevronRight, Bell, Check,
-  Image, MessageSquare, Zap, Download, Link as LinkIcon
+  Image, MessageSquare, Zap, Download, Link as LinkIcon, Sun, Moon,
 } from "lucide-react";
 
 interface TransactionRow {
@@ -33,6 +34,7 @@ const Profile = () => {
   const { user, signOut } = useAuth("/auth");
   const navigate = useNavigate();
   const { profile, loading: loadingProfile, refreshProfile } = useProfile(user?.id);
+  const { resolvedTheme, setTheme } = useTheme();
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState("");
   const [avatarUrlInput, setAvatarUrlInput] = useState("");
@@ -309,6 +311,23 @@ const Profile = () => {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Preferencias — el toggle de modo oscuro vivía en el sidebar
+                principal, compitiendo con la navegación; es una preferencia
+                de cuenta, así que se movió acá (auditoría UX). */}
+            <div className="rounded-3xl bg-muted/50 border border-border p-6 space-y-4">
+              <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Preferencias</h2>
+              <button
+                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-muted border border-border text-sm font-bold text-foreground hover:bg-accent transition-all"
+              >
+                <div className="flex items-center gap-3">
+                  {resolvedTheme === "dark" ? <Sun className="w-4 h-4 text-muted-foreground" /> : <Moon className="w-4 h-4 text-muted-foreground" />}
+                  {resolvedTheme === "dark" ? "Modo claro" : "Modo oscuro"}
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
             </div>
 
             {/* Download app */}

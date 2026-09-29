@@ -471,7 +471,7 @@ export function ChatInput({
                     "h-9 w-9 rounded-xl flex items-center justify-center transition-all duration-300 shadow-md relative overflow-hidden",
                     hasContent
                       ? isArchitectMode
-                        ? "bg-primary text-white shadow-primary/25 hover:brightness-110"
+                        ? "bg-primary text-primary-foreground shadow-primary/25 hover:brightness-110"
                         : "bg-zinc-900 text-white shadow-zinc-300 hover:bg-zinc-700"
                       : "bg-zinc-100 text-zinc-300 shadow-none cursor-not-allowed"
                   )}
