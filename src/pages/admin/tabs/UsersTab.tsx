@@ -1,25 +1,28 @@
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { 
-  Search, Loader2, RefreshCw, Ban, CheckCircle, 
-  Coins, Zap, Rocket, Crown, UserCheck, KeyRound, 
-  ChevronDown, ChevronUp 
+import {
+  Search, Loader2, RefreshCw, Ban, CheckCircle,
+  Coins, Zap, Rocket, Crown, UserCheck, KeyRound,
+  ChevronDown, ChevronUp, UserPlus, Trash2, AlertTriangle
 } from "lucide-react";
 import { AdminUser, TIERS } from "../types";
+import { CreateUserModal } from "../components/CreateUserModal";
 
-export function UsersTab({ 
-  users, 
-  onRefresh, 
-  onManageCredits 
-}: { 
-  users: AdminUser[]; 
+export function UsersTab({
+  users,
+  onRefresh,
+  onManageCredits
+}: {
+  users: AdminUser[];
   onRefresh: () => void;
   onManageCredits: (user: AdminUser) => void;
 }) {
   const [search, setSearch] = useState("");
   const [expandedUser, setExpandedUser] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   const filteredUsers = users.filter(
     (u) =>
@@ -64,6 +67,16 @@ export function UsersTab({
     setActionLoading(null);
   };
 
+  const handleDelete = async (targetUserId: string) => {
+    setActionLoading(targetUserId + "-delete");
+    const res = await fetch(`/api/admin/users/${targetUserId}`, { method: "DELETE", credentials: "include" });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok) toast.error(data?.error || "Error al borrar el usuario");
+    else { toast.success("Usuario borrado"); onRefresh(); }
+    setConfirmDelete(null);
+    setActionLoading(null);
+  };
+
   return (
     <div className="space-y-4">
       {/* Search & Actions */}
@@ -77,14 +90,27 @@ export function UsersTab({
             className="w-full rounded-xl border border-zinc-200 bg-zinc-50 py-2.5 pl-10 pr-4 text-sm text-zinc-900 placeholder-zinc-400 outline-none focus:border-zinc-300 transition-colors"
           />
         </div>
-        <button
-          onClick={onRefresh}
-          className="flex items-center justify-center gap-2 rounded-xl bg-zinc-100 px-4 py-2.5 text-xs font-bold text-zinc-500 hover:bg-zinc-200 transition-all active:scale-95"
-        >
-          <RefreshCw className="h-3.5 w-3.5" />
-          Actualizar
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={onRefresh}
+            className="flex items-center justify-center gap-2 rounded-xl bg-zinc-100 px-4 py-2.5 text-xs font-bold text-zinc-500 hover:bg-zinc-200 transition-all active:scale-95"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            Actualizar
+          </button>
+          <button
+            onClick={() => setShowCreate(true)}
+            className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-white hover:bg-primary/90 transition-all active:scale-95"
+          >
+            <UserPlus className="h-3.5 w-3.5" />
+            Nuevo usuario
+          </button>
+        </div>
       </div>
+
+      {showCreate && (
+        <CreateUserModal onClose={() => setShowCreate(false)} onDone={() => { setShowCreate(false); onRefresh(); }} />
+      )}
 
       {/* Grid Header */}
       <div className="hidden md:grid grid-cols-[1fr_140px_120px_140px_60px] gap-4 px-5 py-3 bg-zinc-50 border border-zinc-100 rounded-t-2xl text-[10px] font-black uppercase tracking-[0.15em] text-zinc-400">
@@ -162,7 +188,7 @@ export function UsersTab({
                 {isExpanded && (
                   <div className="px-5 pb-5 pt-1 space-y-4">
                     <hr className="border-zinc-100 mt-0" />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                       {/* Credit Management */}
                       <button
                         onClick={() => onManageCredits(u)}
@@ -232,6 +258,35 @@ export function UsersTab({
                           <p className="text-[10px] text-zinc-500">{u.is_active ? 'Bloquear acceso temporal' : 'Habilitar acceso normal'}</p>
                         </div>
                       </button>
+
+                      {/* Delete */}
+                      {confirmDelete === u.user_id ? (
+                        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50/50 p-3">
+                          <AlertTriangle className="h-4 w-4 shrink-0 text-red-500" />
+                          <p className="flex-1 text-[10px] font-bold text-red-600">¿Borrar para siempre?</p>
+                          <button
+                            onClick={() => handleDelete(u.user_id)}
+                            disabled={actionLoading === u.user_id + "-delete"}
+                            className="rounded-lg bg-red-500 px-2.5 py-1.5 text-[10px] font-bold text-white hover:bg-red-600"
+                          >
+                            {actionLoading === u.user_id + "-delete" ? <Loader2 className="h-3 w-3 animate-spin" /> : "Sí"}
+                          </button>
+                          <button onClick={() => setConfirmDelete(null)} className="rounded-lg px-2 py-1.5 text-[10px] font-bold text-zinc-500 hover:bg-zinc-100">No</button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDelete(u.user_id)}
+                          className="flex items-center gap-3 rounded-xl border border-zinc-200 p-3 text-left hover:border-red-400/30 hover:bg-red-50/10 transition-all group"
+                        >
+                          <div className="h-9 w-9 rounded-lg bg-red-50 flex items-center justify-center text-red-500 group-hover:scale-110 transition-transform">
+                            <Trash2 className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-zinc-900">Borrar cuenta</p>
+                            <p className="text-[10px] text-zinc-500">Elimina todo, sin vuelta atrás</p>
+                          </div>
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
