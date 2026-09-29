@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Plus, Send, Square, Sun, Moon, ArrowLeft, Loader2, Trash2, Brain, Scale,
+  Menu, Plus, Minus, Send, Square, Sun, Moon, ArrowLeft, Loader2, Trash2, Brain, Scale,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,6 +21,7 @@ const ICONS: Record<string, typeof LayoutTemplate> = {
 };
 
 const MODEL_KEY = "basalt:model";
+const EXPERTS_COLLAPSED_COUNT = 5;
 
 function readModel() {
   try {
@@ -46,6 +47,7 @@ export default function BasaltPage() {
   const [memory, setMemory] = useState<string[]>([]);
   const [showMemory, setShowMemory] = useState(false);
   const [experts, setExperts] = useState<Assistant[]>([]);
+  const [expertsExpanded, setExpertsExpanded] = useState(false);
 
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -300,13 +302,23 @@ export default function BasaltPage() {
         {experts.length > 0 && (
           <>
             <div className="asst-switcher-label">Expertos</div>
-            <div style={{ maxHeight: 180, overflowY: "auto" }}>
-              {experts.map((a) => (
+            <div>
+              {(expertsExpanded ? experts : experts.slice(0, EXPERTS_COLLAPSED_COUNT)).map((a) => (
                 <button key={a.slug} className="asst-switch-item" onClick={() => navigate(`/a/${a.slug}`)} title={a.tagline || a.name}>
                   <span className="asst-switch-dot" style={{ background: a.brand.accent || "var(--asst-txt-3)" }} />
                   {a.name}
                 </button>
               ))}
+              {experts.length > EXPERTS_COLLAPSED_COUNT && (
+                <button
+                  className="asst-side-link"
+                  onClick={() => setExpertsExpanded((v) => !v)}
+                  style={{ color: "var(--asst-txt-3)", fontSize: 12 }}
+                >
+                  {expertsExpanded ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                  {expertsExpanded ? "Ver menos" : `Ver ${experts.length - EXPERTS_COLLAPSED_COUNT} más`}
+                </button>
+              )}
             </div>
           </>
         )}
