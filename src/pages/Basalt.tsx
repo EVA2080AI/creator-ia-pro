@@ -282,7 +282,7 @@ export default function BasaltPage() {
           <Plus className="w-4 h-4" /> Nuevo chat
         </button>
 
-        <button className="asst-side-link" onClick={() => navigate("/arena")}>
+        <button className="asst-side-link" onClick={() => navigate("/a/arena")}>
           <Scale className="w-4 h-4" /> Arena IA
         </button>
         <button className="asst-side-link" onClick={() => setShowMemory((v) => !v)}>
@@ -344,7 +344,7 @@ export default function BasaltPage() {
         </div>
 
         <div className="asst-switcher-label">Plataforma</div>
-        <button className="asst-side-link" onClick={() => navigate("/tareas")}>
+        <button className="asst-side-link" onClick={() => navigate("/tasks")}>
           <ListTodo className="w-4 h-4" /> Tareas
         </button>
         <button className="asst-side-link" onClick={() => navigate("/spaces")}>

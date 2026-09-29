@@ -226,7 +226,7 @@ export default function AssistantPage() {
         ))}
 
         <div className="asst-switcher-label">Plataforma</div>
-        <button className="asst-side-link" onClick={() => navigate("/tareas")}>
+        <button className="asst-side-link" onClick={() => navigate("/tasks")}>
           <ListTodo className="w-4 h-4" /> Tareas
         </button>
         <button className="asst-side-link" onClick={() => navigate("/spaces")}>
