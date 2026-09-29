@@ -40,8 +40,11 @@ export const FREE_DAILY_MESSAGE_LIMIT = 30;
 
 /** Cuentas exentas del límite diario de mensajes gratis — pedido directo del
  * usuario para Andrés (usuario real de prueba), 2026-09-29: "quítale los 30
- * mensajes gratuitos, déjaselo full". */
-export const FREE_LIMIT_EXEMPT_EMAILS = new Set(["andresfhenriquez@hotmail.com"]);
+ * mensajes gratuitos, déjaselo full". sebastian689@gmail.com (la cuenta del
+ * propio dueño/desarrollador del producto) se agrega el mismo día: "quitame
+ * el limite de 30 mensajes diarios" — se quedó bloqueado probando en vivo
+ * los modelos nuevos del catálogo con su propia cuenta. */
+export const FREE_LIMIT_EXEMPT_EMAILS = new Set(["andresfhenriquez@hotmail.com", "sebastian689@gmail.com"]);
 
 /** Cuenta un mensaje gratis contra el límite diario. Devuelve el conteo nuevo, o null si ya se alcanzó el límite. */
 export async function consumeFreeMessage(userId: string, limit = FREE_DAILY_MESSAGE_LIMIT): Promise<number | null> {
