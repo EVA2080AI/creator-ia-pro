@@ -188,7 +188,7 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       <Helmet><title>{"Dashboard | Creator IA Pro"}</title></Helmet>
       
-      <main className="max-w-[1440px] mx-auto px-6 pt-6 pb-20 space-y-8">
+      <main className="max-w-[1240px] mx-auto px-6 pt-6 pb-20 space-y-8">
         {/* Header & Notifications */}
         <section className="space-y-6">
           {(checkoutSuccess || creditsSuccess) && (
