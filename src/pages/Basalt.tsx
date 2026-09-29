@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Plus, Minus, Send, Square, Sun, Moon, ArrowLeft, Loader2, Trash2, Brain, Scale,
+  Menu, Plus, Minus, Send, Square, Sun, Moon, Loader2, Trash2, Brain, Scale,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
   ListTodo, FolderOpen, User, LogOut, ShieldCheck,
 } from "lucide-react";
@@ -273,12 +273,11 @@ export default function BasaltPage() {
 
       <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Basalt">
         <div className="asst-side-top">
+          {/* Basalt YA es el inicio — sin flecha de "volver", no hay ningún
+              lado del que "volver" (pedido directo del usuario, viendo la
+              UI). El panel de métricas pasa a la sección Plataforma, como
+              un destino más, no como una flecha ambigua arriba. */}
           <Logo size="sm" showText onClick={() => navigate("/a/basalt")} />
-          {/* Basalt YA es el inicio — esta flecha va al panel de métricas
-              secundario, no "de vuelta" a ningún lado (ver auditoría UX). */}
-          <button className="asst-icon-btn" onClick={() => navigate("/dashboard")} aria-label="Ver panel de métricas" title="Panel de métricas">
-            <ArrowLeft className="w-4 h-4" />
-          </button>
         </div>
         <button className="asst-new-chat" onClick={newChat}>
           <Plus className="w-4 h-4" /> Nuevo chat
@@ -346,6 +345,9 @@ export default function BasaltPage() {
         </div>
 
         <div className="asst-switcher-label">Plataforma</div>
+        <button className="asst-side-link" onClick={() => navigate("/dashboard")}>
+          <BarChart3 className="w-4 h-4" /> Panel de métricas
+        </button>
         <button className="asst-side-link" onClick={() => navigate("/tasks")}>
           <ListTodo className="w-4 h-4" /> Tareas
         </button>
