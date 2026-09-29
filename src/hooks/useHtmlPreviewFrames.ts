@@ -14,26 +14,50 @@ export function useHtmlPreviewFrames(ref: RefObject<HTMLElement | null>) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
+    let cleanup: (() => void) | undefined;
 
-    const hydrate = () => {
-      el.querySelectorAll<HTMLIFrameElement>(".md-preview-frame").forEach((iframe) => {
-        const code = iframe.parentElement?.querySelector<HTMLElement>(".md-preview-code pre code")?.textContent;
-        if (code != null && iframe.srcdoc !== code) iframe.srcdoc = code;
+    const attach = (el: HTMLElement) => {
+      const hydrate = () => {
+        el.querySelectorAll<HTMLIFrameElement>(".md-preview-frame").forEach((iframe) => {
+          const code = iframe.parentElement?.querySelector<HTMLElement>(".md-preview-code pre code")?.textContent;
+          if (code != null && iframe.srcdoc !== code) iframe.srcdoc = code;
+        });
+      };
+
+      hydrate();
+      const observer = new MutationObserver(() => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(hydrate, 400);
       });
+      observer.observe(el, { childList: true, subtree: true });
+      cleanup = () => {
+        observer.disconnect();
+        if (timerRef.current) clearTimeout(timerRef.current);
+      };
     };
 
-    hydrate();
-    const observer = new MutationObserver(() => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(hydrate, 400);
-    });
-    observer.observe(el, { childList: true, subtree: true });
+    if (ref.current) {
+      attach(ref.current);
+      return () => cleanup?.();
+    }
 
+    // El contenedor todavía no existe en el primer render (ej. mientras
+    // authLoading es true se muestra un spinner en vez del chat real, sin
+    // el elemento del ref) — verificado en vivo: sin este colchón, el
+    // efecto corre una sola vez con ref.current en null y nunca reintenta
+    // (la identidad de `ref` no cambia cuando cambia `ref.current`), así
+    // que el iframe quedaba en blanco para siempre. Se espera a que el
+    // contenedor aparezca en el DOM antes de enganchar el observer real.
+    const waiter = new MutationObserver(() => {
+      if (ref.current) {
+        waiter.disconnect();
+        attach(ref.current);
+      }
+    });
+    waiter.observe(document.body, { childList: true, subtree: true });
     return () => {
-      observer.disconnect();
-      if (timerRef.current) clearTimeout(timerRef.current);
+      waiter.disconnect();
+      cleanup?.();
     };
   }, [ref]);
 }
