@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
@@ -81,6 +82,8 @@ export default function BasaltPage() {
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, []);
+
+  useCopyCodeButtons(scrollerRef);
 
   const persist = useCallback((id: string, msgs: StoredMsg[]) => {
     if (!userId || !msgs.length) return;

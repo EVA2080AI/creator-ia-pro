@@ -168,6 +168,20 @@
 .md-copy-code:hover { background: var(--asst-panel); }
 .md-codeblock pre { background: var(--asst-panel); padding: 13px; overflow-x: auto; margin: 0; }
 .md-codeblock pre code { background: none; padding: 0; font-size: 12.5px; line-height: 1.55; }
+
+/* Preview en vivo de bloques ```html — mismo header que .md-codeblock, con
+   un iframe sandboxeado abajo y el código fuente colapsado por defecto
+   (<details>, sin JS propio — igual que el resto de mdToHtml). */
+.md-htmlpreview { border-radius: 12px; overflow: hidden; margin: 0 0 11px; border: 1px solid var(--asst-border); }
+.md-preview-actions { display: flex; align-items: center; gap: 2px; }
+.md-preview-open { background: none; border: none; color: var(--asst-txt-2); font-size: 11.5px; padding: 5px 10px; border-radius: 14px; text-decoration: none; }
+.md-preview-open:hover { background: var(--asst-panel); text-decoration: none; }
+.md-preview-frame { display: block; width: 100%; height: 360px; border: none; border-top: 1px solid var(--asst-border); background: #fff; resize: vertical; overflow: auto; }
+.md-preview-code { border-top: 1px solid var(--asst-border); }
+.md-preview-code summary { cursor: pointer; padding: 8px 12px; font-size: 11.5px; color: var(--asst-txt-2); background: var(--asst-panel-2); user-select: none; }
+.md-preview-code summary:hover { color: var(--asst-txt); }
+.md-preview-code pre { background: var(--asst-panel); padding: 13px; overflow-x: auto; margin: 0; }
+.md-preview-code pre code { background: none; padding: 0; font-size: 12.5px; line-height: 1.55; }
 .md-table-wrap { overflow-x: auto; margin: 0 0 11px; border: 1px solid var(--asst-border); border-radius: 12px; }
 .asst-md table { border-collapse: collapse; width: 100%; font-size: 13px; }
 .asst-md th, .asst-md td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--asst-border); }

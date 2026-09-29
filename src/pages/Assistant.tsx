@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
+import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import {
@@ -94,6 +95,8 @@ export default function AssistantPage() {
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, []);
+
+  useCopyCodeButtons(scrollerRef);
 
   const newChat = () => {
     abortRef.current?.abort();
