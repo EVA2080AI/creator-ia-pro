@@ -150,6 +150,28 @@ export async function migrateLegacyLocalStorage(userId: string): Promise<void> {
   }
 }
 
+// Una imagen sin url NI error es, en memoria durante una conversación en
+// vivo, "todavía generándose" (el render de Basalt lo muestra con spinner).
+// Pero una conversación CARGADA de la base de datos nunca está en vivo —
+// si llegó así, es porque saveConversation() le quitó la url (data: URI, no
+// se guarda) y quedó sin marcar: el spinner quedaba infinito al reabrirla
+// (reportado por un usuario real, 2026-09-29). Filas viejas guardadas antes
+// del fix en saveConversation también quedan cubiertas acá, sin necesidad
+// de tocar la base de datos.
+function markStaleImages(conv: StoredConversation): StoredConversation {
+  return {
+    ...conv,
+    messages: conv.messages.map((m) => ({
+      ...m,
+      images: m.images?.map((img) =>
+        !img.url && !img.error
+          ? { ...img, error: "Esta imagen no quedó guardada en el historial. Pídesela de nuevo si la necesitas." }
+          : img
+      ),
+    })),
+  };
+}
+
 // assistantSlug: sin valor = chat de Basalt; con valor = chat de ese Experto
 // (cada Experto tiene su propio historial separado, homologado con Basalt —
 // mismo mecanismo, 2026-09-29).
@@ -157,19 +179,28 @@ export async function loadConversations(userId: string, assistantSlug?: string):
   if (!userId) return [];
   const qs = assistantSlug ? `?assistant=${encodeURIComponent(assistantSlug)}` : "";
   const res = await apiJson<{ conversations: StoredConversation[] }>(`/api/basalt/conversations${qs}`);
-  return res.ok ? res.data!.conversations : [];
+  return res.ok ? res.data!.conversations.map(markStaleImages) : [];
 }
 
 export async function saveConversation(userId: string, conv: StoredConversation, assistantSlug?: string) {
   if (!userId) return;
-  // Las imágenes generadas llegan como data: URI pesadas — no se guardan en
-  // el historial para no reventar el tamaño de la fila.
+  // Las imágenes generadas llegan como data: URI pesadas (base64 inline, no
+  // una URL alojada — ver api/ai/image.ts) — no se guardan en el historial
+  // para no reventar el tamaño de la fila. Sin marcar `error`, un mensaje
+  // así quedaba con url:undefined y error:undefined, que el render de
+  // Basalt/Expertos interpreta como "todavía generando" — spinner infinito
+  // al reabrir la conversación, aunque la imagen sí se haya generado en su
+  // momento (reportado por un usuario real, 2026-09-29).
   const slim: StoredConversation & { assistantSlug?: string } = {
     ...conv,
     assistantSlug,
     messages: conv.messages.map((m) => ({
       ...m,
-      images: m.images?.map((img) => ({ ...img, url: img.url?.startsWith("data:") ? undefined : img.url })),
+      images: m.images?.map((img) =>
+        img.url?.startsWith("data:")
+          ? { ...img, url: undefined, error: "Esta imagen no quedó guardada en el historial. Pídesela de nuevo si la necesitas." }
+          : img
+      ),
     })),
   };
   await apiJson("/api/basalt/conversations", { method: "POST", body: JSON.stringify(slim) });
