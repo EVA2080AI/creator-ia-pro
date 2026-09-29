@@ -4,11 +4,15 @@ import { Helmet } from "react-helmet-async";
 import {
   Menu, Plus, Minus, Send, Square, Sun, Moon, Loader2, Trash2, Brain, Scale,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
-  ListTodo, FolderOpen, User, LogOut, ShieldCheck,
+  ListTodo, FolderOpen, User, LogOut, ShieldCheck, Bug,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { Logo } from "@/components/Logo";
+import { ReportModal } from "@/components/tickets/ReportModal";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { brandCssVars, listAssistants, type Assistant } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
 import { CHAT_MODELS } from "@/lib/ai/models";
@@ -50,6 +54,7 @@ export default function BasaltPage() {
   const [conversations, setConversations] = useState<StoredConversation[]>([]);
   const [memory, setMemory] = useState<string[]>([]);
   const [showMemory, setShowMemory] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const [experts, setExperts] = useState<Assistant[]>([]);
   const [expertsExpanded, setExpertsExpanded] = useState(false);
 
@@ -368,9 +373,26 @@ export default function BasaltPage() {
             {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             {theme === "dark" ? "Tema claro" : "Tema oscuro"}
           </button>
-          <button className="asst-side-link" onClick={() => signOut()}>
-            <LogOut className="w-4 h-4" /> Cerrar sesión
-          </button>
+          {/* "Reportar" era un botón flotante suelto encima de todo — ahora
+              es una opción que se despliega desde la cuenta (auditoría UX,
+              mismo patrón que el menú de cuenta de Claude). */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="asst-side-link">
+                <User className="w-4 h-4" /> Cuenta
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" side="top" className="w-56 p-1.5 rounded-2xl shadow-2xl">
+              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => setShowReport(true)}>
+                <Bug className="w-4 h-4" /> Reportar un error o mejora
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="my-1.5" />
+              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer text-rose-500 focus:text-rose-500" onClick={() => signOut()}>
+                <LogOut className="w-4 h-4" /> Cerrar sesión
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <ReportModal open={showReport} onClose={() => setShowReport(false)} />
         </div>
       </nav>
       <div className={`asst-backdrop ${sidebarOpen ? "show" : ""}`} onClick={() => setSidebarOpen(false)} />

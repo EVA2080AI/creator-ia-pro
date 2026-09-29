@@ -4,13 +4,17 @@ import { useState } from 'react';
 import {
   LayoutTemplate, Brain, FolderOpen, Image, Download,
   Coins, LogOut, User, Shield, Zap, Settings, CreditCard, Sparkles,
-  PanelLeftClose, PanelLeftOpen, List,
+  PanelLeftClose, PanelLeftOpen, List, Bug,
   Home, ShieldCheck, Activity,
   Users2, Palette, ListTodo, Scale, Code2, type LucideIcon
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/Logo';
+import { ReportModal } from '@/components/tickets/ReportModal';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useAdmin } from '@/hooks/useAdmin';
@@ -87,6 +91,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, signOut } = useAuth();
+  const [showReport, setShowReport] = useState(false);
   const { profile } = useProfile(user?.id);
   const { isAdmin } = useAdmin(user?.id);
   const { globalExpanded, toggleGlobal } = useSidebarV2();
@@ -275,34 +280,46 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
         ))}
 
         {/* "Modo oscuro" vivía acá antes — es una preferencia de cuenta, no
-            un destino de navegación; se movió a /profile (auditoría UX). */}
-        <div className={cn('flex items-center gap-2 rounded-2xl mt-3 transition-all cursor-pointer group hover:bg-muted', (globalExpanded || isMobile) ? 'p-2' : 'p-2 justify-center')} onClick={() => navigate('/profile')}>
-          {user ? (
-            <>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-muted border border-border shadow-sm transition-transform group-hover:scale-95">
-                {profile?.avatar_url ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" /> : <User className="w-4 h-4 text-muted-foreground" />}
-              </div>
-              {(globalExpanded || isMobile) && (
-                <div className="flex-1 min-w-0 px-1">
-                  <p className="text-[12px] font-black text-foreground truncate leading-none transition-colors">{profile?.display_name || user.email?.split('@')[0]}</p>
-                  <p className="text-[9px] font-bold text-muted-foreground truncate uppercase tracking-widest mt-1.5">{profile?.subscription_tier || 'Free'}</p>
+            un destino de navegación; se movió a /profile (auditoría UX).
+            Esta fila ahora es un menú desplegable (como el de Claude:
+            click en la cuenta → Perfil / Reportar / Cerrar sesión) en vez
+            de navegar directo y tener un botón de tickets flotando aparte. */}
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className={cn('flex w-full items-center gap-2 rounded-2xl mt-3 transition-all group hover:bg-muted', (globalExpanded || isMobile) ? 'p-2' : 'p-2 justify-center')}>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden shrink-0 bg-muted border border-border shadow-sm transition-transform group-hover:scale-95">
+                  {profile?.avatar_url ? <img src={profile.avatar_url} alt="avatar" className="w-full h-full object-cover" /> : <User className="w-4 h-4 text-muted-foreground" />}
                 </div>
-              )}
-              {(globalExpanded || isMobile) && (
-                <button onClick={(e) => { e.stopPropagation(); handleSignOut(); }} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-2 rounded-xl text-muted-foreground hover:text-rose-500 hover:bg-rose-50/80 dark:hover:bg-rose-500/10 transition-all"><LogOut className="w-4 h-4" /></button>
-              )}
-              {!(globalExpanded || isMobile) && (
-                 <button onClick={(e) => { e.stopPropagation(); handleSignOut(); }} title="Cerrar sesión" aria-label="Cerrar sesión" className="p-2 rounded-xl text-muted-foreground hover:text-rose-500 hover:bg-rose-50/80 dark:hover:bg-rose-500/10 transition-all absolute -top-10 right-2 shadow-sm bg-card border border-border opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto"><LogOut className="w-4 h-4" /></button>
-              )}
-            </>
-          ) : (
-             <button onClick={() => navigate('/auth')} className={cn('flex items-center gap-2 text-muted-foreground hover:text-foreground px-3 py-2 w-full', !(globalExpanded || isMobile) && 'justify-center')}>
-              <User className="w-4 h-4" />
-              {(globalExpanded || isMobile) && <span className="text-xs font-bold font-black">LOGIN</span>}
-            </button>
-          )}
-        </div>
+                {(globalExpanded || isMobile) && (
+                  <div className="flex-1 min-w-0 px-1 text-left">
+                    <p className="text-[12px] font-black text-foreground truncate leading-none transition-colors">{profile?.display_name || user.email?.split('@')[0]}</p>
+                    <p className="text-[9px] font-bold text-muted-foreground truncate uppercase tracking-widest mt-1.5">{profile?.subscription_tier || 'Free'}</p>
+                  </div>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" side="top" className="w-56 p-1.5 rounded-2xl bg-popover/95 backdrop-blur-xl border-border shadow-2xl">
+              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => navigate('/profile')}>
+                <User className="w-4 h-4" /> Perfil
+              </DropdownMenuItem>
+              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer" onClick={() => setShowReport(true)}>
+                <Bug className="w-4 h-4" /> Reportar un error o mejora
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="my-1.5" />
+              <DropdownMenuItem className="rounded-xl gap-2.5 py-2.5 cursor-pointer text-rose-500 focus:text-rose-500" onClick={handleSignOut}>
+                <LogOut className="w-4 h-4" /> Cerrar sesión
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <button onClick={() => navigate('/auth')} className={cn('flex items-center gap-2 text-muted-foreground hover:text-foreground px-3 py-2 w-full mt-3', !(globalExpanded || isMobile) && 'justify-center')}>
+            <User className="w-4 h-4" />
+            {(globalExpanded || isMobile) && <span className="text-xs font-bold font-black">LOGIN</span>}
+          </button>
+        )}
       </div>
+      <ReportModal open={showReport} onClose={() => setShowReport(false)} />
     </motion.aside>
   );
 }
