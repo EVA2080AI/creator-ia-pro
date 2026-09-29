@@ -36,6 +36,13 @@
       "when": 1790645226289,
       "tag": "0004_nostalgic_raza",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1790691290303,
+      "tag": "0005_old_exodus",
+      "breakpoints": true
     }
   ]
 }

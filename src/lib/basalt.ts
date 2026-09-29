@@ -97,32 +97,35 @@ export interface StoredConversation {
   messages: StoredMsg[];
 }
 
-const key = (userId: string, kind: "convs" | "memory") => `basalt:${kind}:${userId}`;
-
-function read<T>(k: string, fallback: T): T {
+// Antes esto era localStorage puro (basalt:convs:<userId> / basalt:memory:
+// <userId>) — sin backup ni sync entre dispositivos, un usuario perdía todo
+// al limpiar el navegador o cambiar de dispositivo (caso real: "hice un
+// estudio de mercado y nunca encontré dónde quedó", 2026-09-29). Ahora pega
+// contra /api/basalt/*, ver db/schema/basalt.ts. El userId ya no se usa para
+// armar ninguna key — el servidor identifica al usuario por su sesión — pero
+// se mantiene como parámetro para no tocar cada call site, y como guarda
+// rápida para no disparar el fetch antes de tener sesión.
+async function apiJson<T>(path: string, init?: RequestInit): Promise<{ ok: boolean; data?: T }> {
   try {
-    const raw = localStorage.getItem(k);
-    return raw ? (JSON.parse(raw) as T) : fallback;
+    const res = await fetch(path, { credentials: "include", headers: { "Content-Type": "application/json" }, ...init });
+    if (!res.ok) return { ok: false };
+    const json = await res.json();
+    return json.ok ? { ok: true, data: json } : { ok: false };
   } catch {
-    return fallback;
+    return { ok: false };
   }
 }
 
-function write(k: string, value: unknown) {
-  try {
-    localStorage.setItem(k, JSON.stringify(value));
-  } catch {
-    /* almacenamiento lleno o bloqueado — la conversación sigue en memoria */
-  }
+export async function loadConversations(userId: string): Promise<StoredConversation[]> {
+  if (!userId) return [];
+  const res = await apiJson<{ conversations: StoredConversation[] }>("/api/basalt/conversations");
+  return res.ok ? res.data!.conversations : [];
 }
 
-export function loadConversations(userId: string): StoredConversation[] {
-  return read<StoredConversation[]>(key(userId, "convs"), []).sort((a, b) => b.updatedAt - a.updatedAt);
-}
-
-export function saveConversation(userId: string, conv: StoredConversation) {
-  // Las imágenes generadas llegan como data: URI pesadas — no se guardan en el
-  // historial para no reventar la cuota de localStorage.
+export async function saveConversation(userId: string, conv: StoredConversation) {
+  if (!userId) return;
+  // Las imágenes generadas llegan como data: URI pesadas — no se guardan en
+  // el historial para no reventar el tamaño de la fila.
   const slim: StoredConversation = {
     ...conv,
     messages: conv.messages.map((m) => ({
@@ -130,20 +133,23 @@ export function saveConversation(userId: string, conv: StoredConversation) {
       images: m.images?.map((img) => ({ ...img, url: img.url?.startsWith("data:") ? undefined : img.url })),
     })),
   };
-  const all = loadConversations(userId).filter((c) => c.id !== conv.id);
-  write(key(userId, "convs"), [slim, ...all].slice(0, 50));
+  await apiJson("/api/basalt/conversations", { method: "POST", body: JSON.stringify(slim) });
 }
 
-export function deleteConversation(userId: string, id: string) {
-  write(key(userId, "convs"), loadConversations(userId).filter((c) => c.id !== id));
+export async function deleteConversation(userId: string, id: string) {
+  if (!userId) return;
+  await apiJson(`/api/basalt/conversations/${id}`, { method: "DELETE" });
 }
 
-export function loadMemory(userId: string): string[] {
-  return read<string[]>(key(userId, "memory"), []);
+export async function loadMemory(userId: string): Promise<string[]> {
+  if (!userId) return [];
+  const res = await apiJson<{ facts: string[] }>("/api/basalt/memory");
+  return res.ok ? res.data!.facts : [];
 }
 
-export function saveMemory(userId: string, facts: string[]) {
-  write(key(userId, "memory"), facts.slice(-60));
+export async function saveMemory(userId: string, facts: string[]) {
+  if (!userId) return;
+  await apiJson("/api/basalt/memory", { method: "PUT", body: JSON.stringify({ facts: facts.slice(-60) }) });
 }
 
 /** Separa las etiquetas <memoria> e <imagen> del texto visible. */

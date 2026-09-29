@@ -78,8 +78,8 @@ export default function BasaltPage() {
 
   useEffect(() => {
     if (!userId) return;
-    setConversations(loadConversations(userId));
-    setMemory(loadMemory(userId));
+    void loadConversations(userId).then(setConversations);
+    void loadMemory(userId).then(setMemory);
   }, [userId]);
 
   useEffect(() => {
@@ -94,8 +94,9 @@ export default function BasaltPage() {
   const persist = useCallback((id: string, msgs: StoredMsg[]) => {
     if (!userId || !msgs.length) return;
     const first = msgs.find((m) => m.role === "user")?.text ?? "Nueva conversación";
-    saveConversation(userId, { id, title: first.slice(0, 60), updatedAt: Date.now(), messages: msgs });
-    setConversations(loadConversations(userId));
+    void saveConversation(userId, { id, title: first.slice(0, 60), updatedAt: Date.now(), messages: msgs })
+      .then(() => loadConversations(userId))
+      .then(setConversations);
   }, [userId]);
 
   const generateImages = useCallback(async (base: StoredMsg[], msgId: string, imgs: { prompt: string; format: string }[]) => {
@@ -221,7 +222,7 @@ export default function BasaltPage() {
     if (memories.length && userId) {
       const next = [...memory, ...memories.filter((f) => !memory.includes(f))];
       setMemory(next);
-      saveMemory(userId, next);
+      void saveMemory(userId, next);
     }
 
     setGenerating(false);
@@ -279,15 +280,16 @@ export default function BasaltPage() {
   };
 
   const removeConversation = (id: string) => {
-    deleteConversation(userId, id);
-    setConversations(loadConversations(userId));
+    void deleteConversation(userId, id)
+      .then(() => loadConversations(userId))
+      .then(setConversations);
     if (id === convId) newChat();
   };
 
   const removeMemory = (fact: string) => {
     const next = memory.filter((m) => m !== fact);
     setMemory(next);
-    saveMemory(userId, next);
+    void saveMemory(userId, next);
   };
 
   if (authLoading) {
