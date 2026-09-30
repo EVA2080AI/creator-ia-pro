@@ -74,11 +74,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { id, title, messages, assistantSlug: bodySlug } = parsed.data;
     const slug = bodySlug ?? null;
 
+    // setWhere scopea el UPDATE al dueño real de la fila — sin esto, un
+    // cliente que mande un `id` que por casualidad (o a propósito) coincide
+    // con la conversación de OTRO usuario podía sobreescribírsela, porque
+    // onConflictDoUpdate por sí solo solo mira el `id`, no el `userId`
+    // (encontrado en auditoría 2026-09-29; el resto de los upserts del
+    // proyecto sí scopean el conflicto — este había quedado como excepción).
     await db.insert(schema.basaltConversation)
       .values({ id, userId: user.userId, assistantSlug: slug, title, messages, updatedAt: new Date() })
       .onConflictDoUpdate({
         target: schema.basaltConversation.id,
         set: { title, messages, updatedAt: new Date() },
+        setWhere: eq(schema.basaltConversation.userId, user.userId),
       });
 
     // Tope de 50 conversaciones por usuario Y contexto (Basalt o cada

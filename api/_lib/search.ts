@@ -43,7 +43,9 @@ export const WEB_SEARCH_TOOL = {
   function: {
     name: "web_search",
     description:
-      "Busca información actual en internet — documentación de librerías, versiones, APIs que pueden haber cambiado después de tu entrenamiento. No la uses para saludos ni cosas que ya sabés con certeza.",
+      "Busca información actual en internet — documentación de librerías, versiones, APIs que pueden haber cambiado después de tu entrenamiento. No la uses para saludos ni cosas que ya sabés con certeza. " +
+      "Podés llamarla más de una vez en la misma respuesta (hasta unas pocas rondas) si el primer resultado no alcanza — por ejemplo, reformulando la consulta o buscando un dato relacionado que falte. " +
+      "Cuando uses lo que encontraste, citá la fuente en tu respuesta (ej. \"según [nombre del sitio]\" o el link entre paréntesis) — no presentes el resultado de la búsqueda como si ya lo supieras.",
     parameters: {
       type: "object",
       properties: {

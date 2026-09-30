@@ -12,6 +12,8 @@ import { getSessionUser, getProfile } from "../_lib/session.js";
 import { spendCredits, refundCredits, consumeFreeMessage, logSpend, FREE_DAILY_MESSAGE_LIMIT, FREE_LIMIT_EXEMPT_EMAILS } from "../_lib/credits.js";
 import { CHAT_MODELS, DEFAULT_MODEL_ID, canAccessModel, getModel } from "../../src/lib/ai/models.js";
 import { tavilySearch, WEB_SEARCH_TOOL } from "../_lib/search.js";
+import { USER_DATA_TOOLS, isUserDataToolName } from "../_lib/userDataTools.js";
+import { getUserProjects, getUserAssets, getUserUsage } from "../_lib/userData.js";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 // 1 crédito — mismo orden de magnitud que los modelos de chat más baratos
@@ -133,12 +135,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         model: modelId,
         messages: msgs,
         stream: true,
-        // El modelo decide solo si busca (tool_choice:"auto") — el prompt
-        // (GENESIS_CHAT_SYSTEM_BASE_RULES / CODE_GEN_SYSTEM) le dice cuándo
-        // tiene sentido. En la segunda vuelta (después del resultado de la
-        // búsqueda) no se ofrece de nuevo — fuerza una respuesta final en
-        // vez de encadenar búsquedas.
-        ...(withTools ? { tools: [WEB_SEARCH_TOOL], tool_choice: "auto" } : {}),
+        // El modelo decide solo si usa una herramienta (tool_choice:"auto")
+        // — el prompt le dice cuándo tiene sentido cada una. `withTools` se
+        // apaga en la última ronda permitida (ver MAX_SEARCH_ROUNDS más
+        // abajo) para forzar una respuesta final en vez de seguir
+        // encadenando llamadas.
+        ...(withTools ? { tools: [WEB_SEARCH_TOOL, ...USER_DATA_TOOLS], tool_choice: "auto" } : {}),
         ...(typeof body.temperature === "number" ? { temperature: body.temperature } : {}),
         ...(typeof body.maxTokens === "number" ? { max_tokens: body.maxTokens } : {}),
       }),
@@ -238,68 +240,110 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
   }
 
+  // Antes se permitía UNA sola llamada a herramienta por respuesta (cortaba
+  // duro después de la primera vuelta) — si Tavily no traía lo que hacía
+  // falta a la primera, el modelo se quedaba con resultados incompletos en
+  // vez de reformular y buscar nuevamente. Ahora encadena hasta
+  // MAX_TOOL_ROUNDS rondas (búsqueda y/o las herramientas de datos del
+  // usuario, en cualquier combinación); en la última ya no se vuelve a
+  // ofrecer ninguna herramienta, para forzar una respuesta final
+  // (2026-09-29, pedido: "búsqueda web más fuerte" + herramientas de datos).
+  const MAX_TOOL_ROUNDS = 3;
+
   let full = "";
   let sawAnyContent = false;
-  let searchCreditCharged = false;
+  let currentMessages: ChatMessage[] = messages;
 
   try {
-    const first = await streamAndCollect(upstream);
-    full = first.full;
-    sawAnyContent = first.sawAnyContent;
+    let current = await streamAndCollect(upstream);
+    full = current.full;
+    sawAnyContent = current.sawAnyContent;
 
-    if (first.finishReason === "tool_calls" && first.toolCall?.name === "web_search") {
-      let searchQuery = "";
-      try {
-        searchQuery = String(JSON.parse(first.toolCall.argsText || "{}").query || "");
-      } catch {
-        /* argumentos truncados o inválidos — se trata como consulta vacía */
-      }
-
+    let toolRound = 0;
+    while (
+      current.finishReason === "tool_calls" &&
+      current.toolCall &&
+      (current.toolCall.name === "web_search" || isUserDataToolName(current.toolCall.name)) &&
+      toolRound < MAX_TOOL_ROUNDS
+    ) {
+      toolRound++;
+      const toolCall = current.toolCall;
       let toolResultContent: string;
-      if (!searchQuery) {
-        toolResultContent = JSON.stringify({ results: [], note: "consulta vacía, no se pudo buscar" });
-      } else if (!TAVILY_API_KEY) {
-        toolResultContent = JSON.stringify({ results: [], note: "búsqueda no configurada en este momento" });
-      } else {
-        const newBalance = await spendCredits(user.userId, SEARCH_TOOL_COST);
-        if (newBalance === null) {
-          toolResultContent = JSON.stringify({ results: [], note: "créditos insuficientes para buscar" });
+
+      if (toolCall.name === "web_search") {
+        let searchQuery = "";
+        try {
+          searchQuery = String(JSON.parse(toolCall.argsText || "{}").query || "");
+        } catch {
+          /* argumentos truncados o inválidos — se trata como consulta vacía */
+        }
+
+        let searchCreditCharged = false;
+        if (!searchQuery) {
+          toolResultContent = JSON.stringify({ results: [], note: "consulta vacía, no se pudo buscar" });
+        } else if (!TAVILY_API_KEY) {
+          toolResultContent = JSON.stringify({ results: [], note: "búsqueda no configurada en este momento" });
         } else {
-          searchCreditCharged = true;
-          try {
-            const results = await tavilySearch(searchQuery, TAVILY_API_KEY);
-            toolResultContent = JSON.stringify({ query: searchQuery, results });
-          } catch {
-            await refundCredits(user.userId, SEARCH_TOOL_COST);
-            searchCreditCharged = false;
-            toolResultContent = JSON.stringify({ query: searchQuery, results: [], note: "búsqueda no disponible en este momento" });
+          const newBalance = await spendCredits(user.userId, SEARCH_TOOL_COST);
+          if (newBalance === null) {
+            toolResultContent = JSON.stringify({ results: [], note: "créditos insuficientes para buscar" });
+          } else {
+            searchCreditCharged = true;
+            try {
+              const results = await tavilySearch(searchQuery, TAVILY_API_KEY);
+              toolResultContent = JSON.stringify({ query: searchQuery, results });
+            } catch {
+              await refundCredits(user.userId, SEARCH_TOOL_COST);
+              searchCreditCharged = false;
+              toolResultContent = JSON.stringify({ query: searchQuery, results: [], note: "búsqueda no disponible en este momento" });
+            }
           }
+        }
+        if (searchCreditCharged) await logSpend(user.userId, SEARCH_TOOL_COST, `search ${toolRound}: ${searchQuery.slice(0, 60)}`);
+      } else {
+        // Herramientas de datos del usuario — solo lectura, sin costo (ver
+        // el comentario al tope de api/_lib/userDataTools.ts).
+        try {
+          if (toolCall.name === "get_my_projects") {
+            const rows = await getUserProjects(user.userId);
+            toolResultContent = JSON.stringify({ projects: rows.map((p) => ({ name: p.name, updatedAt: p.updatedAt })) });
+          } else if (toolCall.name === "get_my_assets") {
+            const rows = await getUserAssets(user.userId);
+            toolResultContent = JSON.stringify({ assets: rows.map((a) => ({ type: a.type, prompt: a.prompt, createdAt: a.createdAt })) });
+          } else {
+            const usage = await getUserUsage(user.userId);
+            toolResultContent = JSON.stringify(usage ?? { note: "no se pudo obtener la información de la cuenta en este momento" });
+          }
+        } catch {
+          toolResultContent = JSON.stringify({ note: "no se pudo obtener la información en este momento" });
         }
       }
 
-      const followUpMessages: ChatMessage[] = [
-        ...messages,
+      currentMessages = [
+        ...currentMessages,
         {
           role: "assistant",
           content: null,
-          tool_calls: [{ id: first.toolCall.id, type: "function", function: { name: "web_search", arguments: first.toolCall.argsText } }],
+          tool_calls: [{ id: toolCall.id, type: "function", function: { name: toolCall.name, arguments: toolCall.argsText } }],
         },
-        { role: "tool", tool_call_id: first.toolCall.id, content: toolResultContent },
+        { role: "tool", tool_call_id: toolCall.id, content: toolResultContent },
       ];
 
+      // Solo se vuelve a ofrecer herramientas si todavía queda margen — la
+      // última ronda permitida fuerza una respuesta final en vez de
+      // encadenar otra llamada más.
+      const offerToolsAgain = toolRound < MAX_TOOL_ROUNDS;
       try {
-        const upstream2 = await callOpenRouter(followUpMessages, false);
-        if (upstream2.ok && upstream2.body) {
-          const second = await streamAndCollect(upstream2);
-          full += second.full;
-          sawAnyContent = sawAnyContent || second.sawAnyContent;
-        }
+        const upstreamNext = await callOpenRouter(currentMessages, offerToolsAgain);
+        if (!upstreamNext.ok || !upstreamNext.body) break;
+        current = await streamAndCollect(upstreamNext);
+        full += current.full;
+        sawAnyContent = sawAnyContent || current.sawAnyContent;
       } catch {
-        /* la primera respuesta ya se streameó — si la segunda vuelta falla,
-           el usuario se queda con lo que ya vio en vez de perder todo. */
+        /* la respuesta previa ya se streameó — si esta vuelta falla, el
+           usuario se queda con lo que ya vio en vez de perder todo. */
+        break;
       }
-
-      if (searchCreditCharged) await logSpend(user.userId, SEARCH_TOOL_COST, `search: ${searchQuery.slice(0, 60)}`);
     }
   } finally {
     res.end();

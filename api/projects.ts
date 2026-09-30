@@ -1,8 +1,8 @@
 // Proyectos de Genesis — reemplaza `supabase.from("studio_projects")`.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { eq, desc } from "drizzle-orm";
 import { getDb, schema } from "../db/index.js";
 import { requireUser } from "./_lib/require-user.js";
+import { getUserProjects } from "./_lib/userData.js";
 
 const MAX_NAME = 200;
 
@@ -13,11 +13,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     if (req.method === "GET") {
-      const rows = await db
-        .select()
-        .from(schema.project)
-        .where(eq(schema.project.userId, user.userId))
-        .orderBy(desc(schema.project.updatedAt));
+      const rows = await getUserProjects(user.userId);
       res.status(200).json({ ok: true, projects: rows });
       return;
     }
