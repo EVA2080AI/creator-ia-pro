@@ -80,6 +80,14 @@ export function BasaltShellSidebar({
     listAssistants().then((all) => setExperts(all.filter((a) => a.slug !== "genesis")));
   }, []);
 
+  // Escape cierra el cajón en móvil (en escritorio el sidebar es fijo: setSidebarOpen(false) no cambia nada).
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setSidebarOpen(false); };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [sidebarOpen, setSidebarOpen]);
+
   const go = (path: string) => {
     navigate(path);
     setSidebarOpen(false);

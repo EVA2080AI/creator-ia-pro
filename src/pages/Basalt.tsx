@@ -15,7 +15,7 @@ import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
-import { CHAT_MODELS, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID } from "@/lib/ai/models";
+import { CHAT_MODELS, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID, canAccessModel, getImageModel, getModel } from "@/lib/ai/models";
 import {
   BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply,
   loadConversations, saveConversation, deleteConversation, loadMemory, saveMemory,
@@ -99,6 +99,16 @@ export default function BasaltPage() {
   useEffect(() => {
     try { localStorage.setItem(IMAGE_MODEL_KEY, imageModel); } catch { /* sin storage */ }
   }, [imageModel]);
+
+  // Una elección guardada que el plan actual ya no permite (bajó de plan, o la eligió
+  // cuando el catálogo era otro) terminaba en un 403 en cada mensaje: se vuelve al
+  // modelo por defecto en cuanto se conoce el plan.
+  const tier = profile?.subscription_tier;
+  useEffect(() => {
+    if (!tier) return;
+    if (!canAccessModel(tier, getModel(model).minTier)) setModel(A.defaultModel);
+    if (!canAccessModel(tier, getImageModel(imageModel).minTier)) setImageModel(DEFAULT_IMAGE_MODEL_ID);
+  }, [tier, model, imageModel]);
 
   const stickToBottom = useCallback(() => {
     const el = scrollerRef.current;
@@ -445,7 +455,7 @@ export default function BasaltPage() {
           {/* Un solo selector para texto/código y motor de imagen (Basalt decide solo cuándo
               generar una imagen — etiqueta <imagen>, ver SYSTEM_PROMPT —; el motor elegido
               es CON QUÉ lo hace). Reemplaza a dos <select> nativos de 11px sin candado de plan. */}
-          <ModelPicker model={model} imageModel={imageModel} tier={profile?.subscription_tier} onModel={setModel} onImageModel={setImageModel} />
+          <ModelPicker model={model} imageModel={imageModel} tier={tier} onModel={setModel} onImageModel={setImageModel} />
         </header>
 
         <div className="asst-scroller" ref={scrollerRef}>

@@ -42,6 +42,8 @@
     /* Sin guion (--s3, --r2): otra variante que los modelos escriben por costumbre. */
     --s1: var(--s-1); --s2: var(--s-2); --s3: var(--s-3); --s4: var(--s-4); --s5: var(--s-5); --s6: var(--s-6); --s7: var(--s-7);
     --r1: var(--r-1); --r2: var(--r-2); --r3: var(--r-3);
+    --s0: 0; --s-0: 0; --measure: 68ch;
+    --step0: var(--step-0); --step1: var(--step-1); --step2: var(--step-2); --step3: var(--step-3); --step4: var(--step-4); --step5: var(--step-5); --step6: var(--step-6);
   }
   *, ::before, ::after { box-sizing: border-box; margin: 0; }
   html { accent-color: var(--brand); scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }

@@ -127,7 +127,7 @@ export default function AssistantPage() {
     if (id === convId) newChat();
   };
 
-  const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string }) => {
+  const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string; retry?: boolean }) => {
     const text = prompt.trim();
     if (!text || generating || !assistant) return;
 
@@ -136,9 +136,12 @@ export default function AssistantPage() {
     const continued = opts?.continueFrom ? messages.find((m) => m.id === opts.continueFrom && m.role === "model") : undefined;
     const prefix = continued?.text ?? "";
 
+    // "Reintentar" tras un error: la pregunta del usuario ya está en el hilo (solo se quitó la
+    // respuesta vacía), así que se reenvía tal cual en vez de agregarla por segunda vez.
+    const retrying = !continued && !!opts?.retry && messages[messages.length - 1]?.role === "user";
     const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
-    const history = continued ? messages : [...messages, userMsg];
-    if (!continued) {
+    const history = continued || retrying ? messages : [...messages, userMsg];
+    if (!continued && !retrying) {
       setMessages(history);
       setInput("");
     }
@@ -360,7 +363,7 @@ export default function AssistantPage() {
               {error && (
                 <div className="asst-err" role="alert">
                   <span>⚠️ {error}</span>
-                  <button onClick={() => void sendPrompt(messages[messages.length - 1]?.text || "")}>Reintentar</button>
+                  <button onClick={() => void sendPrompt(messages[messages.length - 1]?.text || "", { retry: true })}>Reintentar</button>
                 </div>
               )}
             </div>
