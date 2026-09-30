@@ -156,16 +156,20 @@ export function BasaltShellSidebar({
 
         <ExpertsAccordion experts={experts} onSelect={(a) => go(`/a/${a.slug}`)} />
 
-        {extraNav}
-
         {/* "Panel de métricas" y "Perfil" salieron de acá: eran los MISMOS destinos que
             "Uso" y "Configuración" del menú de cuenta, un poco más abajo. El cajón
             necesitaba 801px de alto en una pantalla de 664 (medido en un iPhone 13) y
-            el pie —guía, tema y cuenta— quedaba fuera de la vista. */}
+            el pie —guía, tema y cuenta— quedaba fuera de la vista.
+            Plataforma va ANTES del historial: la lista de conversaciones crece sin
+            límite y dejaba "Tareas" y "Proyectos" a varios deslizamientos de distancia
+            (visto en producción con 8 conversaciones). Lo fijo arriba, lo que crece
+            abajo. */}
         <div className="asst-switcher-label">Plataforma</div>
         {platform("/tasks", "Tareas", ListTodo)}
         {platform("/spaces", "Proyectos", FolderOpen)}
         {isAdmin && platform("/admin", "Panel Admin", ShieldCheck)}
+
+        {extraNav}
 
         </div>
 
