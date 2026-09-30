@@ -268,7 +268,9 @@
 .asst-app[data-asst-theme="dark"] .md-console-line.error { color: #f2b8b5; }
 .asst-app[data-asst-theme="dark"] .md-console-line.warn { color: #f0c36b; }
 
-.asst-composer { flex: none; max-width: 780px; width: 100%; margin: 0 auto; padding: 6px 20px calc(10px + env(safe-area-inset-bottom)); }
+/* El aviso "puede cometer errores" iba debajo del compositor y aportaba su propio
+   relleno inferior; al quitarlo (pedido de Sebastián) el compositor lo asume. */
+.asst-composer { flex: none; max-width: 780px; width: 100%; margin: 0 auto; padding: 6px 20px calc(18px + env(safe-area-inset-bottom)); }
 .asst-pill { display: flex; align-items: flex-end; gap: 6px; background: var(--asst-panel); border-radius: 28px; padding: 8px 8px 8px 20px; transition: box-shadow 0.2s; }
 .asst-pill:focus-within { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 14px rgba(0, 0, 0, 0.06); }
 .asst-pill textarea {
@@ -282,7 +284,6 @@
 }
 .asst-send.ready { opacity: 1; pointer-events: auto; color: #fff; background: var(--a-accent, #8b5cf6); }
 .asst-send.stop { opacity: 1; pointer-events: auto; color: var(--asst-txt-2); background: var(--asst-panel-2); }
-.asst-disclaimer { text-align: center; font-size: 11px; color: var(--asst-txt-3); padding: 8px 16px 4px; }
 
 @media (max-width: 768px) {
   /* position:fixed la saca del flujo de .asst-app, así que necesita su
@@ -306,7 +307,6 @@
   .asst-card-ic { order: -1; align-self: center; width: 30px; height: 30px; flex: none; }
   .asst-hello-sub { font-size: 15.5px; line-height: 1.5; margin-top: 6px; }
   .asst-welcome { padding-top: 3vh; }
-  .asst-disclaimer { font-size: 10.5px; padding-top: 6px; }
 }
 
 /* ══ Capa de modernización del shell (Ciclo 2, "css muy antiguo") ═══════════
@@ -511,9 +511,6 @@
   .asst-doc-meta, .asst-docs-note, .asst-picker-row-title small, .asst-cut) {
   font-family: var(--asst-mono);
 }
-/* El aviso del pie solo en escritorio: la monoespaciada es más ancha y en un
-   móvil de 390px partía la línea en dos. */
-@media (min-width: 769px) { .asst-app[data-asst-theme="dark"] .asst-disclaimer { font-family: var(--asst-mono); } }
 .asst-app[data-asst-theme="dark"] .asst-picker-trigger { letter-spacing: -0.02em; }
 
 /* Trama de puntos tenue: da textura de consola sin competir con el texto. */

@@ -483,7 +483,6 @@ export default function AssistantPage() {
               {generating ? <Square className="w-3.5 h-3.5" /> : <Send className="w-4 h-4" />}
             </button>
           </div>
-          <p className="asst-disclaimer">{assistant.name} puede cometer errores. Verifica la información importante.</p>
         </form>
       </main>
     </div>
