@@ -78,6 +78,7 @@ export const BASALT_ASSISTANT: Assistant = {
     subtitle: "Conversa conmigo, crea planes de mercadeo, parrillas de contenido, piezas gráficas y agentes de IA.",
     cards: [
       { label: "Construir una app o web", icon: "layout", prompt: "Constrúyeme una landing page para mi negocio." },
+      { label: "Analizar un contrato", icon: "file", prompt: ATTACH_CARD_PROMPT },
       { label: "Plan de mercadeo", icon: "chart", prompt: "Ayúdame a crear un plan de mercadeo para mi negocio. Hazme primero las preguntas clave que necesitas." },
       { label: "Parrilla de contenido", icon: "layout", prompt: "Crea una parrilla de contenido de un mes para Instagram, Facebook y LinkedIn de una empresa de consultoría en seguridad y salud en el trabajo (HSE)." },
       { label: "Pieza gráfica", icon: "image", prompt: "Diseña una pieza gráfica para Instagram que promocione un taller de cultura de seguridad (HSE) para empresas." },
@@ -95,11 +96,15 @@ export const BASALT_ASSISTANT: Assistant = {
 
 // ─── Persistencia local (historial + memoria) ────────────────────────────────
 
+import { ATTACH_CARD_PROMPT, type DocMeta } from "./doc-context";
+
 export interface StoredMsg {
   id: string;
   role: "user" | "model";
   text: string;
   images?: { prompt: string; format: string; url?: string; error?: string; assetId?: string }[];
+  /** Documentos adjuntos al mensaje del usuario: solo nombre y tamaño. El texto no se guarda (ver doc-context.ts). */
+  attachments?: DocMeta[];
 }
 
 export interface StoredConversation {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Send, Square, Loader2, Trash2, Brain, Scale,
+  Menu, Send, Square, Loader2, Trash2, Brain, Scale, Paperclip, FileText,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -11,6 +11,10 @@ import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
 import { useProfile } from "@/hooks/useProfile";
 import { ModelPicker } from "@/components/basalt/ModelPicker";
+import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
+import { useDocAttachments } from "@/hooks/useDocAttachments";
+import { DOC_ACCEPT } from "@/lib/doc-extract";
+import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
@@ -25,7 +29,7 @@ import { createAsset, getAssetsByIds } from "@/lib/assets";
 import "./Assistant.css";
 
 const ICONS: Record<string, typeof LayoutTemplate> = {
-  layout: LayoutTemplate, image: ImageIcon, pen: PenLine, chart: BarChart3, compare: Scale, dice: Dice5,
+  layout: LayoutTemplate, image: ImageIcon, pen: PenLine, chart: BarChart3, compare: Scale, dice: Dice5, file: FileText,
 };
 
 const MODEL_KEY = "basalt:model";
@@ -83,6 +87,12 @@ export default function BasaltPage() {
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const autoSentRef = useRef(false);
   const lastPromptRef = useRef("");
+  // Documentos adjuntos (contratos, informes…): el texto vive solo en memoria, por mensaje; en el
+  // historial guardado queda únicamente el nombre y el tamaño (ver doc-context.ts).
+  const docsByMsg = useRef(new Map<string, DocPayload[]>());
+  const { docs: pendingDocs, ready: readyDocs, busy: docsBusy, addFiles, remove: removeDoc, clear: clearDocs, restore: restoreDocs } = useDocAttachments();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
@@ -184,8 +194,11 @@ export default function BasaltPage() {
   }, []);
 
   const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string }) => {
-    const text = prompt.trim();
-    if (!text || generating) return;
+    const isContinue = !!opts?.continueFrom;
+    const attached = isContinue ? [] : readyDocs;
+    const text = prompt.trim() || (attached.length ? DEFAULT_DOC_PROMPT : "");
+    if (!text || generating || (!isContinue && docsBusy)) return;
+    const pendingSnapshot = pendingDocs;
 
     // "Continuar": retoma un mensaje cortado por el límite de tiempo. No agrega
     // burbuja de usuario ni mensaje nuevo — el texto nuevo se pega al final del
@@ -202,6 +215,11 @@ export default function BasaltPage() {
     } else {
       lastPromptRef.current = text;
       const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
+      if (attached.length) {
+        userMsg.attachments = attached.map((d) => ({ name: d.name, chars: d.doc!.chars, pages: d.doc!.pages, truncated: d.doc!.truncated }));
+        docsByMsg.current.set(userMsg.id, attached.map((d) => ({ name: d.name, text: d.doc!.text, truncated: d.doc!.truncated })));
+        clearDocs();
+      }
       history = [...messages, userMsg];
       modelMsgId = crypto.randomUUID();
       setMessages([...history, { id: modelMsgId, role: "model", text: "" }]);
@@ -216,7 +234,11 @@ export default function BasaltPage() {
     // antes se borraba del input y, en el primer mensaje de un chat, la
     // pantalla de bienvenida volvía sin ningún error visible — se leía como
     // "escribo y se reinicia".
-    const restoreInput = () => { if (!continued) setInput((cur) => cur || text); };
+    const restoreInput = () => {
+      if (continued) return;
+      setInput((cur) => cur || text);
+      if (attached.length) restoreDocs(pendingSnapshot);
+    };
 
     abortRef.current = new AbortController();
     let acc = "";
@@ -229,9 +251,9 @@ export default function BasaltPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model,
-          systemPrompt: buildSystemPrompt(memory),
+          systemPrompt: buildSystemPrompt(memory) + (hasDocuments(history.slice(-20)) ? `\n\n${DOC_ANALYSIS_PROMPT}` : ""),
           messages: [
-            ...history.slice(-20).map((m) => ({ role: m.role === "model" ? "assistant" : "user", content: m.text })),
+            ...buildApiMessages(history.slice(-20), docsByMsg.current),
             ...(continued ? [{ role: "user", content: text }] : []),
           ],
           temperature: 0.7,
@@ -317,7 +339,7 @@ export default function BasaltPage() {
       stickToBottom();
     }
     persist(convId, final);
-  }, [generating, messages, model, memory, userId, convId, stickToBottom, generateImages, persist, setParams]);
+  }, [generating, messages, model, memory, userId, convId, stickToBottom, generateImages, persist, setParams, readyDocs, docsBusy, pendingDocs, clearDocs, restoreDocs]);
 
   // /a/basalt?q=... (desde /chat o el dashboard) envía el primer mensaje solo.
   useEffect(() => {
@@ -334,6 +356,8 @@ export default function BasaltPage() {
     setMessages([]);
     setError(null);
     setSidebarOpen(false);
+    docsByMsg.current.clear();
+    clearDocs();
   };
 
   const openConversation = (c: StoredConversation) => {
@@ -446,7 +470,17 @@ export default function BasaltPage() {
         }
       />
 
-      <main className="asst-main">
+      <main
+        className={`asst-main${dragging ? " asst-dragging" : ""}`}
+        onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); setDragging(true); } }}
+        onDragLeave={(e) => { if (e.currentTarget === e.target) setDragging(false); }}
+        onDrop={(e) => {
+          if (!e.dataTransfer.files.length) return;
+          e.preventDefault();
+          setDragging(false);
+          void addFiles(e.dataTransfer.files);
+        }}
+      >
         <header className="asst-topbar">
           <button className="asst-icon-btn asst-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú" style={{ display: sidebarOpen ? "none" : undefined }}>
             <Menu className="w-4 h-4" />
@@ -467,7 +501,7 @@ export default function BasaltPage() {
                 {(A.welcome.cards || []).map((c) => {
                   const Icon = (c.icon && ICONS[c.icon]) || Sparkles;
                   return (
-                    <button key={c.label} className="asst-card" onClick={() => void sendPrompt(c.prompt)}>
+                    <button key={c.label} className="asst-card" onClick={() => (c.prompt === ATTACH_CARD_PROMPT ? fileInputRef.current?.click() : void sendPrompt(c.prompt))}>
                       <span>{c.label}</span>
                       <span className="asst-card-ic"><Icon className="w-4 h-4" /></span>
                     </button>
@@ -481,7 +515,10 @@ export default function BasaltPage() {
               {messages.map((m, i) => (
                 <div key={m.id} className={`asst-msg ${m.role}`}>
                   {m.role === "user" ? (
-                    <div className="asst-bubble">{m.text}</div>
+                    <div className="asst-bubble">
+                      {m.attachments?.length ? <SentDocChips docs={m.attachments} /> : null}
+                      {m.text}
+                    </div>
                   ) : (
                     <>
                       <div className="asst-avatar"><Bot className="w-3.5 h-3.5 text-white" /></div>
@@ -523,11 +560,30 @@ export default function BasaltPage() {
         </div>
 
         <form className="asst-composer" onSubmit={(e) => { e.preventDefault(); void sendPrompt(input); }}>
+          <PendingDocChips docs={pendingDocs} onRemove={removeDoc} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={DOC_ACCEPT}
+            multiple
+            hidden
+            aria-label="Adjuntar documentos"
+            onChange={(e) => { if (e.target.files?.length) void addFiles(e.target.files); e.target.value = ""; }}
+          />
           <div className="asst-pill">
+            <button
+              type="button"
+              className="asst-attach"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Adjuntar un documento (PDF, Word o texto)"
+              title="Adjuntar un documento (PDF, Word o texto) para analizarlo"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
             <textarea
               rows={1}
               value={input}
-              placeholder="Pregúntale a Basalt…"
+              placeholder={pendingDocs.length ? "Pregunta sobre el documento, o envía para un análisis completo…" : "Pregúntale a Basalt…"}
               onChange={(e) => {
                 setInput(e.target.value);
                 e.target.style.height = "auto";
@@ -543,7 +599,7 @@ export default function BasaltPage() {
             <button
               type={generating ? "button" : "submit"}
               onClick={generating ? () => abortRef.current?.abort() : undefined}
-              className={`asst-send ${generating ? "stop" : input.trim() ? "ready" : ""}`}
+              className={`asst-send ${generating ? "stop" : (input.trim() || readyDocs.length) && !docsBusy ? "ready" : ""}`}
               aria-label={generating ? "Detener" : "Enviar"}
             >
               {generating ? <Square className="w-3.5 h-3.5" /> : <Send className="w-4 h-4" />}
