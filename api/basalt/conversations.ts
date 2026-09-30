@@ -24,11 +24,23 @@ const IMAGE_SCHEMA = z.object({
   assetId: z.string().optional(),
 });
 
+/** Ficha del documento adjunto: SOLO el rastro de que existió (nombre y tamaño). El texto del
+ *  documento no se guarda en ninguna parte — ver src/lib/doc-context.ts. */
+const ATTACHMENT_SCHEMA = z.object({
+  name: z.string().max(200),
+  chars: z.number(),
+  pages: z.number().optional(),
+  truncated: z.boolean().optional(),
+});
+
 const MSG_SCHEMA = z.object({
   id: z.string(),
   role: z.enum(["user", "model"]),
   text: z.string(),
   images: z.array(IMAGE_SCHEMA).optional(),
+  // Sin esto, zod las descartaba al guardar: al recargar la conversación desaparecía la ficha
+  // "contrato.pdf" de la burbuja y no quedaba señal de que ese mensaje llevaba un documento.
+  attachments: z.array(ATTACHMENT_SCHEMA).max(5).optional(),
 });
 
 const UPSERT_SCHEMA = z.object({

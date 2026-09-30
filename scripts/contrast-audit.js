@@ -25,7 +25,14 @@
     const layers = [];
     for (let e = el; e; e = e.parentElement) {
       const cs = getComputedStyle(e);
-      if (cs.backgroundImage !== "none") return null;
+      // Una TEXTURA en mosaico (la trama de puntos del modo oscuro: background-size de
+      // 22px) no cambia el color de fondo en la práctica, pero antes hacía que se
+      // saltara TODO el chat. Se atraviesa y se sigue buscando el color sólido de abajo;
+      // una imagen o un degradado de verdad (background-size grande o auto) se sigue
+      // saltando porque ahí el contraste no se puede calcular con un solo color.
+      const tile = cs.backgroundSize.split(" ").map((v) => parseFloat(v));
+      const isTexture = tile.length === 2 && tile.every((v) => v > 0 && v <= 64);
+      if (cs.backgroundImage !== "none" && !isTexture) return null;
       const c = parse(cs.backgroundColor);
       if (c && c.a > 0) { layers.push(c); if (c.a >= 1) break; }
     }

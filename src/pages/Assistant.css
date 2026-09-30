@@ -531,6 +531,15 @@
               0 0 26px -8px color-mix(in oklch, var(--asst-term) 55%, transparent);
 }
 
+/* El saludo usa el degradado de marca del Experto (--a-grad) y varios son OSCUROS:
+   sobre el fondo nuevo, "Legal" quedaba casi invisible (visto en producción). En oscuro
+   el título se arma con el acento ya aclarado (--asst-accent-text, que es la marca
+   mezclada con blanco) hacia el color de texto: mantiene la identidad y se lee.
+   La auditoría de contraste no lo detecta: salta el texto con degradado. */
+.asst-app[data-asst-theme="dark"] .asst-hello {
+  background: linear-gradient(92deg, var(--asst-accent-text), var(--asst-txt) 88%);
+}
+
 /* Cursor de terminal al final del saludo. */
 .asst-app[data-asst-theme="dark"] .asst-hello::after {
   content: ""; display: inline-block; width: 0.46em; height: 0.9em; margin-left: 0.16em;
