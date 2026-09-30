@@ -31,9 +31,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === "GET") {
     const profile = await getProfile(user.userId);
-    const rows = profile?.isAdmin
-      ? await db.select().from(schema.ticket).orderBy(desc(schema.ticket.createdAt))
-      : await db.select().from(schema.ticket).where(eq(schema.ticket.userId, user.userId)).orderBy(desc(schema.ticket.createdAt));
+    if (profile?.isAdmin) {
+      // El admin ve a quién pertenece cada ticket y si esa persona es admin: los tickets de mejora que
+      // escribe un admin se implementan directamente; los de usuarios comunes se revisan primero.
+      const rows = await db
+        .select({
+          id: schema.ticket.id, userId: schema.ticket.userId, type: schema.ticket.type, title: schema.ticket.title,
+          description: schema.ticket.description, pageUrl: schema.ticket.pageUrl, status: schema.ticket.status,
+          createdAt: schema.ticket.createdAt, updatedAt: schema.ticket.updatedAt,
+          authorName: schema.user.name, authorEmail: schema.user.email, authorIsAdmin: schema.profile.isAdmin,
+        })
+        .from(schema.ticket)
+        .leftJoin(schema.user, eq(schema.user.id, schema.ticket.userId))
+        .leftJoin(schema.profile, eq(schema.profile.userId, schema.ticket.userId))
+        .orderBy(desc(schema.ticket.createdAt));
+      res.status(200).json({ ok: true, tickets: rows });
+      return;
+    }
+    const rows = await db.select().from(schema.ticket).where(eq(schema.ticket.userId, user.userId)).orderBy(desc(schema.ticket.createdAt));
     res.status(200).json({ ok: true, tickets: rows });
     return;
   }
