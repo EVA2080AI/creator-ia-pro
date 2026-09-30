@@ -32,6 +32,9 @@ export interface ModelDef {
   vision: boolean;
   /** true = no cuesta créditos (útil para el asistente de bienvenida / plan free). */
   free: boolean;
+  /** true = genera muy despacio (medido: ~9 tokens/s → una página completa tarda varios minutos y el
+   *  servidor la corta a los 54s). El selector lo avisa para que no se elija para construir sitios. */
+  slow?: boolean;
 }
 
 export const CATEGORY_META: Record<ModelCategory, { label: string; color: string; bolts: number }> = {
@@ -71,13 +74,14 @@ export const CHAT_MODELS: ModelDef[] = [
     id: "deepseek/deepseek-chat-v3.1",
     label: "DeepSeek V3.1",
     provider: "DeepSeek",
-    description: "Balance ideal costo/calidad. Buen código, sin coste en el plan gratuito.",
+    description: "Buen razonamiento y código sin coste, pero responde despacio (~9 tokens/s): mejor para preguntas cortas que para páginas completas.",
     category: "eco",
     credits: 0,
     minTier: "free",
     context: "160K tokens",
     vision: false,
     free: true,
+    slow: true,
   },
   {
     id: "meta-llama/llama-3.3-70b-instruct",

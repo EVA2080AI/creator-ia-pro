@@ -88,4 +88,12 @@ describe("ModelPicker", () => {
     fireEvent.keyDown(enabled[0], { key: "ArrowDown" });
     expect(document.activeElement).toBe(enabled[1]);
   });
+  it("marca como Lento solo a los modelos con slow:true", () => {
+    const { trigger } = setup("agencia");
+    fireEvent.click(trigger);
+    const slowLabels = CHAT_MODELS.filter((m) => m.slow).map((m) => m.label);
+    expect(slowLabels.length).toBeGreaterThan(0);
+    const flagged = screen.getAllByRole("option").filter((o) => o.textContent?.includes("Lento")).map((o) => o.querySelector(".asst-picker-row-title")?.firstChild?.textContent);
+    expect(flagged).toEqual(slowLabels);
+  });
 });

@@ -406,6 +406,7 @@
   background: var(--asst-panel-2); color: var(--asst-txt-2); font-variant-numeric: tabular-nums;
 }
 .asst-picker-chip.free { background: color-mix(in oklch, oklch(0.7 0.17 150) 18%, var(--asst-bg)); color: color-mix(in oklch, oklch(0.5 0.14 150) 80%, var(--asst-txt)); }
+.asst-picker-chip.slow { background: color-mix(in oklch, oklch(0.78 0.15 75) 22%, var(--asst-bg)); color: color-mix(in oklch, oklch(0.5 0.12 65) 80%, var(--asst-txt)); }
 .asst-picker-chip.lock { background: transparent; border: 1px solid var(--asst-border); color: var(--asst-txt-3); }
 .asst-picker-upsell {
   position: sticky; bottom: -6px; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 6px -6px -6px; padding: 12px;

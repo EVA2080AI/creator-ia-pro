@@ -29,10 +29,11 @@ interface RowProps {
   chip: string;
   selected: boolean;
   lockedTier?: PlanTier;
+  slow?: boolean;
   onPick: () => void;
 }
 
-function Row({ title, sub, desc, chip, selected, lockedTier, onPick }: RowProps) {
+function Row({ title, sub, desc, chip, selected, lockedTier, slow, onPick }: RowProps) {
   const locked = !!lockedTier;
   return (
     <button
@@ -50,6 +51,7 @@ function Row({ title, sub, desc, chip, selected, lockedTier, onPick }: RowProps)
         {desc && <span className="asst-picker-row-desc">{desc}</span>}
       </span>
       <span className="asst-picker-row-end">
+        {slow && !locked && <span className="asst-picker-chip slow" title="Genera despacio: una página completa tarda varios minutos">Lento</span>}
         {locked ? <span className="asst-picker-chip lock"><Lock className="w-3 h-3" />{TIER_LABEL[lockedTier]}</span> : <span className={`asst-picker-chip${chip === "Gratis" ? " free" : ""}`}>{chip}</span>}
         {selected && <Check className="w-4 h-4 asst-picker-check" aria-hidden />}
       </span>
@@ -124,6 +126,7 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: 
                       chip={m.free ? "Gratis" : `${m.credits} cr`}
                       selected={m.id === model}
                       lockedTier={lockOf(m.minTier)}
+                      slow={m.slow}
                       onPick={() => { onModel(m.id); setOpen(false); }}
                     />
                   ))}
