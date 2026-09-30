@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { ArrowLeft, Scale, Send, Square, Trophy, Loader2, Plus, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { mdToHtml } from "@/lib/markdown";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
-import { CHAT_MODELS, getModel, CATEGORY_ORDER, CATEGORY_META } from "@/lib/ai/models";
+import { CHAT_MODELS, getModel, CATEGORY_ORDER, CATEGORY_META, canAccessModel, type ModelDef } from "@/lib/ai/models";
 import "./Assistant.css";
 
 // Arena IA: el mismo prompt a varios modelos en paralelo para comparar
@@ -21,14 +22,20 @@ interface Lane {
   ms?: number;
 }
 
-const DEFAULT_LANES = ["google/gemini-2.5-flash-lite", "deepseek/deepseek-chat-v3.1", "meta-llama/llama-3.3-70b-instruct"]
+// DeepSeek V3.1 (~9 tokens/s) dejaba una columna cortada a los 54 s: se cambió por gpt-oss-120b, también gratis y mucho más ágil.
+const DEFAULT_LANES = ["google/gemini-2.5-flash-lite", "openai/gpt-oss-120b", "meta-llama/llama-3.3-70b-instruct"]
   .filter((id) => CHAT_MODELS.some((m) => m.id === id));
 
 const SYSTEM = "Responde en español de forma clara y útil. Usa markdown cuando ayude.";
 
 export default function ArenaPage() {
   const navigate = useNavigate();
-  const { loading: authLoading } = useAuth("/auth");
+  const { user, loading: authLoading } = useAuth("/auth");
+  const tier = useProfile(user?.id).profile?.subscription_tier;
+  // Plan todavía cargando (tier undefined) = no se bloquea nada; el servidor igual valida.
+  const allowed = (m: ModelDef) => !tier || canAccessModel(tier, m.minTier);
+  const optionLabel = (m: ModelDef) =>
+    `${m.label} ${allowed(m) ? (m.free ? "· gratis" : `· ${m.credits} cr`) : `· requiere ${m.minTier}`}${m.slow && allowed(m) ? " · lento" : ""}`;
   const [lanes, setLanes] = useState<Lane[]>(DEFAULT_LANES.map((model) => ({ model, text: "", status: "idle" })));
   const [prompt, setPrompt] = useState("");
   const [askedPrompt, setAskedPrompt] = useState("");
@@ -159,7 +166,7 @@ export default function ArenaPage() {
                     {CATEGORY_ORDER.map((cat) => (
                       <optgroup key={cat} label={CATEGORY_META[cat].label}>
                         {CHAT_MODELS.filter((cm) => cm.category === cat).map((cm) => (
-                          <option key={cm.id} value={cm.id}>{cm.label} {cm.free ? "· gratis" : `· ${cm.credits} cr`}</option>
+                          <option key={cm.id} value={cm.id} disabled={!allowed(cm) && cm.id !== lane.model}>{optionLabel(cm)}</option>
                         ))}
                       </optgroup>
                     ))}
@@ -196,7 +203,7 @@ export default function ArenaPage() {
           })}
           {lanes.length < 4 && !running && (
             <button
-              onClick={() => setLanes((prev) => [...prev, { model: CHAT_MODELS.find((m) => !prev.some((l) => l.model === m.id))?.id ?? CHAT_MODELS[0].id, text: "", status: "idle" }])}
+              onClick={() => setLanes((prev) => [...prev, { model: (CHAT_MODELS.find((m) => allowed(m) && !prev.some((l) => l.model === m.id)) ?? CHAT_MODELS[0]).id, text: "", status: "idle" }])}
               className="flex min-h-[220px] flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border text-[13px] font-bold text-muted-foreground hover:border-primary hover:text-primary"
             >
               <Plus className="h-5 w-5" /> Agregar modelo
