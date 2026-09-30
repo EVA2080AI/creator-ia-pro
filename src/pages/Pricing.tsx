@@ -505,17 +505,17 @@ export default function Pricing() {
                 <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200">
                   <Globe className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
                   <div className="text-lg font-black text-zinc-700">{(estimateSlider / 10).toFixed(0)}</div>
-                  <div className="text-[11px] font-black uppercase text-zinc-500">Posts de texto</div>
+                  <div className="text-[11px] font-black uppercase text-zinc-600">Posts de texto</div>
                 </div>
                 <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200">
                   <Cpu className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
                   <div className="text-lg font-black text-zinc-700">{(estimateSlider / 100).toFixed(0)}</div>
-                  <div className="text-[11px] font-black uppercase text-zinc-500">Imágenes generadas</div>
+                  <div className="text-[11px] font-black uppercase text-zinc-600">Imágenes generadas</div>
                 </div>
                 <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200 col-span-2 md:col-span-1">
                   <Code2 className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
                   <div className="text-lg font-black text-zinc-700">{(estimateSlider / 50).toFixed(0)}</div>
-                  <div className="text-[11px] font-black uppercase text-zinc-500">Guiones de video</div>
+                  <div className="text-[11px] font-black uppercase text-zinc-600">Guiones de video</div>
                 </div>
               </div>
 
