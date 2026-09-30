@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPreviewDoc, extractFilename, stackblitzFields, uniqueName, type ProjectFile } from "./project-preview";
+import { buildPreviewDoc, extractFilename, findMissingRefs, stackblitzFields, uniqueName, withBasaltBase, type ProjectFile } from "./project-preview";
 
 describe("extractFilename", () => {
   it("lee el nombre de la línea de la valla (resto tras el lenguaje)", () => {
@@ -85,5 +85,59 @@ describe("stackblitzFields", () => {
 
   it("devuelve null si StackBlitz no puede ejecutar el proyecto", () => {
     expect(stackblitzFields([{ name: "main.py", lang: "py", code: "print(1)" }], "x")).toBeNull();
+  });
+});
+
+describe("findMissingRefs y diagnóstico", () => {
+  it("detecta archivos locales enlazados que nunca llegaron (respuesta cortada)", () => {
+    expect(findMissingRefs([html])).toEqual(["styles.css", "app.js"]);
+    expect(findMissingRefs([html, css, js])).toEqual([]);
+  });
+
+  it("ignora URLs externas, data: y anclas", () => {
+    const ext: ProjectFile = {
+      name: "index.html",
+      lang: "html",
+      code: '<html><head><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter"><script src="//cdn.x/y.js"></script></head><body></body></html>',
+    };
+    expect(findMissingRefs([ext])).toEqual([]);
+  });
+
+  it("el preview avisa por consola qué archivo falta", () => {
+    const doc = buildPreviewDoc([html])!;
+    expect(doc).toContain("styles.css está enlazado en el HTML pero no llegó");
+    expect(buildPreviewDoc([html, css, js])).not.toContain("no llegó");
+  });
+});
+
+describe("withBasaltBase", () => {
+  const linked: ProjectFile = {
+    name: "index.html",
+    lang: "html",
+    code: '<html><head><link rel="stylesheet" href="basalt.css"><style>:root{--hue:45}</style></head><body><p>x</p></body></html>',
+  };
+
+  it("suma basalt.css como archivo real cuando el HTML lo enlaza", () => {
+    const files = withBasaltBase([linked]);
+    expect(files.map((f) => f.name)).toEqual(["index.html", "basalt.css"]);
+    expect(files[1].code).toContain("@layer base, components");
+  });
+
+  it("no toca proyectos que no lo enlazan ni pisa uno que el modelo sí escribió", () => {
+    expect(withBasaltBase([html, css, js])).toHaveLength(3);
+    const own: ProjectFile = { name: "basalt.css", lang: "css", code: "/* propio */" };
+    expect(withBasaltBase([linked, own])).toHaveLength(2);
+  });
+
+  it("el preview inlinea basalt.css ANTES del CSS propio (que así siempre gana)", () => {
+    const doc = buildPreviewDoc(withBasaltBase([linked]))!;
+    expect(doc.indexOf("@layer base")).toBeGreaterThan(-1);
+    expect(doc.indexOf("@layer base")).toBeLessThan(doc.indexOf(":root{--hue:45}"));
+    expect(findMissingRefs(withBasaltBase([linked]))).toEqual([]);
+  });
+
+  it("también avisa de <img src> locales que nunca llegaron", () => {
+    const img: ProjectFile = { name: "index.html", lang: "html", code: '<html><head></head><body><img src="./img/pan.jpg" alt="pan"><img src="https://x.test/a.png" alt=""><img src="data:image/png;base64,AAA" alt=""></body></html>' };
+    expect(findMissingRefs([img])).toEqual(["img/pan.jpg"]);
   });
 });

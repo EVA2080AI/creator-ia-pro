@@ -66,4 +66,10 @@ describe("mdToHtml — tarjetas de proyecto", () => {
     expect(host.querySelector(".md-project script")).toBeNull();
     expect(host.querySelector(".md-proj-pane code")?.textContent).toBe("<script>alert(1)</script>");
   });
+
+  it("un HTML que enlaza basalt.css muestra basalt.css como pestaña del proyecto", () => {
+    const host = render(fence("html", '<html><head><link rel="stylesheet" href="basalt.css"></head><body>x</body></html>'));
+    const names = [...host.querySelectorAll(".md-proj-pane[data-file]")].map((p) => p.getAttribute("data-file"));
+    expect(names).toEqual(["index.html", "basalt.css"]);
+  });
 });

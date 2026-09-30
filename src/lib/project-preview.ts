@@ -3,6 +3,8 @@
 // previa combinando HTML + CSS + JS, y preparar el formulario de StackBlitz.
 // Vive aparte de markdown.ts/los hooks para poder testearla sin navegador.
 
+import BASALT_STARTER_CSS from "./basalt-starter.css?raw";
+
 export interface ProjectFile {
   name: string;
   lang: string;
@@ -75,12 +77,65 @@ export const isPreviewable = (files: ProjectFile[]) => files.some((f) => isHtmlN
 // Se inyecta en el <head> del documento de vista previa: reenvía console.* y
 // los errores al padre por postMessage (el iframe no tiene allow-same-origin,
 // así que es la única vía). Sin JSON.stringify para valores raros: String().
-const CONSOLE_SHIM = `<script>(function(){var s=function(x){try{return typeof x==="string"?x:(x instanceof Error?x.message:JSON.stringify(x))}catch(e){return String(x)}};var p=function(t,a){try{parent.postMessage({__basalt:1,t:t,m:Array.prototype.map.call(a,s).join(" ")},"*")}catch(e){}};["log","info","warn","error"].forEach(function(k){var o=console[k];console[k]=function(){p(k,arguments);try{o.apply(console,arguments)}catch(e){}}});window.addEventListener("error",function(e){p("error",[e.message+(e.lineno?" (línea "+e.lineno+")":"")])});window.addEventListener("unhandledrejection",function(e){p("error",["Promesa rechazada: "+(e.reason&&e.reason.message||e.reason)])})})()</script>`;
+const CONSOLE_SHIM = `<script>(function(){var s=function(x){try{return typeof x==="string"?x:(x instanceof Error?x.message:JSON.stringify(x))}catch(e){return String(x)}};var p=function(t,a){try{parent.postMessage({__basalt:1,t:t,m:Array.prototype.map.call(a,s).join(" ")},"*")}catch(e){}};["log","info","warn","error"].forEach(function(k){var o=console[k];console[k]=function(){p(k,arguments);try{o.apply(console,arguments)}catch(e){}}});window.addEventListener("error",function(e){var t=e.target;if(t&&t!==window&&t.tagName){p("warn",["No se pudo cargar "+(t.tagName==="IMG"?"la imagen ":"")+(t.currentSrc||t.src||t.href)]);return}p("error",[e.message+(e.lineno?" (línea "+e.lineno+")":"")])},true);window.addEventListener("unhandledrejection",function(e){p("error",["Promesa rechazada: "+(e.reason&&e.reason.message||e.reason)])})})()</script>`;
 
 const SKIP_JS = /(^|\/)(server|vite\.config|webpack\.config|tailwind\.config|postcss\.config|eslint\.config)\.[mc]?js$|\.(test|spec|config)\.[mc]?js$/i;
 
 const escapeScript = (code: string) => code.replace(/<\/script/gi, "<\\/script");
 const escapeStyle = (code: string) => code.replace(/<\/style/gi, "<\\/style");
+
+function makeLookup(files: ProjectFile[]) {
+  const byPath = new Map(files.map((f) => [normalizePath(f.name), f]));
+  const byBase = new Map(files.map((f) => [baseName(f.name), f]));
+  return (ref: string) => byPath.get(normalizePath(ref)) ?? byBase.get(baseName(ref));
+}
+
+const isLocalRef = (ref: string) => !/^([a-z][a-z0-9+.-]*:|\/\/|#)/i.test(ref.trim());
+
+function mainHtml(files: ProjectFile[]): ProjectFile | undefined {
+  const htmlFiles = files.filter((f) => isHtmlName(f.name));
+  return htmlFiles.find((f) => /^index\.html?$/i.test(baseName(f.name))) ?? htmlFiles[0];
+}
+
+/**
+ * Rutas locales que el HTML principal referencia (<link rel=stylesheet>,
+ * <script src>) y que NO llegaron como archivo del proyecto. El caso real: la
+ * respuesta se cortó antes de styles.css y la vista previa salía con el estilo
+ * por defecto del navegador sin ninguna pista de por qué.
+ */
+export function findMissingRefs(files: ProjectFile[]): string[] {
+  const main = mainHtml(files);
+  if (!main) return [];
+  const lookup = makeLookup(files);
+  const missing = new Set<string>();
+  for (const tag of main.code.match(/<link\b[^>]*>/gi) ?? []) {
+    if (!/rel\s*=\s*["']?stylesheet/i.test(tag)) continue;
+    const href = /href\s*=\s*["']([^"']+)["']/i.exec(tag)?.[1];
+    if (href && isLocalRef(href) && !lookup(href)) missing.add(normalizePath(href));
+  }
+  for (const tag of main.code.match(/<(?:script|img)\b[^>]*>/gi) ?? []) {
+    const src = /\bsrc\s*=\s*["']([^"']+)["']/i.exec(tag)?.[1];
+    if (src && isLocalRef(src) && !lookup(src)) missing.add(normalizePath(src));
+  }
+  return [...missing];
+}
+
+export const BASALT_CSS_NAME = "basalt.css";
+
+/**
+ * Si el HTML enlaza basalt.css y el modelo no lo escribió (no debe: lo agrega el
+ * chat), se suma como archivo real del proyecto. Se resuelve ANTES de armar la
+ * tarjeta, así la vista previa, el ZIP y StackBlitz reciben exactamente el mismo
+ * archivo y además aparece como pestaña — nada de estilos "a escondidas" que el
+ * usuario vea en el preview y no en lo que descarga.
+ */
+export function withBasaltBase(files: ProjectFile[]): ProjectFile[] {
+  if (files.some((f) => baseName(f.name) === BASALT_CSS_NAME)) return files;
+  const linked = files.some(
+    (f) => isHtmlName(f.name) && /<link\b[^>]*href\s*=\s*["'](?:\.?\/)?basalt\.css["']/i.test(f.code),
+  );
+  return linked ? [...files, { name: BASALT_CSS_NAME, lang: "css", code: BASALT_STARTER_CSS.trim() }] : files;
+}
 
 /**
  * Documento completo para el iframe: el HTML principal con los <link
@@ -91,13 +146,9 @@ const escapeStyle = (code: string) => code.replace(/<\/style/gi, "<\\/style");
  * Devuelve null si el proyecto no tiene ningún HTML.
  */
 export function buildPreviewDoc(files: ProjectFile[]): string | null {
-  const htmlFiles = files.filter((f) => isHtmlName(f.name));
-  if (!htmlFiles.length) return null;
-  const main = htmlFiles.find((f) => /^index\.html?$/i.test(baseName(f.name))) ?? htmlFiles[0];
-
-  const byPath = new Map(files.map((f) => [normalizePath(f.name), f]));
-  const byBase = new Map(files.map((f) => [baseName(f.name), f]));
-  const lookup = (ref: string) => byPath.get(normalizePath(ref)) ?? byBase.get(baseName(ref));
+  const main = mainHtml(files);
+  if (!main) return null;
+  const lookup = makeLookup(files);
   const used = new Set<string>();
 
   let doc = main.code;
@@ -132,9 +183,17 @@ export function buildPreviewDoc(files: ProjectFile[]): string | null {
     doc = /<\/body>/i.test(doc) ? doc.replace(/<\/body>/i, () => `${scripts}\n</body>`) : `${doc}\n${scripts}`;
   }
 
-  if (/<head\b[^>]*>/i.test(doc)) return doc.replace(/<head\b[^>]*>/i, (m) => `${m}${CONSOLE_SHIM}`);
-  if (/<html\b[^>]*>/i.test(doc)) return doc.replace(/<html\b[^>]*>/i, (m) => `${m}<head>${CONSOLE_SHIM}</head>`);
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${CONSOLE_SHIM}</head><body>${doc}</body></html>`;
+  const missing = findMissingRefs(files);
+  const warn = missing.length
+    ? `<script>${escapeScript(
+        missing.map((m) => `console.warn(${JSON.stringify(`⚠ ${m} está enlazado en el HTML pero no llegó (¿respuesta cortada?)`)})`).join(";"),
+      )}</script>`
+    : "";
+  const head = CONSOLE_SHIM + warn;
+
+  if (/<head\b[^>]*>/i.test(doc)) return doc.replace(/<head\b[^>]*>/i, (m) => `${m}${head}`);
+  if (/<html\b[^>]*>/i.test(doc)) return doc.replace(/<html\b[^>]*>/i, (m) => `${m}<head>${head}</head>`);
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${head}</head><body>${doc}</body></html>`;
 }
 
 /**

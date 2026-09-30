@@ -1,0 +1,84 @@
+/* basalt.css — base de diseño de los sitios que genera Basalt.
+   Todo va dentro de @layer: cualquier CSS propio del sitio (sin capa) gana
+   siempre, así que esto solo pone el piso — no pelea con el diseño del rubro.
+   Para adaptarlo a una marca basta cambiar --hue (0-360) y --font-head. */
+@layer base, components;
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+    --hue: 255;
+    --brand: oklch(.55 .19 var(--hue));
+    --on-brand: oklch(.99 0 0);
+    --bg: light-dark(oklch(.99 .004 var(--hue)), oklch(.17 .012 var(--hue)));
+    --surface: light-dark(oklch(1 0 0), oklch(.22 .014 var(--hue)));
+    --text: light-dark(oklch(.22 .02 var(--hue)), oklch(.96 .006 var(--hue)));
+    --muted: color-mix(in oklch, var(--text) 62%, var(--bg));
+    --line: color-mix(in oklch, var(--text) 12%, var(--bg));
+    --tint: color-mix(in oklch, var(--brand) 9%, var(--bg));
+    --font: system-ui, ui-sans-serif, "Segoe UI", Roboto, sans-serif;
+    --font-head: var(--font);
+    --step--2: clamp(.75rem, .72rem + .15vw, .85rem);
+    --step--1: clamp(.875rem, .84rem + .17vw, .95rem);
+    --step-0: clamp(1rem, .96rem + .2vw, 1.125rem);
+    --step-1: clamp(1.25rem, 1.1rem + .7vw, 1.65rem);
+    --step-2: clamp(1.6rem, 1.3rem + 1.4vw, 2.4rem);
+    --step-3: clamp(2.1rem, 1.4rem + 3.2vw, 3.75rem);
+    --step-4: clamp(2.6rem, 1.6rem + 4.6vw, 5rem);
+    --step-5: clamp(3.2rem, 1.8rem + 6.5vw, 6.5rem);
+    --step-6: clamp(3.8rem, 2rem + 9vw, 8rem);
+    --s-1: .25rem; --s-2: .5rem; --s-3: 1rem; --s-4: 1.5rem; --s-5: 2.5rem; --s-6: 4rem; --s-7: 6rem;
+    --r-1: .5rem; --r-2: .875rem; --r-3: 1.5rem;
+    --shadow-1: 0 1px 2px rgb(0 0 0/.06), 0 2px 8px rgb(0 0 0/.06);
+    --shadow-2: 0 18px 40px -16px rgb(0 0 0/.3);
+    --shadow-3: 0 32px 64px -24px rgb(0 0 0/.4);
+    --ease: cubic-bezier(.2, .7, .2, 1);
+    /* Alias de los nombres que los modelos suelen inventar por su cuenta: si el sitio usa
+       var(--color-on-primary) sin definirla, el color queda inválido y hereda negro. */
+    --color-primary: var(--brand); --color-on-primary: var(--on-brand); --color-background: var(--bg);
+    --color-surface: var(--surface); --color-text: var(--text); --color-muted: var(--muted); --color-border: var(--line);
+    --font-body: var(--font);
+    /* Sin guion (--s3, --r2): otra variante que los modelos escriben por costumbre. */
+    --s1: var(--s-1); --s2: var(--s-2); --s3: var(--s-3); --s4: var(--s-4); --s5: var(--s-5); --s6: var(--s-6); --s7: var(--s-7);
+    --r1: var(--r-1); --r2: var(--r-2); --r3: var(--r-3);
+  }
+  *, ::before, ::after { box-sizing: border-box; margin: 0; }
+  html { accent-color: var(--brand); scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body { min-block-size: 100dvh; font: var(--step-0)/1.6 var(--font); color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+  img, svg, video { display: block; max-inline-size: 100%; block-size: auto; }
+  h1, h2, h3 { font-family: var(--font-head); line-height: 1.15; letter-spacing: -.02em; text-wrap: balance; }
+  h1 { font-size: var(--step-3); } h2 { font-size: var(--step-2); } h3 { font-size: var(--step-1); }
+  /* Sin color propio en <p>: hereda, así un hero oscuro con color:#fff no queda con texto marrón. */
+  p { text-wrap: pretty; max-inline-size: 68ch; }
+  ul, ol { padding-inline-start: 1.25em; }
+  a { color: var(--brand); text-underline-offset: .2em; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid color-mix(in oklch, var(--brand) 65%, transparent); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+}
+
+@layer components {
+  .container { inline-size: min(100% - 2 * var(--s-3), 68rem); margin-inline: auto; }
+  .section { padding-block: clamp(var(--s-5), 8vw, var(--s-7)); }
+  .hero { padding-block: clamp(var(--s-6), 14vw, 9rem); background: radial-gradient(60rem 30rem at 50% -10%, var(--tint), transparent); }
+  .center { text-align: center; } .center p { margin-inline: auto; }
+  .lead { font-size: var(--step-1); }
+  .muted { color: var(--muted); }
+  /* Lugar de una foto: los modelos inventan URLs de Unsplash que se rompen. */
+  .ph { display: grid; place-items: center; aspect-ratio: 4 / 3; font-size: clamp(2.5rem, 8vw, 4rem); border-radius: var(--r-2); background: linear-gradient(135deg, var(--tint), color-mix(in oklch, var(--brand) 24%, var(--bg))); }
+  .eyebrow { font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); }
+  .stack > * + * { margin-block-start: var(--s-3); }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); }
+  .grid { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+  .card { padding: var(--s-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-2); box-shadow: var(--shadow-1); transition: transform .25s var(--ease), box-shadow .25s var(--ease); }
+  .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-2); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2); padding: .75em 1.25em; border: 1px solid transparent; border-radius: 999px; background: var(--brand); color: var(--on-brand); font-weight: 600; text-decoration: none; cursor: pointer; transition: transform .2s var(--ease), filter .2s; }
+  .btn:hover { transform: translateY(-1px); filter: brightness(1.1); }
+  .btn-ghost { background: transparent; color: var(--text); border-color: var(--line); }
+  .input { inline-size: 100%; padding: .7em .9em; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-1); }
+  .input:user-invalid { border-color: oklch(.6 .21 25); }
+  .badge { padding: .2em .7em; border-radius: 999px; font-size: .8em; font-weight: 600; background: color-mix(in oklch, var(--brand) 14%, var(--bg)); color: var(--brand); }
+  .glass { background: color-mix(in oklch, var(--surface) 70%, transparent); backdrop-filter: blur(14px) saturate(1.4); border: 1px solid var(--line); }
+}

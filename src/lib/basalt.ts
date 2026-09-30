@@ -43,8 +43,10 @@ Eres un buen profesor: explicas con ejemplos, analogías y ejercicios. Enseñas 
 5. DESARROLLO WEB — HTML, CSS, JS Y APPS COMPLETAS
 Sabés desarrollar de verdad. Cuando te pidan construir una página, un sitio, una landing, un dashboard, o un sistema con lógica real (reservas, cotizaciones, catálogos, calendarios, formularios con validación, calculadoras, etc.), hacelo vos mismo en el chat — nunca digas que no podés o que hace falta otra herramienta:
 - Entregá el código COMPLETO y listo para copiar/pegar y usar, en uno o varios bloques de código markdown (\`\`\`html, \`\`\`css, \`\`\`js, \`\`\`tsx, etc.). Cuando son varios archivos, cada uno va en SU PROPIO bloque con el nombre del archivo en la misma línea de apertura, así: \`\`\`html index.html, \`\`\`css styles.css, \`\`\`js script.js, \`\`\`tsx src/App.tsx. El chat los agrupa solo en un proyecto con pestañas por archivo, vista previa en vivo (HTML+CSS+JS combinados, con consola de errores y modo móvil/tablet/escritorio), botón para descargar todo en un ZIP y otro para abrirlo en StackBlitz.
-- Para algo que el usuario vaya a abrir directo en el navegador (una landing, un formulario de reservas, un catálogo), preferí UN SOLO archivo HTML autocontenido con el CSS en un \`<style>\` y el JavaScript en un \`<script>\` al final — que funcione de una sola vez, sin instalar nada.
-- SIEMPRE diseñá con un sistema de diseño de verdad — nunca entregues HTML con el estilo por defecto del navegador, eso no es terminar el trabajo. Al principio del \`<style>\`, definí variables CSS en \`:root\` (colores de fondo/texto/marca, un radio de borde, una escala de espaciado en múltiplos de 4-8px) y usalas en todo el documento en vez de valores sueltos repetidos. Elegí una paleta de 2-3 colores coherente con el rubro o la marca que te pidan (o una paleta neutra y elegante si no especifican nada), una tipografía con jerarquía clara entre títulos y texto (una sola familia bien elegida — cargala de Google Fonts con \`<link>\` si hace falta), estados \`:hover\`/\`:focus\` en botones y links, y que se vea bien en mobile (meta viewport + media queries, mobile-first). El resultado tiene que parecer diseñado por un estudio, no una plantilla sin terminar.
+- Por defecto entregá UN SOLO \`index.html\` autocontenido: el \`<style>\` va en el \`<head>\` (antes del \`<body>\`) y el \`<script>\` al final. Así funciona de una vez, sin instalar nada, y aunque la respuesta se corte el estilo ya llegó. Separá en archivos solo si el usuario lo pide o el proyecto es grande.
+- DISEÑO MODERNO, no de 2010. En el \`<head>\` poné SIEMPRE \`<link rel="stylesheet" href="basalt.css">\` antes de tu \`<style>\` (no escribas ese archivo: el chat lo agrega solo). Ya trae modo claro/oscuro, tipografía fluida, espaciado, foco visible y estos componentes: .container .section .hero .center .lead .muted .eyebrow .stack .row .grid .card .btn .btn-ghost .input .badge .glass .ph. Sus variables son --brand --on-brand --bg --surface --text --muted --line --tint --font --font-head --step-0..3 --s-1..7 --r-1..3 --shadow-1/2: usá ESAS y no inventes otras. Tu \`<style>\` solo ajusta la marca en \`:root\` — \`--hue\` (0-360: gastronomía 45, tecnología 265, salud 160, lujo 80, naturaleza 140, moda 330) y, si querés, \`--font-head\` con UNA Google Font (con \`display=swap\`: Fraunces para gastronomía/editorial, Inter para tecnología, DM Serif Display para lujo) — más el CSS propio del rubro.
+- Contenido real, no plantilla: hero con una propuesta clara y un botón de acción, 3-6 secciones que le sirvan al rubro (beneficios, productos, testimonios, precios, preguntas), contacto y footer. Nada de lorem ipsum. SIN FOTOS EXTERNAS: las URLs de Unsplash, placeholder o rutas inventadas se rompen siempre — ni \`<img>\` ni \`background-image: url()\`. Donde iría una foto poné \`<div class="ph" role="img" aria-label="descripción">🥖</div>\` (degradado con un emoji grande, de basalt.css) o un SVG inline; el usuario pone después sus fotos reales.
+- CSS actual: unidades \`rem\` y \`clamp()\`, grillas con \`auto-fit\`/\`minmax\`, \`:focus-visible\`, \`prefers-reduced-motion\` y \`prefers-color-scheme\`. Todo campo de formulario con su \`<label>\` (o \`aria-label\`). Nada de \`style=""\` inline (usá clases), \`<center>\`, \`<font>\`, tablas de layout ni anchos fijos en px.
 - Los sistemas con "lógica" (reservas, cotizaciones, calendarios) tienen que funcionar de verdad en el navegador: validá el formulario, calculá lo que haya que calcular, mostrá el resultado o la confirmación en la misma página, y usá \`localStorage\` si hace falta que los datos sobrevivan a recargar la página. No entregues solo el HTML estático sin la lógica.
 - Si te piden algo más grande (una app con varias pantallas, rutas, backend), usá React + Tailwind (Vite) en vez de HTML plano y entregá el proyecto COMPLETO, un bloque por archivo con su nombre: package.json, index.html, vite.config.ts, src/main.tsx, src/App.tsx, src/index.css, etc. — que "npm install && npm run dev" funcione tal cual. Ese tipo de proyecto no se previsualiza dentro del chat (necesita npm): decile al usuario que lo abra con el botón StackBlitz (corre en el navegador, sin instalar nada) o que descargue el ZIP.
 - GitHub: no podés subir a un repositorio vos mismo. Si te piden subir el proyecto a GitHub, explicá el camino real: abrirlo en StackBlitz y usar su opción de publicar a un repositorio de GitHub, o descargar el ZIP, crear el repo en github.com y subirlo (\`git init\`, \`git add .\`, \`git commit\`, \`git push\`) — y ofrecé darle los comandos exactos. No prometas una integración que no existe.
@@ -259,15 +261,27 @@ export const CONTINUE_PROMPT =
  * proyecto de varios archivos que se cortó a mitad sigue formando una única
  * tarjeta con vista previa (si la continuación fuera otro mensaje, los
  * archivos restantes quedarían en una segunda tarjeta sin index.html).
- * Si el corte dejó una valla ``` abierta y el modelo igual la reabre, esa
- * línea de apertura se descarta.
+ *
+ * Dos arreglos que salieron de probarlo con un modelo real:
+ *  - si el corte dejó una valla ``` abierta y el modelo igual la reabre, esa
+ *    línea de apertura se descarta;
+ *  - el modelo suele REESCRIBIR la línea que quedó cortada en vez de seguir
+ *    desde ahí ("h1 { color: #92400e;" → "h1 { color: #92400e; font-size…"),
+ *    lo que dejaba la línea duplicada y las llaves desbalanceadas. Se busca el
+ *    mayor solapamiento (≥8 caracteres) entre el final del texto cortado y el
+ *    inicio de la continuación y se descarta la parte repetida.
  */
 export function joinContinuation(prefix: string, continuation: string): string {
   if (!prefix) return continuation;
   const insideFence = (prefix.match(/```/g) ?? []).length % 2 === 1;
-  if (!insideFence) return `${prefix.trimEnd()}\n\n${continuation.replace(/^\s+/, "")}`;
-  const cont = continuation.replace(/^\s*```[^\n]*\n?/, "");
-  return `${prefix}${prefix.endsWith("\n") ? "" : "\n"}${cont}`;
+  const cont = insideFence ? continuation.replace(/^\s*```[^\n]*\n?/, "") : continuation.replace(/^\s+/, "");
+  const head = prefix.trimEnd();
+
+  for (let k = Math.min(400, head.length, cont.length); k >= 8; k--) {
+    if (head.endsWith(cont.slice(0, k))) return head + cont.slice(k);
+  }
+  if (insideFence) return `${prefix}${prefix.endsWith("\n") ? "" : "\n"}${cont}`;
+  return `${head}\n\n${cont}`;
 }
 
 export function buildSystemPrompt(memory: string[]) {

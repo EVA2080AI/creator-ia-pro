@@ -29,4 +29,29 @@ describe("joinContinuation", () => {
     const cont = `${F}css styles.css\np{}\n${F}`;
     expect(joinContinuation(prefix, cont)).toBe(`${prefix}\n\n${cont}`);
   });
+
+  it("si el modelo reescribe la línea que quedó cortada, no la duplica", () => {
+    const prefix = `${F}css styles.css\nbody { margin: 0 }\nh1 { color: #92400e;`;
+    const cont = `h1 { color: #92400e; font-size: 3rem; }\np { color: #78350f; }\n${F}`;
+    const joined = joinContinuation(prefix, cont);
+    expect(joined).toBe(`${F}css styles.css\nbody { margin: 0 }\nh1 { color: #92400e; font-size: 3rem; }\np { color: #78350f; }\n${F}`);
+    expect((joined.match(/\{/g) ?? []).length).toBe((joined.match(/\}/g) ?? []).length);
+  });
+
+  it("descarta también varias líneas repetidas y la valla reabierta a la vez", () => {
+    const prefix = `${F}js script.js\nconst a = 1;\nfunction hola() {\n  console.log("hi");`;
+    const cont = `${F}js\nfunction hola() {\n  console.log("hi");\n}\n${F}`;
+    expect(joinContinuation(prefix, cont)).toBe(`${F}js script.js\nconst a = 1;\nfunction hola() {\n  console.log("hi");\n}\n${F}`);
+  });
+
+  it("un solapamiento corto (<8 caracteres) no cuenta: se une por línea", () => {
+    const prefix = `${F}css styles.css\na { x: 1 }\n}`;
+    expect(joinContinuation(prefix, "}\nb { y: 2 }")).toBe(`${prefix}\n}\nb { y: 2 }`);
+  });
+
+  it("en prosa, si repite el final de la oración no la duplica", () => {
+    expect(joinContinuation("Los beneficios principales son la velocidad y", "Los beneficios principales son la velocidad y la simpleza.")).toBe(
+      "Los beneficios principales son la velocidad y la simpleza.",
+    );
+  });
 });
