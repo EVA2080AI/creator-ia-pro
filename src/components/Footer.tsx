@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
-import { Github, Twitter, Linkedin, Mail, Shield, Zap } from "lucide-react";
+import { Mail, Shield, Zap } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -18,9 +18,11 @@ export function Footer() {
       title: "Soporte",
       links: [
         { name: "Ayuda y documentación", path: "/help" },
-        { name: "Estado del Sistema", path: "/system-status" },
-        { name: "Comunidad", path: "https://discord.gg" },
-        { name: "Contacto", path: "mailto:hola@creator-ia.com" },
+        // "Estado del Sistema" (/system-status) salió de acá: exige sesión (no está en
+        // publicPaths de App.tsx), así que a un visitante lo mandaba al login desde el pie.
+        // Sigue en el menú de admin. "Comunidad" apuntaba a https://discord.gg, que no es
+        // ningún servidor. "Contacto" abría el correo: ahora va a la página, que existe.
+        { name: "Contacto", path: "/contact" },
       ]
     },
     {
@@ -29,6 +31,8 @@ export function Footer() {
         { name: "Términos", path: "/terms" },
         { name: "Privacidad", path: "/privacy" },
         { name: "Seguridad", path: "/security" },
+        // /cookies existía sin un solo enlace en toda la app: solo se llegaba escribiendo la URL.
+        { name: "Cookies", path: "/cookies" },
       ]
     }
   ];
@@ -45,12 +49,14 @@ export function Footer() {
             <p className="text-zinc-500 text-sm leading-relaxed max-w-xs font-medium">
               La plataforma de IA todo-en-uno para crear apps, imágenes y contenido en segundos.
             </p>
-            <div className="flex items-center gap-4 text-zinc-400">
-              <a href="#" className="hover:text-primary transition-colors"><Twitter className="h-5 w-5" /></a>
-              <a href="#" className="hover:text-primary transition-colors"><Github className="h-5 w-5" /></a>
-              <a href="#" className="hover:text-primary transition-colors"><Linkedin className="h-5 w-5" /></a>
-              <a href="#" className="hover:text-primary transition-colors"><Mail className="h-5 w-5" /></a>
-            </div>
+            {/* Eran cuatro iconos con href="#": no llevaban a ningún lado. Queda el correo,
+                que sí existe; las redes vuelven cuando haya cuentas reales que enlazar. */}
+            <a
+              href="mailto:hola@creator-ia.com"
+              className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-primary transition-colors"
+            >
+              <Mail className="h-4 w-4" /> hola@creator-ia.com
+            </a>
           </div>
 
           {/* Link Groups */}

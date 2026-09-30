@@ -121,15 +121,19 @@
      left as-is: they're already dark regardless of
      app theme.
      ============================================ */
+  /* Modo oscuro "terminal" (pedido 2026-09-30: "más tecnológico, como si fuera
+     terminal"). El gris neutro (hue 240) pasa a negro con tinte frío (hue 205) y
+     el anillo de foco al verde fósforo. Solo cambian los tonos: la estructura de
+     tokens y el modo claro quedan igual. Contraste verificado ≥ 4.5:1. */
   .dark {
     /* ── Core ──────────────────────────────── */
-    --background:      240 8% 6%;         /* #0D0D0F near-black */
+    --background:      205 32% 4%;        /* #070C0F — negro con tinte frío (modo terminal) */
     --foreground:      0 0% 98%;          /* #FAFAFA */
 
-    --card:            240 6% 9%;         /* #16161A slightly elevated */
+    --card:            205 26% 7%;        /* #0D141A */
     --card-foreground: 0 0% 98%;
 
-    --popover:         240 6% 9%;
+    --popover:         205 26% 7%;
     --popover-foreground: 0 0% 98%;
 
     /* ── Brand ─────────────────────────────── */
@@ -141,41 +145,41 @@
     --primary-rgb:     250, 250, 250;
 
     /* ── Surfaces ──────────────────────────── */
-    --secondary:       240 4% 16%;        /* #29292E */
+    --secondary:       205 20% 13%;       /* #1A252D */
     --secondary-foreground: 0 0% 98%;
 
-    --muted:           240 4% 16%;
-    --muted-foreground: 240 5% 65%;       /* #A3A3AD */
+    --muted:           205 20% 13%;
+    --muted-foreground: 205 15% 68%;      /* #9EB0BC — 8.2:1 sobre el fondo */
 
-    --accent:          240 4% 16%;
+    --accent:          205 20% 13%;
     --accent-foreground: 0 0% 98%;
 
     /* ── Utility ───────────────────────────── */
     --destructive:     0 63% 42%;
     --destructive-foreground: 0 0% 98%;
 
-    --border:          240 4% 18%;        /* #2C2C31 */
-    --input:           240 4% 18%;
-    --ring:            240 5% 84%;
+    --border:          205 18% 18%;       /* #25333C */
+    --input:           205 18% 18%;
+    --ring:            152 70% 64%;       /* verde fósforo: el foco se ve de terminal */
 
     /* ── Sidebar ───────────────────────────── */
-    --sidebar-background:          240 7% 8%;
-    --sidebar-foreground:          240 5% 65%;
+    --sidebar-background:          205 28% 6%;
+    --sidebar-foreground:          205 15% 68%;
     --sidebar-primary:             0 0% 98%;
     --sidebar-primary-foreground:  240 5.9% 10%;
-    --sidebar-accent:              240 4% 16%;
+    --sidebar-accent:              205 20% 13%;
     --sidebar-accent-foreground:   0 0% 98%;
-    --sidebar-border:              240 4% 18%;
-    --sidebar-ring:                240 5% 84%;
+    --sidebar-border:              205 18% 18%;
+    --sidebar-ring:                152 70% 64%;
 
     /* ── Surface / Text / Border tokens ────── */
-    --surface-primary:   240 6% 9%;
-    --surface-secondary: 240 4% 14%;
+    --surface-primary:   205 26% 7%;
+    --surface-secondary: 205 22% 11%;
     --text-primary:      0 0% 98%;
-    --text-secondary:    240 5% 65%;
-    --text-tertiary:     240 4% 46%;
-    --border-subtle:     240 4% 15%;
-    --border-default:    240 4% 18%;
+    --text-secondary:    205 15% 68%;
+    --text-tertiary:     205 12% 56%;     /* 4.9:1 sobre el fondo */
+    --border-subtle:     205 18% 15%;
+    --border-default:    205 18% 18%;
 
     /* ── Status ────────────────────────────── */
     --success:          142 60% 48%;

@@ -295,8 +295,18 @@
   .asst-pill textarea { font-size: 16px; } /* evita el zoom automático de iOS */
   .asst-topbar { padding: 8px 10px; gap: 6px; }
   .asst-brand-name { font-size: 15px; }
-  .asst-cards { grid-template-columns: 1fr; }
-  .asst-welcome { padding-top: 4vh; }
+  /* Medido en un iPhone 13 (390px): cada tarjeta ocupaba 380px de alto — solo
+     entraban dos y se veían vacías (la etiqueta arriba y el icono suelto abajo
+     a la derecha). En móvil pasan a ser filas compactas con el icono a la
+     izquierda: entran las cuatro sin desplazar, que es lo que hace que la
+     pantalla de bienvenida sirva para algo. */
+  .asst-cards { grid-template-columns: 1fr; gap: 8px; margin-top: 22px; }
+  .asst-card { min-height: 0; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; padding: 13px 14px; border-radius: 14px; font-size: 14.5px; }
+  .asst-card > span:first-child { flex: 1; min-width: 0; }
+  .asst-card-ic { order: -1; align-self: center; width: 30px; height: 30px; flex: none; }
+  .asst-hello-sub { font-size: 15.5px; line-height: 1.5; margin-top: 6px; }
+  .asst-welcome { padding-top: 3vh; }
+  .asst-disclaimer { font-size: 10.5px; padding-top: 6px; }
 }
 
 /* ══ Capa de modernización del shell (Ciclo 2, "css muy antiguo") ═══════════
@@ -416,6 +426,13 @@
 .asst-picker :is(.asst-picker-trigger, .asst-picker-row, .asst-picker-upsell):focus-visible { outline: 2px solid var(--asst-accent-text); outline-offset: -2px; }
 
 /* Móvil: hoja inferior (el panel flotante de 440px no cabe y el pulgar no llega arriba). */
+/* El nombre completo del modelo ("Gemini 2.5 Flash Lite") empujaba la topbar en
+   móvil: chip más chico y con tope de ancho, como el de Gemini. */
+@media (max-width: 768px) {
+  .asst-picker-trigger { font-size: 12px; padding: 5px 8px; gap: 4px; }
+  .asst-picker-label { max-width: 38vw; }
+}
+
 @media (max-width: 640px) {
   .asst-picker-trigger { max-width: 52vw; }
   .asst-picker-backdrop { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(0, 0, 0, 0.45); }
@@ -461,3 +478,80 @@
 .asst-docs-sent .asst-doc { padding-right: 10px; background: color-mix(in oklch, var(--asst-bg) 55%, transparent); }
 .asst-main.asst-dragging::after { content: "Suelta el documento aquí para analizarlo"; position: absolute; inset: 8px; z-index: 30; display: grid; place-items: center; border: 2px dashed var(--asst-accent-text); border-radius: 20px; background: color-mix(in oklch, var(--asst-bg) 88%, transparent); color: var(--asst-accent-text); font-size: 16px; font-weight: 600; pointer-events: none; }
 @media (pointer: coarse) { .asst-attach { width: 44px; height: 44px; } }
+
+/* ══ Modo oscuro "terminal" ═══════════════════════════════════════════════════
+   Pedido (2026-09-30): "el modo oscuro quiero que se vea más tecnológico, como
+   si fuera terminal, los colores". Capa aditiva y acotada a
+   [data-asst-theme="dark"]: el modo claro no cambia ni una regla.
+   Qué cambia y por qué:
+   - Paleta: el gris neutro de Gemini (#131314/#1e1f20) pasa a negro con tinte
+     frío y paneles con un punto de azul, que es lo que hace que se lea como una
+     consola y no como una app gris.
+   - --asst-term (verde fósforo) SOLO para señales de estado, cursor y foco; el
+     morado de marca sigue siendo el color de las acciones.
+   - Monoespaciada en los METADATOS (modelo, etiquetas, tamaños, avisos), nunca
+     en el contenido: se lee como terminal sin volver ilegible una respuesta.
+   Contraste: todos los textos quedan ≥ 4.5:1 sobre su fondo (medido con
+   scripts/contrast-audit.js). */
+.asst-app[data-asst-theme="dark"] {
+  --asst-bg: #070c0f;
+  --asst-panel: #0d141a;
+  --asst-panel-2: #16212a;
+  --asst-txt: #e2ecf2;
+  --asst-txt-2: #b3c4d0;
+  --asst-txt-3: #8ea1af;
+  --asst-border: #1e2c36;
+  --asst-user-bubble: #14212b;
+  --asst-term: #5be9a0;
+  --asst-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Metadatos en monoespaciada (no el contenido). */
+.asst-app[data-asst-theme="dark"] :is(.asst-picker-trigger, .asst-picker-heading, .asst-switcher-label,
+  .asst-doc-meta, .asst-docs-note, .asst-picker-row-title small, .asst-cut) {
+  font-family: var(--asst-mono);
+}
+/* El aviso del pie solo en escritorio: la monoespaciada es más ancha y en un
+   móvil de 390px partía la línea en dos. */
+@media (min-width: 769px) { .asst-app[data-asst-theme="dark"] .asst-disclaimer { font-family: var(--asst-mono); } }
+.asst-app[data-asst-theme="dark"] .asst-picker-trigger { letter-spacing: -0.02em; }
+
+/* Trama de puntos tenue: da textura de consola sin competir con el texto. */
+.asst-app[data-asst-theme="dark"] .asst-scroller,
+.asst-app[data-asst-theme="dark"] .asst-shell-scroller {
+  background-image: radial-gradient(circle at 1px 1px, rgba(142, 161, 175, 0.07) 1px, transparent 0);
+  background-size: 22px 22px;
+}
+
+/* El compositor es el "prompt": cursor y foco en verde fósforo. */
+.asst-app[data-asst-theme="dark"] .asst-pill textarea { caret-color: var(--asst-term); }
+.asst-app[data-asst-theme="dark"] .asst-pill:focus-within {
+  border-color: color-mix(in oklch, var(--asst-term) 45%, var(--asst-border));
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--asst-term) 40%, transparent),
+              0 0 26px -8px color-mix(in oklch, var(--asst-term) 55%, transparent);
+}
+
+/* Cursor de terminal al final del saludo. */
+.asst-app[data-asst-theme="dark"] .asst-hello::after {
+  content: ""; display: inline-block; width: 0.46em; height: 0.9em; margin-left: 0.16em;
+  vertical-align: -0.06em; background: var(--asst-term); animation: asst-caret 1.1s steps(1) infinite;
+}
+@keyframes asst-caret { 50% { opacity: 0; } }
+
+/* Avatar del asistente: bloque con borde, no burbuja de color. */
+.asst-app[data-asst-theme="dark"] .asst-avatar {
+  border-radius: 8px; background: var(--asst-panel-2); border: 1px solid var(--asst-border);
+  box-shadow: inset 0 0 0 1px rgba(91, 233, 160, 0.12);
+}
+
+/* Código: chapa de consola en vez de un recuadro gris. */
+.asst-app[data-asst-theme="dark"] .asst-md code { color: var(--asst-term); background: rgba(91, 233, 160, 0.09); }
+.asst-app[data-asst-theme="dark"] .asst-md pre { border: 1px solid var(--asst-border); background: #050a0d; }
+.asst-app[data-asst-theme="dark"] .asst-md pre code { color: var(--asst-txt); background: none; }
+
+/* "Escribiendo": las barras del shimmer laten en verde. */
+.asst-app[data-asst-theme="dark"] .asst-shimmer i { background: linear-gradient(90deg, var(--asst-panel-2), rgba(91, 233, 160, 0.22), var(--asst-panel-2)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .asst-app[data-asst-theme="dark"] .asst-hello::after { animation: none; }
+}
