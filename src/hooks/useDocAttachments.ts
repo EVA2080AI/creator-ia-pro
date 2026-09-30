@@ -1,10 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { extractDocument, type ExtractedDoc } from "@/lib/doc-extract";
+import { MAX_DOCS_PER_MESSAGE } from "@/lib/doc-context";
 
 // Documentos que el usuario adjuntó y todavía no envió: se leen en el navegador apenas los elige
 // (PDF/Word/texto → texto) y quedan listos para viajar con el próximo mensaje.
-export const MAX_PENDING_DOCS = 5;
+// El tope vive en doc-context.ts porque el servidor aplica el mismo (api/ai/chat.ts).
+export const MAX_PENDING_DOCS = MAX_DOCS_PER_MESSAGE;
 
 export interface PendingDoc {
   id: string;

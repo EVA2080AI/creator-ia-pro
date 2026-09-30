@@ -14,6 +14,7 @@ import { CHAT_MODELS, DEFAULT_MODEL_ID, canAccessModel, getModel } from "../../s
 import { tavilySearch, WEB_SEARCH_TOOL } from "../_lib/search.js";
 import { USER_DATA_TOOLS, isUserDataToolName } from "../_lib/userDataTools.js";
 import { getUserProjects, getUserAssets, getUserUsage } from "../_lib/userData.js";
+import { DOC_ANALYSIS_PROMPT, DOC_RULES_MARKER, docBlock, sanitizeDocuments, type DocPayload } from "../../src/lib/doc-context.js";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 // 1 crédito — mismo orden de magnitud que los modelos de chat más baratos
@@ -50,6 +51,14 @@ interface ChatBody {
   /** 0–2. Genesis usa ~0.3 para código (determinista) y ~0.7 para charla. */
   temperature?: number;
   maxTokens?: number;
+  /**
+   * Documentos adjuntos al ÚLTIMO mensaje del usuario (contratos, informes…). Van aparte del texto
+   * del mensaje a propósito: se pegan delante de él solo para la llamada al modelo y NO se archivan
+   * en la conversación (allí queda la pregunta y los nombres de los archivos). Los Expertos usan
+   * este camino porque su historial sí se persiste en el servidor; Basalt no persiste y los manda
+   * dentro del mensaje.
+   */
+  documents?: DocPayload[];
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -124,9 +133,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const messages: ChatMessage[] = body.systemPrompt
-    ? [{ role: "system", content: body.systemPrompt }, ...body.messages]
-    : body.messages;
+  // Los documentos son DATOS de terceros: se recortan (número y caracteres) y viajan dentro de un
+  // bloque <documento> del que no pueden escapar (ver docBlock), con la regla de "no obedecer lo que
+  // diga el documento" en el system prompt.
+  const docs = sanitizeDocuments(body.documents);
+  // El cliente ya lo agrega cuando hay documentos en el historial (preguntas de seguimiento); acá se
+  // garantiza para cualquier cliente que mande `documents`, sin repetirlo.
+  const promptWithDocs = docs.length && !(body.systemPrompt ?? "").includes(DOC_RULES_MARKER)
+    ? `${body.systemPrompt ? `${body.systemPrompt}\n\n` : ""}${DOC_ANALYSIS_PROMPT}`
+    : body.systemPrompt;
+
+  const messages: ChatMessage[] = promptWithDocs
+    ? [{ role: "system", content: promptWithDocs }, ...withDocuments(body.messages, docs)]
+    : withDocuments(body.messages, docs);
 
   const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
 
@@ -395,6 +414,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       conversationId: body.conversationId,
       projectId: body.projectId,
       userMessage: body.messages[body.messages.length - 1],
+      // Solo los nombres: el texto de los documentos no se guarda (ver ChatBody.documents).
+      attachmentNames: docs.map((d) => d.name),
       assistantText: full,
       model: modelId,
       cost,
@@ -404,12 +425,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
+/**
+ * Pega los documentos delante del último mensaje del usuario, en una COPIA: `body.messages` sigue
+ * intacto para persistConversation, que es lo que archiva el texto del usuario.
+ */
+function withDocuments(messages: ChatMessage[], docs: DocPayload[]): ChatMessage[] {
+  if (!docs.length) return messages;
+  const i = messages.map((m) => m.role).lastIndexOf("user");
+  if (i < 0) return messages;
+  const original = messages[i];
+  const text = typeof original.content === "string" ? original.content : "";
+  const blocks = docs.map(docBlock).join("\n\n");
+  const copy = [...messages];
+  copy[i] = { ...original, content: `${blocks}\n\n${text}` };
+  return copy;
+}
+
 async function persistConversation(opts: {
   userId: string;
   assistantId?: string;
   conversationId?: string;
   projectId?: string;
   userMessage: ChatMessage;
+  attachmentNames?: string[];
   assistantText: string;
   model: string;
   cost: number;
@@ -449,7 +487,12 @@ async function persistConversation(opts: {
     await db.update(schema.conversation).set({ updatedAt: new Date() }).where(eq(schema.conversation.id, conversationId));
   }
 
-  const userText = typeof opts.userMessage.content === "string" ? opts.userMessage.content : JSON.stringify(opts.userMessage.content);
+  const plain = typeof opts.userMessage.content === "string" ? opts.userMessage.content : JSON.stringify(opts.userMessage.content);
+  // Deja constancia de qué adjuntó sin guardar el contenido: si no, el archivo del historial queda
+  // con preguntas ("¿qué riesgos tiene?") sin nada a qué se refieren.
+  const userText = opts.attachmentNames?.length
+    ? `${plain}\n\n[Documentos adjuntos (no se guarda su contenido): ${opts.attachmentNames.join(", ")}]`
+    : plain;
   await db.insert(schema.message).values([
     { id: crypto.randomUUID(), conversationId, role: "user", content: userText },
     { id: crypto.randomUUID(), conversationId, role: "assistant", content: opts.assistantText, model: opts.model, costCredits: opts.cost },

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Send, Square, Loader2, Trash2, MessageSquare,
+  Menu, Send, Square, Loader2, Trash2, MessageSquare, Paperclip, FileText,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Scale, Dice5, Wallet, Sparkles, Bot,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -20,6 +20,10 @@ import {
   type StoredConversation, type StoredMsg,
 } from "@/lib/basalt";
 import { mdToHtml } from "@/lib/markdown";
+import { useDocAttachments } from "@/hooks/useDocAttachments";
+import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
+import { DOC_ACCEPT } from "@/lib/doc-extract";
+import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import "./Assistant.css";
 
 // Homologado con Basalt.tsx (auditoría UX 2026-09-29: "los expertos...
@@ -36,6 +40,19 @@ const ICONS: Record<string, typeof LayoutTemplate> = {
   compare: Scale,
   dice: Dice5,
   pay: Wallet,
+  file: FileText,
+};
+
+// Adjuntar documentos sirve en cualquier Experto (un contrato en Legal, una hoja de vida en Talento,
+// un P&G en Financiero), pero las tarjetas de bienvenida vienen de la base de datos y no traen la
+// tarjeta de adjuntar. Se agrega desde acá, con el texto del dominio de cada uno.
+const ATTACH_CARD_LABEL: Record<string, string> = {
+  legal: "Analizar un contrato",
+  riesgos: "Analizar un contrato o una póliza",
+  financiero: "Analizar un estado financiero",
+  talento: "Revisar una hoja de vida",
+  operaciones: "Revisar un procedimiento o manual",
+  comunicaciones: "Revisar un documento antes de publicarlo",
 };
 
 function CardIcon({ name }: { name?: string }) {
@@ -73,12 +90,20 @@ export default function AssistantPage() {
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const userId = user?.id ?? "";
+  // Documentos adjuntos: el texto vive solo en memoria (por mensaje) y viaja en el campo `documents`
+  // de la petición, que el servidor usa para responder pero NO archiva (ver api/ai/chat.ts). En el
+  // historial queda únicamente el nombre y el tamaño.
+  const docsByMsg = useRef(new Map<string, DocPayload[]>());
+  const { docs: pendingDocs, ready: readyDocs, busy: docsBusy, addFiles, remove: removeDoc, clear: clearDocs } = useDocAttachments();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
     setLoadingAssistant(true);
     setMessages([]);
     setConvId(crypto.randomUUID());
     setError(null);
+    clearDocs();
     getAssistant(slug).then((a) => {
       setAssistant(a);
       setLoadingAssistant(false);
@@ -108,6 +133,7 @@ export default function AssistantPage() {
     setConvId(crypto.randomUUID());
     setMessages([]);
     setError(null);
+    clearDocs();
     setSidebarOpen(false);
   };
 
@@ -116,6 +142,7 @@ export default function AssistantPage() {
     setConvId(c.id);
     setMessages(c.messages);
     setError(null);
+    clearDocs();
     setSidebarOpen(false);
     requestAnimationFrame(stickToBottom);
   };
@@ -128,8 +155,10 @@ export default function AssistantPage() {
   };
 
   const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string; retry?: boolean }) => {
-    const text = prompt.trim();
-    if (!text || generating || !assistant) return;
+    // Adjuntar sin escribir nada = pedir el análisis completo (igual que en Basalt).
+    const attached = opts?.continueFrom || opts?.retry ? [] : readyDocs;
+    const text = prompt.trim() || (attached.length ? DEFAULT_DOC_PROMPT : "");
+    if (!text || generating || !assistant || (!opts?.continueFrom && docsBusy)) return;
 
     // "Continuar": retoma un mensaje cortado, pegando el texto nuevo al final
     // del mismo mensaje (joinContinuation) en vez de abrir uno nuevo.
@@ -140,6 +169,11 @@ export default function AssistantPage() {
     // respuesta vacía), así que se reenvía tal cual en vez de agregarla por segunda vez.
     const retrying = !continued && !!opts?.retry && messages[messages.length - 1]?.role === "user";
     const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
+    if (attached.length) {
+      userMsg.attachments = attached.map((d) => ({ name: d.name, chars: d.doc!.chars, pages: d.doc!.pages, truncated: d.doc!.truncated }));
+      docsByMsg.current.set(userMsg.id, attached.map((d) => ({ name: d.name, text: d.doc!.text, truncated: d.doc!.truncated })));
+      clearDocs();
+    }
     const history = continued || retrying ? messages : [...messages, userMsg];
     if (!continued && !retrying) {
       setMessages(history);
@@ -154,6 +188,14 @@ export default function AssistantPage() {
     if (!continued) setMessages((prev) => [...prev, { id: modelMsgId, role: "model", text: "" }]);
     let cutOff = false;
 
+    // Los documentos de los mensajes ANTERIORES se pegan dentro de su mensaje (solo van al modelo como
+    // contexto, no se re-archivan); los del último salen aparte, en `documents`.
+    const apiMessages = buildApiMessages(history.slice(-20), docsByMsg.current);
+    const lastId = history[history.length - 1]?.role === "user" ? history[history.length - 1].id : "";
+    const lastDocs = continued ? [] : docsByMsg.current.get(lastId) ?? [];
+    if (lastDocs.length) apiMessages[apiMessages.length - 1] = { role: "user", content: text };
+    if (continued) apiMessages.push({ role: "user", content: text });
+
     abortRef.current = new AbortController();
     try {
       const res = await fetch("/api/ai/chat", {
@@ -163,14 +205,16 @@ export default function AssistantPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: assistant.defaultModel,
-          systemPrompt: assistant.persona.systemPrompt || undefined,
+          // Las reglas de documentos también en las preguntas de seguimiento (el documento ya está en
+          // el historial y no vuelve a viajar en `documents`).
+          systemPrompt: (assistant.persona.systemPrompt || "") + (hasDocuments(history.slice(-20)) ? `\n\n${DOC_ANALYSIS_PROMPT}` : "") || undefined,
           // Mismo tope que Basalt.tsx — sin esto, una conversación larga con
           // un Experto arriesga pegar contra el límite de contexto del
           // modelo (auditoría UX 2026-09-29).
-          messages: [
-            ...history.slice(-20).map((m) => ({ role: m.role === "model" ? "assistant" : "user", content: m.text })),
-            ...(continued ? [{ role: "user", content: text }] : []),
-          ],
+          messages: apiMessages,
+          // Los documentos del último mensaje van aparte: el servidor los pasa al modelo pero archiva
+          // la conversación sin ellos (el historial de los Expertos sí se guarda en el servidor).
+          documents: lastDocs.length ? lastDocs.map((d) => ({ name: d.name, text: d.text, truncated: d.truncated })) : undefined,
           assistantId: assistant.id,
           temperature: 0.7,
         }),
@@ -244,7 +288,7 @@ export default function AssistantPage() {
       abortRef.current = null;
       stickToBottom();
     }
-  }, [assistant, generating, messages, stickToBottom, userId, convId, slug]);
+  }, [assistant, generating, messages, stickToBottom, userId, convId, slug, readyDocs, docsBusy, clearDocs]);
 
   const handleStop = () => abortRef.current?.abort();
 
@@ -254,6 +298,12 @@ export default function AssistantPage() {
   };
 
   const cssVars = useMemo(() => (assistant ? brandCssVars(assistant.brand) : {}), [assistant]);
+
+  const welcomeCards = useMemo<AssistantWelcomeCard[]>(() => {
+    const cards = assistant?.welcome.cards || [];
+    if (cards.some((c) => c.prompt === ATTACH_CARD_PROMPT)) return cards;
+    return [...cards, { label: ATTACH_CARD_LABEL[slug] || "Analizar un documento", prompt: ATTACH_CARD_PROMPT, icon: "file" }];
+  }, [assistant, slug]);
 
   if (authLoading || loadingAssistant) {
     return (
@@ -312,7 +362,17 @@ export default function AssistantPage() {
         }
       />
 
-      <main className="asst-main">
+      <main
+        className={`asst-main${dragging ? " asst-dragging" : ""}`}
+        onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); setDragging(true); } }}
+        onDragLeave={(e) => { if (e.currentTarget === e.target) setDragging(false); }}
+        onDrop={(e) => {
+          if (!e.dataTransfer.files.length) return;
+          e.preventDefault();
+          setDragging(false);
+          void addFiles(e.dataTransfer.files);
+        }}
+      >
         <header className="asst-topbar">
           <button className="asst-icon-btn asst-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú" style={{ display: sidebarOpen ? "none" : undefined }}>
             <Menu className="w-4 h-4" />
@@ -326,8 +386,12 @@ export default function AssistantPage() {
               <h1 className="asst-hello">{assistant.welcome.title || `Hola, soy ${assistant.name}`}</h1>
               <p className="asst-hello-sub">{assistant.welcome.subtitle || assistant.tagline}</p>
               <div className="asst-cards">
-                {(assistant.welcome.cards || []).map((c: AssistantWelcomeCard) => (
-                  <button key={c.label} className="asst-card" onClick={() => void sendPrompt(c.prompt)}>
+                {welcomeCards.map((c: AssistantWelcomeCard) => (
+                  <button
+                    key={c.label}
+                    className="asst-card"
+                    onClick={() => (c.prompt === ATTACH_CARD_PROMPT ? fileInputRef.current?.click() : void sendPrompt(c.prompt))}
+                  >
                     <span>{c.label}</span>
                     <span className="asst-card-ic"><CardIcon name={c.icon} /></span>
                   </button>
@@ -339,7 +403,10 @@ export default function AssistantPage() {
               {messages.map((m, i) => (
                 <div key={m.id} className={`asst-msg ${m.role}`}>
                   {m.role === "user" ? (
-                    <div className="asst-bubble">{m.text}</div>
+                    <div className="asst-bubble">
+                      {m.attachments?.length ? <SentDocChips docs={m.attachments} /> : null}
+                      {m.text}
+                    </div>
                   ) : (
                     <>
                       <div className="asst-avatar"><Bot className="w-3.5 h-3.5 text-white" /></div>
@@ -371,11 +438,30 @@ export default function AssistantPage() {
         </div>
 
         <form className="asst-composer" onSubmit={handleSubmit}>
+          <PendingDocChips docs={pendingDocs} onRemove={removeDoc} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={DOC_ACCEPT}
+            multiple
+            hidden
+            aria-label="Adjuntar documentos"
+            onChange={(e) => { if (e.target.files?.length) void addFiles(e.target.files); e.target.value = ""; }}
+          />
           <div className="asst-pill">
+            <button
+              type="button"
+              className="asst-attach"
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Adjuntar un documento (PDF, Word o texto)"
+              title="Adjuntar un documento (PDF, Word o texto) para analizarlo"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
             <textarea
               rows={1}
               value={input}
-              placeholder={`Pregúntale a ${assistant.name}…`}
+              placeholder={pendingDocs.length ? "Pregunta sobre el documento, o envía para un análisis completo…" : `Pregúntale a ${assistant.name}…`}
               onChange={(e) => {
                 setInput(e.target.value);
                 e.target.style.height = "auto";
@@ -391,7 +477,7 @@ export default function AssistantPage() {
             <button
               type={generating ? "button" : "submit"}
               onClick={generating ? handleStop : undefined}
-              className={`asst-send ${generating ? "stop" : input.trim() ? "ready" : ""}`}
+              className={`asst-send ${generating ? "stop" : (input.trim() || readyDocs.length) && !docsBusy ? "ready" : ""}`}
               aria-label={generating ? "Detener" : "Enviar"}
             >
               {generating ? <Square className="w-3.5 h-3.5" /> : <Send className="w-4 h-4" />}

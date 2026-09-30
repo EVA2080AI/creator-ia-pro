@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DOC_ANALYSIS_PROMPT, buildApiMessages, docBlock, hasDocuments, type DocPayload } from "./doc-context";
+import { DOC_ANALYSIS_PROMPT, MAX_DOCS_PER_MESSAGE, buildApiMessages, docBlock, hasDocuments, sanitizeDocuments, type DocPayload } from "./doc-context";
 
 const meta = (name: string, chars = 10) => ({ name, chars });
 const user = (id: string, text: string, names: string[] = []) => ({ id, role: "user" as const, text, attachments: names.length ? names.map((n) => meta(n)) : undefined });
@@ -52,5 +52,38 @@ describe("hasDocuments y el prompt", () => {
     expect(DOC_ANALYSIS_PROMPT).toMatch(/cita de dónde sale/);
     expect(DOC_ANALYSIS_PROMPT).toMatch(/No inventes artículos de ley/);
     expect(DOC_ANALYSIS_PROMPT).toMatch(/no reemplaza la revisión de un abogado/);
+  });
+});
+
+describe("sanitizeDocuments (lo que llega por la red al servidor)", () => {
+  it("descarta lo que no sea un documento con texto", () => {
+    expect(sanitizeDocuments(undefined)).toEqual([]);
+    expect(sanitizeDocuments("contrato")).toEqual([]);
+    expect(sanitizeDocuments([null, 7, {}, { name: "a.pdf" }, { text: "   " }, { text: 5 }])).toEqual([]);
+  });
+
+  it("acepta un documento válido y le pone nombre si no lo trae", () => {
+    expect(sanitizeDocuments([{ text: "CLÁUSULA 1" }])).toEqual([{ name: "documento", text: "CLÁUSULA 1", truncated: false }]);
+    expect(sanitizeDocuments([{ name: " c.pdf ", text: "x", truncated: true }])).toEqual([{ name: "c.pdf", text: "x", truncated: true }]);
+  });
+
+  it("respeta el máximo de documentos por mensaje", () => {
+    const many = Array.from({ length: MAX_DOCS_PER_MESSAGE + 3 }, (_, i) => ({ name: `d${i}.pdf`, text: "x" }));
+    expect(sanitizeDocuments(many)).toHaveLength(MAX_DOCS_PER_MESSAGE);
+  });
+
+  it("recorta el total de caracteres y lo avisa en el texto", () => {
+    const out = sanitizeDocuments([{ name: "a.pdf", text: "a".repeat(80) }, { name: "b.pdf", text: "b".repeat(80) }], 100);
+    expect(out).toHaveLength(2);
+    expect(out[0].text).toBe("a".repeat(80));
+    expect(out[0].truncated).toBe(false);
+    expect(out[1].text.startsWith("b".repeat(20))).toBe(true);
+    expect(out[1].text).toContain("documento truncado");
+    expect(out[1].truncated).toBe(true);
+  });
+
+  it("no deja pasar más texto del presupuesto", () => {
+    const out = sanitizeDocuments([{ name: "a.pdf", text: "a".repeat(500) }], 100);
+    expect(out[0].text.replace(/\n\n\[.*$/s, "")).toHaveLength(100);
   });
 });
