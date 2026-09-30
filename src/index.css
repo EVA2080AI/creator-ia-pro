@@ -256,11 +256,14 @@
   .font-sans    { font-family: 'Inter', sans-serif; }
   .font-mono    { font-family: 'JetBrains Mono', monospace; }
 
+  /* Los títulos heredan el color: fijarlo a --foreground hacía invisibles los <h2>/<h3> dentro de
+     secciones oscuras con "text-white" en el contenedor (visto en /help y /security). El body ya
+     usa --foreground, así que en fondo claro no cambia nada. */
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Outfit', sans-serif;
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: hsl(var(--foreground));
+    color: inherit;
   }
 
   p { line-height: 1.65; }

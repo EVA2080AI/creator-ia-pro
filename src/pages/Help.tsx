@@ -285,7 +285,7 @@ const Help = () => {
       <section className="py-24 bg-zinc-950 text-white">
         <div className="container px-6 mx-auto">
           <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl font-black tracking-tighter mb-4 italic">
+            <h2 className="text-3xl font-black tracking-tighter mb-4 italic text-white">
               ¿No encontraste lo que buscabas?
             </h2>
             <p className="text-zinc-400 mb-8">
@@ -314,7 +314,7 @@ const Help = () => {
             </div>
 
             <div className="mt-8 p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-left max-w-lg mx-auto">
-              <h3 className="font-bold mb-4 text-sm">
+              <h3 className="font-bold mb-4 text-sm text-white">
                 Horario de atención
               </h3>
               <ul className="space-y-2 text-sm text-zinc-400">

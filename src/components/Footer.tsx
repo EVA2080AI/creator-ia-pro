@@ -75,17 +75,17 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between pt-10 border-t border-zinc-100 gap-6">
-          <p className="text-zinc-400 text-xs font-medium italic">
+          <p className="text-zinc-500 text-xs font-medium italic">
             © {currentYear} Creator IA Pro. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200">
               <Shield className="h-3 w-3 text-emerald-500" />
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">AES-256</span>
+              <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">AES-256</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200">
               <Zap className="h-3 w-3 text-amber-500" />
-              <span className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Pagos en COP</span>
+              <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">Pagos en COP</span>
             </div>
           </div>
         </div>
