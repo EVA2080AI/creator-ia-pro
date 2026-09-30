@@ -120,11 +120,13 @@ const Profile = () => {
     <>
       <Helmet><title>Perfil | Creator IA Pro</title></Helmet>
 
-      <div className="max-w-5xl mx-auto px-6 py-10 pb-20">
-        {/* Header */}
-        <div className="mb-10">
-          <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-2">Mi cuenta</p>
-          <h1 className="text-4xl font-bold text-foreground tracking-tight">Perfil</h1>
+      <div className="max-w-5xl mx-auto px-4 md:px-6 py-5 md:py-10 pb-20">
+        {/* Header — mismo criterio que /tareas y /proyectos: en un teléfono la etiqueta
+            de sección y un título de 36px se comen el primer tercio de la pantalla, y
+            arriba la barra ya dice "Perfil". */}
+        <div className="mb-5 md:mb-10">
+          <p className="hidden md:block text-xs text-muted-foreground uppercase tracking-widest font-bold mb-2">Mi cuenta</p>
+          <h1 className="text-2xl md:text-4xl font-bold text-foreground tracking-tight">Perfil</h1>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">

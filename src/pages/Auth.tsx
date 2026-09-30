@@ -193,12 +193,19 @@ const Auth = () => {
       </div>
 
       {/* Right Panel — Form */}
-      <div className="flex flex-1 items-center justify-center px-6 py-12 relative">
+      <div className="flex flex-1 flex-col items-center justify-start lg:justify-center px-6 py-8 lg:py-12 relative">
         {/* Mobile logo + propuesta de valor — el panel de la izquierda (headline,
             features, stats) es hidden lg:flex, así que en celular/tablet no
-            queda NADA de contexto del producto antes del formulario sin esto. */}
-        <div className="absolute top-8 left-1/2 w-full max-w-[340px] -translate-x-1/2 px-6 text-center lg:hidden">
-          <Logo size="sm" showText showPro onClick={() => navigate("/")} className="justify-center" />
+            queda NADA de contexto del producto antes del formulario sin esto.
+            Iba en position:absolute sobre una tarjeta centrada: en un iPhone 13 la
+            tarjeta lo tapaba y del logo se veía media circunferencia asomando por
+            detrás — la frase que da contexto no se leía NUNCA. Ahora va en el flujo,
+            encima de la tarjeta (medido con el formulario de registro, que es el más
+            alto). */}
+        <div className="mb-6 w-full max-w-[340px] px-6 text-center lg:hidden">
+          <div className="flex justify-center">
+            <Logo size="sm" showText showPro onClick={() => navigate("/")} />
+          </div>
           <p className="mt-3 text-[13px] font-medium leading-snug text-muted-foreground">
             Basalt IA convierte tus ideas en apps, imágenes y textos — todo en una sola conversación.
           </p>

@@ -79,6 +79,8 @@ const DEMO_TRANSACTIONS = [
 const json = (route, body) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
 await ctx.route("**/api/**", (r) => {
   const u = new URL(r.request().url()).pathname;
+  // --anon: sin sesión, para ver lo que ve alguien que todavía no entró (/auth, la landing).
+  if (u.endsWith("/auth/get-session") && flag("--anon")) return json(r, { session: null, user: null });
   if (u.endsWith("/auth/get-session")) return json(r, { session: { id: "s1", userId: user.id, token: "t", expiresAt: new Date(Date.now() + 864e5).toISOString(), createdAt: now, updatedAt: now }, user });
   if (u === "/api/profile") return json(r, { ok: true, profile });
   if (u.startsWith("/api/basalt/conversations")) return json(r, { ok: true, conversations: [] });
