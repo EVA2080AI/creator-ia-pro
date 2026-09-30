@@ -27,6 +27,8 @@
   --asst-user-bubble: #333537;
 }
 .asst-app {
+  --asst-bg: #fff;
+  --asst-txt: #1f1f1f;
   --asst-panel: #f7f7f8;
   --asst-panel-2: #eef0f2;
   --asst-txt-2: #575b5f;
@@ -160,6 +162,10 @@
 .asst-md h3 { font-size: 17px; font-weight: 600; margin: 16px 0 7px; }
 .asst-md h4 { font-size: 14.5px; font-weight: 600; margin: 12px 0 6px; }
 .asst-md ul, .asst-md ol { margin: 0 0 11px; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; }
+.asst-md ul { list-style: disc; }
+.asst-md ol { list-style: decimal; }
+.asst-md ul ul { list-style: circle; margin: 4px 0 0; }
+.asst-md li::marker { color: var(--asst-txt-3); }
 .asst-md a { color: var(--a-accent, #8b5cf6); text-decoration: none; }
 .asst-md a:hover { text-decoration: underline; }
 .asst-md blockquote { border-left: 3px solid var(--a-accent, #8b5cf6); padding: 2px 0 2px 12px; margin: 0 0 11px; color: var(--asst-txt-2); }
@@ -252,6 +258,23 @@
   font-size: 13.5px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0;
 }
 .asst-err button { border: 1px solid currentColor; border-radius: 14px; padding: 4px 12px; font-size: 12px; font-weight: 600; color: inherit; background: none; cursor: pointer; }
+/* Aviso de respuesta cortada por el límite de tiempo del servidor
+   (api/ai/chat.ts → finish_reason "length"); "Continuar" retoma en el mismo
+   mensaje. Neutral, no error: el contenido llegado está bien, solo incompleto. */
+.asst-cut {
+  background: var(--asst-panel); border: 1px solid var(--asst-border); color: var(--asst-txt-2); border-radius: 12px;
+  padding: 10px 14px; font-size: 13.5px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0;
+}
+.asst-cut button {
+  border: 1px solid var(--a-accent, #8b5cf6); border-radius: 14px; padding: 5px 14px; font-size: 12.5px; font-weight: 600;
+  color: var(--a-accent, #8b5cf6); background: none; cursor: pointer;
+}
+.asst-cut button:hover { background: var(--a-accent-soft, #f3e8ff); }
+/* .asst-err y la consola eran rosa claro fijo: un bloque rosa sobre #131314. */
+.asst-app[data-asst-theme="dark"] .asst-err { background: #3b1e1c; border-color: #6b2b27; color: #f2b8b5; }
+.asst-app[data-asst-theme="dark"] .md-console-count.err { background: #3b1e1c; color: #f2b8b5; }
+.asst-app[data-asst-theme="dark"] .md-console-line.error { color: #f2b8b5; }
+.asst-app[data-asst-theme="dark"] .md-console-line.warn { color: #f0c36b; }
 
 .asst-composer { flex: none; max-width: 780px; width: 100%; margin: 0 auto; padding: 6px 20px calc(10px + env(safe-area-inset-bottom)); }
 .asst-pill { display: flex; align-items: flex-end; gap: 6px; background: var(--asst-panel); border-radius: 28px; padding: 8px 8px 8px 20px; transition: box-shadow 0.2s; }

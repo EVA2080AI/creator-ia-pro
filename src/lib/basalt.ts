@@ -248,6 +248,28 @@ export function parseBasaltReply(text: string) {
   return { visible: visible.trim(), memories, images };
 }
 
+// Instrucción (solo va a la API, no se muestra como burbuja) para retomar una
+// respuesta que se cortó por el límite de tiempo del servidor (ver
+// STREAM_DEADLINE_MS en api/ai/chat.ts).
+export const CONTINUE_PROMPT =
+  "Continúa exactamente desde donde quedaste, sin repetir lo que ya escribiste ni volver a saludar. Si estabas dentro de un bloque de código, retoma el código en la línea siguiente, sin abrir un bloque nuevo.";
+
+/**
+ * Une el texto cortado con su continuación en UN solo mensaje — así un
+ * proyecto de varios archivos que se cortó a mitad sigue formando una única
+ * tarjeta con vista previa (si la continuación fuera otro mensaje, los
+ * archivos restantes quedarían en una segunda tarjeta sin index.html).
+ * Si el corte dejó una valla ``` abierta y el modelo igual la reabre, esa
+ * línea de apertura se descarta.
+ */
+export function joinContinuation(prefix: string, continuation: string): string {
+  if (!prefix) return continuation;
+  const insideFence = (prefix.match(/```/g) ?? []).length % 2 === 1;
+  if (!insideFence) return `${prefix.trimEnd()}\n\n${continuation.replace(/^\s+/, "")}`;
+  const cont = continuation.replace(/^\s*```[^\n]*\n?/, "");
+  return `${prefix}${prefix.endsWith("\n") ? "" : "\n"}${cont}`;
+}
+
 export function buildSystemPrompt(memory: string[]) {
   if (!memory.length) return SYSTEM_PROMPT;
   return `${SYSTEM_PROMPT}\n\nLO QUE RECUERDAS DEL USUARIO:\n${memory.map((m) => `- ${m}`).join("\n")}`;

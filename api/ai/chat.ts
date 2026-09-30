@@ -24,6 +24,13 @@ const SEARCH_TOOL_COST = 1;
 // OpenRouter) — sin esto, el timeout implícito de Vercel podría cortar la
 // respuesta a mitad de la vuelta de tool-calling.
 export const config = { maxDuration: 60 };
+// Margen bajo maxDuration: si el modelo es lento (los gratuitos rondan pocos
+// tokens/seg) Vercel mataba la función a los 60s en seco y la respuesta
+// quedaba cortada a mitad de un bloque de código SIN que el cliente se
+// enterara — encontrado en vivo (2026-09-30): un sitio de 3 archivos llegaba
+// solo hasta index.html. Ahora se corta a los 54s con un finish_reason
+// explícito ("length") para que el cliente ofrezca "Continuar".
+const STREAM_DEADLINE_MS = 54_000;
 
 interface ChatMessage {
   role: "user" | "assistant" | "system" | "tool";
@@ -51,6 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  const startedAt = Date.now();
   const user = await getSessionUser(req);
   if (!user) {
     res.status(401).json({ ok: false, code: "UNAUTHORIZED", error: "Debes iniciar sesión." });
@@ -178,6 +186,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     sawAnyContent: boolean;
     finishReason: string | null;
     toolCall: { id: string; name: string; argsText: string } | null;
+    timedOut: boolean;
   }
 
   // Lee un stream SSE de OpenRouter, reenvía cada chunk crudo al cliente
@@ -193,10 +202,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     let toolCallId: string | undefined;
     let toolCallName: string | undefined;
     let toolArgsText = "";
+    let timedOut = false;
 
     try {
       while (true) {
-        const { done, value } = await reader.read();
+        const remaining = STREAM_DEADLINE_MS - (Date.now() - startedAt);
+        if (remaining <= 0) { timedOut = true; break; }
+        let timer: ReturnType<typeof setTimeout> | undefined;
+        const next = await Promise.race([
+          reader.read(),
+          new Promise<null>((resolve) => { timer = setTimeout(() => resolve(null), remaining); }),
+        ]);
+        clearTimeout(timer);
+        if (next === null) { timedOut = true; break; }
+        const { done, value } = next;
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         buffer += chunk;
@@ -231,12 +250,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } catch {
       /* stream cortado — se conserva lo acumulado en `full` */
     }
+    if (timedOut) void reader.cancel().catch(() => {});
 
     return {
       full,
       sawAnyContent,
       finishReason,
       toolCall: toolCallId && toolCallName ? { id: toolCallId, name: toolCallName, argsText: toolArgsText } : null,
+      timedOut,
     };
   }
 
@@ -253,14 +274,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let full = "";
   let sawAnyContent = false;
   let currentMessages: ChatMessage[] = messages;
+  let cutForTime = false;
 
   try {
     let current = await streamAndCollect(upstream);
     full = current.full;
     sawAnyContent = current.sawAnyContent;
+    cutForTime = current.timedOut;
 
     let toolRound = 0;
     while (
+      !cutForTime &&
       current.finishReason === "tool_calls" &&
       current.toolCall &&
       (current.toolCall.name === "web_search" || isUserDataToolName(current.toolCall.name)) &&
@@ -333,12 +357,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // última ronda permitida fuerza una respuesta final en vez de
       // encadenar otra llamada más.
       const offerToolsAgain = toolRound < MAX_TOOL_ROUNDS;
+      // Sin margen para una vuelta más al modelo: se corta acá en vez de dejar
+      // que Vercel mate la función a mitad de la respuesta.
+      if (STREAM_DEADLINE_MS - (Date.now() - startedAt) < 6_000) { cutForTime = true; break; }
       try {
         const upstreamNext = await callOpenRouter(currentMessages, offerToolsAgain);
         if (!upstreamNext.ok || !upstreamNext.body) break;
         current = await streamAndCollect(upstreamNext);
         full += current.full;
         sawAnyContent = sawAnyContent || current.sawAnyContent;
+        cutForTime = current.timedOut;
       } catch {
         /* la respuesta previa ya se streameó — si esta vuelta falla, el
            usuario se queda con lo que ya vio en vez de perder todo. */
@@ -346,6 +374,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
   } finally {
+    if (cutForTime) {
+      res.write(`data: ${JSON.stringify({ choices: [{ index: 0, delta: {}, finish_reason: "length" }] })}\n\n`);
+      res.write("data: [DONE]\n\n");
+    }
     res.end();
   }
 

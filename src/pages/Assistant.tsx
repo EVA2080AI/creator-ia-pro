@@ -16,7 +16,7 @@ import {
   type Assistant, type AssistantWelcomeCard,
 } from "@/lib/assistants";
 import {
-  loadConversations, saveConversation, deleteConversation, migrateLegacyLocalStorage,
+  loadConversations, saveConversation, deleteConversation, migrateLegacyLocalStorage, CONTINUE_PROMPT, joinContinuation,
   type StoredConversation, type StoredMsg,
 } from "@/lib/basalt";
 import { mdToHtml } from "@/lib/markdown";
@@ -67,6 +67,9 @@ export default function AssistantPage() {
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Mensaje cuya respuesta se cortó por el límite de tiempo del servidor
+  // (finish_reason "length") — habilita "Continuar" (igual que en Basalt.tsx).
+  const [truncatedId, setTruncatedId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const userId = user?.id ?? "";
@@ -124,20 +127,29 @@ export default function AssistantPage() {
     if (id === convId) newChat();
   };
 
-  const sendPrompt = useCallback(async (prompt: string) => {
+  const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string }) => {
     const text = prompt.trim();
     if (!text || generating || !assistant) return;
 
+    // "Continuar": retoma un mensaje cortado, pegando el texto nuevo al final
+    // del mismo mensaje (joinContinuation) en vez de abrir uno nuevo.
+    const continued = opts?.continueFrom ? messages.find((m) => m.id === opts.continueFrom && m.role === "model") : undefined;
+    const prefix = continued?.text ?? "";
+
     const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
-    const history = [...messages, userMsg];
-    setMessages(history);
-    setInput("");
+    const history = continued ? messages : [...messages, userMsg];
+    if (!continued) {
+      setMessages(history);
+      setInput("");
+    }
     setGenerating(true);
     setError(null);
+    setTruncatedId(null);
     requestAnimationFrame(stickToBottom);
 
-    const modelMsgId = crypto.randomUUID();
-    setMessages((prev) => [...prev, { id: modelMsgId, role: "model", text: "" }]);
+    const modelMsgId = continued ? continued.id : crypto.randomUUID();
+    if (!continued) setMessages((prev) => [...prev, { id: modelMsgId, role: "model", text: "" }]);
+    let cutOff = false;
 
     abortRef.current = new AbortController();
     try {
@@ -152,7 +164,10 @@ export default function AssistantPage() {
           // Mismo tope que Basalt.tsx — sin esto, una conversación larga con
           // un Experto arriesga pegar contra el límite de contexto del
           // modelo (auditoría UX 2026-09-29).
-          messages: history.slice(-20).map((m) => ({ role: m.role === "model" ? "assistant" : "user", content: m.text })),
+          messages: [
+            ...history.slice(-20).map((m) => ({ role: m.role === "model" ? "assistant" : "user", content: m.text })),
+            ...(continued ? [{ role: "user", content: text }] : []),
+          ],
           assistantId: assistant.id,
           temperature: 0.7,
         }),
@@ -181,12 +196,13 @@ export default function AssistantPage() {
           if (!payload || payload === "[DONE]") continue;
           try {
             const json = JSON.parse(payload);
+            if (json.choices?.[0]?.finish_reason === "length") cutOff = true;
             const delta = json.choices?.[0]?.delta?.content;
             if (typeof delta === "string" && delta.length) {
               acc += delta;
               const now = Date.now();
               if (now - lastPaint > 40) {
-                setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: acc } : m)));
+                setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: joinContinuation(prefix, acc) } : m)));
                 lastPaint = now;
                 stickToBottom();
               }
@@ -196,21 +212,28 @@ export default function AssistantPage() {
           }
         }
       }
-      setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: acc } : m)));
+      const finalText = joinContinuation(prefix, acc);
+      setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: finalText } : m)));
       if (!acc.trim()) {
-        setMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
+        if (!continued) setMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
         setError("El modelo no devolvió texto. Prueba a reformular la pregunta.");
-      } else if (userId) {
-        const final: StoredMsg[] = [...history, { id: modelMsgId, role: "model", text: acc }];
-        void saveConversation(userId, { id: convId, title: text.slice(0, 60), updatedAt: Date.now(), messages: final }, slug)
-          .then(() => loadConversations(userId, slug))
-          .then(setConversations);
+      } else {
+        if (cutOff) setTruncatedId(modelMsgId);
+        if (userId) {
+          const final: StoredMsg[] = continued
+            ? history.map((m) => (m.id === modelMsgId ? { ...m, text: finalText } : m))
+            : [...history, { id: modelMsgId, role: "model", text: finalText }];
+          const title = (history.find((m) => m.role === "user")?.text ?? text).slice(0, 60);
+          void saveConversation(userId, { id: convId, title, updatedAt: Date.now(), messages: final }, slug)
+            .then(() => loadConversations(userId, slug))
+            .then(setConversations);
+        }
       }
     } catch (e) {
       if (e instanceof DOMException && e.name === "AbortError") {
         // detenido a propósito — conserva lo que se alcanzó a generar
       } else {
-        setMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
+        if (!continued) setMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
         setError(e instanceof Error ? e.message : "Error al generar la respuesta.");
       }
     } finally {
@@ -328,6 +351,12 @@ export default function AssistantPage() {
                   )}
                 </div>
               ))}
+              {truncatedId && !generating && messages[messages.length - 1]?.id === truncatedId && (
+                <div className="asst-cut">
+                  <span>La respuesta se cortó por el límite de tiempo del modelo.</span>
+                  <button onClick={() => void sendPrompt(CONTINUE_PROMPT, { continueFrom: truncatedId })}>Continuar</button>
+                </div>
+              )}
               {error && (
                 <div className="asst-err">
                   <span>⚠️ {error}</span>

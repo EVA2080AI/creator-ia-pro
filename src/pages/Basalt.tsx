@@ -17,7 +17,7 @@ import { CHAT_MODELS, CATEGORY_ORDER, CATEGORY_META, IMAGE_MODELS, DEFAULT_IMAGE
 import {
   BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply,
   loadConversations, saveConversation, deleteConversation, loadMemory, saveMemory,
-  migrateLegacyLocalStorage, type StoredConversation, type StoredMsg,
+  migrateLegacyLocalStorage, CONTINUE_PROMPT, joinContinuation, type StoredConversation, type StoredMsg,
 } from "@/lib/basalt";
 import { createAsset, getAssetsByIds } from "@/lib/assets";
 import "./Assistant.css";
@@ -73,6 +73,9 @@ export default function BasaltPage() {
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Id del mensaje cuya respuesta se cortó por el límite de tiempo del servidor
+  // (finish_reason "length") — habilita el botón "Continuar".
+  const [truncatedId, setTruncatedId] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const autoSentRef = useRef(false);
@@ -167,22 +170,44 @@ export default function BasaltPage() {
     )));
   }, []);
 
-  const sendPrompt = useCallback(async (prompt: string) => {
+  const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string }) => {
     const text = prompt.trim();
     if (!text || generating) return;
 
-    lastPromptRef.current = text;
-    const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
-    const history = [...messages, userMsg];
-    const modelMsgId = crypto.randomUUID();
-    setMessages([...history, { id: modelMsgId, role: "model", text: "" }]);
-    setInput("");
+    // "Continuar": retoma un mensaje cortado por el límite de tiempo. No agrega
+    // burbuja de usuario ni mensaje nuevo — el texto nuevo se pega al final del
+    // mensaje cortado (joinContinuation), así un proyecto de varios archivos
+    // sigue siendo UNA tarjeta con vista previa.
+    const continued = opts?.continueFrom ? messages.find((m) => m.id === opts.continueFrom && m.role === "model") : undefined;
+    const prefix = continued?.text ?? "";
+
+    let history: StoredMsg[];
+    let modelMsgId: string;
+    if (continued) {
+      history = messages;
+      modelMsgId = continued.id;
+    } else {
+      lastPromptRef.current = text;
+      const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
+      history = [...messages, userMsg];
+      modelMsgId = crypto.randomUUID();
+      setMessages([...history, { id: modelMsgId, role: "model", text: "" }]);
+      setInput("");
+    }
     setGenerating(true);
     setError(null);
+    setTruncatedId(null);
     requestAnimationFrame(stickToBottom);
+
+    // Si algo falla, el texto que el usuario acababa de escribir no se pierde:
+    // antes se borraba del input y, en el primer mensaje de un chat, la
+    // pantalla de bienvenida volvía sin ningún error visible — se leía como
+    // "escribo y se reinicia".
+    const restoreInput = () => { if (!continued) setInput((cur) => cur || text); };
 
     abortRef.current = new AbortController();
     let acc = "";
+    let cutOff = false;
     try {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
@@ -192,7 +217,10 @@ export default function BasaltPage() {
         body: JSON.stringify({
           model,
           systemPrompt: buildSystemPrompt(memory),
-          messages: history.slice(-20).map((m) => ({ role: m.role === "model" ? "assistant" : "user", content: m.text })),
+          messages: [
+            ...history.slice(-20).map((m) => ({ role: m.role === "model" ? "assistant" : "user", content: m.text })),
+            ...(continued ? [{ role: "user", content: text }] : []),
+          ],
           temperature: 0.7,
         }),
       });
@@ -217,13 +245,15 @@ export default function BasaltPage() {
           const payload = line.slice(5).trim();
           if (!payload || payload === "[DONE]") continue;
           try {
-            const delta = JSON.parse(payload).choices?.[0]?.delta?.content;
+            const choice = JSON.parse(payload).choices?.[0];
+            if (choice?.finish_reason === "length") cutOff = true;
+            const delta = choice?.delta?.content;
             if (typeof delta === "string" && delta.length) {
               acc += delta;
               const now = Date.now();
               if (now - lastPaint > 40) {
                 const { visible } = parseBasaltReply(acc);
-                setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: visible } : m)));
+                setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: joinContinuation(prefix, visible) } : m)));
                 lastPaint = now;
                 stickToBottom();
               }
@@ -235,6 +265,7 @@ export default function BasaltPage() {
       if (!(e instanceof DOMException && e.name === "AbortError")) {
         setMessages(messages);
         setError(e instanceof Error ? e.message : "Error al generar la respuesta.");
+        restoreInput();
         setGenerating(false);
         abortRef.current = null;
         return;
@@ -245,16 +276,18 @@ export default function BasaltPage() {
     if (!visible && !images.length) {
       setMessages(messages);
       setError("El modelo no devolvió texto. Prueba a reformular la pregunta.");
+      restoreInput();
       setGenerating(false);
       abortRef.current = null;
       return;
     }
 
-    let final: StoredMsg[] = [
-      ...history,
-      { id: modelMsgId, role: "model", text: visible, images: images.length ? images : undefined },
-    ];
+    const finalText = joinContinuation(prefix, visible);
+    let final: StoredMsg[] = continued
+      ? history.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, images: images.length ? [...(m.images ?? []), ...images] : m.images } : m))
+      : [...history, { id: modelMsgId, role: "model", text: finalText, images: images.length ? images : undefined }];
     setMessages(final);
+    if (cutOff) setTruncatedId(modelMsgId);
 
     if (memories.length && userId) {
       const next = [...memory, ...memories.filter((f) => !memory.includes(f))];
@@ -323,6 +356,13 @@ export default function BasaltPage() {
       </div>
     );
   }
+
+  const errorBanner = error && (
+    <div className="asst-err">
+      <span>⚠️ {error}</span>
+      <button onClick={() => void sendPrompt(lastPromptRef.current)}>Reintentar</button>
+    </div>
+  );
 
   return (
     <div className="asst-app" data-asst-theme={theme} style={brandCssVars(A.brand) as React.CSSProperties}>
@@ -450,6 +490,7 @@ export default function BasaltPage() {
                   );
                 })}
               </div>
+              {errorBanner}
             </section>
           ) : (
             <div className="asst-thread">
@@ -486,12 +527,13 @@ export default function BasaltPage() {
                   )}
                 </div>
               ))}
-              {error && (
-                <div className="asst-err">
-                  <span>⚠️ {error}</span>
-                  <button onClick={() => void sendPrompt(lastPromptRef.current)}>Reintentar</button>
+              {truncatedId && !generating && messages[messages.length - 1]?.id === truncatedId && (
+                <div className="asst-cut">
+                  <span>La respuesta se cortó por el límite de tiempo del modelo.</span>
+                  <button onClick={() => void sendPrompt(CONTINUE_PROMPT, { continueFrom: truncatedId })}>Continuar</button>
                 </div>
               )}
+              {errorBanner}
             </div>
           )}
         </div>
