@@ -74,7 +74,7 @@ export const CHAT_MODELS: ModelDef[] = [
     id: "deepseek/deepseek-chat-v3.1",
     label: "DeepSeek V3.1",
     provider: "DeepSeek",
-    description: "Buen razonamiento y código sin coste, pero responde despacio (~9 tokens/s): mejor para preguntas cortas que para páginas completas.",
+    description: "Buen razonamiento, sin coste, pero lento (~9 tokens/s): úsalo para preguntas cortas.",
     category: "eco",
     credits: 0,
     minTier: "free",

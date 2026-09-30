@@ -330,7 +330,7 @@ export default function Pricing() {
           {/* Annual badge — coming soon */}
           <div className="flex items-center justify-center gap-4 mb-16">
             <span className="text-xs font-black uppercase tracking-widest text-zinc-500">Facturación mensual</span>
-            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[11px] font-bold uppercase tracking-wide">Anual con descuento — Próximamente</span>
+            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold uppercase tracking-wide">Anual con descuento — Próximamente</span>
           </div>
 
           <section className="px-6 mb-32">
@@ -457,7 +457,7 @@ export default function Pricing() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-[11px] font-black text-zinc-500 uppercase">
+                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-[11px] font-black text-zinc-600 uppercase">
                     Modelos Tradicionales
                   </div>
                 </div>
@@ -558,7 +558,7 @@ export default function Pricing() {
                       </div>
                       <div>
                         <div className="text-4xl font-black font-display mb-1">{pack.credits_amount.toLocaleString()}</div>
-                        <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Créditos</div>
+                        <div className="text-xs font-bold text-zinc-600 uppercase tracking-widest">Créditos</div>
                       </div>
                       <div className="text-2xl font-black text-zinc-800 font-display">{pack.price}</div>
                       <button
@@ -638,10 +638,10 @@ export default function Pricing() {
             {[
               { icon: Shield, label: "Pago seguro con Bold" },
               { icon: Lock, label: "Datos protegidos" },
-              { icon: TrendingUp, label: "Cancelás cuando quieras" },
+              { icon: TrendingUp, label: "Cancela cuando quieras" },
               { icon: MessageSquare, label: "Soporte en español" },
             ].map(t => (
-              <div key={t.label} className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-200 flex flex-col items-center gap-4 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all cursor-default group">
+              <div key={t.label} className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-200 flex flex-col items-center gap-4 text-zinc-600 hover:text-zinc-900 transition-colors cursor-default group">
                 <t.icon className="h-6 w-6 group-hover:text-primary transition-colors" />
                 <span className="text-[11px] font-black uppercase tracking-[0.2em] text-center">{t.label}</span>
               </div>
