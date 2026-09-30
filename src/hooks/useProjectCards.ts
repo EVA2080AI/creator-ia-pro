@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import { useAttachWhenReady } from "./useAttachWhenReady";
 import { buildPreviewDoc, stackblitzFields, type ProjectFile } from "@/lib/project-preview";
+import { findViteProblems } from "@/lib/vite-check";
 
 // Comportamiento de las tarjetas de proyecto que produce mdToHtml()
 // (src/lib/markdown.ts → projectCardHtml). Las tarjetas llegan como HTML crudo
@@ -74,8 +75,20 @@ function attachProjectCards(el: HTMLElement): () => void {
     iframe.srcdoc = doc;
   };
 
+  // Proyectos Vite/React: qué le falta para correr con "npm install && npm run dev". No se muestra
+  // mientras el modelo sigue escribiendo (faltaría "tailwind.config.js" solo porque aún no llegó).
+  const showProblems = (card: HTMLElement) => {
+    const box = card.querySelector<HTMLElement>(".md-proj-problems");
+    if (!box) return;
+    const generating = !!document.querySelector(".asst-send.stop");
+    const problems = generating ? [] : findViteProblems(readFiles(card));
+    box.hidden = problems.length === 0;
+    box.textContent = problems.length ? `Revisa antes de ejecutarlo: ${problems.join("; ")}. Pídele a Basalt que agregue lo que falta.` : "";
+  };
+
   const hydrate = () => {
     el.querySelectorAll<HTMLElement>(".md-project").forEach((card) => {
+      showProblems(card);
       const iframe = card.querySelector<HTMLIFrameElement>("iframe.md-preview-frame");
       if (!iframe) return;
       const doc = buildPreviewDoc(readFiles(card));

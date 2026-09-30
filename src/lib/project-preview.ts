@@ -72,7 +72,16 @@ export function uniqueName(preferred: string | undefined, lang: string, taken: S
   }
 }
 
-export const isPreviewable = (files: ProjectFile[]) => files.some((f) => isHtmlName(f.name));
+/** Proyecto que necesita Vite/un bundler: trae package.json o su HTML arranca un módulo .ts/.tsx/.jsx
+ *  (`<script type="module" src="/src/main.tsx">`). El navegador no ejecuta eso sin compilar, así que una
+ *  vista previa quedaba en blanco (visto en vivo con una app React de 11 archivos). */
+export function needsBundler(files: ProjectFile[]): boolean {
+  if (files.some((f) => normalizePath(f.name) === "package.json")) return true;
+  const main = mainHtml(files);
+  return !!main && /<script\b[^>]*\bsrc\s*=\s*["'][^"']+\.(?:tsx?|jsx)["']/i.test(main.code);
+}
+
+export const isPreviewable = (files: ProjectFile[]) => files.some((f) => isHtmlName(f.name)) && !needsBundler(files);
 
 /** ¿Vale la pena renderizar este ```html sin nombre? Los modelos ilustran con fragmentos de una línea
  *  (`<img src="ruta/tu-imagen.jpg">`, `<style>`) que no son una página: una tarjeta con iframe para eso es ruido. */
@@ -219,7 +228,7 @@ export function buildPreviewDoc(files: ProjectFile[]): string | null {
  */
 export function stackblitzFields(files: ProjectFile[], title: string): Record<string, string> | null {
   const hasPackageJson = files.some((f) => normalizePath(f.name) === "package.json");
-  if (!hasPackageJson && !isPreviewable(files)) return null;
+  if (!hasPackageJson && !files.some((f) => isHtmlName(f.name))) return null;
   const fields: Record<string, string> = {
     "project[title]": title,
     "project[description]": "Generado con Basalt — Creator IA",

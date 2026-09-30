@@ -440,3 +440,8 @@
 @media (max-width: 768px) and (prefers-reduced-motion: reduce) {
   .asst-sidebar, .asst-sidebar.open { transition: none; }
 }
+
+/* Proyectos Vite/React: sin vista previa posible, la tarjeta explica qué hacer en vez de mostrar un recuadro en blanco. */
+.md-proj-note { padding: 10px 12px; font-size: 13px; line-height: 1.5; color: var(--asst-txt-2); background: var(--asst-active-bg); border-bottom: 1px solid var(--asst-border); }
+.md-proj-note code { font-size: 12px; }
+.md-proj-problems { margin-top: 8px; padding: 8px 10px; border-radius: 8px; font-size: 12.5px; background: color-mix(in oklch, oklch(0.78 0.15 75) 22%, var(--asst-bg)); color: var(--asst-txt); }

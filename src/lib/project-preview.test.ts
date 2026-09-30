@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPreviewDoc, extractFilename, findMissingRefs, missingRefMessage, stackblitzFields, uniqueName, withBasaltBase, type ProjectFile } from "./project-preview";
+import { buildPreviewDoc, extractFilename, findMissingRefs, missingRefMessage, needsBundler, isPreviewable, stackblitzFields, uniqueName, withBasaltBase, type ProjectFile } from "./project-preview";
 
 describe("extractFilename", () => {
   it("lee el nombre de la línea de la valla (resto tras el lenguaje)", () => {
@@ -145,5 +145,35 @@ describe("withBasaltBase", () => {
   it("también avisa de <img src> locales que nunca llegaron", () => {
     const img: ProjectFile = { name: "index.html", lang: "html", code: '<html><head></head><body><img src="./img/pan.jpg" alt="pan"><img src="https://x.test/a.png" alt=""><img src="data:image/png;base64,AAA" alt=""></body></html>' };
     expect(findMissingRefs([img])).toEqual(["img/pan.jpg"]);
+  });
+});
+
+describe("proyectos que necesitan bundler", () => {
+  const vite: ProjectFile[] = [
+    { name: "package.json", lang: "json", code: '{"name":"x","scripts":{"dev":"vite"}}' },
+    { name: "index.html", lang: "html", code: '<!doctype html><html><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>' },
+    { name: "src/main.tsx", lang: "tsx", code: "import React from 'react';" },
+  ];
+
+  it("un proyecto con package.json o con un módulo .tsx en el HTML necesita bundler y no es previsualizable", () => {
+    expect(needsBundler(vite)).toBe(true);
+    expect(isPreviewable(vite)).toBe(false);
+    // Sin package.json (respuesta cortada) el <script type=module src=*.tsx> también lo delata.
+    expect(needsBundler(vite.slice(1))).toBe(true);
+    expect(isPreviewable(vite.slice(1))).toBe(false);
+  });
+
+  it("un HTML con su .js/.css de siempre sí se previsualiza", () => {
+    const plain: ProjectFile[] = [
+      { name: "index.html", lang: "html", code: '<html><body><script src="app.js"></script></body></html>' },
+      { name: "app.js", lang: "js", code: "console.log(1)" },
+    ];
+    expect(needsBundler(plain)).toBe(false);
+    expect(isPreviewable(plain)).toBe(true);
+  });
+
+  it("StackBlitz sigue disponible para un proyecto con HTML aunque no traiga package.json", () => {
+    expect(stackblitzFields(vite.slice(1), "x")).not.toBeNull();
+    expect(stackblitzFields(vite, "x")?.["project[template]"]).toBe("node");
   });
 });

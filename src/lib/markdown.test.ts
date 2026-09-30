@@ -101,6 +101,37 @@ describe("mdToHtml — tarjetas de proyecto", () => {
   });
 });
 
+describe("mdToHtml — proyectos Vite/React", () => {
+  const vite = [
+    fence("json package.json", '{"name":"x","scripts":{"dev":"vite"}}'),
+    fence("html index.html", '<!doctype html><html><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>'),
+    fence("tsx src/main.tsx", "import React from 'react';"),
+  ].join("\n\n");
+
+  it("no ofrece vista previa (quedaba en blanco) y explica cómo ejecutarlo", () => {
+    const host = render(vite);
+    expect(host.querySelector(".md-project")).not.toBeNull();
+    expect(host.querySelector("iframe")).toBeNull();
+    expect([...host.querySelectorAll(".md-proj-tab")].map((t) => t.textContent)).toEqual(["package.json", "index.html", "src/main.tsx"]);
+    expect(host.querySelector(".md-proj-tab.active")?.textContent).toBe("package.json");
+    expect(host.querySelector(".md-proj-note")?.textContent).toMatch(/StackBlitz.*ZIP.*npm install/);
+    expect(host.querySelector('[data-act="stackblitz"]')).not.toBeNull();
+    expect(host.querySelector(".md-codehead span")?.textContent).toBe("Proyecto · 3 archivos");
+  });
+
+  it("el aviso de faltantes arranca oculto (lo llena useProjectCards cuando el modelo terminó)", () => {
+    const box = render(vite).querySelector<HTMLElement>(".md-proj-problems");
+    expect(box).not.toBeNull();
+    expect(box!.hidden).toBe(true);
+  });
+
+  it("un proyecto web normal conserva su vista previa y no muestra la nota", () => {
+    const host = render([fence("html", "<h1>a</h1><p>b</p>"), fence("css", "p{}")].join("\n\n"));
+    expect(host.querySelector("iframe")).not.toBeNull();
+    expect(host.querySelector(".md-proj-note")).toBeNull();
+  });
+});
+
 describe("mdToHtml — listas", () => {
   it("las viñetas con sangría cuelgan de su ítem numerado y la numeración sigue", () => {
     const host = render("1. **A**:\n   * uno\n   * dos\n2. **B**:\n   * tres");

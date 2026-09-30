@@ -11,6 +11,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { buildSystemPrompt } from "../src/lib/basalt";
 import { extractFilename, isWebLang, uniqueName, withBasaltBase, type ProjectFile } from "../src/lib/project-preview";
 import { scoreProject } from "../src/lib/css-rubric";
+import { findViteProblems } from "../src/lib/vite-check";
 
 const PROMPTS: Record<string, string> = {
   landing: "Hazme la página web (HTML) de una panadería artesanal llamada Trigo: hero, productos, testimonios y contacto.",
@@ -18,6 +19,14 @@ const PROMPTS: Record<string, string> = {
   dashboard: "Hazme un dashboard web (HTML) de ventas con 4 KPIs, una tabla de los últimos pedidos y un filtro por estado.",
   portafolio: "Hazme la página web (HTML) del portafolio de una fotógrafa de bodas: presentación, galería de 6 trabajos, sobre mí y contacto.",
   precios: "Hazme una página web (HTML) de precios con 3 planes y un interruptor mensual/anual que cambie los precios.",
+};
+
+// BENCH_VITE=1 cambia los pedidos por apps React/Vite y puntúa con findViteProblems (1 = sin problemas).
+const VITE = !!process.env.BENCH_VITE;
+const VITE_PROMPTS: Record<string, string> = {
+  todo: "Hazme una app React con Vite y Tailwind: lista de tareas con dos pantallas (lista y estadísticas), en varios archivos.",
+  ventas: "Hazme una app React con Vite y Tailwind de un dashboard de ventas con dos pantallas (resumen y pedidos), en varios archivos.",
+  reservas: "Hazme una app React con Vite y TypeScript de reservas para un consultorio, con validación del formulario y una pantalla de confirmación, en varios archivos.",
 };
 
 function loadKey(): string {
@@ -77,13 +86,13 @@ if (saved) {
 
 // BENCH_PROMPTS=landing,dashboard limita los pedidos (por defecto corren los 5).
 const only = process.env.BENCH_PROMPTS?.split(",");
-const jobs = saved ? [] : models.flatMap((model) => Object.entries(PROMPTS).filter(([id]) => !only || only.includes(id)).map(([id, prompt]) => ({ model, id, prompt })));
+const jobs = saved ? [] : models.flatMap((model) => Object.entries(VITE ? VITE_PROMPTS : PROMPTS).filter(([id]) => !only || only.includes(id)).map(([id, prompt]) => ({ model, id, prompt })));
 const results: Row[] = saved ?? (await Promise.all(
   jobs.map(async (j) => {
     try {
       const out = await run(j.model, key, j.prompt);
       const files = extractProject(out.text);
-      const r = scoreProject(files);
+      const r = VITE ? (() => { const pr = files.some((f) => f.name === "package.json") ? findViteProblems(files) : ["no entregó un proyecto Vite (sin package.json): dio HTML plano"]; return { score: pr.length ? 0 : 1, checks: pr.map((id) => ({ id, pass: false })) }; })() : scoreProject(files);
       return { ...j, ok: true, ms: out.ms, tokens: out.tokens, cut: out.ms > 54_000, files: files.map((f) => f.name), score: r.score, failed: r.checks.filter((c) => !c.pass).map((c) => c.id), text: out.text };
     } catch (e) {
       return { ...j, ok: false, error: String(e), score: 0, failed: ["error"], ms: 0, tokens: 0, cut: false, files: [] as string[], text: "" };
