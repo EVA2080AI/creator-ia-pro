@@ -193,7 +193,7 @@ const GUARANTEES = [
   {
     icon: Code2,
     title: "El código es tuyo",
-    content: "Exportá a ZIP o hacé push directo a GitHub. Nada te ata a la plataforma.",
+    content: "Exporta a ZIP o haz push directo a GitHub. Nada te ata a la plataforma.",
   },
 ];
 
@@ -1028,7 +1028,7 @@ export default function Index() {
                   Por qué elegir <span className="text-primary">Creator IA Pro</span>
                 </motion.h2>
                 <motion.p variants={fadeUp} custom={0.2} className="text-zinc-500 text-[15px] max-w-xl mx-auto">
-                  Nada de números inflados. Esto es lo que de verdad obtenés.
+                  Nada de números inflados. Esto es lo que de verdad obtienes.
                 </motion.p>
               </div>
 

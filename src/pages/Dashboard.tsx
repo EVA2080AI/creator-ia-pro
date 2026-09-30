@@ -10,8 +10,8 @@ import { listAssets } from "@/lib/assets";
 import { listTransactions, weeklySpend, toolBreakdown } from "@/lib/transactions";
 import { toast } from "sonner";
 import {
-  Zap, Coins, CreditCard, LayoutGrid, Image,
-  Megaphone, FileText, FolderPlus, ListTodo
+  Zap, Coins, CreditCard, FolderOpen, Image, Scale,
+  Megaphone, FolderPlus, ListTodo
 } from "lucide-react";
 import { ProjectCard } from "@/components/dashboard/ProjectCard";
 import { useStudioProjects } from "@/hooks/useStudioProjects";
@@ -77,7 +77,6 @@ export default function Dashboard() {
 
   const [usageData, setUsageData] = useState<any[]>([]);
   const [toolData, setToolData] = useState<any[]>([]);
-  const [spacesCount, setSpacesCount] = useState(0);
   const [assetsCount, setAssetsCount] = useState(0);
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState(false);
@@ -106,7 +105,6 @@ export default function Dashboard() {
         );
 
         setSpaces(allProjects);
-        setSpacesCount(flowSpaces.length);
         if (allProjects.length === 0 && !hasSeenWelcomeOnboarding()) {
           setShowWelcome(true);
         }
@@ -215,7 +213,10 @@ export default function Dashboard() {
         <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Créditos" value={profile?.credits_balance ?? 0} icon={Coins} colorClass="text-primary" />
           <StatCard label="Plan" value={TIER_LABELS[currentTier] || "Gratis"} icon={CreditCard} colorClass="text-primary" />
-          <StatCard label="Espacios" value={spacesCount} icon={LayoutGrid} colorClass="text-rose-400" />
+          {/* Decía "Espacios" y contaba SOLO los tableros de Canvas IA (apagado): mostraba 0
+              a alguien con tres proyectos, y "Espacios" ya no es como se llama en ningún
+              menú. Ahora es "Proyectos" y cuenta lo que de verdad hay. */}
+          <StatCard label="Proyectos" value={spaces.length} icon={FolderOpen} colorClass="text-rose-400" />
           <StatCard label="Activos" value={assetsCount} icon={Image} colorClass="text-emerald-400" />
         </section>
 
@@ -226,10 +227,12 @@ export default function Dashboard() {
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {[
             { icon: Zap, label: "Basalt IA", desc: "Asistente", path: "/a/basalt" },
-            { icon: Zap, label: "Arena IA", desc: "Compara modelos", path: "/a/arena" },
-            { icon: Megaphone, label: "Canvas IA", desc: "Próximamente", path: "/studio-flow" },
+            { icon: Scale, label: "Arena IA", desc: "Compara modelos", path: "/a/arena" },
+            // Canvas IA solo cuando exista de verdad: era un acceso directo a un aviso de
+            // "Próximamente" (mismo criterio que el menú lateral y la bienvenida).
+            ...(CANVAS_ENABLED || isAdmin ? [{ icon: Megaphone, label: "Canvas IA", desc: "Editor visual", path: "/studio-flow" }] : []),
             { icon: ListTodo, label: "Tareas", desc: "Kanban", path: "/tasks" },
-            { icon: FileText, label: "Espacios", desc: "Archivos", path: "/spaces" },
+            { icon: FolderOpen, label: "Proyectos", desc: "Tus apps y sitios", path: "/spaces" },
           ].map((app) => (
             <button
               key={app.label}

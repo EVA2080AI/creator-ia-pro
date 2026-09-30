@@ -27,6 +27,9 @@ await ctx.addInitScript(([guide, dark]) => {
   try {
     if (guide) localStorage.removeItem("basalt_guide_seen_v1"); else localStorage.setItem("basalt_guide_seen_v1", "1");
     if (dark) localStorage.setItem("theme", "dark");
+    // El modal de bienvenida del panel tapa la pantalla que se quiere ver; con
+    // --welcome se deja aparecer a propósito.
+    if (guide) localStorage.removeItem("dashboard_onboarded_v1"); else localStorage.setItem("dashboard_onboarded_v1", "1");
   } catch { /* sin storage */ }
 }, [flag("--guide"), flag("--dark")]);
 
@@ -53,6 +56,26 @@ const DEMO_TASKS = [
   createdAt: now, updatedAt: now,
 }));
 
+const ago = (n) => new Date(Date.now() - n * 864e5).toISOString();
+const DEMO_PROJECTS = [
+  ["Landing de la agencia", "Sitio de una p\u00e1gina con formulario"],
+  ["Tienda de velas", "Cat\u00e1logo y carrito"],
+  ["Panel de indicadores", "Tablero con gr\u00e1ficas de ventas"],
+].map(([name, description], i) => ({
+  id: `p${i}`, userId: "u-demo", name, description, thumbnailUrl: null, settings: {},
+  createdAt: ago(20 - i * 5), updatedAt: ago(i),
+}));
+
+const DEMO_TRANSACTIONS = [
+  ["spend", -12, "chat: gemini-2.5-flash", 1],
+  ["spend", -30, "imagen: flux", 2],
+  ["purchase", 500, "Recarga de cr\u00e9ditos", 5],
+  ["spend", -8, "chat: gpt-oss-120b", 6],
+  ["spend", -45, "chat: claude-sonnet-4.5", 9],
+].map(([type, amount, description, d], i) => ({
+  id: `tx${i}`, userId: "u-demo", type, amount, description, createdAt: ago(d),
+}));
+
 const json = (route, body) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
 await ctx.route("**/api/**", (r) => {
   const u = new URL(r.request().url()).pathname;
@@ -64,6 +87,10 @@ await ctx.route("**/api/**", (r) => {
   // Con las respuestas vacías, /tareas y /proyectos salían en su estado "no hay nada":
   // justo el que NO sirve para ver si algo se desborda en un teléfono.
   if (u.startsWith("/api/tasks")) return json(r, { ok: true, tasks: DEMO_TASKS });
+  if (u === "/api/spaces") return json(r, { ok: true, spaces: [] });
+  if (u === "/api/projects") return json(r, { ok: true, projects: DEMO_PROJECTS });
+  if (u.startsWith("/api/assets")) return json(r, { ok: true, assets: [], total: 12 });
+  if (u.startsWith("/api/billing/transactions")) return json(r, { ok: true, transactions: DEMO_TRANSACTIONS });
   if (u.startsWith("/api/basalt/conversations")) return json(r, { ok: true, conversations: DEMO_CONVERSATIONS });
   return json(r, { ok: true });
 });
