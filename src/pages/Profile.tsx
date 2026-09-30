@@ -218,7 +218,7 @@ const Profile = () => {
                           <p className="text-sm font-medium text-muted-foreground truncate">{meta.label}</p>
                           <p className="text-xs text-muted-foreground">{new Date(tx.createdAt).toLocaleDateString("es-ES")}</p>
                         </div>
-                        <span className={`text-sm font-bold tabular-nums ${meta.positive ? "text-green-400" : "text-muted-foreground"}`}>
+                        <span className={`text-sm font-bold tabular-nums ${meta.positive ? "text-green-700 dark:text-green-400" : "text-muted-foreground"}`}>
                           {tx.amount > 0 ? "+" : ""}{tx.amount}
                         </span>
                       </div>
@@ -307,7 +307,7 @@ const Profile = () => {
                   <Check className="w-4 h-4 text-green-400/50 shrink-0" />
                   <div>
                     <p className="text-xs text-muted-foreground">Email verificado</p>
-                    <p className="text-sm font-medium text-green-400/70">Confirmado</p>
+                    <p className="text-sm font-medium text-green-700 dark:text-green-400">Confirmado</p>
                   </div>
                 </div>
               </div>
