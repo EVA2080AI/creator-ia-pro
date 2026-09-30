@@ -8,7 +8,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
-import { useHtmlPreviewFrames } from "@/hooks/useHtmlPreviewFrames";
+import { useProjectCards } from "@/hooks/useProjectCards";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import {
@@ -98,7 +98,7 @@ export default function AssistantPage() {
   }, []);
 
   useCopyCodeButtons(scrollerRef);
-  useHtmlPreviewFrames(scrollerRef);
+  useProjectCards(scrollerRef);
 
   const newChat = () => {
     abortRef.current?.abort();

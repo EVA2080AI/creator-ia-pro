@@ -8,7 +8,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
-import { useHtmlPreviewFrames } from "@/hooks/useHtmlPreviewFrames";
+import { useProjectCards } from "@/hooks/useProjectCards";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
@@ -100,7 +100,7 @@ export default function BasaltPage() {
   }, []);
 
   useCopyCodeButtons(scrollerRef);
-  useHtmlPreviewFrames(scrollerRef);
+  useProjectCards(scrollerRef);
 
   const persist = useCallback((id: string, msgs: StoredMsg[]) => {
     if (!userId || !msgs.length) return;

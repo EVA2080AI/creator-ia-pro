@@ -173,19 +173,52 @@
 .md-codeblock pre { background: var(--asst-panel); padding: 13px; overflow-x: auto; margin: 0; }
 .md-codeblock pre code { background: none; padding: 0; font-size: 12.5px; line-height: 1.55; }
 
-/* Preview en vivo de bloques ```html — mismo header que .md-codeblock, con
-   un iframe sandboxeado abajo y el código fuente colapsado por defecto
-   (<details>, sin JS propio — igual que el resto de mdToHtml). */
-.md-htmlpreview { border-radius: 12px; overflow: hidden; margin: 0 0 11px; border: 1px solid var(--asst-border); }
+/* Tarjeta de proyecto (mdToHtml → projectCardHtml, comportamiento en
+   src/hooks/useProjectCards.ts): un ```html suelto o varios archivos, con
+   pestañas, vista previa en iframe sandboxeado, consola y pantalla completa. */
+.md-project { border-radius: 12px; overflow: hidden; margin: 0 0 11px; border: 1px solid var(--asst-border); }
 .md-preview-actions { display: flex; align-items: center; gap: 2px; }
-.md-preview-open { background: none; border: none; color: var(--asst-txt-2); font-size: 11.5px; padding: 5px 10px; border-radius: 14px; text-decoration: none; }
-.md-preview-open:hover { background: var(--asst-panel); text-decoration: none; }
-.md-preview-frame { display: block; width: 100%; height: 360px; border: none; border-top: 1px solid var(--asst-border); background: #fff; resize: vertical; overflow: auto; }
-.md-preview-code { border-top: 1px solid var(--asst-border); }
-.md-preview-code summary { cursor: pointer; padding: 8px 12px; font-size: 11.5px; color: var(--asst-txt-2); background: var(--asst-panel-2); user-select: none; }
-.md-preview-code summary:hover { color: var(--asst-txt); }
-.md-preview-code pre { background: var(--asst-panel); padding: 13px; overflow-x: auto; margin: 0; }
-.md-preview-code pre code { background: none; padding: 0; font-size: 12.5px; line-height: 1.55; }
+.md-proj-btn { background: none; border: none; color: var(--asst-txt-2); font-size: 11.5px; padding: 5px 10px; border-radius: 14px; cursor: pointer; }
+.md-proj-btn:hover { background: var(--asst-panel); color: var(--asst-txt); }
+.md-proj-tabs { display: flex; gap: 2px; overflow-x: auto; background: var(--asst-panel-2); padding: 0 8px; border-top: 1px solid var(--asst-border); scrollbar-width: none; }
+.md-proj-tab {
+  background: none; border: none; border-bottom: 2px solid transparent; color: var(--asst-txt-2); font-size: 12px;
+  padding: 8px 10px; cursor: pointer; white-space: nowrap; font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+.md-proj-tab:hover { color: var(--asst-txt); }
+.md-proj-tab.active { color: var(--asst-txt); border-bottom-color: var(--a-accent, #8b5cf6); }
+.md-proj-pane { display: none; }
+.md-proj-pane.active { display: block; }
+.md-proj-toolbar { display: flex; align-items: center; gap: 4px; padding: 6px 8px; background: var(--asst-panel); border-top: 1px solid var(--asst-border); }
+.md-proj-tool { background: none; border: none; color: var(--asst-txt-2); font-size: 11.5px; padding: 4px 10px; border-radius: 14px; cursor: pointer; }
+.md-proj-tool:hover { background: var(--asst-panel-2); }
+.md-proj-tool.active { background: var(--asst-panel-2); color: var(--asst-txt); font-weight: 600; }
+.md-proj-tool-end { margin-left: auto; }
+.md-proj-stage { display: flex; justify-content: center; background: var(--asst-panel-2); border-top: 1px solid var(--asst-border); }
+.md-preview-frame { display: block; width: 100%; height: 380px; border: none; background: #fff; resize: vertical; overflow: auto; }
+.md-proj-stage[data-device="tablet"] .md-preview-frame { width: 768px; max-width: 100%; }
+.md-proj-stage[data-device="mobile"] .md-preview-frame { width: 390px; max-width: 100%; }
+.md-proj-console { border-top: 1px solid var(--asst-border); }
+.md-proj-console summary { cursor: pointer; padding: 7px 12px; font-size: 11.5px; color: var(--asst-txt-2); background: var(--asst-panel-2); user-select: none; }
+.md-proj-console summary:hover { color: var(--asst-txt); }
+.md-console-count { display: inline-block; min-width: 16px; margin-left: 4px; padding: 0 5px; border-radius: 8px; font-size: 10.5px; text-align: center; background: var(--asst-panel); }
+.md-console-count:empty { display: none; }
+.md-console-count.err { background: #fce8e6; color: #b3261e; }
+.md-console-lines { max-height: 160px; overflow: auto; padding: 6px 12px; background: var(--asst-panel); font: 12px/1.5 "JetBrains Mono", ui-monospace, monospace; }
+.md-console-line { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--asst-txt-2); }
+.md-console-line.warn { color: #b26a00; }
+.md-console-line.error { color: #b3261e; }
+.md-proj-filebar { display: flex; align-items: center; justify-content: space-between; background: var(--asst-panel-2); padding: 4px 8px 4px 12px; font-size: 11.5px; color: var(--asst-txt-2); border-top: 1px solid var(--asst-border); }
+.md-proj-pane pre { background: var(--asst-panel); padding: 13px; overflow-x: auto; margin: 0; max-height: 460px; }
+.md-proj-pane pre code { background: none; padding: 0; font-size: 12.5px; line-height: 1.55; }
+/* Pantalla completa: la tarjeta se estira sobre la app (el iframe sigue
+   sandboxeado); Esc o "Cerrar" la devuelven a su lugar. */
+.md-project.md-proj-full { position: fixed; inset: 0; z-index: 80; margin: 0; border-radius: 0; border: none; display: flex; flex-direction: column; background: var(--asst-bg); }
+.md-proj-full .md-proj-pane.active { flex: 1; min-height: 0; overflow: auto; }
+.md-proj-full .md-proj-preview.active { display: flex; flex-direction: column; overflow: hidden; }
+.md-proj-full .md-proj-stage { flex: 1; min-height: 0; }
+.md-proj-full .md-preview-frame { height: 100%; resize: none; }
+.md-proj-full .md-proj-pane pre { max-height: none; }
 .md-table-wrap { overflow-x: auto; margin: 0 0 11px; border: 1px solid var(--asst-border); border-radius: 12px; }
 .asst-md table { border-collapse: collapse; width: 100%; font-size: 13px; }
 .asst-md th, .asst-md td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--asst-border); }

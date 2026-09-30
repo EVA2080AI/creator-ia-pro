@@ -4,6 +4,8 @@ import { Helmet } from "react-helmet-async";
 import { ArrowLeft, Scale, Send, Square, Trophy, Loader2, Plus, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { mdToHtml } from "@/lib/markdown";
+import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
+import { useProjectCards } from "@/hooks/useProjectCards";
 import { CHAT_MODELS, getModel, CATEGORY_ORDER, CATEGORY_META } from "@/lib/ai/models";
 import "./Assistant.css";
 
@@ -32,6 +34,12 @@ export default function ArenaPage() {
   const [askedPrompt, setAskedPrompt] = useState("");
   const [winner, setWinner] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  // Los bloques de código y las tarjetas de proyecto de mdToHtml() son HTML
+  // crudo: sin estos hooks el botón Copiar y la vista previa quedaban muertos
+  // también acá (Arena nunca los llamaba).
+  const mainRef = useRef<HTMLElement | null>(null);
+  useCopyCodeButtons(mainRef);
+  useProjectCards(mainRef);
   const running = lanes.some((l) => l.status === "streaming");
 
   const patch = (i: number, p: Partial<Lane>) => setLanes((prev) => prev.map((l, k) => (k === i ? { ...l, ...p } : l)));
@@ -109,7 +117,7 @@ export default function ArenaPage() {
         <span className="hidden text-[12px] text-muted-foreground sm:inline">Compara modelos con el mismo prompt y vota el mejor</span>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6">
+      <main ref={mainRef} className="mx-auto max-w-7xl px-4 py-6">
         <form
           onSubmit={(e) => { e.preventDefault(); run(); }}
           className="mb-6 flex items-end gap-2 rounded-2xl border border-border bg-card p-3 shadow-sm"
