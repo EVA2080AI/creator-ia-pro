@@ -21,6 +21,19 @@ export function undefinedVars(css: string): string[] {
   return [...missing];
 }
 
+/** Texto claro sobre un fondo que es solo una foto: si la URL es inventada y no carga, el texto
+ *  blanco queda invisible sobre el fondo de la página (visto en vivo: hero "Grano" con Unsplash). */
+export function lightTextOnPhoto(css: string): boolean {
+  for (const m of css.matchAll(/\{([^{}]*)\}/g)) {
+    const body = m[1];
+    const light = /(?:^|[;\s])color\s*:\s*(?:#fff(?:fff)?\b|white\b|rgba?\(\s*255[\s,]+255[\s,]+255)/i.test(body);
+    const photo = /url\(\s*["']?(?!data:|#)/i.test(body);
+    const fallback = /gradient\(|background-color\s*:|background\s*:[^;]*(?:#[0-9a-f]{3}|rgb|hsl|oklch)/i.test(body);
+    if (light && photo && !fallback) return true;
+  }
+  return false;
+}
+
 export function scoreProject(files: ProjectFile[]): RubricResult {
   const doc = buildPreviewDoc(files) ?? "";
   const main = files.find((f) => isHtmlName(f.name));
@@ -38,6 +51,7 @@ export function scoreProject(files: ProjectFile[]): RubricResult {
     { id: "styled", label: "Con estilo propio: ≥1500 caracteres de CSS y font-family", pass: css.length >= 1500 && /font-family|font:/.test(css) },
     { id: "restraint", label: "Con mesura: ≤3 style=\"\" inline y ≤6 !important", pass: count(doc, /\sstyle=["']/g) <= 3 && count(css, /!important/g) <= 6 },
     { id: "images", label: "Sin fotos inventadas: nada de <img>/url() a Unsplash, placeholders o rutas inexistentes", pass: !/(unsplash\.com|picsum\.photos|placeholder\.com|placehold\.(co|it)|lorempixel|pexels\.com|pixabay\.com|dummyimage\.com)/i.test(doc) && !/<img\b[^>]*\bsrc=["'](?!data:)/i.test(doc) && !/url\(\s*["']?(?!data:|#)[^)"']*\.(jpe?g|png|webp|gif|avif)/i.test(css) },
+    { id: "contrast", label: "Contraste seguro: texto blanco sobre foto solo con un color/degradado de respaldo", pass: !lightTextOnPhoto(css) },
     { id: "vars", label: "Variables definidas: toda var(--x) sin valor por defecto tiene su --x:", pass: undefinedVars(css).length === 0 },
     { id: "complete", label: "Completo: sin archivos enlazados faltantes y HTML cerrado", pass: !!main && findMissingRefs(files).length === 0 && /<\/(html|body)>/i.test(main.code) },
   ];

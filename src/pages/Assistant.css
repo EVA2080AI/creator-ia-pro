@@ -115,14 +115,6 @@
 .asst-topbar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; flex: none; }
 .asst-brand-name { font-size: 17px; color: var(--asst-txt-2); font-weight: 500; margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.asst-model-select {
-  margin-left: auto; background: var(--asst-panel); color: var(--asst-txt-2); border: 1px solid var(--asst-border);
-  border-radius: 10px; padding: 6px 8px; font-size: 12px; font-weight: 600; max-width: 200px; flex: none;
-}
-/* El selector de motor de imagen va justo después del de texto — sin su
-   propio margin-left:auto (ya cumple ese rol el primero) y más angosto,
-   porque sus labels son más cortos. */
-.asst-image-model-select { margin-left: 0; max-width: 150px; }
 
 .asst-scroller { flex: 1; overflow-y: auto; scroll-behavior: smooth; }
 /* Contenedor de scroll para BasaltAppLayout.tsx (Dashboard/Tasks/Spaces/
@@ -303,13 +295,136 @@
   .asst-pill textarea { font-size: 16px; } /* evita el zoom automático de iOS */
   .asst-topbar { padding: 8px 10px; gap: 6px; }
   .asst-brand-name { font-size: 15px; }
-  .asst-model-select { max-width: 128px; font-size: 11px; padding: 5px 6px; }
   .asst-cards { grid-template-columns: 1fr; }
   .asst-welcome { padding-top: 4vh; }
 }
 
-/* Pantallas muy angostas (iPhone SE y similares, ~360px): el nombre del
-   modelo no cabe ni truncado a 128px sin verse cortado a la mitad. */
-@media (max-width: 380px) {
-  .asst-model-select { max-width: 96px; }
+/* ══ Capa de modernización del shell (Ciclo 2, "css muy antiguo") ═══════════
+   Aditiva a propósito: va al final y solo sobreescribe/agrega, para que el
+   diff sea revisable y se pueda revertir de un solo golpe. Hallazgos del
+   audit: 0 :focus-visible, 0 prefers-reduced-motion, contraste bajo en
+   textos secundarios/acentos, panel #f7f7f8 sobre #fff casi sin jerarquía
+   (1.07:1), acento morado "activo" clarísimo sobre sidebar oscuro. */
+
+/* Contraste: --asst-txt-3 (#78797c) daba 4.07:1 sobre el panel. */
+.asst-app { --asst-txt-3: #666a6e; --asst-active-bg: var(--a-accent-soft, #f3e8ff); --asst-accent-text: color-mix(in oklch, var(--a-accent, #8b5cf6) 72%, black); }
+.asst-app[data-asst-theme="dark"] {
+  --asst-txt-3: #9aa0a6;
+  --asst-active-bg: color-mix(in oklch, var(--a-accent, #8b5cf6) 24%, var(--asst-bg));
+  --asst-accent-text: color-mix(in oklch, var(--a-accent, #8b5cf6) 70%, white);
+}
+.asst-switch-item.active, .asst-side-link.active { background: var(--asst-active-bg); color: var(--asst-accent-text); }
+.asst-md a, .asst-cut button { color: var(--asst-accent-text); }
+.asst-cut button { border-color: var(--asst-accent-text); }
+.asst-cut button:hover { background: var(--asst-active-bg); }
+
+/* Foco visible: los botones conservaban el anillo por defecto del navegador y
+   la caja de texto ninguno (outline:none con solo una sombra tenue de pista). */
+.asst-app :is(button, [role="tab"], select, a, summary):focus-visible {
+  outline: 2px solid var(--a-accent, #8b5cf6); outline-offset: 2px; border-radius: inherit;
+}
+.asst-app :is(button, select, textarea):focus:not(:focus-visible) { outline: none; }
+.asst-pill:focus-within { box-shadow: 0 0 0 2px color-mix(in oklch, var(--a-accent, #8b5cf6) 45%, transparent), 0 6px 24px rgba(0, 0, 0, 0.08); }
+
+/* Profundidad: paneles casi idénticos al fondo se leían planos. */
+.asst-sidebar { border-right: 1px solid var(--asst-border); }
+.asst-pill { border: 1px solid var(--asst-border); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); }
+.asst-card { border: 1px solid var(--asst-border); }
+.asst-card:hover { box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.18); }
+.asst-app[data-asst-theme="dark"] .asst-card:hover { box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.6); }
+
+/* Tipografía: cortes de línea más prolijos. */
+.asst-hello { text-wrap: balance; }
+.asst-md p, .asst-md li { text-wrap: pretty; }
+
+/* Scrollbars finas, visibles en claro y oscuro (antes: default del sistema). */
+.asst-scroller, .asst-sidebar, .md-proj-pane pre, .md-console-lines { scrollbar-width: thin; scrollbar-color: color-mix(in oklch, var(--asst-txt-3) 45%, transparent) transparent; }
+
+/* Táctil: objetivos de 44px donde el dedo manda; sin "hover" pegado. */
+@media (pointer: coarse) {
+  .asst-icon-btn { width: 44px; height: 44px; }
+  .asst-switch-item, .asst-side-link { padding-block: 12px; }
+  .md-proj-tab, .md-proj-tool, .md-proj-btn, .md-copy-code { min-height: 36px; }
+}
+@media (hover: none) { .asst-card:hover { transform: none; box-shadow: none; } }
+
+/* Movimiento reducido: shimmer, smooth-scroll, transiciones y el "levantar" de las tarjetas. */
+@media (prefers-reduced-motion: reduce) {
+  .asst-scroller { scroll-behavior: auto; }
+  .asst-shimmer i { animation: none; }
+  .asst-sidebar, .asst-card, .asst-backdrop, .asst-switch-item, .asst-side-link, .asst-icon-btn { transition: none; }
+  .asst-card:hover { transform: none; }
+}
+
+/* ══ Selector de modelo de Basalt (Ciclo 3) ═════════════════════════════════
+   Reemplaza a los dos <select> nativos de la topbar (.asst-model-select:
+   11-12px, costo dentro del texto de la opción, sin candado de plan). Un
+   botón + panel; en móvil el panel es una hoja inferior con fondo oscurecido. */
+.asst-picker { position: relative; margin-left: auto; flex: none; }
+.asst-picker-trigger {
+  display: inline-flex; align-items: center; gap: 6px; max-width: min(240px, 46vw); min-height: 36px; padding: 6px 12px;
+  background: var(--asst-panel); color: var(--asst-txt); border: 1px solid var(--asst-border); border-radius: 999px;
+  font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s, border-color 0.15s;
+}
+.asst-picker-trigger:hover { background: var(--asst-panel-2); }
+.asst-picker-trigger[aria-expanded="true"] { border-color: var(--asst-accent-text); }
+.asst-picker-trigger > svg:first-child { color: var(--asst-accent-text); flex: none; }
+.asst-picker-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asst-picker-caret { flex: none; color: var(--asst-txt-3); transition: transform 0.2s; }
+.asst-picker-caret.open { transform: rotate(180deg); }
+
+.asst-picker-backdrop { display: none; }
+.asst-picker-pop {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60; width: min(440px, calc(100vw - 24px)); max-height: min(72vh, 640px);
+  display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; padding: 6px;
+  background: var(--asst-bg); color: var(--asst-txt); border: 1px solid var(--asst-border); border-radius: 18px;
+  box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.06);
+  animation: asst-picker-in 0.16s ease-out;
+}
+@keyframes asst-picker-in { from { opacity: 0; transform: translateY(-4px) scale(0.98); } }
+
+.asst-picker-heading {
+  display: flex; align-items: center; gap: 6px; padding: 12px 12px 6px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--asst-txt-3);
+}
+.asst-picker-images { margin-top: 4px; border-top: 1px solid var(--asst-border); }
+.asst-picker-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 44px; padding: 9px 12px;
+  background: transparent; color: inherit; border: 0; border-radius: 12px; text-align: left; font: inherit; cursor: pointer;
+}
+.asst-picker-row:hover:not(:disabled) { background: var(--asst-panel); }
+.asst-picker-row.selected { background: var(--asst-active-bg); }
+.asst-picker-row.locked { opacity: 0.55; cursor: not-allowed; }
+.asst-picker-row-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.asst-picker-row-title { font-size: 14px; font-weight: 600; line-height: 1.3; }
+.asst-picker-row-title small { margin-left: 8px; font-size: 12px; font-weight: 400; color: var(--asst-txt-3); }
+.asst-picker-row-desc { font-size: 12px; line-height: 1.4; color: var(--asst-txt-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.asst-picker-row-end { display: flex; align-items: center; gap: 8px; flex: none; }
+.asst-picker-check { color: var(--asst-accent-text); }
+.asst-picker-chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600;
+  background: var(--asst-panel-2); color: var(--asst-txt-2); font-variant-numeric: tabular-nums;
+}
+.asst-picker-chip.free { background: color-mix(in oklch, oklch(0.7 0.17 150) 18%, var(--asst-bg)); color: color-mix(in oklch, oklch(0.5 0.14 150) 80%, var(--asst-txt)); }
+.asst-picker-chip.lock { background: transparent; border: 1px solid var(--asst-border); color: var(--asst-txt-3); }
+.asst-picker-upsell {
+  position: sticky; bottom: -6px; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 6px -6px -6px; padding: 12px;
+  background: var(--asst-panel); border-top: 1px solid var(--asst-border); color: var(--asst-accent-text); font-size: 13px; font-weight: 600; text-decoration: none;
+}
+.asst-picker-upsell:hover { background: var(--asst-panel-2); }
+.asst-picker :is(.asst-picker-trigger, .asst-picker-row, .asst-picker-upsell):focus-visible { outline: 2px solid var(--asst-accent-text); outline-offset: -2px; }
+
+/* Móvil: hoja inferior (el panel flotante de 440px no cabe y el pulgar no llega arriba). */
+@media (max-width: 640px) {
+  .asst-picker-trigger { max-width: 52vw; }
+  .asst-picker-backdrop { display: block; position: fixed; inset: 0; z-index: 59; background: rgba(0, 0, 0, 0.45); }
+  .asst-picker-pop {
+    position: fixed; inset: auto 0 0 0; top: auto; width: auto; max-height: 82dvh; padding-bottom: env(safe-area-inset-bottom);
+    border-radius: 20px 20px 0 0; border-bottom: 0; animation: asst-sheet-in 0.22s ease-out;
+  }
+  .asst-picker-upsell { bottom: calc(-6px - env(safe-area-inset-bottom)); }
+}
+@keyframes asst-sheet-in { from { transform: translateY(24px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .asst-picker-pop, .asst-picker-caret { animation: none; transition: none; }
 }

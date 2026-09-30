@@ -49,7 +49,11 @@ function flash(btn: HTMLElement, text: string) {
 }
 
 function activateTab(card: HTMLElement, key: string) {
-  card.querySelectorAll<HTMLElement>(".md-proj-tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === key));
+  card.querySelectorAll<HTMLElement>(".md-proj-tab").forEach((t) => {
+    const on = t.dataset.tab === key;
+    t.classList.toggle("active", on);
+    t.setAttribute("aria-selected", String(on));
+  });
   card.querySelectorAll<HTMLElement>(".md-proj-pane").forEach((p) => p.classList.toggle("active", (p.dataset.pane ?? "") === key));
 }
 
@@ -91,7 +95,10 @@ function attachProjectCards(el: HTMLElement): () => void {
     if (device) {
       const stage = card.querySelector<HTMLElement>(".md-proj-stage");
       if (stage) stage.dataset.device = device.dataset.device;
-      card.querySelectorAll<HTMLElement>("[data-device]").forEach((b) => b.classList.toggle("active", b === device));
+      card.querySelectorAll<HTMLElement>("[data-device]").forEach((b) => {
+        b.classList.toggle("active", b === device);
+        b.setAttribute("aria-pressed", String(b === device));
+      });
       return;
     }
 

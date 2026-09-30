@@ -8,7 +8,8 @@
   :root {
     color-scheme: light dark;
     --hue: 255;
-    --brand: oklch(.55 .19 var(--hue));
+    --brand-l: .55; --brand-c: .19; --brand-h: var(--hue);
+    --brand: oklch(var(--brand-l) var(--brand-c) var(--brand-h));
     --on-brand: oklch(.99 0 0);
     --bg: light-dark(oklch(.99 .004 var(--hue)), oklch(.17 .012 var(--hue)));
     --surface: light-dark(oklch(1 0 0), oklch(.22 .014 var(--hue)));

@@ -9,11 +9,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
+import { useProfile } from "@/hooks/useProfile";
+import { ModelPicker } from "@/components/basalt/ModelPicker";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
 import { mdToHtml } from "@/lib/markdown";
-import { CHAT_MODELS, CATEGORY_ORDER, CATEGORY_META, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID } from "@/lib/ai/models";
+import { CHAT_MODELS, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID } from "@/lib/ai/models";
 import {
   BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply,
   loadConversations, saveConversation, deleteConversation, loadMemory, saveMemory,
@@ -49,6 +51,7 @@ export default function BasaltPage() {
   const [params, setParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth("/auth");
   const userId = user?.id ?? "";
+  const { profile } = useProfile(user?.id);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // Un solo tema para toda la app (antes Basalt tenía su propio estado local
@@ -358,7 +361,7 @@ export default function BasaltPage() {
   }
 
   const errorBanner = error && (
-    <div className="asst-err">
+    <div className="asst-err" role="alert">
       <span>⚠️ {error}</span>
       <button onClick={() => void sendPrompt(lastPromptRef.current)}>Reintentar</button>
     </div>
@@ -439,39 +442,10 @@ export default function BasaltPage() {
             <Menu className="w-4 h-4" />
           </button>
           <div className="asst-brand-name">Basalt</div>
-          <select
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            aria-label="Modelo"
-            className="asst-model-select"
-          >
-            {CATEGORY_ORDER.map((cat) => (
-              <optgroup key={cat} label={CATEGORY_META[cat].label}>
-                {CHAT_MODELS.filter((m) => m.category === cat).map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.label} {m.free ? "· gratis" : `· ${m.credits} cr`}
-                  </option>
-                ))}
-              </optgroup>
-            ))}
-          </select>
-          {/* Motor de imagen — separado del selector de texto porque Basalt
-              decide solo cuándo generar una imagen (etiqueta <imagen>, ver
-              SYSTEM_PROMPT); esto solo fija CON QUÉ motor la genera cuando
-              eso pase. Agregado junto con los 4 motores nuevos del catálogo
-              (2026-09-29) — sin esto quedaban en /lib/ai/models.ts sin
-              ninguna forma de elegirlos, ver [[basalt-vision]]. */}
-          <select
-            value={imageModel}
-            onChange={(e) => setImageModel(e.target.value)}
-            aria-label="Motor de imagen"
-            className="asst-model-select asst-image-model-select"
-            title="Motor de imagen"
-          >
-            {IMAGE_MODELS.map((m) => (
-              <option key={m.id} value={m.id}>🖼️ {m.label} · {m.credits} cr</option>
-            ))}
-          </select>
+          {/* Un solo selector para texto/código y motor de imagen (Basalt decide solo cuándo
+              generar una imagen — etiqueta <imagen>, ver SYSTEM_PROMPT —; el motor elegido
+              es CON QUÉ lo hace). Reemplaza a dos <select> nativos de 11px sin candado de plan. */}
+          <ModelPicker model={model} imageModel={imageModel} tier={profile?.subscription_tier} onModel={setModel} onImageModel={setImageModel} />
         </header>
 
         <div className="asst-scroller" ref={scrollerRef}>
@@ -528,7 +502,7 @@ export default function BasaltPage() {
                 </div>
               ))}
               {truncatedId && !generating && messages[messages.length - 1]?.id === truncatedId && (
-                <div className="asst-cut">
+                <div className="asst-cut" role="status">
                   <span>La respuesta se cortó por el límite de tiempo del modelo.</span>
                   <button onClick={() => void sendPrompt(CONTINUE_PROMPT, { continueFrom: truncatedId })}>Continuar</button>
                 </div>

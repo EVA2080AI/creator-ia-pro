@@ -92,10 +92,10 @@ const results: Row[] = saved ?? (await Promise.all(
 for (const model of [...new Set(results.map((r) => r.model))]) {
   console.log(`\n== ${model} ==`);
   for (const r of results.filter((x) => x.model === model)) {
-    console.log(`${r.id.padEnd(11)} ${String(r.score).padStart(1)}/11  ${(r.ms / 1000).toFixed(0).padStart(3)}s ${String(r.tokens).padStart(5)}tok ${r.cut ? "CORTADO>54s" : "           "} files=${r.files.join(",")}  fallan: ${r.failed.join(",") || "-"}`);
+    console.log(`${r.id.padEnd(11)} ${String(r.score).padStart(1)}/12  ${(r.ms / 1000).toFixed(0).padStart(3)}s ${String(r.tokens).padStart(5)}tok ${r.cut ? "CORTADO>54s" : "           "} files=${r.files.join(",")}  fallan: ${r.failed.join(",") || "-"}`);
   }
   const mine = results.filter((x) => x.model === model && x.ok);
-  console.log(`media: ${(mine.reduce((a, r) => a + r.score, 0) / Math.max(1, mine.length)).toFixed(2)}/11  (${mine.length} ok)`);
+  console.log(`media: ${(mine.reduce((a, r) => a + r.score, 0) / Math.max(1, mine.length)).toFixed(2)}/12  (${mine.length} ok)`);
 }
 if (!saved) writeFileSync(`/tmp/css-bench-${label}.json`, JSON.stringify(results, null, 2));
 console.log(saved ? "\n(re-puntuado sin llamar al modelo)" : `\nDetalle: /tmp/css-bench-${label}.json`);

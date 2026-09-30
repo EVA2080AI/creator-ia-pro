@@ -74,6 +74,13 @@ export function uniqueName(preferred: string | undefined, lang: string, taken: S
 
 export const isPreviewable = (files: ProjectFile[]) => files.some((f) => isHtmlName(f.name));
 
+/** ¿Vale la pena renderizar este ```html sin nombre? Los modelos ilustran con fragmentos de una línea
+ *  (`<img src="ruta/tu-imagen.jpg">`, `<style>`) que no son una página: una tarjeta con iframe para eso es ruido. */
+export function looksRenderable(code: string): boolean {
+  if (/<(?:!doctype|html|body)\b/i.test(code)) return true;
+  return (code.match(/<[a-z][\w-]*/gi) ?? []).length >= 2;
+}
+
 // Se inyecta en el <head> del documento de vista previa: reenvía console.* y
 // los errores al padre por postMessage (el iframe no tiene allow-same-origin,
 // así que es la única vía). Sin JSON.stringify para valores raros: String().

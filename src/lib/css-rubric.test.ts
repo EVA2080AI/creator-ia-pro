@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scoreProject, undefinedVars } from "./css-rubric";
+import { lightTextOnPhoto, scoreProject, undefinedVars } from "./css-rubric";
 import { withBasaltBase, type ProjectFile } from "./project-preview";
 
 const bare: ProjectFile = {
@@ -19,7 +19,7 @@ const modern: ProjectFile = {
 describe("scoreProject", () => {
   it("un HTML pelado con marcado antiguo saca casi nada", () => {
     const r = scoreProject([bare]);
-    expect(r.total).toBe(11);
+    expect(r.total).toBe(12);
     // "images"/"vars"/"restraint" son chequeos negativos: pasan por vacío en una página sin CSS.
     const failed = r.checks.filter((c) => !c.pass).map((c) => c.id);
     expect(failed).toEqual(expect.arrayContaining(["tokens", "legacy", "fluid", "modern", "a11y", "styled"]));
@@ -29,7 +29,7 @@ describe("scoreProject", () => {
     const r = scoreProject(withBasaltBase([modern]));
     const failed = r.checks.filter((c) => !c.pass).map((c) => c.id);
     expect(failed).toEqual([]);
-    expect(r.score).toBe(11);
+    expect(r.score).toBe(12);
   });
 
   it("detecta una respuesta cortada: enlaza styles.css que nunca llegó", () => {
@@ -54,5 +54,18 @@ describe("scoreProject", () => {
     expect(undefinedVars('a{color:var(--x)} :root{--y:1} b{c:var(--y)} d{e:var(--z,red)}')).toEqual(["--x"]);
     expect(scoreProject(withBasaltBase([bad])).checks.find((c) => c.id === "vars")!.pass).toBe(false);
     expect(scoreProject(withBasaltBase([modern])).checks.find((c) => c.id === "vars")!.pass).toBe(true);
+  });
+});
+
+describe("lightTextOnPhoto", () => {
+  it("detecta texto blanco sobre una foto sin respaldo (el hero invisible)", () => {
+    expect(lightTextOnPhoto(".hero{background-image:url('https://x.test/a.jpg');color:white;}")).toBe(true);
+    expect(lightTextOnPhoto(".hero{background:url(a.jpg) center/cover;color:#fff}")).toBe(true);
+  });
+  it("no acusa cuando hay degradado o color de fondo, ni cuando el texto es oscuro", () => {
+    expect(lightTextOnPhoto(".hero{background:linear-gradient(#000,#333),url(a.jpg);color:#fff}")).toBe(false);
+    expect(lightTextOnPhoto(".hero{background-color:#111;background-image:url(a.jpg);color:white}")).toBe(false);
+    expect(lightTextOnPhoto(".hero{background-image:url(a.jpg);color:#111}")).toBe(false);
+    expect(lightTextOnPhoto(".x{background-color:white;background-image:url(a.jpg)}")).toBe(false);
   });
 });

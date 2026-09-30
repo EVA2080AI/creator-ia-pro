@@ -12,13 +12,13 @@ function render(md: string) {
 
 describe("mdToHtml — tarjetas de proyecto", () => {
   it("un ```html suelto se vuelve una tarjeta con pestaña de vista previa e iframe sin srcdoc", () => {
-    const host = render(`Acá va:\n\n${fence("html", "<h1>Hola</h1>")}\n\nListo.`);
+    const host = render(`Acá va:\n\n${fence("html", "<h1>Hola</h1><p>mundo</p>")}\n\nListo.`);
     expect(host.querySelectorAll(".md-project")).toHaveLength(1);
     const iframe = host.querySelector("iframe.md-preview-frame")!;
     expect(iframe.getAttribute("sandbox")).toBe("allow-scripts");
     expect(iframe.hasAttribute("srcdoc")).toBe(false);
     expect(host.querySelector('[data-tab="preview"]')).not.toBeNull();
-    expect(host.querySelector('.md-proj-pane[data-file="index.html"] code')?.textContent).toBe("<h1>Hola</h1>");
+    expect(host.querySelector('.md-proj-pane[data-file="index.html"] code')?.textContent).toBe("<h1>Hola</h1><p>mundo</p>");
   });
 
   it("html + css + js sin nombres forman UN proyecto y los otros bloques desaparecen", () => {
@@ -45,7 +45,7 @@ describe("mdToHtml — tarjetas de proyecto", () => {
   });
 
   it("dos ```html sin css/js NO se fusionan: cada uno es su propia tarjeta", () => {
-    const host = render([fence("html", "<p>uno</p>"), fence("html", "<p>dos</p>")].join("\n\n"));
+    const host = render([fence("html", "<h1>uno</h1><p>a</p>"), fence("html", "<h1>dos</h1><p>b</p>")].join("\n\n"));
     expect(host.querySelectorAll(".md-project")).toHaveLength(2);
   });
 
@@ -62,14 +62,38 @@ describe("mdToHtml — tarjetas de proyecto", () => {
   });
 
   it("escapa el código y los nombres (nada de HTML vivo dentro de la tarjeta)", () => {
-    const host = render(fence("html", "<script>alert(1)</script>"));
+    const host = render(fence("html", "<p>hi</p><script>alert(1)</script>"));
     expect(host.querySelector(".md-project script")).toBeNull();
-    expect(host.querySelector(".md-proj-pane code")?.textContent).toBe("<script>alert(1)</script>");
+    expect(host.querySelector(".md-proj-pane code")?.textContent).toBe("<p>hi</p><script>alert(1)</script>");
   });
 
   it("un HTML que enlaza basalt.css muestra basalt.css como pestaña del proyecto", () => {
     const host = render(fence("html", '<html><head><link rel="stylesheet" href="basalt.css"></head><body>x</body></html>'));
     const names = [...host.querySelectorAll(".md-proj-pane[data-file]")].map((p) => p.getAttribute("data-file"));
     expect(names).toEqual(["index.html", "basalt.css"]);
+  });
+
+  it("las pestañas son accesibles: role=tab con aria-selected, paneles con role=tabpanel", () => {
+    const host = render([fence("html", "<p>x</p>"), fence("css", "p{}")].join("\n\n"));
+    const tabs = [...host.querySelectorAll('[role="tab"]')];
+    expect(tabs.map((t) => t.getAttribute("aria-selected"))).toEqual(["true", "false", "false"]);
+    expect(host.querySelectorAll('[role="tabpanel"]')).toHaveLength(3);
+    expect(host.querySelector('[data-device="desktop"]')!.getAttribute("aria-pressed")).toBe("true");
+  });
+  it("el código en línea se escapa una sola vez (no muestra &lt; ni &#39; literales)", () => {
+    const host = render("Cambia `<style>` y `url('x.jpg')` en el CSS, o `<script>alert(1)</script>`.");
+    const codes = [...host.querySelectorAll("p code")].map((c) => c.textContent);
+    expect(codes).toEqual(["<style>", "url('x.jpg')", "<script>alert(1)</script>"]);
+    expect(host.querySelector("p script")).toBeNull();
+  });
+  it("un fragmento html de una sola etiqueta (ilustración) queda como bloque de código, sin iframe", () => {
+    const host = render(`Cambia la foto:\n\n${fence("html", '<img src="ruta/tu-imagen.jpg" alt="Espresso">')}`);
+    expect(host.querySelector(".md-project")).toBeNull();
+    expect(host.querySelector(".md-codeblock code")?.textContent).toBe('<img src="ruta/tu-imagen.jpg" alt="Espresso">');
+  });
+
+  it("un html con nombre de archivo siempre es proyecto, aunque sea corto", () => {
+    const host = render(fence("html index.html", "<p>x</p>"));
+    expect(host.querySelectorAll(".md-project")).toHaveLength(1);
   });
 });

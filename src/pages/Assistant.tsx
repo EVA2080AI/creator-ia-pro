@@ -352,13 +352,13 @@ export default function AssistantPage() {
                 </div>
               ))}
               {truncatedId && !generating && messages[messages.length - 1]?.id === truncatedId && (
-                <div className="asst-cut">
+                <div className="asst-cut" role="status">
                   <span>La respuesta se cortó por el límite de tiempo del modelo.</span>
                   <button onClick={() => void sendPrompt(CONTINUE_PROMPT, { continueFrom: truncatedId })}>Continuar</button>
                 </div>
               )}
               {error && (
-                <div className="asst-err">
+                <div className="asst-err" role="alert">
                   <span>⚠️ {error}</span>
                   <button onClick={() => void sendPrompt(messages[messages.length - 1]?.text || "")}>Reintentar</button>
                 </div>
