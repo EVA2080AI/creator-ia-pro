@@ -71,6 +71,9 @@ describe("mdToHtml — tarjetas de proyecto", () => {
     const host = render(fence("html", '<html><head><link rel="stylesheet" href="basalt.css"></head><body>x</body></html>'));
     const names = [...host.querySelectorAll(".md-proj-pane[data-file]")].map((p) => p.getAttribute("data-file"));
     expect(names).toEqual(["index.html", "basalt.css"]);
+    const bar = host.querySelector('.md-proj-pane[data-file="basalt.css"] .md-proj-filebar')?.textContent ?? "";
+    expect(bar).toMatch(/gu.rdala junto a tu HTML/);
+    expect(host.querySelector('.md-proj-pane[data-file="index.html"] .md-proj-filebar')?.textContent).not.toMatch(/gu.rdala/);
   });
 
   it("las pestañas son accesibles: role=tab con aria-selected, paneles con role=tabpanel", () => {
@@ -95,5 +98,37 @@ describe("mdToHtml — tarjetas de proyecto", () => {
   it("un html con nombre de archivo siempre es proyecto, aunque sea corto", () => {
     const host = render(fence("html index.html", "<p>x</p>"));
     expect(host.querySelectorAll(".md-project")).toHaveLength(1);
+  });
+});
+
+describe("mdToHtml — listas", () => {
+  it("las viñetas con sangría cuelgan de su ítem numerado y la numeración sigue", () => {
+    const host = render("1. **A**:\n   * uno\n   * dos\n2. **B**:\n   * tres");
+    const ols = host.querySelectorAll("ol");
+    expect(ols).toHaveLength(1);
+    const items = ols[0].querySelectorAll(":scope > li");
+    expect(items).toHaveLength(2);
+    expect(items[0].querySelectorAll(":scope > ul > li")).toHaveLength(2);
+    expect(items[1].querySelectorAll(":scope > ul > li")).toHaveLength(1);
+  });
+
+  it("una línea en blanco entre el ítem y sus viñetas no parte la lista", () => {
+    const host = render("1. A\n\n   * x\n\n2. B\n\n   * y");
+    expect(host.querySelectorAll("ol")).toHaveLength(1);
+    expect(host.querySelectorAll("ol > li")).toHaveLength(2);
+    expect(host.querySelectorAll("ol > li > ul > li")).toHaveLength(2);
+  });
+
+  it("una lista que arranca en 3 conserva el número; dos listas separadas por un párrafo son dos listas", () => {
+    expect(render("3. c\n4. d").querySelector("ol")?.getAttribute("start")).toBe("3");
+    const host = render("- a\n- b\n\nTexto suelto\n\n- c");
+    expect(host.querySelectorAll("ul")).toHaveLength(2);
+    expect(host.querySelectorAll("p")).toHaveLength(1);
+  });
+
+  it("una viñeta sin sangría después de una numerada abre otra lista", () => {
+    const host = render("1. uno\n2. dos\n- viñeta");
+    expect(host.querySelectorAll("ol")).toHaveLength(1);
+    expect(host.querySelectorAll("ul")).toHaveLength(1);
   });
 });

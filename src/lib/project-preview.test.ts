@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPreviewDoc, extractFilename, findMissingRefs, stackblitzFields, uniqueName, withBasaltBase, type ProjectFile } from "./project-preview";
+import { buildPreviewDoc, extractFilename, findMissingRefs, missingRefMessage, stackblitzFields, uniqueName, withBasaltBase, type ProjectFile } from "./project-preview";
 
 describe("extractFilename", () => {
   it("lee el nombre de la línea de la valla (resto tras el lenguaje)", () => {
@@ -107,6 +107,12 @@ describe("findMissingRefs y diagnóstico", () => {
     const doc = buildPreviewDoc([html])!;
     expect(doc).toContain("styles.css está enlazado en el HTML pero no llegó");
     expect(buildPreviewDoc([html, css, js])).not.toContain("no llegó");
+  });
+
+  it("una imagen faltante se explica como marcador a reemplazar, no como respuesta cortada", () => {
+    expect(missingRefMessage("url-de-tu-foto-1.jpg")).toMatch(/reemplázala por tu foto/);
+    expect(missingRefMessage("url-de-tu-foto-1.jpg")).not.toMatch(/cortada/);
+    expect(missingRefMessage("app.js")).toMatch(/¿respuesta cortada\?/);
   });
 });
 

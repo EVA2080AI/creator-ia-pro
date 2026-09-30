@@ -156,7 +156,7 @@
 .asst-md ul, .asst-md ol { margin: 0 0 11px; padding-left: 22px; display: flex; flex-direction: column; gap: 4px; }
 .asst-md ul { list-style: disc; }
 .asst-md ol { list-style: decimal; }
-.asst-md ul ul { list-style: circle; margin: 4px 0 0; }
+.asst-md ul ul, .asst-md li > ul { list-style: circle; margin: 4px 0 0; }
 .asst-md li::marker { color: var(--asst-txt-3); }
 .asst-md a { color: var(--a-accent, #8b5cf6); text-decoration: none; }
 .asst-md a:hover { text-decoration: underline; }

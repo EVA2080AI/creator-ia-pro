@@ -127,6 +127,14 @@ export function findMissingRefs(files: ProjectFile[]): string[] {
   return [...missing];
 }
 
+/** Una imagen que falta casi siempre es un marcador ("url-de-tu-foto.jpg") que el usuario debe reemplazar,
+ *  no una respuesta cortada — el aviso de "no llegó" solo aplica a CSS/JS. */
+export function missingRefMessage(ref: string): string {
+  return /\.(?:jpe?g|png|gif|webp|avif|svg|ico)$/i.test(ref)
+    ? `⚠ ${ref}: la imagen no está en el proyecto — reemplázala por tu foto y guárdala junto al HTML`
+    : `⚠ ${ref} está enlazado en el HTML pero no llegó (¿respuesta cortada?)`;
+}
+
 export const BASALT_CSS_NAME = "basalt.css";
 
 /**
@@ -193,7 +201,7 @@ export function buildPreviewDoc(files: ProjectFile[]): string | null {
   const missing = findMissingRefs(files);
   const warn = missing.length
     ? `<script>${escapeScript(
-        missing.map((m) => `console.warn(${JSON.stringify(`⚠ ${m} está enlazado en el HTML pero no llegó (¿respuesta cortada?)`)})`).join(";"),
+        missing.map((m) => `console.warn(${JSON.stringify(missingRefMessage(m))})`).join(";"),
       )}</script>`
     : "";
   const head = CONSOLE_SHIM + warn;
