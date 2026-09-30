@@ -546,7 +546,7 @@ export default function Index() {
                 <span className="block bg-gradient-to-r from-primary via-violet-500 to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
                   IA Generativa
                 </span>
-                <span className="block text-[clamp(1.5rem,4vw,3rem)] text-zinc-400 font-medium mt-2">
+                <span className="block text-[clamp(1.5rem,4vw,3rem)] text-zinc-500 font-medium mt-2">
                   en segundos, no en días
                 </span>
               </motion.h1>
@@ -1409,16 +1409,16 @@ export default function Index() {
               {/* Trust badges */}
               <motion.div variants={fadeUp} custom={0.5} className="flex items-center justify-center gap-6 mt-12 pt-12 border-t border-white/10">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-zinc-500" />
-                  <span className="text-[12px] text-zinc-500">SSL Seguro</span>
+                  <Shield className="h-4 w-4 text-zinc-400" />
+                  <span className="text-[12px] text-zinc-400">SSL Seguro</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-zinc-500" />
-                  <span className="text-[12px] text-zinc-500">Pagos en COP</span>
+                  <Users className="h-4 w-4 text-zinc-400" />
+                  <span className="text-[12px] text-zinc-400">Pagos en COP</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Star className="h-4 w-4 text-zinc-500" />
-                  <span className="text-[12px] text-zinc-500">AES-256</span>
+                  <Star className="h-4 w-4 text-zinc-400" />
+                  <span className="text-[12px] text-zinc-400">AES-256</span>
                 </div>
               </motion.div>
             </InViewSection>
@@ -1435,7 +1435,7 @@ export default function Index() {
                     </div>
                     <span className="text-white font-bold">Creator IA Pro</span>
                   </div>
-                  <p className="text-zinc-500 text-[13px] max-w-sm mb-4">
+                  <p className="text-zinc-400 text-[13px] max-w-sm mb-4">
                     La plataforma de IA todo-en-uno para crear apps, imágenes y contenido en segundos.
                   </p>
                 </div>
@@ -1450,7 +1450,7 @@ export default function Index() {
                       <li key={item.label}>
                         <button
                           onClick={() => navigate(item.path)}
-                          className="text-zinc-500 text-[12px] hover:text-white transition-colors"
+                          className="text-zinc-400 text-[12px] hover:text-white transition-colors"
                         >
                           {item.label}
                         </button>
@@ -1470,7 +1470,7 @@ export default function Index() {
                       <li key={item.label}>
                         <button
                           onClick={() => navigate(item.path)}
-                          className="text-zinc-500 text-[12px] hover:text-white transition-colors"
+                          className="text-zinc-400 text-[12px] hover:text-white transition-colors"
                         >
                           {item.label}
                         </button>
@@ -1480,7 +1480,7 @@ export default function Index() {
                 </div>
               </div>
               <div className="pt-8 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-[11px] text-zinc-600">© 2026 Creator IA Pro. Todos los derechos reservados.</p>
+                <p className="text-[11px] text-zinc-400">© 2026 Creator IA Pro. Todos los derechos reservados.</p>
                 <div className="flex items-center gap-6">
                   {[
                     { label: "Términos", path: "/terms" },
@@ -1490,7 +1490,7 @@ export default function Index() {
                     <button
                       key={item.label}
                       onClick={() => navigate(item.path)}
-                      className="text-[11px] text-zinc-600 hover:text-zinc-400 transition-colors"
+                      className="text-[11px] text-zinc-400 hover:text-white transition-colors"
                     >
                       {item.label}
                     </button>
