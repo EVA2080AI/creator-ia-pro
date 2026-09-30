@@ -262,7 +262,7 @@ const Security = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 onClick={() => window.location.href = "mailto:security@creator-ia.com"}
-                className="bg-emerald-500 hover:bg-emerald-600 text-white"
+                className="bg-emerald-700 hover:bg-emerald-800 text-white"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
                 Reportar por Email

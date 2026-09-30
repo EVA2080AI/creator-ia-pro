@@ -39,7 +39,7 @@
     --secondary-foreground: 240 10% 6%;
 
     --muted:           240 5% 96%;
-    --muted-foreground: 240 4% 50%;       /* #7D7D85 */
+    --muted-foreground: 240 4% 43%;       /* #696972 — antes 50% (#7D7D85): 4.1:1 sobre blanco, ahora ≥4.8:1 también sobre --muted */
 
     --accent:          240 4.8% 95.9%;
     --accent-foreground: 240 5.9% 10%;
