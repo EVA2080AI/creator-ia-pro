@@ -196,13 +196,15 @@ export default function Tasks() {
           (QA post-migración, 2026-09-29). */}
       <div className="max-w-[1240px] mx-auto px-4 md:px-8 pt-4 md:pt-8 pb-32 md:pb-16 font-sans">
         {/* Encabezado */}
-        <header className="mb-5 md:mb-8 flex items-end justify-between gap-4">
-          <div className="space-y-2 min-w-0">
-            <div className="flex items-center gap-2">
+        {/* El encabezado se comía un tercio de un iPhone 13 antes de la primera tarea:
+            en móvil se va la etiqueta "Productividad" y el título baja a 24px. */}
+        <header className="mb-4 md:mb-8 flex items-end justify-between gap-4">
+          <div className="space-y-1.5 md:space-y-2 min-w-0">
+            <div className="hidden md:flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-primary" />
               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.25em] font-display">Productividad</span>
             </div>
-            <h1 className="text-3xl md:text-5xl font-bold tracking-tight font-display text-foreground leading-none">
+            <h1 className="text-2xl md:text-5xl font-bold tracking-tight font-display text-foreground leading-none">
               Tus <span className="text-primary italic font-medium pr-1">Tareas</span>
             </h1>
             <p className="text-[12px] md:text-[13px] text-muted-foreground font-medium leading-relaxed">

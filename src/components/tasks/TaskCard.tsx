@@ -134,7 +134,12 @@ function MoveButton({ icon: Icon, target, onClick, iconRight = false }: { icon: 
       title={target ? `Mover a ${label}` : undefined}
       onClick={(e) => { e.stopPropagation(); onClick(); }}
       className={cn(
-        "flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 h-10 md:h-8 px-3 rounded-xl border text-[11px] font-bold transition-all",
+        "flex-1 md:flex-none items-center justify-center gap-1.5 h-10 md:h-8 px-3 rounded-xl border text-[11px] font-bold transition-all",
+        // En un teléfono, la columna sin destino ("←" con un guion, deshabilitado) ocupaba
+        // media tarjeta sin hacer nada: allí no se dibuja y el botón que SÍ funciona toma
+        // todo el ancho. En escritorio se conserva para que la fila no baile al pasar el
+        // cursor (medido en un iPhone 13: 5 tarjetas por pantalla en vez de 2).
+        target ? "inline-flex" : "hidden md:inline-flex",
         target
           ? "bg-card border-border text-muted-foreground hover:border-foreground hover:text-foreground active:scale-95"
           : "border-border text-muted-foreground cursor-not-allowed"

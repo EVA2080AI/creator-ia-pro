@@ -44,9 +44,13 @@
   display: flex;
   flex-direction: column;
   padding: 12px;
-  overflow-y: auto;
+  overflow: hidden;
   transition: margin 0.28s cubic-bezier(0.2, 0, 0, 1);
 }
+/* Antes scrolleaba el cajón entero: en un teléfono, "Guía rápida", el tema y la
+   cuenta quedaban debajo del borde y nada indicaba que hubiera más. Ahora scrollea
+   solo el cuerpo (chat, expertos, conversaciones, plataforma) y el pie no se mueve. */
+.asst-side-scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; }
 .asst-sidebar.hidden { margin-left: -264px; }
 .asst-side-top { display: flex; align-items: center; gap: 8px; padding: 4px 4px 14px; }
 /* Logo al inicio (izquierda); el botón de icono (volver / métricas) se ancla

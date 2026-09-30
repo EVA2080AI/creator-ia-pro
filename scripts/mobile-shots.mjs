@@ -30,6 +30,29 @@ await ctx.addInitScript(([guide, dark]) => {
   } catch { /* sin storage */ }
 }, [flag("--guide"), flag("--dark")]);
 
+const DEMO_EXPERTS = ["marketing", "legal", "financiero", "talento", "ventas"].map((slug, i) => ({
+  id: `a${i}`, slug, name: slug[0].toUpperCase() + slug.slice(1), tagline: "Experto de prueba",
+  visibility: "system", isActive: true, brand: {}, welcome: { cards: [] }, persona: {}, capabilities: {},
+}));
+
+const DEMO_CONVERSATIONS = [
+  { id: "c1", title: "Analiza este contrato de prestación de servicios", updatedAt: Date.now(), messages: [] },
+  { id: "c2", title: "Plan de mercadeo para la marca", updatedAt: Date.now() - 1e6, messages: [] },
+];
+
+const day = (n) => new Date(Date.now() + n * 864e5).toISOString().slice(0, 10); // columna date: "YYYY-MM-DD"
+const DEMO_TASKS = [
+  ["Revisar el contrato de ACME antes del viernes", "todo", "high", day(2)],
+  ["Preparar la parrilla de contenido de octubre", "todo", "medium", day(6)],
+  ["Llamar al proveedor de pasarela de pagos", "in_progress", "high", day(-1)],
+  ["Ajustar el copy de la landing", "in_progress", "low", null],
+  ["Cerrar la facturación de septiembre", "done", "medium", day(-4)],
+].map(([title, status, priority, dueDate], i) => ({
+  id: `t${i}`, userId: "u-demo", title, description: null, status, priority, dueDate,
+  position: i, notifyEmail: false, reminderSentAt: null, completedAt: null,
+  createdAt: now, updatedAt: now,
+}));
+
 const json = (route, body) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
 await ctx.route("**/api/**", (r) => {
   const u = new URL(r.request().url()).pathname;
@@ -37,7 +60,11 @@ await ctx.route("**/api/**", (r) => {
   if (u === "/api/profile") return json(r, { ok: true, profile });
   if (u.startsWith("/api/basalt/conversations")) return json(r, { ok: true, conversations: [] });
   if (u.startsWith("/api/basalt/memory")) return json(r, { ok: true, facts: [] });
-  if (u.startsWith("/api/assistants")) return json(r, { ok: true, assistants: [] });
+  if (u.startsWith("/api/assistants")) return json(r, { ok: true, assistants: DEMO_EXPERTS });
+  // Con las respuestas vacías, /tareas y /proyectos salían en su estado "no hay nada":
+  // justo el que NO sirve para ver si algo se desborda en un teléfono.
+  if (u.startsWith("/api/tasks")) return json(r, { ok: true, tasks: DEMO_TASKS });
+  if (u.startsWith("/api/basalt/conversations")) return json(r, { ok: true, conversations: DEMO_CONVERSATIONS });
   return json(r, { ok: true });
 });
 

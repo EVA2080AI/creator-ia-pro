@@ -1,7 +1,7 @@
 import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Plus, Scale, BarChart3, ListTodo, FolderOpen, User, ShieldCheck,
+  Plus, Scale, ListTodo, FolderOpen, User, ShieldCheck,
   Sun, Moon, LogOut, Bug, HelpCircle, Settings, Activity, LifeBuoy, CreditCard,
   LayoutTemplate,
 } from "lucide-react";
@@ -111,7 +111,7 @@ export function BasaltShellSidebar({
     go("/studio-flow");
   };
 
-  const platform = (path: string, label: string, Icon: typeof BarChart3) => {
+  const platform = (path: string, label: string, Icon: typeof ListTodo) => {
     const active = activePath === path;
     return (
       <button
@@ -128,6 +128,7 @@ export function BasaltShellSidebar({
   return (
     <>
       <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Basalt">
+        <div className="asst-side-scroll">
         <div className="asst-side-top">
           {/* Basalt YA es el inicio — sin flecha de "volver", no hay ningún
               lado del que "volver" (pedido directo del usuario, viendo la
@@ -142,12 +143,14 @@ export function BasaltShellSidebar({
         <button className="asst-side-link" onClick={() => go("/a/arena")}>
           <Scale className="w-4 h-4" /> Arena IA
         </button>
-        <button className="asst-side-link" onClick={handleCanvasClick}>
-          <LayoutTemplate className="w-4 h-4" /> Canvas IA
-          {!CANVAS_ENABLED && !isAdmin && (
-            <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 700, color: "var(--asst-txt-3)" }}>Pronto</span>
-          )}
-        </button>
+        {/* Mientras Canvas IA no esté listo, para un usuario normal era un ítem de menú
+            que solo abría un aviso de "Próximamente": ocupa lugar y no lleva a ningún
+            lado (auditoría del cajón, 2026-09-30). Los admins sí lo ven para probarlo. */}
+        {(CANVAS_ENABLED || isAdmin) && (
+          <button className="asst-side-link" onClick={handleCanvasClick}>
+            <LayoutTemplate className="w-4 h-4" /> Canvas IA
+          </button>
+        )}
 
         {beforeExperts}
 
@@ -155,12 +158,16 @@ export function BasaltShellSidebar({
 
         {extraNav}
 
+        {/* "Panel de métricas" y "Perfil" salieron de acá: eran los MISMOS destinos que
+            "Uso" y "Configuración" del menú de cuenta, un poco más abajo. El cajón
+            necesitaba 801px de alto en una pantalla de 664 (medido en un iPhone 13) y
+            el pie —guía, tema y cuenta— quedaba fuera de la vista. */}
         <div className="asst-switcher-label">Plataforma</div>
-        {platform("/dashboard", "Panel de métricas", BarChart3)}
         {platform("/tasks", "Tareas", ListTodo)}
         {platform("/spaces", "Proyectos", FolderOpen)}
-        {platform("/profile", "Perfil", User)}
         {isAdmin && platform("/admin", "Panel Admin", ShieldCheck)}
+
+        </div>
 
         <div className="asst-side-bottom">
           <button className="asst-side-link" onClick={() => setShowGuide(true)}>
