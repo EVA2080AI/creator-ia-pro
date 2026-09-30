@@ -537,7 +537,10 @@
    mezclada con blanco) hacia el color de texto: mantiene la identidad y se lee.
    La auditoría de contraste no lo detecta: salta el texto con degradado. */
 .asst-app[data-asst-theme="dark"] .asst-hello {
-  background: linear-gradient(92deg, var(--asst-accent-text), var(--asst-txt) 88%);
+  /* background-image, NO el atajo `background`: el atajo reinicia background-clip y el
+     título se pintaba como un rectángulo de degradado con el texto invisible (visto en
+     producción antes de este arreglo). */
+  background-image: linear-gradient(92deg, var(--asst-accent-text), var(--asst-txt) 88%);
 }
 
 /* Cursor de terminal al final del saludo. */
