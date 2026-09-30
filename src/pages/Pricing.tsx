@@ -220,13 +220,13 @@ function SectionHeader({ badge, title, subtitle }: { badge: string; title: strin
       viewport={{ once: true }}
       className="text-center px-6 mb-16"
     >
-      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-50 border border-zinc-200 text-[10px] font-black uppercase tracking-widest text-primary mb-4">
+      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-50 border border-zinc-200 text-[11px] font-black uppercase tracking-widest text-primary mb-4">
         {badge}
       </span>
       <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase font-display mb-4">
         {title}
       </h2>
-      <p className="max-w-xl mx-auto text-zinc-400 text-[15px] leading-relaxed">
+      <p className="max-w-xl mx-auto text-zinc-500 text-[15px] leading-relaxed">
         {subtitle}
       </p>
     </motion.div>
@@ -304,7 +304,7 @@ export default function Pricing() {
                 Crea más,<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-b from-primary to-purple-300 italic">paga menos.</span>
               </h1>
-              <p className="max-w-xl mx-auto text-lg text-zinc-400 leading-relaxed font-medium mb-12">
+              <p className="max-w-xl mx-auto text-lg text-zinc-500 leading-relaxed font-medium mb-12">
                 Crea contenido de calidad profesional con la IA más avanzada. Paga sólo lo que usas, cuando lo usas, en pesos colombianos con{" "}
                 <span className="text-zinc-900 border-b-2 border-primary/20">Bold.co</span>.
               </p>
@@ -313,7 +313,7 @@ export default function Pricing() {
               <div className="max-w-md mx-auto p-4 rounded-[1.5rem] bg-white border border-zinc-100 shadow-xl mb-12">
                 <div className="flex justify-between items-end mb-2">
                   <div className="text-left">
-                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest">Ejemplo de Uso</p>
+                    <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">Ejemplo de Uso</p>
                     <p className="text-[12px] font-bold text-zinc-900">Créditos del Proyecto</p>
                   </div>
                   <div className="text-right">
@@ -329,8 +329,8 @@ export default function Pricing() {
 
           {/* Annual badge — coming soon */}
           <div className="flex items-center justify-center gap-4 mb-16">
-            <span className="text-xs font-black uppercase tracking-widest text-zinc-400">Facturación mensual</span>
-            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[10px] font-bold uppercase tracking-wide">Anual con descuento — Próximamente</span>
+            <span className="text-xs font-black uppercase tracking-widest text-zinc-500">Facturación mensual</span>
+            <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 text-[11px] font-bold uppercase tracking-wide">Anual con descuento — Próximamente</span>
           </div>
 
           <section className="px-6 mb-32">
@@ -362,7 +362,7 @@ export default function Pricing() {
                       style={{ background: `radial-gradient(circle at top right, ${'glow' in plan ? plan.glow : 'rgba(255,255,255,0.05)'}, transparent 70%)` }} />
 
                     {plan.badge && (
-                      <div className="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-primary text-white text-[9px] font-black uppercase tracking-widest">
+                      <div className="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-primary text-white text-[11px] font-black uppercase tracking-widest">
                         {plan.badge}
                       </div>
                     )}
@@ -372,22 +372,24 @@ export default function Pricing() {
                         <Icon className="h-5 w-5" style={{ color: plan.color }} />
                       </div>
                       <h3 className="text-xl font-black uppercase font-display mb-1">{plan.name}</h3>
-                      <p className="text-zinc-400 text-xs leading-relaxed">{plan.description}</p>
+                      <p className="text-zinc-500 text-xs leading-relaxed">{plan.description}</p>
                     </div>
 
                     <div className="py-6 relative">
                       {isContact ? (
                         <div>
                           <span className="text-3xl font-black font-display tracking-tighter">A medida</span>
-                          <p className="text-xs text-zinc-400 mt-1">Precio según tu volumen</p>
+                          <p className="text-xs text-zinc-500 mt-1">Precio según tu volumen</p>
                         </div>
                       ) : (
                         <>
-                          <div className="flex items-baseline gap-1">
-                            <span className="text-3xl font-black font-display tracking-tighter">
+                          {/* Con 5 columnas (xl) la tarjeta mide ~140px de contenido: "$1.499.900 COP/MES" en una
+                              sola línea se salía de la tarjeta. Ahí el período va debajo del precio, igual en todas. */}
+                          <div className="flex flex-wrap items-baseline gap-x-1.5 xl:flex-col xl:items-start xl:gap-0">
+                            <span className={`${displayPrice >= 1_000_000 ? "text-3xl xl:text-2xl" : "text-3xl"} font-black font-display tracking-tighter whitespace-nowrap`}>
                               ${displayPrice.toLocaleString('es-CO')}
                             </span>
-                            <span className="text-zinc-300 text-xs font-bold uppercase tracking-widest">COP/mes</span>
+                            <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest whitespace-nowrap">COP/mes</span>
                           </div>
                           <div className="mt-2 flex items-center gap-2 py-1 px-2.5 rounded-lg bg-zinc-100 border border-zinc-200 w-fit">
                             <Coins className="h-3 w-3 text-primary" />
@@ -401,7 +403,7 @@ export default function Pricing() {
                       {plan.features.map(f => (
                         <li key={f.label} className="flex gap-2.5 items-start">
                           <Check className={cn("h-3.5 w-3.5 shrink-0 mt-0.5", f.highlight ? "text-primary" : "text-zinc-300")} />
-                          <span className={cn("text-xs leading-relaxed", f.highlight ? "text-zinc-700 font-semibold" : "text-zinc-400")}>
+                          <span className={cn("text-xs leading-relaxed", f.highlight ? "text-zinc-700 font-semibold" : "text-zinc-500")}>
                             {f.label}
                           </span>
                         </li>
@@ -448,14 +450,14 @@ export default function Pricing() {
             
             <div className="max-w-4xl mx-auto rounded-[3rem] bg-zinc-50 border border-zinc-200 p-4 sm:p-12 overflow-hidden relative">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
-                <div className="hidden sm:block text-xs font-black uppercase text-zinc-300 tracking-widest mt-4">Característica</div>
+                <div className="hidden sm:block text-xs font-black uppercase text-zinc-500 tracking-widest mt-4">Característica</div>
                 <div className="text-center">
-                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] font-black text-primary uppercase">
+                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-black text-primary uppercase">
                     Creator IA Pro
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-[10px] font-black text-zinc-400 uppercase">
+                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-[11px] font-black text-zinc-500 uppercase">
                     Modelos Tradicionales
                   </div>
                 </div>
@@ -464,7 +466,7 @@ export default function Pricing() {
                   <React.Fragment key={row.feature}>
                     <div className="hidden sm:block py-4 border-t border-zinc-200 text-xs font-bold text-zinc-500">{row.feature}</div>
                     <div className="py-4 border-t border-zinc-200 text-center text-xs font-black text-zinc-900">{row.creator}</div>
-                    <div className="py-4 border-t border-zinc-200 text-center text-xs font-medium text-zinc-400">{row.others}</div>
+                    <div className="py-4 border-t border-zinc-200 text-center text-xs font-medium text-zinc-500">{row.others}</div>
                   </React.Fragment>
                 ))}
               </div>
@@ -481,7 +483,7 @@ export default function Pricing() {
               
               <div className="mb-12">
                 <div className="flex justify-between items-center mb-6">
-                  <span className="text-xs font-black uppercase text-zinc-400 tracking-widest">Uso estimado</span>
+                  <span className="text-xs font-black uppercase text-zinc-500 tracking-widest">Uso estimado</span>
                   <span className="text-2xl font-black text-primary font-display">{estimateSlider} créditos</span>
                 </div>
                 <input 
@@ -493,7 +495,7 @@ export default function Pricing() {
                   onChange={(e) => setEstimateSlider(parseInt(e.target.value))}
                   className="w-full h-1.5 bg-zinc-100 rounded-full appearance-none cursor-pointer accent-primary"
                 />
-                <div className="flex justify-between mt-4 text-[10px] font-bold text-zinc-300 uppercase tracking-widest">
+                <div className="flex justify-between mt-4 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
                   <span>Uso casual</span>
                   <span>Uso profesional</span>
                 </div>
@@ -503,17 +505,17 @@ export default function Pricing() {
                 <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200">
                   <Globe className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
                   <div className="text-lg font-black text-zinc-700">{(estimateSlider / 10).toFixed(0)}</div>
-                  <div className="text-[9px] font-black uppercase text-zinc-400">Posts de texto</div>
+                  <div className="text-[11px] font-black uppercase text-zinc-500">Posts de texto</div>
                 </div>
                 <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200">
                   <Cpu className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
                   <div className="text-lg font-black text-zinc-700">{(estimateSlider / 100).toFixed(0)}</div>
-                  <div className="text-[9px] font-black uppercase text-zinc-400">Imágenes generadas</div>
+                  <div className="text-[11px] font-black uppercase text-zinc-500">Imágenes generadas</div>
                 </div>
                 <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200 col-span-2 md:col-span-1">
                   <Code2 className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
                   <div className="text-lg font-black text-zinc-700">{(estimateSlider / 50).toFixed(0)}</div>
-                  <div className="text-[9px] font-black uppercase text-zinc-400">Guiones de video</div>
+                  <div className="text-[11px] font-black uppercase text-zinc-500">Guiones de video</div>
                 </div>
               </div>
 
@@ -551,19 +553,19 @@ export default function Pricing() {
                           <Coins className="h-5 w-5 text-primary" />
                         </div>
                         {pack.popular && (
-                          <span className="px-2 py-0.5 rounded-full bg-primary text-white text-[9px] font-black uppercase tracking-widest">Popular</span>
+                          <span className="px-2 py-0.5 rounded-full bg-primary text-white text-[11px] font-black uppercase tracking-widest">Popular</span>
                         )}
                       </div>
                       <div>
                         <div className="text-4xl font-black font-display mb-1">{pack.credits_amount.toLocaleString()}</div>
-                        <div className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Créditos</div>
+                        <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Créditos</div>
                       </div>
                       <div className="text-2xl font-black text-zinc-800 font-display">{pack.price}</div>
                       <button
                         onClick={() => handleBoldAction(pack.id)}
                         disabled={isLoadingThis}
                         className={cn(
-                          "w-full py-4 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all",
+                          "w-full py-4 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all",
                           pack.popular ? "bg-primary text-white hover:bg-primary/90" : "bg-zinc-100 text-zinc-900 border border-zinc-200 hover:bg-zinc-200"
                         )}
                       >
@@ -601,7 +603,7 @@ export default function Pricing() {
                     <img src={t.avatar} className="w-10 h-10 rounded-2xl border border-zinc-200" alt={t.name} />
                     <div>
                       <div className="text-xs font-black uppercase tracking-widest text-zinc-900">{t.name}</div>
-                      <div className="text-[10px] font-bold text-zinc-400 uppercase">{t.role}</div>
+                      <div className="text-[11px] font-bold text-zinc-500 uppercase">{t.role}</div>
                     </div>
                   </div>
                 </motion.div>
@@ -641,14 +643,14 @@ export default function Pricing() {
             ].map(t => (
               <div key={t.label} className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-200 flex flex-col items-center gap-4 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all cursor-default group">
                 <t.icon className="h-6 w-6 group-hover:text-primary transition-colors" />
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-center">{t.label}</span>
+                <span className="text-[11px] font-black uppercase tracking-[0.2em] text-center">{t.label}</span>
               </div>
             ))}
           </section>
 
           {/* Terms Notice */}
           <section className="px-6 max-w-3xl mx-auto mb-20 text-center">
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-zinc-500">
               Al adquirir cualquier plan, aceptas nuestros{" "}
               <a href="/terms" className="text-primary hover:underline">Términos de Servicio</a>{" "}
               y{" "}

@@ -1,5 +1,5 @@
 // Benchmark de calidad del CSS que genera Basalt. Uso:
-//   BENCH_LABEL=<etiqueta> [BENCH_MODELS=modelo,modelo] npx vite-node scripts/css-benchmark.ts
+//   BENCH_LABEL=<etiqueta> [BENCH_MODELS=modelo,modelo] [BENCH_PROMPTS=id,id] npx vite-node scripts/css-benchmark.ts
 //   BENCH_RESCORE=<etiqueta> npx vite-node scripts/css-benchmark.ts   (re-puntúa una corrida guardada, sin llamar al modelo)
 // Llama a OpenRouter directo (OPENROUTER_API_KEY de .env.local) con el
 // SYSTEM_PROMPT REAL de src/lib/basalt.ts y 5 pedidos fijos, arma el proyecto
@@ -75,7 +75,9 @@ if (saved) {
   }
 }
 
-const jobs = saved ? [] : models.flatMap((model) => Object.entries(PROMPTS).map(([id, prompt]) => ({ model, id, prompt })));
+// BENCH_PROMPTS=landing,dashboard limita los pedidos (por defecto corren los 5).
+const only = process.env.BENCH_PROMPTS?.split(",");
+const jobs = saved ? [] : models.flatMap((model) => Object.entries(PROMPTS).filter(([id]) => !only || only.includes(id)).map(([id, prompt]) => ({ model, id, prompt })));
 const results: Row[] = saved ?? (await Promise.all(
   jobs.map(async (j) => {
     try {
