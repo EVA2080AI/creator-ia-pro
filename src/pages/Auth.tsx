@@ -32,11 +32,26 @@ const Auth = () => {
   const [displayName, setDisplayName] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  // Qué botones sociales existen de verdad en este despliegue: si el proveedor no
+  // tiene credenciales, better-auth responde "Provider not found" y el usuario se
+  // come un error justo al registrarse (pasaba con los tres, medido en producción).
+  const [socialProviders, setSocialProviders] = useState<string[]>([]);
+
   const navigate = useNavigate();
   const { data: session } = useSession();
 
   // Punto de entrada tras iniciar sesión: el chat de Basalt (como Gemini/ChatGPT),
   // no el dashboard de métricas — eso queda como vista secundaria (⌘⇧D).
+
+  useEffect(() => {
+    let vivo = true;
+    void fetch("/api/auth-providers")
+      .then((r) => r.json())
+      .then((j) => { if (vivo && j?.ok) setSocialProviders(j.providers ?? []); })
+      .catch(() => { /* sin red: se queda sin botones sociales, el correo sigue */ });
+    return () => { vivo = false; };
+  }, []);
+
   useEffect(() => {
     if (session?.user) navigate("/a/basalt", { replace: true });
   }, [session, navigate]);
@@ -348,8 +363,8 @@ const Auth = () => {
               </Button>
             </form>
 
-            {/* Social Login */}
-            {mode !== "forgot" && (
+            {/* Social Login — solo lo que está configurado (ver /api/auth-providers) */}
+            {mode !== "forgot" && socialProviders.length > 0 && (
               <div className="mt-8 space-y-5 relative z-10">
                 <div className="relative flex items-center justify-center">
                   <div className="absolute inset-0 flex items-center">
@@ -360,8 +375,8 @@ const Auth = () => {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3">
-                  <Button
+                <div className={`grid gap-3 ${socialProviders.length === 1 ? "grid-cols-1" : socialProviders.length === 2 ? "grid-cols-2" : "grid-cols-3"}`}>
+                  {socialProviders.includes("google") && <Button
                     type="button"
                     variant="outline"
                     className="h-11 gap-3 border-border bg-muted/50 hover:bg-muted hover:border-border rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground transition-all active:scale-[0.98]"
@@ -380,9 +395,9 @@ const Auth = () => {
                       <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="currentColor" />
                     </svg>
                     <span className="hidden sm:inline">Google</span>
-                  </Button>
+                  </Button>}
 
-                  <Button
+                  {socialProviders.includes("apple") && <Button
                     type="button"
                     variant="outline"
                     className="h-11 gap-3 border-border bg-muted/50 hover:bg-muted hover:border-border rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground transition-all active:scale-[0.98]"
@@ -398,9 +413,9 @@ const Auth = () => {
                       <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
                     </svg>
                     <span className="hidden sm:inline">Apple</span>
-                  </Button>
+                  </Button>}
 
-                  <Button
+                  {socialProviders.includes("github") && <Button
                     type="button"
                     variant="outline"
                     className="h-11 gap-3 border-border bg-muted/50 hover:bg-muted hover:border-border rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground transition-all active:scale-[0.98]"
@@ -416,7 +431,7 @@ const Auth = () => {
                       <path d="M12 .5C5.73.5.5 5.73.5 12c0 5.09 3.29 9.4 7.86 10.93.57.1.79-.25.79-.55 0-.27-.01-1.17-.02-2.12-3.2.7-3.88-1.36-3.88-1.36-.52-1.34-1.28-1.7-1.28-1.7-1.04-.72.08-.7.08-.7 1.15.08 1.76 1.19 1.76 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.77.11 3.06.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.27 5.69.42.36.78 1.07.78 2.17 0 1.56-.01 2.82-.01 3.2 0 .3.21.66.8.55A11.5 11.5 0 0 0 23.5 12c0-6.27-5.23-11.5-11.5-11.5Z" />
                     </svg>
                     <span className="hidden sm:inline">GitHub</span>
-                  </Button>
+                  </Button>}
                 </div>
               </div>
             )}
