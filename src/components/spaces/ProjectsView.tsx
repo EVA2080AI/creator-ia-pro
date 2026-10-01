@@ -217,8 +217,8 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
     <>
 
 
-      <div className="flex flex-col md:flex-row items-center gap-4 mb-10 p-1.5 bg-muted/50 backdrop-blur-xl border border-border/60 rounded-[2rem] shadow-inner animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
-        <div className="relative flex-1 group">
+      <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mb-4 md:mb-10 p-1.5 bg-muted/50 backdrop-blur-xl border border-border/60 rounded-[2rem] shadow-inner animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
+        <div className="relative w-full md:flex-1 group">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <input
             type="text"
@@ -229,9 +229,9 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
           />
         </div>
         
-        <div className="flex items-center gap-2 pr-2">
+        <div className="flex w-full md:w-auto items-center gap-2 md:pr-2">
           <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
-            <SelectTrigger className="w-[160px] h-12 bg-card border-border rounded-[1.2rem] text-[11px] font-black uppercase tracking-widest text-muted-foreground shadow-sm transition-all focus:ring-4 focus:ring-primary/5">
+            <SelectTrigger className="flex-1 md:w-[160px] md:flex-none h-11 md:h-12 bg-card border-border rounded-[1.2rem] text-[11px] font-black uppercase tracking-widest text-muted-foreground shadow-sm transition-all focus:ring-4 focus:ring-primary/5">
               <SelectValue placeholder="Ordenar" />
             </SelectTrigger>
             <SelectContent className="rounded-2xl border-border shadow-2xl">
@@ -264,7 +264,9 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
         </div>
       </div>
 
-      <div className="flex items-center gap-4 mb-6">
+      {/* "Seleccionar todo" es una acción secundaria y estaba por ENCIMA de los
+          proyectos, sumando otra fila antes del contenido en un teléfono. */}
+      <div className="flex items-center gap-4 mb-3 md:mb-6">
         <button 
           onClick={toggleSelectAll}
           className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-card hover:bg-muted text-[11px] font-bold text-foreground transition-all font-display shadow-sm"

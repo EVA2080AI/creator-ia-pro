@@ -43,15 +43,15 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="lg:col-span-2 p-8 bg-card/70 backdrop-blur-xl border border-border/60 rounded-[2.5rem] shadow-sm relative overflow-hidden group"
+        className="lg:col-span-2 p-5 md:p-8 bg-card/70 backdrop-blur-xl border border-border/60 rounded-[2.5rem] shadow-sm relative overflow-hidden group"
       >
         {/* Ambient glow in corner */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -z-10 group-hover:bg-primary/10 transition-colors duration-700" />
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-5 md:mb-8">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-[1.25rem] bg-muted border border-border/80 text-muted-foreground shadow-sm">
+            <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-[1.25rem] bg-muted border border-border/80 text-muted-foreground shadow-sm">
                <Activity className="h-5 w-5" />
             </div>
             <div>
@@ -62,7 +62,9 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
         </div>
 
         {/* Chart */}
-        <div className="h-[240px] w-full mt-4">
+        {/* 180px en móvil: con 240 la gráfica sola se comía el resto de la pantalla
+            después de las cuatro tarjetas de métricas. */}
+        <div className="h-[180px] md:h-[240px] w-full mt-2 md:mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={usageData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
@@ -119,14 +121,14 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-        className="p-8 bg-stone-950 rounded-[2.5rem] text-white shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col group border border-stone-800/80"
+        className="p-5 md:p-8 bg-stone-950 rounded-[2.5rem] text-white shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col group border border-stone-800/80"
       >
         {/* Subtle dynamic glow */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-primary/10 to-transparent blur-[100px] -z-10 group-hover:from-primary/20 transition-all duration-1000 rotate-12" />
         
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8 relative z-10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-[1.25rem] bg-stone-900/80 border border-stone-800 text-primary shadow-inner">
+        <div className="flex items-center gap-4 mb-5 md:mb-8 relative z-10">
+          <div className="flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-[1.25rem] bg-stone-900/80 border border-stone-800 text-primary shadow-inner">
              <Sparkles className="h-5 w-5" />
           </div>
           <div>

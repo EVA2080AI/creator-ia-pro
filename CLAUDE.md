@@ -52,6 +52,18 @@ Ver `.design/tokens/index.css` para variables CSS completas.
 --font-size-base: 0.9375rem; /* 15px */
 ```
 
+**Modo oscuro "terminal" (2026-09-30).** El oscuro dejó de ser el gris neutro de
+Gemini: negro con tinte frío (hue 205, `#070c0f`), trama de puntos, verde fósforo
+(`--asst-term` `#5be9a0`) solo para señales —cursor del compositor, foco, código en
+línea, el cursor que parpadea al final del saludo— y monoespaciada **solo en los
+metadatos**, nunca en el contenido de una respuesta. El morado de marca sigue siendo
+el color de las acciones. La capa vive al final de `src/pages/Assistant.css`, acotada
+a `[data-asst-theme="dark"]`: el modo claro no cambia ni una regla.
+
+**Raíz tipográfica (2026-10-01).** `html` pasó de 14px a 15px: Tailwind mide todo en
+rem, así que con 14 la app se renderizaba un 12,5 % más chica que su propio sistema
+(`text-sm` a 12,25px). La escala no cambió, solo dejó de estar comprimida.
+
 Modo oscuro: implementado a nivel de app desde 2026-09-29 (`src/hooks/useTheme.tsx`, toggle `.dark` en `<html>`, respeta `prefers-color-scheme`). Toggle en Perfil y en el sidebar de Basalt. Ver la nota completa al tope de `.design/tokens/index.css`.
 
 ## Tickets de mejora (flujo con Claude)
@@ -66,6 +78,27 @@ Reglas para Claude al leerlos:
   (p. ej. Angie); los de `usuario` son sugerencias: mostrarlas al dueño antes de tocar código.
 - Commits que referencian el id corto del ticket (`[abcdef12]`) y, al terminar, pedir/indicar que se pase a "resuelto".
 - Claude no lee la base de producción por su cuenta (el sistema de permisos lo bloquea): los tickets llegan por el botón de copiar o pegados a mano.
+
+## Cómo viajan los datos (2026-10-01)
+
+Tres reglas que vienen de medir en producción, no de teoría:
+
+1. **Las listas no traen contenido.** `GET /api/basalt/conversations` devuelve solo
+   id, título, fecha y anclado — los mensajes se piden al abrir la conversación
+   (`/api/basalt/conversations/[id]`). `GET /api/assets` devuelve metadatos y la URL
+   de `/api/assets/[id]/raw`, nunca el data URI. Antes eran 92 KB y 6 MB por carga.
+2. **Guardar una conversación sube el hilo completo**, así que nada debe escribir en
+   una conversación cuyos mensajes aún no llegaron. El servidor lo impide con
+   `messages.min(1)` y el cliente con el guard de `threadStatus`.
+3. **El perfil se pide con react-query** (`useProfile`), una sola vez por carga para
+   los ocho componentes que lo usan.
+
+## Cómo se mide el móvil
+
+`node scripts/mobile-shots.mjs <ruta> <salida.png>` abre la app en un Chromium con
+métricas de iPhone y la API simulada (`--dark`, `--anon` sin sesión, `--guide` con el
+modal de bienvenida, `--full`, `--device`). Es la única forma fiable: cambiar el
+tamaño de la ventana del navegador no cambia el viewport de captura.
 
 ## Stack Técnico
 

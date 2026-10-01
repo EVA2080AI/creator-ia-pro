@@ -3,6 +3,13 @@
  * Philosophy: Dieter Rams + Swiss
  * Generado: 2026-04-18 · Reconciliado contra el CSS real: 2026-09-09
  *
+ * DESACTUALIZADO desde 2026-09-30: el modo oscuro de la app pasó al tema
+ * "terminal" (hue 205 en vez de 240, fondo #070c0f, acento --asst-term #5be9a0)
+ * y la raíz tipográfica subió de 14px a 15px. Los valores de abajo siguen
+ * describiendo el modo claro, que no cambió. Para el oscuro, la fuente de
+ * verdad es el bloque `.dark` de `src/index.css` y la capa del final de
+ * `src/pages/Assistant.css`.
+ *
  * IMPORTANTE: este archivo nunca se importa en `src/` — es documentación,
  * no CSS que corre en producción. La fuente de verdad viva es
  * `src/index.css`. Las secciones de color primitivo y tokens semánticos de
