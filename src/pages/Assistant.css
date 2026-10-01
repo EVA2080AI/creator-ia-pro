@@ -619,3 +619,33 @@
   html[data-asst-sidebar="collapsed"] .asst-expand-btn { display: grid; }
   html[data-asst-sidebar="collapsed"] .asst-topbar { padding-left: 52px; }
 }
+
+/* Anclar: los dos botones de la fila aparecen al pasar el cursor (en táctil siempre,
+   porque ahí no hay hover); el alfiler de una conversación anclada se queda fijo. */
+.asst-pin-btn, .asst-row-btn { opacity: 0; transition: opacity 0.15s, background 0.15s, color 0.15s; }
+.asst-conv-row:hover :is(.asst-pin-btn, .asst-row-btn),
+.asst-conv-row:focus-within :is(.asst-pin-btn, .asst-row-btn),
+.asst-pin-btn.pinned { opacity: 1; }
+.asst-pin-btn.pinned { color: var(--asst-accent-text); }
+@media (hover: none) { .asst-pin-btn, .asst-row-btn { opacity: 1; } }
+
+/* ══ Legibilidad de las respuestas ═══════════════════════════════════════════
+   El sistema de diseño no cambia (mismos tokens, misma escala): lo que cambia es
+   cómo se lee un texto largo —un análisis de contrato son siete secciones—.
+   - 15 → 15,5px con interlineado 1,68: el salto de línea deja de ser el cuello de
+     botella al leer párrafos seguidos.
+   - Medida: a 15,5px el hilo de 780px da ~82 caracteres por línea, más de los
+     ~75 que el ojo sigue sin perder el renglón. Se limita SOLO en el texto
+     corrido; las tablas, el código y las imágenes siguen usando todo el ancho,
+     que es justo lo que ellos necesitan.
+   - Más aire entre párrafos, ítems y secciones: con un interlineado mayor, la
+     separación anterior ya no se distinguía del propio renglón. */
+.asst-md { font-size: 15.5px; line-height: 1.68; }
+.asst-md > :is(p, ul, ol, h3, h4, blockquote) { max-width: 60ch; }
+.asst-md p { margin-bottom: 13px; }
+.asst-md ul, .asst-md ol { margin-bottom: 13px; gap: 6px; }
+.asst-md h3 { margin-top: 22px; }
+.asst-md h4 { margin-top: 16px; }
+.asst-msg.user .asst-bubble { font-size: 15.5px; line-height: 1.6; }
+/* 10,5px era el único texto de la interfaz por debajo del mínimo cómodo. */
+.asst-group-label { font-size: 11px; }

@@ -1,0 +1,1 @@
+ALTER TABLE "basalt_conversation" ADD COLUMN "pinned" boolean DEFAULT false NOT NULL;

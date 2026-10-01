@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Loader2, MessageSquare, Search, Trash2, X } from "lucide-react";
+import { Loader2, MessageSquare, Pin, PinOff, Search, Trash2, X } from "lucide-react";
 import { filterConversations, groupConversationsByDate, type StoredConversation } from "@/lib/basalt";
 
 // Historial del menú lateral. Estaba copiado tal cual en Basalt.tsx y en
@@ -15,9 +15,10 @@ export interface ConversationListProps {
   activeId: string;
   onOpen: (c: StoredConversation) => void;
   onDelete: (id: string) => void;
+  onTogglePin: (c: StoredConversation) => void;
 }
 
-export function ConversationList({ conversations, loading, activeId, onOpen, onDelete }: ConversationListProps) {
+export function ConversationList({ conversations, loading, activeId, onOpen, onDelete, onTogglePin }: ConversationListProps) {
   const [query, setQuery] = useState("");
   const searching = query.trim().length > 0;
 
@@ -72,7 +73,16 @@ export function ConversationList({ conversations, loading, activeId, onOpen, onD
                     <MessageSquare className="w-3.5 h-3.5 shrink-0" aria-hidden />
                     <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
                   </button>
-                  <button className="asst-icon-btn" onClick={() => onDelete(c.id)} aria-label={`Borrar ${c.title}`}>
+                  <button
+                    className={`asst-icon-btn asst-pin-btn ${c.pinned ? "pinned" : ""}`}
+                    onClick={() => onTogglePin(c)}
+                    aria-label={c.pinned ? `Desanclar ${c.title}` : `Anclar ${c.title}`}
+                    title={c.pinned ? "Desanclar" : "Anclar arriba"}
+                    aria-pressed={!!c.pinned}
+                  >
+                    {c.pinned ? <PinOff className="w-3.5 h-3.5" aria-hidden /> : <Pin className="w-3.5 h-3.5" aria-hidden />}
+                  </button>
+                  <button className="asst-icon-btn asst-row-btn" onClick={() => onDelete(c.id)} aria-label={`Borrar ${c.title}`}>
                     <Trash2 className="w-3.5 h-3.5" aria-hidden />
                   </button>
                 </div>

@@ -112,6 +112,8 @@ export interface StoredConversation {
   title: string;
   updatedAt: number;
   messages: StoredMsg[];
+  /** Anclada: va al principio del historial y el tope de 50 no la borra. */
+  pinned?: boolean;
 }
 
 // Antes esto era localStorage puro (basalt:convs:<userId> / basalt:memory:
@@ -222,6 +224,16 @@ export async function saveConversation(userId: string, conv: StoredConversation,
   await apiJson("/api/basalt/conversations", { method: "POST", body: JSON.stringify(slim) });
 }
 
+/** Ancla o desancla. Devuelve false si el servidor no pudo guardarlo (el cliente revierte). */
+export async function setConversationPinned(userId: string, id: string, pinned: boolean): Promise<boolean> {
+  if (!userId) return false;
+  const res = await apiJson("/api/basalt/conversations", {
+    method: "PATCH",
+    body: JSON.stringify({ id, pinned }),
+  });
+  return res.ok;
+}
+
 export async function deleteConversation(userId: string, id: string) {
   if (!userId) return;
   await apiJson(`/api/basalt/conversations/${id}`, { method: "DELETE" });
@@ -315,6 +327,8 @@ export function filterConversations(list: StoredConversation[], query: string): 
 export interface ConversationGroup {
   label: string;
   items: StoredConversation[];
+  /** El grupo de ancladas: no es una fecha, va siempre primero. */
+  pinned?: boolean;
 }
 
 const MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -328,13 +342,20 @@ export function groupConversationsByDate(list: StoredConversation[], now: Date =
 
   const groups: ConversationGroup[] = [];
   const byLabel = new Map<string, ConversationGroup>();
+  // Las ancladas van arriba y juntas: si cayeran en "Hoy"/"Agosto" según su fecha,
+  // anclarlas no serviría de nada.
+  const pinned = list.filter((c) => c.pinned);
+  const rest = pinned.length ? list.filter((c) => !c.pinned) : list;
+  if (pinned.length) {
+    groups.push({ label: "Ancladas", items: [...pinned].sort((a, b) => b.updatedAt - a.updatedAt), pinned: true });
+  }
   const push = (label: string, c: StoredConversation) => {
     let g = byLabel.get(label);
     if (!g) { g = { label, items: [] }; byLabel.set(label, g); groups.push(g); }
     g.items.push(c);
   };
 
-  for (const c of [...list].sort((a, b) => b.updatedAt - a.updatedAt)) {
+  for (const c of [...rest].sort((a, b) => b.updatedAt - a.updatedAt)) {
     if (c.updatedAt >= today) push("Hoy", c);
     else if (c.updatedAt >= yesterday) push("Ayer", c);
     else if (c.updatedAt >= week) push("Últimos 7 días", c);

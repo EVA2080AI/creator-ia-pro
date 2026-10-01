@@ -50,6 +50,22 @@ const UPSERT_SCHEMA = z.object({
   assistantSlug: z.string().trim().min(1).max(MAX_SLUG).nullish(),
 });
 
+const PIN_SCHEMA = z.object({
+  id: z.string().min(1),
+  pinned: z.boolean(),
+});
+
+/**
+ * Las migraciones de este proyecto se aplican a mano (`npx drizzle-kit push`), así que el código
+ * puede llegar a producción antes que la columna `pinned` (db/migrations/0007). Mientras no exista,
+ * el historial sigue funcionando exactamente como antes y anclar devuelve un error entendible, en vez
+ * de tumbar la pantalla entera con un 500.
+ */
+function isMissingPinnedColumn(e: unknown): boolean {
+  const err = e as { code?: string; message?: string };
+  return err?.code === "42703" || /column .*pinned.* does not exist/i.test(err?.message ?? "");
+}
+
 function slugFilter(slug: string | null) {
   return slug ? eq(schema.basaltConversation.assistantSlug, slug) : isNull(schema.basaltConversation.assistantSlug);
 }
@@ -61,10 +77,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const assistantSlug = typeof req.query.assistant === "string" ? req.query.assistant : null;
 
   if (req.method === "GET") {
-    const rows = await db.select().from(schema.basaltConversation)
-      .where(and(eq(schema.basaltConversation.userId, user.userId), slugFilter(assistantSlug)))
-      .orderBy(desc(schema.basaltConversation.updatedAt))
-      .limit(MAX_CONVERSATIONS);
+    const cols = {
+      id: schema.basaltConversation.id,
+      title: schema.basaltConversation.title,
+      updatedAt: schema.basaltConversation.updatedAt,
+      messages: schema.basaltConversation.messages,
+    };
+    const where = and(eq(schema.basaltConversation.userId, user.userId), slugFilter(assistantSlug));
+    // Las ancladas primero: con el tope de 50, ordenarlo acá (y no en el cliente) es lo que
+    // garantiza que una anclada vieja no se caiga de la lista.
+    let rows: { id: string; title: string; updatedAt: Date; messages: unknown; pinned: boolean }[];
+    try {
+      rows = await db.select({ ...cols, pinned: schema.basaltConversation.pinned }).from(schema.basaltConversation)
+        .where(where)
+        .orderBy(desc(schema.basaltConversation.pinned), desc(schema.basaltConversation.updatedAt))
+        .limit(MAX_CONVERSATIONS);
+    } catch (e) {
+      if (!isMissingPinnedColumn(e)) throw e;
+      const plain = await db.select(cols).from(schema.basaltConversation)
+        .where(where)
+        .orderBy(desc(schema.basaltConversation.updatedAt))
+        .limit(MAX_CONVERSATIONS);
+      rows = plain.map((r) => ({ ...r, pinned: false }));
+    }
     res.status(200).json({
       ok: true,
       conversations: rows.map((r) => ({
@@ -72,8 +107,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         title: r.title,
         updatedAt: r.updatedAt.getTime(),
         messages: r.messages,
+        pinned: r.pinned,
       })),
     });
+    return;
+  }
+
+  // Anclar / desanclar. Va aparte del POST a propósito: guardar una conversación no toca `pinned`,
+  // así que ese camino sigue funcionando aunque la columna todavía no exista.
+  if (req.method === "PATCH") {
+    const parsed = PIN_SCHEMA.safeParse(req.body ?? {});
+    if (!parsed.success) {
+      res.status(400).json({ ok: false, code: "BAD_REQUEST", error: parsed.error.issues[0]?.message ?? "Datos inválidos." });
+      return;
+    }
+    try {
+      await db.update(schema.basaltConversation)
+        .set({ pinned: parsed.data.pinned })
+        .where(and(eq(schema.basaltConversation.id, parsed.data.id), eq(schema.basaltConversation.userId, user.userId)));
+    } catch (e) {
+      if (!isMissingPinnedColumn(e)) throw e;
+      console.error("[basalt/conversations] Falta aplicar la migración 0007 (columna pinned): npx drizzle-kit push");
+      res.status(503).json({ ok: false, code: "PIN_UNAVAILABLE", error: "Anclar conversaciones todavía no está disponible. Inténtalo más tarde." });
+      return;
+    }
+    res.status(200).json({ ok: true });
     return;
   }
 
@@ -103,10 +161,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Tope de 50 conversaciones por usuario Y contexto (Basalt o cada
     // Experto por separado) — igual al límite que ya aplicaba el
     // localStorage (Array.slice(0, 50) en src/lib/basalt.ts).
-    const all = await db.select({ id: schema.basaltConversation.id })
-      .from(schema.basaltConversation)
-      .where(and(eq(schema.basaltConversation.userId, user.userId), slugFilter(slug)))
-      .orderBy(desc(schema.basaltConversation.updatedAt));
+    let all: { id: string }[];
+    try {
+      // Las ancladas quedan de primeras: lo que se cae del tope es lo más viejo SIN anclar.
+      all = await db.select({ id: schema.basaltConversation.id })
+        .from(schema.basaltConversation)
+        .where(and(eq(schema.basaltConversation.userId, user.userId), slugFilter(slug)))
+        .orderBy(desc(schema.basaltConversation.pinned), desc(schema.basaltConversation.updatedAt));
+    } catch (e) {
+      if (!isMissingPinnedColumn(e)) throw e;
+      all = await db.select({ id: schema.basaltConversation.id })
+        .from(schema.basaltConversation)
+        .where(and(eq(schema.basaltConversation.userId, user.userId), slugFilter(slug)))
+        .orderBy(desc(schema.basaltConversation.updatedAt));
+    }
     if (all.length > MAX_CONVERSATIONS) {
       const toDelete = all.slice(MAX_CONVERSATIONS).map((r) => r.id);
       await db.delete(schema.basaltConversation).where(inArray(schema.basaltConversation.id, toDelete));
@@ -116,6 +184,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  res.setHeader("Allow", "GET, POST");
+  res.setHeader("Allow", "GET, POST, PATCH");
   res.status(405).json({ ok: false, code: "METHOD_NOT_ALLOWED", error: "Método no permitido." });
 }

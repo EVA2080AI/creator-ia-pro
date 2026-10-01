@@ -103,3 +103,25 @@ describe("groupConversationsByDate", () => {
     expect(groups[0].items.map((c) => c.id)).toEqual(["tarde", "temprano"]);
   });
 });
+
+describe("groupConversationsByDate con ancladas", () => {
+  const now = new Date(2026, 9, 1, 15, 0);
+  const at = (id: string, d: Date, pinned = false) => ({ id, title: id, updatedAt: d.getTime(), messages: [], pinned });
+
+  it("las ancladas van en su propio grupo al principio, sin repetirse en su fecha", () => {
+    const groups = groupConversationsByDate([
+      at("hoy", new Date(2026, 9, 1, 9, 0)),
+      at("vieja-anclada", new Date(2026, 5, 2, 9, 0), true),
+      at("hoy-anclada", new Date(2026, 9, 1, 11, 0), true),
+    ], now);
+    expect(groups[0].label).toBe("Ancladas");
+    expect(groups[0].pinned).toBe(true);
+    expect(groups[0].items.map((c) => c.id)).toEqual(["hoy-anclada", "vieja-anclada"]);
+    expect(groups.slice(1).flatMap((g) => g.items.map((c) => c.id))).toEqual(["hoy"]);
+  });
+
+  it("sin ancladas no aparece el grupo", () => {
+    const groups = groupConversationsByDate([at("hoy", new Date(2026, 9, 1, 9, 0))], now);
+    expect(groups.map((g) => g.label)).toEqual(["Hoy"]);
+  });
+});

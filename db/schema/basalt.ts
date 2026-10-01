@@ -9,7 +9,7 @@
 // `assistantSlug` null = chat de Basalt; con valor = chat de ese Experto
 // (homologado 2026-09-29: "los expertos... deben tener también persistir
 // sus chat" — mismo mecanismo que Basalt, no uno aparte).
-import { pgTable, text, timestamp, jsonb, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, jsonb, index, boolean } from "drizzle-orm/pg-core";
 import { user } from "./auth.js";
 
 export const basaltConversation = pgTable("basalt_conversation", {
@@ -18,6 +18,8 @@ export const basaltConversation = pgTable("basalt_conversation", {
   assistantSlug: text("assistant_slug"),
   title: text("title").notNull().default("Nueva conversación"),
   messages: jsonb("messages").notNull().default([]),
+  /** Anclada por el usuario: sube al principio del historial y no la borra el tope de 50. */
+  pinned: boolean("pinned").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 }, (t) => ({

@@ -16,9 +16,10 @@ import {
   type Assistant, type AssistantWelcomeCard,
 } from "@/lib/assistants";
 import {
-  loadConversations, saveConversation, deleteConversation, migrateLegacyLocalStorage, CONTINUE_PROMPT, joinContinuation,
+  loadConversations, saveConversation, deleteConversation, setConversationPinned, migrateLegacyLocalStorage, CONTINUE_PROMPT, joinContinuation,
   type StoredConversation, type StoredMsg,
 } from "@/lib/basalt";
+import { toast } from "sonner";
 import { mdToHtml } from "@/lib/markdown";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
@@ -153,6 +154,19 @@ export default function AssistantPage() {
       .then(() => loadConversations(userId, slug))
       .then(setConversations);
     if (id === convId) newChat();
+  };
+
+
+  // Anclar es optimista: la lista se reordena al instante y, si el servidor no pudo
+  // guardarlo, vuelve a su sitio con un aviso (en vez de quedar mintiendo).
+  const togglePin = (c: StoredConversation) => {
+    const next = !c.pinned;
+    setConversations((prev) => prev.map((x) => (x.id === c.id ? { ...x, pinned: next } : x)));
+    void setConversationPinned(userId, c.id, next).then((ok) => {
+      if (ok) return;
+      setConversations((prev) => prev.map((x) => (x.id === c.id ? { ...x, pinned: !next } : x)));
+      toast.error(next ? "No se pudo anclar la conversación." : "No se pudo desanclar la conversación.");
+    });
   };
 
   const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string; retry?: boolean }) => {
@@ -342,6 +356,7 @@ export default function AssistantPage() {
             activeId={convId}
             onOpen={openConversation}
             onDelete={removeConversation}
+            onTogglePin={togglePin}
           />
         }
       />

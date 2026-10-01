@@ -240,7 +240,14 @@
 }
 
 @layer base {
-  html { font-size: 14px; }
+  /* La raíz estaba en 14px, y como Tailwind mide TODO en rem eso encogía la app
+     entera un 12,5 %: `text-sm` se renderizaba a 12,25px y `text-xs` a 10,5px, por
+     debajo de lo que se lee cómodo en un teléfono. A 15px la escala del sistema de
+     diseño no cambia (siguen siendo los mismos text-sm/text-xs), solo deja de estar
+     comprimida: 13,1px y 11,25px. Se verificó que nada se desborde a 390px en la
+     landing, /pricing, el panel, /tareas, /proyectos, /perfil y /auth.
+     El chat (Assistant.css) usa px absolutos y no se ve afectado. */
+  html { font-size: 15px; }
 
   * {
     box-sizing: border-box;
