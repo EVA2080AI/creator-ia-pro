@@ -61,7 +61,7 @@ export async function listAssets(opts?: { spaceId?: string; favoriteOnly?: boole
   const params = new URLSearchParams();
   if (opts?.spaceId) params.set("spaceId", opts.spaceId);
   if (opts?.favoriteOnly) params.set("favoriteOnly", "true");
-  if (opts?.limit) params.set("limit", String(opts.limit));
+  if (opts?.limit !== undefined) params.set("limit", String(opts.limit));
   if (opts?.offset) params.set("offset", String(opts.offset));
   const res = await api<{ assets: ApiAsset[]; total: number }>(`/api/assets?${params.toString()}`);
   return res.ok ? { assets: res.data!.assets.map(fromApi), total: res.data!.total } : { assets: [], total: 0 };

@@ -65,7 +65,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
-    const take = Math.min(parseInt(limit || "24", 10) || 24, PAGE_SIZE_MAX);
+    // Ojo con el 0: `parseInt(limit) || 24` lo trataba como "sin valor" y devolvía la
+    // página entera, justo lo contrario de lo que pide `limit=0` (solo el total).
+    const parsedLimit = parseInt(limit ?? "", 10);
+    const take = Number.isFinite(parsedLimit) ? Math.min(Math.max(parsedLimit, 0), PAGE_SIZE_MAX) : 24;
     const skip = Math.max(parseInt(offset || "0", 10) || 0, 0);
 
     const conditions = [eq(schema.savedAsset.userId, user.userId)];
