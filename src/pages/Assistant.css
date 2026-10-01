@@ -621,13 +621,20 @@
 }
 
 /* Anclar: los dos botones de la fila aparecen al pasar el cursor (en táctil siempre,
-   porque ahí no hay hover); el alfiler de una conversación anclada se queda fijo. */
-.asst-pin-btn, .asst-row-btn { opacity: 0; transition: opacity 0.15s, background 0.15s, color 0.15s; }
+   porque ahí no hay hover); el alfiler de una conversación anclada se queda fijo.
+   En reposo ocupan ancho CERO, no solo opacidad: con dos botones reservando sitio,
+   los títulos se truncaban varios caracteres antes ("Analiza este do…"). */
+.asst-pin-btn, .asst-row-btn {
+  width: 0; min-width: 0; padding: 0; opacity: 0; overflow: hidden; flex: none;
+  transition: width 0.15s, opacity 0.15s, background 0.15s, color 0.15s;
+}
 .asst-conv-row:hover :is(.asst-pin-btn, .asst-row-btn),
 .asst-conv-row:focus-within :is(.asst-pin-btn, .asst-row-btn),
-.asst-pin-btn.pinned { opacity: 1; }
+.asst-pin-btn.pinned { width: 28px; opacity: 1; }
 .asst-pin-btn.pinned { color: var(--asst-accent-text); }
-@media (hover: none) { .asst-pin-btn, .asst-row-btn { opacity: 1; } }
+@media (hover: none) {
+  .asst-pin-btn, .asst-row-btn { width: 36px; opacity: 1; }
+}
 
 /* ══ Legibilidad de las respuestas ═══════════════════════════════════════════
    El sistema de diseño no cambia (mismos tokens, misma escala): lo que cambia es
