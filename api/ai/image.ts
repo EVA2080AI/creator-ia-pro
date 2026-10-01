@@ -6,6 +6,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { getSessionUser, getProfile } from "../_lib/session.js";
 import { spendCredits, refundCredits, getBalance, logSpend } from "../_lib/credits.js";
 import { IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID, canAccessModel, getImageModel } from "../../src/lib/ai/models.js";
+import { uploadImage } from "../_lib/blob.js";
 
 interface ImageBody {
   prompt?: string;
@@ -82,9 +83,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const imageUrl = model.provider === "openrouter"
+    const generated = model.provider === "openrouter"
       ? await generateOpenRouterImage(model.openrouterSlug!, prompt, aspectRatio, imagePrompt, apiKey)
       : await generateReplicateImage(model.replicateSlug!, prompt, aspectRatio, imagePrompt, apiKey);
+    // Los proveedores devuelven o una URL temporal o un data URI de varios MB. Se sube
+    // a Blob para que lo que viaje al navegador —y lo que se guarde después en la
+    // biblioteca— sea una URL corta y cacheable, no la imagen entera en base64.
+    // Si la subida falla, se sigue con lo que vino: la imagen está pagada.
+    const imageUrl = (await uploadImage(generated, user.userId)) ?? generated;
     if (cost > 0) await logSpend(user.userId, cost, `image: ${modelId}`);
     const creditsRemaining = await getBalance(user.userId).catch(() => null);
     res.status(200).json({ ok: true, imageUrl, model: modelId, cost, creditsRemaining });
