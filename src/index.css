@@ -1,4 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;0,14..32,900;1,14..32,400&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* Las fuentes se cargan desde index.html con preconnect, no con @import: dentro de una
+   hoja bloqueante el @import encadena HTML → CSS → Google Fonts → woff2 en vez de
+   pedirlas en paralelo, y es de lo primero que retrasa el primer texto en pantalla. */
 
 @tailwind base;
 @tailwind components;

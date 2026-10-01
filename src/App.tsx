@@ -7,10 +7,16 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 import { HelmetProvider } from "react-helmet-async";
 import { toast } from "sonner";
-import { AppLayout } from "@/components/layout/AppLayout";
-import { BasaltAppLayout } from "@/components/layout/BasaltAppLayout";
-import { GlobalSearch } from "@/components/search/GlobalSearch";
-import { PerformanceMonitor } from "@/components/performance/PerformanceMonitor";
+// Los dos shells y el buscador se cargan aparte a propósito: estáticos metían en el
+// paquete inicial los dos sidebars con sus modales, Assistant.css entero y —por tres
+// archivos de esa cadena— framer-motion completa, que el chat ni siquiera usa.
+const AppLayout = lazy(() => import("@/components/layout/AppLayout").then((m) => ({ default: m.AppLayout })));
+const BasaltAppLayout = lazy(() => import("@/components/layout/BasaltAppLayout").then((m) => ({ default: m.BasaltAppLayout })));
+const GlobalSearch = lazy(() => import("@/components/search/GlobalSearch").then((m) => ({ default: m.GlobalSearch })));
+// Solo existe en desarrollo; antes el módulo viajaba igual a producción.
+const PerformanceMonitor = import.meta.env.DEV
+  ? lazy(() => import("@/components/performance/PerformanceMonitor").then((m) => ({ default: m.PerformanceMonitor })))
+  : null;
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { usePageTracking } from "@/hooks/useAnalytics";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -117,8 +123,17 @@ function AuthWatcher() {
 
   return (
     <>
-      <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-      <PerformanceMonitor enabled={import.meta.env.DEV} />
+      {/* El buscador solo se descarga cuando de verdad se abre (atajo de teclado). */}
+      {searchOpen && (
+        <Suspense fallback={null}>
+          <GlobalSearch isOpen onClose={() => setSearchOpen(false)} />
+        </Suspense>
+      )}
+      {PerformanceMonitor && (
+        <Suspense fallback={null}>
+          <PerformanceMonitor enabled />
+        </Suspense>
+      )}
     </>
   );
 }
