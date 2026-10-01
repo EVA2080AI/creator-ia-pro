@@ -145,7 +145,7 @@ export function BasaltShellSidebar({
 
   return (
     <>
-      <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""} ${collapsed ? "collapsed" : ""}`} aria-label="Basalt">
+      <nav id="asst-menu" className={`asst-sidebar ${sidebarOpen ? "open" : ""} ${collapsed ? "collapsed" : ""}`} aria-label="Basalt">
         <div className="asst-side-scroll">
         <div className="asst-side-top">
           {/* Basalt YA es el inicio — sin flecha de "volver", no hay ningún

@@ -66,8 +66,10 @@ export function useTasks(userId: string | undefined) {
     setLoading(true);
     const res = await api<{ tasks: ApiTask[] }>("/api/tasks");
     if (!res.ok) {
+      // Sin toast: el error se pinta en la página (Tasks.tsx) y queda a la vista.
+      // Antes solo existía el toast —el `error` no lo leía nadie— así que si te
+      // distraías tres segundos, el tablero parecía vacío sin explicación.
       setError(res.error!);
-      toast.error("No se pudieron cargar las tareas", { description: res.error });
     } else {
       setTasks(sortTasks((res.data!.tasks || []).map(fromApi)));
       setError(null);

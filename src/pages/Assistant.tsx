@@ -396,6 +396,7 @@ export default function AssistantPage() {
       />
 
       <main
+        id="main-content"
         className={`asst-main${dragging ? " asst-dragging" : ""}`}
         onDragOver={(e) => { if (e.dataTransfer.types.includes("Files")) { e.preventDefault(); setDragging(true); } }}
         onDragLeave={(e) => { if (e.currentTarget === e.target) setDragging(false); }}
@@ -407,13 +408,15 @@ export default function AssistantPage() {
         }}
       >
         <header className="asst-topbar">
-          <button className="asst-icon-btn asst-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú" style={{ display: sidebarOpen ? "none" : undefined }}>
+          <button className="asst-icon-btn asst-menu-btn" onClick={() => setSidebarOpen(true)} aria-label="Abrir menú" aria-expanded={sidebarOpen} aria-controls="asst-menu" style={{ display: sidebarOpen ? "none" : undefined }}>
             <Menu className="w-4 h-4" />
           </button>
           <div className="asst-brand-name">{assistant.name}</div>
         </header>
 
-        <div className="asst-scroller" ref={scrollerRef}>
+        {/* aria-live: sin esto, a quien usa un lector de pantalla la respuesta le
+            llegaba en silencio — veía el chat "congelado" mientras escribía. */}
+        <div className="asst-scroller" ref={scrollerRef} aria-live="polite" aria-busy={generating}>
           {threadStatus !== "idle" ? (
             <div className="asst-thread">
               {/* El título de la conversación ES el principio del primer mensaje del
@@ -499,6 +502,7 @@ export default function AssistantPage() {
             aria-label="Adjuntar documentos"
             onChange={(e) => { if (e.target.files?.length) void addFiles(e.target.files); e.target.value = ""; }}
           />
+          <p id="asst-enviar-ayuda" className="sr-only">Enter envía el mensaje; Shift y Enter hacen un salto de línea.</p>
           <div className="asst-pill">
             <button
               type="button"
@@ -512,6 +516,8 @@ export default function AssistantPage() {
             <textarea
               rows={1}
               value={input}
+              aria-label={`Escribe tu mensaje para ${assistant.name}`}
+              aria-describedby="asst-enviar-ayuda"
               placeholder={pendingDocs.length ? "Pregunta sobre el documento, o envía para un análisis completo…" : `Pregúntale a ${assistant.name}…`}
               onChange={(e) => {
                 setInput(e.target.value);

@@ -36,6 +36,7 @@ export const LibraryView = () => {
   const [hasMore, setHasMore] = useState(true);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [editingAsset, setEditingAsset] = useState<SavedAsset | null>(null);
+  const [loadError, setLoadError] = useState(false);
   const [savingDoc, setSavingDoc] = useState(false);
 
   const PAGE_SIZE = 24;
@@ -56,11 +57,14 @@ export const LibraryView = () => {
         limit: PAGE_SIZE,
         offset: currentPage * PAGE_SIZE,
       });
+      setLoadError(false);
       setAssets(prev => reset || currentPage === 0 ? newData : [...prev, ...newData]);
       setHasMore(newData.length === PAGE_SIZE);
       if (reset) setPage(0);
     } catch {
-      toast.error("Error al cargar activos");
+      // Antes solo salía un toast y la lista quedaba vacía: el usuario leía "Tu
+      // biblioteca está vacía" cuando lo que pasó es que la carga falló.
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -204,6 +208,14 @@ export const LibraryView = () => {
         <div className="flex h-64 items-center justify-center">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
         </div>
+      ) : loadError && assets.length === 0 ? (
+        <div role="alert" className="flex h-64 flex-col items-center justify-center gap-3 border border-dashed border-rose-200 dark:border-rose-500/30 rounded-3xl bg-rose-50/60 dark:bg-rose-500/10">
+          <p className="text-lg font-bold text-rose-700 dark:text-rose-300 font-display tracking-tight">No se pudo cargar tu biblioteca</p>
+          <p className="text-[13px] text-rose-600/80 dark:text-rose-300/70 font-medium">Revisa tu conexión e inténtalo otra vez.</p>
+          <button type="button" onClick={() => fetchAssets(true)} className="mt-1 rounded-xl bg-foreground px-4 py-2 text-[12px] font-bold text-background">
+            Reintentar
+          </button>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="flex h-64 flex-col items-center justify-center gap-4 border border-dashed border-border/60 rounded-3xl bg-muted/50">
           <Ghost className="h-10 w-10 text-muted-foreground" />
@@ -211,7 +223,7 @@ export const LibraryView = () => {
             {search || filterFav ? "Sin resultados" : "Tu biblioteca está vacía"}
           </p>
           <p className="text-[13px] text-muted-foreground font-medium">
-            {search || filterFav ? "Prueba otros filtros" : "Las imágenes generadas en el canvas se guardan aquí"}
+            {search || filterFav ? "Prueba otros filtros" : "Las imágenes que generes en el chat se guardan aquí"}
           </p>
         </div>
       ) : (

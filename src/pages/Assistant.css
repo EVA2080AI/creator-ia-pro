@@ -611,7 +611,10 @@
 .asst-collapse-btn, .asst-expand-btn { display: none; }
 @media (min-width: 769px) {
   .asst-side-top .asst-collapse-btn { display: grid; margin-left: auto; }
-  .asst-sidebar.collapsed { margin-left: -264px; }
+  /* visibility:hidden además del margen: con solo sacarlo de pantalla, el panel
+     plegado seguía recibiendo el foco al tabular y el cursor se perdía en una
+     columna invisible. Mismo arreglo que ya tenía el cajón móvil. */
+  .asst-sidebar.collapsed { margin-left: -264px; visibility: hidden; }
   .asst-expand-btn {
     position: fixed; top: calc(10px + env(safe-area-inset-top)); left: 10px; z-index: 45;
     background: var(--asst-panel); border: 1px solid var(--asst-border);

@@ -204,6 +204,10 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <BrowserRouter>
+              {/* Saltar al contenido: el ancla #main-content ya existía en los dos
+                  shells, pero no había ningún enlace que llevara a ella. Solo se ve
+                  al tabular, que es cuando sirve. */}
+              <a href="#main-content" className="asst-skip-link">Saltar al contenido</a>
               <AuthWatcher />
               <Suspense fallback={<LoadingScreen />}>
                 <Routes>

@@ -38,7 +38,7 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 export default function Tasks() {
   const { user, loading: authLoading } = useAuth("/auth");
   const isMobile = useIsMobile();
-  const { tasks, loading, refresh, createTask, updateTask, moveTask, deleteTask, deleteDone, markReminded } = useTasks(user?.id);
+  const { tasks, loading, error, refresh, createTask, updateTask, moveTask, deleteTask, deleteDone, markReminded } = useTasks(user?.id);
 
   const grouped = useMemo(() => groupTasksByStatus(tasks), [tasks]);
   const pendingCount = grouped.todo.length + grouped.in_progress.length;
@@ -240,7 +240,19 @@ export default function Tasks() {
           </div>
         </header>
 
-        {loading ? (
+        {error && !loading ? (
+          <div role="alert" className="rounded-[1.75rem] border border-rose-200 bg-rose-50 p-6 text-center dark:border-rose-500/30 dark:bg-rose-500/10">
+            <p className="text-sm font-bold text-rose-700 dark:text-rose-300">No se pudieron cargar tus tareas.</p>
+            <p className="mt-1 text-[13px] text-rose-600/80 dark:text-rose-300/70">{error}</p>
+            <button
+              type="button"
+              onClick={() => void refresh()}
+              className="mt-4 rounded-xl bg-foreground px-4 py-2 text-[12px] font-bold text-background"
+            >
+              Reintentar
+            </button>
+          </div>
+        ) : loading ? (
           <div className="grid md:grid-cols-3 gap-4">
             {TASK_STATUSES.map((s) => (
               <div key={s} className="h-[260px] md:h-[60vh] rounded-[1.75rem] bg-muted/70 animate-pulse" />

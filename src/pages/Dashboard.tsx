@@ -118,8 +118,9 @@ export default function Dashboard() {
         setToolData(toolBreakdown(transactions));
       } catch (err) {
         console.error("Dashboard Fetch Error:", err);
+        // Solo el banner de la página: el toast decía exactamente lo mismo y el
+        // usuario leía dos veces el mismo error.
         setDataError(true);
-        toast.error("No se pudo cargar tu panel. Intenta recargar la página.");
       } finally {
         setDataLoading(false);
       }
@@ -187,7 +188,9 @@ export default function Dashboard() {
     <div className="min-h-screen bg-background">
       <Helmet><title>{"Dashboard | Creator IA Pro"}</title></Helmet>
       
-      <main className="max-w-[1240px] mx-auto px-6 pt-6 pb-20 space-y-8">
+      {/* div y no <main>: el shell (BasaltAppLayout) ya aporta el <main> de la página
+          y dos landmarks "main" dejan a un lector de pantalla sin saber cuál es. */}
+      <div className="max-w-[1240px] mx-auto px-6 pt-6 pb-20 space-y-8">
         {/* Header & Notifications */}
         <section className="space-y-6">
           {(checkoutSuccess || creditsSuccess) && (
@@ -280,7 +283,7 @@ export default function Dashboard() {
             </div>
           )}
         </section>
-      </main>
+      </div>
 
       {showWelcome && <WelcomeOnboarding onDismiss={() => setShowWelcome(false)} />}
 

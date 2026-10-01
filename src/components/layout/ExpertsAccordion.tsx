@@ -15,7 +15,9 @@ export function ExpertsAccordion({
   onSelect: (a: Assistant) => void;
 }) {
   const [open, setOpen] = useState(() => experts.some((a) => a.slug === activeSlug));
-  if (experts.length === 0) return null;
+  // Mientras cargaban, la sección entera desaparecía del menú: se veía igual que
+  // "no hay expertos". Ahora se anuncia que están en camino.
+  if (experts.length === 0) return <div className="asst-switcher-label">Expertos · cargando…</div>;
 
   return (
     <div>

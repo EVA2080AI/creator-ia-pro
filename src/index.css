@@ -584,3 +584,25 @@
   width: 100% !important;
   flex: 1 1 auto !important;
 }
+
+/* Saltar al contenido: invisible hasta que recibe el foco con el tabulador. */
+.asst-skip-link {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 100;
+  transform: translate(-50%, -120%);
+  padding: 10px 18px;
+  border-radius: 0 0 12px 12px;
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  font-size: 14px;
+  font-weight: 700;
+  transition: transform 0.18s ease-out;
+}
+.asst-skip-link:focus-visible {
+  transform: translate(-50%, 0);
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) { .asst-skip-link { transition: none; } }

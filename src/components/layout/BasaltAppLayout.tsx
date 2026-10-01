@@ -49,7 +49,7 @@ export function BasaltAppLayout() {
         setTheme={setTheme}
       />
 
-      <main className="asst-main">
+      <main id="main-content" className="asst-main">
         <header className="asst-topbar">
           <button
             className="asst-icon-btn asst-menu-btn"
