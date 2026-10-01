@@ -30,7 +30,7 @@ const baseName = (p: string) => normalizePath(p).split("/").pop() ?? p;
  *      (mdToHtml solo captura el lenguaje, así que el resto llega como primera
  *      línea del código, empezando con espacio)
  *   2) como comentario en la primera línea no vacía:  <!-- index.html -->,
- *      /* styles.css *​/, // script.js, # main.py
+ *      un comentario de CSS con el nombre, // script.js, # main.py
  */
 export function extractFilename(code: string): { name?: string; code: string } {
   const lines = code.split("\n");
