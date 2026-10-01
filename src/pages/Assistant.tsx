@@ -16,8 +16,7 @@ import {
   type Assistant, type AssistantWelcomeCard,
 } from "@/lib/assistants";
 import {
-  loadConversations, saveConversation, deleteConversation, setConversationPinned, migrateLegacyLocalStorage,
-  getCachedMessages, loadConversationMessages, prefetchConversation, CONTINUE_PROMPT, joinContinuation,
+  loadConversations, saveConversation, CONTINUE_PROMPT, joinContinuation,
   type ConversationSummary, type StoredMsg,
 } from "@/lib/basalt";
 import { toast } from "sonner";
@@ -25,6 +24,8 @@ import { mdToHtml } from "@/lib/markdown";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
 import { ConversationList } from "@/components/basalt/ConversationList";
+import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
+import { useConversationHistory } from "@/hooks/useConversationHistory";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
 import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import "./Assistant.css";
@@ -81,8 +82,7 @@ export default function AssistantPage() {
   const [autoGuide] = useState(() => !hasSeenBasaltGuide());
 
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
-  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
-  const [conversationsLoading, setConversationsLoading] = useState(true);
+
   const [messages, setMessages] = useState<StoredMsg[]>([]);
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
@@ -90,10 +90,7 @@ export default function AssistantPage() {
   // Mensaje cuya respuesta se cortó por el límite de tiempo del servidor
   // (finish_reason "length") — habilita "Continuar" (igual que en Basalt.tsx).
   const [truncatedId, setTruncatedId] = useState<string | null>(null);
-  // Estado de la conversación abierta: "loading" mientras llegan sus mensajes.
-  const [threadStatus, setThreadStatus] = useState<"idle" | "loading" | "error">("idle");
-  const [openingTitle, setOpeningTitle] = useState("");
-  const openRef = useRef("");
+
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const userId = user?.id ?? "";
@@ -117,40 +114,34 @@ export default function AssistantPage() {
     });
   }, [slug, clearDocs]);
 
-  // Historial propio por Experto — mismo mecanismo que Basalt (homologado
-  // 2026-09-29), separado por assistantSlug en la misma tabla.
-  useEffect(() => {
-    if (!userId) return;
-    setConversationsLoading(true);
-    void migrateLegacyLocalStorage(userId).then(() => {
-      void loadConversations(userId, slug).then((c) => { setConversations(c); setConversationsLoading(false); });
-    });
-  }, [userId, slug]);
-
   const stickToBottom = useCallback(() => {
     const el = scrollerRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }, []);
+
+  // Lista, apertura, borrado y anclado del historial: lo mismo que usa Basalt.tsx.
+  const chats = useConversationHistory({
+    userId,
+    assistantSlug: slug,
+    onMessages: setMessages,
+    onOpened: () => requestAnimationFrame(stickToBottom),
+  });
+  const { threadStatus } = chats;
 
   useCopyCodeButtons(scrollerRef);
   useProjectCards(scrollerRef);
 
   const newChat = () => {
     abortRef.current?.abort();
-    openRef.current = "";
+    chats.reset();
     setConvId(crypto.randomUUID());
     setMessages([]);
-    setThreadStatus("idle");
     setError(null);
     setTruncatedId(null);
     clearDocs();
     setSidebarOpen(false);
   };
 
-  // Abrir una conversación trae sus mensajes (la lista ya no los descarga). Si ya se
-  // abrió antes están en memoria y el cambio es instantáneo; si no, se pinta un
-  // esqueleto —nunca la pantalla de bienvenida, que daría un parpadeo feísimo— y
-  // openRef descarta la respuesta si para entonces ya se abrió otra.
   const openConversation = (c: ConversationSummary) => {
     abortRef.current?.abort();
     setConvId(c.id);
@@ -158,45 +149,12 @@ export default function AssistantPage() {
     setTruncatedId(null);
     clearDocs();
     setSidebarOpen(false);
-    openRef.current = c.id;
-
-    const cached = getCachedMessages(userId, c.id);
-    if (cached) {
-      setMessages(cached);
-      setThreadStatus("idle");
-      requestAnimationFrame(stickToBottom);
-      return;
-    }
-    setMessages([]);
-    setOpeningTitle(c.title);
-    setThreadStatus("loading");
-    void loadConversationMessages(userId, c.id).then((messages) => {
-      if (openRef.current !== c.id) return;
-      if (!messages) { setThreadStatus("error"); return; }
-      setMessages(messages);
-      setThreadStatus("idle");
-      requestAnimationFrame(stickToBottom);
-    });
+    chats.open(c);
   };
 
   const removeConversation = (id: string) => {
-    void deleteConversation(userId, id)
-      .then(() => loadConversations(userId, slug))
-      .then(setConversations);
+    chats.remove(id);
     if (id === convId) newChat();
-  };
-
-
-  // Anclar es optimista: la lista se reordena al instante y, si el servidor no pudo
-  // guardarlo, vuelve a su sitio con un aviso (en vez de quedar mintiendo).
-  const togglePin = (c: ConversationSummary) => {
-    const next = !c.pinned;
-    setConversations((prev) => prev.map((x) => (x.id === c.id ? { ...x, pinned: next } : x)));
-    void setConversationPinned(userId, c.id, next).then((ok) => {
-      if (ok) return;
-      setConversations((prev) => prev.map((x) => (x.id === c.id ? { ...x, pinned: !next } : x)));
-      toast.error(next ? "No se pudo anclar la conversación." : "No se pudo desanclar la conversación.");
-    });
   };
 
   const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string; retry?: boolean }) => {
@@ -320,8 +278,7 @@ export default function AssistantPage() {
             : [...history, { id: modelMsgId, role: "model", text: finalText }];
           const title = (history.find((m) => m.role === "user")?.text ?? text).slice(0, 60);
           void saveConversation(userId, { id: convId, title, updatedAt: Date.now(), messages: final }, slug)
-            .then(() => loadConversations(userId, slug))
-            .then(setConversations);
+            .then(() => chats.refresh());
         }
       }
     } catch (e) {
@@ -336,7 +293,7 @@ export default function AssistantPage() {
       abortRef.current = null;
       stickToBottom();
     }
-  }, [assistant, generating, messages, stickToBottom, userId, convId, slug, readyDocs, docsBusy, clearDocs, threadStatus]);
+  }, [assistant, generating, messages, stickToBottom, userId, convId, slug, readyDocs, docsBusy, clearDocs, threadStatus, chats]);
 
   const handleStop = () => abortRef.current?.abort();
 
@@ -384,13 +341,10 @@ export default function AssistantPage() {
         autoOpenGuide={autoGuide}
         extraNav={
           <ConversationList
-            conversations={conversations}
-            loading={conversationsLoading}
+            {...chats.listProps}
             activeId={convId}
             onOpen={openConversation}
             onDelete={removeConversation}
-            onTogglePin={togglePin}
-            onPrefetch={(id) => prefetchConversation(userId, id)}
           />
         }
       />
@@ -418,23 +372,11 @@ export default function AssistantPage() {
             llegaba en silencio — veía el chat "congelado" mientras escribía. */}
         <div className="asst-scroller" ref={scrollerRef} aria-live="polite" aria-busy={generating}>
           {threadStatus !== "idle" ? (
-            <div className="asst-thread">
-              {/* El título de la conversación ES el principio del primer mensaje del
-                  usuario, así que el esqueleto no inventa nada. Va en el render y
-                  nunca dentro de `messages`: así no hay forma de persistirlo. */}
-              <div className="asst-msg user"><div className="asst-bubble">{openingTitle}</div></div>
-              {threadStatus === "loading" ? (
-                <div className="asst-msg model">
-                  <div className="asst-avatar"><Bot className="w-3.5 h-3.5 text-white" aria-hidden /></div>
-                  <div className="asst-body"><div className="asst-shimmer" role="status" aria-label="Abriendo la conversación"><i /><i /><i /></div></div>
-                </div>
-              ) : (
-                <div className="asst-err" role="alert">
-                  <span>⚠️ No se pudo abrir esta conversación.</span>
-                  <button onClick={() => openConversation({ id: convId, title: openingTitle, updatedAt: Date.now() })}>Reintentar</button>
-                </div>
-              )}
-            </div>
+            <ThreadSkeleton
+              title={chats.openingTitle}
+              status={threadStatus}
+              onRetry={() => openConversation({ id: convId, title: chats.openingTitle, updatedAt: Date.now() })}
+            />
           ) : messages.length === 0 ? (
             <section className="asst-welcome">
               <h1 className="asst-hello">{assistant.welcome.title || `Hola, soy ${assistant.name}`}</h1>

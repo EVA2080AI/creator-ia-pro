@@ -12,6 +12,8 @@ import { useProjectCards } from "@/hooks/useProjectCards";
 import { useProfile } from "@/hooks/useProfile";
 import { ModelPicker } from "@/components/basalt/ModelPicker";
 import { ConversationList } from "@/components/basalt/ConversationList";
+import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
+import { useConversationHistory } from "@/hooks/useConversationHistory";
 import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
@@ -24,9 +26,8 @@ import { mdToHtml } from "@/lib/markdown";
 import { CHAT_MODELS, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID, canAccessModel, getImageModel, getModel } from "@/lib/ai/models";
 import {
   BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply,
-  loadConversations, saveConversation, deleteConversation, setConversationPinned, loadMemory, saveMemory,
-  migrateLegacyLocalStorage, CONTINUE_PROMPT, joinContinuation,
-  getCachedMessages, loadConversationMessages, prefetchConversation,
+  saveConversation, loadMemory, saveMemory, migrateLegacyLocalStorage,
+  CONTINUE_PROMPT, joinContinuation,
   type ConversationSummary, type StoredMsg,
 } from "@/lib/basalt";
 import { createAsset } from "@/lib/assets";
@@ -73,11 +74,7 @@ export default function BasaltPage() {
 
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
   const [messages, setMessages] = useState<StoredMsg[]>([]);
-  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
-  // Sin esto, "Conversaciones" se ve igual vacía mientras carga que cuando
-  // de verdad no hay ninguna — se lee como sección rota (auditoría UX
-  // 2026-09-29), a diferencia de "Memoria" que sí distingue los dos casos.
-  const [conversationsLoading, setConversationsLoading] = useState(true);
+
   const [memory, setMemory] = useState<string[]>([]);
   const [showMemory, setShowMemory] = useState(false);
 
@@ -87,10 +84,7 @@ export default function BasaltPage() {
   // Id del mensaje cuya respuesta se cortó por el límite de tiempo del servidor
   // (finish_reason "length") — habilita el botón "Continuar".
   const [truncatedId, setTruncatedId] = useState<string | null>(null);
-  // Estado de la conversación abierta: "loading" mientras llegan sus mensajes.
-  const [threadStatus, setThreadStatus] = useState<"idle" | "loading" | "error">("idle");
-  const [openingTitle, setOpeningTitle] = useState("");
-  const openRef = useRef("");
+
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const autoSentRef = useRef(false);
@@ -102,12 +96,17 @@ export default function BasaltPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
 
+  // Lista, apertura, borrado y anclado del historial: lo mismo que usan los Expertos.
+  const chats = useConversationHistory({
+    userId,
+    onMessages: setMessages,
+    onOpened: () => requestAnimationFrame(stickToBottom),
+  });
+  const { threadStatus } = chats;
+
   useEffect(() => {
     if (!userId) return;
-    void migrateLegacyLocalStorage(userId).then(() => {
-      void loadConversations(userId).then((c) => { setConversations(c); setConversationsLoading(false); });
-      void loadMemory(userId).then(setMemory);
-    });
+    void migrateLegacyLocalStorage(userId).then(() => loadMemory(userId)).then(setMemory);
   }, [userId]);
 
   useEffect(() => {
@@ -140,9 +139,8 @@ export default function BasaltPage() {
     if (!userId || !msgs.length) return;
     const first = msgs.find((m) => m.role === "user")?.text ?? "Nueva conversación";
     void saveConversation(userId, { id, title: first.slice(0, 60), updatedAt: Date.now(), messages: msgs })
-      .then(() => loadConversations(userId))
-      .then(setConversations);
-  }, [userId]);
+      .then(() => chats.refresh());
+  }, [userId, chats]);
 
   const generateImages = useCallback(async (base: StoredMsg[], msgId: string, imgs: { prompt: string; format: string }[]) => {
     const results = await Promise.all(imgs.map(async (img) => {
@@ -170,18 +168,6 @@ export default function BasaltPage() {
     setMessages((prev) => prev.map((m) => (m.id === msgId ? { ...m, images: results } : m)));
     return final;
   }, [imageModel]);
-
-  // Anclar es optimista: la lista se reordena al instante y, si el servidor no pudo
-  // guardarlo, vuelve a su sitio con un aviso (en vez de quedar mintiendo).
-  const togglePin = (c: ConversationSummary) => {
-    const next = !c.pinned;
-    setConversations((prev) => prev.map((x) => (x.id === c.id ? { ...x, pinned: next } : x)));
-    void setConversationPinned(userId, c.id, next).then((ok) => {
-      if (ok) return;
-      setConversations((prev) => prev.map((x) => (x.id === c.id ? { ...x, pinned: !next } : x)));
-      toast.error(next ? "No se pudo anclar la conversación." : "No se pudo desanclar la conversación.");
-    });
-  };
 
   const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string }) => {
     const isContinue = !!opts?.continueFrom;
@@ -345,10 +331,9 @@ export default function BasaltPage() {
 
   const newChat = () => {
     abortRef.current?.abort();
-    openRef.current = "";
+    chats.reset();
     setConvId(crypto.randomUUID());
     setMessages([]);
-    setThreadStatus("idle");
     setError(null);
     setTruncatedId(null);
     setSidebarOpen(false);
@@ -356,41 +341,17 @@ export default function BasaltPage() {
     clearDocs();
   };
 
-  // Abrir una conversación trae sus mensajes (la lista ya no los descarga). Si ya se
-  // abrió antes están en memoria y el cambio es instantáneo; si no, se pinta un
-  // esqueleto —nunca la pantalla de bienvenida, que daría un parpadeo feísimo— y
-  // openRef descarta la respuesta si para entonces ya se abrió otra.
   const openConversation = (c: ConversationSummary) => {
     abortRef.current?.abort();
     setConvId(c.id);
     setError(null);
     setTruncatedId(null);
     setSidebarOpen(false);
-    openRef.current = c.id;
-
-    const cached = getCachedMessages(userId, c.id);
-    if (cached) {
-      setMessages(cached);
-      setThreadStatus("idle");
-      requestAnimationFrame(stickToBottom);
-      return;
-    }
-    setMessages([]);
-    setOpeningTitle(c.title);
-    setThreadStatus("loading");
-    void loadConversationMessages(userId, c.id).then((messages) => {
-      if (openRef.current !== c.id) return;
-      if (!messages) { setThreadStatus("error"); return; }
-      setMessages(messages);
-      setThreadStatus("idle");
-      requestAnimationFrame(stickToBottom);
-    });
+    chats.open(c);
   };
 
   const removeConversation = (id: string) => {
-    void deleteConversation(userId, id)
-      .then(() => loadConversations(userId))
-      .then(setConversations);
+    chats.remove(id);
     if (id === convId) newChat();
   };
 
@@ -454,13 +415,10 @@ export default function BasaltPage() {
         }
         extraNav={
           <ConversationList
-            conversations={conversations}
-            loading={conversationsLoading}
+            {...chats.listProps}
             activeId={convId}
             onOpen={openConversation}
             onDelete={removeConversation}
-            onTogglePin={togglePin}
-            onPrefetch={(id) => prefetchConversation(userId, id)}
           />
         }
       />
@@ -492,23 +450,11 @@ export default function BasaltPage() {
             llegaba en silencio — veía el chat "congelado" mientras escribía. */}
         <div className="asst-scroller" ref={scrollerRef} aria-live="polite" aria-busy={generating}>
           {threadStatus !== "idle" ? (
-            <div className="asst-thread">
-              {/* El título de la conversación ES el principio del primer mensaje del
-                  usuario, así que el esqueleto no inventa nada. Va en el render y
-                  nunca dentro de `messages`: así no hay forma de persistirlo. */}
-              <div className="asst-msg user"><div className="asst-bubble">{openingTitle}</div></div>
-              {threadStatus === "loading" ? (
-                <div className="asst-msg model">
-                  <div className="asst-avatar"><Bot className="w-3.5 h-3.5 text-white" aria-hidden /></div>
-                  <div className="asst-body"><div className="asst-shimmer" role="status" aria-label="Abriendo la conversación"><i /><i /><i /></div></div>
-                </div>
-              ) : (
-                <div className="asst-err" role="alert">
-                  <span>⚠️ No se pudo abrir esta conversación.</span>
-                  <button onClick={() => openConversation({ id: convId, title: openingTitle, updatedAt: Date.now() })}>Reintentar</button>
-                </div>
-              )}
-            </div>
+            <ThreadSkeleton
+              title={chats.openingTitle}
+              status={threadStatus}
+              onRetry={() => openConversation({ id: convId, title: chats.openingTitle, updatedAt: Date.now() })}
+            />
           ) : messages.length === 0 ? (
             <section className="asst-welcome">
               <h1 className="asst-hello">{A.welcome.title}</h1>

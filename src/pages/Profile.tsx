@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   User, Mail, Shield, Coins, LogOut, Loader2, Save,
   Calendar, CreditCard, ChevronRight, Bell, Check,
-  Image, MessageSquare, Zap, Download, Link as LinkIcon, Sun, Moon,
+  Image, MessageSquare, Zap, Download, Sun, Moon,
 } from "lucide-react";
 
 interface TransactionRow {
@@ -37,13 +37,11 @@ const Profile = () => {
   const { resolvedTheme, setTheme } = useTheme();
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState("");
-  const [avatarUrlInput, setAvatarUrlInput] = useState("");
   const [creditHistory, setCreditHistory] = useState<TransactionRow[]>([]);
 
   useEffect(() => {
     if (!profile) return;
     setFullName(profile.displayName ?? "");
-    setAvatarUrlInput(profile.avatarUrl ?? "");
   }, [profile]);
 
   useEffect(() => {
@@ -64,16 +62,7 @@ const Profile = () => {
     try {
       const body: Record<string, string> = {};
       const trimmedName = fullName.trim();
-      const trimmedAvatar = avatarUrlInput.trim();
       if (trimmedName && trimmedName !== (profile?.displayName ?? "")) body.displayName = trimmedName;
-      if (trimmedAvatar !== (profile?.avatarUrl ?? "")) {
-        if (trimmedAvatar && !/^https?:\/\//.test(trimmedAvatar)) {
-          toast.error("La URL de la foto debe empezar con http:// o https://");
-          setSaving(false);
-          return;
-        }
-        body.avatarUrl = trimmedAvatar;
-      }
       if (Object.keys(body).length === 0) {
         toast.info("No hay cambios que guardar");
         setSaving(false);
@@ -140,6 +129,10 @@ const Profile = () => {
               {/* Avatar */}
               <div className="flex items-center gap-5 mb-8">
                 <div className="w-20 h-20 rounded-2xl overflow-hidden bg-muted border border-border shrink-0 flex items-center justify-center">
+                  {/* La foto viene del proveedor con el que entraste (Google, GitHub…).
+                      El campo para pegar una URL salió de acá: nadie tiene a mano la
+                      dirección de su propia foto. Vuelve como subida de archivo cuando
+                      haya almacenamiento (ver el pendiente de Vercel Blob). */}
                   {profile?.avatarUrl ? (
                     <img src={profile.avatarUrl} alt="avatar" className="w-full h-full object-cover" />
                   ) : (
@@ -172,22 +165,6 @@ const Profile = () => {
                     placeholder="Tu nombre..."
                     className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary/40 focus:bg-card focus:outline-none text-sm text-foreground placeholder:text-muted-foreground transition-all font-medium"
                   />
-                </div>
-                <div>
-                  <label htmlFor="avatar-url" className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">
-                    Foto de perfil (URL)
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <LinkIcon className="w-4 h-4 text-muted-foreground shrink-0 ml-1" />
-                    <input
-                      id="avatar-url"
-                      type="url"
-                      value={avatarUrlInput}
-                      onChange={(e) => setAvatarUrlInput(e.target.value)}
-                      placeholder="https://ejemplo.com/mi-foto.jpg"
-                      className="w-full px-4 py-3 rounded-xl bg-muted/50 border border-border focus:border-primary/40 focus:bg-card focus:outline-none text-sm text-foreground placeholder:text-muted-foreground transition-all font-medium"
-                    />
-                  </div>
                 </div>
                 <div className="flex justify-end">
                   <button
