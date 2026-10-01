@@ -38,6 +38,11 @@ const DEMO_EXPERTS = ["marketing", "legal", "financiero", "talento", "ventas"].m
   visibility: "system", isActive: true, brand: {}, welcome: { cards: [] }, persona: {}, capabilities: {},
 }));
 
+const DEMO_MESSAGES = [
+  { id: "u1", role: "user", text: "Analiza este contrato y dime los riesgos para mí." },
+  { id: "m1", role: "model", text: "## Resumen\n\nContrato de prestación de servicios entre **ACME** y el contratista.\n\n- Pago contra entrega\n- Plazo de cuatro meses\n\nEste análisis es orientativo y no reemplaza la revisión de un abogado." },
+];
+
 const DEMO_CONVERSATIONS = [
   { id: "c1", title: "Analiza este contrato de prestación de servicios", updatedAt: Date.now(), messages: [] },
   { id: "c2", title: "Plan de mercadeo para la marca", updatedAt: Date.now() - 1e6, messages: [] },
@@ -83,7 +88,6 @@ await ctx.route("**/api/**", (r) => {
   if (u.endsWith("/auth/get-session") && flag("--anon")) return json(r, { session: null, user: null });
   if (u.endsWith("/auth/get-session")) return json(r, { session: { id: "s1", userId: user.id, token: "t", expiresAt: new Date(Date.now() + 864e5).toISOString(), createdAt: now, updatedAt: now }, user });
   if (u === "/api/profile") return json(r, { ok: true, profile });
-  if (u.startsWith("/api/basalt/conversations")) return json(r, { ok: true, conversations: [] });
   if (u.startsWith("/api/basalt/memory")) return json(r, { ok: true, facts: [] });
   if (u.startsWith("/api/assistants")) return json(r, { ok: true, assistants: DEMO_EXPERTS });
   // Con las respuestas vacías, /tareas y /proyectos salían en su estado "no hay nada":
@@ -93,6 +97,11 @@ await ctx.route("**/api/**", (r) => {
   if (u === "/api/projects") return json(r, { ok: true, projects: DEMO_PROJECTS });
   if (u.startsWith("/api/assets")) return json(r, { ok: true, assets: [], total: 12 });
   if (u.startsWith("/api/billing/transactions")) return json(r, { ok: true, transactions: DEMO_TRANSACTIONS });
+  // La ruta por id va ANTES del prefijo: si no, el mock de la lista se la come y el
+  // cliente cree que la conversación no existe.
+  if (/^\/api\/basalt\/conversations\/[^/]+$/.test(u)) {
+    return json(r, { ok: true, conversation: { ...DEMO_CONVERSATIONS[0], messages: DEMO_MESSAGES } });
+  }
   if (u.startsWith("/api/basalt/conversations")) return json(r, { ok: true, conversations: DEMO_CONVERSATIONS });
   return json(r, { ok: true });
 });

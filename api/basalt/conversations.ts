@@ -46,7 +46,11 @@ const MSG_SCHEMA = z.object({
 const UPSERT_SCHEMA = z.object({
   id: z.string().min(1),
   title: z.string().trim().min(1).max(MAX_TITLE),
-  messages: z.array(MSG_SCHEMA),
+  // min(1) es la red de seguridad contra el borrado accidental: el cliente sube el
+  // hilo COMPLETO en cada guardado, así que un `messages: []` —por un cliente viejo
+  // o por guardar una conversación cuyos mensajes aún no llegaron— vaciaría una
+  // conversación existente sin que nada lo frene.
+  messages: z.array(MSG_SCHEMA).min(1),
   assistantSlug: z.string().trim().min(1).max(MAX_SLUG).nullish(),
 });
 
@@ -77,16 +81,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const assistantSlug = typeof req.query.assistant === "string" ? req.query.assistant : null;
 
   if (req.method === "GET") {
+    // Sin `messages`: la lista del menú solo pinta títulos y con 9 conversaciones
+    // eran 92 KB medidos en producción (y creciendo con cada mensaje). Los mensajes
+    // se piden al abrir una conversación, en api/basalt/conversations/[id].ts.
+    // De paso Postgres deja de leer el jsonb grande (TOAST) para esta consulta.
     const cols = {
       id: schema.basaltConversation.id,
       title: schema.basaltConversation.title,
       updatedAt: schema.basaltConversation.updatedAt,
-      messages: schema.basaltConversation.messages,
     };
     const where = and(eq(schema.basaltConversation.userId, user.userId), slugFilter(assistantSlug));
     // Las ancladas primero: con el tope de 50, ordenarlo acá (y no en el cliente) es lo que
     // garantiza que una anclada vieja no se caiga de la lista.
-    let rows: { id: string; title: string; updatedAt: Date; messages: unknown; pinned: boolean }[];
+    let rows: { id: string; title: string; updatedAt: Date; pinned: boolean }[];
     try {
       rows = await db.select({ ...cols, pinned: schema.basaltConversation.pinned }).from(schema.basaltConversation)
         .where(where)
@@ -106,7 +113,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         id: r.id,
         title: r.title,
         updatedAt: r.updatedAt.getTime(),
-        messages: r.messages,
         pinned: r.pinned,
       })),
     });

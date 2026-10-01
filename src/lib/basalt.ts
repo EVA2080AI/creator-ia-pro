@@ -107,13 +107,18 @@ export interface StoredMsg {
   attachments?: DocMeta[];
 }
 
-export interface StoredConversation {
+/** Lo que necesita la lista del menú. El historial ya no descarga los mensajes:
+ *  con 9 conversaciones eran 92 KB para pintar 1 KB de títulos. */
+export interface ConversationSummary {
   id: string;
   title: string;
   updatedAt: number;
-  messages: StoredMsg[];
   /** Anclada: va al principio del historial y el tope de 50 no la borra. */
   pinned?: boolean;
+}
+
+export interface StoredConversation extends ConversationSummary {
+  messages: StoredMsg[];
 }
 
 // Antes esto era localStorage puro (basalt:convs:<userId> / basalt:memory:
@@ -162,39 +167,114 @@ export async function migrateLegacyLocalStorage(userId: string): Promise<void> {
   }
 }
 
-// Una imagen sin url NI error es, en memoria durante una conversación en
-// vivo, "todavía generándose" (el render de Basalt lo muestra con spinner).
-// Pero una conversación CARGADA de la base de datos nunca está en vivo — si
-// llegó así sin url ni error, es una de dos: (a) tiene assetId → se subió a
-// /api/assets al generarla (ver generateImages en Basalt.tsx) y falta
-// rehidratar su url real, algo que openConversation() resuelve aparte
-// (getAssetsByIds) — se deja tal cual para que el spinner dure lo que tarda
-// esa rehidratación; (b) sin assetId → fila vieja de antes de esa migración,
-// o falló la subida a assets — ahí sí se marca como no recuperable, porque
-// si no el spinner queda infinito al reabrirla (reportado por un usuario
-// real, 2026-09-29).
-function markStaleImages(conv: StoredConversation): StoredConversation {
-  return {
-    ...conv,
-    messages: conv.messages.map((m) => ({
+// Una imagen sin url NI error es, en memoria durante una conversación en vivo,
+// "todavía generándose" (el render lo muestra con spinner). Pero una conversación
+// recién traída de la base nunca está en vivo: si llegó así, o tiene assetId —y
+// entonces su url es la del endpoint que sirve ese asset— o es irrecuperable.
+//
+// Antes esto eran dos pasos: marcar las rotas acá y pedirle al servidor las urls
+// reales (getAssetsByIds) desde la página, con su spinner. Desde que /api/assets
+// sirve cada imagen por una URL estable, rehidratar es construir un string: una
+// función pura, sin red, sin carreras al cambiar de conversación.
+export function hydrateImages(messages: StoredMsg[]): StoredMsg[] {
+  return messages.map((m) => (
+    !m.images?.length ? m : {
       ...m,
-      images: m.images?.map((img) =>
-        !img.url && !img.error && !img.assetId
-          ? { ...img, error: "Esta imagen no quedó guardada en el historial. Pídesela de nuevo si la necesitas." }
-          : img
-      ),
-    })),
-  };
+      images: m.images.map((img) => {
+        if (img.url || img.error) return img;
+        if (img.assetId) return { ...img, url: `/api/assets/${img.assetId}/raw` };
+        return { ...img, error: "Esta imagen no quedó guardada en el historial. Pídesela de nuevo si la necesitas." };
+      }),
+    }
+  ));
 }
 
 // assistantSlug: sin valor = chat de Basalt; con valor = chat de ese Experto
 // (cada Experto tiene su propio historial separado, homologado con Basalt —
 // mismo mecanismo, 2026-09-29).
-export async function loadConversations(userId: string, assistantSlug?: string): Promise<StoredConversation[]> {
+export async function loadConversations(userId: string, assistantSlug?: string): Promise<ConversationSummary[]> {
   if (!userId) return [];
   const qs = assistantSlug ? `?assistant=${encodeURIComponent(assistantSlug)}` : "";
-  const res = await apiJson<{ conversations: StoredConversation[] }>(`/api/basalt/conversations${qs}`);
-  return res.ok ? res.data!.conversations.map(markStaleImages) : [];
+  const res = await apiJson<{ conversations: ConversationSummary[] }>(`/api/basalt/conversations${qs}`);
+  return res.ok ? res.data!.conversations : [];
+}
+
+// ─── Mensajes de una conversación ────────────────────────────────────────────
+// Se piden al abrirla, no al cargar el menú. La caché es de MENSAJES (no de
+// conversaciones enteras) para que el título, la fecha y el anclado tengan una
+// sola fuente de verdad: la lista.
+const MAX_CACHED_THREADS = 10;
+let cacheOwner = "";
+const msgCache = new Map<string, StoredMsg[]>();
+const inFlight = new Map<string, Promise<StoredMsg[] | null>>();
+
+function ensureOwner(userId: string) {
+  if (cacheOwner === userId) return;
+  // Cambió la cuenta en la misma pestaña: lo de la anterior no se puede reusar.
+  msgCache.clear();
+  inFlight.clear();
+  cacheOwner = userId;
+}
+
+function remember(id: string, messages: StoredMsg[]) {
+  msgCache.delete(id);
+  msgCache.set(id, messages);
+  if (msgCache.size > MAX_CACHED_THREADS) {
+    const oldest = msgCache.keys().next().value;
+    if (oldest) msgCache.delete(oldest);
+  }
+}
+
+/** Síncrono a propósito: es lo que hace que reabrir una conversación sea instantáneo. */
+export function getCachedMessages(userId: string, id: string): StoredMsg[] | undefined {
+  ensureOwner(userId);
+  const hit = msgCache.get(id);
+  if (hit) remember(id, hit); // refresca su posición en el LRU
+  return hit;
+}
+
+export function cacheMessages(userId: string, id: string, messages: StoredMsg[]) {
+  ensureOwner(userId);
+  remember(id, messages);
+}
+
+export function forgetConversation(id: string) {
+  msgCache.delete(id);
+  inFlight.delete(id);
+}
+
+export function clearConversationCache() {
+  msgCache.clear();
+  inFlight.clear();
+  cacheOwner = "";
+}
+
+/** Trae los mensajes de una conversación (de la caché si ya se abrió). */
+export function loadConversationMessages(userId: string, id: string): Promise<StoredMsg[] | null> {
+  if (!userId) return Promise.resolve(null);
+  ensureOwner(userId);
+  const cached = msgCache.get(id);
+  if (cached) return Promise.resolve(cached);
+  const pending = inFlight.get(id);
+  if (pending) return pending;
+
+  const request = apiJson<{ conversation: { messages: StoredMsg[] } }>(`/api/basalt/conversations/${id}`)
+    .then((res) => {
+      if (!res.ok || !res.data?.conversation) return null;
+      const messages = hydrateImages(res.data.conversation.messages ?? []);
+      remember(id, messages);
+      return messages;
+    })
+    .finally(() => { inFlight.delete(id); });
+
+  inFlight.set(id, request);
+  return request;
+}
+
+/** Se dispara al pasar el cursor por una fila del historial: al soltar el clic ya está. */
+export function prefetchConversation(userId: string, id: string) {
+  if (!userId || msgCache.has(id) || inFlight.has(id)) return;
+  void loadConversationMessages(userId, id);
 }
 
 export async function saveConversation(userId: string, conv: StoredConversation, assistantSlug?: string) {
@@ -222,6 +302,9 @@ export async function saveConversation(userId: string, conv: StoredConversation,
     })),
   };
   await apiJson("/api/basalt/conversations", { method: "POST", body: JSON.stringify(slim) });
+  // La conversación en la que estás es la que más se reabre: queda cacheada ya
+  // hidratada, con las urls que el render necesita.
+  cacheMessages(userId, conv.id, hydrateImages(conv.messages));
 }
 
 /** Ancla o desancla. Devuelve false si el servidor no pudo guardarlo (el cliente revierte). */
@@ -236,6 +319,7 @@ export async function setConversationPinned(userId: string, id: string, pinned: 
 
 export async function deleteConversation(userId: string, id: string) {
   if (!userId) return;
+  forgetConversation(id);
   await apiJson(`/api/basalt/conversations/${id}`, { method: "DELETE" });
 }
 
@@ -315,7 +399,7 @@ export function buildSystemPrompt(memory: string[]) {
 const normalize = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 /** Filtra por título: sin acentos, sin mayúsculas y por palabras sueltas en cualquier orden. */
-export function filterConversations(list: StoredConversation[], query: string): StoredConversation[] {
+export function filterConversations<T extends ConversationSummary>(list: T[], query: string): T[] {
   const terms = normalize(query.trim()).split(/\s+/).filter(Boolean);
   if (!terms.length) return list;
   return list.filter((c) => {
@@ -324,9 +408,9 @@ export function filterConversations(list: StoredConversation[], query: string): 
   });
 }
 
-export interface ConversationGroup {
+export interface ConversationGroup<T = ConversationSummary> {
   label: string;
-  items: StoredConversation[];
+  items: T[];
   /** El grupo de ancladas: no es una fecha, va siempre primero. */
   pinned?: boolean;
 }
@@ -334,14 +418,14 @@ export interface ConversationGroup {
 const MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
 /** Agrupa de más nueva a más vieja: Hoy, Ayer, Últimos 7 días y luego por mes. */
-export function groupConversationsByDate(list: StoredConversation[], now: Date = new Date()): ConversationGroup[] {
+export function groupConversationsByDate<T extends ConversationSummary>(list: T[], now: Date = new Date()): ConversationGroup<T>[] {
   const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
   const today = startOfDay(now);
   const yesterday = today - 86_400_000;
   const week = today - 6 * 86_400_000;
 
-  const groups: ConversationGroup[] = [];
-  const byLabel = new Map<string, ConversationGroup>();
+  const groups: ConversationGroup<T>[] = [];
+  const byLabel = new Map<string, ConversationGroup<T>>();
   // Las ancladas van arriba y juntas: si cayeran en "Hoy"/"Agosto" según su fecha,
   // anclarlas no serviría de nada.
   const pinned = list.filter((c) => c.pinned);
@@ -349,7 +433,7 @@ export function groupConversationsByDate(list: StoredConversation[], now: Date =
   if (pinned.length) {
     groups.push({ label: "Ancladas", items: [...pinned].sort((a, b) => b.updatedAt - a.updatedAt), pinned: true });
   }
-  const push = (label: string, c: StoredConversation) => {
+  const push = (label: string, c: T) => {
     let g = byLabel.get(label);
     if (!g) { g = { label, items: [] }; byLabel.set(label, g); groups.push(g); }
     g.items.push(c);

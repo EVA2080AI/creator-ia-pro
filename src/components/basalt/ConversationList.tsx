@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Loader2, MessageSquare, Pin, PinOff, Search, Trash2, X } from "lucide-react";
-import { filterConversations, groupConversationsByDate, type StoredConversation } from "@/lib/basalt";
+import { filterConversations, groupConversationsByDate, type ConversationSummary } from "@/lib/basalt";
 
 // Historial del menú lateral. Estaba copiado tal cual en Basalt.tsx y en
 // Assistant.tsx (los Expertos); acá vive una sola vez y de paso gana lo que le
@@ -10,15 +10,18 @@ import { filterConversations, groupConversationsByDate, type StoredConversation 
 const SEARCH_FROM = 6;
 
 export interface ConversationListProps {
-  conversations: StoredConversation[];
+  conversations: ConversationSummary[];
   loading: boolean;
   activeId: string;
-  onOpen: (c: StoredConversation) => void;
+  onOpen: (c: ConversationSummary) => void;
   onDelete: (id: string) => void;
-  onTogglePin: (c: StoredConversation) => void;
+  onTogglePin: (c: ConversationSummary) => void;
+  /** Al pasar el cursor o el foco por una fila se piden sus mensajes: al soltar el
+   *  clic la conversación ya está en memoria y abre sin esqueleto. */
+  onPrefetch?: (id: string) => void;
 }
 
-export function ConversationList({ conversations, loading, activeId, onOpen, onDelete, onTogglePin }: ConversationListProps) {
+export function ConversationList({ conversations, loading, activeId, onOpen, onDelete, onTogglePin, onPrefetch }: ConversationListProps) {
   const [query, setQuery] = useState("");
   const searching = query.trim().length > 0;
 
@@ -64,7 +67,12 @@ export function ConversationList({ conversations, loading, activeId, onOpen, onD
             <div key={group.label || "resultados"}>
               {group.label && <div className="asst-group-label">{group.label}</div>}
               {group.items.map((c) => (
-                <div key={c.id} className="asst-conv-row">
+                <div
+                  key={c.id}
+                  className="asst-conv-row"
+                  onPointerEnter={() => onPrefetch?.(c.id)}
+                  onFocusCapture={() => onPrefetch?.(c.id)}
+                >
                   <button
                     className={`asst-switch-item ${c.id === activeId ? "active" : ""}`}
                     onClick={() => onOpen(c)}

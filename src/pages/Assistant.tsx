@@ -16,8 +16,9 @@ import {
   type Assistant, type AssistantWelcomeCard,
 } from "@/lib/assistants";
 import {
-  loadConversations, saveConversation, deleteConversation, setConversationPinned, migrateLegacyLocalStorage, CONTINUE_PROMPT, joinContinuation,
-  type StoredConversation, type StoredMsg,
+  loadConversations, saveConversation, deleteConversation, setConversationPinned, migrateLegacyLocalStorage,
+  getCachedMessages, loadConversationMessages, prefetchConversation, CONTINUE_PROMPT, joinContinuation,
+  type ConversationSummary, type StoredMsg,
 } from "@/lib/basalt";
 import { toast } from "sonner";
 import { mdToHtml } from "@/lib/markdown";
@@ -80,7 +81,7 @@ export default function AssistantPage() {
   const [autoGuide] = useState(() => !hasSeenBasaltGuide());
 
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
-  const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [conversationsLoading, setConversationsLoading] = useState(true);
   const [messages, setMessages] = useState<StoredMsg[]>([]);
   const [input, setInput] = useState("");
@@ -89,6 +90,10 @@ export default function AssistantPage() {
   // Mensaje cuya respuesta se cortó por el límite de tiempo del servidor
   // (finish_reason "length") — habilita "Continuar" (igual que en Basalt.tsx).
   const [truncatedId, setTruncatedId] = useState<string | null>(null);
+  // Estado de la conversación abierta: "loading" mientras llegan sus mensajes.
+  const [threadStatus, setThreadStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [openingTitle, setOpeningTitle] = useState("");
+  const openRef = useRef("");
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const userId = user?.id ?? "";
@@ -132,21 +137,46 @@ export default function AssistantPage() {
 
   const newChat = () => {
     abortRef.current?.abort();
+    openRef.current = "";
     setConvId(crypto.randomUUID());
     setMessages([]);
+    setThreadStatus("idle");
     setError(null);
+    setTruncatedId(null);
     clearDocs();
     setSidebarOpen(false);
   };
 
-  const openConversation = (c: StoredConversation) => {
+  // Abrir una conversación trae sus mensajes (la lista ya no los descarga). Si ya se
+  // abrió antes están en memoria y el cambio es instantáneo; si no, se pinta un
+  // esqueleto —nunca la pantalla de bienvenida, que daría un parpadeo feísimo— y
+  // openRef descarta la respuesta si para entonces ya se abrió otra.
+  const openConversation = (c: ConversationSummary) => {
     abortRef.current?.abort();
     setConvId(c.id);
-    setMessages(c.messages);
     setError(null);
+    setTruncatedId(null);
     clearDocs();
     setSidebarOpen(false);
-    requestAnimationFrame(stickToBottom);
+    openRef.current = c.id;
+
+    const cached = getCachedMessages(userId, c.id);
+    if (cached) {
+      setMessages(cached);
+      setThreadStatus("idle");
+      requestAnimationFrame(stickToBottom);
+      return;
+    }
+    setMessages([]);
+    setOpeningTitle(c.title);
+    setThreadStatus("loading");
+    void loadConversationMessages(userId, c.id).then((messages) => {
+      if (openRef.current !== c.id) return;
+      if (!messages) { setThreadStatus("error"); return; }
+      setMessages(messages);
+      setThreadStatus("idle");
+      requestAnimationFrame(stickToBottom);
+    });
   };
 
   const removeConversation = (id: string) => {
@@ -159,7 +189,7 @@ export default function AssistantPage() {
 
   // Anclar es optimista: la lista se reordena al instante y, si el servidor no pudo
   // guardarlo, vuelve a su sitio con un aviso (en vez de quedar mintiendo).
-  const togglePin = (c: StoredConversation) => {
+  const togglePin = (c: ConversationSummary) => {
     const next = !c.pinned;
     setConversations((prev) => prev.map((x) => (x.id === c.id ? { ...x, pinned: next } : x)));
     void setConversationPinned(userId, c.id, next).then((ok) => {
@@ -173,7 +203,10 @@ export default function AssistantPage() {
     // Adjuntar sin escribir nada = pedir el análisis completo (igual que en Basalt).
     const attached = opts?.continueFrom || opts?.retry ? [] : readyDocs;
     const text = prompt.trim() || (attached.length ? DEFAULT_DOC_PROMPT : "");
-    if (!text || generating || !assistant || (!opts?.continueFrom && docsBusy)) return;
+    // Nunca escribir sobre una conversación cuyos mensajes aún no llegaron: al
+    // guardar se sube el hilo COMPLETO desde el estado local, así que hacerlo con
+    // el hilo a medias borraría lo anterior.
+    if (!text || generating || !assistant || threadStatus !== "idle" || (!opts?.continueFrom && docsBusy)) return;
 
     // "Continuar": retoma un mensaje cortado, pegando el texto nuevo al final
     // del mismo mensaje (joinContinuation) en vez de abrir uno nuevo.
@@ -303,7 +336,7 @@ export default function AssistantPage() {
       abortRef.current = null;
       stickToBottom();
     }
-  }, [assistant, generating, messages, stickToBottom, userId, convId, slug, readyDocs, docsBusy, clearDocs]);
+  }, [assistant, generating, messages, stickToBottom, userId, convId, slug, readyDocs, docsBusy, clearDocs, threadStatus]);
 
   const handleStop = () => abortRef.current?.abort();
 
@@ -357,6 +390,7 @@ export default function AssistantPage() {
             onOpen={openConversation}
             onDelete={removeConversation}
             onTogglePin={togglePin}
+            onPrefetch={(id) => prefetchConversation(userId, id)}
           />
         }
       />
@@ -380,7 +414,25 @@ export default function AssistantPage() {
         </header>
 
         <div className="asst-scroller" ref={scrollerRef}>
-          {messages.length === 0 ? (
+          {threadStatus !== "idle" ? (
+            <div className="asst-thread">
+              {/* El título de la conversación ES el principio del primer mensaje del
+                  usuario, así que el esqueleto no inventa nada. Va en el render y
+                  nunca dentro de `messages`: así no hay forma de persistirlo. */}
+              <div className="asst-msg user"><div className="asst-bubble">{openingTitle}</div></div>
+              {threadStatus === "loading" ? (
+                <div className="asst-msg model">
+                  <div className="asst-avatar"><Bot className="w-3.5 h-3.5 text-white" aria-hidden /></div>
+                  <div className="asst-body"><div className="asst-shimmer" role="status" aria-label="Abriendo la conversación"><i /><i /><i /></div></div>
+                </div>
+              ) : (
+                <div className="asst-err" role="alert">
+                  <span>⚠️ No se pudo abrir esta conversación.</span>
+                  <button onClick={() => openConversation({ id: convId, title: openingTitle, updatedAt: Date.now() })}>Reintentar</button>
+                </div>
+              )}
+            </div>
+          ) : messages.length === 0 ? (
             <section className="asst-welcome">
               <h1 className="asst-hello">{assistant.welcome.title || `Hola, soy ${assistant.name}`}</h1>
               <p className="asst-hello-sub">{assistant.welcome.subtitle || assistant.tagline}</p>
@@ -476,7 +528,8 @@ export default function AssistantPage() {
             <button
               type={generating ? "button" : "submit"}
               onClick={generating ? handleStop : undefined}
-              className={`asst-send ${generating ? "stop" : (input.trim() || readyDocs.length) && !docsBusy ? "ready" : ""}`}
+              disabled={threadStatus !== "idle" && !generating}
+              className={`asst-send ${generating ? "stop" : (input.trim() || readyDocs.length) && !docsBusy && threadStatus === "idle" ? "ready" : ""}`}
               aria-label={generating ? "Detener" : "Enviar"}
             >
               {generating ? <Square className="w-3.5 h-3.5" /> : <Send className="w-4 h-4" />}

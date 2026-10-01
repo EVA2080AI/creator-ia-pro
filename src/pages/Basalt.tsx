@@ -25,9 +25,11 @@ import { CHAT_MODELS, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID, canAccessModel, getI
 import {
   BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply,
   loadConversations, saveConversation, deleteConversation, setConversationPinned, loadMemory, saveMemory,
-  migrateLegacyLocalStorage, CONTINUE_PROMPT, joinContinuation, type StoredConversation, type StoredMsg,
+  migrateLegacyLocalStorage, CONTINUE_PROMPT, joinContinuation,
+  getCachedMessages, loadConversationMessages, prefetchConversation,
+  type ConversationSummary, type StoredMsg,
 } from "@/lib/basalt";
-import { createAsset, getAssetsByIds } from "@/lib/assets";
+import { createAsset } from "@/lib/assets";
 import "./Assistant.css";
 
 const ICONS: Record<string, typeof LayoutTemplate> = {
@@ -71,7 +73,7 @@ export default function BasaltPage() {
 
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
   const [messages, setMessages] = useState<StoredMsg[]>([]);
-  const [conversations, setConversations] = useState<StoredConversation[]>([]);
+  const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   // Sin esto, "Conversaciones" se ve igual vacía mientras carga que cuando
   // de verdad no hay ninguna — se lee como sección rota (auditoría UX
   // 2026-09-29), a diferencia de "Memoria" que sí distingue los dos casos.
@@ -85,6 +87,10 @@ export default function BasaltPage() {
   // Id del mensaje cuya respuesta se cortó por el límite de tiempo del servidor
   // (finish_reason "length") — habilita el botón "Continuar".
   const [truncatedId, setTruncatedId] = useState<string | null>(null);
+  // Estado de la conversación abierta: "loading" mientras llegan sus mensajes.
+  const [threadStatus, setThreadStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [openingTitle, setOpeningTitle] = useState("");
+  const openRef = useRef("");
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const autoSentRef = useRef(false);
@@ -165,40 +171,9 @@ export default function BasaltPage() {
     return final;
   }, [imageModel]);
 
-  // Al reabrir una conversación, las imágenes que sobrevivieron solo traen
-  // assetId (su url pesada se sacó del historial al guardar — ver
-  // saveConversation). Se resuelven en un solo pedido por lote y se
-  // mezclan por m.id, así que si el usuario ya cambió de conversación para
-  // cuando esto resuelve, el merge simplemente no encuentra nada que tocar.
-  const rehydrateImages = useCallback(async (msgs: StoredMsg[]) => {
-    const ids = Array.from(new Set(
-      msgs.flatMap((m) => m.images ?? [])
-        .filter((img) => !img.url && !img.error && img.assetId)
-        .map((img) => img.assetId!)
-    ));
-    if (!ids.length) return;
-    const assets = await getAssetsByIds(ids);
-    const byId = new Map(assets.map((a) => [a.id, a.asset_url]));
-    setMessages((prev) => prev.map((m) => (
-      !m.images?.some((img) => img.assetId && !img.url && !img.error)
-        ? m
-        : {
-            ...m,
-            images: m.images!.map((img) => {
-              if (img.url || img.error || !img.assetId) return img;
-              const url = byId.get(img.assetId);
-              return url
-                ? { ...img, url }
-                : { ...img, error: "Esta imagen no quedó guardada en el historial. Pídesela de nuevo si la necesitas." };
-            }),
-          }
-    )));
-  }, []);
-
-
   // Anclar es optimista: la lista se reordena al instante y, si el servidor no pudo
   // guardarlo, vuelve a su sitio con un aviso (en vez de quedar mintiendo).
-  const togglePin = (c: StoredConversation) => {
+  const togglePin = (c: ConversationSummary) => {
     const next = !c.pinned;
     setConversations((prev) => prev.map((x) => (x.id === c.id ? { ...x, pinned: next } : x)));
     void setConversationPinned(userId, c.id, next).then((ok) => {
@@ -212,7 +187,10 @@ export default function BasaltPage() {
     const isContinue = !!opts?.continueFrom;
     const attached = isContinue ? [] : readyDocs;
     const text = prompt.trim() || (attached.length ? DEFAULT_DOC_PROMPT : "");
-    if (!text || generating || (!isContinue && docsBusy)) return;
+    // Nunca escribir sobre una conversación cuyos mensajes aún no llegaron: al
+    // guardar se sube el hilo COMPLETO desde el estado local, así que hacerlo con
+    // el hilo a medias borraría lo anterior.
+    if (!text || generating || threadStatus !== "idle" || (!isContinue && docsBusy)) return;
     const pendingSnapshot = pendingDocs;
 
     // "Continuar": retoma un mensaje cortado por el límite de tiempo. No agrega
@@ -354,7 +332,7 @@ export default function BasaltPage() {
       stickToBottom();
     }
     persist(convId, final);
-  }, [generating, messages, model, memory, userId, convId, stickToBottom, generateImages, persist, setParams, readyDocs, docsBusy, pendingDocs, clearDocs, restoreDocs]);
+  }, [generating, messages, model, memory, userId, convId, stickToBottom, generateImages, persist, setParams, readyDocs, docsBusy, pendingDocs, clearDocs, restoreDocs, threadStatus]);
 
   // /a/basalt?q=... (desde /chat o el dashboard) envía el primer mensaje solo.
   useEffect(() => {
@@ -367,22 +345,46 @@ export default function BasaltPage() {
 
   const newChat = () => {
     abortRef.current?.abort();
+    openRef.current = "";
     setConvId(crypto.randomUUID());
     setMessages([]);
+    setThreadStatus("idle");
     setError(null);
+    setTruncatedId(null);
     setSidebarOpen(false);
     docsByMsg.current.clear();
     clearDocs();
   };
 
-  const openConversation = (c: StoredConversation) => {
+  // Abrir una conversación trae sus mensajes (la lista ya no los descarga). Si ya se
+  // abrió antes están en memoria y el cambio es instantáneo; si no, se pinta un
+  // esqueleto —nunca la pantalla de bienvenida, que daría un parpadeo feísimo— y
+  // openRef descarta la respuesta si para entonces ya se abrió otra.
+  const openConversation = (c: ConversationSummary) => {
     abortRef.current?.abort();
     setConvId(c.id);
-    setMessages(c.messages);
     setError(null);
+    setTruncatedId(null);
     setSidebarOpen(false);
-    requestAnimationFrame(stickToBottom);
-    void rehydrateImages(c.messages);
+    openRef.current = c.id;
+
+    const cached = getCachedMessages(userId, c.id);
+    if (cached) {
+      setMessages(cached);
+      setThreadStatus("idle");
+      requestAnimationFrame(stickToBottom);
+      return;
+    }
+    setMessages([]);
+    setOpeningTitle(c.title);
+    setThreadStatus("loading");
+    void loadConversationMessages(userId, c.id).then((messages) => {
+      if (openRef.current !== c.id) return;
+      if (!messages) { setThreadStatus("error"); return; }
+      setMessages(messages);
+      setThreadStatus("idle");
+      requestAnimationFrame(stickToBottom);
+    });
   };
 
   const removeConversation = (id: string) => {
@@ -458,6 +460,7 @@ export default function BasaltPage() {
             onOpen={openConversation}
             onDelete={removeConversation}
             onTogglePin={togglePin}
+            onPrefetch={(id) => prefetchConversation(userId, id)}
           />
         }
       />
@@ -485,7 +488,25 @@ export default function BasaltPage() {
         </header>
 
         <div className="asst-scroller" ref={scrollerRef}>
-          {messages.length === 0 ? (
+          {threadStatus !== "idle" ? (
+            <div className="asst-thread">
+              {/* El título de la conversación ES el principio del primer mensaje del
+                  usuario, así que el esqueleto no inventa nada. Va en el render y
+                  nunca dentro de `messages`: así no hay forma de persistirlo. */}
+              <div className="asst-msg user"><div className="asst-bubble">{openingTitle}</div></div>
+              {threadStatus === "loading" ? (
+                <div className="asst-msg model">
+                  <div className="asst-avatar"><Bot className="w-3.5 h-3.5 text-white" aria-hidden /></div>
+                  <div className="asst-body"><div className="asst-shimmer" role="status" aria-label="Abriendo la conversación"><i /><i /><i /></div></div>
+                </div>
+              ) : (
+                <div className="asst-err" role="alert">
+                  <span>⚠️ No se pudo abrir esta conversación.</span>
+                  <button onClick={() => openConversation({ id: convId, title: openingTitle, updatedAt: Date.now() })}>Reintentar</button>
+                </div>
+              )}
+            </div>
+          ) : messages.length === 0 ? (
             <section className="asst-welcome">
               <h1 className="asst-hello">{A.welcome.title}</h1>
               <p className="asst-hello-sub">{A.welcome.subtitle}</p>
@@ -591,7 +612,8 @@ export default function BasaltPage() {
             <button
               type={generating ? "button" : "submit"}
               onClick={generating ? () => abortRef.current?.abort() : undefined}
-              className={`asst-send ${generating ? "stop" : (input.trim() || readyDocs.length) && !docsBusy ? "ready" : ""}`}
+              disabled={threadStatus !== "idle" && !generating}
+              className={`asst-send ${generating ? "stop" : (input.trim() || readyDocs.length) && !docsBusy && threadStatus === "idle" ? "ready" : ""}`}
               aria-label={generating ? "Detener" : "Enviar"}
             >
               {generating ? <Square className="w-3.5 h-3.5" /> : <Send className="w-4 h-4" />}
