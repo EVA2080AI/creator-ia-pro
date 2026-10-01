@@ -568,3 +568,54 @@
 @media (prefers-reduced-motion: reduce) {
   .asst-app[data-asst-theme="dark"] .asst-hello::after { animation: none; }
 }
+
+/* ══ Historial: buscar y agrupar por fecha ═══════════════════════════════════
+   Con una lista larga de títulos truncados había que leerlos todos para
+   encontrar una conversación (visto en producción con 9). */
+.asst-conv-search {
+  display: flex; align-items: center; gap: 6px; margin: 0 8px 6px; padding: 0 8px;
+  border: 1px solid var(--asst-border); border-radius: 10px; background: var(--asst-bg);
+  color: var(--asst-txt-3);
+}
+.asst-conv-search:focus-within { border-color: var(--asst-accent-text); }
+.asst-conv-search input {
+  flex: 1; min-width: 0; height: 32px; border: 0; background: none; outline: none;
+  font-size: 12.5px; color: var(--asst-txt); font-family: inherit;
+}
+.asst-conv-search input::placeholder { color: var(--asst-txt-3); }
+/* La X nativa de type="search" en Chrome aparece encima de la nuestra. */
+.asst-conv-search input::-webkit-search-cancel-button { display: none; }
+.asst-conv-search button {
+  flex: none; width: 20px; height: 20px; display: grid; place-items: center;
+  border: 0; border-radius: 50%; background: transparent; color: var(--asst-txt-3); cursor: pointer;
+}
+.asst-conv-search button:hover { background: var(--asst-panel-2); color: var(--asst-txt); }
+
+.asst-group-label {
+  padding: 10px 12px 4px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--asst-txt-3);
+}
+.asst-conv-row { display: flex; align-items: center; }
+.asst-conv-note {
+  display: flex; align-items: center; gap: 8px; padding: 4px 12px;
+  font-size: 12px; line-height: 1.45; color: var(--asst-txt-3);
+}
+.asst-app[data-asst-theme="dark"] :is(.asst-group-label, .asst-conv-search input) { font-family: var(--asst-mono); }
+.asst-app[data-asst-theme="dark"] .asst-conv-search:focus-within { border-color: color-mix(in oklch, var(--asst-term) 45%, var(--asst-border)); }
+
+/* ══ Panel plegable en escritorio ════════════════════════════════════════════
+   En móvil el panel ya es un cajón; en escritorio estaba fijo y ocupaba 264px
+   aunque estuvieras mirando código a pantalla partida. El botón para volver a
+   abrirlo va FUERA del <nav> (si estuviera dentro se plegaría con él) y la barra
+   superior le deja sitio. */
+.asst-collapse-btn, .asst-expand-btn { display: none; }
+@media (min-width: 769px) {
+  .asst-side-top .asst-collapse-btn { display: grid; margin-left: auto; }
+  .asst-sidebar.collapsed { margin-left: -264px; }
+  .asst-expand-btn {
+    position: fixed; top: calc(10px + env(safe-area-inset-top)); left: 10px; z-index: 45;
+    background: var(--asst-panel); border: 1px solid var(--asst-border);
+  }
+  html[data-asst-sidebar="collapsed"] .asst-expand-btn { display: grid; }
+  html[data-asst-sidebar="collapsed"] .asst-topbar { padding-left: 52px; }
+}

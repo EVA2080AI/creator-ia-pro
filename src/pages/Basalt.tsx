@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Send, Square, Loader2, Trash2, Brain, Scale, Paperclip, FileText,
-  LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, MessageSquare, X,
+  Menu, Send, Square, Loader2, Brain, Scale, Paperclip, FileText,
+  LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, X,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -11,6 +11,7 @@ import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
 import { useProfile } from "@/hooks/useProfile";
 import { ModelPicker } from "@/components/basalt/ModelPicker";
+import { ConversationList } from "@/components/basalt/ConversationList";
 import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
@@ -436,37 +437,13 @@ export default function BasaltPage() {
           </>
         }
         extraNav={
-          <>
-            <div className="asst-switcher-label">Conversaciones</div>
-            {/* Antes tenía flex:1 — .asst-side-bottom (más abajo) usa
-                margin-top:auto en el mismo flex column, y le ganaba todo el
-                espacio a este contenedor dejándolo en 0px de alto (nunca se
-                notó porque esta cuenta no tenía conversaciones guardadas
-                hasta la migración a base de datos, 2026-09-29). El nav ya
-                scrollea completo (overflow-y:auto), como la lista de
-                Expertos — no hace falta un scroll anidado acá. */}
-            <div>
-              {conversationsLoading ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando…
-                </div>
-              ) : conversations.length === 0 ? (
-                <p style={{ padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>Todavía no hay conversaciones guardadas.</p>
-              ) : (
-                conversations.map((c) => (
-                  <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
-                    <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
-                      <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-                    </button>
-                    <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </>
+          <ConversationList
+            conversations={conversations}
+            loading={conversationsLoading}
+            activeId={convId}
+            onOpen={openConversation}
+            onDelete={removeConversation}
+          />
         }
       />
 

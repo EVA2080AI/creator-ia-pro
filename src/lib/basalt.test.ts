@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { joinContinuation } from "./basalt";
+import { filterConversations, groupConversationsByDate, joinContinuation, type StoredConversation } from "./basalt";
+
+const conv = (id: string, title: string, updatedAt = Date.now()): StoredConversation => ({ id, title, updatedAt, messages: [] });
 
 const F = "```";
 
@@ -53,5 +55,51 @@ describe("joinContinuation", () => {
     expect(joinContinuation("Los beneficios principales son la velocidad y", "Los beneficios principales son la velocidad y la simpleza.")).toBe(
       "Los beneficios principales son la velocidad y la simpleza.",
     );
+  });
+});
+
+describe("filterConversations", () => {
+  const list = [
+    conv("1", "Analiza este contrato de servicios"),
+    conv("2", "Plan de mercadeo para la marca"),
+    conv("3", "Hazme una landing para el gimnasio"),
+  ];
+
+  it("sin texto devuelve todo", () => {
+    expect(filterConversations(list, "   ")).toHaveLength(3);
+  });
+
+  it("ignora acentos y mayúsculas", () => {
+    expect(filterConversations(list, "MERCADÉO").map((c) => c.id)).toEqual(["2"]);
+  });
+
+  it("exige todas las palabras, en cualquier orden", () => {
+    expect(filterConversations(list, "landing gimnasio").map((c) => c.id)).toEqual(["3"]);
+    expect(filterConversations(list, "landing contrato")).toHaveLength(0);
+  });
+});
+
+describe("groupConversationsByDate", () => {
+  const now = new Date(2026, 9, 1, 15, 0); // 1 de octubre de 2026
+  const at = (id: string, d: Date) => ({ id, title: id, updatedAt: d.getTime(), messages: [] });
+
+  it("separa hoy, ayer, la semana y los meses anteriores", () => {
+    const groups = groupConversationsByDate([
+      at("hoy", new Date(2026, 9, 1, 9, 0)),
+      at("ayer", new Date(2026, 8, 30, 23, 30)),
+      at("semana", new Date(2026, 8, 27, 12, 0)),
+      at("agosto", new Date(2026, 7, 3, 12, 0)),
+      at("viejo", new Date(2025, 11, 24, 12, 0)),
+    ], now);
+    expect(groups.map((g) => g.label)).toEqual(["Hoy", "Ayer", "Últimos 7 días", "Agosto", "Diciembre 2025"]);
+    expect(groups[0].items.map((c) => c.id)).toEqual(["hoy"]);
+  });
+
+  it("ordena de más nueva a más vieja dentro del grupo", () => {
+    const groups = groupConversationsByDate([
+      at("temprano", new Date(2026, 9, 1, 8, 0)),
+      at("tarde", new Date(2026, 9, 1, 14, 0)),
+    ], now);
+    expect(groups[0].items.map((c) => c.id)).toEqual(["tarde", "temprano"]);
   });
 });

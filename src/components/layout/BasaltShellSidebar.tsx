@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   Plus, Scale, ListTodo, FolderOpen, User, ShieldCheck,
   Sun, Moon, LogOut, Bug, HelpCircle, Settings, Activity, LifeBuoy, CreditCard,
-  LayoutTemplate,
+  LayoutTemplate, PanelLeftClose, PanelLeftOpen,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
@@ -21,6 +21,8 @@ import { listAssistants, type Assistant } from "@/lib/assistants";
 
 // Mismo mapa que Profile.tsx (TIER_LABELS) — se duplica acá porque es un
 // objeto de 7 entradas, no amerita un módulo compartido.
+const SIDEBAR_KEY = "basalt_sidebar_collapsed";
+
 const TIER_LABELS: Record<string, string> = { free: "Free", creador: "Creador", pro: "Pro", agencia: "Agencia", pyme: "Pyme", pymes: "Pymes", admin: "Admin" };
 
 export interface BasaltShellSidebarProps {
@@ -65,9 +67,25 @@ export function BasaltShellSidebar({
   const { user, signOut } = useAuth();
   const { isAdmin } = useAdmin(user?.id);
   const { profile } = useProfile(user?.id);
+  // Plegar el panel en escritorio (en móvil ya es un cajón). Con el chat a pantalla
+  // completa se gana el ancho del panel para el código y la vista previa, que es
+  // donde más falta hace. La preferencia se recuerda.
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem(SIDEBAR_KEY) === "1"; } catch { return false; }
+  });
   const [showReport, setShowReport] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [experts, setExperts] = useState<Assistant[]>([]);
+
+  // El botón para volver a abrirlo vive fuera del <nav> (si no, se va con él al
+  // plegarse) y la barra superior necesita dejarle sitio: las dos cosas se resuelven
+  // con un atributo en <html>, igual que el tema.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.asstSidebar = collapsed ? "collapsed" : "open";
+    try { localStorage.setItem(SIDEBAR_KEY, collapsed ? "1" : "0"); } catch { /* sin storage */ }
+    return () => { delete root.dataset.asstSidebar; };
+  }, [collapsed]);
 
   useEffect(() => {
     if (autoOpenGuide) setShowGuide(true);
@@ -127,7 +145,7 @@ export function BasaltShellSidebar({
 
   return (
     <>
-      <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""}`} aria-label="Basalt">
+      <nav className={`asst-sidebar ${sidebarOpen ? "open" : ""} ${collapsed ? "collapsed" : ""}`} aria-label="Basalt">
         <div className="asst-side-scroll">
         <div className="asst-side-top">
           {/* Basalt YA es el inicio — sin flecha de "volver", no hay ningún
@@ -135,6 +153,14 @@ export function BasaltShellSidebar({
               UI). El panel de métricas pasa a la sección Plataforma, como
               un destino más, no como una flecha ambigua arriba. */}
           <Logo size="sm" showText onClick={() => go("/a/basalt")} />
+          <button
+            className="asst-icon-btn asst-collapse-btn"
+            onClick={() => setCollapsed(true)}
+            aria-label="Ocultar el panel"
+            title="Ocultar el panel"
+          >
+            <PanelLeftClose className="w-4 h-4" />
+          </button>
         </div>
         <button className="asst-new-chat" onClick={handleNewChat}>
           <Plus className="w-4 h-4" /> Nuevo chat
@@ -229,6 +255,14 @@ export function BasaltShellSidebar({
           <QuickGuideModal open={showGuide} onClose={() => setShowGuide(false)} />
         </div>
       </nav>
+      <button
+        className="asst-icon-btn asst-expand-btn"
+        onClick={() => setCollapsed(false)}
+        aria-label="Mostrar el panel"
+        title="Mostrar el panel"
+      >
+        <PanelLeftOpen className="w-4 h-4" />
+      </button>
       <div className={`asst-backdrop ${sidebarOpen ? "show" : ""}`} onClick={() => setSidebarOpen(false)} />
     </>
   );

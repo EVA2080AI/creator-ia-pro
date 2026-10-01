@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Send, Square, Loader2, Trash2, MessageSquare, Paperclip, FileText,
+  Menu, Send, Square, Loader2, Paperclip, FileText,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Scale, Dice5, Wallet, Sparkles, Bot,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,6 +22,7 @@ import {
 import { mdToHtml } from "@/lib/markdown";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
+import { ConversationList } from "@/components/basalt/ConversationList";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
 import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import "./Assistant.css";
@@ -108,7 +109,7 @@ export default function AssistantPage() {
       setAssistant(a);
       setLoadingAssistant(false);
     });
-  }, [slug]);
+  }, [slug, clearDocs]);
 
   // Historial propio por Experto — mismo mecanismo que Basalt (homologado
   // 2026-09-29), separado por assistantSlug en la misma tabla.
@@ -335,30 +336,13 @@ export default function AssistantPage() {
         onNewChat={newChat}
         autoOpenGuide={autoGuide}
         extraNav={
-          <>
-            <div className="asst-switcher-label">Conversaciones</div>
-            <div>
-              {conversationsLoading ? (
-                <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando…
-                </div>
-              ) : conversations.length === 0 ? (
-                <p style={{ padding: "4px 12px", fontSize: 12, color: "var(--asst-txt-3)" }}>Todavía no hay conversaciones guardadas.</p>
-              ) : (
-                conversations.map((c) => (
-                  <div key={c.id} style={{ display: "flex", alignItems: "center" }}>
-                    <button className={`asst-switch-item ${c.id === convId ? "active" : ""}`} onClick={() => openConversation(c)} style={{ flex: 1, minWidth: 0 }}>
-                      <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-                      <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
-                    </button>
-                    <button className="asst-icon-btn" onClick={() => removeConversation(c.id)} aria-label="Borrar conversación">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          </>
+          <ConversationList
+            conversations={conversations}
+            loading={conversationsLoading}
+            activeId={convId}
+            onOpen={openConversation}
+            onDelete={removeConversation}
+          />
         }
       />
 

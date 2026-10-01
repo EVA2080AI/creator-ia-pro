@@ -293,3 +293,57 @@ export function buildSystemPrompt(memory: string[]) {
   if (!memory.length) return SYSTEM_PROMPT;
   return `${SYSTEM_PROMPT}\n\nLO QUE RECUERDAS DEL USUARIO:\n${memory.map((m) => `- ${m}`).join("\n")}`;
 }
+
+// ─── Historial: buscar y agrupar ──────────────────────────────────────────────
+// Con más de un puñado de conversaciones, una lista plana de títulos truncados
+// obliga a leerlas todas para encontrar una. Gemini resuelve lo mismo con
+// "Buscar conversaciones" + "Recientes"; acá se busca por título y se agrupa por
+// fecha, que es como la gente recuerda ("la de ayer").
+
+const normalize = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+/** Filtra por título: sin acentos, sin mayúsculas y por palabras sueltas en cualquier orden. */
+export function filterConversations(list: StoredConversation[], query: string): StoredConversation[] {
+  const terms = normalize(query.trim()).split(/\s+/).filter(Boolean);
+  if (!terms.length) return list;
+  return list.filter((c) => {
+    const title = normalize(c.title);
+    return terms.every((t) => title.includes(t));
+  });
+}
+
+export interface ConversationGroup {
+  label: string;
+  items: StoredConversation[];
+}
+
+const MONTHS = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+
+/** Agrupa de más nueva a más vieja: Hoy, Ayer, Últimos 7 días y luego por mes. */
+export function groupConversationsByDate(list: StoredConversation[], now: Date = new Date()): ConversationGroup[] {
+  const startOfDay = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const today = startOfDay(now);
+  const yesterday = today - 86_400_000;
+  const week = today - 6 * 86_400_000;
+
+  const groups: ConversationGroup[] = [];
+  const byLabel = new Map<string, ConversationGroup>();
+  const push = (label: string, c: StoredConversation) => {
+    let g = byLabel.get(label);
+    if (!g) { g = { label, items: [] }; byLabel.set(label, g); groups.push(g); }
+    g.items.push(c);
+  };
+
+  for (const c of [...list].sort((a, b) => b.updatedAt - a.updatedAt)) {
+    if (c.updatedAt >= today) push("Hoy", c);
+    else if (c.updatedAt >= yesterday) push("Ayer", c);
+    else if (c.updatedAt >= week) push("Últimos 7 días", c);
+    else {
+      const d = new Date(c.updatedAt);
+      const month = MONTHS[d.getMonth()];
+      const label = d.getFullYear() === now.getFullYear() ? month : `${month} ${d.getFullYear()}`;
+      push(label.charAt(0).toUpperCase() + label.slice(1), c);
+    }
+  }
+  return groups;
+}
