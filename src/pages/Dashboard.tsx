@@ -6,7 +6,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useAdmin } from "@/hooks/useAdmin";
 import { CANVAS_ENABLED } from "@/lib/features";
 import { listSpaces, createSpace, deleteSpace, type Space } from "@/lib/spaces";
-import { listAssets } from "@/lib/assets";
+import { countAssets } from "@/lib/assets";
 import { listTransactions, weeklySpend, toolBreakdown } from "@/lib/transactions";
 import { toast } from "sonner";
 import {
@@ -109,8 +109,9 @@ export default function Dashboard() {
           setShowWelcome(true);
         }
 
-        const { total } = await listAssets({ limit: 1 });
-        setAssetsCount(total);
+        // countAssets en vez de listAssets({limit:1}): contar no tiene por qué bajar
+        // una fila que puede ser una imagen de 1,9 MB incrustada.
+        setAssetsCount(await countAssets());
 
         const transactions = await listTransactions();
         setUsageData(weeklySpend(transactions));

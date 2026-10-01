@@ -10,6 +10,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const id = req.query.id as string;
   const owned = and(eq(schema.savedAsset.id, id), eq(schema.savedAsset.userId, user.userId));
 
+  // El contenido completo de un documento: la lista solo manda un resumen recortado
+  // (ver `listColumns` en api/assets.ts) y el editor lo pide entero al abrirse.
+  if (req.method === "GET") {
+    const [row] = await db
+      .select({
+        id: schema.savedAsset.id,
+        spaceId: schema.savedAsset.spaceId,
+        nodeId: schema.savedAsset.nodeId,
+        prompt: schema.savedAsset.prompt,
+        type: schema.savedAsset.type,
+        isFavorite: schema.savedAsset.isFavorite,
+        tags: schema.savedAsset.tags,
+        content: schema.savedAsset.content,
+        createdAt: schema.savedAsset.createdAt,
+        assetUrl: schema.savedAsset.assetUrl,
+      })
+      .from(schema.savedAsset)
+      .where(owned)
+      .limit(1);
+    if (!row) return void res.status(404).json({ ok: false, code: "NOT_FOUND", error: "Activo no encontrado." });
+    // La imagen no se devuelve incrustada ni acá: se sirve por /raw, que sí se cachea.
+    const assetUrl = row.assetUrl.startsWith("data:") ? `/api/assets/${row.id}/raw` : row.assetUrl;
+    res.status(200).json({ ok: true, asset: { ...row, assetUrl } });
+    return;
+  }
+
   if (req.method === "PATCH") {
     const body = (req.body ?? {}) as { isFavorite?: boolean; content?: string; tags?: string[]; spaceId?: string | null };
     const patch: Record<string, unknown> = {};
@@ -20,7 +46,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const [updated] = await db.update(schema.savedAsset).set(patch).where(owned).returning();
     if (!updated) return void res.status(404).json({ ok: false, code: "NOT_FOUND", error: "Activo no encontrado." });
-    res.status(200).json({ ok: true, asset: updated });
+    const assetUrl = updated.assetUrl.startsWith("data:") ? `/api/assets/${updated.id}/raw` : updated.assetUrl;
+    res.status(200).json({ ok: true, asset: { ...updated, assetUrl } });
     return;
   }
 
@@ -31,5 +58,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  res.setHeader("Allow", "GET, PATCH, DELETE");
   res.status(405).json({ ok: false, code: "METHOD_NOT_ALLOWED", error: "Método no permitido" });
 }

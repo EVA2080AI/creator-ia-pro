@@ -10,7 +10,10 @@ export interface SavedAsset {
   tags: string[];
   created_at: string;
   space_id: string | null;
+  /** Solo viene completo al pedir un asset puntual (`getAsset`); en la lista es null. */
   content: string | null;
+  /** Primeros caracteres de `content`, para pintar la lista sin bajar documentos enteros. */
+  content_preview: string | null;
 }
 
 interface ApiAsset {
@@ -23,7 +26,8 @@ interface ApiAsset {
   type: string;
   isFavorite: boolean;
   tags: string[];
-  content: string | null;
+  content?: string | null;
+  contentPreview?: string | null;
   createdAt: string;
 }
 
@@ -37,7 +41,8 @@ function fromApi(a: ApiAsset): SavedAsset {
     tags: a.tags || [],
     created_at: a.createdAt,
     space_id: a.spaceId,
-    content: a.content,
+    content: a.content ?? null,
+    content_preview: a.contentPreview ?? a.content ?? null,
   };
 }
 
@@ -64,6 +69,19 @@ export async function listAssets(opts?: { spaceId?: string; favoriteOnly?: boole
 
 export async function createAsset(input: { assetUrl: string; prompt?: string; type?: string; spaceId?: string | null; tags?: string[]; content?: string }): Promise<SavedAsset | null> {
   const res = await api<{ asset: ApiAsset }>("/api/assets", { method: "POST", body: JSON.stringify(input) });
+  return res.ok ? fromApi(res.data!.asset) : null;
+}
+
+/** Cuenta sin traer filas: el panel pedía `limit:1` solo para leer el total y se
+ *  bajaba una fila entera, que podía ser una imagen de 1,9 MB incrustada. */
+export async function countAssets(): Promise<number> {
+  const res = await api<{ total: number }>("/api/assets?limit=0");
+  return res.ok ? res.data!.total : 0;
+}
+
+/** Un asset con su `content` completo — lo usa el editor de documentos al abrirlo. */
+export async function getAsset(id: string): Promise<SavedAsset | null> {
+  const res = await api<{ asset: ApiAsset }>(`/api/assets/${id}`);
   return res.ok ? fromApi(res.data!.asset) : null;
 }
 

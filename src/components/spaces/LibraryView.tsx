@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { listSpaces } from "@/lib/spaces";
-import { listAssets, createAsset, updateAsset, deleteAsset, type SavedAsset } from "@/lib/assets";
+import { listAssets, createAsset, updateAsset, deleteAsset, type SavedAsset, getAsset } from "@/lib/assets";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import {
@@ -111,9 +111,21 @@ export const LibraryView = () => {
     setDeleteTargetId(null);
   };
 
+  // La lista solo trae un resumen del documento (ver `listColumns` en api/assets.ts):
+  // el contenido completo se pide al abrir el editor.
+  const openEditor = async (asset: SavedAsset) => {
+    setEditingAsset(asset);
+    if (asset.type !== "document" || asset.content !== null) return;
+    const full = await getAsset(asset.id);
+    if (full) setEditingAsset(full);
+  };
+
   const handleCopyUrl = async (asset: SavedAsset) => {
     try {
-      await navigator.clipboard.writeText(asset.asset_url || "");
+      // asset_url puede ser relativa (/api/assets/<id>/raw) — se copia absoluta
+      // para que sirva al pegarla en otro lado.
+      const url = asset.asset_url ? new URL(asset.asset_url, window.location.origin).href : "";
+      await navigator.clipboard.writeText(url);
       toast.success("URL copiada al portapapeles");
     } catch {
       toast.error("No se pudo copiar la URL");
@@ -213,7 +225,7 @@ export const LibraryView = () => {
                 {asset.type === "document" ? (
                   <div className="w-full h-full bg-white rounded-xl shadow-sm border border-zinc-200 p-4 overflow-hidden relative">
                     <div className="text-[10px] text-zinc-400 font-mono leading-relaxed line-clamp-6 opacity-70">
-                      {asset.content ? asset.content.replace(/<[^>]*>?/gm, '') : "Documento vacío"}
+                      {asset.content_preview ? asset.content_preview.replace(/<[^>]*>?/gm, '') : "Documento vacío"}
                     </div>
                     <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white to-transparent" />
                     <FileText className="absolute bottom-4 right-4 h-6 w-6 text-zinc-200" />
@@ -224,6 +236,7 @@ export const LibraryView = () => {
                     alt={asset.prompt || "Asset"}
                     className="h-full w-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-110"
                     loading="lazy"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -236,7 +249,7 @@ export const LibraryView = () => {
                   </button>
                   
                   {asset.type === "document" ? (
-                    <button onClick={() => setEditingAsset(asset)} className="h-8 w-8 rounded-xl bg-white/90 backdrop-blur-xl border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-primary transition-all">
+                    <button onClick={() => void openEditor(asset)} className="h-8 w-8 rounded-xl bg-white/90 backdrop-blur-xl border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-primary transition-all">
                       <Maximize2 className="h-3.5 w-3.5" />
                     </button>
                   ) : (

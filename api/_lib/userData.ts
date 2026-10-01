@@ -18,7 +18,15 @@ export async function getUserProjects(userId: string) {
 
 export async function getUserAssets(userId: string, limit = 20) {
   const db = getDb();
-  return db.select().from(schema.savedAsset).where(eq(schema.savedAsset.userId, userId)).orderBy(desc(schema.savedAsset.createdAt)).limit(limit);
+  // Columnas explícitas: con `select()` se leía también `asset_url`, que hoy puede ser
+  // una imagen entera en base64 — megas traídos de la base para que api/ai/chat.ts los
+  // descartara en JS dos líneas después.
+  return db.select({
+    id: schema.savedAsset.id,
+    type: schema.savedAsset.type,
+    prompt: schema.savedAsset.prompt,
+    createdAt: schema.savedAsset.createdAt,
+  }).from(schema.savedAsset).where(eq(schema.savedAsset.userId, userId)).orderBy(desc(schema.savedAsset.createdAt)).limit(limit);
 }
 
 export interface UserUsage {
