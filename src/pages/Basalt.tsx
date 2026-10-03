@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
@@ -16,6 +16,8 @@ import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
 import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
 import { Activity, Sources } from "@/components/basalt/SearchActivity";
+import { LinkSuggestions } from "@/components/basalt/LinkSuggestions";
+import { findLinks } from "@/lib/links";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
 import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
@@ -100,7 +102,14 @@ export default function BasaltPage() {
   // Documentos adjuntos (contratos, informes…): el texto vive solo en memoria, por mensaje; en el
   // historial guardado queda únicamente el nombre y el tamaño (ver doc-context.ts).
   const docsByMsg = useRef(new Map<string, DocPayload[]>());
-  const { docs: pendingDocs, ready: readyDocs, busy: docsBusy, addFiles, remove: removeDoc, clear: clearDocs, restore: restoreDocs } = useDocAttachments();
+  const { docs: pendingDocs, ready: readyDocs, busy: docsBusy, addFiles, addUrl, remove: removeDoc, clear: clearDocs, restore: restoreDocs } = useDocAttachments();
+  // Enlaces pegados en el compositor que todavía no se leyeron. El modelo no puede
+  // abrir una URL: sin esto, o inventa el contenido o dice que no puede (ver links.ts).
+  const pendingLinks = useMemo(
+    () => findLinks(input).filter((u) => !pendingDocs.some((d) => d.url === u)),
+    [input, pendingDocs],
+  );
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -564,6 +573,7 @@ export default function BasaltPage() {
         </div>
 
         <form className="asst-composer" onSubmit={(e) => { e.preventDefault(); void sendPrompt(input); }}>
+          <LinkSuggestions urls={pendingLinks} onRead={(u) => void addUrl(u)} />
           <PendingDocChips docs={pendingDocs} onRemove={removeDoc} />
           <input
             ref={fileInputRef}

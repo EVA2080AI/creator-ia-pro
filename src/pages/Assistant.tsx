@@ -24,6 +24,8 @@ import { mdToHtml } from "@/lib/markdown";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
 import { Activity, Sources } from "@/components/basalt/SearchActivity";
+import { LinkSuggestions } from "@/components/basalt/LinkSuggestions";
+import { findLinks } from "@/lib/links";
 import { activityLabel, mergeSources, readBasaltEvent, type SearchSource } from "@/lib/stream-events";
 import { ConversationList } from "@/components/basalt/ConversationList";
 import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
@@ -104,7 +106,14 @@ export default function AssistantPage() {
   // de la petición, que el servidor usa para responder pero NO archiva (ver api/ai/chat.ts). En el
   // historial queda únicamente el nombre y el tamaño.
   const docsByMsg = useRef(new Map<string, DocPayload[]>());
-  const { docs: pendingDocs, ready: readyDocs, busy: docsBusy, addFiles, remove: removeDoc, clear: clearDocs } = useDocAttachments();
+  const { docs: pendingDocs, ready: readyDocs, busy: docsBusy, addFiles, addUrl, remove: removeDoc, clear: clearDocs } = useDocAttachments();
+  // Enlaces pegados en el compositor que todavía no se leyeron. El modelo no puede
+  // abrir una URL: sin esto, o inventa el contenido o dice que no puede (ver links.ts).
+  const pendingLinks = useMemo(
+    () => findLinks(input).filter((u) => !pendingDocs.some((d) => d.url === u)),
+    [input, pendingDocs],
+  );
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -469,6 +478,7 @@ export default function AssistantPage() {
         </div>
 
         <form className="asst-composer" onSubmit={handleSubmit}>
+          <LinkSuggestions urls={pendingLinks} onRead={(u) => void addUrl(u)} />
           <PendingDocChips docs={pendingDocs} onRemove={removeDoc} />
           <input
             ref={fileInputRef}

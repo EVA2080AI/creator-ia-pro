@@ -720,3 +720,23 @@
   border-color: color-mix(in oklch, var(--asst-term) 28%, var(--asst-border));
 }
 .asst-app[data-asst-theme="dark"] .asst-activity svg { color: var(--asst-term); }
+
+/* ══ Enlaces pegados (Fase 1 A3) ═════════════════════════════════════════════
+   El modelo no puede abrir una URL. Si el usuario pega una y pide un resumen,
+   acá aparece "Leer <dominio>", que la baja con /api/scrape y la adjunta como
+   un documento más. No se lee sola: tarda segundos y a veces el enlace se pega
+   solo para mencionarlo. */
+.asst-links { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 4px 7px; }
+.asst-link-btn {
+  display: inline-flex; align-items: center; gap: 7px; max-width: 100%;
+  padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  background: var(--asst-panel); border: 1px solid var(--asst-border); color: var(--asst-txt-2);
+  font: inherit; font-size: 12.5px; line-height: 1.3; transition: background 0.15s, border-color 0.15s;
+}
+.asst-link-btn:hover { background: var(--asst-panel-2); border-color: var(--asst-txt-3); }
+.asst-link-btn strong { color: var(--asst-txt); font-weight: 600; }
+.asst-link-btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asst-link-btn svg { flex: none; color: var(--a-accent, #8b5cf6); }
+.asst-link-btn:focus-visible { outline: 2px solid var(--asst-accent-text, var(--a-accent, #8b5cf6)); outline-offset: 2px; }
+.asst-app[data-asst-theme="dark"] .asst-link-btn { font-family: var(--asst-mono); }
+.asst-app[data-asst-theme="dark"] .asst-link-btn svg { color: var(--asst-term); }
