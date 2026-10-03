@@ -93,6 +93,32 @@ Tres reglas que vienen de medir en producción, no de teoría:
 3. **El perfil se pide con react-query** (`useProfile`), una sola vez por carga para
    los ocho componentes que lo usan.
 
+## Fase 1 — "ser mejores que Gemini" (2026-10-03)
+
+Lo que el chat gana, y las reglas que trae cada cosa:
+
+1. **Busca en internet y lo dice.** El prompt (sección 7 de `src/lib/basalt.ts`)
+   le dice al modelo que tiene `web_search`; el servidor avisa por el MISMO stream
+   SSE qué está buscando y qué fuentes trajo (`src/lib/stream-events.ts`: una línea
+   `data:` sin `choices`, que cualquier cliente viejo ignora). Cada búsqueda cuesta
+   1 crédito y eso se dice en tres lugares: el bloque de fuentes, el pie del selector
+   de modelo y la guía rápida. **Sin `TAVILY_API_KEY` no se ofrece la herramienta** y
+   se le agrega al prompt una nota de que no puede buscar, para que no lo prometa.
+2. **Lee una URL que le pegues** (`findLinks` → botón "Leer <dominio>" → `/api/scrape`).
+   No se lee sola: tarda segundos y a veces el enlace solo se menciona.
+3. **Ve fotos.** Se reescalan en el navegador a 1400px/JPEG antes de viajar (el cuerpo
+   de una función de Vercel tope 4,5 MB). Si el modelo no tiene `vision`, se avisa
+   ANTES de cobrar y se ofrece cambiar.
+4. **Acciones del mensaje**: copiar, regenerar, "otro modelo" (la misma pregunta a
+   cualquiera de los 21) y qué modelo respondió (cabecera `X-Model-Used`, que ya
+   existía y nadie leía). Renombrar la conversación desde su fila del menú.
+5. **Mis expertos** (`/expertos/nuevo`, `/expertos/<slug>`): crear el tuyo o duplicar
+   uno de los 11 y ajustarlo.
+
+**Regla que no cambia:** documentos, páginas web y fotos viajan en la petición y NO se
+guardan — en el historial queda solo la ficha (nombre, tipo, tamaño). Es la misma razón
+por la que `saved_asset` dejó de guardar data URIs.
+
 ## Cómo se mide el móvil
 
 `node scripts/mobile-shots.mjs <ruta> <salida.png>` abre la app en un Chromium con
