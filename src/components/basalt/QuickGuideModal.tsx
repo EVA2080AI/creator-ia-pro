@@ -1,4 +1,4 @@
-import { X, MessageSquare, Users, Brain, Scale, LayoutGrid, LayoutTemplate } from "lucide-react";
+import { X, MessageSquare, Users, Brain, Scale, LayoutGrid, LayoutTemplate, Globe } from "lucide-react";
 import { markBasaltGuideSeen } from "@/lib/basalt-guide";
 
 const STEPS = [
@@ -6,6 +6,11 @@ const STEPS = [
     icon: MessageSquare,
     title: "Conversa como con Gemini o ChatGPT",
     desc: "Escríbele lo que necesites: dudas, ideas, planes. Si le pides una app o un sitio web, te da el código listo para copiar, ahí mismo en el chat.",
+  },
+  {
+    icon: Globe,
+    title: "Busca en internet cuando hace falta",
+    desc: "Si le preguntas por algo reciente —un precio de hoy, una noticia, una versión nueva— lo busca en la web y te deja los enlaces de dónde lo sacó. Cada búsqueda suma 1 crédito al costo del mensaje.",
   },
   {
     icon: Users,

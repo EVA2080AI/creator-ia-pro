@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Check, ChevronDown, Image as ImageIcon, Lock, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Globe, Image as ImageIcon, Lock, Sparkles } from "lucide-react";
 import {
   CATEGORY_META, CATEGORY_ORDER, CHAT_MODELS, IMAGE_MODELS, canAccessModel, getImageModel, getModel,
   type PlanTier,
@@ -148,6 +148,12 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: 
                 />
               ))}
             </div>
+            {/* El costo de la búsqueda web no estaba escrito en ninguna parte: el chat
+                puede buscar en internet solo y cada búsqueda suma 1 crédito al del
+                mensaje. Va acá, donde el usuario está mirando precios. */}
+            <p className="asst-picker-note">
+              <Globe className="w-3 h-3" aria-hidden /> Si hace falta buscar en internet, cada búsqueda suma 1 crédito.
+            </p>
             {anyLocked && (
               <a className="asst-picker-upsell" href="/pricing">
                 <Lock className="w-3.5 h-3.5" aria-hidden /> Desbloquea más modelos — ver planes

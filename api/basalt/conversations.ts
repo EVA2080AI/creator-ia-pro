@@ -33,6 +33,13 @@ const ATTACHMENT_SCHEMA = z.object({
   truncated: z.boolean().optional(),
 });
 
+/** Fuente web citada por una respuesta: para que al reabrir la conversación siga
+ *  constando de dónde salió el dato (y que se pagó una búsqueda por él). */
+const SOURCE_SCHEMA = z.object({
+  title: z.string().max(300),
+  url: z.string().url().max(2000),
+});
+
 const MSG_SCHEMA = z.object({
   id: z.string(),
   role: z.enum(["user", "model"]),
@@ -41,6 +48,7 @@ const MSG_SCHEMA = z.object({
   // Sin esto, zod las descartaba al guardar: al recargar la conversación desaparecía la ficha
   // "contrato.pdf" de la burbuja y no quedaba señal de que ese mensaje llevaba un documento.
   attachments: z.array(ATTACHMENT_SCHEMA).max(5).optional(),
+  sources: z.array(SOURCE_SCHEMA).max(20).optional(),
 });
 
 const UPSERT_SCHEMA = z.object({

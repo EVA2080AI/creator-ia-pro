@@ -15,6 +15,7 @@ import { tavilySearch, WEB_SEARCH_TOOL } from "../_lib/search.js";
 import { USER_DATA_TOOLS, isUserDataToolName } from "../_lib/userDataTools.js";
 import { getUserProjects, getUserAssets, getUserUsage } from "../_lib/userData.js";
 import { DOC_ANALYSIS_PROMPT, DOC_RULES_MARKER, docBlock, sanitizeDocuments, type DocPayload } from "../../src/lib/doc-context.js";
+import { basaltEventLine, type SearchSource } from "../../src/lib/stream-events.js";
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 // 1 crédito — mismo orden de magnitud que los modelos de chat más baratos
@@ -210,6 +211,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("X-Model-Used", modelId);
   res.setHeader("X-Credits-Charged", String(cost));
 
+  // Lo que el usuario ve mientras la respuesta se cocina: que está buscando, con qué
+  // consulta, qué fuentes trajo y qué se le cobró. Viaja por el mismo SSE; ver
+  // src/lib/stream-events.ts para por qué es seguro mezclarlo con los chunks crudos.
+  const emit = (event: Parameters<typeof basaltEventLine>[0]) => res.write(basaltEventLine(event));
+
   interface StreamResult {
     full: string;
     sawAnyContent: boolean;
@@ -332,6 +338,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         let searchCreditCharged = false;
+        let fuentes: SearchSource[] = [];
+        if (searchQuery) emit({ type: "search", query: searchQuery });
         if (!searchQuery) {
           toolResultContent = JSON.stringify({ results: [], note: "consulta vacía, no se pudo buscar" });
         } else if (!TAVILY_API_KEY) {
@@ -344,6 +352,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             searchCreditCharged = true;
             try {
               const results = await tavilySearch(searchQuery, TAVILY_API_KEY);
+              fuentes = results.filter((r) => r.url).map((r) => ({ title: r.title, url: r.url }));
               toolResultContent = JSON.stringify({ query: searchQuery, results });
             } catch {
               await refundCredits(user.userId, SEARCH_TOOL_COST);
@@ -353,9 +362,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           }
         }
         if (searchCreditCharged) await logSpend(user.userId, SEARCH_TOOL_COST, `search ${toolRound}: ${searchQuery.slice(0, 60)}`);
+        if (searchQuery) {
+          // Se manda también cuando no hubo fuentes (fallo o sin créditos): el cliente
+          // tiene que poder apagar el "buscando…" en vez de dejarlo colgado.
+          emit({ type: "sources", query: searchQuery, sources: fuentes, credits: searchCreditCharged ? SEARCH_TOOL_COST : 0 });
+        }
       } else {
         // Herramientas de datos del usuario — solo lectura, sin costo (ver
         // el comentario al tope de api/_lib/userDataTools.ts).
+        emit({ type: "account", tool: toolCall.name });
         try {
           if (toolCall.name === "get_my_projects") {
             const rows = await getUserProjects(user.userId);

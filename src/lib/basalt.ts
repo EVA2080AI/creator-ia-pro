@@ -102,6 +102,7 @@ export const BASALT_ASSISTANT: Assistant = {
 // ─── Persistencia local (historial + memoria) ────────────────────────────────
 
 import { ATTACH_CARD_PROMPT, type DocMeta } from "./doc-context";
+import type { SearchSource } from "./stream-events";
 
 export interface StoredMsg {
   id: string;
@@ -110,6 +111,8 @@ export interface StoredMsg {
   images?: { prompt: string; format: string; url?: string; error?: string; assetId?: string }[];
   /** Documentos adjuntos al mensaje del usuario: solo nombre y tamaño. El texto no se guarda (ver doc-context.ts). */
   attachments?: DocMeta[];
+  /** Fuentes web que el modelo consultó para esta respuesta (ver stream-events.ts). */
+  sources?: SearchSource[];
 }
 
 /** Lo que necesita la lista del menú. El historial ya no descarga los mensajes:

@@ -23,6 +23,8 @@ import { toast } from "sonner";
 import { mdToHtml } from "@/lib/markdown";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
+import { Activity, Sources } from "@/components/basalt/SearchActivity";
+import { activityLabel, mergeSources, readBasaltEvent, type SearchSource } from "@/lib/stream-events";
 import { ConversationList } from "@/components/basalt/ConversationList";
 import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
@@ -90,6 +92,10 @@ export default function AssistantPage() {
   // Mensaje cuya respuesta se cortó por el límite de tiempo del servidor
   // (finish_reason "length") — habilita "Continuar" (igual que en Basalt.tsx).
   const [truncatedId, setTruncatedId] = useState<string | null>(null);
+  // Qué está haciendo el modelo mientras no hay texto, y qué costaron las búsquedas
+  // de cada respuesta en esta sesión (ver src/lib/stream-events.ts).
+  const [activity, setActivity] = useState("");
+  const [searchCost, setSearchCost] = useState<Record<string, number>>({});
 
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -203,6 +209,9 @@ export default function AssistantPage() {
     if (continued) apiMessages.push({ role: "user", content: text });
 
     abortRef.current = new AbortController();
+    let sources: SearchSource[] = [];
+    let searchCredits = 0;
+    setActivity("");
     try {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
@@ -249,6 +258,23 @@ export default function AssistantPage() {
           if (!payload || payload === "[DONE]") continue;
           try {
             const json = JSON.parse(payload);
+            // Evento nuestro (búsqueda, fuentes, datos de la cuenta), no un chunk del modelo.
+            const ev = readBasaltEvent(json);
+            if (ev) {
+              if (ev.type === "sources") {
+                setActivity("");
+                searchCredits += ev.credits;
+                sources = mergeSources(sources, ev.sources);
+                if (sources.length) {
+                  const snapshot = sources;
+                  setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, sources: snapshot } : m)));
+                }
+              } else {
+                setActivity(activityLabel(ev));
+                stickToBottom();
+              }
+              continue;
+            }
             if (json.choices?.[0]?.finish_reason === "length") cutOff = true;
             const delta = json.choices?.[0]?.delta?.content;
             if (typeof delta === "string" && delta.length) {
@@ -266,7 +292,12 @@ export default function AssistantPage() {
         }
       }
       const finalText = joinContinuation(prefix, acc);
-      setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: finalText } : m)));
+      const withSources = (previous?: SearchSource[]) => {
+        const all = mergeSources(previous, sources);
+        return all.length ? all : undefined;
+      };
+      setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, sources: withSources(m.sources) } : m)));
+      if (searchCredits) setSearchCost((prev) => ({ ...prev, [modelMsgId]: (prev[modelMsgId] ?? 0) + searchCredits }));
       if (!acc.trim()) {
         if (!continued) setMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
         setError("El modelo no devolvió texto. Prueba a reformular la pregunta.");
@@ -274,8 +305,8 @@ export default function AssistantPage() {
         if (cutOff) setTruncatedId(modelMsgId);
         if (userId) {
           const final: StoredMsg[] = continued
-            ? history.map((m) => (m.id === modelMsgId ? { ...m, text: finalText } : m))
-            : [...history, { id: modelMsgId, role: "model", text: finalText }];
+            ? history.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, sources: withSources(m.sources) } : m))
+            : [...history, { id: modelMsgId, role: "model", text: finalText, sources: withSources() }];
           const title = (history.find((m) => m.role === "user")?.text ?? text).slice(0, 60);
           void saveConversation(userId, { id: convId, title, updatedAt: Date.now(), messages: final }, slug)
             .then(() => chats.refresh());
@@ -290,6 +321,7 @@ export default function AssistantPage() {
       }
     } finally {
       setGenerating(false);
+      setActivity("");
       abortRef.current = null;
       stickToBottom();
     }
@@ -409,8 +441,11 @@ export default function AssistantPage() {
                       <div className="asst-body">
                         {m.text ? (
                           <div className="asst-md" dangerouslySetInnerHTML={{ __html: mdToHtml(m.text) }} />
-                        ) : generating && i === messages.length - 1 ? (
-                          <div className="asst-shimmer"><i /><i /><i /></div>
+                        ) : null}
+                        {m.sources?.length ? <Sources items={m.sources} credits={searchCost[m.id]} /> : null}
+                        {/* Lo que está pasando ahora, al final del mensaje (ver Basalt.tsx). */}
+                        {generating && i === messages.length - 1 ? (
+                          activity ? <Activity label={activity} /> : m.text ? null : <div className="asst-shimmer"><i /><i /><i /></div>
                         ) : null}
                       </div>
                     </>

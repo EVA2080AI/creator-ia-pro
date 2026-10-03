@@ -422,6 +422,13 @@
 .asst-picker-chip.free { background: color-mix(in oklch, oklch(0.7 0.17 150) 18%, var(--asst-bg)); color: color-mix(in oklch, oklch(0.5 0.14 150) 80%, var(--asst-txt)); }
 .asst-picker-chip.slow { background: color-mix(in oklch, oklch(0.78 0.15 75) 22%, var(--asst-bg)); color: color-mix(in oklch, oklch(0.5 0.12 65) 80%, var(--asst-txt)); }
 .asst-picker-chip.lock { background: transparent; border: 1px solid var(--asst-border); color: var(--asst-txt-3); }
+/* Aviso del costo de la búsqueda web, encima del enlace a planes. */
+.asst-picker-note {
+  display: flex; align-items: center; gap: 6px; margin: 4px 0 0; padding: 8px 10px 2px;
+  border-top: 1px solid var(--asst-border); color: var(--asst-txt-3); font-size: 11.5px; line-height: 1.4;
+}
+.asst-picker-note svg { flex: none; }
+
 .asst-picker-upsell {
   position: sticky; bottom: -6px; display: flex; align-items: center; justify-content: center; gap: 6px; margin: 6px -6px -6px; padding: 12px;
   background: var(--asst-panel); border-top: 1px solid var(--asst-border); color: var(--asst-accent-text); font-size: 13px; font-weight: 600; text-decoration: none;
@@ -659,3 +666,57 @@
 .asst-msg.user .asst-bubble { font-size: 15.5px; line-height: 1.6; }
 /* 10,5px era el único texto de la interfaz por debajo del mínimo cómodo. */
 .asst-group-label { font-size: 11px; }
+
+/* ══ Actividad y fuentes (Ciclo 18 — Fase 1 A2) ══════════════════════════════
+   El único indicio de que el modelo estaba buscando en internet era el shimmer
+   de tres puntos: una respuesta con tres rondas de búsqueda (Tavily + un stream
+   completo por ronda) se veía igual que una respuesta lenta, y el crédito de
+   cada búsqueda se cobraba sin decirlo en ninguna parte. El servidor manda ahora
+   lo que está haciendo y qué fuentes trajo (src/lib/stream-events.ts). */
+.asst-activity {
+  display: inline-flex; align-items: center; gap: 8px; margin-top: 2px;
+  padding: 7px 12px; border-radius: 999px; max-width: 100%;
+  background: var(--asst-panel); border: 1px solid var(--asst-border);
+  color: var(--asst-txt-2); font-size: 13px; line-height: 1.3;
+}
+/* La consulta puede ser larga: se recorta en vez de empujar el hilo. */
+.asst-activity span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asst-activity svg { flex: none; color: var(--a-accent, #8b5cf6); }
+
+.asst-sources { margin-top: 14px; max-width: 60ch; }
+.asst-sources-head {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 7px;
+  font-size: 12px; font-weight: 600; color: var(--asst-txt-3);
+}
+.asst-sources-cost {
+  font-weight: 500; padding: 1px 7px; border-radius: 999px;
+  background: var(--asst-panel-2); color: var(--asst-txt-2);
+}
+.asst-sources-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.asst-sources-list a {
+  display: flex; align-items: center; gap: 9px; padding: 7px 11px; border-radius: 12px;
+  border: 1px solid var(--asst-border); background: var(--asst-panel);
+  color: var(--asst-txt-2); font-size: 13px; text-decoration: none; transition: border-color 0.15s, background 0.15s;
+}
+.asst-sources-list a:hover { background: var(--asst-panel-2); border-color: var(--asst-txt-3); }
+.asst-source-n {
+  flex: none; width: 18px; height: 18px; border-radius: 6px; display: grid; place-items: center;
+  background: var(--asst-panel-2); color: var(--asst-txt-3); font-size: 11px; font-weight: 600;
+}
+.asst-source-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--asst-txt); }
+.asst-source-host { flex: none; font-size: 11px; color: var(--asst-txt-3); }
+@media (max-width: 520px) {
+  /* El dominio se va abajo antes que recortar el título a tres palabras. */
+  .asst-sources-list a { flex-wrap: wrap; row-gap: 2px; }
+  .asst-source-title { flex-basis: calc(100% - 27px); }
+  .asst-source-host { margin-left: 27px; }
+}
+
+/* En oscuro, metadatos en monoespaciada y el verde solo como señal de actividad. */
+.asst-app[data-asst-theme="dark"] :is(.asst-activity, .asst-sources-head, .asst-source-host, .asst-source-n) {
+  font-family: var(--asst-mono);
+}
+.asst-app[data-asst-theme="dark"] .asst-activity {
+  border-color: color-mix(in oklch, var(--asst-term) 28%, var(--asst-border));
+}
+.asst-app[data-asst-theme="dark"] .asst-activity svg { color: var(--asst-term); }

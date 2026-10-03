@@ -15,6 +15,7 @@ import { ConversationList } from "@/components/basalt/ConversationList";
 import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
 import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
+import { Activity, Sources } from "@/components/basalt/SearchActivity";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
 import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
@@ -30,6 +31,7 @@ import {
   CONTINUE_PROMPT, joinContinuation,
   type ConversationSummary, type StoredMsg,
 } from "@/lib/basalt";
+import { activityLabel, mergeSources, readBasaltEvent, type SearchSource } from "@/lib/stream-events";
 import { createAsset } from "@/lib/assets";
 import "./Assistant.css";
 
@@ -84,6 +86,12 @@ export default function BasaltPage() {
   // Id del mensaje cuya respuesta se cortó por el límite de tiempo del servidor
   // (finish_reason "length") — habilita el botón "Continuar".
   const [truncatedId, setTruncatedId] = useState<string | null>(null);
+  // Qué está haciendo el modelo mientras no hay texto: buscar en la web, leer los
+  // datos de la cuenta… (eventos del servidor, ver src/lib/stream-events.ts).
+  const [activity, setActivity] = useState("");
+  // Créditos que costaron las búsquedas de cada respuesta, por id de mensaje. No se
+  // guarda en la base: es el aviso del cobro de ESTA sesión, no parte del historial.
+  const [searchCost, setSearchCost] = useState<Record<string, number>>({});
 
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
@@ -222,6 +230,9 @@ export default function BasaltPage() {
     abortRef.current = new AbortController();
     let acc = "";
     let cutOff = false;
+    let sources: SearchSource[] = [];
+    let searchCredits = 0;
+    setActivity("");
     try {
       const res = await fetch("/api/ai/chat", {
         method: "POST",
@@ -259,7 +270,25 @@ export default function BasaltPage() {
           const payload = line.slice(5).trim();
           if (!payload || payload === "[DONE]") continue;
           try {
-            const choice = JSON.parse(payload).choices?.[0];
+            const json = JSON.parse(payload);
+            // Evento nuestro (búsqueda, fuentes, datos de la cuenta) — no es un chunk del modelo.
+            const ev = readBasaltEvent(json);
+            if (ev) {
+              if (ev.type === "sources") {
+                setActivity("");
+                searchCredits += ev.credits;
+                sources = mergeSources(sources, ev.sources);
+                if (sources.length) {
+                  const snapshot = sources;
+                  setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, sources: snapshot } : m)));
+                }
+              } else {
+                setActivity(activityLabel(ev));
+                stickToBottom();
+              }
+              continue;
+            }
+            const choice = json.choices?.[0];
             if (choice?.finish_reason === "length") cutOff = true;
             const delta = choice?.delta?.content;
             if (typeof delta === "string" && delta.length) {
@@ -281,10 +310,12 @@ export default function BasaltPage() {
         setError(e instanceof Error ? e.message : "Error al generar la respuesta.");
         restoreInput();
         setGenerating(false);
+        setActivity("");
         abortRef.current = null;
         return;
       }
     }
+    setActivity("");
 
     const { visible, memories, images } = parseBasaltReply(acc);
     if (!visible && !images.length) {
@@ -295,11 +326,16 @@ export default function BasaltPage() {
       abortRef.current = null;
       return;
     }
+    if (searchCredits) setSearchCost((prev) => ({ ...prev, [modelMsgId]: (prev[modelMsgId] ?? 0) + searchCredits }));
 
     const finalText = joinContinuation(prefix, visible);
+    const withSources = (previous?: SearchSource[]) => {
+      const all = mergeSources(previous, sources);
+      return all.length ? all : undefined;
+    };
     let final: StoredMsg[] = continued
-      ? history.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, images: images.length ? [...(m.images ?? []), ...images] : m.images } : m))
-      : [...history, { id: modelMsgId, role: "model", text: finalText, images: images.length ? images : undefined }];
+      ? history.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, images: images.length ? [...(m.images ?? []), ...images] : m.images, sources: withSources(m.sources) } : m))
+      : [...history, { id: modelMsgId, role: "model", text: finalText, images: images.length ? images : undefined, sources: withSources() }];
     setMessages(final);
     if (cutOff) setTruncatedId(modelMsgId);
 
@@ -487,8 +523,14 @@ export default function BasaltPage() {
                       <div className="asst-body">
                         {m.text ? (
                           <div className="asst-md" dangerouslySetInnerHTML={{ __html: mdToHtml(m.text) }} />
-                        ) : generating && i === messages.length - 1 ? (
-                          <div className="asst-shimmer"><i /><i /><i /></div>
+                        ) : null}
+                        {m.sources?.length ? <Sources items={m.sources} credits={searchCost[m.id]} /> : null}
+                        {/* Buscando / leyendo la cuenta. Va al final —después del texto y de las
+                            fuentes— porque es lo que está pasando AHORA: si todavía no hay nada
+                            que leer reemplaza al shimmer, y si ya hay texto se agrega debajo (el
+                            modelo puede volver a buscar a mitad de la respuesta). */}
+                        {generating && i === messages.length - 1 ? (
+                          activity ? <Activity label={activity} /> : m.text ? null : <div className="asst-shimmer"><i /><i /><i /></div>
                         ) : null}
                         {m.images?.map((img, k) => (
                           <div key={k} style={{ marginTop: 12 }}>
