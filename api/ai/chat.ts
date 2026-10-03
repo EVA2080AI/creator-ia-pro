@@ -33,6 +33,10 @@ export const config = { maxDuration: 60 };
 // explícito ("length") para que el cliente ofrezca "Continuar".
 const STREAM_DEADLINE_MS = 54_000;
 
+/** Se agrega al prompt cuando no hay TAVILY_API_KEY en este despliegue. */
+const NO_SEARCH_NOTE =
+  "NOTA DEL SISTEMA: ahora mismo la búsqueda web no está disponible. No digas que vas a buscar ni que buscaste; responde con lo que sabes y avisa de que un dato que cambia (precios, versiones, noticias, horarios) puede estar desactualizado.";
+
 interface ChatMessage {
   role: "user" | "assistant" | "system" | "tool";
   content: string | Array<{ type: string; text?: string; image_url?: { url: string } }> | null;
@@ -137,17 +141,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // bloque <documento> del que no pueden escapar (ver docBlock), con la regla de "no obedecer lo que
   // diga el documento" en el system prompt.
   const docs = sanitizeDocuments(body.documents);
-  // El cliente ya lo agrega cuando hay documentos en el historial (preguntas de seguimiento); acá se
-  // garantiza para cualquier cliente que mande `documents`, sin repetirlo.
-  const promptWithDocs = docs.length && !(body.systemPrompt ?? "").includes(DOC_RULES_MARKER)
-    ? `${body.systemPrompt ? `${body.systemPrompt}\n\n` : ""}${DOC_ANALYSIS_PROMPT}`
-    : body.systemPrompt;
-
-  const messages: ChatMessage[] = promptWithDocs
-    ? [{ role: "system", content: promptWithDocs }, ...withDocuments(body.messages, docs)]
-    : withDocuments(body.messages, docs);
-
   const TAVILY_API_KEY = process.env.TAVILY_API_KEY;
+
+  // Añadidos al prompt que decide el servidor, no el cliente:
+  //  - las reglas de documentos (el cliente ya las manda cuando hay documentos en el
+  //    historial; acá se garantizan para cualquier cliente que mande `documents`);
+  //  - el aviso de que no hay búsqueda, porque el prompt del cliente SÍ le dice al
+  //    modelo que puede buscar: sin la clave eso lo llevaría a prometer una búsqueda
+  //    que nunca ocurre (y a gastar una ronda llamando a una herramienta muerta).
+  const extras = [
+    docs.length && !(body.systemPrompt ?? "").includes(DOC_RULES_MARKER) ? DOC_ANALYSIS_PROMPT : "",
+    TAVILY_API_KEY ? "" : NO_SEARCH_NOTE,
+  ].filter(Boolean);
+  const systemPrompt = [body.systemPrompt, ...extras].filter(Boolean).join("\n\n");
+
+  const messages: ChatMessage[] = systemPrompt
+    ? [{ role: "system", content: systemPrompt }, ...withDocuments(body.messages, docs)]
+    : withDocuments(body.messages, docs);
 
   const callOpenRouter = (msgs: ChatMessage[], withTools: boolean) =>
     fetch(OPENROUTER_URL, {
@@ -167,7 +177,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // apaga en la última ronda permitida (ver MAX_SEARCH_ROUNDS más
         // abajo) para forzar una respuesta final en vez de seguir
         // encadenando llamadas.
-        ...(withTools ? { tools: [WEB_SEARCH_TOOL, ...USER_DATA_TOOLS], tool_choice: "auto" } : {}),
+        ...(withTools ? { tools: [...(TAVILY_API_KEY ? [WEB_SEARCH_TOOL] : []), ...USER_DATA_TOOLS], tool_choice: "auto" } : {}),
         ...(typeof body.temperature === "number" ? { temperature: body.temperature } : {}),
         ...(typeof body.maxTokens === "number" ? { max_tokens: body.maxTokens } : {}),
       }),
