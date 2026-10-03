@@ -38,7 +38,10 @@ const ATTACHMENT_SCHEMA = z.object({
  *  constando de dónde salió el dato (y que se pagó una búsqueda por él). */
 const SOURCE_SCHEMA = z.object({
   title: z.string().max(300),
-  url: z.string().url().max(2000),
+  // Sin `.url()`: esto valida el hilo ENTERO, y una URL rara de un buscador haría
+  // fallar el guardado de toda la conversación. El cliente ya descarta lo que no sea
+  // http(s) antes de pintarlo (src/lib/stream-events.ts).
+  url: z.string().max(2000),
 });
 
 const MSG_SCHEMA = z.object({

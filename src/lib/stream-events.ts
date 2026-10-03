@@ -26,6 +26,18 @@ export function basaltEventLine(event: BasaltEvent): string {
   return `data: ${JSON.stringify({ basalt: event })}\n\n`;
 }
 
+/** Solo http(s): la fuente se pinta como enlace, y un `javascript:` ahí sería un
+ *  agujero aunque hoy las URLs vengan de Tavily y no del usuario. */
+function isWebUrl(url: unknown): url is string {
+  if (typeof url !== "string") return false;
+  try {
+    const u = new URL(url);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 /** Devuelve el evento si este JSON del stream es uno nuestro, o null si es de OpenRouter. */
 export function readBasaltEvent(json: unknown): BasaltEvent | null {
   const e = (json as { basalt?: unknown })?.basalt as BasaltEvent | undefined;
@@ -33,7 +45,7 @@ export function readBasaltEvent(json: unknown): BasaltEvent | null {
   if (e.type === "search") return typeof e.query === "string" ? e : null;
   if (e.type === "sources") {
     return Array.isArray(e.sources) && typeof e.query === "string"
-      ? { type: "sources", query: e.query, sources: e.sources.filter((s) => s && typeof s.url === "string"), credits: Number(e.credits) || 0 }
+      ? { type: "sources", query: e.query, sources: e.sources.filter((s) => s && isWebUrl(s.url)), credits: Number(e.credits) || 0 }
       : null;
   }
   if (e.type === "account") return typeof e.tool === "string" ? e : null;
@@ -66,7 +78,7 @@ export function sourceHost(url: string): string {
 export function mergeSources(previous: SearchSource[] | undefined, incoming: SearchSource[]): SearchSource[] {
   const out = [...(previous ?? [])];
   for (const s of incoming) {
-    if (s.url && !out.some((p) => p.url === s.url)) out.push({ title: s.title || sourceHost(s.url), url: s.url });
+    if (isWebUrl(s.url) && !out.some((p) => p.url === s.url)) out.push({ title: s.title || sourceHost(s.url), url: s.url });
   }
   return out;
 }

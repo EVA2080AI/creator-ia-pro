@@ -18,6 +18,13 @@ describe("readBasaltEvent", () => {
     expect(readBasaltEvent({ basalt: "search" })).toBeNull();
   });
 
+  it("descarta una fuente que no sea http(s) — se pinta como enlace", () => {
+    const e = readBasaltEvent({
+      basalt: { type: "sources", query: "q", credits: 1, sources: [{ title: "mala", url: "javascript:alert(1)" }, { title: "B", url: "https://b.com" }] },
+    });
+    expect(e).toEqual({ type: "sources", query: "q", sources: [{ title: "B", url: "https://b.com" }], credits: 1 });
+  });
+
   it("normaliza las fuentes y el costo", () => {
     const e = readBasaltEvent({
       basalt: { type: "sources", query: "q", sources: [{ title: "A", url: "https://a.com" }, { title: "sin url" }], credits: "1" },
