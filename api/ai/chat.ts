@@ -64,6 +64,37 @@ interface ChatBody {
    * dentro del mensaje.
    */
   documents?: DocPayload[];
+  /**
+   * Fotos adjuntas al ÚLTIMO mensaje del usuario, como data URI (el navegador ya las
+   * reescaló; ver src/lib/image-attach.ts). Mismo trato que `documents`: se pegan a la
+   * llamada al modelo y NO se archivan — en la conversación queda el nombre, no la foto,
+   * que es justo lo que se sacó de `saved_asset` cuando una lista de 4 imágenes pesaba
+   * 6 MB. Solo las entienden los modelos con `vision`.
+   */
+  images?: string[];
+  /** Nombres de esas fotos, para que la ficha siga en el historial del servidor. */
+  imageNames?: string[];
+}
+
+/** Lo que acepta un modelo con visión de OpenRouter, y el tope por imagen y en total. */
+const IMAGE_DATA_URI = /^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/]+=*$/;
+const MAX_IMAGES = 2;
+const MAX_IMAGE_CHARS = 1_600_000; // ~1,2 MB por foto ya reescalada
+const MAX_IMAGES_CHARS = 3_000_000;
+
+/** Descarta lo que no sea una imagen base64 razonable: entra por la red. */
+function sanitizeImages(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  let left = MAX_IMAGES_CHARS;
+  for (const item of raw) {
+    if (out.length >= MAX_IMAGES) break;
+    if (typeof item !== "string" || item.length > MAX_IMAGE_CHARS || item.length > left) continue;
+    if (!IMAGE_DATA_URI.test(item)) continue;
+    out.push(item);
+    left -= item.length;
+  }
+  return out;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -87,6 +118,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const modelId = body.model && CHAT_MODELS.some((m) => m.id === body.model) ? body.model : DEFAULT_MODEL_ID;
   const model = getModel(modelId);
+
+  // Antes de cobrar: si el modelo elegido no ve, decirlo en vez de cobrar un mensaje
+  // en el que la foto se iba a ignorar en silencio.
+  const images = sanitizeImages(body.images);
+  if (images.length && !model.vision) {
+    const conVista = CHAT_MODELS.filter((m) => m.vision && m.free).map((m) => m.label);
+    res.status(400).json({
+      ok: false,
+      code: "MODEL_HAS_NO_VISION",
+      error: `"${model.label}" no puede ver imágenes. Cambia a uno que sí${conVista.length ? ` (gratis: ${conVista.join(", ")})` : ""} y vuelve a enviarla.`,
+    });
+    return;
+  }
 
   const profile = await getProfile(user.userId);
   const tier = profile?.subscriptionTier ?? "free";
@@ -156,9 +200,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   ].filter(Boolean);
   const systemPrompt = [body.systemPrompt, ...extras].filter(Boolean).join("\n\n");
 
+  const conAdjuntos = withImages(withDocuments(body.messages, docs), images);
   const messages: ChatMessage[] = systemPrompt
-    ? [{ role: "system", content: systemPrompt }, ...withDocuments(body.messages, docs)]
-    : withDocuments(body.messages, docs);
+    ? [{ role: "system", content: systemPrompt }, ...conAdjuntos]
+    : conAdjuntos;
 
   const callOpenRouter = (msgs: ChatMessage[], withTools: boolean) =>
     fetch(OPENROUTER_URL, {
@@ -440,7 +485,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       projectId: body.projectId,
       userMessage: body.messages[body.messages.length - 1],
       // Solo los nombres: el texto de los documentos no se guarda (ver ChatBody.documents).
-      attachmentNames: docs.map((d) => d.name),
+      attachmentNames: [...docs.map((d) => d.name), ...imageNames(body.imageNames, images.length)],
       assistantText: full,
       model: modelId,
       cost,
@@ -459,11 +504,46 @@ function withDocuments(messages: ChatMessage[], docs: DocPayload[]): ChatMessage
   const i = messages.map((m) => m.role).lastIndexOf("user");
   if (i < 0) return messages;
   const original = messages[i];
-  const text = typeof original.content === "string" ? original.content : "";
+  const text = textOf(original.content);
   const blocks = docs.map(docBlock).join("\n\n");
   const copy = [...messages];
   copy[i] = { ...original, content: `${blocks}\n\n${text}` };
   return copy;
+}
+
+/** El texto de un contenido que puede venir ya en partes (texto + imágenes). */
+function textOf(content: ChatMessage["content"]): string {
+  if (typeof content === "string") return content;
+  if (!Array.isArray(content)) return "";
+  return content.filter((p) => p.type === "text").map((p) => p.text ?? "").join("\n");
+}
+
+/**
+ * Convierte el último mensaje del usuario a contenido multimodal: su texto más una parte
+ * por foto. Va DESPUÉS de withDocuments para que el texto que llega acá ya incluya los
+ * bloques <documento> — antes, con una imagen y un documento en el mismo mensaje, el
+ * `typeof content === "string"` de withDocuments descartaba el texto del usuario.
+ */
+function withImages(messages: ChatMessage[], images: string[]): ChatMessage[] {
+  if (!images.length) return messages;
+  const i = messages.map((m) => m.role).lastIndexOf("user");
+  if (i < 0) return messages;
+  const original = messages[i];
+  const copy = [...messages];
+  copy[i] = {
+    ...original,
+    content: [
+      { type: "text", text: textOf(original.content) },
+      ...images.map((url) => ({ type: "image_url", image_url: { url } })),
+    ],
+  };
+  return copy;
+}
+
+/** Nombres de las fotos para el historial: solo los que de verdad acompañan a una imagen. */
+function imageNames(raw: unknown, count: number): string[] {
+  const names = Array.isArray(raw) ? raw.filter((n): n is string => typeof n === "string") : [];
+  return Array.from({ length: count }, (_, i) => (names[i] || `imagen ${i + 1}`).slice(0, 200));
 }
 
 async function persistConversation(opts: {

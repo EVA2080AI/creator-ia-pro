@@ -31,6 +31,7 @@ const ATTACHMENT_SCHEMA = z.object({
   chars: z.number(),
   pages: z.number().optional(),
   truncated: z.boolean().optional(),
+  kind: z.enum(["doc", "web", "image"]).optional(),
 });
 
 /** Fuente web citada por una respuesta: para que al reabrir la conversación siga

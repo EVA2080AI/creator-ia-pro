@@ -11,6 +11,8 @@ export interface DocMeta {
   chars: number;
   pages?: number;
   truncated?: boolean;
+  /** Qué era: un archivo del disco (por defecto), una página web o una foto. */
+  kind?: "doc" | "web" | "image";
 }
 
 /** Tope de texto de documentos por petición (≈ 75k tokens): los más recientes entran primero. */
@@ -21,6 +23,9 @@ export const MAX_DOCS_PER_MESSAGE = 5;
 
 /** Mensaje que se envía si el usuario adjunta sin escribir nada. */
 export const DEFAULT_DOC_PROMPT = "Analiza este documento. Si es un contrato, revisa las partes, el objeto, los plazos, los pagos, las obligaciones, las penalidades, la terminación y los riesgos principales.";
+
+/** Mensaje que se envía si el usuario adjunta una foto sin escribir nada. */
+export const DEFAULT_IMAGE_PROMPT = "Mira esta imagen y descríbeme qué ves. Si tiene texto, transcríbelo.";
 
 /** Sentinela de la tarjeta "Analizar un contrato" de la bienvenida: abre el selector de archivos. */
 export const ATTACH_CARD_PROMPT = "@adjuntar";
@@ -94,6 +99,12 @@ export function buildApiMessages(history: HistoryMsg[], docs: Map<string, DocPay
     const parts: string[] = [];
     const inMemory = docs.get(m.id) ?? [];
     for (const meta of m.attachments) {
+      // Las fotos no tienen texto que pegar: viajan como imagen en el mensaje actual
+      // (campo `images`) y en los anteriores quedan como una nota.
+      if (meta.kind === "image") {
+        parts.push(`[El usuario adjuntó la imagen «${attr(meta.name)}» en este mensaje.]`);
+        continue;
+      }
       const d = inMemory.find((x) => x.name === meta.name);
       if (d && d.text.length <= left) {
         parts.push(docBlock(d));

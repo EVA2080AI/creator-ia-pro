@@ -22,7 +22,7 @@ import {
 import { toast } from "sonner";
 import { mdToHtml } from "@/lib/markdown";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
-import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
+import { PendingDocChips, SentDocChips, SentImages } from "@/components/basalt/DocChips";
 import { Activity, Sources } from "@/components/basalt/SearchActivity";
 import { LinkSuggestions } from "@/components/basalt/LinkSuggestions";
 import { findLinks } from "@/lib/links";
@@ -31,7 +31,9 @@ import { ConversationList } from "@/components/basalt/ConversationList";
 import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
-import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
+import { IMAGE_ACCEPT, imagesFromTransfer, recentImages } from "@/lib/image-attach";
+import { getModel } from "@/lib/ai/models";
+import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DEFAULT_IMAGE_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import "./Assistant.css";
 
 // Homologado con Basalt.tsx (auditoría UX 2026-09-29: "los expertos...
@@ -106,7 +108,9 @@ export default function AssistantPage() {
   // de la petición, que el servidor usa para responder pero NO archiva (ver api/ai/chat.ts). En el
   // historial queda únicamente el nombre y el tamaño.
   const docsByMsg = useRef(new Map<string, DocPayload[]>());
-  const { docs: pendingDocs, ready: readyDocs, busy: docsBusy, addFiles, addUrl, remove: removeDoc, clear: clearDocs } = useDocAttachments();
+  /** Fotos por mensaje, solo en memoria — ver Basalt.tsx. */
+  const imagesByMsg = useRef(new Map<string, string[]>());
+  const { docs: pendingDocs, ready: readyDocs, images: pendingImages, busy: docsBusy, addFiles, addUrl, remove: removeDoc, clear: clearDocs } = useDocAttachments();
   // Enlaces pegados en el compositor que todavía no se leyeron. El modelo no puede
   // abrir una URL: sin esto, o inventa el contenido o dice que no puede (ver links.ts).
   const pendingLinks = useMemo(
@@ -175,11 +179,19 @@ export default function AssistantPage() {
   const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string; retry?: boolean }) => {
     // Adjuntar sin escribir nada = pedir el análisis completo (igual que en Basalt).
     const attached = opts?.continueFrom || opts?.retry ? [] : readyDocs;
-    const text = prompt.trim() || (attached.length ? DEFAULT_DOC_PROMPT : "");
+    const attachedImages = opts?.continueFrom || opts?.retry ? [] : pendingImages;
+    const text = prompt.trim() || (attached.length ? DEFAULT_DOC_PROMPT : attachedImages.length ? DEFAULT_IMAGE_PROMPT : "");
     // Nunca escribir sobre una conversación cuyos mensajes aún no llegaron: al
     // guardar se sube el hilo COMPLETO desde el estado local, así que hacerlo con
     // el hilo a medias borraría lo anterior.
     if (!text || generating || !assistant || threadStatus !== "idle" || (!opts?.continueFrom && docsBusy)) return;
+    // Un Experto trae su modelo fijo: si ese no ve, decirlo antes de cobrar el mensaje.
+    if (attachedImages.length && !getModel(assistant.defaultModel).vision) {
+      toast.error(`${assistant.name} usa ${getModel(assistant.defaultModel).label}, que no puede ver imágenes.`, {
+        description: "Pregúntale a Basalt con un modelo con visión, o describe la imagen con palabras.",
+      });
+      return;
+    }
 
     // "Continuar": retoma un mensaje cortado, pegando el texto nuevo al final
     // del mismo mensaje (joinContinuation) en vez de abrir uno nuevo.
@@ -190,9 +202,13 @@ export default function AssistantPage() {
     // respuesta vacía), así que se reenvía tal cual en vez de agregarla por segunda vez.
     const retrying = !continued && !!opts?.retry && messages[messages.length - 1]?.role === "user";
     const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
-    if (attached.length) {
-      userMsg.attachments = attached.map((d) => ({ name: d.name, chars: d.doc!.chars, pages: d.doc!.pages, truncated: d.doc!.truncated }));
-      docsByMsg.current.set(userMsg.id, attached.map((d) => ({ name: d.name, text: d.doc!.text, truncated: d.doc!.truncated })));
+    if (attached.length || attachedImages.length) {
+      userMsg.attachments = [
+        ...attached.map((d) => ({ name: d.name, chars: d.doc!.chars, pages: d.doc!.pages, truncated: d.doc!.truncated, kind: d.url ? ("web" as const) : ("doc" as const) })),
+        ...attachedImages.map((d) => ({ name: d.name, chars: 0, kind: "image" as const })),
+      ];
+      if (attached.length) docsByMsg.current.set(userMsg.id, attached.map((d) => ({ name: d.name, text: d.doc!.text, truncated: d.doc!.truncated })));
+      if (attachedImages.length) imagesByMsg.current.set(userMsg.id, attachedImages.map((d) => d.image!.dataUrl));
       clearDocs();
     }
     const history = continued || retrying ? messages : [...messages, userMsg];
@@ -239,6 +255,14 @@ export default function AssistantPage() {
           // Los documentos del último mensaje van aparte: el servidor los pasa al modelo pero archiva
           // la conversación sin ellos (el historial de los Expertos sí se guarda en el servidor).
           documents: lastDocs.length ? lastDocs.map((d) => ({ name: d.name, text: d.text, truncated: d.truncated })) : undefined,
+          // Las fotos del mensaje actual o, si no trae, las de la última pregunta con foto
+          // (que siguen en memoria): así una pregunta de seguimiento no se responde a ciegas.
+          ...(() => {
+            const fotos = attachedImages.length
+              ? { urls: attachedImages.map((d) => d.image!.dataUrl), names: attachedImages.map((d) => d.name) }
+              : recentImages(history, imagesByMsg.current);
+            return fotos.urls.length ? { images: fotos.urls, imageNames: fotos.names } : {};
+          })(),
           assistantId: assistant.id,
           temperature: 0.7,
         }),
@@ -441,7 +465,8 @@ export default function AssistantPage() {
                 <div key={m.id} className={`asst-msg ${m.role}`}>
                   {m.role === "user" ? (
                     <div className="asst-bubble">
-                      {m.attachments?.length ? <SentDocChips docs={m.attachments} /> : null}
+                      <SentImages urls={imagesByMsg.current.get(m.id)} />
+                      {m.attachments?.length ? <SentDocChips docs={m.attachments.filter((a) => a.kind !== "image" || !imagesByMsg.current.has(m.id))} /> : null}
                       {m.text}
                     </div>
                   ) : (
@@ -483,10 +508,10 @@ export default function AssistantPage() {
           <input
             ref={fileInputRef}
             type="file"
-            accept={DOC_ACCEPT}
+            accept={`${DOC_ACCEPT},${IMAGE_ACCEPT}`}
             multiple
             hidden
-            aria-label="Adjuntar documentos"
+            aria-label="Adjuntar documentos o imágenes"
             onChange={(e) => { if (e.target.files?.length) void addFiles(e.target.files); e.target.value = ""; }}
           />
           <p id="asst-enviar-ayuda" className="sr-only">Enter envía el mensaje; Shift y Enter hacen un salto de línea.</p>
@@ -495,8 +520,8 @@ export default function AssistantPage() {
               type="button"
               className="asst-attach"
               onClick={() => fileInputRef.current?.click()}
-              aria-label="Adjuntar un documento (PDF, Word o texto)"
-              title="Adjuntar un documento (PDF, Word o texto) para analizarlo"
+              aria-label="Adjuntar un documento o una imagen"
+              title="Adjuntar un documento (PDF, Word, texto) o una imagen para analizarla"
             >
               <Paperclip className="w-4 h-4" />
             </button>
@@ -510,6 +535,10 @@ export default function AssistantPage() {
                 setInput(e.target.value);
                 e.target.style.height = "auto";
                 e.target.style.height = Math.min(e.target.scrollHeight, 170) + "px";
+              }}
+              onPaste={(e) => {
+                const fotos = imagesFromTransfer(e.clipboardData?.items);
+                if (fotos.length) { e.preventDefault(); void addFiles(fotos); }
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {

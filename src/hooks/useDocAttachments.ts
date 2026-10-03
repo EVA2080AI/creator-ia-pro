@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { extractDocument, type ExtractedDoc } from "@/lib/doc-extract";
+import { isImageFile, prepareImage, type PreparedImage } from "@/lib/image-attach";
 import { MAX_DOCS_PER_MESSAGE } from "@/lib/doc-context";
 
 // Documentos que el usuario adjuntó y todavía no envió: se leen en el navegador apenas los elige
@@ -16,7 +17,12 @@ export interface PendingDoc {
   doc?: ExtractedDoc;
   /** Página web leída con /api/scrape en vez de un archivo del disco. */
   url?: string;
+  /** Foto para un modelo con visión: no se extrae texto, se manda la imagen. */
+  image?: PreparedImage;
 }
+
+/** Imágenes por mensaje: cada una suma tokens y pesa en el cuerpo de la petición. */
+export const MAX_PENDING_IMAGES = 2;
 
 /** Texto máximo de una página web, igual que el de /api/scrape. */
 const MAX_WEB_CHARS = 15_000;
@@ -30,6 +36,24 @@ export function useDocAttachments() {
   const addFiles = useCallback(async (input: FileList | File[]) => {
     const files = Array.from(input);
     for (const file of files) {
+      // Una imagen no se "lee": se reescala y viaja como imagen para que el modelo la mire.
+      if (isImageFile(file)) {
+        if (docsRef.current.filter((d) => d.image).length >= MAX_PENDING_IMAGES) {
+          toast.error(`Máximo ${MAX_PENDING_IMAGES} imágenes por mensaje.`);
+          continue;
+        }
+        if (docsRef.current.some((d) => d.name === file.name && d.size === file.size)) continue;
+        const id = crypto.randomUUID();
+        commit([...docsRef.current, { id, name: file.name, size: file.size, status: "leyendo" }]);
+        try {
+          const image = await prepareImage(file);
+          commit(docsRef.current.map((d) => (d.id === id ? { ...d, status: "listo", image } : d)));
+        } catch (e) {
+          commit(docsRef.current.filter((d) => d.id !== id));
+          toast.error(e instanceof Error ? e.message : `No pude preparar «${file.name}».`);
+        }
+        continue;
+      }
       if (docsRef.current.length >= MAX_PENDING_DOCS) {
         toast.error(`Máximo ${MAX_PENDING_DOCS} documentos por mensaje.`);
         break;
@@ -95,6 +119,7 @@ export function useDocAttachments() {
   const restore = useCallback((prev: PendingDoc[]) => commit(prev), []);
 
   const ready = useMemo(() => docs.filter((d) => d.status === "listo" && d.doc), [docs]);
+  const images = useMemo(() => docs.filter((d) => d.status === "listo" && d.image), [docs]);
   const busy = docs.some((d) => d.status === "leyendo");
-  return { docs, ready, busy, addFiles, addUrl, remove, clear, restore };
+  return { docs, ready, images, busy, addFiles, addUrl, remove, clear, restore };
 }

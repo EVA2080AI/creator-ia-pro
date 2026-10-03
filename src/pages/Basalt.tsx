@@ -14,13 +14,14 @@ import { ModelPicker } from "@/components/basalt/ModelPicker";
 import { ConversationList } from "@/components/basalt/ConversationList";
 import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
-import { PendingDocChips, SentDocChips } from "@/components/basalt/DocChips";
+import { PendingDocChips, SentDocChips, SentImages } from "@/components/basalt/DocChips";
 import { Activity, Sources } from "@/components/basalt/SearchActivity";
 import { LinkSuggestions } from "@/components/basalt/LinkSuggestions";
 import { findLinks } from "@/lib/links";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
-import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
+import { IMAGE_ACCEPT, imagesFromTransfer, recentImages } from "@/lib/image-attach";
+import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DEFAULT_IMAGE_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
@@ -102,7 +103,12 @@ export default function BasaltPage() {
   // Documentos adjuntos (contratos, informes…): el texto vive solo en memoria, por mensaje; en el
   // historial guardado queda únicamente el nombre y el tamaño (ver doc-context.ts).
   const docsByMsg = useRef(new Map<string, DocPayload[]>());
-  const { docs: pendingDocs, ready: readyDocs, busy: docsBusy, addFiles, addUrl, remove: removeDoc, clear: clearDocs, restore: restoreDocs } = useDocAttachments();
+  // Fotos por mensaje, solo en memoria (igual que los documentos): sirven para que una
+  // pregunta de seguimiento —"¿y qué dice abajo?"— siga viendo la imagen. Nunca se
+  // guardan: una imagen dentro de la fila de la conversación es justo lo que se sacó de
+  // `saved_asset` cuando una lista de 4 pesaba 6 MB.
+  const imagesByMsg = useRef(new Map<string, string[]>());
+  const { docs: pendingDocs, ready: readyDocs, images: pendingImages, busy: docsBusy, addFiles, addUrl, remove: removeDoc, clear: clearDocs, restore: restoreDocs } = useDocAttachments();
   // Enlaces pegados en el compositor que todavía no se leyeron. El modelo no puede
   // abrir una URL: sin esto, o inventa el contenido o dice que no puede (ver links.ts).
   const pendingLinks = useMemo(
@@ -189,11 +195,21 @@ export default function BasaltPage() {
   const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string }) => {
     const isContinue = !!opts?.continueFrom;
     const attached = isContinue ? [] : readyDocs;
-    const text = prompt.trim() || (attached.length ? DEFAULT_DOC_PROMPT : "");
+    const attachedImages = isContinue ? [] : pendingImages;
+    const text = prompt.trim() || (attached.length ? DEFAULT_DOC_PROMPT : attachedImages.length ? DEFAULT_IMAGE_PROMPT : "");
     // Nunca escribir sobre una conversación cuyos mensajes aún no llegaron: al
     // guardar se sube el hilo COMPLETO desde el estado local, así que hacerlo con
     // el hilo a medias borraría lo anterior.
     if (!text || generating || threadStatus !== "idle" || (!isContinue && docsBusy)) return;
+    // Avisar ANTES de cobrar: con un modelo sin visión la foto se ignoraría en silencio.
+    if (attachedImages.length && !getModel(model).vision) {
+      const alternativa = CHAT_MODELS.find((m) => m.vision && m.free && canAccessModel(tier, m.minTier));
+      toast.error(`${getModel(model).label} no puede ver imágenes.`, {
+        description: alternativa ? `Cambia a ${alternativa.label} y vuelve a enviarla.` : "Elige un modelo con visión en el selector de arriba.",
+        action: alternativa ? { label: `Usar ${alternativa.label}`, onClick: () => setModel(alternativa.id) } : undefined,
+      });
+      return;
+    }
     const pendingSnapshot = pendingDocs;
 
     // "Continuar": retoma un mensaje cortado por el límite de tiempo. No agrega
@@ -211,9 +227,13 @@ export default function BasaltPage() {
     } else {
       lastPromptRef.current = text;
       const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
-      if (attached.length) {
-        userMsg.attachments = attached.map((d) => ({ name: d.name, chars: d.doc!.chars, pages: d.doc!.pages, truncated: d.doc!.truncated }));
-        docsByMsg.current.set(userMsg.id, attached.map((d) => ({ name: d.name, text: d.doc!.text, truncated: d.doc!.truncated })));
+      if (attached.length || attachedImages.length) {
+        userMsg.attachments = [
+          ...attached.map((d) => ({ name: d.name, chars: d.doc!.chars, pages: d.doc!.pages, truncated: d.doc!.truncated, kind: d.url ? ("web" as const) : ("doc" as const) })),
+          ...attachedImages.map((d) => ({ name: d.name, chars: 0, kind: "image" as const })),
+        ];
+        if (attached.length) docsByMsg.current.set(userMsg.id, attached.map((d) => ({ name: d.name, text: d.doc!.text, truncated: d.doc!.truncated })));
+        if (attachedImages.length) imagesByMsg.current.set(userMsg.id, attachedImages.map((d) => d.image!.dataUrl));
         clearDocs();
       }
       history = [...messages, userMsg];
@@ -255,6 +275,14 @@ export default function BasaltPage() {
             ...buildApiMessages(history.slice(-20), docsByMsg.current),
             ...(continued ? [{ role: "user", content: text }] : []),
           ],
+          // Las fotos del mensaje que se está enviando o, si no trae, las de la última
+          // pregunta con foto: así "¿y qué dice abajo?" sigue viendo la imagen.
+          ...(() => {
+            const fotos = attachedImages.length
+              ? { urls: attachedImages.map((d) => d.image!.dataUrl), names: attachedImages.map((d) => d.name) }
+              : recentImages(history, imagesByMsg.current);
+            return fotos.urls.length ? { images: fotos.urls, imageNames: fotos.names } : {};
+          })(),
           temperature: 0.7,
         }),
       });
@@ -523,7 +551,8 @@ export default function BasaltPage() {
                 <div key={m.id} className={`asst-msg ${m.role}`}>
                   {m.role === "user" ? (
                     <div className="asst-bubble">
-                      {m.attachments?.length ? <SentDocChips docs={m.attachments} /> : null}
+                      <SentImages urls={imagesByMsg.current.get(m.id)} />
+                      {m.attachments?.length ? <SentDocChips docs={m.attachments.filter((a) => a.kind !== "image" || !imagesByMsg.current.has(m.id))} /> : null}
                       {m.text}
                     </div>
                   ) : (
@@ -578,10 +607,10 @@ export default function BasaltPage() {
           <input
             ref={fileInputRef}
             type="file"
-            accept={DOC_ACCEPT}
+            accept={`${DOC_ACCEPT},${IMAGE_ACCEPT}`}
             multiple
             hidden
-            aria-label="Adjuntar documentos"
+            aria-label="Adjuntar documentos o imágenes"
             onChange={(e) => { if (e.target.files?.length) void addFiles(e.target.files); e.target.value = ""; }}
           />
           <p id="asst-enviar-ayuda" className="sr-only">Enter envía el mensaje; Shift y Enter hacen un salto de línea.</p>
@@ -590,8 +619,8 @@ export default function BasaltPage() {
               type="button"
               className="asst-attach"
               onClick={() => fileInputRef.current?.click()}
-              aria-label="Adjuntar un documento (PDF, Word o texto)"
-              title="Adjuntar un documento (PDF, Word o texto) para analizarlo"
+              aria-label="Adjuntar un documento o una imagen"
+              title="Adjuntar un documento (PDF, Word, texto) o una imagen para analizarla"
             >
               <Paperclip className="w-4 h-4" />
             </button>
@@ -605,6 +634,12 @@ export default function BasaltPage() {
                 setInput(e.target.value);
                 e.target.style.height = "auto";
                 e.target.style.height = Math.min(e.target.scrollHeight, 170) + "px";
+              }}
+              onPaste={(e) => {
+                // Pegar una captura (Cmd+V) es como adjuntarla: sin esto el portapapeles
+                // no dejaba nada y parecía que el chat no aceptaba imágenes.
+                const fotos = imagesFromTransfer(e.clipboardData?.items);
+                if (fotos.length) { e.preventDefault(); void addFiles(fotos); }
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
