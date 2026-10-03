@@ -754,3 +754,69 @@
   max-width: 160px; max-height: 160px; border-radius: 12px; display: block;
   border: 1px solid var(--asst-border);
 }
+
+/* ══ Acciones del mensaje (Fase 1 C) ═════════════════════════════════════════
+   Copiar, regenerar, "probar con otro modelo" —lo que solo nosotros podemos
+   ofrecer, con 21 modelos— y qué modelo respondió. Existían en src/pages/Chat.tsx,
+   que hace semanas no está enrutado. En reposo son discretas; aparecen completas
+   al pasar el cursor por el mensaje (y siempre en táctil, donde no hay hover). */
+.asst-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-top: 8px; position: relative; }
+.asst-act {
+  display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 9px;
+  background: none; border: 1px solid transparent; color: var(--asst-txt-3);
+  font: inherit; font-size: 12px; line-height: 1.2; cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
+}
+.asst-act:hover:not(:disabled) { background: var(--asst-panel); color: var(--asst-txt); border-color: var(--asst-border); }
+.asst-act:disabled { opacity: 0.45; cursor: default; }
+.asst-act svg { flex: none; }
+.asst-act-model { margin-left: 2px; padding: 3px 8px; border-radius: 999px; background: var(--asst-panel); color: var(--asst-txt-3); font-size: 11px; }
+/* El lápiz del último mensaje del usuario va alineado a la derecha, bajo su burbuja. */
+.asst-act-edit { align-self: flex-end; margin-top: 4px; }
+
+/* Discretas hasta que el mensaje recibe atención (en táctil, siempre visibles). */
+@media (hover: hover) {
+  .asst-actions, .asst-act-edit { opacity: 0; }
+  .asst-msg:hover .asst-actions, .asst-msg:focus-within .asst-actions,
+  .asst-msg:hover .asst-act-edit, .asst-msg:focus-within .asst-act-edit { opacity: 1; }
+}
+
+.asst-act-pop {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; min-width: 230px; max-height: 320px; overflow: auto;
+  background: var(--asst-bg); border: 1px solid var(--asst-border); border-radius: 14px; padding: 6px;
+  box-shadow: 0 18px 44px -18px rgba(0, 0, 0, 0.45);
+}
+.asst-act-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;
+  padding: 7px 9px; border-radius: 10px; background: none; border: none; cursor: pointer;
+  font: inherit; font-size: 13px; color: var(--asst-txt); text-align: left;
+}
+.asst-act-item:hover, .asst-act-item:focus-visible { background: var(--asst-panel); }
+.asst-act-item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Renombrar una conversación desde su fila del menú. */
+.asst-rename-input {
+  flex: 1; min-width: 0; padding: 6px 10px; border-radius: 10px;
+  background: var(--asst-bg); border: 1px solid var(--asst-accent-text, var(--a-accent, #8b5cf6));
+  color: var(--asst-txt); font: inherit; font-size: 13px;
+}
+/* Sin esto el campo se queda con el anillo por defecto del navegador, que en oscuro
+   sale ámbar y no se parece a nada del producto (las reglas de foco de arriba solo
+   cubren button/select/a). */
+.asst-rename-input:focus-visible {
+  outline: 2px solid var(--asst-accent-text, var(--a-accent, #8b5cf6)); outline-offset: 1px;
+}
+.asst-app[data-asst-theme="dark"] .asst-rename-input {
+  border-color: color-mix(in oklch, var(--asst-term) 45%, var(--asst-border));
+  font-family: var(--asst-mono);
+}
+.asst-app[data-asst-theme="dark"] .asst-rename-input:focus-visible {
+  outline-color: color-mix(in oklch, var(--asst-term) 70%, transparent);
+}
+.asst-row-btn.open { width: 28px; opacity: 1; }
+@media (hover: none) {
+  /* Con tres botones por fila (renombrar, anclar, borrar) a 36px el título se cortaba
+     demasiado pronto en un teléfono. */
+  .asst-pin-btn, .asst-row-btn { width: 32px; }
+}
+.asst-app[data-asst-theme="dark"] :is(.asst-act, .asst-act-model) { font-family: var(--asst-mono); }

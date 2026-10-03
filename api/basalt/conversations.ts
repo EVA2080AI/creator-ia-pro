@@ -50,6 +50,8 @@ const MSG_SCHEMA = z.object({
   // "contrato.pdf" de la burbuja y no quedaba señal de que ese mensaje llevaba un documento.
   attachments: z.array(ATTACHMENT_SCHEMA).max(5).optional(),
   sources: z.array(SOURCE_SCHEMA).max(20).optional(),
+  /** Modelo que respondió, para que al reabrir siga diciendo cuál fue. */
+  model: z.string().max(120).optional(),
 });
 
 const UPSERT_SCHEMA = z.object({
@@ -63,10 +65,12 @@ const UPSERT_SCHEMA = z.object({
   assistantSlug: z.string().trim().min(1).max(MAX_SLUG).nullish(),
 });
 
-const PIN_SCHEMA = z.object({
+/** PATCH: anclar y/o renombrar. Al menos uno de los dos. */
+const PATCH_SCHEMA = z.object({
   id: z.string().min(1),
-  pinned: z.boolean(),
-});
+  pinned: z.boolean().optional(),
+  title: z.string().trim().min(1).max(MAX_TITLE).optional(),
+}).refine((v) => v.pinned !== undefined || v.title !== undefined, { message: "Nada que cambiar." });
 
 /**
  * Las migraciones de este proyecto se aplican a mano (`npx drizzle-kit push`), así que el código
@@ -128,23 +132,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  // Anclar / desanclar. Va aparte del POST a propósito: guardar una conversación no toca `pinned`,
-  // así que ese camino sigue funcionando aunque la columna todavía no exista.
+  // Anclar / desanclar y renombrar. Va aparte del POST a propósito: guardar una conversación
+  // sube el hilo completo y no toca ni `pinned` ni el título puesto a mano.
   if (req.method === "PATCH") {
-    const parsed = PIN_SCHEMA.safeParse(req.body ?? {});
+    const parsed = PATCH_SCHEMA.safeParse(req.body ?? {});
     if (!parsed.success) {
       res.status(400).json({ ok: false, code: "BAD_REQUEST", error: parsed.error.issues[0]?.message ?? "Datos inválidos." });
       return;
     }
-    try {
-      await db.update(schema.basaltConversation)
-        .set({ pinned: parsed.data.pinned })
-        .where(and(eq(schema.basaltConversation.id, parsed.data.id), eq(schema.basaltConversation.userId, user.userId)));
-    } catch (e) {
-      if (!isMissingPinnedColumn(e)) throw e;
-      console.error("[basalt/conversations] Falta aplicar la migración 0007 (columna pinned): npx drizzle-kit push");
-      res.status(503).json({ ok: false, code: "PIN_UNAVAILABLE", error: "Anclar conversaciones todavía no está disponible. Inténtalo más tarde." });
-      return;
+    const { id, pinned, title } = parsed.data;
+    const where = and(eq(schema.basaltConversation.id, id), eq(schema.basaltConversation.userId, user.userId));
+    // El título no depende de la columna `pinned`: se guarda primero para que renombrar
+    // funcione aunque falte la migración 0007.
+    if (title !== undefined) {
+      await db.update(schema.basaltConversation).set({ title }).where(where);
+    }
+    if (pinned !== undefined) {
+      try {
+        await db.update(schema.basaltConversation).set({ pinned }).where(where);
+      } catch (e) {
+        if (!isMissingPinnedColumn(e)) throw e;
+        console.error("[basalt/conversations] Falta aplicar la migración 0007 (columna pinned): npx drizzle-kit push");
+        res.status(503).json({ ok: false, code: "PIN_UNAVAILABLE", error: "Anclar conversaciones todavía no está disponible. Inténtalo más tarde." });
+        return;
+      }
     }
     res.status(200).json({ ok: true });
     return;

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Loader2, MessageSquare, Pin, PinOff, Search, Trash2, X } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Check, Loader2, MessageSquare, Pencil, Pin, PinOff, Search, Trash2, X } from "lucide-react";
 import { filterConversations, groupConversationsByDate, type ConversationSummary } from "@/lib/basalt";
 
 // Historial del menú lateral. Estaba copiado tal cual en Basalt.tsx y en
@@ -16,13 +16,28 @@ export interface ConversationListProps {
   onOpen: (c: ConversationSummary) => void;
   onDelete: (id: string) => void;
   onTogglePin: (c: ConversationSummary) => void;
+  /** Renombrar: el título se deriva del primer mensaje y muchas veces no dice nada
+   *  ("Hola", "Analiza este do…"). Encontrar una conversación vieja dependía de eso. */
+  onRename?: (id: string, title: string) => void;
   /** Al pasar el cursor o el foco por una fila se piden sus mensajes: al soltar el
    *  clic la conversación ya está en memoria y abre sin esqueleto. */
   onPrefetch?: (id: string) => void;
 }
 
-export function ConversationList({ conversations, loading, activeId, onOpen, onDelete, onTogglePin, onPrefetch }: ConversationListProps) {
+export function ConversationList({ conversations, loading, activeId, onOpen, onDelete, onTogglePin, onRename, onPrefetch }: ConversationListProps) {
   const [query, setQuery] = useState("");
+  // Id de la conversación que se está renombrando, y el texto en edición.
+  const [editing, setEditing] = useState("");
+  const [draft, setDraft] = useState("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const commitRename = () => {
+    const id = editing;
+    const title = draft.trim();
+    setEditing("");
+    const original = conversations.find((c) => c.id === id)?.title;
+    if (id && title && title !== original) onRename?.(id, title);
+  };
   const searching = query.trim().length > 0;
 
   const results = useMemo(() => filterConversations(conversations, query), [conversations, query]);
@@ -73,6 +88,29 @@ export function ConversationList({ conversations, loading, activeId, onOpen, onD
                   onPointerEnter={() => onPrefetch?.(c.id)}
                   onFocusCapture={() => onPrefetch?.(c.id)}
                 >
+                  {editing === c.id ? (
+                    <>
+                      <input
+                        ref={inputRef}
+                        className="asst-rename-input"
+                        value={draft}
+                        autoFocus
+                        aria-label={`Nuevo nombre de ${c.title}`}
+                        onChange={(e) => setDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") { e.preventDefault(); commitRename(); }
+                          if (e.key === "Escape") { e.preventDefault(); setEditing(""); }
+                        }}
+                        // Al salir del campo se guarda: cerrar el menú o tocar otra fila en
+                        // el teléfono no debería perder lo escrito.
+                        onBlur={commitRename}
+                      />
+                      <button className="asst-icon-btn asst-row-btn open" onMouseDown={(e) => e.preventDefault()} onClick={commitRename} aria-label="Guardar el nombre">
+                        <Check className="w-3.5 h-3.5" aria-hidden />
+                      </button>
+                    </>
+                  ) : (
+                  <>
                   <button
                     className={`asst-switch-item ${c.id === activeId ? "active" : ""}`}
                     onClick={() => onOpen(c)}
@@ -81,6 +119,16 @@ export function ConversationList({ conversations, loading, activeId, onOpen, onD
                     <MessageSquare className="w-3.5 h-3.5 shrink-0" aria-hidden />
                     <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.title}</span>
                   </button>
+                  {onRename && (
+                    <button
+                      className="asst-icon-btn asst-row-btn"
+                      onClick={() => { setEditing(c.id); setDraft(c.title); }}
+                      aria-label={`Renombrar ${c.title}`}
+                      title="Renombrar"
+                    >
+                      <Pencil className="w-3.5 h-3.5" aria-hidden />
+                    </button>
+                  )}
                   <button
                     className={`asst-icon-btn asst-pin-btn ${c.pinned ? "pinned" : ""}`}
                     onClick={() => onTogglePin(c)}
@@ -93,6 +141,8 @@ export function ConversationList({ conversations, loading, activeId, onOpen, onD
                   <button className="asst-icon-btn asst-row-btn" onClick={() => onDelete(c.id)} aria-label={`Borrar ${c.title}`}>
                     <Trash2 className="w-3.5 h-3.5" aria-hidden />
                   </button>
+                  </>
+                  )}
                 </div>
               ))}
             </div>

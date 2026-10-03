@@ -114,6 +114,9 @@ export interface StoredMsg {
   attachments?: DocMeta[];
   /** Fuentes web que el modelo consultó para esta respuesta (ver stream-events.ts). */
   sources?: SearchSource[];
+  /** Qué modelo respondió (cabecera X-Model-Used). Con 21 modelos, es la diferencia
+   *  entre "la IA se equivocó" y "este modelo se equivocó". */
+  model?: string;
 }
 
 /** Lo que necesita la lista del menú. El historial ya no descarga los mensajes:
@@ -322,6 +325,16 @@ export async function setConversationPinned(userId: string, id: string, pinned: 
   const res = await apiJson("/api/basalt/conversations", {
     method: "PATCH",
     body: JSON.stringify({ id, pinned }),
+  });
+  return res.ok;
+}
+
+/** Renombra. Devuelve false si el servidor no pudo guardarlo (el cliente revierte). */
+export async function renameConversation(userId: string, id: string, title: string): Promise<boolean> {
+  if (!userId || !title.trim()) return false;
+  const res = await apiJson("/api/basalt/conversations", {
+    method: "PATCH",
+    body: JSON.stringify({ id, title: title.trim().slice(0, 200) }),
   });
   return res.ok;
 }

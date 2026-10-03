@@ -17,6 +17,7 @@ import { useConversationHistory } from "@/hooks/useConversationHistory";
 import { PendingDocChips, SentDocChips, SentImages } from "@/components/basalt/DocChips";
 import { Activity, Sources } from "@/components/basalt/SearchActivity";
 import { LinkSuggestions } from "@/components/basalt/LinkSuggestions";
+import { MessageActions, EditButton } from "@/components/basalt/MessageActions";
 import { findLinks } from "@/lib/links";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
@@ -37,6 +38,15 @@ import {
 import { activityLabel, mergeSources, readBasaltEvent, type SearchSource } from "@/lib/stream-events";
 import { createAsset } from "@/lib/assets";
 import "./Assistant.css";
+
+/** Opciones de sendPrompt: continuar un mensaje cortado, rehacer el último (sin
+ *  duplicar la burbuja del usuario), partir de un hilo recortado y/o usar otro modelo. */
+interface SendOpts {
+  continueFrom?: string;
+  retry?: boolean;
+  base?: StoredMsg[];
+  model?: string;
+}
 
 const ICONS: Record<string, typeof LayoutTemplate> = {
   layout: LayoutTemplate, image: ImageIcon, pen: PenLine, chart: BarChart3, compare: Scale, dice: Dice5, file: FileText,
@@ -78,6 +88,10 @@ export default function BasaltPage() {
   const [autoGuide] = useState(() => !hasSeenBasaltGuide());
 
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
+  // Título de la conversación abierta. El servidor lo recibe en cada guardado (que sube
+  // el hilo completo): sin esto, el guardado siguiente lo volvería a derivar del primer
+  // mensaje y se perdería el nombre que el usuario puso a mano.
+  const [convTitle, setConvTitle] = useState("");
   const [messages, setMessages] = useState<StoredMsg[]>([]);
 
   const [memory, setMemory] = useState<string[]>([]);
@@ -115,6 +129,11 @@ export default function BasaltPage() {
     () => findLinks(input).filter((u) => !pendingDocs.some((d) => d.url === u)),
     [input, pendingDocs],
   );
+
+  // Último mensaje del usuario: es el que se puede editar y reenviar (editar uno del
+  // medio tiraría todo lo que vino después). Casi nunca es el último del hilo: la
+  // respuesta va debajo.
+  const lastUserIdx = useMemo(() => messages.map((m) => m.role).lastIndexOf("user"), [messages]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -161,9 +180,10 @@ export default function BasaltPage() {
   const persist = useCallback((id: string, msgs: StoredMsg[]) => {
     if (!userId || !msgs.length) return;
     const first = msgs.find((m) => m.role === "user")?.text ?? "Nueva conversación";
-    void saveConversation(userId, { id, title: first.slice(0, 60), updatedAt: Date.now(), messages: msgs })
+    const title = convTitle.trim() || first.slice(0, 60);
+    void saveConversation(userId, { id, title, updatedAt: Date.now(), messages: msgs })
       .then(() => chats.refresh());
-  }, [userId, chats]);
+  }, [userId, chats, convTitle]);
 
   const generateImages = useCallback(async (base: StoredMsg[], msgId: string, imgs: { prompt: string; format: string }[]) => {
     const results = await Promise.all(imgs.map(async (img) => {
@@ -192,8 +212,12 @@ export default function BasaltPage() {
     return final;
   }, [imageModel]);
 
-  const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string }) => {
+  const sendPrompt = useCallback(async (prompt: string, opts?: SendOpts) => {
     const isContinue = !!opts?.continueFrom;
+    // `base` permite rehacer una respuesta sobre un hilo ya recortado sin esperar a que
+    // el estado se actualice (regenerar borra la respuesta vieja y vuelve a preguntar).
+    const base = opts?.base ?? messages;
+    const modelToUse = opts?.model ?? model;
     const attached = isContinue ? [] : readyDocs;
     const attachedImages = isContinue ? [] : pendingImages;
     const text = prompt.trim() || (attached.length ? DEFAULT_DOC_PROMPT : attachedImages.length ? DEFAULT_IMAGE_PROMPT : "");
@@ -216,14 +240,19 @@ export default function BasaltPage() {
     // burbuja de usuario ni mensaje nuevo — el texto nuevo se pega al final del
     // mensaje cortado (joinContinuation), así un proyecto de varios archivos
     // sigue siendo UNA tarjeta con vista previa.
-    const continued = opts?.continueFrom ? messages.find((m) => m.id === opts.continueFrom && m.role === "model") : undefined;
+    const continued = opts?.continueFrom ? base.find((m) => m.id === opts.continueFrom && m.role === "model") : undefined;
     const prefix = continued?.text ?? "";
 
     let history: StoredMsg[];
     let modelMsgId: string;
     if (continued) {
-      history = messages;
+      history = base;
       modelMsgId = continued.id;
+    } else if (opts?.retry) {
+      // La pregunta ya está en el hilo (regenerar): no se agrega una burbuja nueva.
+      history = base;
+      modelMsgId = crypto.randomUUID();
+      setMessages([...history, { id: modelMsgId, role: "model", text: "" }]);
     } else {
       lastPromptRef.current = text;
       const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
@@ -236,7 +265,7 @@ export default function BasaltPage() {
         if (attachedImages.length) imagesByMsg.current.set(userMsg.id, attachedImages.map((d) => d.image!.dataUrl));
         clearDocs();
       }
-      history = [...messages, userMsg];
+      history = [...base, userMsg];
       modelMsgId = crypto.randomUUID();
       setMessages([...history, { id: modelMsgId, role: "model", text: "" }]);
       setInput("");
@@ -261,6 +290,7 @@ export default function BasaltPage() {
     let cutOff = false;
     let sources: SearchSource[] = [];
     let searchCredits = 0;
+    let respondedWith = modelToUse;
     setActivity("");
     try {
       const res = await fetch("/api/ai/chat", {
@@ -269,7 +299,7 @@ export default function BasaltPage() {
         signal: abortRef.current.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model,
+          model: modelToUse,
           systemPrompt: buildSystemPrompt(memory) + (hasDocuments(history.slice(-20)) ? `\n\n${DOC_ANALYSIS_PROMPT}` : ""),
           messages: [
             ...buildApiMessages(history.slice(-20), docsByMsg.current),
@@ -291,6 +321,9 @@ export default function BasaltPage() {
         const body = await res.json().catch(() => null);
         throw new Error(body?.error || `Error ${res.status}`);
       }
+      // El servidor ya mandaba esta cabecera y nadie la leía: es la que permite decir
+      // QUÉ modelo respondió cada mensaje (y recordarlo al reabrir la conversación).
+      respondedWith = res.headers.get("X-Model-Used") || modelToUse;
 
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
@@ -343,7 +376,7 @@ export default function BasaltPage() {
       }
     } catch (e) {
       if (!(e instanceof DOMException && e.name === "AbortError")) {
-        setMessages(messages);
+        setMessages(base);
         setError(e instanceof Error ? e.message : "Error al generar la respuesta.");
         restoreInput();
         setGenerating(false);
@@ -356,7 +389,7 @@ export default function BasaltPage() {
 
     const { visible, memories, images } = parseBasaltReply(acc);
     if (!visible && !images.length) {
-      setMessages(messages);
+      setMessages(base);
       setError("El modelo no devolvió texto. Prueba a reformular la pregunta.");
       restoreInput();
       setGenerating(false);
@@ -371,8 +404,8 @@ export default function BasaltPage() {
       return all.length ? all : undefined;
     };
     let final: StoredMsg[] = continued
-      ? history.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, images: images.length ? [...(m.images ?? []), ...images] : m.images, sources: withSources(m.sources) } : m))
-      : [...history, { id: modelMsgId, role: "model", text: finalText, images: images.length ? images : undefined, sources: withSources() }];
+      ? history.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, images: images.length ? [...(m.images ?? []), ...images] : m.images, sources: withSources(m.sources), model: respondedWith } : m))
+      : [...history, { id: modelMsgId, role: "model", text: finalText, images: images.length ? images : undefined, sources: withSources(), model: respondedWith }];
     setMessages(final);
     if (cutOff) setTruncatedId(modelMsgId);
 
@@ -391,7 +424,7 @@ export default function BasaltPage() {
       stickToBottom();
     }
     persist(convId, final);
-  }, [generating, messages, model, memory, userId, convId, stickToBottom, generateImages, persist, setParams, readyDocs, docsBusy, pendingDocs, clearDocs, restoreDocs, threadStatus]);
+  }, [generating, messages, model, tier, memory, userId, convId, stickToBottom, generateImages, persist, setParams, readyDocs, pendingImages, docsBusy, pendingDocs, clearDocs, restoreDocs, threadStatus]);
 
   // /a/basalt?q=... (desde /chat o el dashboard) envía el primer mensaje solo.
   useEffect(() => {
@@ -402,10 +435,35 @@ export default function BasaltPage() {
     void sendPrompt(q);
   }, [params, authLoading, userId, sendPrompt, setParams]);
 
+  /** Rehace la última respuesta, opcionalmente con OTRO modelo. */
+  const regenerate = useCallback((msgId: string, modelId?: string) => {
+    if (generating) return;
+    const i = messages.findIndex((m) => m.id === msgId);
+    if (i < 1) return;
+    const pregunta = [...messages.slice(0, i)].reverse().find((m) => m.role === "user");
+    if (!pregunta) return;
+    const recortado = messages.slice(0, i);
+    setMessages(recortado);
+    setTruncatedId(null);
+    void sendPrompt(pregunta.text, { retry: true, base: recortado, model: modelId });
+  }, [generating, messages, sendPrompt]);
+
+  /** Devuelve el mensaje al compositor y descarta lo que vino después. */
+  const editMessage = useCallback((msgId: string) => {
+    if (generating) return;
+    const i = messages.findIndex((m) => m.id === msgId);
+    if (i < 0) return;
+    setInput(messages[i].text);
+    setMessages(messages.slice(0, i));
+    setTruncatedId(null);
+    requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>(".asst-pill textarea")?.focus());
+  }, [generating, messages]);
+
   const newChat = () => {
     abortRef.current?.abort();
     chats.reset();
     setConvId(crypto.randomUUID());
+    setConvTitle("");
     setMessages([]);
     setError(null);
     setTruncatedId(null);
@@ -417,6 +475,7 @@ export default function BasaltPage() {
   const openConversation = (c: ConversationSummary) => {
     abortRef.current?.abort();
     setConvId(c.id);
+    setConvTitle(c.title);
     setError(null);
     setTruncatedId(null);
     setSidebarOpen(false);
@@ -492,6 +551,7 @@ export default function BasaltPage() {
             activeId={convId}
             onOpen={openConversation}
             onDelete={removeConversation}
+            onRename={(id, title) => { chats.rename(id, title); if (id === convId) setConvTitle(title); }}
           />
         }
       />
@@ -550,11 +610,15 @@ export default function BasaltPage() {
               {messages.map((m, i) => (
                 <div key={m.id} className={`asst-msg ${m.role}`}>
                   {m.role === "user" ? (
-                    <div className="asst-bubble">
-                      <SentImages urls={imagesByMsg.current.get(m.id)} />
-                      {m.attachments?.length ? <SentDocChips docs={m.attachments.filter((a) => a.kind !== "image" || !imagesByMsg.current.has(m.id))} /> : null}
-                      {m.text}
-                    </div>
+                    <>
+                      <div className="asst-bubble">
+                        <SentImages urls={imagesByMsg.current.get(m.id)} />
+                        {m.attachments?.length ? <SentDocChips docs={m.attachments.filter((a) => a.kind !== "image" || !imagesByMsg.current.has(m.id))} /> : null}
+                        {m.text}
+                      </div>
+                      {/* Editar solo el último: cambiar uno del medio tiraría el resto del hilo. */}
+                      {!generating && i === lastUserIdx && <EditButton onEdit={() => editMessage(m.id)} />}
+                    </>
                   ) : (
                     <>
                       <div className="asst-avatar"><Bot className="w-3.5 h-3.5 text-white" /></div>
@@ -563,6 +627,16 @@ export default function BasaltPage() {
                           <div className="asst-md" dangerouslySetInnerHTML={{ __html: mdToHtml(m.text) }} />
                         ) : null}
                         {m.sources?.length ? <Sources items={m.sources} credits={searchCost[m.id]} /> : null}
+                        {m.text && !(generating && i === messages.length - 1) ? (
+                          <MessageActions
+                            text={m.text}
+                            model={m.model}
+                            tier={tier}
+                            disabled={generating}
+                            onRegenerate={i === messages.length - 1 ? () => regenerate(m.id) : undefined}
+                            onRegenerateWith={i === messages.length - 1 ? (id) => regenerate(m.id, id) : undefined}
+                          />
+                        ) : null}
                         {/* Buscando / leyendo la cuenta. Va al final —después del texto y de las
                             fuentes— porque es lo que está pasando AHORA: si todavía no hay nada
                             que leer reemplaza al shimmer, y si ya hay texto se agrega debajo (el

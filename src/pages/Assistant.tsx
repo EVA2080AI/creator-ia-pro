@@ -25,6 +25,7 @@ import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { PendingDocChips, SentDocChips, SentImages } from "@/components/basalt/DocChips";
 import { Activity, Sources } from "@/components/basalt/SearchActivity";
 import { LinkSuggestions } from "@/components/basalt/LinkSuggestions";
+import { MessageActions, EditButton } from "@/components/basalt/MessageActions";
 import { findLinks } from "@/lib/links";
 import { activityLabel, mergeSources, readBasaltEvent, type SearchSource } from "@/lib/stream-events";
 import { ConversationList } from "@/components/basalt/ConversationList";
@@ -88,6 +89,8 @@ export default function AssistantPage() {
   const [autoGuide] = useState(() => !hasSeenBasaltGuide());
 
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
+  /** Título puesto a mano de la conversación abierta (ver persist en Basalt.tsx). */
+  const [convTitle, setConvTitle] = useState("");
 
   const [messages, setMessages] = useState<StoredMsg[]>([]);
   const [input, setInput] = useState("");
@@ -117,6 +120,11 @@ export default function AssistantPage() {
     () => findLinks(input).filter((u) => !pendingDocs.some((d) => d.url === u)),
     [input, pendingDocs],
   );
+
+  // Último mensaje del usuario: es el que se puede editar y reenviar (editar uno del
+  // medio tiraría todo lo que vino después). Casi nunca es el último del hilo: la
+  // respuesta va debajo.
+  const lastUserIdx = useMemo(() => messages.map((m) => m.role).lastIndexOf("user"), [messages]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -154,6 +162,7 @@ export default function AssistantPage() {
     abortRef.current?.abort();
     chats.reset();
     setConvId(crypto.randomUUID());
+    setConvTitle("");
     setMessages([]);
     setError(null);
     setTruncatedId(null);
@@ -164,6 +173,7 @@ export default function AssistantPage() {
   const openConversation = (c: ConversationSummary) => {
     abortRef.current?.abort();
     setConvId(c.id);
+    setConvTitle(c.title);
     setError(null);
     setTruncatedId(null);
     clearDocs();
@@ -176,7 +186,10 @@ export default function AssistantPage() {
     if (id === convId) newChat();
   };
 
-  const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string; retry?: boolean }) => {
+  const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string; retry?: boolean; base?: StoredMsg[] }) => {
+    // `base` permite rehacer una respuesta sobre un hilo ya recortado sin esperar al
+    // estado (ver regenerate), igual que en Basalt.tsx.
+    const base = opts?.base ?? messages;
     // Adjuntar sin escribir nada = pedir el análisis completo (igual que en Basalt).
     const attached = opts?.continueFrom || opts?.retry ? [] : readyDocs;
     const attachedImages = opts?.continueFrom || opts?.retry ? [] : pendingImages;
@@ -195,12 +208,12 @@ export default function AssistantPage() {
 
     // "Continuar": retoma un mensaje cortado, pegando el texto nuevo al final
     // del mismo mensaje (joinContinuation) en vez de abrir uno nuevo.
-    const continued = opts?.continueFrom ? messages.find((m) => m.id === opts.continueFrom && m.role === "model") : undefined;
+    const continued = opts?.continueFrom ? base.find((m) => m.id === opts.continueFrom && m.role === "model") : undefined;
     const prefix = continued?.text ?? "";
 
     // "Reintentar" tras un error: la pregunta del usuario ya está en el hilo (solo se quitó la
     // respuesta vacía), así que se reenvía tal cual en vez de agregarla por segunda vez.
-    const retrying = !continued && !!opts?.retry && messages[messages.length - 1]?.role === "user";
+    const retrying = !continued && !!opts?.retry && base[base.length - 1]?.role === "user";
     const userMsg: StoredMsg = { id: crypto.randomUUID(), role: "user", text };
     if (attached.length || attachedImages.length) {
       userMsg.attachments = [
@@ -211,7 +224,7 @@ export default function AssistantPage() {
       if (attachedImages.length) imagesByMsg.current.set(userMsg.id, attachedImages.map((d) => d.image!.dataUrl));
       clearDocs();
     }
-    const history = continued || retrying ? messages : [...messages, userMsg];
+    const history = continued || retrying ? base : [...base, userMsg];
     if (!continued && !retrying) {
       setMessages(history);
       setInput("");
@@ -236,6 +249,7 @@ export default function AssistantPage() {
     abortRef.current = new AbortController();
     let sources: SearchSource[] = [];
     let searchCredits = 0;
+    let respondedWith = assistant.defaultModel;
     setActivity("");
     try {
       const res = await fetch("/api/ai/chat", {
@@ -272,6 +286,7 @@ export default function AssistantPage() {
         const body = await res.json().catch(() => null);
         throw new Error(body?.error || `Error ${res.status}`);
       }
+      respondedWith = res.headers.get("X-Model-Used") || assistant.defaultModel;
 
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
@@ -329,7 +344,7 @@ export default function AssistantPage() {
         const all = mergeSources(previous, sources);
         return all.length ? all : undefined;
       };
-      setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, sources: withSources(m.sources) } : m)));
+      setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, sources: withSources(m.sources), model: respondedWith } : m)));
       if (searchCredits) setSearchCost((prev) => ({ ...prev, [modelMsgId]: (prev[modelMsgId] ?? 0) + searchCredits }));
       if (!acc.trim()) {
         if (!continued) setMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
@@ -338,9 +353,11 @@ export default function AssistantPage() {
         if (cutOff) setTruncatedId(modelMsgId);
         if (userId) {
           const final: StoredMsg[] = continued
-            ? history.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, sources: withSources(m.sources) } : m))
-            : [...history, { id: modelMsgId, role: "model", text: finalText, sources: withSources() }];
-          const title = (history.find((m) => m.role === "user")?.text ?? text).slice(0, 60);
+            ? history.map((m) => (m.id === modelMsgId ? { ...m, text: finalText, sources: withSources(m.sources), model: respondedWith } : m))
+            : [...history, { id: modelMsgId, role: "model", text: finalText, sources: withSources(), model: respondedWith }];
+          // El título puesto a mano gana: cada guardado sube el hilo completo y, sin esto,
+          // volvería a derivarse del primer mensaje.
+          const title = convTitle.trim() || (history.find((m) => m.role === "user")?.text ?? text).slice(0, 60);
           void saveConversation(userId, { id: convId, title, updatedAt: Date.now(), messages: final }, slug)
             .then(() => chats.refresh());
         }
@@ -358,7 +375,30 @@ export default function AssistantPage() {
       abortRef.current = null;
       stickToBottom();
     }
-  }, [assistant, generating, messages, stickToBottom, userId, convId, slug, readyDocs, docsBusy, clearDocs, threadStatus, chats]);
+  }, [assistant, generating, messages, stickToBottom, userId, convId, convTitle, slug, readyDocs, pendingImages, docsBusy, clearDocs, threadStatus, chats]);
+
+  /** Rehace la última respuesta del Experto (su modelo es fijo: no hay "otro modelo"). */
+  const regenerate = useCallback((msgId: string) => {
+    if (generating) return;
+    const i = messages.findIndex((m) => m.id === msgId);
+    if (i < 1) return;
+    const recortado = messages.slice(0, i);
+    if (recortado[recortado.length - 1]?.role !== "user") return;
+    setMessages(recortado);
+    setTruncatedId(null);
+    void sendPrompt(recortado[recortado.length - 1].text, { retry: true, base: recortado });
+  }, [generating, messages, sendPrompt]);
+
+  /** Devuelve el mensaje al compositor y descarta lo que vino después. */
+  const editMessage = useCallback((msgId: string) => {
+    if (generating) return;
+    const i = messages.findIndex((m) => m.id === msgId);
+    if (i < 0) return;
+    setInput(messages[i].text);
+    setMessages(messages.slice(0, i));
+    setTruncatedId(null);
+    requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>(".asst-pill textarea")?.focus());
+  }, [generating, messages]);
 
   const handleStop = () => abortRef.current?.abort();
 
@@ -410,6 +450,7 @@ export default function AssistantPage() {
             activeId={convId}
             onOpen={openConversation}
             onDelete={removeConversation}
+            onRename={(id, title) => { chats.rename(id, title); if (id === convId) setConvTitle(title); }}
           />
         }
       />
@@ -464,11 +505,14 @@ export default function AssistantPage() {
               {messages.map((m, i) => (
                 <div key={m.id} className={`asst-msg ${m.role}`}>
                   {m.role === "user" ? (
-                    <div className="asst-bubble">
-                      <SentImages urls={imagesByMsg.current.get(m.id)} />
-                      {m.attachments?.length ? <SentDocChips docs={m.attachments.filter((a) => a.kind !== "image" || !imagesByMsg.current.has(m.id))} /> : null}
-                      {m.text}
-                    </div>
+                    <>
+                      <div className="asst-bubble">
+                        <SentImages urls={imagesByMsg.current.get(m.id)} />
+                        {m.attachments?.length ? <SentDocChips docs={m.attachments.filter((a) => a.kind !== "image" || !imagesByMsg.current.has(m.id))} /> : null}
+                        {m.text}
+                      </div>
+                      {!generating && i === lastUserIdx && <EditButton onEdit={() => editMessage(m.id)} />}
+                    </>
                   ) : (
                     <>
                       <div className="asst-avatar"><Bot className="w-3.5 h-3.5 text-white" /></div>
@@ -477,6 +521,14 @@ export default function AssistantPage() {
                           <div className="asst-md" dangerouslySetInnerHTML={{ __html: mdToHtml(m.text) }} />
                         ) : null}
                         {m.sources?.length ? <Sources items={m.sources} credits={searchCost[m.id]} /> : null}
+                        {m.text && !(generating && i === messages.length - 1) ? (
+                          <MessageActions
+                            text={m.text}
+                            model={m.model}
+                            disabled={generating}
+                            onRegenerate={i === messages.length - 1 ? () => regenerate(m.id) : undefined}
+                          />
+                        ) : null}
                         {/* Lo que está pasando ahora, al final del mensaje (ver Basalt.tsx). */}
                         {generating && i === messages.length - 1 ? (
                           activity ? <Activity label={activity} /> : m.text ? null : <div className="asst-shimmer"><i /><i /><i /></div>

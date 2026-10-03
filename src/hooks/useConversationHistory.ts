@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
-  loadConversations, deleteConversation, setConversationPinned,
+  loadConversations, deleteConversation, setConversationPinned, renameConversation,
   getCachedMessages, loadConversationMessages, prefetchConversation,
   migrateLegacyLocalStorage,
   type ConversationSummary, type StoredMsg,
@@ -102,6 +102,23 @@ export function useConversationHistory({ userId, assistantSlug, onMessages, onOp
     });
   }, [userId]);
 
+  /** Optimista, como anclar: el título cambia al instante y vuelve atrás si falla. */
+  const rename = useCallback((id: string, title: string) => {
+    const limpio = title.trim();
+    if (!limpio) return;
+    let anterior = "";
+    setConversations((prev) => prev.map((x) => {
+      if (x.id !== id) return x;
+      anterior = x.title;
+      return { ...x, title: limpio };
+    }));
+    void renameConversation(userId, id, limpio).then((ok) => {
+      if (ok) return;
+      setConversations((prev) => prev.map((x) => (x.id === id ? { ...x, title: anterior } : x)));
+      toast.error("No se pudo renombrar la conversación.");
+    });
+  }, [userId]);
+
   const prefetch = useCallback((id: string) => prefetchConversation(userId, id), [userId]);
 
   /** Props que espera <ConversationList>, para no repetir el cableado en cada página. */
@@ -111,8 +128,9 @@ export function useConversationHistory({ userId, assistantSlug, onMessages, onOp
     onOpen: open,
     onDelete: remove,
     onTogglePin: togglePin,
+    onRename: rename,
     onPrefetch: prefetch,
   };
 
-  return { conversations, loading, threadStatus, openingTitle, open, reset, remove, togglePin, prefetch, refresh, listProps };
+  return { conversations, loading, threadStatus, openingTitle, open, reset, remove, togglePin, rename, prefetch, refresh, listProps };
 }
