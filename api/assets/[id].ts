@@ -31,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .limit(1);
     if (!row) return void res.status(404).json({ ok: false, code: "NOT_FOUND", error: "Activo no encontrado." });
     // La imagen no se devuelve incrustada ni acá: se sirve por /raw, que sí se cachea.
-    const assetUrl = row.assetUrl.startsWith("data:") ? `/api/assets/${row.id}/raw` : row.assetUrl;
+    const assetUrl = /^(data|drive):/.test(row.assetUrl) ? `/api/assets/${row.id}/raw` : row.assetUrl;
     res.status(200).json({ ok: true, asset: { ...row, assetUrl } });
     return;
   }
@@ -46,7 +46,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const [updated] = await db.update(schema.savedAsset).set(patch).where(owned).returning();
     if (!updated) return void res.status(404).json({ ok: false, code: "NOT_FOUND", error: "Activo no encontrado." });
-    const assetUrl = updated.assetUrl.startsWith("data:") ? `/api/assets/${updated.id}/raw` : updated.assetUrl;
+    const assetUrl = /^(data|drive):/.test(updated.assetUrl) ? `/api/assets/${updated.id}/raw` : updated.assetUrl;
     res.status(200).json({ ok: true, asset: { ...updated, assetUrl } });
     return;
   }

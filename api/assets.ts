@@ -28,9 +28,11 @@ const listColumns = {
   tags: schema.savedAsset.tags,
   createdAt: schema.savedAsset.createdAt,
   /** true = el contenido está incrustado en la fila y hay que servirlo por /raw. */
-  inline: sql<boolean>`${schema.savedAsset.assetUrl} LIKE 'data:%'`.as("inline"),
+  // "inline" = hay que servirlo por /raw: o está incrustado como data URI (filas
+  // viejas) o vive en el Drive del usuario, que exige su token para leerlo.
+  inline: sql<boolean>`(${schema.savedAsset.assetUrl} LIKE 'data:%' OR ${schema.savedAsset.assetUrl} LIKE 'drive:%')`.as("inline"),
   /** La url tal cual cuando ya vive fuera (Blob, Replicate…); null si está incrustada. */
-  remoteUrl: sql<string | null>`CASE WHEN ${schema.savedAsset.assetUrl} LIKE 'data:%' THEN NULL ELSE ${schema.savedAsset.assetUrl} END`.as("remote_url"),
+  remoteUrl: sql<string | null>`CASE WHEN (${schema.savedAsset.assetUrl} LIKE 'data:%' OR ${schema.savedAsset.assetUrl} LIKE 'drive:%') THEN NULL ELSE ${schema.savedAsset.assetUrl} END`.as("remote_url"),
   contentPreview: sql<string | null>`left(${schema.savedAsset.content}, ${PREVIEW_CHARS})`.as("content_preview"),
 };
 

@@ -7,6 +7,7 @@ import { getSessionUser, getProfile } from "../_lib/session.js";
 import { spendCredits, refundCredits, getBalance, logSpend } from "../_lib/credits.js";
 import { IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID, canAccessModel, getImageModel } from "../../src/lib/ai/models.js";
 import { uploadImage } from "../_lib/blob.js";
+import { hasDriveLinked, uploadToDrive, DRIVE_PREFIX } from "../_lib/drive.js";
 
 interface ImageBody {
   prompt?: string;
@@ -86,11 +87,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const generated = model.provider === "openrouter"
       ? await generateOpenRouterImage(model.openrouterSlug!, prompt, aspectRatio, imagePrompt, apiKey)
       : await generateReplicateImage(model.replicateSlug!, prompt, aspectRatio, imagePrompt, apiKey);
-    // Los proveedores devuelven o una URL temporal o un data URI de varios MB. Se sube
-    // a Blob para que lo que viaje al navegador —y lo que se guarde después en la
-    // biblioteca— sea una URL corta y cacheable, no la imagen entera en base64.
-    // Si la subida falla, se sigue con lo que vino: la imagen está pagada.
-    const imageUrl = (await uploadImage(generated, user.userId)) ?? generated;
+    // Los proveedores devuelven o una URL temporal o un data URI de varios MB. La
+    // imagen se guarda antes de responder para que lo que viaje al navegador sea una
+    // referencia corta, no la imagen entera en base64.
+    //
+    // Si el usuario vinculó su Google Drive, va ahí (es su espacio y su decisión, ver
+    // /perfil). Si no lo vinculó —o Drive falla por token, permisos o cuota— se usa el
+    // almacenamiento de la plataforma. Y si todo falla, se devuelve lo que vino: una
+    // imagen que el usuario pagó no se pierde por un problema de almacenamiento.
+    const imageUrl = (await guardarImagen(generated, user.userId)) ?? generated;
     if (cost > 0) await logSpend(user.userId, cost, `image: ${modelId}`);
     const creditsRemaining = await getBalance(user.userId).catch(() => null);
     res.status(200).json({ ok: true, imageUrl, model: modelId, cost, creditsRemaining });
@@ -99,6 +104,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const message = err instanceof Error ? err.message : "Error al generar la imagen.";
     res.status(502).json({ ok: false, code: "PROVIDER_ERROR", error: message.slice(0, 300) });
   }
+}
+
+const DATA_URI = /^data:([^;,]+);base64,(.*)$/s;
+
+/**
+ * Guarda la imagen donde corresponda y devuelve la referencia que se persistirá:
+ * `drive:<fileId>` si es el Drive del usuario, o la URL pública de Blob.
+ */
+async function guardarImagen(generated: string, userId: string): Promise<string | null> {
+  const match = DATA_URI.exec(generated);
+  if (match && (await hasDriveLinked(userId))) {
+    const [, mime, base64] = match;
+    const nombre = `creator-ia-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.${mime.split("/")[1] || "png"}`;
+    const fileId = await uploadToDrive(userId, Buffer.from(base64, "base64"), mime, nombre);
+    if (fileId) return `${DRIVE_PREFIX}${fileId}`;
+    console.warn("[image] Drive no aceptó la imagen; se guarda en la plataforma.");
+  }
+  return uploadImage(generated, userId);
 }
 
 /** Forma mínima de una respuesta de la Image API de OpenRouter (POST /api/v1/images). */

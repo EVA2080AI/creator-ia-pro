@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
+import { authClient } from "@/lib/auth-client";
 import { useProfile } from "@/hooks/useProfile";
 import { useTheme } from "@/hooks/useTheme";
 import { toast } from "sonner";
@@ -36,8 +37,21 @@ const Profile = () => {
   const { profile, loading: loadingProfile, refreshProfile } = useProfile(user?.id);
   const { resolvedTheme, setTheme } = useTheme();
   const [saving, setSaving] = useState(false);
+  // Dónde se guardan las imágenes de este usuario (su Drive o la plataforma).
+  const [almacenamiento, setAlmacenamiento] = useState<{ drive: boolean } | null>(null);
+  const [vinculando, setVinculando] = useState(false);
   const [fullName, setFullName] = useState("");
   const [creditHistory, setCreditHistory] = useState<TransactionRow[]>([]);
+
+
+  useEffect(() => {
+    let vivo = true;
+    void fetch("/api/storage-status", { credentials: "include" })
+      .then((r) => r.json())
+      .then((j) => { if (vivo && j?.ok) setAlmacenamiento({ drive: !!j.drive }); })
+      .catch(() => { /* sin red: no se promete nada */ });
+    return () => { vivo = false; };
+  }, []);
 
   useEffect(() => {
     if (!profile) return;
@@ -263,6 +277,53 @@ const Profile = () => {
                 </button>
               )}
             </div>
+
+            {/* Dónde se guardan las imágenes generadas. Vincular Drive es opcional:
+                sin él, se guardan en el almacenamiento de la plataforma. El permiso
+                que se pide (drive.file) solo da acceso a los archivos que crea esta
+                app, no al resto de la unidad del usuario. */}
+            {almacenamiento && (
+              <div className="rounded-3xl bg-muted/50 border border-border p-6 space-y-4">
+                <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Dónde se guardan tus imágenes</h2>
+                {almacenamiento.drive ? (
+                  <div className="flex items-start gap-3">
+                    <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">En tu Google Drive</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        En la carpeta «Creator IA Pro». Puedes quitar el permiso cuando quieras desde tu cuenta de Google.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Hoy se guardan en el almacenamiento de Creator IA. Si prefieres que vivan en tu propio
+                      Google Drive, puedes vincularlo: solo tendremos acceso a los archivos que creemos nosotros.
+                    </p>
+                    <button
+                      type="button"
+                      disabled={vinculando}
+                      onClick={async () => {
+                        setVinculando(true);
+                        const { error } = await authClient.linkSocial({
+                          provider: "google",
+                          scopes: ["https://www.googleapis.com/auth/drive.file"],
+                          callbackURL: "/profile",
+                        });
+                        if (error) {
+                          toast.error(error.message || "No se pudo vincular Google Drive.");
+                          setVinculando(false);
+                        }
+                      }}
+                      className="w-full h-11 rounded-xl bg-foreground text-background text-sm font-bold disabled:opacity-60"
+                    >
+                      {vinculando ? "Abriendo Google…" : "Vincular mi Google Drive"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Account info */}
             <div className="rounded-3xl bg-muted/50 border border-border p-6 space-y-4">

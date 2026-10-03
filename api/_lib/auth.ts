@@ -23,11 +23,24 @@ const APP_URL =
       ? `https://${process.env.VERCEL_URL}`
       : "http://localhost:5173");
 
-const socialProviders: Record<string, { clientId: string; clientSecret: string }> = {};
+/** Permiso para guardar en el Drive del usuario. `drive.file` da acceso SOLO a los
+ *  archivos que crea esta app, no al resto de su unidad: por eso Google lo clasifica
+ *  como no sensible y no exige verificación. Se pide aparte (al vincular desde el
+ *  perfil), nunca en el registro: entrar no debería exigir ceder el Drive. */
+export const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
+
+const socialProviders: Record<string, {
+  clientId: string; clientSecret: string;
+  accessType?: string; prompt?: string;
+}> = {};
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   socialProviders.google = {
     clientId: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    // offline + consent son lo que hace que Google entregue un refresh token: sin él,
+    // el acceso a Drive se caería a la hora y habría que volver a pedir permiso.
+    accessType: "offline",
+    prompt: "select_account consent",
   };
 }
 if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {

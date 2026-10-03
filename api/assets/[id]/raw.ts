@@ -11,6 +11,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { and, eq } from "drizzle-orm";
 import { getDb, schema } from "../../../db/index.js";
 import { requireUser } from "../../_lib/require-user.js";
+import { driveFileId, downloadFromDrive } from "../../_lib/drive.js";
 
 /** Lo que se devuelve con su propio Content-Type. Un SVG puede traer <script> y acá se
  *  serviría desde nuestro propio origen, así que no entra: se baja como archivo. */
@@ -47,6 +48,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Las que ya están en un almacenamiento externo (Blob, Replicate…) no se proxean.
     if (/^https?:\/\//i.test(row.assetUrl)) {
       res.redirect(302, row.assetUrl);
+      return;
+    }
+
+    // Guardada en el Drive del usuario: un archivo privado de Drive no se puede poner
+    // en un <img>, así que se descarga con SU token y se sirve desde acá. La caché es
+    // privada y larga para que el navegador no la vuelva a pedir en cada visita.
+    const fileId = driveFileId(row.assetUrl);
+    if (fileId) {
+      const archivo = await downloadFromDrive(user.userId, fileId);
+      if (!archivo) {
+        // Token revocado, archivo borrado por el usuario o sin permiso.
+        res.status(404).json({ ok: false, code: "DRIVE_UNAVAILABLE", error: "No se pudo leer el archivo desde tu Google Drive." });
+        return;
+      }
+      const buf = Buffer.from(archivo.body);
+      res.setHeader("Content-Type", INLINE_TYPES.has(archivo.mime.toLowerCase()) ? archivo.mime : "application/octet-stream");
+      res.setHeader("Content-Length", String(buf.length));
+      res.setHeader("Cache-Control", "private, max-age=31536000, immutable");
+      res.setHeader("ETag", `"${id}"`);
+      res.status(200).end(buf);
       return;
     }
 
