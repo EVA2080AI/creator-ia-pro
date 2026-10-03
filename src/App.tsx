@@ -168,6 +168,7 @@ const SystemStatus = lazy(() => import("./pages/SystemStatus"));
 const DesignSystem = lazy(() => import("./pages/DesignSystem"));
 const Tasks        = lazy(() => import("./pages/Tasks"));
 const AssistantPage = lazy(() => import("./pages/Assistant"));
+const ExpertEditorPage = lazy(() => import("./pages/ExpertEditor"));
 const BasaltPage    = lazy(() => import("./pages/Basalt"));
 const ArenaPage     = lazy(() => import("./pages/Arena"));
 
@@ -275,6 +276,10 @@ const App = () => {
                     <Route path="/tareas"       element={<Navigate to="/tasks" replace />} />
                     <Route path="/assets"       element={<Navigate to="/spaces" replace />} />
                     <Route path="/profile"      element={<Profile />} />
+                    {/* "Mis expertos": crear el tuyo o duplicar uno de los 11 y ajustarlo.
+                        La API existía desde hacía semanas sin pantalla que la usara. */}
+                    <Route path="/expertos/nuevo" element={<ExpertEditorPage />} />
+                    <Route path="/expertos/:slug" element={<ExpertEditorPage />} />
                     <Route path="/hub"          element={<Navigate to="/spaces" replace />} />
                     {/* ShareScreen es una herramienta independiente (P2P, sin relación
                         con Admin) — a diferencia de /system-status y /design-system,

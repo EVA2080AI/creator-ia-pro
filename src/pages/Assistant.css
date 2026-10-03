@@ -820,3 +820,22 @@
   .asst-pin-btn, .asst-row-btn { width: 32px; }
 }
 .asst-app[data-asst-theme="dark"] :is(.asst-act, .asst-act-model) { font-family: var(--asst-mono); }
+
+/* ══ Mis expertos (Fase 1 D) ═════════════════════════════════════════════════
+   Duplicar un Experto del sistema y ajustarlo: el atajo que diferencia esto de
+   un Gem vacío. En la barra del Experto, discreto, a la derecha del nombre. */
+.asst-dup-btn {
+  display: inline-flex; align-items: center; gap: 6px; margin-left: auto; flex: none;
+  padding: 6px 12px; border-radius: 999px; cursor: pointer;
+  background: var(--asst-panel); border: 1px solid var(--asst-border); color: var(--asst-txt-2);
+  font: inherit; font-size: 12.5px; font-weight: 600; transition: background 0.15s, color 0.15s;
+}
+.asst-dup-btn:hover { background: var(--asst-panel-2); color: var(--asst-txt); }
+.asst-dup-btn svg { flex: none; }
+@media (max-width: 520px) {
+  /* En un teléfono el nombre del Experto ya ocupa la barra: queda solo el icono. */
+  .asst-dup-btn span { display: none; }
+  .asst-dup-btn { padding: 6px 9px; }
+}
+.asst-create-expert { color: var(--asst-accent-text, var(--a-accent, #8b5cf6)); font-weight: 600; }
+.asst-app[data-asst-theme="dark"] .asst-dup-btn { font-family: var(--asst-mono); }

@@ -180,7 +180,12 @@ export function BasaltShellSidebar({
 
         {beforeExperts}
 
-        <ExpertsAccordion experts={experts} onSelect={(a) => go(`/a/${a.slug}`)} />
+        <ExpertsAccordion
+          experts={experts}
+          onSelect={(a) => go(`/a/${a.slug}`)}
+          onCreate={() => go("/expertos/nuevo")}
+          onEdit={(a) => go(`/expertos/${a.slug}`)}
+        />
 
         {/* "Panel de métricas" y "Perfil" salieron de acá: eran los MISMOS destinos que
             "Uso" y "Configuración" del menú de cuenta, un poco más abajo. El cajón

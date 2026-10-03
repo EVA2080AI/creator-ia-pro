@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Send, Square, Loader2, Paperclip, FileText,
+  Menu, Send, Square, Loader2, Paperclip, FileText, Copy, Pencil,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Scale, Dice5, Wallet, Sparkles, Bot,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -472,6 +472,16 @@ export default function AssistantPage() {
             <Menu className="w-4 h-4" />
           </button>
           <div className="asst-brand-name">{assistant.name}</div>
+          {/* El atajo que hace que la ventaja se note: partir de un experto real del
+              dominio en vez de una hoja en blanco (que es donde la gente abandona).
+              Si el experto ya es tuyo, el mismo botón lo abre para editarlo. */}
+          <button
+            className="asst-dup-btn"
+            onClick={() => navigate(assistant.visibility === "system" ? `/expertos/nuevo?desde=${assistant.slug}` : `/expertos/${assistant.slug}`)}
+            title={assistant.visibility === "system" ? "Quedarte con una copia tuya y ajustarla" : "Editar este experto"}
+          >
+            {assistant.visibility === "system" ? <><Copy className="w-3.5 h-3.5" aria-hidden /> <span>Duplicar y ajustar</span></> : <><Pencil className="w-3.5 h-3.5" aria-hidden /> <span>Editar</span></>}
+          </button>
         </header>
 
         {/* aria-live: sin esto, a quien usa un lector de pantalla la respuesta le
