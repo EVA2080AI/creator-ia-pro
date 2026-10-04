@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { CANVAS_ENABLED } from "@/lib/features";
 import { useStudioProjects } from "@/hooks/useStudioProjects";
 import { listSpaces, updateSpace, deleteSpace } from "@/lib/spaces";
@@ -11,7 +12,7 @@ import {
   Plus, Search, Loader2, FolderOpen, MoreVertical,
   Trash2, Pencil, BookOpen, LayoutGrid, ChevronRight,
   List, HardDrive, LayoutTemplate, Code2, Sparkles,
-  Square, CheckSquare, X, Check
+  Square, CheckSquare, X, Check, ArrowDownWideNarrow
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -67,6 +68,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
   const [creating, setCreating] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string, type: 'flow' | 'code' } | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'updated' | 'name' | 'created'>('updated');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -217,22 +219,32 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
     <>
 
 
-      <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mb-4 md:mb-10 p-1.5 bg-muted/50 backdrop-blur-xl border border-border/60 rounded-[2rem] shadow-inner animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
-        <div className="relative w-full md:flex-1 group">
-          <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+      {/* Medido en un iPhone 13: el nombre del primer proyecto quedaba a 603px de 664,
+          o sea al borde inferior de la pantalla. Esta barra se llevaba 112px en DOS
+          filas (buscar arriba, ordenar y vista abajo); en móvil va en una sola. */}
+      <div className="flex flex-row items-center gap-2 md:gap-4 mb-4 md:mb-10 p-1.5 bg-muted/50 backdrop-blur-xl border border-border/60 rounded-[2rem] shadow-inner animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
+        <div className="relative flex-1 min-w-0 group">
+          <Search className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <input
             type="text"
             placeholder="Buscar proyectos, flujos o archivos..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-card border border-transparent focus:border-primary/20 focus:ring-4 focus:ring-primary/5 rounded-[1.5rem] py-3.5 pl-14 pr-6 text-sm font-medium transition-all outline-none shadow-sm"
+            className="w-full bg-card border border-transparent focus:border-primary/20 focus:ring-4 focus:ring-primary/5 rounded-[1.5rem] py-2.5 md:py-3.5 pl-11 md:pl-14 pr-4 md:pr-6 text-sm font-medium transition-all outline-none shadow-sm"
           />
         </div>
         
-        <div className="flex w-full md:w-auto items-center gap-2 md:pr-2">
+        <div className="flex w-auto shrink-0 items-center gap-2 md:pr-2">
           <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
-            <SelectTrigger className="flex-1 md:w-[160px] md:flex-none h-11 md:h-12 bg-card border-border rounded-[1.2rem] text-[11px] font-black uppercase tracking-widest text-muted-foreground shadow-sm transition-all focus:ring-4 focus:ring-primary/5">
-              <SelectValue placeholder="Ordenar" />
+            {/* En móvil el valor ("MODIFICADO") ocupaba media fila para decir algo que
+                se ve igual al abrirlo: queda el icono, con su nombre accesible. No se
+                esconde con `hidden`: SelectTrigger le mete `[&>span]:line-clamp-1` a sus
+                hijos, que vuelve a ponerles display y gana. */}
+            <SelectTrigger
+              aria-label="Ordenar los proyectos"
+              className="w-10 justify-center md:w-[160px] h-10 md:h-12 px-0 md:px-3 bg-card border-border rounded-[1.2rem] text-[11px] font-black uppercase tracking-widest text-muted-foreground shadow-sm transition-all focus:ring-4 focus:ring-primary/5 [&>svg:last-child]:hidden md:[&>svg:last-child]:block"
+            >
+              {isMobile ? <ArrowDownWideNarrow className="h-4 w-4" aria-hidden /> : <SelectValue placeholder="Ordenar" />}
             </SelectTrigger>
             <SelectContent className="rounded-2xl border-border shadow-2xl">
               <SelectItem value="updated" className="text-[11px] font-bold">MODIFICADO</SelectItem>
@@ -244,8 +256,9 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
           <div className="flex p-1 bg-card border border-border rounded-[1.2rem] shadow-sm shrink-0">
             <button
               onClick={() => setViewMode('grid')}
+              aria-label="Ver en cuadrícula"
               className={cn(
-                "p-2.5 rounded-xl transition-all",
+                "p-2 md:p-2.5 rounded-xl transition-all",
                 viewMode === 'grid' ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
@@ -253,8 +266,9 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
             </button>
             <button
               onClick={() => setViewMode('list')}
+              aria-label="Ver en lista"
               className={cn(
-                "p-2.5 rounded-xl transition-all",
+                "p-2 md:p-2.5 rounded-xl transition-all",
                 viewMode === 'list' ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
@@ -266,7 +280,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
 
       {/* "Seleccionar todo" es una acción secundaria y estaba por ENCIMA de los
           proyectos, sumando otra fila antes del contenido en un teléfono. */}
-      <div className="flex items-center gap-4 mb-3 md:mb-6">
+      <div className={cn("items-center gap-4 mb-3 md:mb-6 md:flex", selectedIds.size > 0 ? "flex" : "hidden")}>
         <button 
           onClick={toggleSelectAll}
           className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-card hover:bg-muted text-[11px] font-bold text-foreground transition-all font-display shadow-sm"
@@ -341,7 +355,10 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
                   className={`absolute top-3 right-3 z-20 h-7 w-7 rounded-lg border flex items-center justify-center transition-all 
                     ${selectedIds.has(space.id) 
                       ? 'bg-primary border-primary text-primary-foreground shadow-lg'
-                      : 'bg-card/80 border-border text-muted-foreground opacity-0 group-hover:opacity-100'}`}
+                      // En un teléfono NO hay hover: la casilla no aparecía nunca y la única
+                      // forma de seleccionar era "Seleccionar Todo" (o sea, no se podía
+                      // elegir UN proyecto con el dedo). Solo se esconde donde hay cursor.
+                      : 'bg-card/80 border-border text-muted-foreground [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100'}`}
                 >
                   {selectedIds.has(space.id) ? <Check className="h-4 w-4" /> : <Plus className="h-3 w-3" />}
                 </button>
@@ -349,7 +366,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
                 <div className={`absolute top-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity ${isCode ? 'bg-gradient-to-r from-emerald-500/60 to-transparent' : 'bg-gradient-to-r from-primary/60 to-transparent'}`} />
 
                 {/* Thumbnail / Headers space */}
-                <div className="flex h-32 items-center justify-center bg-muted/50 border-b border-border overflow-hidden relative">
+                <div className="flex h-20 sm:h-32 items-center justify-center bg-muted/50 border-b border-border overflow-hidden relative">
                   {/* Badge */}
                   <div className="absolute top-3 left-3 z-10">
                     <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest bg-card/90 backdrop-blur ${isCode ? 'text-emerald-600 border-emerald-500/20' : 'text-primary/80 border-primary/20'}`}>
