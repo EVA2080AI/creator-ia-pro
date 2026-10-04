@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Send, Square, Loader2, Brain, Scale, Paperclip, FileText,
-  LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot, X,
+  Menu, Send, Square, Loader2, Scale, Paperclip, FileText,
+  LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -15,6 +15,7 @@ import { ConversationList } from "@/components/basalt/ConversationList";
 import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
 import { PendingDocChips, SentDocChips, SentImages } from "@/components/basalt/DocChips";
+import { MemoryPanel, MemoryToggle } from "@/components/basalt/MemoryPanel";
 import { Activity, Sources } from "@/components/basalt/SearchActivity";
 import { LinkSuggestions } from "@/components/basalt/LinkSuggestions";
 import { MessageActions, EditButton } from "@/components/basalt/MessageActions";
@@ -487,8 +488,8 @@ export default function BasaltPage() {
     if (id === convId) newChat();
   };
 
-  const removeMemory = (fact: string) => {
-    const next = memory.filter((m) => m !== fact);
+  /** Un solo camino para todo lo que toca la memoria (añadir, corregir, olvidar). */
+  const updateMemory = (next: string[]) => {
     setMemory(next);
     void saveMemory(userId, next);
   };
@@ -525,24 +526,8 @@ export default function BasaltPage() {
         autoOpenGuide={autoGuide}
         beforeExperts={
           <>
-            <button className="asst-side-link" onClick={() => setShowMemory((v) => !v)}>
-              <Brain className="w-4 h-4" /> Memoria ({memory.length})
-            </button>
-
-            {showMemory && (
-              <div style={{ padding: "4px 8px 8px", fontSize: 12, color: "var(--asst-txt-2)" }}>
-                {memory.length === 0 ? (
-                  <p style={{ padding: "4px 6px" }}>Aún no recuerdo nada. Cuéntame de ti o de tu empresa.</p>
-                ) : memory.map((m) => (
-                  <div key={m} style={{ display: "flex", gap: 6, alignItems: "flex-start", padding: "4px 6px" }}>
-                    <span style={{ flex: 1 }}>{m}</span>
-                    <button onClick={() => removeMemory(m)} aria-label="Olvidar" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--asst-txt-3)" }}>
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            <MemoryToggle count={memory.length} open={showMemory} onToggle={() => setShowMemory((v) => !v)} />
+            {showMemory && <MemoryPanel facts={memory} onChange={updateMemory} readOnly={!userId} />}
           </>
         }
         extraNav={

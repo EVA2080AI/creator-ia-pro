@@ -407,9 +407,15 @@ export function joinContinuation(prefix: string, continuation: string): string {
   return `${head}\n\n${cont}`;
 }
 
+/** Pega la memoria del usuario al final de un prompt. La memoria es del USUARIO, no de
+ *  Basalt: los Expertos usan esto mismo para no hacerle repetir a quién le trabaja. */
+export function withMemory(prompt: string, memory: string[]) {
+  if (!memory.length) return prompt;
+  return `${prompt}\n\nLO QUE RECUERDAS DEL USUARIO:\n${memory.map((m) => `- ${m}`).join("\n")}`;
+}
+
 export function buildSystemPrompt(memory: string[]) {
-  if (!memory.length) return SYSTEM_PROMPT;
-  return `${SYSTEM_PROMPT}\n\nLO QUE RECUERDAS DEL USUARIO:\n${memory.map((m) => `- ${m}`).join("\n")}`;
+  return withMemory(SYSTEM_PROMPT, memory);
 }
 
 // ─── Historial: buscar y agrupar ──────────────────────────────────────────────

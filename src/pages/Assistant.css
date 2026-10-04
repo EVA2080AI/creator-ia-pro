@@ -839,3 +839,43 @@
 }
 .asst-create-expert { color: var(--asst-accent-text, var(--a-accent, #8b5cf6)); font-weight: 600; }
 .asst-app[data-asst-theme="dark"] .asst-dup-btn { font-family: var(--asst-mono); }
+
+/* ══ Memoria del usuario (ciclo 19) ══════════════════════════════════════════
+   Era markup con estilos en línea dentro de Basalt.tsx y solo dejaba BORRAR: para
+   enseñarle un dato había que soltarlo de casualidad en una conversación y esperar
+   que el modelo lo guardara, y un dato mal recordado no se podía corregir. Ahora se
+   añade y se corrige a mano, y la usan también los Expertos. */
+.asst-memory { padding: 2px 8px 8px; font-size: 12.5px; color: var(--asst-txt-2); }
+.asst-memory-empty { padding: 4px 6px; margin: 0; color: var(--asst-txt-3); line-height: 1.45; }
+.asst-memory-row { display: flex; align-items: flex-start; gap: 4px; padding: 4px 6px; border-radius: 8px; }
+.asst-memory-row:hover { background: var(--asst-panel); }
+.asst-memory-text { flex: 1; min-width: 0; line-height: 1.45; overflow-wrap: anywhere; }
+.asst-memory-btn {
+  flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px;
+  background: none; border: none; color: var(--asst-txt-3); cursor: pointer; transition: color 0.15s, background 0.15s;
+}
+.asst-memory-btn:hover { color: var(--asst-txt); background: var(--asst-panel-2); }
+/* En táctil no hay hover: los botones no pueden depender de él para existir. */
+@media (hover: hover) {
+  .asst-memory-row .asst-memory-btn { opacity: 0; }
+  .asst-memory-row:hover .asst-memory-btn, .asst-memory-row:focus-within .asst-memory-btn { opacity: 1; }
+}
+.asst-memory-row.editing { background: var(--asst-panel); }
+.asst-memory-input {
+  flex: 1; min-width: 0; padding: 5px 8px; border-radius: 8px;
+  background: var(--asst-bg); border: 1px solid var(--asst-border); color: var(--asst-txt);
+  font: inherit; font-size: 12.5px;
+}
+.asst-memory-input:focus-visible { outline: 2px solid var(--asst-accent-text, var(--a-accent, #8b5cf6)); outline-offset: 1px; }
+.asst-memory-add {
+  display: flex; align-items: center; gap: 6px; margin-top: 2px; padding: 6px;
+  background: none; border: none; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 600;
+  color: var(--asst-accent-text, var(--a-accent, #8b5cf6));
+}
+.asst-app[data-asst-theme="dark"] .asst-memory-input {
+  border-color: color-mix(in oklch, var(--asst-term) 40%, var(--asst-border));
+  font-family: var(--asst-mono);
+}
+.asst-app[data-asst-theme="dark"] .asst-memory-input:focus-visible {
+  outline-color: color-mix(in oklch, var(--asst-term) 70%, transparent);
+}

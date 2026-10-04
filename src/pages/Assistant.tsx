@@ -16,7 +16,8 @@ import {
   type Assistant, type AssistantWelcomeCard,
 } from "@/lib/assistants";
 import {
-  loadConversations, saveConversation, CONTINUE_PROMPT, joinContinuation,
+  loadConversations, saveConversation, loadMemory, saveMemory, withMemory,
+  CONTINUE_PROMPT, joinContinuation,
   type ConversationSummary, type StoredMsg,
 } from "@/lib/basalt";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ import { PendingDocChips, SentDocChips, SentImages } from "@/components/basalt/D
 import { Activity, Sources } from "@/components/basalt/SearchActivity";
 import { LinkSuggestions } from "@/components/basalt/LinkSuggestions";
 import { MessageActions, EditButton } from "@/components/basalt/MessageActions";
+import { MemoryPanel, MemoryToggle } from "@/components/basalt/MemoryPanel";
 import { findLinks } from "@/lib/links";
 import { activityLabel, mergeSources, readBasaltEvent, type SearchSource } from "@/lib/stream-events";
 import { ConversationList } from "@/components/basalt/ConversationList";
@@ -91,6 +93,11 @@ export default function AssistantPage() {
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
   /** Título puesto a mano de la conversación abierta (ver persist en Basalt.tsx). */
   const [convTitle, setConvTitle] = useState("");
+  // La memoria es del USUARIO, no de Basalt: lo que le contó de su empresa o de su
+  // marca le sirve igual (o más) a un Experto. Hasta ahora solo la leía Basalt, así
+  // que el mismo usuario tenía que repetirse al cambiar de pestaña.
+  const [memory, setMemory] = useState<string[]>([]);
+  const [showMemory, setShowMemory] = useState(false);
 
   const [messages, setMessages] = useState<StoredMsg[]>([]);
   const [input, setInput] = useState("");
@@ -186,6 +193,16 @@ export default function AssistantPage() {
     if (id === convId) newChat();
   };
 
+  useEffect(() => {
+    if (!userId) return;
+    void loadMemory(userId).then(setMemory);
+  }, [userId]);
+
+  const updateMemory = (next: string[]) => {
+    setMemory(next);
+    void saveMemory(userId, next);
+  };
+
   const sendPrompt = useCallback(async (prompt: string, opts?: { continueFrom?: string; retry?: boolean; base?: StoredMsg[] }) => {
     // `base` permite rehacer una respuesta sobre un hilo ya recortado sin esperar al
     // estado (ver regenerate), igual que en Basalt.tsx.
@@ -261,7 +278,7 @@ export default function AssistantPage() {
           model: assistant.defaultModel,
           // Las reglas de documentos también en las preguntas de seguimiento (el documento ya está en
           // el historial y no vuelve a viajar en `documents`).
-          systemPrompt: (assistant.persona.systemPrompt || "") + (hasDocuments(history.slice(-20)) ? `\n\n${DOC_ANALYSIS_PROMPT}` : "") || undefined,
+          systemPrompt: withMemory(assistant.persona.systemPrompt || "", memory) + (hasDocuments(history.slice(-20)) ? `\n\n${DOC_ANALYSIS_PROMPT}` : "") || undefined,
           // Mismo tope que Basalt.tsx — sin esto, una conversación larga con
           // un Experto arriesga pegar contra el límite de contexto del
           // modelo (auditoría UX 2026-09-29).
@@ -375,7 +392,7 @@ export default function AssistantPage() {
       abortRef.current = null;
       stickToBottom();
     }
-  }, [assistant, generating, messages, stickToBottom, userId, convId, convTitle, slug, readyDocs, pendingImages, docsBusy, clearDocs, threadStatus, chats]);
+  }, [assistant, generating, messages, stickToBottom, userId, convId, convTitle, slug, memory, readyDocs, pendingImages, docsBusy, clearDocs, threadStatus, chats]);
 
   /** Rehace la última respuesta del Experto (su modelo es fijo: no hay "otro modelo"). */
   const regenerate = useCallback((msgId: string) => {
@@ -442,6 +459,12 @@ export default function AssistantPage() {
         setSidebarOpen={setSidebarOpen}
         theme={theme}
         setTheme={setTheme}
+        beforeExperts={
+          <>
+            <MemoryToggle count={memory.length} open={showMemory} onToggle={() => setShowMemory((v) => !v)} />
+            {showMemory && <MemoryPanel facts={memory} onChange={updateMemory} readOnly={!userId} />}
+          </>
+        }
         onNewChat={newChat}
         autoOpenGuide={autoGuide}
         extraNav={
