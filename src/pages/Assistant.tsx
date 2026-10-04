@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Send, Square, Loader2, Paperclip, FileText, Copy, Pencil,
+  Menu, Send, Square, Loader2, Paperclip, FileText, Copy, Pencil, Download,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Scale, Dice5, Wallet, Sparkles, Bot,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +30,7 @@ import { MessageActions, EditButton } from "@/components/basalt/MessageActions";
 import { MemoryPanel, MemoryToggle } from "@/components/basalt/MemoryPanel";
 import { findLinks } from "@/lib/links";
 import { activityLabel, mergeSources, readBasaltEvent, type SearchSource } from "@/lib/stream-events";
+import { downloadMarkdown, safeFileName, toMarkdown } from "@/lib/export-conversation";
 import { ConversationList } from "@/components/basalt/ConversationList";
 import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
@@ -132,6 +133,9 @@ export default function AssistantPage() {
   // medio tiraría todo lo que vino después). Casi nunca es el último del hilo: la
   // respuesta va debajo.
   const lastUserIdx = useMemo(() => messages.map((m) => m.role).lastIndexOf("user"), [messages]);
+
+  /** Título del archivo descargado (ver Basalt.tsx). */
+  const exportTitle = convTitle.trim() || messages.find((m) => m.role === "user")?.text.slice(0, 60) || assistant?.name || "Conversación";
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -498,6 +502,16 @@ export default function AssistantPage() {
           {/* El atajo que hace que la ventaja se note: partir de un experto real del
               dominio en vez de una hoja en blanco (que es donde la gente abandona).
               Si el experto ya es tuyo, el mismo botón lo abre para editarlo. */}
+          {messages.length > 0 && !generating && (
+            <button
+              className="asst-icon-btn asst-export-btn"
+              onClick={() => downloadMarkdown(safeFileName(exportTitle), toMarkdown(exportTitle, messages, { assistantName: assistant.name }))}
+              aria-label="Descargar la conversación en Markdown"
+              title="Descargar la conversación (.md)"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+          )}
           <button
             className="asst-dup-btn"
             onClick={() => navigate(assistant.visibility === "system" ? `/expertos/nuevo?desde=${assistant.slug}` : `/expertos/${assistant.slug}`)}

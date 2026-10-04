@@ -879,3 +879,8 @@
 .asst-app[data-asst-theme="dark"] .asst-memory-input:focus-visible {
   outline-color: color-mix(in oklch, var(--asst-term) 70%, transparent);
 }
+
+/* Descargar la conversación: empuja al selector de modelo (o al botón de duplicar)
+   contra el borde derecho sin dejar un hueco entre los dos. */
+.asst-export-btn { margin-left: auto; flex: none; }
+.asst-export-btn + .asst-picker, .asst-export-btn + .asst-dup-btn { margin-left: 0; }

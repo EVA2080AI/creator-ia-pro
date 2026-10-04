@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Send, Square, Loader2, Scale, Paperclip, FileText,
+  Menu, Send, Square, Loader2, Scale, Paperclip, FileText, Download,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -37,6 +37,7 @@ import {
   type ConversationSummary, type StoredMsg,
 } from "@/lib/basalt";
 import { activityLabel, mergeSources, readBasaltEvent, type SearchSource } from "@/lib/stream-events";
+import { downloadMarkdown, safeFileName, toMarkdown } from "@/lib/export-conversation";
 import { createAsset } from "@/lib/assets";
 import "./Assistant.css";
 
@@ -130,6 +131,10 @@ export default function BasaltPage() {
     () => findLinks(input).filter((u) => !pendingDocs.some((d) => d.url === u)),
     [input, pendingDocs],
   );
+
+  // El título que lleva el archivo descargado: el puesto a mano si lo hay, y si no el
+  // mismo que se usa al guardar (el primer mensaje recortado).
+  const exportTitle = convTitle.trim() || messages.find((m) => m.role === "user")?.text.slice(0, 60) || "Conversación";
 
   // Último mensaje del usuario: es el que se puede editar y reenviar (editar uno del
   // medio tiraría todo lo que vino después). Casi nunca es el último del hilo: la
@@ -561,6 +566,19 @@ export default function BasaltPage() {
           {/* Un solo selector para texto/código y motor de imagen (Basalt decide solo cuándo
               generar una imagen — etiqueta <imagen>, ver SYSTEM_PROMPT —; el motor elegido
               es CON QUÉ lo hace). Reemplaza a dos <select> nativos de 11px sin candado de plan. */}
+          {/* Descargar lo hablado. Un análisis de contrato se necesita FUERA del chat
+              (correo, expediente, abogado) y hasta ahora había que copiar mensaje por
+              mensaje — y al borrar la conversación se perdía. */}
+          {messages.length > 0 && !generating && (
+            <button
+              className="asst-icon-btn asst-export-btn"
+              onClick={() => downloadMarkdown(safeFileName(exportTitle), toMarkdown(exportTitle, messages))}
+              aria-label="Descargar la conversación en Markdown"
+              title="Descargar la conversación (.md)"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+          )}
           <ModelPicker model={model} imageModel={imageModel} tier={tier} onModel={setModel} onImageModel={setImageModel} />
         </header>
 
