@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { motion } from "framer-motion";
-import { Activity, Sparkles } from "lucide-react";
+import { Activity, ArrowRight, Sparkles } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 
 interface ChartSectionProps {
@@ -34,6 +35,14 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
   // Ensure toolData is an array to avoid map errors
   const safeToolData = toolData || [];
 
+  // Una cuenta nueva no ha gastado nada, y la gráfica dibujaba una línea plana en 0 con
+  // el eje 0-4: 305px de la mejor parte de la pantalla para no decir nada (y pareciendo
+  // un error). Si no hay gasto, se dice en palabras y se ofrece el siguiente paso.
+  const sinUso = useMemo(
+    () => !usageData?.length || usageData.reduce((total, d) => total + (Number(d?.credits) || 0), 0) === 0,
+    [usageData],
+  );
+
   return (
     <section className="grid lg:grid-cols-3 gap-6">
       {/* ─────────────────────────────────────────────────────────────
@@ -64,6 +73,20 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
         {/* Chart */}
         {/* 180px en móvil: con 240 la gráfica sola se comía el resto de la pantalla
             después de las cuatro tarjetas de métricas. */}
+        {sinUso ? (
+          <div className="flex flex-col items-start gap-3 rounded-[1.75rem] border border-dashed border-border/70 bg-muted/30 px-5 py-6 md:px-6 md:py-7 mt-2 md:mt-4">
+            <p className="text-[14px] font-bold text-foreground tracking-tight">Todavía no has gastado créditos</p>
+            <p className="text-[12.5px] text-muted-foreground leading-relaxed max-w-sm">
+              Cuando converses en el chat o generes una pieza gráfica, acá verás en qué se van, día por día.
+            </p>
+            <Link
+              to="/a/basalt"
+              className="mt-1 inline-flex items-center gap-2 rounded-xl bg-foreground px-4 py-2 text-[12px] font-bold text-background transition-transform active:scale-95"
+            >
+              Abrir Basalt <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        ) : (
         <div className="h-[180px] md:h-[240px] w-full mt-2 md:mt-4">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={usageData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
@@ -112,6 +135,7 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
             </AreaChart>
           </ResponsiveContainer>
         </div>
+        )}
       </motion.div>
 
       {/* ─────────────────────────────────────────────────────────────
@@ -132,7 +156,9 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
              <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-500">Top Herramientas</h3>
+            {/* stone-500 sobre el negro de la tarjeta daba 4.1:1 a 10px (medido con
+                scripts/contrast-audit.js); stone-400 lo sube sin cambiar la jerarquía. */}
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400">Top Herramientas</h3>
             <p className="text-[15px] font-bold text-stone-100 mt-0.5 tracking-tight">Uso por módulo</p>
           </div>
         </div>
@@ -140,7 +166,9 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
         {/* Progress Bars */}
         <div className="space-y-7 flex-1 justify-center flex flex-col relative z-10 mt-2">
           {safeToolData.length === 0 ? (
-            <div className="text-center text-stone-500 text-sm font-medium">No hay datos disponibles</div>
+            <div className="text-center text-stone-400 text-[13px] font-medium leading-relaxed">
+              Todavía sin uso.<br />Acá aparecerá en qué módulo se van tus créditos.
+            </div>
           ) : (
             safeToolData.map((tool, index) => (
               <motion.div 
@@ -154,7 +182,9 @@ export function ChartSection({ usageData, toolData }: ChartSectionProps) {
                   <span className="text-[13px] font-bold text-stone-400 group-hover/item:text-white transition-colors">{tool.name}</span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-black text-white">{tool.value}</span>
-                    <span className="text-[10px] font-medium text-stone-600 uppercase tracking-wider">créditos</span>
+                    {/* stone-600 sobre negro era 2.6:1 — la unidad del número se leía peor
+                        que el propio número. */}
+                    <span className="text-[10px] font-medium text-stone-400 uppercase tracking-wider">créditos</span>
                   </div>
                 </div>
                 
