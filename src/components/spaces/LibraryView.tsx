@@ -18,6 +18,9 @@ import {
 import { Label } from "@/components/ui/label";
 import { DocumentEditor } from "@/components/studio/DocumentEditor";
 
+/** Se esconde SOLO donde hay cursor: en táctil no existe el hover y la acción se perdía. */
+const HOVER_REVEAL = "[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100";
+
 interface Space { id: string; name: string; }
 
 export const LibraryView = () => {
@@ -251,10 +254,16 @@ export const LibraryView = () => {
                     onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
                   />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                {/* El degradado da contraste a lo que va encima; en táctil se queda fijo
+                    porque el panel de acciones también. */}
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent ${HOVER_REVEAL} transition-opacity duration-500 pointer-events-none`} />
               </div>
 
-              <div className="absolute inset-0 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-4">
+              {/* TODO lo que se puede hacer con un recurso —marcar favorito, copiar,
+                  descargar, borrar— vivía detrás del hover. En un teléfono no hay hover:
+                  la biblioteca era una galería que no dejaba hacer NADA con lo guardado
+                  (ni ver el prompt con el que se generó). Solo se esconde donde hay cursor. */}
+              <div className={`absolute inset-0 flex flex-col justify-between ${HOVER_REVEAL} transition-opacity duration-300 p-4`}>
                 <div className="flex justify-end gap-1.5 z-10">
                   <button onClick={() => toggleFav(asset.id, asset.is_favorite)} className={`h-8 w-8 rounded-xl bg-white/90 backdrop-blur-xl border border-zinc-200 flex items-center justify-center transition-all ${asset.is_favorite ? 'text-rose-400 fill-rose-400' : 'text-zinc-500 hover:text-zinc-900'}`}>
                     <Heart className={`h-3.5 w-3.5 ${asset.is_favorite ? "fill-current" : ""}`} />

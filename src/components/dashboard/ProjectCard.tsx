@@ -85,8 +85,9 @@ export function ProjectCard({ project, onClick, onDuplicate, onDelete }: Project
         </div>
       </div>
 
-      {/* Hover Actions Menu */}
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+      {/* Menú de la tarjeta (editar, duplicar, eliminar). En táctil no hay hover: estaba
+          escondido para siempre en un teléfono. */}
+      <div className="absolute top-3 right-3 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100 transition-all duration-300">
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
             <button className="h-8 w-8 rounded-xl bg-card shadow-lg border border-border/50 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
