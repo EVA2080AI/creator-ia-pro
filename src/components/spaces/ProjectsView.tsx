@@ -55,11 +55,12 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
     navigate("/studio-flow");
   };
   const {
-    projects: codeProjects, loading: codeLoading, deleteProject: deleteCodeProject,
+    projects: codeProjects, loading: codeLoading, loadError: codeError, deleteProject: deleteCodeProject,
     updateProjectMeta, refetch: refetchCodeProjects,
   } = useStudioProjects();
 
   const [flowSpaces, setFlowSpaces] = useState<UnifiedProject[]>([]);
+  const [flowError, setFlowError] = useState(false);
   const [flowLoading, setFlowLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -79,10 +80,16 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
     if (!user) return;
     setFlowLoading(true);
     const rows = await listSpaces();
-    setFlowSpaces(rows.map((s): UnifiedProject => ({
-      id: s.id, name: s.name, description: s.description, thumbnail_url: s.thumbnailUrl,
-      created_at: s.createdAt, updated_at: s.updatedAt, type: 'flow', settings: s.settings,
-    })));
+    // null = la petición falló. Sin esto, la pantalla mostraba "Tu Hub de Proyectos —
+    // inicia un Flujo visual o un Desarrollo de Código": a alguien con diez proyectos
+    // y sin señal se le decía que no tiene ninguno.
+    setFlowError(rows === null);
+    if (rows) {
+      setFlowSpaces(rows.map((s): UnifiedProject => ({
+        id: s.id, name: s.name, description: s.description, thumbnail_url: s.thumbnailUrl,
+        created_at: s.createdAt, updated_at: s.updatedAt, type: 'flow', settings: s.settings,
+      })));
+    }
     setFlowLoading(false);
   }, [user]);
 
@@ -96,6 +103,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
     })),
   ];
   const loading = flowLoading || codeLoading;
+  const loadError = flowError || codeError;
   const fetchSpaces = useCallback(() => { fetchFlowSpaces(); refetchCodeProjects(); }, [fetchFlowSpaces, refetchCodeProjects]);
 
   const handleOpenEdit = (space: UnifiedProject) => {
@@ -315,6 +323,15 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
       {loading ? (
         <div className="flex h-48 items-center justify-center">
           <Loader2 className="h-7 w-7 animate-spin text-primary/50" />
+        </div>
+      ) : loadError && spaces.length === 0 ? (
+        // Mismo trato (y misma pinta) que la biblioteca: decir qué pasó y dejar reintentar.
+        <div role="alert" className="flex h-64 flex-col items-center justify-center gap-3 border border-dashed border-rose-200 dark:border-rose-500/30 rounded-3xl bg-rose-50/60 dark:bg-rose-500/10">
+          <p className="text-lg font-bold text-rose-700 dark:text-rose-300 font-display tracking-tight">No se pudieron cargar tus proyectos</p>
+          <p className="text-[13px] text-rose-700 dark:text-rose-300 font-medium">Revisa tu conexión e inténtalo otra vez.</p>
+          <button type="button" onClick={fetchSpaces} className="mt-1 rounded-xl bg-foreground px-4 py-2 text-[12px] font-bold text-background">
+            Reintentar
+          </button>
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex h-64 flex-col items-center justify-center border border-dashed border-border rounded-3xl bg-muted/50">

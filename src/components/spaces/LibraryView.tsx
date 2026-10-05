@@ -47,7 +47,9 @@ export const LibraryView = () => {
   const fetchSpaces = useCallback(async () => {
     if (!user) return;
     const data = await listSpaces();
-    setSpaces(data.map((s) => ({ id: s.id, name: s.name })));
+    // Los espacios son solo el filtro de arriba: si fallan, se deja el que había (el
+    // aviso de que algo no cargó lo da la lista de recursos, que es lo que importa).
+    if (data) setSpaces(data.map((s) => ({ id: s.id, name: s.name })));
   }, [user]);
 
   const fetchAssets = useCallback(async (reset = false) => {
@@ -214,7 +216,7 @@ export const LibraryView = () => {
       ) : loadError && assets.length === 0 ? (
         <div role="alert" className="flex h-64 flex-col items-center justify-center gap-3 border border-dashed border-rose-200 dark:border-rose-500/30 rounded-3xl bg-rose-50/60 dark:bg-rose-500/10">
           <p className="text-lg font-bold text-rose-700 dark:text-rose-300 font-display tracking-tight">No se pudo cargar tu biblioteca</p>
-          <p className="text-[13px] text-rose-600/80 dark:text-rose-300/70 font-medium">Revisa tu conexión e inténtalo otra vez.</p>
+          <p className="text-[13px] text-rose-700 dark:text-rose-300 font-medium">Revisa tu conexión e inténtalo otra vez.</p>
           <button type="button" onClick={() => fetchAssets(true)} className="mt-1 rounded-xl bg-foreground px-4 py-2 text-[12px] font-bold text-background">
             Reintentar
           </button>

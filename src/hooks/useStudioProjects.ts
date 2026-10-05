@@ -78,6 +78,8 @@ export function useStudioProjects() {
   const [projects, setProjects] = useState<StudioProject[]>([]);
   const [activeProject, setActiveProject] = useState<StudioProject | null>(null);
   const [loading, setLoading] = useState(true);
+  /** La última carga de la lista falló: la pantalla lo dice en vez de parecer vacía. */
+  const [loadError, setLoadError] = useState(false);
   const [previousFiles, setPreviousFiles] = useState<Record<string, StudioFile> | null>(null);
 
   const fetchProjects = useCallback(async (showLoading = false) => {
@@ -88,10 +90,12 @@ export function useStudioProjects() {
     if (!res.ok) {
       console.error('Error fetching projects:', res.error);
       toast.error('No se pudieron cargar los proyectos');
+      setLoadError(true);
       setLoading(false);
       return;
     }
 
+    setLoadError(false);
     setProjects((res.data!.projects || []).map(fromApi));
     // No autoseleccionar el primero al cargar — evita saltarse la pantalla de bienvenida de Genesis.
     setLoading(false);
@@ -229,7 +233,7 @@ export function useStudioProjects() {
   }, [activeProject]);
 
   return {
-    projects, activeProject, setActiveProject, loading,
+    projects, activeProject, setActiveProject, loading, loadError,
     createProject, updateProjectFiles, renameProject, updateProjectMeta,
     deleteProject, duplicateProject, rollbackFiles, canUndo: !!previousFiles,
     refetch: fetchProjects, getProjectFiles, hardResetProject

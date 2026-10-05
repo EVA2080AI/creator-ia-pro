@@ -93,6 +93,9 @@ export default function Dashboard() {
       setDataError(false);
       try {
         const flowSpaces = await listSpaces();
+        // null = falló: se trata como error de la pantalla (ya hay banner), no como
+        // "no tienes proyectos".
+        if (!flowSpaces) throw new Error("No se pudieron cargar los proyectos.");
         const formattedFlows: DashboardProject[] = flowSpaces.map((s: Space) => ({
           id: s.id, name: s.name, description: s.description, updated_at: s.updatedAt,
           created_at: s.createdAt, type: 'flow', thumbnail_url: s.thumbnailUrl, user_id: s.userId,

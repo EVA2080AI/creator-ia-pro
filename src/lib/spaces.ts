@@ -21,9 +21,11 @@ async function api<T>(path: string, init?: RequestInit): Promise<{ ok: boolean; 
   }
 }
 
-export async function listSpaces(): Promise<Space[]> {
+/** `null` si no se pudo cargar: con `[]` la pantalla decía "Tu Hub de Proyectos" (o
+ *  sea, "no tienes ninguno") cuando lo que pasó fue que se cayó la petición. */
+export async function listSpaces(): Promise<Space[] | null> {
   const res = await api<{ spaces: Space[] }>("/api/spaces");
-  return res.ok ? res.data!.spaces : [];
+  return res.ok ? res.data!.spaces : null;
 }
 
 export async function getSpace(id: string): Promise<Space | null> {
