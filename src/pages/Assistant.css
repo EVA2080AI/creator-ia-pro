@@ -915,3 +915,42 @@
   background: #b3261e; color: #fff; font-size: 12px; font-weight: 700; text-decoration: none;
 }
 .asst-err-cta:hover { background: #8c1d18; }
+
+/* ══ Recorrido guiado (pedido 2026-10-05: "debería ser guiado… aquí creas un nuevo
+   chat") ═══════════════════════════════════════════════════════════════════════
+   El halo resalta el control real y su sombra de 9999px hace de telón; la tarjeta
+   se coloca con tour-geometry.ts (debajo si cabe, arriba si no, nunca fuera). */
+.asst-tour { position: fixed; inset: 0; z-index: 90; }
+.asst-tour-halo {
+  position: fixed; border-radius: 16px; pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(2, 6, 10, 0.62), 0 0 0 2px var(--a-accent, #8b5cf6);
+  transition: top 0.25s ease, left 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+.asst-tour-tip {
+  position: fixed; padding: 14px 16px; border-radius: 16px;
+  background: var(--asst-bg); border: 1px solid var(--asst-border); color: var(--asst-txt);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.55);
+  transition: top 0.25s ease, left 0.25s ease;
+}
+.asst-tour-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.asst-tour-count { font-size: 11px; font-weight: 700; color: var(--asst-txt-3); letter-spacing: 0.04em; }
+.asst-tour-skip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 999px;
+  background: none; border: none; cursor: pointer; font: inherit; font-size: 11.5px; font-weight: 600; color: var(--asst-txt-3);
+}
+.asst-tour-skip:hover { color: var(--asst-txt); background: var(--asst-panel); }
+.asst-tour-title { margin: 0 0 4px; font-size: 14.5px; font-weight: 800; }
+.asst-tour-text { margin: 0; font-size: 13px; line-height: 1.55; color: var(--asst-txt-2); }
+.asst-tour-nav { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.asst-tour-btn {
+  padding: 7px 14px; border-radius: 12px; cursor: pointer; font: inherit; font-size: 12.5px; font-weight: 700;
+  background: var(--asst-panel); border: 1px solid var(--asst-border); color: var(--asst-txt);
+}
+.asst-tour-btn:hover { background: var(--asst-panel-2); }
+/* #7c3aed y no --a-accent: el morado de marca da 4.0:1 con texto blanco a 13px
+   (medido); este tono de la misma familia da 5.9:1 en claro y oscuro. */
+.asst-tour-btn.principal { background: #7c3aed; border-color: transparent; color: #fff; }
+.asst-tour-btn.principal:hover { filter: brightness(1.08); }
+.asst-tour-btn:focus-visible { outline: 2px solid var(--asst-accent-text, var(--a-accent, #8b5cf6)); outline-offset: 2px; }
+/* En oscuro, los metadatos del recorrido en mono, como el resto de señales. */
+.asst-app[data-asst-theme="dark"] :is(.asst-tour-count, .asst-tour-skip) { font-family: var(--asst-mono); }

@@ -49,6 +49,8 @@ export interface BasaltShellSidebarProps {
    *  una sola vez en Basalt.tsx con hasSeenBasaltGuide()) — abre la guía
    *  rápida automáticamente sin que el usuario tenga que buscarla. */
   autoOpenGuide?: boolean;
+  /** Lanza el recorrido guiado (solo Basalt lo tiene por ahora). */
+  onStartTour?: () => void;
 }
 
 /**
@@ -61,7 +63,7 @@ export interface BasaltShellSidebarProps {
  * vía `beforeExperts`/`extraNav` en sus posiciones originales exactas.
  */
 export function BasaltShellSidebar({
-  activePath, sidebarOpen, setSidebarOpen, theme, setTheme, onNewChat, beforeExperts, extraNav, autoOpenGuide,
+  activePath, sidebarOpen, setSidebarOpen, theme, setTheme, onNewChat, beforeExperts, extraNav, autoOpenGuide, onStartTour,
 }: BasaltShellSidebarProps) {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -169,7 +171,7 @@ export function BasaltShellSidebar({
             <PanelLeftClose className="w-4 h-4" />
           </button>
         </div>
-        <button className="asst-new-chat" onClick={handleNewChat}>
+        <button className="asst-new-chat" data-tour="nuevo-chat" onClick={handleNewChat}>
           <Plus className="w-4 h-4" /> Nuevo chat
         </button>
 
@@ -266,7 +268,7 @@ export function BasaltShellSidebar({
             </DropdownMenuContent>
           </DropdownMenu>
           <ReportModal open={showReport} onClose={() => setShowReport(false)} />
-          <QuickGuideModal open={showGuide} onClose={() => setShowGuide(false)} showCanvas={CANVAS_ENABLED || isAdmin} />
+          <QuickGuideModal open={showGuide} onClose={() => setShowGuide(false)} showCanvas={CANVAS_ENABLED || isAdmin} onStartTour={onStartTour && (() => { setShowGuide(false); onStartTour(); })} />
         </div>
       </nav>
       <button

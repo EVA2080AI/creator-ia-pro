@@ -98,6 +98,7 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: 
       <button
         type="button"
         className="asst-picker-trigger"
+        data-tour="modelo"
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? popId : undefined}

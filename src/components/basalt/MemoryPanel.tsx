@@ -151,7 +151,7 @@ export function MemoryPanel({ facts, onChange, readOnly, error, onRetry }: Props
 /** El botón del menú que abre y cierra el panel. */
 export function MemoryToggle({ count, open, onToggle }: { count: number; open: boolean; onToggle: () => void }) {
   return (
-    <button className="asst-side-link" onClick={onToggle} aria-expanded={open}>
+    <button className="asst-side-link" data-tour="memoria" onClick={onToggle} aria-expanded={open}>
       <Brain className="w-4 h-4" /> Memoria ({count})
     </button>
   );

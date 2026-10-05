@@ -19,13 +19,14 @@ import { MemoryPanel, MemoryToggle } from "@/components/basalt/MemoryPanel";
 import { Activity, Sources } from "@/components/basalt/SearchActivity";
 import { LinkSuggestions } from "@/components/basalt/LinkSuggestions";
 import { MessageActions, EditButton } from "@/components/basalt/MessageActions";
+import { GuidedTour, type TourStep } from "@/components/basalt/GuidedTour";
 import { findLinks } from "@/lib/links";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
 import { IMAGE_ACCEPT, imagesFromTransfer, recentImages } from "@/lib/image-attach";
 import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DEFAULT_IMAGE_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
-import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
+import { hasSeenBasaltGuide, markBasaltGuideSeen } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
 import { toast } from "sonner";
 import { mdToHtml } from "@/lib/markdown";
@@ -50,6 +51,17 @@ interface SendOpts {
   base?: StoredMsg[];
   model?: string;
 }
+
+/** El recorrido señala la interfaz REAL (pedido 2026-10-05: "aquí creas un nuevo
+ *  chat…"). Los objetivos llevan data-tour; un paso cuyo objetivo no se ve, se salta. */
+const TOUR_STEPS: TourStep[] = [
+  { target: "chat", title: "Habla con Basalt", text: "Escríbele aquí lo que necesites: un plan de mercadeo, analizar un contrato, construir una página web completa." },
+  { target: "adjuntar", title: "Adjunta archivos", text: "Un contrato en PDF o Word para revisarlo, o una foto para que la mire. También puedes pegar un enlace y te ofrece leerlo." },
+  { target: "modelo", title: "Elige el modelo", text: "Hay 21 modelos. Los marcados \"Gratis\" no gastan créditos; los demás muestran su costo antes de usarlos." },
+  { target: "nuevo-chat", title: "Nuevo chat", text: "Empieza una conversación limpia cuando cambies de tema. Las anteriores quedan guardadas en \"Conversaciones\".", drawer: true },
+  { target: "expertos", title: "Expertos", text: "Asistentes por área —Legal, Marketing y más— y los que crees tú. Mismo chat, enfoque distinto.", drawer: true },
+  { target: "memoria", title: "Memoria", text: "Lo que le cuentes de tu negocio queda aquí: puedes añadir, corregir u olvidar datos cuando quieras.", drawer: true },
+];
 
 const ICONS: Record<string, typeof LayoutTemplate> = {
   layout: LayoutTemplate, image: ImageIcon, pen: PenLine, chart: BarChart3, compare: Scale, dice: Dice5, file: FileText,
@@ -87,8 +99,10 @@ export default function BasaltPage() {
   const [model, setModel] = useState(readModel);
   const [imageModel, setImageModel] = useState(readImageModel);
   // Se calcula una sola vez al montar: si cambia durante la sesión (al cerrar
-  // la guía) no debe reabrirse solo por un re-render.
+  // la guía) no debe reabrirse solo por un re-render. La primera visita abre el
+  // RECORRIDO (señala la interfaz); el modal queda como resumen en "Guía rápida".
   const [autoGuide] = useState(() => !hasSeenBasaltGuide());
+  const [tourOpen, setTourOpen] = useState(autoGuide);
 
   const [convId, setConvId] = useState<string>(() => crypto.randomUUID());
   // Título de la conversación abierta. El servidor lo recibe en cada guardado (que sube
@@ -559,7 +573,7 @@ export default function BasaltPage() {
         theme={theme}
         setTheme={setTheme}
         onNewChat={newChat}
-        autoOpenGuide={autoGuide}
+        onStartTour={() => { setSidebarOpen(false); setTourOpen(true); }}
         beforeExperts={
           <>
             <MemoryToggle count={memory.length} open={showMemory} onToggle={() => setShowMemory((v) => !v)} />
@@ -575,6 +589,13 @@ export default function BasaltPage() {
             onRename={(id, title) => { chats.rename(id, title); if (id === convId) setConvTitle(title); }}
           />
         }
+      />
+
+      <GuidedTour
+        steps={TOUR_STEPS}
+        open={tourOpen}
+        onClose={() => { setTourOpen(false); markBasaltGuideSeen(); }}
+        onDrawer={setSidebarOpen}
       />
 
       <main
@@ -722,10 +743,11 @@ export default function BasaltPage() {
             onChange={(e) => { if (e.target.files?.length) void addFiles(e.target.files); e.target.value = ""; }}
           />
           <p id="asst-enviar-ayuda" className="sr-only">Enter envía el mensaje; Shift y Enter hacen un salto de línea.</p>
-          <div className="asst-pill">
+          <div className="asst-pill" data-tour="chat">
             <button
               type="button"
               className="asst-attach"
+              data-tour="adjuntar"
               onClick={() => fileInputRef.current?.click()}
               aria-label="Adjuntar un documento o una imagen"
               title="Adjuntar un documento (PDF, Word, texto) o una imagen para analizarla"

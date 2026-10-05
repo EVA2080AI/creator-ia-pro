@@ -66,6 +66,7 @@ export function ExpertsAccordion({
     <div>
       <button
         className="asst-switcher-label asst-accordion-toggle"
+        data-tour="expertos"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >

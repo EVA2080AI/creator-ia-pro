@@ -39,7 +39,7 @@ const STEPS = [
   },
 ];
 
-export function QuickGuideModal({ open, onClose, showCanvas = false }: { open: boolean; onClose: () => void; showCanvas?: boolean }) {
+export function QuickGuideModal({ open, onClose, showCanvas = false, onStartTour }: { open: boolean; onClose: () => void; showCanvas?: boolean; onStartTour?: () => void }) {
   if (!open) return null;
   // Canvas IA está oculto para quien no es admin mientras no exista de verdad: contarle
   // en la guía algo que su menú NO tiene era puro desconcierto (reporte 2026-10-05).
@@ -93,10 +93,22 @@ export function QuickGuideModal({ open, onClose, showCanvas = false }: { open: b
           ))}
         </div>
 
+        {/* El recorrido señala la interfaz real; este modal queda como resumen. */}
+        {onStartTour && (
+          <button
+            onClick={() => { markBasaltGuideSeen(); onStartTour(); }}
+            className="w-full rounded-xl py-2.5 text-[13px] font-bold mb-2"
+            style={{ background: "var(--a-accent, #8b5cf6)", color: "#fff" }}
+          >
+            Ver el recorrido (1 min)
+          </button>
+        )}
         <button
           onClick={close}
           className="w-full rounded-xl py-2.5 text-[13px] font-bold"
-          style={{ background: "var(--a-accent, #8b5cf6)", color: "#fff" }}
+          style={onStartTour
+            ? { background: "var(--asst-panel)", border: "1px solid var(--asst-border)", color: "var(--asst-txt)" }
+            : { background: "var(--a-accent, #8b5cf6)", color: "#fff" }}
         >
           Entendido, empezar
         </button>
