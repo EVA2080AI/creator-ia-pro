@@ -147,7 +147,7 @@ const Admin = () => {
               <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Estado Núcleo</p>
               <div className="flex items-center gap-1.5 justify-end">
                 <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">Sistemas Operativos</span>
+                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">Sistemas Operativos</span>
               </div>
             </div>
           </div>

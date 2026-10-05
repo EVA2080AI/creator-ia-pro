@@ -40,7 +40,8 @@ const TIER_CONFIG: Record<string, { label: string, color: string, bg: string }> 
   'agencia': { label: 'AGENCIA', color: 'text-amber-600 dark:text-amber-400',     bg: 'bg-amber-50/80 dark:bg-amber-500/10' },
   'pyme':    { label: 'PYME',    color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-500/10' },
   'pymes':   { label: 'PYMES',   color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50/80 dark:bg-emerald-500/10' },
-  'admin':   { label: 'ADMIN',   color: 'text-red-500 dark:text-red-400',         bg: 'bg-red-50/80 dark:bg-red-500/10' },
+  // red-700 y no red-500: a 9px sobre el fondo rosado daba 3.4:1 (auditoría 2026-10-05).
+  'admin':   { label: 'ADMIN',   color: 'text-red-700 dark:text-red-400',         bg: 'bg-red-50/80 dark:bg-red-500/10' },
   'soon':    { label: 'PRONTO',  color: 'text-muted-foreground', bg: 'bg-muted' },
 };
 
@@ -205,7 +206,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
           <div className="px-3 space-y-1 mb-6">
             {(globalExpanded || isMobile) && (
              <div className="pt-3 pb-1 mb-1 px-1">
-                <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-red-500/60">
+                <span className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.25em] text-red-700 dark:text-red-400">
                    <Shield className="w-3 h-3" />
                    Sistema
                 </span>
