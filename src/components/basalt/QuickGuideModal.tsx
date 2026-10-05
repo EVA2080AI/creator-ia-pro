@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import { X, MessageSquare, Users, Brain, Scale, LayoutGrid, LayoutTemplate, Globe } from "lucide-react";
+import { useDialogFocus } from "@/hooks/useDialogFocus";
 import { markBasaltGuideSeen } from "@/lib/basalt-guide";
 
 const STEPS = [
@@ -40,6 +42,10 @@ const STEPS = [
 ];
 
 export function QuickGuideModal({ open, onClose, showCanvas = false, onStartTour }: { open: boolean; onClose: () => void; showCanvas?: boolean; onStartTour?: () => void }) {
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  // Tab queda DENTRO del modal y Escape cierra; al cerrar, el foco vuelve al botón
+  // "Guía rápida" que lo abrió (antes seguía recorriendo la página oscurecida).
+  useDialogFocus(cardRef, open, () => { markBasaltGuideSeen(); onClose(); });
   if (!open) return null;
   // Canvas IA está oculto para quien no es admin mientras no exista de verdad: contarle
   // en la guía algo que su menú NO tiene era puro desconcierto (reporte 2026-10-05).
@@ -57,6 +63,10 @@ export function QuickGuideModal({ open, onClose, showCanvas = false, onStartTour
       onClick={close}
     >
       <div
+        ref={cardRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Guía rápida de Basalt"
         className="w-full max-w-md rounded-[1.75rem] p-6 shadow-2xl max-h-[85dvh] overflow-y-auto overscroll-contain"
         style={{ background: "var(--asst-bg)", border: "1px solid var(--asst-border)", color: "var(--asst-txt)", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
         onClick={(e) => e.stopPropagation()}

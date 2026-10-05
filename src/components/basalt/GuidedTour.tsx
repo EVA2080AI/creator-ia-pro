@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { haloRect, placeTooltip, type Rect, type TooltipPlacement } from "@/lib/tour-geometry";
+import { useDialogFocus } from "@/hooks/useDialogFocus";
 
 // El recorrido guiado que pidió Sebastián (2026-10-05): en vez de un modal que CUENTA
 // la interfaz, un paso a paso que la SEÑALA — "aquí escribes", "aquí adjuntas", "aquí
@@ -100,10 +101,18 @@ export function GuidedTour({ steps, open, onClose, onDrawer }: Props) {
     };
   }, [open, medir]);
 
+  // Tab circula dentro de la tarjeta (Saltar → Anterior → Siguiente) y al cerrar el
+  // foco vuelve a donde estaba. El Escape de este hook se desactiva: el recorrido ya
+  // tiene el suyo (saltar) junto con las flechas.
+  useDialogFocus(tipRef, open && !!medidas);
+
   const cerrar = useCallback((terminado: boolean) => {
     if (abrioMenu.current) { abrioMenu.current = false; onDrawer?.(false); }
     setI(0);
     onClose(terminado);
+    // "Listo, a crear" debe dejarte LISTO PARA CREAR: el foco aterriza en el
+    // compositor (quien abrió el recorrido —el modal— ya no existe para devolvérselo).
+    requestAnimationFrame(() => document.querySelector<HTMLElement>('[data-tour="chat"] textarea')?.focus());
   }, [onClose, onDrawer]);
 
   // Escape salta el recorrido; flechas navegan.
@@ -147,7 +156,7 @@ export function GuidedTour({ steps, open, onClose, onDrawer }: Props) {
           {i > 0 && (
             <button type="button" className="asst-tour-btn" onClick={() => setI(i - 1)}>Anterior</button>
           )}
-          <button type="button" className="asst-tour-btn principal" autoFocus onClick={() => (ultimo ? cerrar(true) : setI(i + 1))}>
+          <button type="button" className="asst-tour-btn principal" data-autofocus autoFocus onClick={() => (ultimo ? cerrar(true) : setI(i + 1))}>
             {ultimo ? "Listo, a crear" : "Siguiente"}
           </button>
         </div>
