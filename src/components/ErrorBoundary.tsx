@@ -13,6 +13,16 @@ interface State {
   error?: Error;
   errorInfo?: React.ErrorInfo;
   errorId: string;
+  /** El fallo fue cargando un chunk (pestaña sobre un despliegue viejo o red caída):
+   *  tiene SU arreglo (recargar) y "Intentar de nuevo" solo puede volver a fallar. */
+  esChunk?: boolean;
+}
+
+/** Los mensajes con que Chrome, Safari y Firefox reportan un import() fallido. */
+function esErrorDeChunk(error: Error): boolean {
+  return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Unable to preload CSS|ChunkLoadError/i.test(
+    `${error.name} ${error.message}`,
+  );
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -37,6 +47,28 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
+    // Chunk que no cargó: la pestaña quedó sobre un despliegue anterior (o la red
+    // parpadeó). Recargar UNA vez lo arregla solo — misma guarda de 60s que el
+    // manejador de vite:preloadError en main.tsx, por si este atrapó primero.
+    // Sin ticket en ese caso: un reporte por pestaña abierta en cada despliegue
+    // sería puro ruido. Si ya recargamos hace nada y sigue fallando, entonces sí
+    // se muestra, se reporta, y el botón que manda es "Recargar".
+    if (esErrorDeChunk(error)) {
+      let recargar = false;
+      try {
+        const ultima = Number(sessionStorage.getItem("chunk_reload_at") || 0);
+        if (Date.now() - ultima >= 60_000) {
+          sessionStorage.setItem("chunk_reload_at", String(Date.now()));
+          recargar = true;
+        }
+      } catch { recargar = true; }
+      if (recargar) {
+        window.location.reload();
+        return;
+      }
+      this.setState({ esChunk: true });
+    }
+
     const errorId = this.generateErrorId();
     this.setState({ errorId, errorInfo: info });
 
@@ -52,6 +84,7 @@ export class ErrorBoundary extends Component<Props, State> {
     // 2026-10-05: una usuaria mandó una captura con su ERR-… y no había dónde
     // mirarlo). Ahora queda como ticket (Panel Admin → Tickets), con sesión; si no
     // hay sesión o la red está caída, el intento no rompe nada.
+    if (esErrorDeChunk(error)) return;
     try {
       const detalle = [
         error.toString(),
@@ -95,11 +128,13 @@ export class ErrorBoundary extends Component<Props, State> {
               </div>
 
               <h1 className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight mb-3">
-                Algo salió mal
+                {this.state.esChunk ? "La app se actualizó" : "Algo salió mal"}
               </h1>
 
               <p className="text-zinc-500 mb-6 leading-relaxed">
-                Lo sentimos, ha ocurrido un error inesperado. Nuestro equipo ha sido notificado.
+                {this.state.esChunk
+                  ? "Salió una versión nueva mientras tenías esta pestaña abierta. Recárgala para seguir donde ibas."
+                  : "Lo sentimos, ha ocurrido un error inesperado. Nuestro equipo ha sido notificado."}
               </p>
 
               {this.state.errorId && (
@@ -111,19 +146,23 @@ export class ErrorBoundary extends Component<Props, State> {
               )}
 
               <div className="flex flex-col sm:flex-row gap-3 w-full">
+                {/* Con un chunk perdido, "Intentar de nuevo" repite el mismo import roto:
+                    no se ofrece. Recargar es el único camino que funciona. */}
+                {!this.state.esChunk && (
+                  <Button
+                    onClick={this.handleReset}
+                    className="flex-1 bg-primary hover:bg-primary/90"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Intentar de nuevo
+                  </Button>
+                )}
                 <Button
-                  onClick={this.handleReset}
-                  className="flex-1 bg-primary hover:bg-primary/90"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Intentar de nuevo
-                </Button>
-                <Button
-                  variant="outline"
+                  variant={this.state.esChunk ? "default" : "outline"}
                   onClick={() => window.location.reload()}
-                  className="flex-1"
+                  className={this.state.esChunk ? "flex-1 bg-primary hover:bg-primary/90" : "flex-1"}
                 >
-                  <Bug className="w-4 h-4 mr-2" />
+                  {this.state.esChunk ? <RefreshCw className="w-4 h-4 mr-2" /> : <Bug className="w-4 h-4 mr-2" />}
                   Recargar página
                 </Button>
               </div>
