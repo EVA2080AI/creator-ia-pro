@@ -1,4 +1,4 @@
-import { useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import { useCallback, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus, Scale, ListTodo, FolderOpen, User, ShieldCheck,
@@ -76,6 +76,7 @@ export function BasaltShellSidebar({
   const [showReport, setShowReport] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [experts, setExperts] = useState<Assistant[]>([]);
+  const [expertsError, setExpertsError] = useState(false);
 
   // El botón para volver a abrirlo vive fuera del <nav> (si no, se va con él al
   // plegarse) y la barra superior necesita dejarle sitio: las dos cosas se resuelven
@@ -92,11 +93,17 @@ export function BasaltShellSidebar({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpenGuide]);
 
-  useEffect(() => {
-    // "genesis" era Basalt-como-constructor — redundante ahora que Basalt lo
-    // absorbió; el resto son los expertos por área (marketing, legal, etc.).
-    listAssistants().then((all) => setExperts(all.filter((a) => a.slug !== "genesis")));
+  // "genesis" era Basalt-como-constructor — redundante ahora que Basalt lo
+  // absorbió; el resto son los expertos por área (marketing, legal, etc.).
+  const loadExperts = useCallback(() => {
+    setExpertsError(false);
+    void listAssistants().then((all) => {
+      if (all) setExperts(all.filter((a) => a.slug !== "genesis"));
+      else setExpertsError(true);
+    });
   }, []);
+
+  useEffect(() => loadExperts(), [loadExperts]);
 
   // Escape cierra el cajón en móvil (en escritorio el sidebar es fijo: setSidebarOpen(false) no cambia nada).
   useEffect(() => {
@@ -182,6 +189,8 @@ export function BasaltShellSidebar({
 
         <ExpertsAccordion
           experts={experts}
+          error={expertsError}
+          onRetry={loadExperts}
           onSelect={(a) => go(`/a/${a.slug}`)}
           onCreate={() => go("/expertos/nuevo")}
           onEdit={(a) => go(`/expertos/${a.slug}`)}

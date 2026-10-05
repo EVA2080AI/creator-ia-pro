@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Check, Loader2, MessageSquare, Pencil, Pin, PinOff, Search, Trash2, X } from "lucide-react";
+import { AlertCircle, Check, Loader2, MessageSquare, Pencil, Pin, PinOff, RotateCw, Search, Trash2, X } from "lucide-react";
 import { filterConversations, groupConversationsByDate, type ConversationSummary } from "@/lib/basalt";
 
 // Historial del menú lateral. Estaba copiado tal cual en Basalt.tsx y en
@@ -19,12 +19,16 @@ export interface ConversationListProps {
   /** Renombrar: el título se deriva del primer mensaje y muchas veces no dice nada
    *  ("Hola", "Analiza este do…"). Encontrar una conversación vieja dependía de eso. */
   onRename?: (id: string, title: string) => void;
+  /** El historial NO se pudo cargar. Distinto de una lista vacía: decir "todavía no
+   *  hay conversaciones" cuando se cayó la red se lee como "las perdí". */
+  error?: boolean;
+  onRetry?: () => void;
   /** Al pasar el cursor o el foco por una fila se piden sus mensajes: al soltar el
    *  clic la conversación ya está en memoria y abre sin esqueleto. */
   onPrefetch?: (id: string) => void;
 }
 
-export function ConversationList({ conversations, loading, activeId, onOpen, onDelete, onTogglePin, onRename, onPrefetch }: ConversationListProps) {
+export function ConversationList({ conversations, loading, activeId, onOpen, onDelete, onTogglePin, onRename, onPrefetch, error, onRetry }: ConversationListProps) {
   const [query, setQuery] = useState("");
   // Id de la conversación que se está renombrando, y el texto en edición.
   const [editing, setEditing] = useState("");
@@ -73,6 +77,11 @@ export function ConversationList({ conversations, loading, activeId, onOpen, onD
       <div>
         {loading ? (
           <p className="asst-conv-note"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Cargando…</p>
+        ) : error && conversations.length === 0 ? (
+          <p className="asst-conv-note asst-conv-error">
+            <AlertCircle className="w-3.5 h-3.5" aria-hidden /> <span>No se pudo cargar tu historial.</span>
+            {onRetry && <button type="button" onClick={onRetry}><RotateCw className="w-3 h-3" aria-hidden /> Reintentar</button>}
+          </p>
         ) : conversations.length === 0 ? (
           <p className="asst-conv-note">Todavía no hay conversaciones guardadas.</p>
         ) : results.length === 0 ? (

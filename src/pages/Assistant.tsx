@@ -16,7 +16,7 @@ import {
   type Assistant, type AssistantWelcomeCard,
 } from "@/lib/assistants";
 import {
-  loadConversations, saveConversation, loadMemory, saveMemory, withMemory,
+  saveConversation, loadMemory, saveMemory, withMemory,
   CONTINUE_PROMPT, joinContinuation,
   type ConversationSummary, type StoredMsg,
 } from "@/lib/basalt";

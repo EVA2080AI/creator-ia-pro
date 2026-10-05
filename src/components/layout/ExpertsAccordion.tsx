@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Pencil, Plus } from "lucide-react";
+import { AlertCircle, ChevronDown, ChevronRight, Pencil, Plus, RotateCw } from "lucide-react";
 import type { Assistant } from "@/lib/assistants";
 
 // Sección "Expertos" del sidebar — la usan tanto Basalt (BasaltShellSidebar)
@@ -12,20 +12,31 @@ import type { Assistant } from "@/lib/assistants";
 // asistentes personalizados existía desde hacía semanas y no había por dónde
 // entrar (ver src/pages/ExpertEditor.tsx).
 export function ExpertsAccordion({
-  experts, activeSlug, onSelect, onCreate, onEdit,
+  experts, activeSlug, onSelect, onCreate, onEdit, error, onRetry,
 }: {
   experts: Assistant[];
   activeSlug?: string;
   onSelect: (a: Assistant) => void;
   onCreate?: () => void;
   onEdit?: (a: Assistant) => void;
+  /** No se pudieron cargar: antes se quedaba en "cargando…" para siempre. */
+  error?: boolean;
+  onRetry?: () => void;
 }) {
   const [open, setOpen] = useState(() => experts.some((a) => a.slug === activeSlug));
   const propios = experts.filter((a) => a.visibility !== "system");
   const sistema = experts.filter((a) => a.visibility === "system");
   // Mientras cargaban, la sección entera desaparecía del menú: se veía igual que
   // "no hay expertos". Ahora se anuncia que están en camino.
-  if (experts.length === 0) return <div className="asst-switcher-label">Expertos · cargando…</div>;
+  if (experts.length === 0) {
+    if (!error) return <div className="asst-switcher-label">Expertos · cargando…</div>;
+    return (
+      <p className="asst-conv-note asst-conv-error">
+        <AlertCircle className="w-3.5 h-3.5" aria-hidden /> <span>No se pudieron cargar los expertos.</span>
+        {onRetry && <button type="button" onClick={onRetry}><RotateCw className="w-3 h-3" aria-hidden /> Reintentar</button>}
+      </p>
+    );
+  }
 
   const fila = (a: Assistant, editable: boolean) => (
     <div key={a.slug} className="asst-conv-row">

@@ -60,9 +60,11 @@ async function api<T>(path: string, init?: RequestInit): Promise<{ ok: boolean; 
   }
 }
 
-export async function listAssistants(): Promise<Assistant[]> {
+/** `null` si no se pudo cargar — con `[]` el menú decía "Expertos · cargando…" para
+ *  siempre, que es mentira y además no deja reintentar. */
+export async function listAssistants(): Promise<Assistant[] | null> {
   const res = await api<{ assistants: Assistant[] }>("/api/assistants");
-  return res.ok ? res.data!.assistants : [];
+  return res.ok ? res.data!.assistants : null;
 }
 
 export async function getAssistant(slug: string): Promise<Assistant | null> {

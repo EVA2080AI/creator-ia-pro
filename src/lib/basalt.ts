@@ -204,11 +204,18 @@ export function hydrateImages(messages: StoredMsg[]): StoredMsg[] {
 // assistantSlug: sin valor = chat de Basalt; con valor = chat de ese Experto
 // (cada Experto tiene su propio historial separado, homologado con Basalt —
 // mismo mecanismo, 2026-09-29).
-export async function loadConversations(userId: string, assistantSlug?: string): Promise<ConversationSummary[]> {
+/**
+ * La lista del menú. Devuelve `null` si NO se pudo cargar — que no es lo mismo que una
+ * lista vacía: devolviendo `[]` en los dos casos, a quien tenía 30 conversaciones y se
+ * quedó sin red el menú le decía "Todavía no hay conversaciones guardadas", que es
+ * exactamente el susto que ya hubo una vez ("hice un estudio de mercado y nunca
+ * encontré dónde quedó").
+ */
+export async function loadConversations(userId: string, assistantSlug?: string): Promise<ConversationSummary[] | null> {
   if (!userId) return [];
   const qs = assistantSlug ? `?assistant=${encodeURIComponent(assistantSlug)}` : "";
   const res = await apiJson<{ conversations: ConversationSummary[] }>(`/api/basalt/conversations${qs}`);
-  return res.ok ? res.data!.conversations : [];
+  return res.ok ? res.data!.conversations : null;
 }
 
 // ─── Mensajes de una conversación ────────────────────────────────────────────

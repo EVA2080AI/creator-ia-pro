@@ -31,6 +31,8 @@ interface Options {
 export function useConversationHistory({ userId, assistantSlug, onMessages, onOpened }: Options) {
   const [conversations, setConversations] = useState<ConversationSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  /** El historial no se pudo cargar (red caída, 500, sesión vencida). */
+  const [listError, setListError] = useState(false);
   const [threadStatus, setThreadStatus] = useState<ThreadStatus>("idle");
   const [openingTitle, setOpeningTitle] = useState("");
   // Id de la conversación que se está abriendo: si para cuando llegan los mensajes
@@ -40,23 +42,31 @@ export function useConversationHistory({ userId, assistantSlug, onMessages, onOp
   const refresh = useCallback(async () => {
     if (!userId) return;
     const list = await loadConversations(userId, assistantSlug);
-    setConversations(list);
-    return list;
+    // null = no se pudo cargar: se conserva lo que ya estaba en pantalla en vez de
+    // vaciar la lista (un guardado que termina mientras se cae la red no debería
+    // hacer desaparecer el historial).
+    setListError(list === null);
+    if (list) setConversations(list);
+    return list ?? undefined;
   }, [userId, assistantSlug]);
 
-  useEffect(() => {
-    if (!userId) return;
+  const load = useCallback(() => {
+    if (!userId) return () => {};
     let vivo = true;
     setLoading(true);
+    setListError(false);
     void migrateLegacyLocalStorage(userId)
       .then(() => loadConversations(userId, assistantSlug))
       .then((list) => {
         if (!vivo) return;
-        setConversations(list);
+        if (list) setConversations(list);
+        else setListError(true);
         setLoading(false);
       });
     return () => { vivo = false; };
   }, [userId, assistantSlug]);
+
+  useEffect(() => load(), [load]);
 
   /** Abre una conversación: instantáneo si ya está en memoria, con esqueleto si no. */
   const open = useCallback((c: ConversationSummary) => {
@@ -127,10 +137,12 @@ export function useConversationHistory({ userId, assistantSlug, onMessages, onOp
     loading,
     onOpen: open,
     onDelete: remove,
+    error: listError,
+    onRetry: load,
     onTogglePin: togglePin,
     onRename: rename,
     onPrefetch: prefetch,
   };
 
-  return { conversations, loading, threadStatus, openingTitle, open, reset, remove, togglePin, rename, prefetch, refresh, listProps };
+  return { conversations, loading, listError, threadStatus, openingTitle, open, reset, remove, togglePin, rename, prefetch, refresh, listProps };
 }
