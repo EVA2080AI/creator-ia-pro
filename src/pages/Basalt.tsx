@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
-  Menu, Send, Square, Loader2, Scale, Paperclip, FileText, Download,
+  Menu, Send, Square, Loader2, Scale, Paperclip, FileText, Download, Code2,
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -64,7 +64,7 @@ const TOUR_STEPS: TourStep[] = [
 ];
 
 const ICONS: Record<string, typeof LayoutTemplate> = {
-  layout: LayoutTemplate, image: ImageIcon, pen: PenLine, chart: BarChart3, compare: Scale, dice: Dice5, file: FileText,
+  layout: LayoutTemplate, image: ImageIcon, pen: PenLine, chart: BarChart3, compare: Scale, dice: Dice5, file: FileText, code: Code2,
 };
 
 const MODEL_KEY = "basalt:model";

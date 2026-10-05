@@ -83,3 +83,21 @@ describe("utilidades", () => {
     expect(normalizeText("  a \n\n\n b  ")).toBe("a\n\n b");
   });
 });
+
+describe("extractDocument con .md", () => {
+  it("lee un README.md como texto plano, con su markdown intacto", async () => {
+    const md = "# Mi proyecto\n\n## Arquitectura\n\n- Frontend: Vite + React\n- API: Vercel Functions\n\n## Despliegue\n\n```bash\nvercel --prod\n```\n";
+    const file = new File([md], "README.md", { type: "text/markdown" });
+    const doc = await extractDocument(file);
+    expect(doc.name).toBe("README.md");
+    expect(doc.text).toContain("## Despliegue");
+    expect(doc.text).toContain("vercel --prod");
+    expect(doc.truncated).toBe(false);
+  });
+
+  it("lee un .markdown aunque el navegador no le ponga mime", async () => {
+    const file = new File(["## Stack\nNode 20"], "arquitectura.markdown", { type: "" });
+    const doc = await extractDocument(file);
+    expect(doc.text).toContain("Node 20");
+  });
+});

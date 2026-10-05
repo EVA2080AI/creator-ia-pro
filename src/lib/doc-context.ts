@@ -22,7 +22,7 @@ export const MAX_TOTAL_DOC_CHARS = 300_000;
 export const MAX_DOCS_PER_MESSAGE = 5;
 
 /** Mensaje que se envía si el usuario adjunta sin escribir nada. */
-export const DEFAULT_DOC_PROMPT = "Analiza este documento. Si es un contrato, revisa las partes, el objeto, los plazos, los pagos, las obligaciones, las penalidades, la terminación y los riesgos principales.";
+export const DEFAULT_DOC_PROMPT = "Analiza este documento. Si es un contrato, revisa las partes, el objeto, los plazos, los pagos, las obligaciones, las penalidades, la terminación y los riesgos principales. Si es la documentación de un proyecto (README, arquitectura), explícame el stack, cómo se despliega paso a paso y qué mejorarías.";
 
 /** Mensaje que se envía si el usuario adjunta una foto sin escribir nada. */
 export const DEFAULT_IMAGE_PROMPT = "Mira esta imagen y descríbeme qué ves. Si tiene texto, transcríbelo.";
