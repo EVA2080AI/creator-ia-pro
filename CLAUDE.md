@@ -119,6 +119,21 @@ Lo que el chat gana, y las reglas que trae cada cosa:
 guardan — en el historial queda solo la ficha (nombre, tipo, tamaño). Es la misma razón
 por la que `saved_asset` dejó de guardar data URIs.
 
+## Contraste (WCAG)
+
+`scripts/contrast-audit.js` se pega en la consola (o en `page.evaluate` del arnés) y
+recorre cada texto visible midiéndolo contra el primer fondo sólido de sus ancestros.
+**Salta los controles deshabilitados** (`[disabled]`, `[aria-disabled]`), que WCAG
+exime y que suelen llevar `opacity:.3` a propósito — sin eso, /a/arena reportaba cuatro
+fallos que eran el botón "Comparar" sin texto escrito y los "Votar" antes de haber
+respuestas. Tampoco entiende oklch/color-mix: ahí da falsos positivos.
+
+Estado medido (2026-10-05, iPhone 13, claro y oscuro): **0 fallos** en las ocho páginas
+públicas (/, /pricing, /help, /contact, /terms, /privacy, /security, /cookies,
+/descargar) y en las de sesión (/dashboard, /tasks, /spaces, /profile, /a/basalt,
+/a/arena). Los únicos textos que siguen fallando viven en maquetas decorativas de la
+landing (8-9px dentro de un mockup del producto, no contenido).
+
 ## Cómo se mide el móvil
 
 `node scripts/mobile-shots.mjs <ruta> <salida.png>` abre la app en un Chromium con

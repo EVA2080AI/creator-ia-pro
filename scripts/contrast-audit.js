@@ -52,6 +52,11 @@
     if (t.length < 3) continue;
     const el = n.parentElement;
     if (!el || !el.checkVisibility({ opacityProperty: true, visibilityProperty: true })) continue;
+    // Un control DESHABILITADO está exento de la regla de contraste (WCAG 1.4.3), y
+    // además suele llevar opacity:.3-.4 a propósito. Sin esto, /a/arena salía con 4
+    // "fallos" que eran el botón Comparar sin texto escrito y los Votar antes de que
+    // haya respuestas — ruido que ya había mandado a investigar una vez.
+    if (el.closest("[disabled], [aria-disabled='true'], fieldset:disabled")) continue;
     const box = el.getBoundingClientRect();
     if (box.width < 2 || box.height < 2) continue;
     const cs = getComputedStyle(el);

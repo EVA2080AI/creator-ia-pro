@@ -386,7 +386,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
                 <div className="flex h-20 sm:h-32 items-center justify-center bg-muted/50 border-b border-border overflow-hidden relative">
                   {/* Badge */}
                   <div className="absolute top-3 left-3 z-10">
-                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest bg-card/90 backdrop-blur ${isCode ? 'text-emerald-600 border-emerald-500/20' : 'text-primary/80 border-primary/20'}`}>
+                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md border text-[9px] font-black uppercase tracking-widest bg-card/90 backdrop-blur ${isCode ? 'text-emerald-700 dark:text-emerald-400 border-emerald-500/20' : 'text-primary/80 border-primary/20'}`}>
                       {isCode ? <Code2 className="h-3 w-3" /> : <LayoutTemplate className="h-3 w-3" />}
                       {isCode ? 'Código' : 'Flujo'}
                     </div>
@@ -487,7 +487,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
                 </div>
                 
                 <span className="pr-4">
-                  <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[9px] font-black uppercase tracking-widest bg-card ${isCode ? 'text-emerald-600 border-emerald-500/20' : 'text-primary/80 border-primary/20'}`}>
+                  <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[9px] font-black uppercase tracking-widest bg-card ${isCode ? 'text-emerald-700 dark:text-emerald-400 border-emerald-500/20' : 'text-primary/80 border-primary/20'}`}>
                      {isCode ? <Code2 className="h-3 w-3" /> : <LayoutTemplate className="h-3 w-3" />}
                      {isCode ? 'Código' : 'Flujo'}
                   </div>
