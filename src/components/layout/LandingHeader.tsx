@@ -16,7 +16,13 @@ interface NavLink {
   badge?: string;
 }
 
-export function LandingHeader(): React.ReactElement {
+/**
+ * `themed`: seguir el tema de la app (claro/oscuro). Por defecto NO, porque las páginas
+ * públicas (landing, legales, ayuda) son claras siempre y una barra oscura encima de
+ * una página blanca se ve rota. Lo activa /pricing, que sí es la misma página en claro
+ * y en oscuro — es a donde el chat manda al usuario cuando se le acaban los créditos.
+ */
+export function LandingHeader({ themed = false }: { themed?: boolean } = {}): React.ReactElement {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -42,7 +48,10 @@ export function LandingHeader(): React.ReactElement {
         className={cn(
           "fixed top-0 left-0 w-full z-50 transition-all duration-700 panorama-transition px-6 md:px-12",
           isScrolled 
-            ? "py-4 bg-white bg-opacity-80 backdrop-blur-xl border-b border-black border-opacity-5 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.05)]" 
+            ? cn(
+                "py-4 bg-white bg-opacity-80 backdrop-blur-xl border-b border-black border-opacity-5 shadow-[0_8px_32px_-8px_rgba(0,0,0,0.05)]",
+                themed && "dark:bg-zinc-950 dark:bg-opacity-80 dark:border-white dark:border-opacity-10",
+              )
             : "py-8 bg-transparent"
         )}
       >
@@ -109,7 +118,10 @@ export function LandingHeader(): React.ReactElement {
             </button>
 
             <button 
-              className="lg:hidden p-2 text-zinc-900 border border-black border-opacity-5 rounded-xl bg-white bg-opacity-50 backdrop-blur-md"
+              className={cn(
+                "lg:hidden p-2 text-zinc-900 border border-black border-opacity-5 rounded-xl bg-white bg-opacity-50 backdrop-blur-md",
+                themed && "dark:text-zinc-100 dark:border-white dark:border-opacity-10 dark:bg-zinc-900 dark:bg-opacity-60",
+              )}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
               {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -123,7 +135,10 @@ export function LandingHeader(): React.ReactElement {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="lg:hidden absolute top-full left-0 w-full bg-white border-b border-zinc-100 p-8 flex flex-col gap-6 shadow-2xl"
+              className={cn(
+                "lg:hidden absolute top-full left-0 w-full bg-white border-b border-zinc-100 p-8 flex flex-col gap-6 shadow-2xl",
+                themed && "dark:bg-zinc-950 dark:border-zinc-800",
+              )}
             >
               {NAV_LINKS.map((link) => {
                 const Icon = link.icon;

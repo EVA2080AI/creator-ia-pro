@@ -50,7 +50,7 @@ const PLANS = [
     description: "Todo lo que necesitas para empezar a crear contenido con IA.",
     color: "#94A3B8",
     gradient: "from-zinc-500/10 to-zinc-500/5",
-    border: "border-zinc-200",
+    border: "border-zinc-200 dark:border-zinc-800",
     icon: Sparkles,
     badge: null,
     features: [
@@ -220,13 +220,13 @@ function SectionHeader({ badge, title, subtitle }: { badge: string; title: strin
       viewport={{ once: true }}
       className="text-center px-6 mb-16"
     >
-      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-50 border border-zinc-200 text-[11px] font-black uppercase tracking-widest text-primary mb-4">
+      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-[11px] font-black uppercase tracking-widest text-primary mb-4">
         {badge}
       </span>
       <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase font-display mb-4">
         {title}
       </h2>
-      <p className="max-w-xl mx-auto text-zinc-500 text-[15px] leading-relaxed">
+      <p className="max-w-xl mx-auto text-zinc-500 dark:text-zinc-400 text-[15px] leading-relaxed">
         {subtitle}
       </p>
     </motion.div>
@@ -288,7 +288,9 @@ export default function Pricing() {
 
       <div className="h-full bg-background selection:bg-primary/15 relative overflow-x-hidden">
         <MeshGradient />
-        <LandingHeader />
+        {/* La única página pública que sigue el tema: es a donde entra el usuario desde
+            el chat, donde ya eligió claro u oscuro. */}
+        <LandingHeader themed />
 
         <div className="pt-20 lg:pt-32 pb-40 relative z-10">
           
@@ -300,27 +302,27 @@ export default function Pricing() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="max-w-5xl mx-auto text-center"
             >
-              <h1 className="text-6xl sm:text-8xl md:text-[8rem] font-black tracking-[-0.05em] uppercase font-display leading-[0.85] mb-8 text-zinc-900">
+              <h1 className="text-6xl sm:text-8xl md:text-[8rem] font-black tracking-[-0.05em] uppercase font-display leading-[0.85] mb-8 text-zinc-900 dark:text-zinc-100">
                 Crea más,<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-b from-primary to-purple-300 italic">paga menos.</span>
               </h1>
-              <p className="max-w-xl mx-auto text-lg text-zinc-500 leading-relaxed font-medium mb-12">
+              <p className="max-w-xl mx-auto text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium mb-12">
                 Crea contenido de calidad profesional con la IA más avanzada. Paga sólo lo que usas, cuando lo usas, en pesos colombianos con{" "}
-                <span className="text-zinc-900 border-b-2 border-primary/20">Bold.co</span>.
+                <span className="text-zinc-900 dark:text-zinc-100 border-b-2 border-primary/20">Bold.co</span>.
               </p>
 
               {/* Credit Bar Illustrative */}
-              <div className="max-w-md mx-auto p-4 rounded-[1.5rem] bg-white border border-zinc-100 shadow-xl mb-12">
+              <div className="max-w-md mx-auto p-4 rounded-[1.5rem] bg-white dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 shadow-xl mb-12">
                 <div className="flex justify-between items-end mb-2">
                   <div className="text-left">
-                    <p className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">Ejemplo de Uso</p>
-                    <p className="text-[12px] font-bold text-zinc-900">Créditos del Proyecto</p>
+                    <p className="text-[11px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Ejemplo de Uso</p>
+                    <p className="text-[12px] font-bold text-zinc-900 dark:text-zinc-100">Créditos del Proyecto</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[14px] font-black text-primary italic">120 / 150</p>
                   </div>
                 </div>
-                <div className="h-4 w-full bg-zinc-50 rounded-full border border-zinc-100 overflow-hidden p-1">
+                <div className="h-4 w-full bg-zinc-50 dark:bg-zinc-900 rounded-full border border-zinc-100 dark:border-zinc-800 overflow-hidden p-1">
                   <div className="h-full w-[80%] rounded-full bg-gradient-to-r from-primary via-indigo-400 to-primary animate-pulse" />
                 </div>
               </div>
@@ -329,7 +331,7 @@ export default function Pricing() {
 
           {/* Annual badge — coming soon */}
           <div className="flex items-center justify-center gap-4 mb-16">
-            <span className="text-xs font-black uppercase tracking-widest text-zinc-500">Facturación mensual</span>
+            <span className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Facturación mensual</span>
             <span className="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold uppercase tracking-wide">Anual con descuento — Próximamente</span>
           </div>
 
@@ -352,34 +354,34 @@ export default function Pricing() {
                     className={cn(
                       "relative group rounded-[2rem] border p-6 flex flex-col transition-all duration-500 overflow-hidden",
                       isPopular
-                        ? "bg-zinc-50 border-primary/40 shadow-[0_20px_80px_-15px_rgba(var(--primary-rgb),0.15)]"
+                        ? "bg-zinc-50 dark:bg-zinc-900 border-primary/40 shadow-[0_20px_80px_-15px_rgba(var(--primary-rgb),0.15)]"
                         : isContact
                         ? "bg-gradient-to-br from-purple-500/5 to-purple-500/10 border-purple-500/20"
-                        : "bg-zinc-50 border-zinc-200"
+                        : "bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
                     )}
                   >
                     <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                       style={{ background: `radial-gradient(circle at top right, ${'glow' in plan ? plan.glow : 'rgba(255,255,255,0.05)'}, transparent 70%)` }} />
 
                     {plan.badge && (
-                      <div className="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-primary text-white text-[11px] font-black uppercase tracking-widest">
+                      <div className="absolute top-4 right-4 px-2.5 py-1 rounded-full bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-widest">
                         {plan.badge}
                       </div>
                     )}
 
                     <div className="mb-6">
-                      <div className="w-10 h-10 rounded-xl bg-zinc-100 flex items-center justify-center mb-5 border border-zinc-200 group-hover:border-zinc-300 transition-colors">
+                      <div className="w-10 h-10 rounded-xl bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mb-5 border border-zinc-200 dark:border-zinc-800 group-hover:border-zinc-300 transition-colors">
                         <Icon className="h-5 w-5" style={{ color: plan.color }} />
                       </div>
                       <h3 className="text-xl font-black uppercase font-display mb-1">{plan.name}</h3>
-                      <p className="text-zinc-500 text-xs leading-relaxed">{plan.description}</p>
+                      <p className="text-zinc-500 dark:text-zinc-400 text-xs leading-relaxed">{plan.description}</p>
                     </div>
 
                     <div className="py-6 relative">
                       {isContact ? (
                         <div>
                           <span className="text-3xl font-black font-display tracking-tighter">A medida</span>
-                          <p className="text-xs text-zinc-500 mt-1">Precio según tu volumen</p>
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Precio según tu volumen</p>
                         </div>
                       ) : (
                         <>
@@ -389,9 +391,9 @@ export default function Pricing() {
                             <span className={`${displayPrice >= 1_000_000 ? "text-3xl xl:text-2xl" : "text-3xl"} font-black font-display tracking-tighter whitespace-nowrap`}>
                               ${displayPrice.toLocaleString('es-CO')}
                             </span>
-                            <span className="text-zinc-500 text-xs font-bold uppercase tracking-widest whitespace-nowrap">COP/mes</span>
+                            <span className="text-zinc-500 dark:text-zinc-400 text-xs font-bold uppercase tracking-widest whitespace-nowrap">COP/mes</span>
                           </div>
-                          <div className="mt-2 flex items-center gap-2 py-1 px-2.5 rounded-lg bg-zinc-100 border border-zinc-200 w-fit">
+                          <div className="mt-2 flex items-center gap-2 py-1 px-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 w-fit">
                             <Coins className="h-3 w-3 text-primary" />
                             <span className="text-[11px] font-bold" style={{ color: plan.color }}>{plan.creditsLabel}</span>
                           </div>
@@ -403,7 +405,7 @@ export default function Pricing() {
                       {plan.features.map(f => (
                         <li key={f.label} className="flex gap-2.5 items-start">
                           <Check className={cn("h-3.5 w-3.5 shrink-0 mt-0.5", f.highlight ? "text-primary" : "text-zinc-300")} />
-                          <span className={cn("text-xs leading-relaxed", f.highlight ? "text-zinc-700 font-semibold" : "text-zinc-500")}>
+                          <span className={cn("text-xs leading-relaxed", f.highlight ? "text-zinc-700 dark:text-zinc-200 font-semibold" : "text-zinc-500 dark:text-zinc-400")}>
                             {f.label}
                           </span>
                         </li>
@@ -413,7 +415,7 @@ export default function Pricing() {
                     {isContact ? (
                       <a
                         href="mailto:hola@creator-ia.com?subject=Plan Empresarial Creator IA Pro"
-                        className="w-full py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all bg-primary text-white hover:bg-primary/90 flex items-center justify-center gap-2"
+                        className="w-full py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2"
                       >
                         Contactar representante <ArrowRight className="h-3.5 w-3.5" />
                       </a>
@@ -423,7 +425,7 @@ export default function Pricing() {
                         disabled={loadingAction === plan.key}
                         className={cn(
                           "w-full py-3.5 rounded-xl text-[11px] font-black uppercase tracking-[0.15em] transition-all relative overflow-hidden group/btn",
-                          isPopular ? "bg-primary text-white hover:bg-primary/90" : "bg-zinc-100 text-zinc-900 border border-zinc-200 hover:bg-zinc-200"
+                          isPopular ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200"
                         )}
                       >
                         {loadingAction === plan.key ? (
@@ -448,25 +450,25 @@ export default function Pricing() {
               subtitle="Diseñado para creadores latinoamericanos. Sin dólares, sin costos ocultos."
             />
             
-            <div className="max-w-4xl mx-auto rounded-[3rem] bg-zinc-50 border border-zinc-200 p-4 sm:p-12 overflow-hidden relative">
+            <div className="max-w-4xl mx-auto rounded-[3rem] bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 sm:p-12 overflow-hidden relative">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-8">
-                <div className="hidden sm:block text-xs font-black uppercase text-zinc-500 tracking-widest mt-4">Característica</div>
+                <div className="hidden sm:block text-xs font-black uppercase text-zinc-500 dark:text-zinc-400 tracking-widest mt-4">Característica</div>
                 <div className="text-center">
                   <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[11px] font-black text-primary uppercase">
                     Creator IA Pro
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-zinc-100 border border-zinc-200 text-[11px] font-black text-zinc-600 uppercase">
+                  <div className="inline-flex items-center gap-2 mb-6 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-[11px] font-black text-zinc-600 dark:text-zinc-400 uppercase">
                     Modelos Tradicionales
                   </div>
                 </div>
 
                 {COMPARISON_DATA.map((row, idx) => (
                   <React.Fragment key={row.feature}>
-                    <div className="hidden sm:block py-4 border-t border-zinc-200 text-xs font-bold text-zinc-500">{row.feature}</div>
-                    <div className="py-4 border-t border-zinc-200 text-center text-xs font-black text-zinc-900">{row.creator}</div>
-                    <div className="py-4 border-t border-zinc-200 text-center text-xs font-medium text-zinc-500">{row.others}</div>
+                    <div className="hidden sm:block py-4 border-t border-zinc-200 dark:border-zinc-800 text-xs font-bold text-zinc-500 dark:text-zinc-400">{row.feature}</div>
+                    <div className="py-4 border-t border-zinc-200 dark:border-zinc-800 text-center text-xs font-black text-zinc-900 dark:text-zinc-100">{row.creator}</div>
+                    <div className="py-4 border-t border-zinc-200 dark:border-zinc-800 text-center text-xs font-medium text-zinc-500 dark:text-zinc-400">{row.others}</div>
                   </React.Fragment>
                 ))}
               </div>
@@ -483,7 +485,7 @@ export default function Pricing() {
               
               <div className="mb-12">
                 <div className="flex justify-between items-center mb-6">
-                  <span className="text-xs font-black uppercase text-zinc-500 tracking-widest">Uso estimado</span>
+                  <span className="text-xs font-black uppercase text-zinc-500 dark:text-zinc-400 tracking-widest">Uso estimado</span>
                   <span className="text-2xl font-black text-primary font-display">{estimateSlider} créditos</span>
                 </div>
                 <input 
@@ -493,35 +495,35 @@ export default function Pricing() {
                   step="100"
                   value={estimateSlider}
                   onChange={(e) => setEstimateSlider(parseInt(e.target.value))}
-                  className="w-full h-1.5 bg-zinc-100 rounded-full appearance-none cursor-pointer accent-primary"
+                  className="w-full h-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full appearance-none cursor-pointer accent-primary"
                 />
-                <div className="flex justify-between mt-4 text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
+                <div className="flex justify-between mt-4 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
                   <span>Uso casual</span>
                   <span>Uso profesional</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
-                <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200">
+                <div className="p-4 rounded-3xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800">
                   <Globe className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
-                  <div className="text-lg font-black text-zinc-700">{(estimateSlider / 10).toFixed(0)}</div>
-                  <div className="text-[11px] font-black uppercase text-zinc-600">Posts de texto</div>
+                  <div className="text-lg font-black text-zinc-700 dark:text-zinc-200">{(estimateSlider / 10).toFixed(0)}</div>
+                  <div className="text-[11px] font-black uppercase text-zinc-600 dark:text-zinc-400">Posts de texto</div>
                 </div>
-                <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200">
+                <div className="p-4 rounded-3xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800">
                   <Cpu className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
-                  <div className="text-lg font-black text-zinc-700">{(estimateSlider / 100).toFixed(0)}</div>
-                  <div className="text-[11px] font-black uppercase text-zinc-600">Imágenes generadas</div>
+                  <div className="text-lg font-black text-zinc-700 dark:text-zinc-200">{(estimateSlider / 100).toFixed(0)}</div>
+                  <div className="text-[11px] font-black uppercase text-zinc-600 dark:text-zinc-400">Imágenes generadas</div>
                 </div>
-                <div className="p-4 rounded-3xl bg-zinc-100 border border-zinc-200 col-span-2 md:col-span-1">
+                <div className="p-4 rounded-3xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 col-span-2 md:col-span-1">
                   <Code2 className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
-                  <div className="text-lg font-black text-zinc-700">{(estimateSlider / 50).toFixed(0)}</div>
-                  <div className="text-[11px] font-black uppercase text-zinc-600">Guiones de video</div>
+                  <div className="text-lg font-black text-zinc-700 dark:text-zinc-200">{(estimateSlider / 50).toFixed(0)}</div>
+                  <div className="text-[11px] font-black uppercase text-zinc-600 dark:text-zinc-400">Guiones de video</div>
                 </div>
               </div>
 
               <button 
                 onClick={() => document.getElementById('credit-packs-section')?.scrollIntoView({ behavior: 'smooth' })}
-                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-primary text-white text-xs font-black uppercase tracking-widest hover:bg-primary/90 hover:scale-105 transition-transform font-bold"
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest hover:bg-primary/90 hover:scale-105 transition-transform font-bold"
               >
                 Ver recargas de créditos <Bolt className="h-4 w-4 fill-current" />
               </button>
@@ -544,8 +546,8 @@ export default function Pricing() {
                       key={pack.id}
                       whileHover={{ scale: 1.02 }}
                       className={cn(
-                        "relative rounded-3xl border p-8 flex flex-col gap-6 transition-all bg-zinc-50",
-                        pack.popular ? "border-primary/40 bg-primary/5 shadow-2xl" : "border-zinc-200"
+                        "relative rounded-3xl border p-8 flex flex-col gap-6 transition-all bg-zinc-50 dark:bg-zinc-900",
+                        pack.popular ? "border-primary/40 bg-primary/5 shadow-2xl" : "border-zinc-200 dark:border-zinc-800"
                       )}
                     >
                       <div className="flex items-center justify-between">
@@ -553,20 +555,20 @@ export default function Pricing() {
                           <Coins className="h-5 w-5 text-primary" />
                         </div>
                         {pack.popular && (
-                          <span className="px-2 py-0.5 rounded-full bg-primary text-white text-[11px] font-black uppercase tracking-widest">Popular</span>
+                          <span className="px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[11px] font-black uppercase tracking-widest">Popular</span>
                         )}
                       </div>
                       <div>
                         <div className="text-4xl font-black font-display mb-1">{pack.credits_amount.toLocaleString()}</div>
-                        <div className="text-xs font-bold text-zinc-600 uppercase tracking-widest">Créditos</div>
+                        <div className="text-xs font-bold text-zinc-600 dark:text-zinc-400 uppercase tracking-widest">Créditos</div>
                       </div>
-                      <div className="text-2xl font-black text-zinc-800 font-display">{pack.price}</div>
+                      <div className="text-2xl font-black text-zinc-800 dark:text-zinc-100 font-display">{pack.price}</div>
                       <button
                         onClick={() => handleBoldAction(pack.id)}
                         disabled={isLoadingThis}
                         className={cn(
                           "w-full py-4 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all",
-                          pack.popular ? "bg-primary text-white hover:bg-primary/90" : "bg-zinc-100 text-zinc-900 border border-zinc-200 hover:bg-zinc-200"
+                          pack.popular ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200"
                         )}
                       >
                         {isLoadingThis ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Comprar Pack"}
@@ -593,17 +595,17 @@ export default function Pricing() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
-                  className="p-8 rounded-[2.5rem] bg-zinc-50 border border-zinc-200 relative"
+                  className="p-8 rounded-[2.5rem] bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 relative"
                 >
                   <div className="flex gap-1 mb-6">
                     {Array.from({ length: 5 }).map((_, j) => <Star key={j} className="h-3 w-3 fill-primary text-primary" />)}
                   </div>
-                  <p className="text-[14px] text-zinc-500 leading-relaxed italic mb-8">"{t.content}"</p>
+                  <p className="text-[14px] text-zinc-500 dark:text-zinc-400 leading-relaxed italic mb-8">"{t.content}"</p>
                   <div className="flex items-center gap-4">
-                    <img src={t.avatar} className="w-10 h-10 rounded-2xl border border-zinc-200" alt={t.name} />
+                    <img src={t.avatar} className="w-10 h-10 rounded-2xl border border-zinc-200 dark:border-zinc-800" alt={t.name} />
                     <div>
-                      <div className="text-xs font-black uppercase tracking-widest text-zinc-900">{t.name}</div>
-                      <div className="text-[11px] font-bold text-zinc-500 uppercase">{t.role}</div>
+                      <div className="text-xs font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-100">{t.name}</div>
+                      <div className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase">{t.role}</div>
                     </div>
                   </div>
                 </motion.div>
@@ -621,11 +623,11 @@ export default function Pricing() {
             <div className="max-w-3xl mx-auto">
               <Accordion type="single" collapsible className="w-full space-y-4">
                 {FAQS.map((faq, i) => (
-                  <AccordionItem key={i} value={`item-${i}`} className="border border-zinc-100 rounded-3xl px-6 bg-white shadow-sm overflow-hidden transition-all hover:border-zinc-200">
-                    <AccordionTrigger className="text-xs font-black uppercase tracking-widest text-zinc-900 hover:no-underline py-6">
+                  <AccordionItem key={i} value={`item-${i}`} className="border border-zinc-100 dark:border-zinc-800 rounded-3xl px-6 bg-white dark:bg-zinc-900 shadow-sm overflow-hidden transition-all hover:border-zinc-200 dark:border-zinc-800">
+                    <AccordionTrigger className="text-xs font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-100 hover:no-underline py-6">
                       {faq.question}
                     </AccordionTrigger>
-                    <AccordionContent className="text-[13px] text-zinc-500 leading-relaxed pb-6">
+                    <AccordionContent className="text-[13px] text-zinc-500 dark:text-zinc-400 leading-relaxed pb-6">
                       {faq.answer}
                     </AccordionContent>
                   </AccordionItem>
@@ -641,7 +643,7 @@ export default function Pricing() {
               { icon: TrendingUp, label: "Cancela cuando quieras" },
               { icon: MessageSquare, label: "Soporte en español" },
             ].map(t => (
-              <div key={t.label} className="p-6 rounded-[2rem] bg-zinc-50 border border-zinc-200 flex flex-col items-center gap-4 text-zinc-600 hover:text-zinc-900 transition-colors cursor-default group">
+              <div key={t.label} className="p-6 rounded-[2rem] bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex flex-col items-center gap-4 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:text-zinc-100 transition-colors cursor-default group">
                 <t.icon className="h-6 w-6 group-hover:text-primary transition-colors" />
                 <span className="text-[11px] font-black uppercase tracking-[0.2em] text-center">{t.label}</span>
               </div>
@@ -650,7 +652,7 @@ export default function Pricing() {
 
           {/* Terms Notice */}
           <section className="px-6 max-w-3xl mx-auto mb-20 text-center">
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
               Al adquirir cualquier plan, aceptas nuestros{" "}
               <a href="/terms" className="text-primary hover:underline">Términos de Servicio</a>{" "}
               y{" "}
