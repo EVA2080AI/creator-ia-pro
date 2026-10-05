@@ -39,8 +39,11 @@ const STEPS = [
   },
 ];
 
-export function QuickGuideModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function QuickGuideModal({ open, onClose, showCanvas = false }: { open: boolean; onClose: () => void; showCanvas?: boolean }) {
   if (!open) return null;
+  // Canvas IA está oculto para quien no es admin mientras no exista de verdad: contarle
+  // en la guía algo que su menú NO tiene era puro desconcierto (reporte 2026-10-05).
+  const steps = STEPS.filter((s) => s.title !== "Canvas IA" || showCanvas);
 
   const close = () => {
     markBasaltGuideSeen();
@@ -54,8 +57,8 @@ export function QuickGuideModal({ open, onClose }: { open: boolean; onClose: () 
       onClick={close}
     >
       <div
-        className="w-full max-w-md rounded-[1.75rem] p-6 shadow-2xl"
-        style={{ background: "var(--asst-bg)", border: "1px solid var(--asst-border)", color: "var(--asst-txt)" }}
+        className="w-full max-w-md rounded-[1.75rem] p-6 shadow-2xl max-h-[85dvh] overflow-y-auto overscroll-contain"
+        style={{ background: "var(--asst-bg)", border: "1px solid var(--asst-border)", color: "var(--asst-txt)", paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-4 flex items-start justify-between gap-4">
@@ -74,7 +77,7 @@ export function QuickGuideModal({ open, onClose }: { open: boolean; onClose: () 
         </div>
 
         <div className="space-y-3.5 mb-5">
-          {STEPS.map((s) => (
+          {steps.map((s) => (
             <div key={s.title} className="flex items-start gap-3">
               <div
                 className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"

@@ -266,7 +266,7 @@ export function BasaltShellSidebar({
             </DropdownMenuContent>
           </DropdownMenu>
           <ReportModal open={showReport} onClose={() => setShowReport(false)} />
-          <QuickGuideModal open={showGuide} onClose={() => setShowGuide(false)} />
+          <QuickGuideModal open={showGuide} onClose={() => setShowGuide(false)} showCanvas={CANVAS_ENABLED || isAdmin} />
         </div>
       </nav>
       <button
