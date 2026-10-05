@@ -1,7 +1,7 @@
 // Extrae el texto de un documento adjunto (PDF, Word .docx, texto plano) EN EL NAVEGADOR: el archivo no
 // se sube a ningún servidor nuestro; solo el texto extraído viaja al modelo cuando el usuario envía el
 // mensaje (pedido urgente: "subir documentos para analizar contratos", 2026-09-30).
-import JSZip from "jszip";
+import type JSZipType from "jszip";
 
 export const MAX_FILE_BYTES = 15 * 1024 * 1024;
 /** ≈ 50-60 páginas de contrato por documento (~50k tokens). Más que eso se corta y se avisa. */
@@ -103,8 +103,13 @@ function blocks(el: Element): string[] {
 }
 
 export async function docxToText(buffer: ArrayBuffer): Promise<string> {
-  let zip: JSZip;
-  try { zip = await JSZip.loadAsync(buffer); } catch { throw new DocError("El archivo no parece un .docx válido (¿está dañado?)."); }
+  // JSZip son ~97 KB que viajaban en el chunk del chat para leer UN tipo de archivo
+  // (.docx). Se carga al abrir uno, igual que ya se hacía con pdfjs más abajo.
+  let zip: JSZipType;
+  try {
+    const { default: JSZip } = await import("jszip");
+    zip = await JSZip.loadAsync(buffer);
+  } catch { throw new DocError("El archivo no parece un .docx válido (¿está dañado?)."); }
   const xml = await zip.file("word/document.xml")?.async("string");
   if (!xml) throw new DocError("El archivo no parece un .docx válido: no encontré el cuerpo del documento.");
   const dom = new DOMParser().parseFromString(xml, "application/xml");

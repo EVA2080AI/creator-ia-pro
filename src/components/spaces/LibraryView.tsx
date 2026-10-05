@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { listSpaces } from "@/lib/spaces";
 import { listAssets, createAsset, updateAsset, deleteAsset, type SavedAsset, getAsset } from "@/lib/assets";
@@ -16,7 +16,10 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { DocumentEditor } from "@/components/studio/DocumentEditor";
+// TipTap (editor + starter-kit + extensiones) son ~230 KB que viajaban en el chunk de
+// /proyectos aunque el editor solo se abre al tocar "ampliar" en un asset de tipo
+// documento. Se carga cuando de verdad se abre.
+const DocumentEditor = lazy(() => import("@/components/studio/DocumentEditor").then((m) => ({ default: m.DocumentEditor })));
 
 /** Se esconde SOLO donde hay cursor: en táctil no existe el hover y la acción se perdía. */
 const HOVER_REVEAL = "[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100";
@@ -414,6 +417,7 @@ export const LibraryView = () => {
       {editingAsset && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 md:p-8 animate-in fade-in duration-200">
           <div className="w-full max-w-6xl h-full shadow-2xl animate-in zoom-in-95 duration-200">
+            <Suspense fallback={<div className="flex h-full items-center justify-center rounded-3xl bg-card"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
             <DocumentEditor
               initialContent={editingAsset.content || ""}
               title={
@@ -427,6 +431,7 @@ export const LibraryView = () => {
               onClose={() => setEditingAsset(null)}
               isSaving={savingDoc}
             />
+            </Suspense>
           </div>
         </div>
       )}
