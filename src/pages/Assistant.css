@@ -907,3 +907,11 @@
   background: var(--asst-panel); border: 1px solid var(--asst-border);
   font-size: 11.5px; line-height: 1.5; color: var(--asst-txt-3);
 }
+
+/* La salida del aviso de error cuando la hay (ver planes). Mismo peso que "Reintentar",
+   pero rellena: es lo que de verdad desatasca cuando faltan créditos o plan. */
+.asst-err-cta {
+  display: inline-flex; align-items: center; padding: 4px 13px; border-radius: 14px;
+  background: #b3261e; color: #fff; font-size: 12px; font-weight: 700; text-decoration: none;
+}
+.asst-err-cta:hover { background: #8c1d18; }

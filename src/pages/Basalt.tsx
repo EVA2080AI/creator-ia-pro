@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   Menu, Send, Square, Loader2, Scale, Paperclip, FileText, Download,
@@ -38,6 +38,7 @@ import {
 } from "@/lib/basalt";
 import { activityLabel, mergeSources, readBasaltEvent, type SearchSource } from "@/lib/stream-events";
 import { downloadMarkdown, safeFileName, toMarkdown } from "@/lib/export-conversation";
+import { ChatError, canRetry, chatError, errorAction } from "@/lib/chat-errors";
 import { createAsset } from "@/lib/assets";
 import "./Assistant.css";
 
@@ -105,6 +106,16 @@ export default function BasaltPage() {
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Código del servidor para el último error: decide qué se ofrece (planes, reintentar). */
+  const [errorCode, setErrorCode] = useState<string | undefined>();
+
+  // En la pantalla de bienvenida el aviso va DESPUÉS de las tarjetas: en un teléfono
+  // (664px) queda fuera de la vista, así que un primer mensaje fallido se veía como
+  // "no pasó nada". Se lleva a la vista en cuanto aparece.
+  useEffect(() => {
+    if (!error) return;
+    requestAnimationFrame(() => document.querySelector(".asst-err")?.scrollIntoView({ block: "center", behavior: "smooth" }));
+  }, [error]);
   // Id del mensaje cuya respuesta se cortó por el límite de tiempo del servidor
   // (finish_reason "length") — habilita el botón "Continuar".
   const [truncatedId, setTruncatedId] = useState<string | null>(null);
@@ -286,6 +297,7 @@ export default function BasaltPage() {
     }
     setGenerating(true);
     setError(null);
+    setErrorCode(undefined);
     setTruncatedId(null);
     requestAnimationFrame(stickToBottom);
 
@@ -333,7 +345,8 @@ export default function BasaltPage() {
 
       if (!res.ok || res.headers.get("content-type")?.includes("application/json")) {
         const body = await res.json().catch(() => null);
-        throw new Error(body?.error || `Error ${res.status}`);
+        // Con el código, el aviso puede ofrecer la salida (ver src/lib/chat-errors.ts).
+        throw chatError(body, res.status);
       }
       // El servidor ya mandaba esta cabecera y nadie la leía: es la que permite decir
       // QUÉ modelo respondió cada mensaje (y recordarlo al reabrir la conversación).
@@ -392,6 +405,7 @@ export default function BasaltPage() {
       if (!(e instanceof DOMException && e.name === "AbortError")) {
         setMessages(base);
         setError(e instanceof Error ? e.message : "Error al generar la respuesta.");
+        setErrorCode(e instanceof ChatError ? e.code : undefined);
         restoreInput();
         setGenerating(false);
         setActivity("");
@@ -482,6 +496,7 @@ export default function BasaltPage() {
     setConvTitle("");
     setMessages([]);
     setError(null);
+    setErrorCode(undefined);
     setTruncatedId(null);
     setSidebarOpen(false);
     docsByMsg.current.clear();
@@ -493,6 +508,7 @@ export default function BasaltPage() {
     setConvId(c.id);
     setConvTitle(c.title);
     setError(null);
+    setErrorCode(undefined);
     setTruncatedId(null);
     setSidebarOpen(false);
     chats.open(c);
@@ -521,10 +537,14 @@ export default function BasaltPage() {
     );
   }
 
+  const errorAccion = errorAction(errorCode);
   const errorBanner = error && (
     <div className="asst-err" role="alert">
       <span>⚠️ {error}</span>
-      <button onClick={() => void sendPrompt(lastPromptRef.current)}>Reintentar</button>
+      {/* Si lo que falta son créditos o plan, lo que resuelve es ver planes, no
+          reintentar (que vuelve a fallar igual). */}
+      {errorAccion && <Link className="asst-err-cta" to={errorAccion.to}>{errorAccion.label}</Link>}
+      {canRetry(errorCode) && <button onClick={() => void sendPrompt(lastPromptRef.current)}>Reintentar</button>}
     </div>
   );
 

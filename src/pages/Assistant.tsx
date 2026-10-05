@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import {
   Menu, Send, Square, Loader2, Paperclip, FileText, Copy, Pencil, Download,
@@ -31,6 +31,7 @@ import { MemoryPanel, MemoryToggle } from "@/components/basalt/MemoryPanel";
 import { findLinks } from "@/lib/links";
 import { activityLabel, mergeSources, readBasaltEvent, type SearchSource } from "@/lib/stream-events";
 import { downloadMarkdown, safeFileName, toMarkdown } from "@/lib/export-conversation";
+import { ChatError, canRetry, chatError, errorAction } from "@/lib/chat-errors";
 import { ConversationList } from "@/components/basalt/ConversationList";
 import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
@@ -106,6 +107,16 @@ export default function AssistantPage() {
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /** Código del servidor para el último error: decide qué se ofrece (planes, reintentar). */
+  const [errorCode, setErrorCode] = useState<string | undefined>();
+
+  // En la pantalla de bienvenida el aviso va DESPUÉS de las tarjetas: en un teléfono
+  // (664px) queda fuera de la vista, así que un primer mensaje fallido se veía como
+  // "no pasó nada". Se lleva a la vista en cuanto aparece.
+  useEffect(() => {
+    if (!error) return;
+    requestAnimationFrame(() => document.querySelector(".asst-err")?.scrollIntoView({ block: "center", behavior: "smooth" }));
+  }, [error]);
   // Mensaje cuya respuesta se cortó por el límite de tiempo del servidor
   // (finish_reason "length") — habilita "Continuar" (igual que en Basalt.tsx).
   const [truncatedId, setTruncatedId] = useState<string | null>(null);
@@ -147,6 +158,7 @@ export default function AssistantPage() {
     setMessages([]);
     setConvId(crypto.randomUUID());
     setError(null);
+    setErrorCode(undefined);
     clearDocs();
     getAssistant(slug).then((a) => {
       setAssistant(a);
@@ -178,6 +190,7 @@ export default function AssistantPage() {
     setConvTitle("");
     setMessages([]);
     setError(null);
+    setErrorCode(undefined);
     setTruncatedId(null);
     clearDocs();
     setSidebarOpen(false);
@@ -188,6 +201,7 @@ export default function AssistantPage() {
     setConvId(c.id);
     setConvTitle(c.title);
     setError(null);
+    setErrorCode(undefined);
     setTruncatedId(null);
     clearDocs();
     setSidebarOpen(false);
@@ -259,6 +273,7 @@ export default function AssistantPage() {
     }
     setGenerating(true);
     setError(null);
+    setErrorCode(undefined);
     setTruncatedId(null);
     requestAnimationFrame(stickToBottom);
 
@@ -312,7 +327,8 @@ export default function AssistantPage() {
 
       if (!res.ok || res.headers.get("content-type")?.includes("application/json")) {
         const body = await res.json().catch(() => null);
-        throw new Error(body?.error || `Error ${res.status}`);
+        // Con el código, el aviso puede ofrecer la salida (ver src/lib/chat-errors.ts).
+        throw chatError(body, res.status);
       }
       respondedWith = res.headers.get("X-Model-Used") || assistant.defaultModel;
 
@@ -396,6 +412,7 @@ export default function AssistantPage() {
       } else {
         if (!continued) setMessages((prev) => prev.filter((m) => m.id !== modelMsgId));
         setError(e instanceof Error ? e.message : "Error al generar la respuesta.");
+        setErrorCode(e instanceof ChatError ? e.code : undefined);
       }
     } finally {
       setGenerating(false);
@@ -601,7 +618,11 @@ export default function AssistantPage() {
               {error && (
                 <div className="asst-err" role="alert">
                   <span>⚠️ {error}</span>
-                  <button onClick={() => void sendPrompt(messages[messages.length - 1]?.text || "", { retry: true })}>Reintentar</button>
+                  {/* Ver Basalt.tsx: si faltan créditos o plan, reintentar no arregla nada. */}
+                  {errorAction(errorCode) && <Link className="asst-err-cta" to={errorAction(errorCode)!.to}>{errorAction(errorCode)!.label}</Link>}
+                  {canRetry(errorCode) && (
+                    <button onClick={() => void sendPrompt(messages[messages.length - 1]?.text || "", { retry: true })}>Reintentar</button>
+                  )}
                 </div>
               )}
             </div>
