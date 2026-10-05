@@ -900,3 +900,10 @@
   font: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer;
 }
 .asst-conv-note.asst-conv-error button:hover { background: var(--asst-panel-2); }
+
+/* Aviso del tope de conversaciones: no es un error, es una regla de la casa. */
+.asst-conv-note.asst-conv-cap {
+  display: block; margin: 6px 4px 2px; padding: 8px 10px; border-radius: 10px;
+  background: var(--asst-panel); border: 1px solid var(--asst-border);
+  font-size: 11.5px; line-height: 1.5; color: var(--asst-txt-3);
+}

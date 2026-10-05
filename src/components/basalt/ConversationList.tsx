@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { AlertCircle, Check, Loader2, MessageSquare, Pencil, Pin, PinOff, RotateCw, Search, Trash2, X } from "lucide-react";
 import { filterConversations, groupConversationsByDate, type ConversationSummary } from "@/lib/basalt";
+import { MAX_CONVERSATIONS } from "@/lib/limits";
 
 // Historial del menú lateral. Estaba copiado tal cual en Basalt.tsx y en
 // Assistant.tsx (los Expertos); acá vive una sola vez y de paso gana lo que le
@@ -156,6 +157,16 @@ export function ConversationList({ conversations, loading, activeId, onOpen, onD
               ))}
             </div>
           ))
+        )}
+
+        {/* Al pasar de 50, el servidor BORRA la más antigua sin anclar y hasta ahora no
+            lo decía en ninguna parte: el usuario solo notaba que una conversación vieja
+            había desaparecido. Se avisa justo cuando llega al tope, con las dos salidas
+            que ya existen: anclarla (no se cae del tope) o descargarla. */}
+        {!searching && conversations.length >= MAX_CONVERSATIONS && (
+          <p className="asst-conv-note asst-conv-cap">
+            Se guardan tus últimas {MAX_CONVERSATIONS} conversaciones. Ancla las que quieras conservar o descárgalas; al pasar de ahí, la más antigua sin anclar se borra.
+          </p>
         )}
       </div>
     </>

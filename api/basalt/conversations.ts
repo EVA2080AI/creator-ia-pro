@@ -10,8 +10,11 @@ import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { z } from "zod";
 import { getDb, schema } from "../../db/index.js";
 import { requireUser } from "../_lib/require-user.js";
+import { MAX_CONVERSATIONS } from "../../src/lib/limits.js";
 
-const MAX_CONVERSATIONS = 50;
+// El tope vive en el cliente porque también lo necesita la interfaz para avisar antes
+// de que se borre nada (src/lib/basalt.ts).
+
 const MAX_TITLE = 200;
 const MAX_SLUG = 80;
 
@@ -206,6 +209,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     if (all.length > MAX_CONVERSATIONS) {
       const toDelete = all.slice(MAX_CONVERSATIONS).map((r) => r.id);
+      // Esto borra de verdad y para siempre: queda el rastro en los logs, y la
+      // interfaz avisa al llegar al tope para que se pueda anclar o descargar.
+      console.warn(`[basalt/conversations] tope de ${MAX_CONVERSATIONS} alcanzado: se borran ${toDelete.length} conversación(es) antigua(s) de ${user.userId}`);
       await db.delete(schema.basaltConversation).where(inArray(schema.basaltConversation.id, toDelete));
     }
 
