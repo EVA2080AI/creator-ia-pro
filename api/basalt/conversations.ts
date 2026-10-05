@@ -48,10 +48,12 @@ const SOURCE_SCHEMA = z.object({
 });
 
 const MSG_SCHEMA = z.object({
-  id: z.string(),
+  id: z.string().max(64),
   role: z.enum(["user", "model"]),
-  text: z.string(),
-  images: z.array(IMAGE_SCHEMA).optional(),
+  // 120k caracteres es más que cualquier respuesta real (el stream corta a los 54s);
+  // sin tope, una fila podía crecer sin límite — la lección de saved_asset (6 MB).
+  text: z.string().max(120_000),
+  images: z.array(IMAGE_SCHEMA).max(8).optional(),
   // Sin esto, zod las descartaba al guardar: al recargar la conversación desaparecía la ficha
   // "contrato.pdf" de la burbuja y no quedaba señal de que ese mensaje llevaba un documento.
   attachments: z.array(ATTACHMENT_SCHEMA).max(5).optional(),
@@ -67,7 +69,7 @@ const UPSERT_SCHEMA = z.object({
   // hilo COMPLETO en cada guardado, así que un `messages: []` —por un cliente viejo
   // o por guardar una conversación cuyos mensajes aún no llegaron— vaciaría una
   // conversación existente sin que nada lo frene.
-  messages: z.array(MSG_SCHEMA).min(1),
+  messages: z.array(MSG_SCHEMA).min(1).max(200),
   assistantSlug: z.string().trim().min(1).max(MAX_SLUG).nullish(),
 });
 

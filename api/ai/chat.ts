@@ -34,6 +34,18 @@ export const config = { maxDuration: 60 };
 // explícito ("length") para que el cliente ofrezca "Continuar".
 const STREAM_DEADLINE_MS = 54_000;
 
+// ── Topes de entrada (QA adversarial 2026-10-05) ────────────────────────────
+// El crédito que cobramos es PLANO por mensaje, pero lo que OpenRouter nos cobra
+// depende de los tokens. Sin estos topes, un script con una cuenta de 1 crédito podía
+// mandar 4 MB de contexto con max_tokens enorme en bucle: gasto real nuestro sin
+// relación con el ingreso. El cliente normal queda lejísimos de estos límites.
+const MAX_MESSAGES = 60;
+// 700k deja pasar el peor caso LEGÍTIMO (20 mensajes del historial + los 300k del
+// presupuesto de documentos) y mata el abuso de megabytes; la mayoría de los modelos
+// ni siquiera aceptan tanto contexto.
+const MAX_TOTAL_CHARS = 700_000;
+const MAX_OUTPUT_TOKENS = 8_192;
+
 /** Se agrega al prompt cuando no hay TAVILY_API_KEY en este despliegue. */
 const NO_SEARCH_NOTE =
   "NOTA DEL SISTEMA: ahora mismo la búsqueda web no está disponible. No digas que vas a buscar ni que buscaste; responde con lo que sabes y avisa de que un dato que cambia (precios, versiones, noticias, horarios) puede estar desactualizado.";
@@ -114,6 +126,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!body?.messages?.length) {
     res.status(400).json({ ok: false, code: "BAD_REQUEST", error: "Faltan mensajes." });
     return;
+  }
+  if (body.messages.length > MAX_MESSAGES) {
+    res.status(413).json({ ok: false, code: "PAYLOAD_TOO_LARGE", error: "La conversación es demasiado larga para enviarla entera: abre un chat nuevo." });
+    return;
+  }
+  {
+    let chars = (body.systemPrompt?.length ?? 0);
+    for (const m of body.messages) {
+      if (typeof m.content === "string") chars += m.content.length;
+      else if (Array.isArray(m.content)) for (const parte of m.content) chars += parte.text?.length ?? 0;
+      if (chars > MAX_TOTAL_CHARS) break;
+    }
+    if (chars > MAX_TOTAL_CHARS) {
+      res.status(413).json({ ok: false, code: "PAYLOAD_TOO_LARGE", error: "El mensaje y su contexto superan el tamaño máximo. Recorta el texto o abre un chat nuevo." });
+      return;
+    }
   }
 
   const modelId = body.model && CHAT_MODELS.some((m) => m.id === body.model) ? body.model : DEFAULT_MODEL_ID;
@@ -224,8 +252,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // abajo) para forzar una respuesta final en vez de seguir
         // encadenando llamadas.
         ...(withTools ? { tools: [...(TAVILY_API_KEY ? [WEB_SEARCH_TOOL] : []), ...USER_DATA_TOOLS], tool_choice: "auto" } : {}),
-        ...(typeof body.temperature === "number" ? { temperature: body.temperature } : {}),
-        ...(typeof body.maxTokens === "number" ? { max_tokens: body.maxTokens } : {}),
+        ...(typeof body.temperature === "number" ? { temperature: Math.min(2, Math.max(0, body.temperature)) } : {}),
+        ...(typeof body.maxTokens === "number" ? { max_tokens: Math.min(MAX_OUTPUT_TOKENS, Math.max(16, Math.floor(body.maxTokens))) } : {}),
       }),
     });
 

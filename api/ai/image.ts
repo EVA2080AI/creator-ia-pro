@@ -42,7 +42,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const modelId = body.model && IMAGE_MODELS.some((m) => m.id === body.model) ? body.model : DEFAULT_IMAGE_MODEL_ID;
   const model = getImageModel(modelId);
   const aspectRatio = body.aspectRatio && ASPECT_RATIOS.has(body.aspectRatio) ? body.aspectRatio : "1:1";
-  const imagePrompt = model.supportsImagePrompt ? body.imagePrompt : undefined;
+  // Solo una referencia con forma de imagen y acotada: esto se reenvía al proveedor
+  // tal cual y sin tope aceptaba cualquier cosa hasta el límite del cuerpo (4,5 MB).
+  const imagePrompt = model.supportsImagePrompt
+    && typeof body.imagePrompt === "string"
+    && body.imagePrompt.length <= 2_000_000
+    && (/^data:image\/(png|jpe?g|webp);base64,/.test(body.imagePrompt) || /^https:\/\//.test(body.imagePrompt))
+      ? body.imagePrompt
+      : undefined;
 
   const profile = await getProfile(user.userId);
   const tier = profile?.subscriptionTier ?? "free";

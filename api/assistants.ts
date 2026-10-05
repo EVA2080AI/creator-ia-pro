@@ -2,7 +2,7 @@
 // (Genesis, Mentor IA…) + los propios (personalización por cliente/usuario).
 // Ver db/schema/assistants.ts y docs/PLAN_REFACTOR_GENESIS.md.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { eq, or, and } from "drizzle-orm";
+import {eq, or, and, count} from "drizzle-orm";
 import { getDb, schema } from "../db/index.js";
 import { requireUser } from "./_lib/require-user.js";
 
@@ -44,6 +44,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.status(400).json({ ok: false, code: "BAD_REQUEST", error: "Falta el nombre del asistente." });
       return;
     }
+    // Tope de asistentes propios (QA adversarial 2026-10-05): la pantalla de crear
+    // existe desde la fase 1 y sin tope un bucle podía sembrar filas sin fin.
+    const [propios] = await db.select({ total: count() }).from(schema.assistant)
+      .where(eq(schema.assistant.ownerId, user.userId));
+    if ((propios?.total ?? 0) >= 20) {
+      res.status(400).json({ ok: false, code: "LIMIT_REACHED", error: "Ya tienes 20 expertos propios. Borra alguno para crear otro." });
+      return;
+    }
+
     const slug = (body.slug || body.name)
       .toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")

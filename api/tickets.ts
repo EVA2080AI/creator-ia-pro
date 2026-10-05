@@ -2,7 +2,7 @@
 // estado (solo admin) en /api/tickets/[id]. Ver db/schema/tickets.ts y
 // src/components/tickets/ReportButton.tsx.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { desc, eq } from "drizzle-orm";
+import {desc, eq, count, gte, and} from "drizzle-orm";
 import { z } from "zod";
 import { getDb, schema } from "../db/index.js";
 import { requireUser } from "./_lib/require-user.js";
@@ -57,6 +57,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const parsed = CREATE_SCHEMA.safeParse(req.body ?? {});
     if (!parsed.success) return validationError(res, parsed.error);
     const { type, title, description, pageUrl } = parsed.data;
+
+    // Tope por usuario y día (QA adversarial 2026-10-05): sin esto, un bucle podía
+    // llenar la tabla — y desde que la pantalla de error reporta sola, un crash en
+    // loop haría lo mismo sin mala intención. 20 alcanza de sobra para uso real.
+    const hace24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const [recientes] = await db.select({ total: count() }).from(schema.ticket)
+      .where(and(eq(schema.ticket.userId, user.userId), gte(schema.ticket.createdAt, hace24h)));
+    if ((recientes?.total ?? 0) >= 20) {
+      res.status(429).json({ ok: false, code: "TOO_MANY_TICKETS", error: "Ya enviaste muchos reportes hoy. Si es urgente, escríbenos directamente." });
+      return;
+    }
 
     const [created] = await db.insert(schema.ticket).values({
       id: crypto.randomUUID(),
