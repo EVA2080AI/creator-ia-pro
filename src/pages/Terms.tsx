@@ -142,7 +142,7 @@ Las modificaciones entran en vigor al publicarse en esta página. El uso continu
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-zinc-950">
       <SEO
         title="Términos de Servicio"
         description="Términos y condiciones de uso de Creator IA Pro. Lee nuestras políticas de uso del servicio, pagos, créditos y responsabilidades."
@@ -153,7 +153,7 @@ Las modificaciones entran en vigor al publicarse en esta página. El uso continu
       <LandingHeader />
 
       {/* Hero */}
-      <section className="pt-32 pb-16 bg-zinc-50 border-b border-zinc-100">
+      <section className="pt-32 pb-16 bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-100 dark:border-zinc-800">
         <div className="container px-6 mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -162,7 +162,7 @@ Las modificaciones entran en vigor al publicarse en esta página. El uso continu
           >
             <Button
               variant="ghost"
-              className="mb-6 text-zinc-500 hover:text-zinc-900 -ml-4"
+              className="mb-6 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 -ml-4"
               onClick={() => navigate(-1)}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -176,16 +176,18 @@ Las modificaciones entran en vigor al publicarse en esta página. El uso continu
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary italic">Legal</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tighter mb-6 italic">
+            <h1 className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-zinc-100 tracking-tighter mb-6 italic">
               Términos de Servicio
             </h1>
 
-            <p className="text-lg text-zinc-500 leading-relaxed">
+            <p className="text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed">
               Al utilizar Creator IA Pro, aceptas estos términos y condiciones.
               Por favor, léelos cuidadosamente antes de continuar.
             </p>
 
-            <div className="flex items-center gap-4 mt-8 text-sm text-zinc-400">
+            {/* zinc-400 sobre blanco es 2.5:1 — estos metadatos (versión, vigencia) se
+                leían peor que el cuerpo del documento legal que acompañan. */}
+            <div className="flex items-center gap-4 mt-8 text-sm text-zinc-600 dark:text-zinc-300">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 <span>Versión 2.1.0</span>

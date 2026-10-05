@@ -143,13 +143,13 @@ const Contact = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1 }}
-                  className="p-6 rounded-2xl bg-zinc-50 border border-zinc-100 text-center hover:border-primary/20 transition-colors"
+                  className="p-6 rounded-2xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800 text-center hover:border-primary/20 transition-colors"
                 >
-                  <div className="inline-flex p-3 rounded-xl bg-white border border-zinc-200 mb-4">
-                    <method.icon className="h-5 w-5 text-zinc-600" />
+                  <div className="inline-flex p-3 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 mb-4">
+                    <method.icon className="h-5 w-5 text-zinc-600 dark:text-zinc-300" />
                   </div>
-                  <h3 className="font-bold text-zinc-900 mb-1">{method.title}</h3>
-                  <p className="text-xs text-zinc-500 mb-3">{method.description}</p>
+                  <h3 className="font-bold text-zinc-900 dark:text-zinc-100 mb-1">{method.title}</h3>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3">{method.description}</p>
                   {method.action ? (
                     <a
                       href={method.action}
@@ -158,7 +158,7 @@ const Contact = () => {
                       {method.value}
                     </a>
                   ) : (
-                    <span className="text-sm font-medium text-zinc-700">{method.value}</span>
+                    <span className="text-sm font-medium text-zinc-700 dark:text-zinc-200">{method.value}</span>
                   )}
                 </motion.div>
               ))}
