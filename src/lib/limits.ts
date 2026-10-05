@@ -11,3 +11,16 @@
  * para avisarlo ANTES de que pase, y así se pueda anclar o descargar lo que importe.
  */
 export const MAX_CONVERSATIONS = 50;
+
+/**
+ * Créditos que cada plan otorga al mes. Es lo que venden /pricing y la landing
+ * ("1.000 créditos/mes", …): si cambian allá, cambia AQUÍ — el panel admin proyecta
+ * con estos números cuánta plata hay que tener cargada en OpenRouter.
+ */
+export const PLAN_MONTHLY_CREDITS: Record<string, number> = {
+  free: 0,
+  creador: 1_000,
+  pro: 3_000,
+  agencia: 8_000,
+  pyme: 20_000,
+};

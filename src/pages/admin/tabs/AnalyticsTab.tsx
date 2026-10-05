@@ -1,4 +1,5 @@
 import { TrendingUp, Users2, Layers, Zap, Loader2, BarChart2, Activity } from "lucide-react";
+import { OpenRouterProjection, type TierRow } from "../components/OpenRouterProjection";
 
 interface AnalyticsData {
   totalSpend: number;
@@ -8,6 +9,8 @@ interface AnalyticsData {
   conversionRate: number;
   toolUsage: { name: string; count: number; color: string }[];
   dailyCredits: { name: string; credits: number }[];
+  /** Opcional durante el despliegue: la función vieja todavía no lo manda. */
+  tiers?: TierRow[];
 }
 
 export function AnalyticsTab({ 
@@ -30,6 +33,10 @@ export function AnalyticsTab({
 
   return (
     <div className="space-y-6">
+      {/* ¿Cuánto cargar en OpenRouter? — va primero: es la decisión de plata que este
+          panel existe para responder (pedido 2026-10-05). */}
+      {data.tiers && <OpenRouterProjection tiers={data.tiers} totalSpend30d={data.totalSpend} />}
+
       {/* Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="rounded-3xl border border-border bg-card p-6 shadow-sm overflow-hidden relative group">

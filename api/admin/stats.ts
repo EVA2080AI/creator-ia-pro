@@ -1,7 +1,7 @@
 // Estadísticas para la pestaña Analytics del panel admin — reemplaza las
 // consultas directas a Supabase (transactions/profiles) de useAdminAnalytics.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { and, eq, ne, gte, count } from "drizzle-orm";
+import { and, eq, ne, gte, count, sum } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { requireAdmin } from "../_lib/require-admin.js";
 
@@ -18,11 +18,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
   const DAY_LABELS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-  const [spendTxs, recentUsersRow, totalUsersRow, payingUsersRow] = await Promise.all([
+  const [spendTxs, recentUsersRow, totalUsersRow, payingUsersRow, tierRows] = await Promise.all([
     db.select().from(schema.transaction).where(and(eq(schema.transaction.type, "spend"), gte(schema.transaction.createdAt, thirtyDaysAgo))),
     db.select({ total: count() }).from(schema.profile).where(gte(schema.profile.createdAt, sevenDaysAgo)),
     db.select({ total: count() }).from(schema.profile),
     db.select({ total: count() }).from(schema.profile).where(ne(schema.profile.subscriptionTier, "free")),
+    // Para la proyección de OpenRouter: cuántos usuarios hay en cada plan y cuánto
+    // saldo vivo suman (los créditos ya emitidos que podrían gastarse mañana).
+    db.select({ tier: schema.profile.subscriptionTier, users: count(), creditsBalance: sum(schema.profile.creditsBalance) })
+      .from(schema.profile)
+      .groupBy(schema.profile.subscriptionTier),
   ]);
 
   let totalSpend = 0;
@@ -53,6 +58,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   res.status(200).json({
     ok: true,
+    tiers: tierRows.map((t) => ({ tier: t.tier ?? "free", users: t.users, creditsBalance: Number(t.creditsBalance ?? 0) })),
     totalSpend,
     recentUsers: recentUsersRow[0]?.total ?? 0,
     totalUsers,
