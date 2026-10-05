@@ -97,6 +97,9 @@ export default function BasaltPage() {
   const [messages, setMessages] = useState<StoredMsg[]>([]);
 
   const [memory, setMemory] = useState<string[]>([]);
+  /** La memoria no se pudo cargar: NO se escribe nada mientras tanto (guardar sube la
+   *  lista completa y borraría del servidor lo que sí hay). */
+  const [memoryError, setMemoryError] = useState(false);
   const [showMemory, setShowMemory] = useState(false);
 
   const [input, setInput] = useState("");
@@ -152,10 +155,15 @@ export default function BasaltPage() {
   });
   const { threadStatus } = chats;
 
-  useEffect(() => {
+  const cargarMemoria = useCallback(async () => {
     if (!userId) return;
-    void migrateLegacyLocalStorage(userId).then(() => loadMemory(userId)).then(setMemory);
+    await migrateLegacyLocalStorage(userId);
+    const facts = await loadMemory(userId);
+    setMemoryError(facts === null);
+    if (facts) setMemory(facts);
   }, [userId]);
+
+  useEffect(() => { void cargarMemoria(); }, [cargarMemoria]);
 
   useEffect(() => {
     try { localStorage.setItem(MODEL_KEY, model); } catch { /* sin storage */ }
@@ -415,7 +423,9 @@ export default function BasaltPage() {
     setMessages(final);
     if (cutOff) setTruncatedId(modelMsgId);
 
-    if (memories.length && userId) {
+    // Si la memoria no cargó, no se escribe: subiríamos una lista incompleta encima
+    // de la buena (ver loadMemory en src/lib/basalt.ts).
+    if (memories.length && userId && !memoryError) {
       const next = [...memory, ...memories.filter((f) => !memory.includes(f))];
       setMemory(next);
       void saveMemory(userId, next);
@@ -430,7 +440,7 @@ export default function BasaltPage() {
       stickToBottom();
     }
     persist(convId, final);
-  }, [generating, messages, model, tier, memory, userId, convId, stickToBottom, generateImages, persist, setParams, readyDocs, pendingImages, docsBusy, pendingDocs, clearDocs, restoreDocs, threadStatus]);
+  }, [generating, messages, model, tier, memory, memoryError, userId, convId, stickToBottom, generateImages, persist, setParams, readyDocs, pendingImages, docsBusy, pendingDocs, clearDocs, restoreDocs, threadStatus]);
 
   // /a/basalt?q=... (desde /chat o el dashboard) envía el primer mensaje solo.
   useEffect(() => {
@@ -495,6 +505,7 @@ export default function BasaltPage() {
 
   /** Un solo camino para todo lo que toca la memoria (añadir, corregir, olvidar). */
   const updateMemory = (next: string[]) => {
+    if (memoryError) return;
     setMemory(next);
     void saveMemory(userId, next);
   };
@@ -532,7 +543,7 @@ export default function BasaltPage() {
         beforeExperts={
           <>
             <MemoryToggle count={memory.length} open={showMemory} onToggle={() => setShowMemory((v) => !v)} />
-            {showMemory && <MemoryPanel facts={memory} onChange={updateMemory} readOnly={!userId} />}
+            {showMemory && <MemoryPanel facts={memory} onChange={updateMemory} readOnly={!userId} error={memoryError} onRetry={() => void cargarMemoria()} />}
           </>
         }
         extraNav={

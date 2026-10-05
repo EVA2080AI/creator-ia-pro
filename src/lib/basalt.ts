@@ -352,10 +352,17 @@ export async function deleteConversation(userId: string, id: string) {
   await apiJson(`/api/basalt/conversations/${id}`, { method: "DELETE" });
 }
 
-export async function loadMemory(userId: string): Promise<string[]> {
+/**
+ * Devuelve `null` si no se pudo cargar. No es un detalle: guardar la memoria SUBE LA
+ * LISTA COMPLETA, así que con `[]` tras un fallo de red el panel decía "aún no recuerdo
+ * nada" y, en cuanto el usuario añadía un dato (o el modelo escribía una <memoria>), el
+ * PUT siguiente borraba del servidor todo lo que sí había. Mientras no sepamos cuál es
+ * la lista de verdad, no se escribe.
+ */
+export async function loadMemory(userId: string): Promise<string[] | null> {
   if (!userId) return [];
   const res = await apiJson<{ facts: string[] }>("/api/basalt/memory");
-  return res.ok ? res.data!.facts : [];
+  return res.ok ? res.data!.facts : null;
 }
 
 export async function saveMemory(userId: string, facts: string[]) {

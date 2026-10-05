@@ -99,6 +99,8 @@ export default function AssistantPage() {
   // que el mismo usuario tenía que repetirse al cambiar de pestaña.
   const [memory, setMemory] = useState<string[]>([]);
   const [showMemory, setShowMemory] = useState(false);
+  /** Ver Basalt.tsx: con la memoria sin cargar no se escribe nada. */
+  const [memoryError, setMemoryError] = useState(false);
 
   const [messages, setMessages] = useState<StoredMsg[]>([]);
   const [input, setInput] = useState("");
@@ -197,12 +199,17 @@ export default function AssistantPage() {
     if (id === convId) newChat();
   };
 
-  useEffect(() => {
+  const cargarMemoria = useCallback(async () => {
     if (!userId) return;
-    void loadMemory(userId).then(setMemory);
+    const facts = await loadMemory(userId);
+    setMemoryError(facts === null);
+    if (facts) setMemory(facts);
   }, [userId]);
 
+  useEffect(() => { void cargarMemoria(); }, [cargarMemoria]);
+
   const updateMemory = (next: string[]) => {
+    if (memoryError) return;
     setMemory(next);
     void saveMemory(userId, next);
   };
@@ -466,7 +473,7 @@ export default function AssistantPage() {
         beforeExperts={
           <>
             <MemoryToggle count={memory.length} open={showMemory} onToggle={() => setShowMemory((v) => !v)} />
-            {showMemory && <MemoryPanel facts={memory} onChange={updateMemory} readOnly={!userId} />}
+            {showMemory && <MemoryPanel facts={memory} onChange={updateMemory} readOnly={!userId} error={memoryError} onRetry={() => void cargarMemoria()} />}
           </>
         }
         onNewChat={newChat}

@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Brain, Check, Pencil, Plus, X } from "lucide-react";
+import { AlertCircle, Brain, Check, Pencil, Plus, RotateCw, X } from "lucide-react";
 
 // La memoria del usuario: lo que el asistente recuerda entre conversaciones.
 //
@@ -22,9 +22,13 @@ interface Props {
   onChange: (next: string[]) => void;
   /** Sin sesión no se puede guardar nada: se muestra, pero no se deja editar. */
   readOnly?: boolean;
+  /** No se pudo cargar: NO se deja editar, porque guardar sube la lista completa y
+   *  escribiría encima de lo que sí hay en el servidor. */
+  error?: boolean;
+  onRetry?: () => void;
 }
 
-export function MemoryPanel({ facts, onChange, readOnly }: Props) {
+export function MemoryPanel({ facts, onChange, readOnly, error, onRetry }: Props) {
   const [editing, setEditing] = useState(-1);
   const [draft, setDraft] = useState("");
   const [adding, setAdding] = useState(false);
@@ -63,6 +67,15 @@ export function MemoryPanel({ facts, onChange, readOnly }: Props) {
     if (e.key === "Enter") { e.preventDefault(); onEnter(); }
     if (e.key === "Escape") { e.preventDefault(); setEditing(-1); setAdding(false); }
   };
+
+  if (error) {
+    return (
+      <p className="asst-conv-note asst-conv-error">
+        <AlertCircle className="w-3.5 h-3.5" aria-hidden /> <span>No se pudo cargar tu memoria. No se guardará nada hasta recuperarla.</span>
+        {onRetry && <button type="button" onClick={onRetry}><RotateCw className="w-3 h-3" aria-hidden /> Reintentar</button>}
+      </p>
+    );
+  }
 
   return (
     <div className="asst-memory">
