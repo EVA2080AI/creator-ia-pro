@@ -46,6 +46,32 @@ export class ErrorBoundary extends Component<Props, State> {
       componentStack: info.componentStack,
       timestamp: new Date().toISOString(),
     });
+
+    // "Nuestro equipo ha sido notificado" era mentira: el error moría en la consola
+    // del navegador del usuario y el ID no servía para buscar nada (incidente real,
+    // 2026-10-05: una usuaria mandó una captura con su ERR-… y no había dónde
+    // mirarlo). Ahora queda como ticket (Panel Admin → Tickets), con sesión; si no
+    // hay sesión o la red está caída, el intento no rompe nada.
+    try {
+      const detalle = [
+        error.toString(),
+        (error.stack || "").split("\n").slice(0, 4).join("\n"),
+        `Componente: ${(info.componentStack || "").trim().split("\n")[0] || "?"}`,
+        `URL: ${window.location.href}`,
+        `Navegador: ${navigator.userAgent}`,
+      ].join("\n\n").slice(0, 3900);
+      void fetch("/api/tickets", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "bug",
+          title: `[auto] Pantalla "Algo salió mal" (${errorId})`,
+          description: detalle,
+          pageUrl: window.location.href.slice(0, 500),
+        }),
+      }).catch(() => {});
+    } catch { /* reportar nunca debe causar otro error */ }
   }
 
   private handleReset = () => {

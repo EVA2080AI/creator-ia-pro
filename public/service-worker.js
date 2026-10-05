@@ -1,7 +1,7 @@
 // Creator IA Pro - Service Worker
 // Provides offline support, caching, and background sync
 
-const CACHE_NAME = 'creator-ia-v2';
+const CACHE_NAME = 'creator-ia-v3'; // v3: /api/ NUNCA se cachea (v2 servía respuestas viejas de la API con red inestable)
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -41,10 +41,15 @@ self.addEventListener('fetch', (event) => {
   // Skip non-GET requests
   if (request.method !== 'GET') return;
 
-  // Skip API requests
-  if (request.url.includes('supabase.co')) return;
-  if (request.url.includes('openrouter.ai')) return;
-  if (request.url.includes('fal.ai')) return;
+  const url = new URL(request.url);
+
+  // La API NUNCA pasa por el service worker. La v2 cacheaba /api/profile,
+  // /api/basalt/conversations, la sesión… y con la red inestable servía esas
+  // respuestas VIEJAS desde caché: créditos desactualizados, estados imposibles y la
+  // pantalla de "Algo salió mal" (incidente real, 2026-10-05, ERR-1791229042501).
+  // Solo cacheamos lo nuestro y estático; lo de otros orígenes, tampoco.
+  if (url.pathname.startsWith('/api/')) return;
+  if (url.origin !== self.location.origin) return;
 
   // Skip analytics
   if (request.url.includes('analytics') || request.url.includes('sentry')) return;
@@ -75,7 +80,11 @@ self.addEventListener('fetch', (event) => {
             return caches.match('/index.html');
           }
 
-          return new Response('Offline', { status: 503 });
+          // Un chunk con hash de un despliegue anterior no está en la caché nueva:
+          // responder 503 hacía reventar el import() y salía la pantalla de error.
+          // Mejor dejar que el error sea de red de verdad: el manejador de
+          // vite:preloadError (src/main.tsx) recarga la página una vez.
+          return Response.error();
         });
       })
   );
