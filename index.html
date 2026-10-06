@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Creator IA Pro — Hub de IA Generativa</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- iOS ignora el manifest y el favicon SVG: sin esto, "Añadir a pantalla
+         de inicio" (que /descargar promueve) salía sin marca. Sin alpha y sin
+         esquinas a propósito: iOS las redondea él. -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <!-- Fuentes: preconnect + hoja propia (antes iban en un @import dentro de
          src/index.css, que encadena las peticiones en vez de paralelizarlas).
          Pesos recortados a los que el diseño usa de verdad: Inter variable para el
