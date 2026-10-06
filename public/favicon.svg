@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- Misma marca que src/components/Logo.tsx: tile oscuro, "C" de anillo grueso
-       abierto a la derecha y el punto morado de la marca en la apertura.
-       (El favicon anterior era un tile AZUL con sparkles genéricos: tercera
-       identidad distinta conviviendo con las otras dos.) -->
+  <!-- Misma marca que src/components/Logo.tsx (V3+V2): "C" gruesa de cortes
+       planos y el bloque-cursor morado en la apertura. Aquí sí hay tile: una
+       pestaña del navegador necesita fondo propio; la app lleva la marca
+       desnuda. -->
   <rect width="32" height="32" rx="9" fill="#18181B"/>
-  <circle cx="16" cy="16" r="8.5" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" stroke-dasharray="38.6 53.4" transform="rotate(50 16 16)"/>
-  <circle cx="24.5" cy="16" r="3" fill="#A855F7"/>
+  <circle cx="16" cy="16" r="8.5" stroke="#FFFFFF" stroke-width="5" stroke-linecap="butt" stroke-dasharray="41.5 53.4" transform="rotate(40.1 16 16)"/>
+  <rect x="21.7" y="12.3" width="5.6" height="7.4" rx="1.2" fill="#A855F7"/>
 </svg>

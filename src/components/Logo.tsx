@@ -11,13 +11,13 @@ interface LogoProps {
 }
 
 const sizeMap = {
-  sm: { wrap: "w-7 h-7",   icon: "w-4 h-4",   text: "text-[14px]", subtext: "text-[9px]"  },
-  md: { wrap: "w-9 h-9",   icon: "w-5 h-5",   text: "text-[16px]", subtext: "text-[10px]" },
-  lg: { wrap: "w-12 h-12", icon: "w-7 h-7",   text: "text-[20px]", subtext: "text-[12px]" },
+  sm: { icon: "w-6 h-6",   text: "text-[14px]", subtext: "text-[9px]"  },
+  md: { icon: "w-7 h-7",   text: "text-[16px]", subtext: "text-[10px]" },
+  lg: { icon: "w-10 h-10", text: "text-[20px]", subtext: "text-[12px]" },
 };
 
 /** El morado de marca, fijo: `text-primary` dejó de ser morado cuando los tokens se
- *  volvieron neutros y el "IA" del wordmark quedó del mismo color que "Creator". */
+ *  volvieron neutros. Es el único color de la marca: vive en el bloque-cursor. */
 const BRAND_PURPLE = "#A855F7";
 
 export function Logo({ size = "sm", showText = true, showPro = false, className, onClick }: LogoProps) {
@@ -29,19 +29,16 @@ export function Logo({ size = "sm", showText = true, showPro = false, className,
       onClick={onClick}
       className={cn("flex items-center gap-2.5 shrink-0", onClick && "group cursor-pointer", className)}
     >
-      {/* Marca: "C" de Creator —un anillo GRUESO con la apertura franca a la
-          derecha— y el punto morado de la marca dentro de esa apertura. El anillo
-          fino anterior, a 28px, se leía como un spinner de carga ("se ve muy
-          antiguo, no se lee", 2026-10-05). Mismo dibujo que public/favicon.svg:
-          una sola identidad en pestaña, cabecera y app. */}
-      <div
-        className={cn("relative rounded-[30%] flex items-center justify-center shrink-0 bg-primary", s.wrap)}
-      >
-        <svg viewBox="0 0 24 24" fill="none" className={cn("text-primary-foreground", s.icon)} xmlns="http://www.w3.org/2000/svg" aria-hidden>
-          <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeDasharray="36.3 50.3" transform="rotate(50 12 12)" />
-          <circle cx="20" cy="12" r="2.6" fill={BRAND_PURPLE} />
-        </svg>
-      </div>
+      {/* Marca (V3+V2, 2026-10-06): la "C" gruesa con CORTES PLANOS (los extremos
+          redondeados la hacían ver blanda, de plantilla) y, en la apertura, un
+          BLOQUE-CURSOR morado — el cursor de terminal que ya parpadea en el
+          compositor del modo oscuro: una sola seña en toda la marca. Va desnuda,
+          sin tile detrás: el tile queda solo para el favicon (public/favicon.svg,
+          mismo dibujo), donde hace falta fondo propio. */}
+      <svg viewBox="0 0 24 24" fill="none" className={cn("shrink-0 text-zinc-900 dark:text-zinc-50", s.icon)} xmlns="http://www.w3.org/2000/svg" aria-hidden>
+        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="5" strokeLinecap="butt" strokeDasharray="39 50.3" transform="rotate(40.35 12 12)" />
+        <rect x="17.85" y="8.9" width="4.8" height="6.2" rx="1" fill={BRAND_PURPLE} />
+      </svg>
 
       {/* Text */}
       {showText && (
@@ -49,12 +46,11 @@ export function Logo({ size = "sm", showText = true, showPro = false, className,
           {/* logo-wordmark: selector estable para overrides externos (ver
               Assistant.css) — no depender de que esta combinación exacta de
               clases utilitarias se mantenga si este componente cambia. */}
-          {/* Caja alta y bold —no MAYÚSCULAS black apretadas a 12px, que a ese
-              tamaño se emborronaban— y el "IA" vuelve a ser morado (más oscuro en
-              claro para que también pase contraste). */}
+          {/* Monocromo a propósito: con el bloque morado al lado, un "IA" también
+              morado era dos acentos peleándose. El wordmark acompaña; la marca
+              es la C con el cursor. */}
           <span className={cn("logo-wordmark font-bold text-zinc-900 dark:text-zinc-50 tracking-tight font-display", s.text)}>
-            Creator{" "}
-            <span className="text-purple-700 dark:text-purple-400">IA</span>
+            Creator IA
             {showPro && (
               <span className="ml-1 text-zinc-500 dark:text-zinc-400 font-semibold tracking-normal" style={{ fontSize: "0.7em" }}>
                 Pro
