@@ -77,16 +77,15 @@ const NAV_MAIN: NavItemDef[] = [
 const NAV_SYSTEM: NavItemDef[] = [
   { path: '/admin',          label: 'Panel Control',    icon: ShieldCheck, minTier: 'admin' },
   { path: '/admin',          label: 'Usuarios',         icon: Users2,      minTier: 'admin', tab: 'usuarios' },
+  // El Roadmap muestra el backlog interno (equipos, P0/P1, qué está bloqueado):
+  // la página se volvió solo-admin, así que el enlace vive aquí — tenerlo en
+  // NAV_BOTTOM mandaba a cualquier usuario a una pantalla de "Acceso Restringido".
+  { path: '/product-backlog', label: 'Roadmap',         icon: List,        minTier: 'admin' },
   { path: '/design-system',  label: 'Sistema de Diseño', icon: Palette,   minTier: 'admin' },
   { path: '/system-status',  label: 'Estatus',          icon: Activity,    minTier: 'admin' },
 ];
 
-// Roadmap es pública (minTier: 'free') — va en NAV_BOTTOM, no en NAV_SYSTEM,
-// porque ese bloque solo se renderiza para admins (ver `{isAdmin && (...)}`
-// más abajo). Estaba mal ubicada: los usuarios normales nunca la veían en
-// el sidebar aunque la ruta siempre estuvo disponible para todos.
 const NAV_BOTTOM = [
-  { path: '/product-backlog', label: 'Roadmap',    icon: List },
   { path: '/pricing',         label: 'Planes',      icon: CreditCard },
   { path: '/descargar',       label: 'Descargar',   icon: Download },
 ];
@@ -111,7 +110,7 @@ export function SidebarGlobal({ isMobile }: { isMobile?: boolean } = {}) {
   };
 
   const handleNav = (path: string, minTier = 'free', label = '', tab?: string) => {
-    const isPublic = ['/pricing', '/descargar', '/product-backlog'].includes(path);
+    const isPublic = ['/pricing', '/descargar'].includes(path);
     if (!user && !isPublic) {
       navigate('/auth');
       return;

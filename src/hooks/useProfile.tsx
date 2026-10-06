@@ -95,8 +95,8 @@ export function useProfile(userId: string | undefined) {
   return {
     profile: data ?? null,
     // Con `enabled:false` react-query deja el estado en "pending" para siempre.
-    // Sin este guard, las páginas públicas que esperan a `loading` (/product-backlog,
-    // Canvas, Estatus) se quedarían con el spinner eterno para un visitante sin sesión.
+    // Sin este guard, las páginas que esperan a `loading` sin exigir sesión antes
+    // (Canvas, Estatus, el gate admin del Roadmap) se quedarían con el spinner eterno.
     loading: !!userId && isPending,
     refreshProfile,
   };

@@ -109,7 +109,9 @@ function AuthWatcher() {
       // que un falso "tu sesión expiró".
       authClient.getSession({ query: {} }).then(({ data }) => {
         if (data) { hadSessionRef.current = true; return; }
-        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/product-backlog", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs", "/cookies"];
+        // /product-backlog dejó de ser pública: es el backlog interno (equipos, P0/P1,
+        // bloqueos) y la página ya exige admin — sin sesión, mejor directo a /auth.
+        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs", "/cookies"];
         const isPublic = publicPaths.some(p =>
           window.location.pathname === p || window.location.pathname.startsWith("/herramienta")
         );
