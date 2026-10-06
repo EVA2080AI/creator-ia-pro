@@ -31,7 +31,7 @@ import { hasSeenBasaltGuide, markBasaltGuideSeen } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
 import { toast } from "sonner";
 import { mdToHtml } from "@/lib/markdown";
-import { CHAT_MODELS, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID, canAccessModel, getImageModel, getModel } from "@/lib/ai/models";
+import { CHAT_MODELS, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID, canAccessModel, getImageModel, getModel, AUTO_MODEL_ID, resolveAutoModel } from "@/lib/ai/models";
 import {
   BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply,
   saveConversation, loadMemory, saveMemory, migrateLegacyLocalStorage,
@@ -58,7 +58,7 @@ interface SendOpts {
 const TOUR_STEPS: TourStep[] = [
   { target: "chat", title: "Habla con Basalt", text: "Escríbele aquí lo que necesites: un plan de mercadeo, analizar un contrato, construir una página web completa." },
   { target: "adjuntar", title: "Adjunta archivos", text: "Un contrato en PDF o Word para revisarlo, o una foto para que la mire. También puedes pegar un enlace y te ofrece leerlo." },
-  { target: "modelo", title: "Elige el modelo", text: "Hay 21 modelos. Los marcados \"Gratis\" no gastan créditos; los demás muestran su costo antes de usarlos." },
+  { target: "modelo", title: "Elige el modelo", text: "Hay 21 modelos — o deja \"Auto\" y Basalt elige por ti (siempre entre los gratis). Los de pago muestran su costo antes de usarlos." },
   { target: "nuevo-chat", title: "Nuevo chat", text: "Empieza una conversación limpia cuando cambies de tema. Las anteriores quedan guardadas en \"Conversaciones\".", drawer: true },
   { target: "expertos", title: "Expertos", text: "Asistentes por área —Legal, Marketing y más— y los que crees tú. Mismo chat, enfoque distinto.", drawer: true },
   { target: "memoria", title: "Memoria", text: "Lo que le cuentes de tu negocio queda aquí: puedes añadir, corregir u olvidar datos cuando quieras.", drawer: true },
@@ -74,9 +74,10 @@ const IMAGE_MODEL_KEY = "basalt:image-model";
 function readModel() {
   try {
     const m = localStorage.getItem(MODEL_KEY);
-    if (m && CHAT_MODELS.some((x) => x.id === m)) return m;
+    if (m === AUTO_MODEL_ID || (m && CHAT_MODELS.some((x) => x.id === m))) return m;
   } catch { /* sin storage */ }
-  return A.defaultModel;
+  // Sin preferencia guardada: Auto. Quien ya eligió un modelo a mano conserva el suyo.
+  return AUTO_MODEL_ID;
 }
 
 function readImageModel() {
@@ -205,7 +206,8 @@ export default function BasaltPage() {
   const tier = profile?.subscription_tier;
   useEffect(() => {
     if (!tier) return;
-    if (!canAccessModel(tier, getModel(model).minTier)) setModel(A.defaultModel);
+    // Auto no se valida contra el plan: resuelve solo a modelos gratis.
+    if (model !== AUTO_MODEL_ID && !canAccessModel(tier, getModel(model).minTier)) setModel(AUTO_MODEL_ID);
     if (!canAccessModel(tier, getImageModel(imageModel).minTier)) setImageModel(DEFAULT_IMAGE_MODEL_ID);
   }, [tier, model, imageModel]);
 
@@ -257,7 +259,7 @@ export default function BasaltPage() {
     // `base` permite rehacer una respuesta sobre un hilo ya recortado sin esperar a que
     // el estado se actualice (regenerar borra la respuesta vieja y vuelve a preguntar).
     const base = opts?.base ?? messages;
-    const modelToUse = opts?.model ?? model;
+    const elegido = opts?.model ?? model;
     const attached = isContinue ? [] : readyDocs;
     const attachedImages = isContinue ? [] : pendingImages;
     const text = prompt.trim() || (attached.length ? DEFAULT_DOC_PROMPT : attachedImages.length ? DEFAULT_IMAGE_PROMPT : "");
@@ -265,10 +267,15 @@ export default function BasaltPage() {
     // guardar se sube el hilo COMPLETO desde el estado local, así que hacerlo con
     // el hilo a medias borraría lo anterior.
     if (!text || generating || threadStatus !== "idle" || (!isContinue && docsBusy)) return;
+    // "Auto" se resuelve AQUÍ a un modelo concreto (gratis), con lo que ya se sabe
+    // del mensaje: si trae fotos y si pinta a código. El servidor nunca ve "auto".
+    const modelToUse = elegido === AUTO_MODEL_ID
+      ? resolveAutoModel({ hasImages: attachedImages.length > 0, text }).id
+      : elegido;
     // Avisar ANTES de cobrar: con un modelo sin visión la foto se ignoraría en silencio.
-    if (attachedImages.length && !getModel(model).vision) {
+    if (attachedImages.length && !getModel(modelToUse).vision) {
       const alternativa = CHAT_MODELS.find((m) => m.vision && m.free && canAccessModel(tier, m.minTier));
-      toast.error(`${getModel(model).label} no puede ver imágenes.`, {
+      toast.error(`${getModel(modelToUse).label} no puede ver imágenes.`, {
         description: alternativa ? `Cambia a ${alternativa.label} y vuelve a enviarla.` : "Elige un modelo con visión en el selector de arriba.",
         action: alternativa ? { label: `Usar ${alternativa.label}`, onClick: () => setModel(alternativa.id) } : undefined,
       });

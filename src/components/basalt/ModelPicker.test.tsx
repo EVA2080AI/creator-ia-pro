@@ -32,7 +32,20 @@ describe("ModelPicker", () => {
     expect(selected.map((o) => o.textContent)).toEqual(expect.arrayContaining([expect.stringContaining(freeModel.label)]));
     expect(within(dialog).getByRole("listbox", { name: /modelos de texto/i })).toBeTruthy();
     expect(within(dialog).getByRole("listbox", { name: /motores de imagen/i })).toBeTruthy();
-    expect(within(dialog).getAllByRole("option")).toHaveLength(CHAT_MODELS.length + IMAGE_MODELS.length);
+    // +1: la fila "Auto" (Basalt elige por ti), que no es un modelo del catálogo.
+    expect(within(dialog).getAllByRole("option")).toHaveLength(CHAT_MODELS.length + IMAGE_MODELS.length + 1);
+  });
+
+  it("la fila Auto existe, va primera, y elegirla manda el id sintético", () => {
+    const { trigger, onModel } = setup("free");
+    fireEvent.click(trigger);
+    const lista = within(screen.getByRole("dialog")).getByRole("listbox", { name: /modelos de texto/i });
+    const filas = within(lista).getAllByRole("option");
+    expect(filas[0].textContent).toContain("Auto");
+    expect(filas[0].textContent).toContain("Gratis");
+    fireEvent.click(filas[0]);
+    expect(onModel).toHaveBeenCalledWith("auto");
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
   it("elegir un modelo permitido lo aplica y cierra el panel", () => {

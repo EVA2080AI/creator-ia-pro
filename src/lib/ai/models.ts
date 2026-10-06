@@ -317,6 +317,36 @@ export const CHAT_MODELS: ModelDef[] = [
 
 export const DEFAULT_MODEL_ID = CHAT_MODELS[0].id; // google/gemini-2.5-flash-lite — gratis, disponible en todos los planes
 
+/** "Auto": Basalt elige el modelo según la tarea. No es un modelo del catálogo —
+ *  el cliente lo resuelve a uno concreto ANTES de enviar, así el servidor nunca
+ *  lo ve y la cabecera X-Model-Used muestra cuál respondió de verdad. */
+export const AUTO_MODEL_ID = "auto";
+
+// Por qué solo dos y siempre gratis: Auto no debe gastar créditos por su cuenta
+// (sorpresa de cobro) ni apostar por un modelo flaco. Del benchmark 2026-10-04:
+// gpt-oss-120b 12/12 en sitios (9-47 s); flash-lite 11/12 y el más rápido
+// (6-14 s), con visión y 1M de contexto. DeepSeek V3.1 fuera (9 tok/s, se corta);
+// Gemma 4 fuera (429 intermitentes del upstream).
+const AUTO_CHAT_ID = "google/gemini-2.5-flash-lite";
+const AUTO_CODE_ID = "openai/gpt-oss-120b";
+
+// Señales de "esto es código o un sitio", en el español de los usuarios y en
+// inglés técnico. Deliberadamente conservadora: ante la duda, el chat general.
+const CODE_RE = /\b(c[oó]digo|programa(?:r|ci[oó]n)|app|aplicaci[oó]n|web|sitio|p[aá]gina|landing|dashboard|formulario|calculadora|componente|funci[oó]n|script|html|css|javascript|typescript|react|vite|tailwind|python|sql|api|json|regex|bug|depurar?|refactor)\b/i;
+
+export function looksLikeCodeRequest(text: string): boolean {
+  return CODE_RE.test(text);
+}
+
+/** El modelo concreto que usaría "Auto" para este mensaje. */
+export function resolveAutoModel(opts: { hasImages: boolean; text: string }): ModelDef {
+  // Con foto manda la visión (una captura de un error también es código, pero
+  // sin ojos no hay nada que hacer); flash-lite ve y además aguanta código.
+  if (opts.hasImages) return getModel(AUTO_CHAT_ID);
+  if (looksLikeCodeRequest(opts.text)) return getModel(AUTO_CODE_ID);
+  return getModel(AUTO_CHAT_ID);
+}
+
 export function getModel(id: string | null | undefined): ModelDef {
   return CHAT_MODELS.find((m) => m.id === id) ?? CHAT_MODELS.find((m) => m.id === DEFAULT_MODEL_ID)!;
 }

@@ -114,6 +114,12 @@ Lo que el chat gana, y las reglas que trae cada cosa:
    existía y nadie leía). Renombrar la conversación desde su fila del menú.
 5. **Mis expertos** (`/expertos/nuevo`, `/expertos/<slug>`): crear el tuyo o duplicar
    uno de los 11 y ajustarlo.
+6. **Modelo "Auto"** (2026-10-06, Fase 2): el selector trae "Auto" (y es el defecto
+   para quien nunca eligió). Se resuelve EN EL CLIENTE antes de enviar
+   (`resolveAutoModel` en `src/lib/ai/models.ts`) y SOLO a modelos gratis — nunca
+   gasta créditos por su cuenta: Flash Lite (visión, 1M) para chat/fotos y
+   GPT-OSS 120B si el texto pinta a código/sitio (benchmark 2026-10-04). El
+   servidor nunca ve "auto"; el chip por mensaje muestra cuál respondió.
 
 ## Subir a GitHub (2026-10-05)
 

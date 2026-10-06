@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Check, ChevronDown, Globe, Image as ImageIcon, Lock, Sparkles } from "lucide-react";
 import {
-  CATEGORY_META, CATEGORY_ORDER, CHAT_MODELS, IMAGE_MODELS, canAccessModel, getImageModel, getModel,
+  AUTO_MODEL_ID, CATEGORY_META, CATEGORY_ORDER, CHAT_MODELS, IMAGE_MODELS, canAccessModel, getImageModel, getModel,
   type PlanTier,
 } from "@/lib/ai/models";
 
@@ -64,6 +64,7 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: 
   const rootRef = useRef<HTMLDivElement | null>(null);
   const popRef = useRef<HTMLDivElement | null>(null);
   const popId = useId();
+  const esAuto = model === AUTO_MODEL_ID;
   const current = getModel(model);
   const currentImage = getImageModel(imageModel);
   const lockOf = (min: PlanTier) => (tier && !canAccessModel(tier, min) ? min : undefined);
@@ -103,10 +104,10 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: 
         aria-expanded={open}
         aria-controls={open ? popId : undefined}
         onClick={() => setOpen((o) => !o)}
-        title={`Modelo: ${current.label} · Imágenes: ${currentImage.label}`}
+        title={`Modelo: ${esAuto ? "Auto" : current.label} · Imágenes: ${currentImage.label}`}
       >
         <Sparkles className="w-3.5 h-3.5" aria-hidden />
-        <span className="asst-picker-label">{current.label}</span>
+        <span className="asst-picker-label">{esAuto ? "Auto" : current.label}</span>
         <ChevronDown className={`w-3.5 h-3.5 asst-picker-caret${open ? " open" : ""}`} aria-hidden />
       </button>
 
@@ -115,6 +116,19 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: 
           <div className="asst-picker-backdrop" onClick={() => setOpen(false)} aria-hidden />
           <div className="asst-picker-pop" id={popId} ref={popRef} role="dialog" aria-label="Elegir modelo" onKeyDown={onPopKey}>
             <div className="asst-picker-scroll" role="listbox" aria-label="Modelos de texto y código">
+              {/* Auto va primero y fuera de las categorías: no es un modelo del
+                  catálogo, es "Basalt elige por ti" — y solo entre los gratis,
+                  para que nunca gaste créditos por su cuenta. */}
+              <div className="asst-picker-group">
+                <Row
+                  title="Auto"
+                  sub="Basalt elige por ti"
+                  desc="Siempre gratis: Flash Lite para conversar y ver fotos; GPT-OSS 120B cuando pides código o un sitio. Debajo de cada respuesta ves cuál respondió."
+                  chip="Gratis"
+                  selected={esAuto}
+                  onPick={() => { onModel(AUTO_MODEL_ID); setOpen(false); }}
+                />
+              </div>
               {CATEGORY_ORDER.map((cat) => (
                 <div key={cat} className="asst-picker-group">
                   <div className="asst-picker-heading">{cat === "eco" ? "Gratis" : CATEGORY_META[cat].label}</div>
