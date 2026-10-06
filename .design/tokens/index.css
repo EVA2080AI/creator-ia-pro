@@ -1,14 +1,38 @@
 /**
  * Creator IA Pro — Design Tokens
  * Philosophy: Dieter Rams + Swiss
- * Generado: 2026-04-18 · Reconciliado contra el CSS real: 2026-09-09
+ * Generado: 2026-04-18 · Reconciliado contra el CSS real: 2026-09-09 ·
+ * Modo terminal y raíz de 15px incorporados: 2026-10-06
  *
- * DESACTUALIZADO desde 2026-09-30: el modo oscuro de la app pasó al tema
- * "terminal" (hue 205 en vez de 240, fondo #070c0f, acento --asst-term #5be9a0)
- * y la raíz tipográfica subió de 14px a 15px. Los valores de abajo siguen
- * describiendo el modo claro, que no cambió. Para el oscuro, la fuente de
- * verdad es el bloque `.dark` de `src/index.css` y la capa del final de
- * `src/pages/Assistant.css`.
+ * QUÉ DOCUMENTA: el modo claro (abajo, sin cambios desde la reconciliación) y
+ * el MODO OSCURO "TERMINAL" (2026-09-30), que reemplazó al gris neutro:
+ *
+ *   Capa viva: el final de `src/pages/Assistant.css`, acotada a
+ *   `.asst-app[data-asst-theme="dark"]` — el claro no cambia ni una regla.
+ *   OJO: ese archivo tiene un bloque oscuro VIEJO más arriba (#131314, gris
+ *   Gemini); la capa del final lo pisa. Valores reales:
+ *
+ *     --asst-bg: #070c0f        negro con tinte frío (hue 205, no 240)
+ *     --asst-panel: #0d141a     --asst-panel-2: #16212a
+ *     --asst-txt: #e2ecf2       --asst-txt-2: #b3c4d0   --asst-txt-3: #8ea1af
+ *     --asst-border: #1e2c36    --asst-user-bubble: #14212b
+ *     --asst-term: #5be9a0      verde fósforo SOLO para señales: cursor del
+ *                               compositor, foco, código en línea — nunca el
+ *                               cuerpo de una respuesta
+ *     --asst-mono               JetBrains Mono, SOLO en metadatos (selector de
+ *                               modelo, fichas de documento), nunca el contenido
+ *     + trama de puntos radial-gradient de 22px sobre los scrollers
+ *
+ *   Todos los textos del tema quedan ≥ 4.5:1 (scripts/contrast-audit.js).
+ *
+ * RAÍZ TIPOGRÁFICA (2026-10-01): `html { font-size: 15px }` en src/index.css.
+ * Era 14px y comprimía TODO un 12,5 % (Tailwind mide en rem: text-sm salía a
+ * 12,25px). La escala de abajo está en rem: sigue siendo válida, pero 1rem son
+ * 15px, no 16 ni 14, al convertir a píxeles.
+ *
+ * El morado de marca #A855F7 vive también como const BRAND_PURPLE en
+ * src/components/Logo.tsx (los tokens semánticos se volvieron neutros y
+ * `--primary` dejó de ser morado; la marca es la "C" con el bloque-cursor).
  *
  * IMPORTANTE: este archivo nunca se importa en `src/` — es documentación,
  * no CSS que corre en producción. La fuente de verdad viva es
