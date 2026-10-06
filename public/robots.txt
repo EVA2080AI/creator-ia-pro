@@ -24,6 +24,7 @@ Sitemap: https://creator-ia.com/sitemap.xml
 
 # Disallow private/admin routes
 Disallow: /admin
+Disallow: /product-backlog
 Disallow: /system-status
 Disallow: /sharescreen
 Disallow: /design-system
@@ -39,6 +40,7 @@ Disallow: /spaces
 Disallow: /tareas
 Disallow: /tasks
 Disallow: /profile
+Disallow: /expertos
 Disallow: /studio-flow
 Disallow: /formarketing
 Disallow: /canvas
