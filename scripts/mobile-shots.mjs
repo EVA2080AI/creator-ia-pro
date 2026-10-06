@@ -103,6 +103,9 @@ await ctx.route("**/api/**", (r) => {
     return json(r, { ok: true, conversation: { ...DEMO_CONVERSATIONS[0], messages: DEMO_MESSAGES } });
   }
   if (u.startsWith("/api/basalt/conversations")) return json(r, { ok: true, conversations: DEMO_CONVERSATIONS });
+  // El bloque de GitHub del perfil solo aparece si el servidor dice "configurado";
+  // sin este mock la captura de /profile no lo mostraría nunca.
+  if (u === "/api/github/export") return json(r, { ok: true, configured: true, linked: false });
   return json(r, { ok: true });
 });
 
@@ -110,7 +113,17 @@ const page = await ctx.newPage();
 await page.goto(base + route, { waitUntil: "networkidle" });
 await page.waitForTimeout(1200); // animaciones de entrada
 const y = Number(opt("--scroll", 0));
-if (y) { await page.evaluate((v) => document.querySelector(".asst-scroller")?.scrollTo(0, v), y); await page.waitForTimeout(300); }
+if (y) {
+  // El chat scrollea en .asst-scroller; el resto de páginas, en el contenedor que
+  // desborde (o el documento). Sin esto, --scroll solo servía para el chat.
+  await page.evaluate((v) => {
+    const el = document.querySelector(".asst-scroller")
+      ?? [...document.querySelectorAll("main, div")].find((m) => m.scrollHeight > m.clientHeight + 50 && /(auto|scroll)/.test(getComputedStyle(m).overflowY))
+      ?? document.scrollingElement;
+    el?.scrollTo(0, v);
+  }, y);
+  await page.waitForTimeout(300);
+}
 await page.screenshot({ path: out, fullPage: flag("--full") });
 console.log(`${dev} ${page.viewportSize().width}x${page.viewportSize().height} → ${out}`);
 await browser.close();

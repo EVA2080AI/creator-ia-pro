@@ -7,7 +7,7 @@ const STEPS = [
   {
     icon: MessageSquare,
     title: "Conversa como con Gemini o ChatGPT",
-    desc: "Escríbele lo que necesites: dudas, ideas, planes. Si le pides una app o un sitio web, te da el código listo para copiar, ahí mismo en el chat.",
+    desc: "Escríbele lo que necesites: dudas, ideas, planes. Si le pides una app o un sitio web, te da el código ahí mismo, con vista previa y botones para bajarlo en ZIP, abrirlo en StackBlitz o subirlo a tu GitHub.",
   },
   {
     icon: Globe,

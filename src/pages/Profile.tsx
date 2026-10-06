@@ -9,8 +9,9 @@ import { toast } from "sonner";
 import {
   User, Mail, Shield, Coins, LogOut, Loader2, Save,
   Calendar, CreditCard, ChevronRight, Bell, Check,
-  Image, MessageSquare, Zap, Download, Sun, Moon,
+  Image, MessageSquare, Zap, Download, Sun, Moon, Github,
 } from "lucide-react";
+import { GITHUB_REPO_SCOPE } from "@/lib/github-export";
 
 interface TransactionRow {
   id: string;
@@ -40,6 +41,11 @@ const Profile = () => {
   // Dónde se guardan las imágenes de este usuario (su Drive o la plataforma).
   const [almacenamiento, setAlmacenamiento] = useState<{ drive: boolean } | null>(null);
   const [vinculando, setVinculando] = useState(false);
+  // Conexión con GitHub (el botón «Subir a GitHub» de los proyectos del chat).
+  // null = servidor sin la OAuth app configurada (o sin respuesta): el bloque no
+  // se muestra — nada de botones que no pueden funcionar.
+  const [github, setGithub] = useState<{ linked: boolean; username: string | null } | null>(null);
+  const [vinculandoGh, setVinculandoGh] = useState(false);
   const [fullName, setFullName] = useState("");
   const [creditHistory, setCreditHistory] = useState<TransactionRow[]>([]);
 
@@ -49,6 +55,10 @@ const Profile = () => {
     void fetch("/api/storage-status", { credentials: "include" })
       .then((r) => r.json())
       .then((j) => { if (vivo && j?.ok) setAlmacenamiento({ drive: !!j.drive }); })
+      .catch(() => { /* sin red: no se promete nada */ });
+    void fetch("/api/github/export", { credentials: "include" })
+      .then((r) => r.json())
+      .then((j) => { if (vivo && j?.ok && j.configured) setGithub({ linked: !!j.linked, username: j.username ?? null }); })
       .catch(() => { /* sin red: no se promete nada */ });
     return () => { vivo = false; };
   }, []);
@@ -319,6 +329,56 @@ const Profile = () => {
                       className="w-full h-11 rounded-xl bg-foreground text-background text-sm font-bold disabled:opacity-60"
                     >
                       {vinculando ? "Abriendo Google…" : "Vincular mi Google Drive"}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* GitHub: aparece solo si la OAuth app está configurada en el servidor.
+                El permiso (repo) alimenta el botón «Subir a GitHub» de los proyectos
+                del chat; el usuario puede revocarlo desde su configuración de GitHub. */}
+            {github && (
+              <div className="rounded-3xl bg-muted/50 border border-border p-6 space-y-4">
+                <h2 className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2"><Github className="w-3.5 h-3.5" aria-hidden /> GitHub</h2>
+                {github.linked ? (
+                  <div className="flex items-start gap-3">
+                    <Check className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">
+                        Conectado{github.username ? <> como <span className="font-mono">@{github.username}</span></> : null}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Los proyectos que generes en el chat tienen «Subir a GitHub»: el repositorio se crea
+                        en tu cuenta. Puedes revocar el permiso cuando quieras desde github.com → Settings → Applications.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Conéctala para subir los proyectos que generes en el chat a un repositorio tuyo
+                      con un clic. Solo se pide el permiso de repositorios, nada más.
+                    </p>
+                    <button
+                      type="button"
+                      disabled={vinculandoGh}
+                      onClick={async () => {
+                        setVinculandoGh(true);
+                        const { error } = await authClient.linkSocial({
+                          provider: "github",
+                          scopes: [GITHUB_REPO_SCOPE],
+                          callbackURL: "/profile",
+                        });
+                        if (error) {
+                          toast.error(error.message || "No se pudo conectar GitHub.");
+                          setVinculandoGh(false);
+                        }
+                      }}
+                      className="w-full h-11 rounded-xl bg-foreground text-background text-sm font-bold disabled:opacity-60 flex items-center justify-center gap-2"
+                    >
+                      <Github className="w-4 h-4" aria-hidden />
+                      {vinculandoGh ? "Abriendo GitHub…" : "Conectar mi GitHub"}
                     </button>
                   </div>
                 )}
