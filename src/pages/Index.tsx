@@ -437,7 +437,7 @@ export default function Index() {
         <meta property="og:url" content="https://creator-ia.com/" />
         <meta property="og:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
         <meta property="og:description" content="Plataforma todo-en-uno: Basalt IA para apps, imágenes y texto + Canvas IA para flujos visuales. Paga en COP con Bold." />
-        <meta property="og:image" content="https://creator-ia.com/og-image.jpg" />
+        <meta property="og:image" content="https://creator-ia.com/og-image.png" />
         <meta property="og:site_name" content="Creator IA Pro" />
         <meta property="og:locale" content="es_CO" />
 
@@ -446,7 +446,7 @@ export default function Index() {
         <meta property="twitter:url" content="https://creator-ia.com/" />
         <meta property="twitter:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
         <meta property="twitter:description" content="Plataforma todo-en-uno: Basalt IA para apps, imágenes y texto + Canvas IA para flujos visuales. Paga en COP con Bold." />
-        <meta property="twitter:image" content="https://creator-ia.com/og-image.jpg" />
+        <meta property="twitter:image" content="https://creator-ia.com/og-image.png" />
 
         {/* Canonical */}
         <link rel="canonical" href="https://creator-ia.com/" />

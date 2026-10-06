@@ -42,3 +42,6 @@ tests/.auth/
 test-results/
 playwright-report/
 blob-report/
+
+# Conflictos de Syncthing (espejo con la Air): nunca al repo
+*.sync-conflict-*
