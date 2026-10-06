@@ -14,7 +14,7 @@ export function SEO({
   title,
   description,
   keywords,
-  ogImage = "https://creator-ia.com/og-image.jpg",
+  ogImage = "https://creator-ia.com/og-image.png",
   ogType = "website",
   canonical,
   noindex = false,
@@ -57,13 +57,18 @@ export function SEO({
   );
 }
 
-// OG Images by category
+// Una sola imagen OG real para todo el sitio. Las cuatro variantes .jpg por
+// categoría NUNCA existieron en public/ (404 desde siempre: toda página se
+// compartía sin imagen), y el og-image.svg de index.html tampoco servía —
+// WhatsApp/Facebook/Twitter/LinkedIn no renderizan SVG como og:image.
+// og-image.png se genera de un tablero HTML con la marca actual (1200×630).
+const OG_IMAGE = "https://creator-ia.com/og-image.png";
 const OG_IMAGES = {
-  default: "https://creator-ia.com/og-image.jpg",
-  pricing: "https://creator-ia.com/og-pricing.jpg",
-  tools: "https://creator-ia.com/og-tools.jpg",
-  docs: "https://creator-ia.com/og-docs.jpg",
-  legal: "https://creator-ia.com/og-image.jpg",
+  default: OG_IMAGE,
+  pricing: OG_IMAGE,
+  tools: OG_IMAGE,
+  docs: OG_IMAGE,
+  legal: OG_IMAGE,
 };
 
 // Preset SEO configs for common pages

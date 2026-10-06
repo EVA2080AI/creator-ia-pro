@@ -275,13 +275,13 @@ export default function Pricing() {
         <meta property="og:url" content="https://creator-ia.com/pricing" />
         <meta property="og:title" content="Planes y Precios — Creator IA Pro" />
         <meta property="og:description" content="6 planes desde $0. Paga en pesos colombianos con Bold. GPT-4, Claude, Gemini incluidos." />
-        <meta property="og:image" content="https://creator-ia.com/og-pricing.jpg" />
+        <meta property="og:image" content="https://creator-ia.com/og-image.png" />
 
         {/* Twitter */}
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:title" content="Planes y Precios — Creator IA Pro" />
         <meta property="twitter:description" content="6 planes desde $0. Paga en COP con Bold." />
-        <meta property="twitter:image" content="https://creator-ia.com/og-pricing.jpg" />
+        <meta property="twitter:image" content="https://creator-ia.com/og-image.png" />
 
         <link rel="canonical" href="https://creator-ia.com/pricing" />
       </Helmet>
