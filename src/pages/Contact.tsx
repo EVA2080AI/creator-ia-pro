@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { toast } from "sonner";
+import { validarContacto } from "@/lib/contact";
 
 const Contact = () => {
   const navigate = useNavigate();
@@ -20,16 +21,46 @@ const Contact = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  // Señuelo anti-bot: invisible para humanos; si un bot lo llena, el servidor
+  // responde "ok" sin enviar nada.
+  const [website, setWebsite] = useState("");
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const problema = validarContacto(formData);
+    if (problema) return void toast.error(problema);
     setLoading(true);
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, website }),
+      });
+      if (res.ok) {
+        toast.success("Mensaje enviado. Te responderemos pronto.");
+        setFormData({ name: "", email: "", subject: "", message: "" });
+        return;
+      }
+      const json = (await res.json().catch(() => null)) as { error?: string } | null;
+      // Honestidad ante el fallo: nada de limpiar el formulario ni fingir éxito —
+      // se ofrece el correo directo con lo escrito, para que el mensaje no se pierda.
+      toast.error(json?.error || "No se pudo enviar el mensaje.", {
+        description: "También puedes escribirnos directo a hola@creator-ia.com.",
+        action: {
+          label: "Abrir correo",
+          onClick: () => {
+            const cuerpo = encodeURIComponent(`${formData.message}
 
-    // Simular envío
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    toast.success("Mensaje enviado. Te responderemos pronto.");
-    setFormData({ name: "", email: "", subject: "", message: "" });
-    setLoading(false);
+— ${formData.name} <${formData.email}>`);
+            window.location.href = `mailto:hola@creator-ia.com?subject=${encodeURIComponent(formData.subject)}&body=${cuerpo}`;
+          },
+        },
+      });
+    } catch {
+      toast.error("Sin conexión con el servidor.", { description: "Escríbenos a hola@creator-ia.com." });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const contactMethods = [
@@ -187,6 +218,17 @@ const Contact = () => {
               onSubmit={handleSubmit}
               className="space-y-6"
             >
+              {/* Señuelo anti-bot: fuera de pantalla y fuera del orden de tabulación. */}
+              <input
+                type="text"
+                name="website"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                autoComplete="off"
+                tabIndex={-1}
+                aria-hidden="true"
+                className="absolute -left-[9999px] top-0 h-px w-px opacity-0"
+              />
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-zinc-700">Nombre</label>
