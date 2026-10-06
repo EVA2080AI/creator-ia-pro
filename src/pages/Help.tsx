@@ -58,13 +58,13 @@ const Help = () => {
     {
       question: "¿Cómo empiezo a usar Creator IA Pro?",
       answer:
-        "Crea una cuenta gratuita en /auth y recibe 5 créditos para explorar. Desde el Dashboard, accede a Basalt IA para crear apps y generar imágenes o texto, o a Canvas IA para armar flujos visuales.",
+        "Crea una cuenta gratuita en /auth y recibe 5 créditos para explorar. Desde el Dashboard, accede a Basalt IA para conversar, crear apps y sitios, analizar documentos y generar imágenes — o entra directo a un Experto por oficio (marketing, legal, finanzas y más).",
       category: "Primeros pasos",
     },
     {
       question: "¿Qué son los créditos?",
       answer:
-        "Son nuestra unidad de cómputo. Cada operación de IA consume créditos según el modelo que elijas: los modelos rápidos/gratuitos cuestan 0, los intermedios 1-2, los más avanzados hasta 10. Generar una imagen cuesta 2-4. Las recargas puntuales no vencen nunca.",
+        "Son nuestra unidad de cómputo. Cada operación de IA consume créditos según el modelo que elijas: los modelos rápidos/gratuitos cuestan 0, los intermedios 1-2, los más avanzados hasta 10. Generar una imagen cuesta 3-5. Las recargas puntuales no vencen nunca.",
       category: "Facturación",
     },
     {
@@ -97,12 +97,8 @@ const Help = () => {
         "Sí, tienes derechos de uso completo sobre el contenido que generas. Sin embargo, eres responsable de verificar que no infrinja derechos de terceros.",
       category: "Legal",
     },
-    {
-      question: "¿Cómo funciona el Canvas IA?",
-      answer:
-        "El Canvas (Studio Flow) es un lienzo visual donde conectas nodos de IA para crear flujos de trabajo. Arrastra nodos, conéctalos y ejecuta el flujo completo.",
-      category: "Técnico",
-    },
+    // Canvas IA está apagado (CANVAS_ENABLED=false): el FAQ no promete lo que
+    // el usuario no puede abrir. Cuando se encienda, devolver aquí su entrada.
   ];
 
   const filteredFaqs = searchQuery
