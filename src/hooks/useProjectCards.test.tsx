@@ -48,3 +48,25 @@ describe("useProjectCards — aviso de faltantes en proyectos Vite", () => {
     expect(container.querySelector<HTMLElement>(".md-proj-problems")!.hidden).toBe(true);
   });
 });
+
+describe("useProjectCards — Subir a GitHub", () => {
+  it("el botón junta los archivos del DOM y dispara el evento del diálogo", () => {
+    const { container } = render(
+      <Host md={[fence("html index.html", "<title>Mi tienda</title><h1>hola</h1>"), fence("css styles.css", "h1{color:red}")].join("\n\n")} />,
+    );
+    const btn = container.querySelector<HTMLButtonElement>('[data-act="github"]')!;
+    expect(btn).toBeTruthy();
+    let detalle: { titulo: string; archivos: { path: string; content: string }[] } | null = null;
+    const onEvt = (e: Event) => { detalle = (e as CustomEvent<typeof detalle>).detail; };
+    window.addEventListener("basalt:github-export", onEvt);
+    btn.click();
+    window.removeEventListener("basalt:github-export", onEvt);
+    expect(detalle).not.toBeNull();
+    expect(detalle!.titulo).toBe("Mi tienda");
+    const paths = detalle!.archivos.map((a) => a.path);
+    expect(paths).toContain("index.html");
+    expect(paths).toContain("styles.css");
+    const css = detalle!.archivos.find((a) => a.path === "styles.css")!;
+    expect(css.content).toBe("h1{color:red}");
+  });
+});

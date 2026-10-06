@@ -7,6 +7,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { mdToHtml } from "@/lib/markdown";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
+import { GitHubExportDialog } from "@/components/basalt/GitHubExportDialog";
 import { CHAT_MODELS, getModel, CATEGORY_ORDER, CATEGORY_META, canAccessModel, type ModelDef } from "@/lib/ai/models";
 import "./Assistant.css";
 
@@ -211,6 +212,7 @@ export default function ArenaPage() {
           )}
         </div>
       </main>
+      <GitHubExportDialog />
     </div>
   );
 }

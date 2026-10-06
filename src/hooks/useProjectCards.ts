@@ -1,6 +1,7 @@
 import type { RefObject } from "react";
 import { useAttachWhenReady } from "./useAttachWhenReady";
 import { buildPreviewDoc, stackblitzFields, type ProjectFile } from "@/lib/project-preview";
+import { GITHUB_EXPORT_EVENT } from "@/lib/github-export";
 import { findViteProblems } from "@/lib/vite-check";
 
 // Comportamiento de las tarjetas de proyecto que produce mdToHtml()
@@ -143,6 +144,16 @@ function attachProjectCards(el: HTMLElement): () => void {
             flash(actEl, "Error");
           }
         })();
+        break;
+      }
+      case "github": {
+        // El diálogo (GitHubExportDialog, montado en la página) hace el resto:
+        // estado de vinculación, nombre del repo y subida. Acá solo se juntan
+        // los archivos del DOM, igual que hace el ZIP.
+        const files = readFiles(card);
+        window.dispatchEvent(new CustomEvent(GITHUB_EXPORT_EVENT, {
+          detail: { titulo: projectTitle(files), archivos: files.map((f) => ({ path: f.name, content: f.code })) },
+        }));
         break;
       }
       case "stackblitz": {

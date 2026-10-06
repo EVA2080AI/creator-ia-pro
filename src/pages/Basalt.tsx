@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
+import { GitHubExportDialog } from "@/components/basalt/GitHubExportDialog";
 import { useProfile } from "@/hooks/useProfile";
 import { ModelPicker } from "@/components/basalt/ModelPicker";
 import { ConversationList } from "@/components/basalt/ConversationList";
@@ -790,6 +791,7 @@ export default function BasaltPage() {
           </div>
         </form>
       </main>
+      <GitHubExportDialog />
     </div>
   );
 }

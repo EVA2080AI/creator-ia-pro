@@ -115,6 +115,26 @@ Lo que el chat gana, y las reglas que trae cada cosa:
 5. **Mis expertos** (`/expertos/nuevo`, `/expertos/<slug>`): crear el tuyo o duplicar
    uno de los 11 y ajustarlo.
 
+## Subir a GitHub (2026-10-05)
+
+La tarjeta de proyecto del chat tiene «Subir a GitHub» (junto a ZIP/StackBlitz):
+crea un repositorio en la cuenta del usuario y sube todos los archivos en UN solo
+commit (árbol con contenido inline → commit → mover la rama — la git data API
+acepta texto por entrada, así que no hay blobs uno a uno ni un commit por archivo).
+
+- El permiso `repo` se vincula AL EXPORTAR con `linkSocial` (patrón de drive.ts),
+  nunca en el login. `api/_lib/github.ts` + `api/github/export.ts` (GET estado /
+  POST subir); reglas puras compartidas en `src/lib/github-export.ts`.
+- La tarjeta es HTML crudo: el botón dispara `GITHUB_EXPORT_EVENT` por `window` y
+  `GitHubExportDialog` (montado en Basalt, Assistant y Arena) hace el resto.
+- Sin `GITHUB_CLIENT_ID/SECRET` el diálogo lo dice y sugiere el ZIP; códigos que
+  la UI distingue: GITHUB_NOT_CONFIGURED / GITHUB_NOT_LINKED / GITHUB_RELINK /
+  NAME_TAKEN (vuelve al formulario) / INVALID_FILES.
+- better-auth ganó `accountLinking` (trustedProviders google/github/apple +
+  allowDifferentEmails): sin eso, vincular GitHub con un correo distinto fallaba
+  y «Continuar con GitHub» rebotaba a quien ya tenía cuenta con ese correo.
+- Los archivos viajan en la petición y NO se guardan (misma regla que documentos).
+
 **Regla que no cambia:** documentos, páginas web y fotos viajan en la petición y NO se
 guardan — en el historial queda solo la ficha (nombre, tipo, tamaño). Es la misma razón
 por la que `saved_asset` dejó de guardar data URIs.

@@ -84,6 +84,20 @@ export const auth = betterAuth({
     },
   },
   socialProviders,
+  account: {
+    accountLinking: {
+      enabled: true,
+      // Dos situaciones reales que los defaults de better-auth rompen:
+      //  1. Alguien con cuenta (Google o correo) pulsa "Continuar con GitHub": con el
+      //     mismo correo verificado debe ENTRAR a su cuenta, no recibir un error de
+      //     "cuenta no vinculada". Eso es trustedProviders (los tres verifican correo).
+      //  2. "Subir a GitHub" vincula GitHub desde un diálogo estando ya con sesión: el
+      //     correo de GitHub casi nunca coincide con el de Google, y sin
+      //     allowDifferentEmails ese linkSocial explícito fallaría.
+      trustedProviders: ["google", "github", "apple"],
+      allowDifferentEmails: true,
+    },
+  },
   plugins: [organization()],
   user: {
     additionalFields: {},

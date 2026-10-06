@@ -9,6 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
+import { GitHubExportDialog } from "@/components/basalt/GitHubExportDialog";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide } from "@/lib/basalt-guide";
 import {
@@ -686,6 +687,7 @@ export default function AssistantPage() {
           </div>
         </form>
       </main>
+      <GitHubExportDialog />
     </div>
   );
 }
