@@ -26,11 +26,12 @@ const Auth = () => {
   // Vuelta tras entrar: ToolLanding manda ?next=/apps/<tool> para que quien llegó
   // desde una landing buscando UNA herramienta no aterrice en el Basalt genérico.
   const next = safeInternalPath(searchParams.get("next"));
-  // /auth?mode=signup (usado por el CTA "Crear cuenta gratis" de Pricing) abre
-  // directo el formulario de registro en vez de caer siempre en login.
-  const [mode, setMode] = useState<"login" | "signup" | "forgot">(
-    searchParams.get("mode") === "signup" ? "signup" : "login"
-  );
+  // /auth?mode=signup (CTAs de registro) y /auth?mode=forgot (desde un enlace de
+  // recuperación vencido en /reset-password) abren directo el formulario que toca.
+  const [mode, setMode] = useState<"login" | "signup" | "forgot">(() => {
+    const m = searchParams.get("mode");
+    return m === "signup" || m === "forgot" ? m : "login";
+  });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");

@@ -14,10 +14,13 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
+  // better-auth redirige acá con ?error=INVALID_TOKEN (sin token) cuando el enlace
+  // del correo expiró (1 hora) o ya se usó — ver password.mjs de better-auth.
+  const linkVencido = !token && searchParams.get("error") !== null;
 
   useEffect(() => {
-    if (!token) navigate("/auth");
-  }, [token, navigate]);
+    if (!token && !linkVencido) navigate("/auth");
+  }, [token, linkVencido, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,6 +35,30 @@ const ResetPassword = () => {
     }
     setLoading(false);
   };
+
+  if (linkVencido) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background font-sans">
+        <SEO title="Enlace vencido" description="El enlace de recuperación ya no es válido." noindex={true} />
+        <div className="relative z-10 w-full max-w-md px-6 text-center">
+          <div className="rounded-[2rem] border border-zinc-200 bg-white p-10 shadow-xl shadow-zinc-100">
+            <h1 className="text-2xl font-black text-zinc-900 tracking-tight mb-3">Este enlace ya no sirve</h1>
+            <p className="text-sm text-zinc-500 leading-relaxed mb-8">
+              Los enlaces de recuperación duran 1 hora y solo se pueden usar una vez.
+              Pide uno nuevo y revisa tu correo.
+            </p>
+            <Button
+              onClick={() => navigate("/auth?mode=forgot")}
+              className="w-full h-12 bg-primary text-white hover:bg-primary/90 rounded-2xl gap-2 font-bold text-[13px]"
+            >
+              Pedir un enlace nuevo
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!token) return null;
 
