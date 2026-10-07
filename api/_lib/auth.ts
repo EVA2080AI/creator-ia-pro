@@ -68,6 +68,9 @@ export const auth = betterAuth({
   database: drizzleAdapter(getDb(), { provider: "pg", schema }),
   emailAndPassword: {
     enabled: true,
+    // Explícito aunque 8 es el default de better-auth: los formularios (Auth.tsx y
+    // ResetPassword.tsx) muestran y validan este mismo número. Si cambia, cambiar allá.
+    minPasswordLength: 8,
     // La verificación por correo se activa en cuanto RESEND_API_KEY esté configurada.
     requireEmailVerification: false,
     sendResetPassword: async ({ user, url }) => {

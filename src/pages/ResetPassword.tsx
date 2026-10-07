@@ -67,9 +67,9 @@ const ResetPassword = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres"
                 required
-                minLength={6}
+                minLength={8}
                 className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all"
               />
             </div>

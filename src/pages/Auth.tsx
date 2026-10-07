@@ -323,9 +323,12 @@ const Auth = () => {
                       type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Tu contraseña"}
+                      placeholder={mode === "signup" ? "Mínimo 8 caracteres" : "Tu contraseña"}
                       required
-                      minLength={6}
+                      // El server (better-auth) exige 8 — ver minPasswordLength en
+                      // api/_lib/auth.ts. En login NO se pre-valida longitud: una
+                      // contraseña vieja más corta debe poder intentarse igual.
+                      minLength={mode === "signup" ? 8 : undefined}
                       autoComplete={mode === "login" ? "current-password" : "new-password"}
                       className="bg-muted/50 border-border focus:border-primary/40 rounded-2xl pl-11 pr-12 h-12 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:ring-0 focus:bg-muted"
                     />
@@ -340,7 +343,7 @@ const Auth = () => {
                   </div>
                   {mode === "signup" && (
                     <p className="text-[11px] text-muted-foreground ml-1">
-                      Usa al menos 6 caracteres.
+                      Usa al menos 8 caracteres.
                     </p>
                   )}
                 </div>
