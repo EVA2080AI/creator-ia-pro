@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { safeInternalPath } from "@/lib/safe-path";
 import { SEO, seoPresets } from "@/components/SEO";
 import { authClient, useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,9 @@ const features = [
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
+  // Vuelta tras entrar: ToolLanding manda ?next=/apps/<tool> para que quien llegó
+  // desde una landing buscando UNA herramienta no aterrice en el Basalt genérico.
+  const next = safeInternalPath(searchParams.get("next"));
   // /auth?mode=signup (usado por el CTA "Crear cuenta gratis" de Pricing) abre
   // directo el formulario de registro en vez de caer siempre en login.
   const [mode, setMode] = useState<"login" | "signup" | "forgot">(
@@ -53,8 +57,8 @@ const Auth = () => {
   }, []);
 
   useEffect(() => {
-    if (session?.user) navigate("/a/basalt", { replace: true });
-  }, [session, navigate]);
+    if (session?.user) navigate(next, { replace: true });
+  }, [session, navigate, next]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +76,7 @@ const Auth = () => {
         const { error } = await authClient.signIn.email({ email, password });
         if (error) throw new Error(error.message);
         toast.success("Sesión iniciada correctamente.");
-        navigate("/a/basalt", { replace: true });
+        navigate(next, { replace: true });
       } else {
         const { error } = await authClient.signUp.email({
           email,
@@ -81,7 +85,7 @@ const Auth = () => {
         });
         if (error) throw new Error(error.message);
         toast.success("Cuenta creada. ¡Bienvenido!");
-        navigate("/a/basalt", { replace: true });
+        navigate(next, { replace: true });
       }
     } catch (error: any) {
       toast.error(error.message || "Algo salió mal. Intenta de nuevo.");
@@ -383,7 +387,7 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await authClient.signIn.social({ provider: "google", callbackURL: "/a/basalt" });
+                      const { error } = await authClient.signIn.social({ provider: "google", callbackURL: next });
                       if (error) toast.error(error.message || "Google aún no está configurado.");
                       setLoading(false);
                     }}
@@ -404,7 +408,7 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await authClient.signIn.social({ provider: "apple", callbackURL: "/a/basalt" });
+                      const { error } = await authClient.signIn.social({ provider: "apple", callbackURL: next });
                       if (error) toast.error(error.message || "Apple aún no está configurado.");
                       setLoading(false);
                     }}
@@ -422,7 +426,7 @@ const Auth = () => {
                     disabled={loading}
                     onClick={async () => {
                       setLoading(true);
-                      const { error } = await authClient.signIn.social({ provider: "github", callbackURL: "/a/basalt" });
+                      const { error } = await authClient.signIn.social({ provider: "github", callbackURL: next });
                       if (error) toast.error(error.message || "GitHub aún no está configurado.");
                       setLoading(false);
                     }}

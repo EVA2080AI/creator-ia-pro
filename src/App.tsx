@@ -48,6 +48,9 @@ const APP_ID_TO_TOOL: Record<string, string> = {
   copywriter: "copywriter", logo: "logo", social: "social",
   blog: "blog", ads: "ads", enhance: "enhance",
   "remove-bg": "background", style: "style", upscale: "upscale", product: "product",
+  // Los ids que manda ToolLanding (tool.id) y faltaban: sin ellos el CTA de esas
+  // landings abría el panel sin preseleccionar lo que el visitante venía buscando.
+  generate: "generate", restore: "restore", eraser: "eraser", background: "background",
 };
 const ToolsRedirect = () => {
   const loc = useLocation();

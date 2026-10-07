@@ -220,13 +220,16 @@ const ToolLanding = () => {
     );
   }
 
+  // El destino de ESTA herramienta dentro de la app — con sesión se navega directo;
+  // sin sesión viaja en ?next= para que /auth devuelva aquí tras entrar (quien llega
+  // de una landing viene buscando esta herramienta, no el chat genérico).
+  const toolDest = tool.id === "formaketing" ? "/formarketing" : `/apps/${tool.id}`;
+  const goAuth = (signup = false) =>
+    navigate(`/auth?${signup ? "mode=signup&" : ""}next=${encodeURIComponent(toolDest)}`);
+
   const handleCTA = () => {
-    if (isLoggedIn) {
-      if (tool.id === "formaketing") navigate("/formarketing");
-      else navigate(`/apps/${tool.id}`);
-    } else {
-      navigate("/auth");
-    }
+    if (isLoggedIn) navigate(toolDest);
+    else goAuth();
   };
 
   const handleTryDemo = async () => {
@@ -271,7 +274,7 @@ const ToolLanding = () => {
       if (message.toLowerCase().includes("límite de pruebas gratuitas")) {
         setDemoUsed(true);
         toast("Ya usaste tus pruebas gratis. Regístrate para seguir.", {
-          action: { label: "Registrarme", onClick: () => navigate("/auth") },
+          action: { label: "Registrarme", onClick: () => goAuth(true) },
         });
       } else {
         toast.error(message);
@@ -482,7 +485,7 @@ const ToolLanding = () => {
                         <div className="rounded-xl border border-primary/15 bg-primary/5 p-3 text-center">
                           <p className="text-xs font-medium text-zinc-900">✨ ¡Resultado listo!</p>
                           <p className="text-xs text-zinc-500 mt-0.5">Regístrate para descargar en alta calidad.</p>
-                          <Button onClick={() => navigate("/auth")} size="sm" className="mt-2 h-7 text-xs rounded-full bg-primary text-white gap-1">
+                          <Button onClick={() => goAuth(true)} size="sm" className="mt-2 h-7 text-xs rounded-full bg-primary text-white gap-1">
                             Crear Cuenta Gratis <ArrowRight className="h-3 w-3" aria-hidden="true" />
                           </Button>
                         </div>
@@ -495,7 +498,7 @@ const ToolLanding = () => {
                         <div className="rounded-xl border border-primary/15 bg-primary/5 p-3 text-center">
                           <p className="text-xs font-medium text-zinc-900">✨ ¡Texto generado!</p>
                           <p className="text-xs text-zinc-500 mt-0.5">Regístrate para generar sin límites.</p>
-                          <Button onClick={() => navigate("/auth")} size="sm" className="mt-2 h-7 text-xs rounded-full bg-primary text-white gap-1">
+                          <Button onClick={() => goAuth(true)} size="sm" className="mt-2 h-7 text-xs rounded-full bg-primary text-white gap-1">
                             Registrarme Gratis <ArrowRight className="h-3 w-3" aria-hidden="true" />
                           </Button>
                         </div>
