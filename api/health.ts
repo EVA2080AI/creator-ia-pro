@@ -8,6 +8,9 @@ export default async function handler(_req: VercelRequest, res: VercelResponse) 
     await db.execute(sql`select 1`);
     res.status(200).json({ ok: true, db: "up", time: new Date().toISOString() });
   } catch (err) {
-    res.status(500).json({ ok: false, error: err instanceof Error ? err.message : String(err) });
+    // El mensaje crudo de un fallo de conexión puede traer el host o el usuario de
+    // la base — a un endpoint público va lo mínimo; el detalle, al log del server.
+    console.error("[health] db down:", err);
+    res.status(500).json({ ok: false, db: "down", error: "La base de datos no respondió." });
   }
 }
