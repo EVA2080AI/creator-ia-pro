@@ -427,8 +427,8 @@ export default function Index() {
     <>
       <Helmet>
         <title>Creator IA Pro — Crea Apps con IA en Segundos</title>
-        <meta name="description" content="La plataforma definitiva para crear apps React, imágenes y contenido con IA. Usa GPT-4, Claude y Gemini. Paga en pesos colombianos con Bold." />
-        <meta name="keywords" content="IA generativa, crear apps, React, imágenes IA, GPT-4, Claude, Gemini, Colombia, Bold" />
+        <meta name="description" content="La plataforma definitiva para crear apps React, imágenes y contenido con IA. Usa GPT-5, Claude y Gemini. Paga en pesos colombianos con Bold." />
+        <meta name="keywords" content="IA generativa, crear apps, React, imágenes IA, GPT-5, Claude, Gemini, Colombia, Bold" />
         <meta name="author" content="Creator IA Pro" />
         <meta name="robots" content="index, follow" />
 

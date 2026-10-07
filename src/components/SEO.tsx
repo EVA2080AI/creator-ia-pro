@@ -75,14 +75,14 @@ const OG_IMAGES = {
 export const seoPresets = {
   home: {
     title: "Crea Apps con IA en Segundos",
-    description: "La plataforma definitiva para crear apps React, imágenes y contenido con IA. Usa GPT-4, Claude y Gemini. Paga en pesos colombianos con Bold.",
-    keywords: "IA generativa, crear apps, React, imágenes IA, GPT-4, Claude, Gemini, Colombia",
+    description: "La plataforma definitiva para crear apps React, imágenes y contenido con IA. Usa GPT-5, Claude y Gemini. Paga en pesos colombianos con Bold.",
+    keywords: "IA generativa, crear apps, React, imágenes IA, GPT-5, Claude, Gemini, Colombia",
     ogImage: OG_IMAGES.default,
   },
   pricing: {
     title: "Planes y Precios",
     description: "6 planes flexibles desde $0. Free, Creador, Pro, Agencia, Pyme y Empresarial. Paga en pesos colombianos con Bold.",
-    keywords: "precios IA, planes GPT-4, Bold Colombia, créditos IA, suscripción IA",
+    keywords: "precios IA, planes GPT-5, Bold Colombia, créditos IA, suscripción IA",
     ogImage: OG_IMAGES.pricing,
   },
   auth: {

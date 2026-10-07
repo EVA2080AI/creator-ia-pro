@@ -76,7 +76,7 @@ const PLANS = [
     badge: "Más popular",
     features: [
       { label: "3.000 créditos mensuales", highlight: true },
-      { label: "Modelos premium de IA (GPT-4, Claude)", highlight: true },
+      { label: "Modelos premium de IA (GPT-5, Claude)", highlight: true },
       { label: "Generación prioritaria (más rápido)", highlight: true },
       { label: "Múltiples chats de IA simultáneos", highlight: false },
       { label: "Soporte prioritario", highlight: false },
@@ -154,7 +154,7 @@ const PLANS = [
 const FAQS = [
   {
     question: "¿Qué es un crédito y cómo se usa?",
-    answer: "Un crédito es la unidad de medida de Creator IA Pro. Cada vez que generas texto, imágenes o código, el sistema descuenta una cantidad según la tarea y el modelo que elijas. Los modelos más rápidos consumen menos; los más avanzados (como GPT-4 o Claude) consumen un poco más."
+    answer: "Un crédito es la unidad de medida de Creator IA Pro. Cada vez que generas texto, imágenes o código, el sistema descuenta una cantidad según la tarea y el modelo que elijas. Los modelos más rápidos consumen menos; los más avanzados (como GPT-5 o Claude) consumen un poco más."
   },
   {
     question: "¿Cuándo se renuevan mis créditos?",
@@ -267,14 +267,14 @@ export default function Pricing() {
       <Helmet>
         <title>Planes y Precios — Creator IA Pro (Desde $0)</title>
         <meta name="description" content="6 planes flexibles: Free, Creador ($149.900), Pro ($349.900), Agencia ($699.900), Pyme y Empresarial. Paga en pesos colombianos con Bold." />
-        <meta name="keywords" content="precios IA, planes GPT-4, Bold Colombia, créditos IA, suscripción IA" />
+        <meta name="keywords" content="precios IA, planes GPT-5, Bold Colombia, créditos IA, suscripción IA" />
         <meta name="robots" content="index, follow" />
 
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://creator-ia.com/pricing" />
         <meta property="og:title" content="Planes y Precios — Creator IA Pro" />
-        <meta property="og:description" content="6 planes desde $0. Paga en pesos colombianos con Bold. GPT-4, Claude, Gemini incluidos." />
+        <meta property="og:description" content="6 planes desde $0. Paga en pesos colombianos con Bold. GPT-5, Claude, Gemini incluidos." />
         <meta property="og:image" content="https://creator-ia.com/og-image.png" />
 
         {/* Twitter */}
@@ -506,17 +506,21 @@ export default function Pricing() {
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
                 <div className="p-4 rounded-3xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800">
                   <Globe className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
-                  <div className="text-lg font-black text-zinc-700 dark:text-zinc-200">{(estimateSlider / 10).toFixed(0)}</div>
+                  {/* Divisores anclados al catálogo real (models.ts / FAQ de /help):
+                      un post con modelos intermedios 1-2 cr; una imagen 3-5 cr
+                      (IMAGE_MODELS); un guion largo con modelo avanzado ~10 cr.
+                      Antes decían /10, /100 y /50 — inflaban el consumo hasta 20×. */}
+                  <div className="text-lg font-black text-zinc-700 dark:text-zinc-200">{(estimateSlider / 2).toFixed(0)}</div>
                   <div className="text-[11px] font-black uppercase text-zinc-600 dark:text-zinc-400">Posts de texto</div>
                 </div>
                 <div className="p-4 rounded-3xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800">
                   <Cpu className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
-                  <div className="text-lg font-black text-zinc-700 dark:text-zinc-200">{(estimateSlider / 100).toFixed(0)}</div>
+                  <div className="text-lg font-black text-zinc-700 dark:text-zinc-200">{(estimateSlider / 4).toFixed(0)}</div>
                   <div className="text-[11px] font-black uppercase text-zinc-600 dark:text-zinc-400">Imágenes generadas</div>
                 </div>
                 <div className="p-4 rounded-3xl bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 col-span-2 md:col-span-1">
                   <Code2 className="h-4 w-4 text-zinc-400 mx-auto mb-2" />
-                  <div className="text-lg font-black text-zinc-700 dark:text-zinc-200">{(estimateSlider / 50).toFixed(0)}</div>
+                  <div className="text-lg font-black text-zinc-700 dark:text-zinc-200">{(estimateSlider / 10).toFixed(0)}</div>
                   <div className="text-[11px] font-black uppercase text-zinc-600 dark:text-zinc-400">Guiones de video</div>
                 </div>
               </div>
