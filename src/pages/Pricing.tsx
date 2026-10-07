@@ -29,6 +29,10 @@ const PLANS = [
     creditsLabel: "5 créditos de por vida",
     description: "Para explorar el potencial de la IA sin compromiso.",
     color: "#64748B",
+    // chipColor: el texto "N créditos" mide 11px → WCAG pide 4.5:1, y ningún color
+    // único pasa sobre bg-zinc-100 Y dark:bg-zinc-800 (los umbrales se cruzan).
+    // Un tono por modo, misma familia que `color`. Análisis: memoria del proyecto.
+    chipColor: { light: "#475569", dark: "#94A3B8" },
     gradient: "from-slate-500/10 to-slate-500/5",
     border: "border-slate-200",
     icon: Zap,
@@ -49,6 +53,7 @@ const PLANS = [
     creditsLabel: "1.000 créditos al mes",
     description: "Todo lo que necesitas para empezar a crear contenido con IA.",
     color: "#94A3B8",
+    chipColor: { light: "#334155", dark: "#CBD5E1" },
     gradient: "from-zinc-500/10 to-zinc-500/5",
     border: "border-zinc-200 dark:border-zinc-800",
     icon: Sparkles,
@@ -69,6 +74,7 @@ const PLANS = [
     creditsLabel: "3.000 créditos al mes",
     description: "Para creadores que publican a diario y quieren más potencia.",
     color: "#6366F1",
+    chipColor: { light: "#4F46E5", dark: "#818CF8" },
     gradient: "from-indigo-500/15 to-indigo-500/5",
     border: "border-indigo-500/20",
     glow: "rgba(99, 102, 241, 0.15)",
@@ -91,6 +97,7 @@ const PLANS = [
     creditsLabel: "8.000 créditos al mes",
     description: "Ideal para agencias y equipos que crean contenido en escala.",
     color: "#F59E0B",
+    chipColor: { light: "#B45309", dark: "#F59E0B" },
     gradient: "from-amber-500/20 to-amber-500/5",
     border: "border-amber-500/30",
     glow: "rgba(245, 158, 11, 0.25)",
@@ -113,6 +120,7 @@ const PLANS = [
     creditsLabel: "20.000 créditos al mes",
     description: "Para negocios que necesitan IA a escala sin límites.",
     color: "#10B981",
+    chipColor: { light: "#047857", dark: "#10B981" },
     gradient: "from-emerald-500/20 to-emerald-500/5",
     border: "border-emerald-500/30",
     glow: "rgba(16, 185, 129, 0.2)",
@@ -135,6 +143,7 @@ const PLANS = [
     creditsLabel: "Créditos personalizados",
     description: "Solución personalizada para grandes organizaciones.",
     color: "#A855F7",
+    chipColor: { light: "#9333EA", dark: "#C084FC" },
     gradient: "from-purple-500/10 to-purple-500/5",
     border: "border-purple-500/20",
     glow: "rgba(168, 85, 247, 0.15)",
@@ -395,7 +404,10 @@ export default function Pricing() {
                           </div>
                           <div className="mt-2 flex items-center gap-2 py-1 px-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 w-fit">
                             <Coins className="h-3 w-3 text-primary" />
-                            <span className="text-[11px] font-bold" style={{ color: plan.color }}>{plan.creditsLabel}</span>
+                            <span
+                              className="text-[11px] font-bold text-[color:var(--chip)] dark:text-[color:var(--chip-dark)]"
+                              style={{ "--chip": plan.chipColor.light, "--chip-dark": plan.chipColor.dark } as React.CSSProperties}
+                            >{plan.creditsLabel}</span>
                           </div>
                         </>
                       )}
