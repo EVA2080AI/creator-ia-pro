@@ -40,7 +40,7 @@ export default function ArenaPage() {
   const [lanes, setLanes] = useState<Lane[]>(DEFAULT_LANES.map((model) => ({ model, text: "", status: "idle" })));
   const [prompt, setPrompt] = useState("");
   const [askedPrompt, setAskedPrompt] = useState("");
-  const [winner, setWinner] = useState<string | null>(null);
+  const [winner, setWinner] = useState<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   // Los bloques de código y las tarjetas de proyecto de mdToHtml() son HTML
   // crudo: sin estos hooks el botón Copiar y la vista previa quedaban muertos
@@ -131,6 +131,7 @@ export default function ArenaPage() {
           className="mb-6 flex items-end gap-2 rounded-2xl border border-border bg-card p-3 shadow-sm"
         >
           <textarea
+            aria-label="Prompt para comparar entre modelos"
             rows={2}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
@@ -154,14 +155,15 @@ export default function ArenaPage() {
         <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(auto-fit, minmax(280px, 1fr))` }}>
           {lanes.map((lane, i) => {
             const m = getModel(lane.model);
-            const isWinner = winner === lane.model;
+            const isWinner = winner === i;
             return (
               <section key={i} className={`flex flex-col rounded-2xl border bg-card ${isWinner ? "border-amber-400 ring-2 ring-amber-200" : "border-border"}`}>
                 <div className="flex items-center gap-2 border-b border-border px-3 py-2">
                   <select
+                    aria-label={`Modelo de la columna ${i + 1}`}
                     value={lane.model}
                     disabled={running}
-                    onChange={(e) => patch(i, { model: e.target.value, text: "", status: "idle" })}
+                    onChange={(e) => { patch(i, { model: e.target.value, text: "", status: "idle" }); setWinner((w) => (w === i ? null : w)); }}
                     className="min-w-0 flex-1 rounded-lg bg-muted px-2 py-1.5 text-[12px] font-bold text-foreground outline-none"
                   >
                     {CATEGORY_ORDER.map((cat) => (
@@ -173,7 +175,7 @@ export default function ArenaPage() {
                     ))}
                   </select>
                   {lanes.length > 2 && !running && (
-                    <button onClick={() => setLanes((prev) => prev.filter((_, k) => k !== i))} className="rounded p-1 text-muted-foreground hover:text-foreground" aria-label="Quitar modelo">
+                    <button onClick={() => { setLanes((prev) => prev.filter((_, k) => k !== i)); setWinner(null); }} className="rounded p-1 text-muted-foreground hover:text-foreground" aria-label="Quitar modelo">
                       <X className="h-3.5 w-3.5" />
                     </button>
                   )}
@@ -193,7 +195,7 @@ export default function ArenaPage() {
                   <span>{lane.ms ? `${(lane.ms / 1000).toFixed(1)} s` : ""}</span>
                   <button
                     disabled={lane.status !== "done" || running}
-                    onClick={() => setWinner(lane.model)}
+                    onClick={() => setWinner(i)}
                     className={`flex items-center gap-1 rounded-lg px-2.5 py-1 font-bold disabled:opacity-30 ${isWinner ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400" : "text-muted-foreground hover:bg-muted"}`}
                   >
                     <Trophy className="h-3.5 w-3.5" /> {isWinner ? "Ganador" : "Votar"}
