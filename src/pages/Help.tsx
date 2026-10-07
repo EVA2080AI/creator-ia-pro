@@ -9,7 +9,6 @@ import {
   Search,
   ArrowLeft,
   Mail,
-  MessageCircle,
   ExternalLink,
 } from "lucide-react";
 import { LandingHeader } from "@/components/layout/LandingHeader";
@@ -297,16 +296,6 @@ const Help = () => {
                 <Mail className="h-4 w-4 mr-2" />
                 Enviar mensaje
               </Button>
-              <Button
-                variant="outline"
-                onClick={() =>
-                  (window.location.href = "https://discord.gg/creator-ia")
-                }
-                className="border-zinc-700 text-zinc-300 hover:bg-zinc-900"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Comunidad Discord
-              </Button>
             </div>
 
             <div className="mt-8 p-6 rounded-2xl bg-zinc-900 border border-zinc-800 text-left max-w-lg mx-auto">
@@ -314,7 +303,7 @@ const Help = () => {
                 Horario de atención
               </h3>
               <ul className="space-y-2 text-sm text-zinc-400">
-                <li>• Soporte por chat: 24/7 (respuesta en 24h)</li>
+                <li>• Formulario de contacto: respuesta en 24-48h hábiles</li>
                 <li>• Email: Lunes a Viernes, 9AM - 6PM (COT)</li>
                 <li>• Planes Enterprise: Soporte prioritario 24/7</li>
               </ul>

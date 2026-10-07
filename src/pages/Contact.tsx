@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Mail, MessageCircle, Clock, MapPin, Phone, ArrowLeft, Send, HelpCircle, BookOpen, MessageSquare } from "lucide-react";
+import { Mail, Clock, MapPin, Phone, ArrowLeft, Send, HelpCircle, BookOpen, MessageSquare } from "lucide-react";
 import { LandingHeader } from "@/components/layout/LandingHeader";
 import { Footer } from "@/components/Footer";
 import { SEO } from "@/components/SEO";
@@ -71,12 +71,15 @@ const Contact = () => {
       value: "hola@creator-ia.com",
       action: "mailto:hola@creator-ia.com"
     },
+    // Acá había una tarjeta de Discord ("discord.gg/creator-ia"), pero ese invite no
+    // existe: la API de Discord responde "Unknown Invite". Si algún día se abre un
+    // servidor de verdad, esta es la tarjeta a restaurar (icono MessageCircle).
     {
-      icon: MessageCircle,
-      title: "Discord",
-      description: "Comunidad y soporte en tiempo real",
-      value: "Unirse al servidor",
-      action: "https://discord.gg/creator-ia"
+      icon: HelpCircle,
+      title: "Centro de ayuda",
+      description: "Guías y preguntas frecuentes",
+      value: "Ir al centro de ayuda",
+      action: "/help"
     },
     {
       icon: Clock,
