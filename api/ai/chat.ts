@@ -398,6 +398,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let sawAnyContent = false;
   let currentMessages: ChatMessage[] = messages;
   let cutForTime = false;
+  // Lo cobrado por búsquedas (SEARCH_TOOL_COST × veces que spendCredits
+  // confirmó cargo). Si el cliente aborta, se reembolsa junto al cost
+  // principal — mismo criterio que para el mensaje.
+  let searchCreditsCharged = 0;
 
   try {
     let current = await streamAndCollect(upstream);
@@ -449,7 +453,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             }
           }
         }
-        if (searchCreditCharged) await logSpend(user.userId, SEARCH_TOOL_COST, `search ${toolRound}: ${searchQuery.slice(0, 60)}`);
+        if (searchCreditCharged) {
+          searchCreditsCharged += SEARCH_TOOL_COST;
+          await logSpend(user.userId, SEARCH_TOOL_COST, `search ${toolRound}: ${searchQuery.slice(0, 60)}`);
+        }
         if (searchQuery) {
           // Se manda también cuando no hubo fuentes (fallo o sin créditos): el cliente
           // tiene que poder apagar el "buscando…" en vez de dejarlo colgado.
@@ -518,6 +525,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (cost > 0) {
     if (!sawAnyContent || clientAborted) await refundCredits(user.userId, cost);
     else await logSpend(user.userId, cost, `chat: ${modelId}`);
+  }
+  // Si el usuario paró y en el camino hubo búsquedas cobradas, también
+  // vuelven: la respuesta final nunca se vio y la búsqueda sola no es
+  // producto final — así se queda en una política coherente.
+  if (clientAborted && searchCreditsCharged > 0) {
+    await refundCredits(user.userId, searchCreditsCharged);
   }
 
   try {
