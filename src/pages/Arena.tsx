@@ -10,6 +10,7 @@ import { useProjectCards } from "@/hooks/useProjectCards";
 import { GitHubExportDialog } from "@/components/basalt/GitHubExportDialog";
 import { CHAT_MODELS, getModel, CATEGORY_ORDER, CATEGORY_META, canAccessModel, type ModelDef } from "@/lib/ai/models";
 import "./Assistant.css";
+import { shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
 
 // Arena IA: el mismo prompt a varios modelos en paralelo para comparar
 // respuestas lado a lado y votar la mejor. Usa /api/ai/chat (cada columna
@@ -37,6 +38,7 @@ export default function ArenaPage() {
   const allowed = (m: ModelDef) => !tier || canAccessModel(tier, m.minTier);
   const optionLabel = (m: ModelDef) =>
     `${m.label} ${allowed(m) ? (m.free ? "· gratis" : `· ${m.credits} cr`) : `· requiere ${m.minTier}`}${m.slow && allowed(m) ? " · lento" : ""}`;
+  const prefersClickSubmit = usePrefersClickSubmit();
   const [lanes, setLanes] = useState<Lane[]>(DEFAULT_LANES.map((model) => ({ model, text: "", status: "idle" })));
   const [prompt, setPrompt] = useState("");
   const [askedPrompt, setAskedPrompt] = useState("");
@@ -135,7 +137,7 @@ export default function ArenaPage() {
             rows={2}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); } }}
+            onKeyDown={(e) => { if (shouldSubmitOnEnter(e.nativeEvent, prefersClickSubmit)) { e.preventDefault(); run(); } }}
             placeholder="Escribe un prompt para comparar, ej: Escribe 3 copys para lanzar un curso de IA para pymes"
             className="flex-1 resize-none bg-transparent px-2 py-1 text-[14px] outline-none"
           />

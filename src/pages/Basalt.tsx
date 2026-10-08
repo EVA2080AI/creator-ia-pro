@@ -43,6 +43,7 @@ import { downloadMarkdown, safeFileName, toMarkdown } from "@/lib/export-convers
 import { ChatError, canRetry, chatError, errorAction } from "@/lib/chat-errors";
 import { createAsset } from "@/lib/assets";
 import "./Assistant.css";
+import { shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
 
 /** Opciones de sendPrompt: continuar un mensaje cortado, rehacer el último (sin
  *  duplicar la burbuja del usuario), partir de un hilo recortado y/o usar otro modelo. */
@@ -89,6 +90,7 @@ function readImageModel() {
 }
 
 export default function BasaltPage() {
+  const prefersClickSubmit = usePrefersClickSubmit();
   const [params, setParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth("/auth");
   const userId = user?.id ?? "";
@@ -780,7 +782,7 @@ export default function BasaltPage() {
                 if (fotos.length) { e.preventDefault(); void addFiles(fotos); }
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                if (shouldSubmitOnEnter(e.nativeEvent, prefersClickSubmit)) {
                   e.preventDefault();
                   void sendPrompt(input);
                 }

@@ -16,6 +16,7 @@ import { ModelSelector } from "@/components/studio/chat/ModelSelector";
 import { DEFAULT_MODEL_ID, DEFAULT_IMAGE_MODEL_ID, getModel, getImageModel } from "@/lib/ai/models";
 import { createAsset } from "@/lib/assets";
 import { cn } from "@/lib/utils";
+import { shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type ToolId =
@@ -170,6 +171,7 @@ const Tools = () => {
   const navigate = useNavigate();
   const { appId } = useParams();
   const [searchParams] = useSearchParams();
+  const prefersClickSubmit = usePrefersClickSubmit();
 
   const [activeTool, setActiveTool]           = useState<ToolId>("generate");
   const [category, setCategory]               = useState<"image" | "text">("image");
@@ -711,7 +713,7 @@ const Tools = () => {
                 value={textPrompt}
                 onChange={(e) => setTextPrompt(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey && !currentTool.needsUpload) {
+                  if (!currentTool.needsUpload && shouldSubmitOnEnter(e.nativeEvent, prefersClickSubmit)) {
                     e.preventDefault();
                     handleProcess();
                   }

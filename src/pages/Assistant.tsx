@@ -41,6 +41,7 @@ import { IMAGE_ACCEPT, imagesFromTransfer, recentImages } from "@/lib/image-atta
 import { getModel } from "@/lib/ai/models";
 import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DEFAULT_IMAGE_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import "./Assistant.css";
+import { shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
 
 // Homologado con Basalt.tsx (auditoría UX 2026-09-29: "los expertos...
 // deben ser un solo nombre" + "deben tener también persistir sus chat") —
@@ -80,6 +81,8 @@ export default function AssistantPage() {
   const { slug = "mentor" } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth("/auth");
+
+  const prefersClickSubmit = usePrefersClickSubmit();
 
   const [assistant, setAssistant] = useState<Assistant | null>(null);
   const [loadingAssistant, setLoadingAssistant] = useState(true);
@@ -669,7 +672,7 @@ export default function AssistantPage() {
                 if (fotos.length) { e.preventDefault(); void addFiles(fotos); }
               }}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
+                if (shouldSubmitOnEnter(e.nativeEvent, prefersClickSubmit)) {
                   e.preventDefault();
                   void sendPrompt(input);
                 }
