@@ -443,7 +443,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           } else {
             searchCreditCharged = true;
             try {
-              const results = await tavilySearch(searchQuery, TAVILY_API_KEY);
+              const results = await tavilySearch(searchQuery, TAVILY_API_KEY, abortController.signal);
               fuentes = results.filter((r) => r.url).map((r) => ({ title: r.title, url: r.url }));
               toolResultContent = JSON.stringify({ query: searchQuery, results });
             } catch {

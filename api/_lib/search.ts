@@ -11,7 +11,7 @@ export interface SearchResult {
 const TAVILY_URL = "https://api.tavily.com/search";
 
 /** Lanza en caso de error — el llamador decide créditos/reembolso, igual que generateOpenRouterImage. */
-export async function tavilySearch(query: string, apiKey: string): Promise<SearchResult[]> {
+export async function tavilySearch(query: string, apiKey: string, signal?: AbortSignal): Promise<SearchResult[]> {
   const res = await fetch(TAVILY_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -21,6 +21,7 @@ export async function tavilySearch(query: string, apiKey: string): Promise<Searc
       max_results: 5,
       search_depth: "basic",
     }),
+    signal,
   });
 
   if (!res.ok) {
