@@ -108,8 +108,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(200).json({ ok: true, imageUrl, model: modelId, cost, creditsRemaining });
   } catch (err) {
     if (cost > 0) await refundCredits(user.userId, cost);
-    const message = err instanceof Error ? err.message : "Error al generar la imagen.";
-    res.status(502).json({ ok: false, code: "PROVIDER_ERROR", error: message.slice(0, 300) });
+    // Los helpers del proveedor arman err.message con fragmentos crudos
+    // (status + hasta 200 chars del body, 'Invalid API key: ...',
+    // slug del modelo, etc.). Lo registramos para debuggear sin
+    // mandárselo al usuario — no puede hacer nada con eso.
+    console.error("[image] fallo del proveedor:", err);
+    res.status(502).json({ ok: false, code: "PROVIDER_ERROR", error: "No se pudo generar la imagen. Se devolvieron los créditos — vuelve a intentarlo o prueba otro modelo." });
   }
 }
 

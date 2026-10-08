@@ -97,7 +97,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(200).json({ ok: true, url, linkId });
   } catch (err) {
     const isTimeout = err instanceof Error && err.name === "TimeoutError";
-    const message = isTimeout ? "Bold tardó demasiado en responder. Intenta de nuevo." : err instanceof Error ? err.message : "Error al conectar con Bold.";
-    res.status(502).json({ ok: false, code: isTimeout ? "TIMEOUT" : "PROVIDER_ERROR", error: message });
+    // err.message puede incluir data.errors[0].detail de Bold (bodies
+    // crudos de la API del merchant). Útil para debug, no para el usuario:
+    // registramos el detalle y devolvemos un mensaje genérico.
+    console.error("[billing/checkout] fallo:", err);
+    res.status(502).json({
+      ok: false,
+      code: isTimeout ? "TIMEOUT" : "PROVIDER_ERROR",
+      error: isTimeout
+        ? "Bold tardó demasiado en responder. Intenta de nuevo."
+        : "No se pudo iniciar el pago. Intenta de nuevo en unos minutos.",
+    });
   }
 }
