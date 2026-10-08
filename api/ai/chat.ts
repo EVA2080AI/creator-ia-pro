@@ -233,9 +233,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ? [{ role: "system", content: systemPrompt }, ...conAdjuntos]
     : conAdjuntos;
 
+  // Si el usuario cierra la pestaña o pulsa "parar", abortamos el fetch
+  // a OpenRouter (nos cobran por tokens aunque nadie los lea, y Vercel
+  // sigue facturando segundos de función) y reembolsamos el crédito aun
+  // con contenido parcial: el usuario pidió parar — ese contenido ya no
+  // vale lo que se cobró.
+  const abortController = new AbortController();
+  let clientAborted = false;
+  req.on("close", () => {
+    if (!res.writableEnded) {
+      clientAborted = true;
+      abortController.abort();
+    }
+  });
+
   const callOpenRouter = (msgs: ChatMessage[], withTools: boolean) =>
     fetch(OPENROUTER_URL, {
       method: "POST",
+      signal: abortController.signal,
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${OPENROUTER_API_KEY}`,
@@ -501,7 +516,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Cobro sin resultado: reembolsa. Con resultado parcial, se conserva el cobro
   // (igual que en un chat normal: pagas por lo que sí se generó).
   if (cost > 0) {
-    if (!sawAnyContent) await refundCredits(user.userId, cost);
+    if (!sawAnyContent || clientAborted) await refundCredits(user.userId, cost);
     else await logSpend(user.userId, cost, `chat: ${modelId}`);
   }
 
