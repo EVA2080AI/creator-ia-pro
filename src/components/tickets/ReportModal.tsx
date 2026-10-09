@@ -53,10 +53,10 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 p-4 sm:items-center" onClick={close}>
-      <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-[15px] font-black text-zinc-900">Reportar</h2>
-          <button onClick={close} className="rounded-lg p-1 text-zinc-400 hover:bg-zinc-100" aria-label="Cerrar">
+          <h2 className="font-display text-[15px] font-black text-foreground">Reportar</h2>
+          <button onClick={close} className="rounded-lg p-1 text-muted-foreground hover:bg-muted" aria-label="Cerrar">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -64,13 +64,13 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
         <div className="mb-3 flex gap-2">
           <button
             onClick={() => setType("bug")}
-            className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-bold", type === "bug" ? "border-red-200 bg-red-50 text-red-600" : "border-zinc-200 text-zinc-500")}
+            className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-bold", type === "bug" ? "border-red-200 bg-red-50 text-red-600 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-400" : "border-border text-muted-foreground")}
           >
             <Bug className="h-3.5 w-3.5" /> Error
           </button>
           <button
             onClick={() => setType("mejora")}
-            className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-bold", type === "mejora" ? "border-primary/30 bg-primary/5 text-primary" : "border-zinc-200 text-zinc-500")}
+            className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-[12px] font-bold", type === "mejora" ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground")}
           >
             <Sparkles className="h-3.5 w-3.5" /> Mejora
           </button>
@@ -80,7 +80,7 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={type === "bug" ? "¿Qué salió mal?" : "¿Qué te gustaría que tuviera?"}
-          className="mb-2 w-full rounded-xl border border-zinc-200 px-3 py-2 text-[13px] outline-none focus:border-primary"
+          className="mb-2 w-full rounded-xl border border-border bg-card px-3 py-2 text-[13px] text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
           autoFocus
         />
         <textarea
@@ -88,7 +88,7 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Cuéntanos más (opcional)"
           rows={3}
-          className="mb-4 w-full resize-none rounded-xl border border-zinc-200 px-3 py-2 text-[13px] outline-none focus:border-primary"
+          className="mb-4 w-full resize-none rounded-xl border border-border bg-card px-3 py-2 text-[13px] text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
         />
 
         <button
