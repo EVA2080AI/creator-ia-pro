@@ -55,8 +55,14 @@ export default function ShareScreen() {
   };
 
   const initHost = async () => {
-    const hasCredits = await consumeCredit();
-    if (!hasCredits) return;
+    // Guard de saldo SIN cobrar: el cobro se hace recién en startSharing,
+    // después de que el usuario conceda el permiso de captura. Antes se
+    // cobraba acá y, si el usuario rechazaba el permiso del navegador,
+    // pagaba por una sesión que nunca empezó.
+    if (!profile || profile.credits_balance < 1) {
+      toast.error("No tienes créditos suficientes para ser Host. Recarga en Planes.");
+      return;
+    }
 
     setMode("host");
     const id = Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -128,6 +134,14 @@ export default function ShareScreen() {
         video: { cursor: "always" } as any,
         audio: false
       });
+      // Cobro recién acá: ya hubo permiso real del navegador y de verdad
+      // vamos a capturar algo. Si el cobro falla (saldo cero por una
+      // compra concurrente, 500, etc.), paramos el stream y volvemos.
+      const hasCredits = await consumeCredit();
+      if (!hasCredits) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
       streamRef.current = stream;
       setStatus("Capturando pantalla... Dile al Viewer que se conecte.");
       toast.success("Captura iniciada. Comparte tu código.");
