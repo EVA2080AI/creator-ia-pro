@@ -193,7 +193,7 @@ export default function ShareScreen() {
         {/* MODO SELECTOR */}
         {!mode ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-            <button onClick={initHost} className="flex flex-col items-center gap-6 p-10 rounded-[2.5rem] border border-white/5 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-[var(--brand)]/20 hover:shadow-2xl hover:shadow-[var(--brand)]/5 transition-all cursor-pointer group">
+            <button onClick={initHost} className="flex flex-col items-center gap-6 p-10 rounded-[2.5rem] border border-white/5 bg-card shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-[var(--brand)]/20 hover:shadow-2xl hover:shadow-[var(--brand)]/5 transition-all cursor-pointer group">
               <div className="w-16 h-16 rounded-2xl bg-[var(--brand)]/10 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl shadow-[var(--brand)]/10">
                 <Monitor className="h-8 w-8 text-[var(--brand)]" />
               </div>
@@ -202,7 +202,7 @@ export default function ShareScreen() {
                 <p className="text-sm text-slate-400 font-bold mt-3 leading-relaxed">compartir pantalla desde este dispositivo. genera un código para el espectador.</p>
               </div>
             </button>
-            <button onClick={initViewer} className="flex flex-col items-center gap-6 p-10 rounded-[2.5rem] border border-white/5 bg-white shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-[var(--brand)]/20 hover:shadow-2xl hover:shadow-[var(--brand)]/5 transition-all cursor-pointer group">
+            <button onClick={initViewer} className="flex flex-col items-center gap-6 p-10 rounded-[2.5rem] border border-white/5 bg-card shadow-[0_10px_40px_rgba(0,0,0,0.1)] hover:border-[var(--brand)]/20 hover:shadow-2xl hover:shadow-[var(--brand)]/5 transition-all cursor-pointer group">
                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform shadow-2xl">
                 <Smartphone className="h-8 w-8 text-foreground" />
               </div>
@@ -214,7 +214,7 @@ export default function ShareScreen() {
           </div>
         ) : mode === "host" ? (
           /* MODO HOST PANEL */
-          <div className="max-w-md mx-auto p-8 rounded-[2.5rem] border border-white/10 bg-white/80 backdrop-blur-3xl shadow-2xl mt-10 space-y-6">
+          <div className="max-w-md mx-auto p-8 rounded-[2.5rem] border border-white/10 bg-card/90 backdrop-blur-3xl shadow-2xl mt-10 space-y-6">
             <div className="flex justify-between items-center border-b border-white/5 pb-4">
               <h2 className="text-xl font-black text-foreground lowercase">panel_emisión</h2>
               <span className="text-[10px] font-black px-3 py-1 bg-[var(--brand)]/10 text-[var(--brand)] rounded-full uppercase tracking-widest">{status}</span>
@@ -242,7 +242,7 @@ export default function ShareScreen() {
           </div>
         ) : (
           /* MODO VIEWER PANEL */
-          <div className="max-w-md mx-auto p-8 rounded-[2.5rem] border border-white/10 bg-white/80 backdrop-blur-3xl shadow-2xl mt-10 space-y-6">
+          <div className="max-w-md mx-auto p-8 rounded-[2.5rem] border border-white/10 bg-card/90 backdrop-blur-3xl shadow-2xl mt-10 space-y-6">
             <div className="flex justify-between items-center border-b border-white/5 pb-4">
               <h2 className="text-xl font-black text-foreground lowercase">receptor</h2>
               <span className="text-[10px] font-black px-3 py-1 bg-blue-500/10 text-blue-500 rounded-full uppercase tracking-widest">{status}</span>
