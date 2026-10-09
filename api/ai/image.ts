@@ -62,6 +62,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
+  // Si el cliente cierra la pestaña (o se va la red) a mitad de la generación,
+  // Replicate puede tardar hasta ~1m40s (fetch sync 60s + 20 polls × 2s). Sin esto,
+  // seguíamos trabajando, cobrábamos y hacíamos logSpend aunque el usuario nunca
+  // viera la imagen. Lo mismo que el fix de chat.ts del ciclo h.
+  const abortController = new AbortController();
+  let clientAborted = false;
+  req.on("close", () => {
+    if (!res.writableEnded) {
+      clientAborted = true;
+      abortController.abort();
+    }
+  });
+
   const cost = model.credits;
   if (cost > 0) {
     const newBalance = await spendCredits(user.userId, cost);
@@ -92,8 +105,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const generated = model.provider === "openrouter"
-      ? await generateOpenRouterImage(model.openrouterSlug!, prompt, aspectRatio, imagePrompt, apiKey)
-      : await generateReplicateImage(model.replicateSlug!, prompt, aspectRatio, imagePrompt, apiKey);
+      ? await generateOpenRouterImage(model.openrouterSlug!, prompt, aspectRatio, imagePrompt, apiKey, abortController.signal)
+      : await generateReplicateImage(model.replicateSlug!, prompt, aspectRatio, imagePrompt, apiKey, abortController.signal);
     // Los proveedores devuelven o una URL temporal o un data URI de varios MB. La
     // imagen se guarda antes de responder para que lo que viaje al navegador sea una
     // referencia corta, no la imagen entera en base64.
@@ -103,11 +116,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // almacenamiento de la plataforma. Y si todo falla, se devuelve lo que vino: una
     // imagen que el usuario pagó no se pierde por un problema de almacenamiento.
     const imageUrl = (await guardarImagen(generated, user.userId)) ?? generated;
+    // Puede haber abortado entre que terminó el fetch del proveedor y aquí: si no
+    // va a ver la imagen, le devolvemos el crédito en lugar de cobrarlo.
+    if (clientAborted) {
+      if (cost > 0) await refundCredits(user.userId, cost);
+      return;
+    }
     if (cost > 0) await logSpend(user.userId, cost, `image: ${modelId}`);
     const creditsRemaining = await getBalance(user.userId).catch(() => null);
     res.status(200).json({ ok: true, imageUrl, model: modelId, cost, creditsRemaining });
   } catch (err) {
     if (cost > 0) await refundCredits(user.userId, cost);
+    // Si el cliente ya se fue, el error es un AbortError que nosotros mismos
+    // disparamos y no vale la pena ni gritar en logs ni intentar responder.
+    if (clientAborted) return;
     // Los helpers del proveedor arman err.message con fragmentos crudos
     // (status + hasta 200 chars del body, 'Invalid API key: ...',
     // slug del modelo, etc.). Lo registramos para debuggear sin
@@ -147,12 +169,14 @@ async function generateOpenRouterImage(
   aspectRatio: string,
   imagePrompt: string | undefined,
   token: string,
+  signal?: AbortSignal,
 ): Promise<string> {
   const body: Record<string, unknown> = { model: openrouterSlug, prompt, n: 1, aspect_ratio: aspectRatio };
   if (imagePrompt) body.input_references = [imagePrompt];
 
   const res = await fetch("https://openrouter.ai/api/v1/images", {
     method: "POST",
+    signal,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -185,12 +209,14 @@ async function generateReplicateImage(
   aspectRatio: string,
   imagePrompt: string | undefined,
   token: string,
+  signal?: AbortSignal,
 ): Promise<string> {
   const input: Record<string, unknown> = { prompt, aspect_ratio: aspectRatio };
   if (imagePrompt) input.image_prompt = imagePrompt;
 
   const createRes = await fetch(`https://api.replicate.com/v1/models/${replicateSlug}/predictions`, {
     method: "POST",
+    signal,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -207,9 +233,12 @@ async function generateReplicateImage(
   let prediction = (await createRes.json()) as ReplicatePrediction;
 
   // Si el `wait` síncrono expiró antes de terminar, seguimos con polling manual.
+  // Si el cliente abortó, salimos: el fetch siguiente tiraría AbortError igual,
+  // pero así no esperamos otros 2s por nada.
   for (let i = 0; i < 20 && (prediction.status === "starting" || prediction.status === "processing"); i++) {
+    if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
     await new Promise((r) => setTimeout(r, 2000));
-    const pollRes = await fetch(prediction.urls?.get, { headers: { Authorization: `Bearer ${token}` } });
+    const pollRes = await fetch(prediction.urls?.get, { headers: { Authorization: `Bearer ${token}` }, signal });
     if (!pollRes.ok) continue;
     prediction = (await pollRes.json()) as ReplicatePrediction;
   }
