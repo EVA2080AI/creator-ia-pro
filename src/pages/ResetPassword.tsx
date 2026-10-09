@@ -41,15 +41,15 @@ const ResetPassword = () => {
       <div className="flex min-h-screen items-center justify-center bg-background font-sans">
         <SEO title="Enlace vencido" description="El enlace de recuperación ya no es válido." noindex={true} />
         <div className="relative z-10 w-full max-w-md px-6 text-center">
-          <div className="rounded-[2rem] border border-zinc-200 bg-white p-10 shadow-xl shadow-zinc-100">
-            <h1 className="text-2xl font-black text-zinc-900 tracking-tight mb-3">Este enlace ya no sirve</h1>
-            <p className="text-sm text-zinc-500 leading-relaxed mb-8">
+          <div className="rounded-[2rem] border border-border bg-card p-10 shadow-xl shadow-black/5">
+            <h1 className="text-2xl font-black text-foreground tracking-tight mb-3">Este enlace ya no sirve</h1>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-8">
               Los enlaces de recuperación duran 1 hora y solo se pueden usar una vez.
               Pide uno nuevo y revisa tu correo.
             </p>
             <Button
               onClick={() => navigate("/auth?mode=forgot")}
-              className="w-full h-12 bg-primary text-white hover:bg-primary/90 rounded-2xl gap-2 font-bold text-[13px]"
+              className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl gap-2 font-bold text-[13px]"
             >
               Pedir un enlace nuevo
               <ArrowRight className="h-4 w-4" />
@@ -79,16 +79,16 @@ const ResetPassword = () => {
           <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10">
             <Sparkles className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tight">
+          <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight">
             Nueva <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">contraseña</span>
           </h1>
-          <p className="mt-3 text-[13px] text-zinc-400 font-medium">Ingresa tu nueva contraseña para acceder a tu cuenta</p>
+          <p className="mt-3 text-[13px] text-muted-foreground font-medium">Ingresa tu nueva contraseña para acceder a tu cuenta</p>
         </div>
 
-        <div className="rounded-[2rem] border border-zinc-200 bg-white p-10 shadow-xl shadow-zinc-100">
+        <div className="rounded-[2rem] border border-border bg-card p-10 shadow-xl shadow-black/5">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-zinc-500 text-[11px] font-bold uppercase tracking-[0.2em]">Nueva contraseña</Label>
+              <Label htmlFor="password" className="text-muted-foreground text-[11px] font-bold uppercase tracking-[0.2em]">Nueva contraseña</Label>
               <Input
                 id="password"
                 type="password"
@@ -97,16 +97,16 @@ const ResetPassword = () => {
                 placeholder="Mínimo 8 caracteres"
                 required
                 minLength={8}
-                className="bg-zinc-50 border-zinc-200 focus:border-primary/40 rounded-2xl h-12 text-sm text-zinc-900 placeholder:text-zinc-300 transition-all"
+                className="bg-background border-border focus:border-primary/40 rounded-2xl h-12 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all"
               />
             </div>
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-12 bg-primary text-white hover:bg-primary/90 rounded-2xl gap-2 font-bold text-[13px] transition-all active:scale-95 disabled:opacity-50 mt-2"
+              className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 rounded-2xl gap-2 font-bold text-[13px] transition-all active:scale-95 disabled:opacity-50 mt-2"
             >
               {loading ? (
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
               ) : (
                 <>
                   Actualizar contraseña
