@@ -99,12 +99,20 @@ const Spaces = () => {
                   <Sparkles className="h-4 w-4 mr-3 opacity-60 text-primary" /> 
                   Hub de Plantillas
                 </DropdownMenuItem>
-                <DropdownMenuItem className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-muted focus:bg-primary/10 focus:text-primary transition-all font-display text-muted-foreground mb-0.5"
-                  onClick={goToCanvas}>
-                  <LayoutTemplate className="h-4 w-4 mr-3 opacity-60" /> 
-                  Flujo en Blanco
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-muted my-1 mx-2" />
+                {/* Mismo criterio que el sidebar y el dashboard: mientras
+                    Canvas IA no esté listo, un usuario normal solo veía un
+                    ítem que abría un toast de "próximamente". Admins sí
+                    lo ven para probarlo. */}
+                {(CANVAS_ENABLED || isAdmin) && (
+                  <>
+                    <DropdownMenuItem className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-muted focus:bg-primary/10 focus:text-primary transition-all font-display text-muted-foreground mb-0.5"
+                      onClick={goToCanvas}>
+                      <LayoutTemplate className="h-4 w-4 mr-3 opacity-60" /> 
+                      Flujo en Blanco
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-muted my-1 mx-2" />
+                  </>
+                )}
                 <DropdownMenuItem onClick={() => navigate('/code')} className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-muted focus:bg-emerald-500/10 focus:text-emerald-600 transition-all font-display text-muted-foreground">
                   <Code2 className="h-4 w-4 mr-3 opacity-60" />
                   Desarrollo de Código
