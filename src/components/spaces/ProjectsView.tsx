@@ -235,7 +235,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
           <Search className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <input
             type="text"
-            placeholder="Buscar proyectos, flujos o archivos..."
+            placeholder={isMobile ? "Buscar..." : "Buscar proyectos, flujos o archivos..."}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-card border border-transparent focus:border-primary/20 focus:ring-4 focus:ring-primary/5 rounded-[1.5rem] py-2.5 md:py-3.5 pl-11 md:pl-14 pr-4 md:pr-6 text-sm font-medium transition-all outline-none shadow-sm"
