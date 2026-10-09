@@ -94,7 +94,7 @@ export function ReportModal({ open, onClose }: { open: boolean; onClose: () => v
         <button
           onClick={submit}
           disabled={!title.trim() || sending}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-white disabled:opacity-40"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-[13px] font-bold text-primary-foreground disabled:opacity-40"
         >
           {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Enviar"}
         </button>
