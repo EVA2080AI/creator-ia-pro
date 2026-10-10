@@ -207,7 +207,7 @@ export default function ShareScreen() {
                 <Smartphone className="h-8 w-8 text-foreground" />
               </div>
               <div className="text-center">
-                <h3 className="text-2xl font-black text-foreground">modo viewer <span className="text-[10px] bg-white/10 text-muted-foreground px-3 py-1 rounded-full ml-2 lowercase font-black tracking-tight">gratis</span></h3>
+                <h3 className="text-2xl font-black text-foreground">modo viewer <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full ml-2 lowercase font-black tracking-tight">gratis</span></h3>
                 <p className="text-sm text-muted-foreground font-bold mt-3 leading-relaxed">ver la pantalla de otro dispositivo. requiere ingresar el código del host.</p>
               </div>
             </button>
