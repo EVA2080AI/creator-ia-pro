@@ -142,7 +142,7 @@ export default function ArenaPage() {
             className="flex-1 resize-none bg-transparent px-2 py-1 text-[14px] outline-none"
           />
           {running ? (
-            <button type="button" onClick={() => abortRef.current?.abort()} className="flex items-center gap-2 rounded-xl bg-zinc-900 px-4 py-2.5 text-[13px] font-bold text-white">
+            <button type="button" onClick={() => abortRef.current?.abort()} className="flex items-center gap-2 rounded-xl bg-foreground px-4 py-2.5 text-[13px] font-bold text-background">
               <Square className="h-3.5 w-3.5" /> Detener
             </button>
           ) : (
