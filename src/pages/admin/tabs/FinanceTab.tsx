@@ -1,19 +1,17 @@
-// Panel financiero del admin — MRR estimado y suscripciones por plan.
+// Panel financiero del admin — MRR estimado + ingresos REALES de 30d.
 //
 // MRR = sum(usuarios[plan] × precio[plan]). Los `tiers` vienen del mismo
 // `/api/admin/stats` (agrupado por `profile.subscription_tier`); los precios de
 // `src/lib/limits.ts` (fuente de verdad compartida con /pricing).
 //
-// Qué NO entra todavía (siguiente ciclo, requiere endpoint): ingresos REALES
-// desde `transaction` (type IN ('purchase', 'bold_approved')) con el monto en
-// COP, última recarga, suscripciones próximas a vencer. Hoy la tabla
-// `transaction` guarda el amount en CRÉDITOS, no en COP, así que para montos
-// en pesos hay que mapear amount→pack vía CREDIT_PACKS o plan→PLAN_PRICES_COP
-// y eso lo resuelve el endpoint que viene después.
-import { Loader2, DollarSign, Users, TrendingUp, Info } from "lucide-react";
+// Ingresos reales = sum(transactions type='bold_approved' últimos 30d, con el
+// monto en COP leído de CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP según el
+// packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
+import { Loader2, DollarSign, Users, Info, Receipt, Clock } from "lucide-react";
 import { PLAN_PRICES_COP, PLAN_MONTHLY_CREDITS } from "@/lib/limits";
 import { normalizeTier } from "@/lib/ai/models";
 import type { TierRow } from "../components/OpenRouterProjection";
+import type { FinanceData } from "../hooks/useAdminData";
 
 const TIER_LABEL: Record<string, string> = {
   free: "Free",
@@ -26,7 +24,19 @@ const TIER_LABEL: Record<string, string> = {
 const cop = (n: number) =>
   n.toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 
-export function FinanceTab({ tiers, loading }: { tiers: TierRow[] | undefined; loading: boolean }) {
+export function FinanceTab({
+  tiers,
+  loading,
+  finance,
+  financeLoading,
+  financeError,
+}: {
+  tiers: TierRow[] | undefined;
+  loading: boolean;
+  finance: FinanceData | null;
+  financeLoading: boolean;
+  financeError: string | null;
+}) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 space-y-4">
@@ -135,14 +145,87 @@ export function FinanceTab({ tiers, loading }: { tiers: TierRow[] | undefined; l
         </div>
       </div>
 
-      <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 flex gap-3">
-        <TrendingUp className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-        <div className="space-y-1">
-          <p className="text-[11px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400">Siguiente ciclo</p>
-          <p className="text-[13px] text-foreground leading-relaxed">
-            Ingresos REALES (sumando transacciones Bold aprobadas en los últimos 30 días), última recarga, suscripciones próximas a vencer y recargas puntuales por pack. Requiere un endpoint nuevo <code className="font-mono text-xs text-muted-foreground">/api/admin/finance</code> que lea <code className="font-mono text-xs text-muted-foreground">transaction</code> y mapee monto en créditos → COP.
-          </p>
+      <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-2xl bg-muted border border-border flex items-center justify-center">
+            <Receipt className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <div>
+            <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Ingresos reales 30d</h3>
+            <p className="text-[11px] text-muted-foreground font-medium">Compras aprobadas por Bold en los últimos 30 días</p>
+          </div>
         </div>
+
+        {financeLoading && (
+          <div className="flex flex-col items-center justify-center py-10 space-y-3">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Cargando movimientos</p>
+          </div>
+        )}
+
+        {!financeLoading && financeError && (
+          <div className="rounded-2xl border border-rose-500/30 bg-rose-500/5 p-4 text-[13px] text-foreground">
+            No se pudieron cargar los ingresos: <span className="text-muted-foreground">{financeError}</span>
+          </div>
+        )}
+
+        {!financeLoading && !financeError && finance && (
+          <>
+            <div className="grid sm:grid-cols-3 gap-4 mb-6">
+              <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/5 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-700 dark:text-emerald-400 mb-1">Ingresos 30d</p>
+                <p className="text-2xl font-black font-mono text-foreground">{cop(finance.revenueCop)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{finance.salesCount.toLocaleString()} compra{finance.salesCount === 1 ? "" : "s"} aprobada{finance.salesCount === 1 ? "" : "s"}</p>
+              </div>
+              <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Ticket promedio</p>
+                <p className="text-2xl font-black font-mono text-foreground">{finance.salesCount > 0 ? cop(Math.round(finance.revenueCop / finance.salesCount)) : cop(0)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">COP por compra</p>
+              </div>
+              <div className="rounded-2xl border border-border bg-muted/40 p-4 flex flex-col justify-between">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1 flex items-center gap-1.5"><Clock className="h-3 w-3" /> Última compra</p>
+                  {finance.lastPurchase ? (
+                    <>
+                      <p className="text-lg font-black font-mono text-foreground">{cop(finance.lastPurchase.amountCop)}</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">{finance.lastPurchase.label}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{new Date(finance.lastPurchase.createdAt).toLocaleString("es-CO", { dateStyle: "medium", timeStyle: "short" })}</p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted-foreground mt-2">Sin compras aún</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {finance.breakdown.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="text-[10px] font-black uppercase tracking-widest text-muted-foreground border-b border-border">
+                      <th className="py-2 pr-4">Item</th>
+                      <th className="py-2 pr-4">Tipo</th>
+                      <th className="py-2 pr-4">Vendidos</th>
+                      <th className="py-2 pr-4">Créditos otorgados</th>
+                      <th className="py-2">Ingreso</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {finance.breakdown.map((row) => (
+                      <tr key={row.packId} className="border-b border-border/50 text-[13px] text-foreground">
+                        <td className="py-2 pr-4 font-bold">{row.label}</td>
+                        <td className="py-2 pr-4 text-muted-foreground">{row.kind === "recarga" ? "Recarga" : "Suscripción"}</td>
+                        <td className="py-2 pr-4 font-mono">{row.items}</td>
+                        <td className="py-2 pr-4 font-mono text-muted-foreground">{row.creditsGranted.toLocaleString()}</td>
+                        <td className="py-2 font-mono">{cop(row.revenueCop)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       <div className="rounded-2xl border border-border bg-muted/30 p-4 flex gap-3">
@@ -150,11 +233,11 @@ export function FinanceTab({ tiers, loading }: { tiers: TierRow[] | undefined; l
         <div className="space-y-1">
           <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Cómo se calcula</p>
           <p className="text-[12px] text-muted-foreground leading-relaxed">
-            El MRR es una ESTIMACIÓN: cuenta a cada usuario como si estuviera pagando el precio de su plan actual este mes. Los planes duran 30 días desde la compra y <strong className="text-foreground">no se renuevan automáticamente</strong> (ver <code className="font-mono text-xs">/pricing</code> FAQ), así que la cifra real depende de cuántos renuevan — y eso solo lo sabe el endpoint financiero que viene después.
+            El MRR es una ESTIMACIÓN proyectiva (usuarios × precio de su plan actual). Los planes duran 30 días y <strong className="text-foreground">no se renuevan automáticamente</strong> (ver <code className="font-mono text-xs">/pricing</code> FAQ), así que es un techo si todos renuevan a tiempo. Los <strong className="text-foreground">ingresos reales</strong> de abajo salen de las compras aprobadas por Bold (transacciones <code className="font-mono text-xs">bold_approved</code> de los últimos 30 días) y son hechos consumados.
           </p>
           <div className="flex gap-3 mt-2">
             <Users className="h-3.5 w-3.5 text-muted-foreground" />
-            <p className="text-[11px] text-muted-foreground">Fuente de usuarios: <code className="font-mono">/api/admin/stats</code> (agrupado por plan). Fuente de precios: <code className="font-mono">src/lib/limits.ts</code> (PLAN_PRICES_COP).</p>
+            <p className="text-[11px] text-muted-foreground">Fuentes: <code className="font-mono">/api/admin/stats</code> (usuarios por plan) + <code className="font-mono">/api/admin/finance</code> (compras aprobadas) + <code className="font-mono">src/lib/limits.ts</code> (precios).</p>
           </div>
         </div>
       </div>

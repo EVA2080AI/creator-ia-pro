@@ -62,3 +62,47 @@ export function useAdminAnalytics(isAdmin: boolean, activeTab: string) {
 
   return { data, loading, refresh: fetchAnalytics };
 }
+
+export interface FinanceBreakdownItem {
+  packId: string;
+  label: string;
+  kind: "recarga" | "suscripcion";
+  items: number;
+  revenueCop: number;
+  creditsGranted: number;
+}
+
+export interface FinanceData {
+  revenueCop: number;
+  salesCount: number;
+  breakdown: FinanceBreakdownItem[];
+  lastPurchase: {
+    packId: string;
+    label: string;
+    amountCop: number;
+    creditsGranted: number;
+    createdAt: string;
+  } | null;
+}
+
+export function useAdminFinance(isAdmin: boolean, activeTab: string) {
+  const [data, setData] = useState<FinanceData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchFinance = useCallback(async () => {
+    if (!isAdmin) return;
+    setLoading(true);
+    setError(null);
+    const res = await api<FinanceData>("/api/admin/finance");
+    if (res.ok) setData(res.data!);
+    else setError(res.error || "No se pudo cargar la información financiera.");
+    setLoading(false);
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (activeTab === "finance") fetchFinance();
+  }, [activeTab, fetchFinance]);
+
+  return { data, loading, error, refresh: fetchFinance };
+}

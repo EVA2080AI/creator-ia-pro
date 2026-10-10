@@ -38,3 +38,15 @@ export const PLAN_PRICES_COP: Record<string, number> = {
   agencia: 699_900,
   pyme: 1_499_900,
 };
+
+/**
+ * Precio de las recargas puntuales (packs de créditos) en COP. Debe coincidir con
+ * `src/lib/credit-packs.ts` (CREDIT_PACKS[].price). Se usa en el endpoint financiero
+ * para traducir una `transaction.description` que empieza con "pack_200|…" a su
+ * monto cobrado.
+ */
+export const CREDIT_PACK_PRICES_COP: Record<string, number> = {
+  pack_200: 25_000,
+  pack_1000: 90_000,
+  pack_2000: 150_000,
+};

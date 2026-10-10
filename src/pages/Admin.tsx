@@ -20,7 +20,7 @@ import { FinanceTab } from "./admin/tabs/FinanceTab";
 import { SettingsTab } from "./admin/tabs/SettingsTab";
 import { CredentialsTab } from "./admin/tabs/CredentialsTab";
 import { TicketsTab } from "./admin/tabs/TicketsTab";
-import { useAdminData, useAdminAnalytics } from "./admin/hooks/useAdminData";
+import { useAdminData, useAdminAnalytics, useAdminFinance } from "./admin/hooks/useAdminData";
 import { cn } from "@/lib/utils";
 
 const Admin = () => {
@@ -33,6 +33,7 @@ const Admin = () => {
 
   const { users, loadingUsers, fetchUsers } = useAdminData(!!isAdmin);
   const { data: analyticsData, loading: loadingAnalytics } = useAdminAnalytics(!!isAdmin, activeTab);
+  const { data: financeData, loading: loadingFinance, error: financeError } = useAdminFinance(!!isAdmin, activeTab);
 
   // Sync tab from URL query param
   useEffect(() => {
@@ -243,6 +244,9 @@ const Admin = () => {
               <FinanceTab
                 tiers={analyticsData?.tiers}
                 loading={loadingAnalytics}
+                finance={financeData}
+                financeLoading={loadingFinance}
+                financeError={financeError}
               />
             )}
             {activeTab === "credentials" && (
