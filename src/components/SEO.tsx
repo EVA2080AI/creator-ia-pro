@@ -50,9 +50,6 @@ export function SEO({
       {/* og:url por página: sin esto, compartir /pricing o una herramienta en redes
           atribuía la tarjeta a la portada (el og:url fijo que vivía en index.html). */}
       {canonical && <meta property="og:url" content={canonical} />}
-
-      {/* Theme */}
-      <meta name="theme-color" content="#A855F7" />
     </Helmet>
   );
 }
