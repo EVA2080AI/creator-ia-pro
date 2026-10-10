@@ -168,17 +168,17 @@ const ProductBacklog = () => {
   if (!isAdmin) {
     return (
       <div className="flex h-[80vh] flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-zinc-100 border border-zinc-200 mb-6">
-          <Shield className="h-8 w-8 text-zinc-400" />
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted border border-border mb-6">
+          <Shield className="h-8 w-8 text-muted-foreground" />
         </div>
-        <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Acceso Restringido</h1>
-        <p className="text-sm text-zinc-500 mt-2 max-w-xs mx-auto">
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Acceso Restringido</h1>
+        <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
           Esta página contiene información interna de desarrollo y solo es accesible para administradores.
         </p>
-        <Button 
-          onClick={() => navigate("/dashboard")} 
-          variant="outline" 
-          className="mt-8 rounded-xl border-zinc-200 hover:bg-zinc-50"
+        <Button
+          onClick={() => navigate("/dashboard")}
+          variant="outline"
+          className="mt-8 rounded-xl"
         >
           <ArrowLeft className="w-4 h-4 mr-2" /> Volver al Dashboard
         </Button>
