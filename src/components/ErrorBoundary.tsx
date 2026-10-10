@@ -120,26 +120,26 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-6">
-          <div className="max-w-lg w-full bg-white rounded-3xl shadow-xl border border-zinc-100 p-8 md:p-12">
+        <div className="min-h-screen bg-background flex items-center justify-center p-6">
+          <div className="max-w-lg w-full bg-card rounded-3xl shadow-xl border border-border p-8 md:p-12">
             <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 rounded-2xl bg-rose-100 flex items-center justify-center mb-6">
-                <AlertCircle className="w-10 h-10 text-rose-500" />
+              <div className="w-20 h-20 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-6">
+                <AlertCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
               </div>
 
-              <h1 className="text-2xl md:text-3xl font-black text-zinc-900 tracking-tight mb-3">
+              <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-3">
                 {this.state.esChunk ? "La app se actualizó" : "Algo salió mal"}
               </h1>
 
-              <p className="text-zinc-500 mb-6 leading-relaxed">
+              <p className="text-muted-foreground mb-6 leading-relaxed">
                 {this.state.esChunk
                   ? "Salió una versión nueva mientras tenías esta pestaña abierta. Recárgala para seguir donde ibas."
                   : "Lo sentimos, ha ocurrido un error inesperado. Nuestro equipo ha sido notificado."}
               </p>
 
               {this.state.errorId && (
-                <div className="mb-6 p-3 bg-zinc-100 rounded-xl w-full">
-                  <p className="text-xs text-zinc-400 font-mono">
+                <div className="mb-6 p-3 bg-muted rounded-xl w-full">
+                  <p className="text-xs text-muted-foreground font-mono">
                     Error ID: {this.state.errorId}
                   </p>
                 </div>
@@ -169,7 +169,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
               <button
                 onClick={() => window.location.href = "/"}
-                className="mt-4 text-sm text-zinc-400 hover:text-primary transition-colors flex items-center gap-1"
+                className="mt-4 text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
               >
                 <Home className="w-4 h-4" />
                 Volver al inicio
