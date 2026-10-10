@@ -176,7 +176,7 @@ const Profile = () => {
                   <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/50 border border-border">
                     <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
                     <span className="text-sm text-muted-foreground">{user?.email}</span>
-                    <span className="ml-auto text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">Verificado</span>
+                    <span className="ml-auto text-[10px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">Verificado</span>
                   </div>
                 </div>
                 <div>
