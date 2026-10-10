@@ -24,3 +24,17 @@ export const PLAN_MONTHLY_CREDITS: Record<string, number> = {
   agencia: 8_000,
   pyme: 20_000,
 };
+
+/**
+ * Precio mensual del plan en COP, en pesos (no centavos). Fuente de verdad para el
+ * panel admin financiero (MRR estimado = usuarios por plan × este precio). Debe
+ * coincidir con `src/pages/Pricing.tsx` (PLANS[].price): si cambia allá, cambia AQUÍ.
+ * "empresarial" es a medida y no se incluye.
+ */
+export const PLAN_PRICES_COP: Record<string, number> = {
+  free: 0,
+  creador: 149_900,
+  pro: 349_900,
+  agencia: 699_900,
+  pyme: 1_499_900,
+};

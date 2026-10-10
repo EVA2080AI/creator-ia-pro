@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { AdminUser } from "../types";
+import type { TierRow } from "../components/OpenRouterProjection";
 
 async function api<T>(path: string, init?: RequestInit): Promise<{ ok: boolean; error?: string; data?: T }> {
   try {
@@ -43,6 +44,7 @@ export function useAdminAnalytics(isAdmin: boolean, activeTab: string) {
     conversionRate: number;
     toolUsage: { name: string; count: number; color: string }[];
     dailyCredits: { name: string; credits: number }[];
+    tiers?: TierRow[];
   } | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -55,7 +57,7 @@ export function useAdminAnalytics(isAdmin: boolean, activeTab: string) {
   }, [isAdmin]);
 
   useEffect(() => {
-    if (activeTab === "analytics") fetchAnalytics();
+    if (activeTab === "analytics" || activeTab === "finance") fetchAnalytics();
   }, [activeTab, fetchAnalytics]);
 
   return { data, loading, refresh: fetchAnalytics };

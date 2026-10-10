@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
-import { 
-  Shield, Users, Loader2, Zap, Settings, 
-  BarChart2, Activity, Rocket, Image, Video, 
+import {
+  Shield, Users, Loader2, Zap, Settings,
+  BarChart2, Activity, Rocket, Image, Video,
   Code2, FileText, Globe, DollarSign, LogOut,
-  ChevronRight, LayoutDashboard, Database, KeyRound, Ticket
+  ChevronRight, LayoutDashboard, Database, KeyRound, Ticket,
+  ListTodo, Server
 } from "lucide-react";
 import { AdminUser } from "./admin/types";
 import { CreditModal } from "./admin/components/CreditModal";
@@ -15,6 +16,7 @@ import { AdminBootstrap } from "./admin/components/AdminBootstrap";
 import { UsersTab } from "./admin/tabs/UsersTab";
 import { RolesTab } from "./admin/tabs/RolesTab";
 import { AnalyticsTab } from "./admin/tabs/AnalyticsTab";
+import { FinanceTab } from "./admin/tabs/FinanceTab";
 import { SettingsTab } from "./admin/tabs/SettingsTab";
 import { CredentialsTab } from "./admin/tabs/CredentialsTab";
 import { TicketsTab } from "./admin/tabs/TicketsTab";
@@ -26,7 +28,7 @@ const Admin = () => {
   const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<"users" | "roles" | "analytics" | "overview" | "settings" | "credentials" | "tickets">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "roles" | "analytics" | "finance" | "overview" | "settings" | "credentials" | "tickets">("users");
   const [creditModalUser, setCreditModalUser] = useState<AdminUser | null>(null);
 
   const { users, loadingUsers, fetchUsers } = useAdminData(!!isAdmin);
@@ -39,6 +41,7 @@ const Admin = () => {
     if (tab === "usuarios") setActiveTab("users");
     else if (tab === "roles") setActiveTab("roles");
     else if (tab === "analytics") setActiveTab("analytics");
+    else if (tab === "finanzas") setActiveTab("finance");
     else if (tab === "config") setActiveTab("settings");
     else if (tab === "credenciales") setActiveTab("credentials");
     else if (tab === "tickets") setActiveTab("tickets");
@@ -47,7 +50,7 @@ const Admin = () => {
   const handleTabChange = (tab: typeof activeTab) => {
     setActiveTab(tab);
     const searchParams = new URLSearchParams(window.location.search);
-    const tabMap = { users: "usuarios", roles: "roles", analytics: "analytics", settings: "config", overview: "overview", credentials: "credenciales", tickets: "tickets" };
+    const tabMap = { users: "usuarios", roles: "roles", analytics: "analytics", finance: "finanzas", settings: "config", overview: "overview", credentials: "credenciales", tickets: "tickets" };
     searchParams.set("tab", tabMap[tab]);
     window.history.replaceState(null, "", `${window.location.pathname}?${searchParams.toString()}`);
   };
@@ -118,6 +121,7 @@ const Admin = () => {
     { id: "users", label: "Usuarios", icon: Users },
     { id: "roles", label: "Seguridad", icon: Shield },
     { id: "analytics", label: "Métricas", icon: BarChart2 },
+    { id: "finance", label: "Finanzas", icon: DollarSign },
     { id: "credentials", label: "Credenciales", icon: KeyRound },
     { id: "tickets", label: "Tickets", icon: Ticket },
     { id: "settings", label: "Infraestructura", icon: Settings },
@@ -142,6 +146,25 @@ const Admin = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Accesos directos a /product-backlog (tickets) y /system-status (estado real
+              de servicios externos): viven como pantallas separadas pero el admin es el
+              lugar donde el super-admin espera verlo todo (pedido 2026-10-10). */}
+          <div className="hidden md:flex items-center gap-2 mr-2">
+            <Link
+              to="/product-backlog"
+              className="h-9 px-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all inline-flex items-center gap-2 text-xs font-bold"
+            >
+              <ListTodo className="h-3.5 w-3.5" />
+              Backlog
+            </Link>
+            <Link
+              to="/system-status"
+              className="h-9 px-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all inline-flex items-center gap-2 text-xs font-bold"
+            >
+              <Server className="h-3.5 w-3.5" />
+              Estado
+            </Link>
+          </div>
           <div className="hidden md:flex items-center gap-6 mr-6">
             <div className="text-right">
               <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Estado Núcleo</p>
@@ -211,9 +234,15 @@ const Admin = () => {
               />
             )}
             {activeTab === "analytics" && (
-              <AnalyticsTab 
-                data={analyticsData} 
-                loading={loadingAnalytics} 
+              <AnalyticsTab
+                data={analyticsData}
+                loading={loadingAnalytics}
+              />
+            )}
+            {activeTab === "finance" && (
+              <FinanceTab
+                tiers={analyticsData?.tiers}
+                loading={loadingAnalytics}
               />
             )}
             {activeTab === "credentials" && (
