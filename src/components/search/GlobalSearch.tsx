@@ -95,12 +95,12 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
           initial={{ opacity: 0, scale: 0.95, y: -20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -20 }}
-          className="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden"
+          className="w-full max-w-xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center gap-3 px-4 py-4 border-b border-zinc-100">
-            <Search className="h-5 w-5 text-zinc-400" />
+          <div className="flex items-center gap-3 px-4 py-4 border-b border-border">
+            <Search className="h-5 w-5 text-muted-foreground" />
             <input
               ref={inputRef}
               type="text"
@@ -108,36 +108,36 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1 bg-transparent outline-none text-zinc-900 placeholder:text-zinc-400"
+              className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
             />
-            <div className="flex items-center gap-1 text-xs text-zinc-400">
-              <kbd className="px-2 py-1 bg-zinc-100 rounded font-mono">⌘K</kbd>
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <kbd className="px-2 py-1 bg-muted rounded font-mono">⌘K</kbd>
             </div>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-zinc-100 rounded-lg transition-colors"
+              className="p-1 hover:bg-muted rounded-lg transition-colors"
             >
-              <X className="h-4 w-4 text-zinc-400" />
+              <X className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
 
           {/* Results */}
           <div className="max-h-[50vh] overflow-y-auto">
             {results.length === 0 && query && (
-              <div className="p-8 text-center text-zinc-500">
+              <div className="p-8 text-center text-muted-foreground">
                 <p>No se encontraron resultados</p>
                 <p className="text-sm mt-1">Intenta con otra búsqueda</p>
               </div>
             )}
 
             {results.length === 0 && !query && (
-              <div className="p-8 text-center text-zinc-400">
+              <div className="p-8 text-center text-muted-foreground">
                 <Command className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">Escribe para buscar</p>
                 <div className="flex gap-2 justify-center mt-4 text-xs">
-                  <span className="px-2 py-1 bg-zinc-100 rounded">↑↓ navegar</span>
-                  <span className="px-2 py-1 bg-zinc-100 rounded">↵ seleccionar</span>
-                  <span className="px-2 py-1 bg-zinc-100 rounded">esc cerrar</span>
+                  <span className="px-2 py-1 bg-muted rounded">↑↓ navegar</span>
+                  <span className="px-2 py-1 bg-muted rounded">↵ seleccionar</span>
+                  <span className="px-2 py-1 bg-muted rounded">esc cerrar</span>
                 </div>
               </div>
             )}
@@ -154,24 +154,24 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
                     onClose();
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                    isSelected ? 'bg-primary/5' : 'hover:bg-zinc-50'
+                    isSelected ? 'bg-primary/10' : 'hover:bg-muted'
                   }`}
                   onMouseEnter={() => setSelectedIndex(index)}
                 >
                   <div
                     className={`p-2 rounded-lg ${
-                      isSelected ? 'bg-primary/10 text-primary' : 'bg-zinc-100 text-zinc-600'
+                      isSelected ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
                     }`}
                   >
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-zinc-900">{result.title}</p>
+                    <p className="text-sm font-medium text-foreground">{result.title}</p>
                     {result.subtitle && (
-                      <p className="text-xs text-zinc-500">{result.subtitle}</p>
+                      <p className="text-xs text-muted-foreground">{result.subtitle}</p>
                     )}
                   </div>
-                  <span className="text-[10px] uppercase tracking-wider text-zinc-400">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                     {result.category}
                   </span>
                 </button>
@@ -180,15 +180,15 @@ export function GlobalSearch({ isOpen, onClose }: GlobalSearchProps) {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-2 border-t border-zinc-100 bg-zinc-50 text-xs text-zinc-400 flex items-center justify-between">
+          <div className="px-4 py-2 border-t border-border bg-muted/50 text-xs text-muted-foreground flex items-center justify-between">
             <span>{results.length} resultados</span>
             <div className="flex gap-3">
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-white rounded border">↑↓</kbd>
+                <kbd className="px-1.5 py-0.5 bg-card rounded border border-border">↑↓</kbd>
                 <span>navegar</span>
               </span>
               <span className="flex items-center gap-1">
-                <kbd className="px-1.5 py-0.5 bg-white rounded border">↵</kbd>
+                <kbd className="px-1.5 py-0.5 bg-card rounded border border-border">↵</kbd>
                 <span>seleccionar</span>
               </span>
             </div>
