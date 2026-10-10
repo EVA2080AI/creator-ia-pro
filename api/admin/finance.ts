@@ -11,7 +11,7 @@
 // desde los `tiers` que /api/admin/stats devuelve). Este endpoint es solo
 // ingresos reales + última compra + desglose por item vendido.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { and, eq, gte, desc } from "drizzle-orm";
+import { and, eq, gte, lte, ne, isNotNull, asc, desc } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { requireAdmin } from "../_lib/require-admin.js";
 import { CREDIT_PACK_PRICES_COP, PLAN_PRICES_COP } from "../../src/lib/limits.js";
@@ -39,13 +39,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!admin) return;
 
   const db = getDb();
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAhead = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-  const approved = await db
-    .select()
-    .from(schema.transaction)
-    .where(and(eq(schema.transaction.type, "bold_approved"), gte(schema.transaction.createdAt, thirtyDaysAgo)))
-    .orderBy(desc(schema.transaction.createdAt));
+  const [approved, renewalsRows] = await Promise.all([
+    db
+      .select()
+      .from(schema.transaction)
+      .where(and(eq(schema.transaction.type, "bold_approved"), gte(schema.transaction.createdAt, thirtyDaysAgo)))
+      .orderBy(desc(schema.transaction.createdAt)),
+    // Planes pagados que vencen en los próximos 30 días — mismo criterio que el cron
+    // de recordatorios (api/cron/subscription-renewals.ts) pero con la ventana ampliada
+    // para que el admin vea de un vistazo quién está por renovar, no solo los de 3 días.
+    db
+      .select({
+        userId: schema.profile.userId,
+        name: schema.user.name,
+        email: schema.user.email,
+        tier: schema.profile.subscriptionTier,
+        expiresAt: schema.profile.subscriptionExpiresAt,
+      })
+      .from(schema.profile)
+      .innerJoin(schema.user, eq(schema.user.id, schema.profile.userId))
+      .where(and(
+        ne(schema.profile.subscriptionTier, "free"),
+        isNotNull(schema.profile.subscriptionExpiresAt),
+        gte(schema.profile.subscriptionExpiresAt, now),
+        lte(schema.profile.subscriptionExpiresAt, thirtyDaysAhead),
+      ))
+      .orderBy(asc(schema.profile.subscriptionExpiresAt))
+      .limit(20),
+  ]);
 
   let revenueCop = 0;
   const byItem = new Map<string, { items: number; revenueCop: number; creditsGranted: number }>();
@@ -81,11 +106,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     : null;
 
+  // Expectedia estimada por renovar: si TODOS los que vencen en 30d renuevan en su mismo plan,
+  // suma los precios. Es un techo (el cron real baja a Free a quien no paga), ver el aviso en el UI.
+  const upcomingRenewals = renewalsRows.map((r) => {
+    const expiresAt = r.expiresAt as Date;
+    const daysLeft = Math.max(0, Math.ceil((expiresAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)));
+    const tier = r.tier ?? "free";
+    return {
+      userId: r.userId,
+      name: r.name,
+      email: r.email,
+      tier,
+      tierLabel: PACK_LABEL[tier] ?? tier,
+      expiresAt: expiresAt.toISOString(),
+      daysLeft,
+      priceCop: PLAN_PRICES_COP[tier] ?? 0,
+    };
+  });
+  const renewalsExpected7d = upcomingRenewals.filter((r) => r.daysLeft <= 7);
+  const renewalsPipeline30dCop = upcomingRenewals.reduce((a, r) => a + r.priceCop, 0);
+
   res.status(200).json({
     ok: true,
     revenueCop,
     salesCount: approved.length,
     breakdown,
     lastPurchase,
+    upcomingRenewals,
+    renewalsNext7Count: renewalsExpected7d.length,
+    renewalsPipeline30dCop,
   });
 }

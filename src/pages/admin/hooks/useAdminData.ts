@@ -72,6 +72,17 @@ export interface FinanceBreakdownItem {
   creditsGranted: number;
 }
 
+export interface UpcomingRenewal {
+  userId: string;
+  name: string;
+  email: string;
+  tier: string;
+  tierLabel: string;
+  expiresAt: string;
+  daysLeft: number;
+  priceCop: number;
+}
+
 export interface FinanceData {
   revenueCop: number;
   salesCount: number;
@@ -83,6 +94,9 @@ export interface FinanceData {
     creditsGranted: number;
     createdAt: string;
   } | null;
+  upcomingRenewals: UpcomingRenewal[];
+  renewalsNext7Count: number;
+  renewalsPipeline30dCop: number;
 }
 
 export function useAdminFinance(isAdmin: boolean, activeTab: string) {

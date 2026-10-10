@@ -7,7 +7,7 @@
 // Ingresos reales = sum(transactions type='bold_approved' últimos 30d, con el
 // monto en COP leído de CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP según el
 // packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
-import { Loader2, DollarSign, Users, Info, Receipt, Clock } from "lucide-react";
+import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock } from "lucide-react";
 import { PLAN_PRICES_COP, PLAN_MONTHLY_CREDITS } from "@/lib/limits";
 import { normalizeTier } from "@/lib/ai/models";
 import type { TierRow } from "../components/OpenRouterProjection";
@@ -228,16 +228,93 @@ export function FinanceTab({
         )}
       </div>
 
+      {!financeLoading && !financeError && finance && (
+        <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-2xl bg-muted border border-border flex items-center justify-center">
+              <CalendarClock className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Próximas renovaciones</h3>
+              <p className="text-[11px] text-muted-foreground font-medium">Planes pagados que vencen en los próximos 30 días</p>
+            </div>
+          </div>
+
+          {finance.upcomingRenewals.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-muted/40 p-6 text-center">
+              <p className="text-sm text-muted-foreground">Nadie vence en los próximos 30 días.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid sm:grid-cols-2 gap-4 mb-6">
+                <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-1">Vencen esta semana</p>
+                  <p className="text-2xl font-black font-mono text-foreground">{finance.renewalsNext7Count}</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">de {finance.upcomingRenewals.length} que vencen en los próximos 30 días</p>
+                </div>
+                <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Pipeline 30d (si todos renuevan)</p>
+                  <p className="text-2xl font-black font-mono text-foreground">{cop(finance.renewalsPipeline30dCop)}</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">Techo si cada uno paga su mismo plan</p>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="text-[10px] font-black uppercase tracking-widest text-muted-foreground border-b border-border">
+                      <th className="py-2 pr-4">Usuario</th>
+                      <th className="py-2 pr-4">Plan</th>
+                      <th className="py-2 pr-4">Vence</th>
+                      <th className="py-2 pr-4">En</th>
+                      <th className="py-2">Precio</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {finance.upcomingRenewals.map((r) => {
+                      const chipClass = r.daysLeft <= 3
+                        ? "bg-rose-500/10 text-rose-700 dark:text-rose-400"
+                        : r.daysLeft <= 7
+                          ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                          : "bg-muted text-muted-foreground";
+                      return (
+                        <tr key={r.userId} className="border-b border-border/50 text-[13px] text-foreground">
+                          <td className="py-2 pr-4">
+                            <div className="font-bold">{r.name}</div>
+                            <div className="text-[11px] text-muted-foreground">{r.email}</div>
+                          </td>
+                          <td className="py-2 pr-4 font-mono">{TIER_LABEL[r.tier] ?? r.tier}</td>
+                          <td className="py-2 pr-4 font-mono text-muted-foreground">{new Date(r.expiresAt).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}</td>
+                          <td className="py-2 pr-4">
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-widest ${chipClass}`}>
+                              {r.daysLeft === 0 ? "hoy" : r.daysLeft === 1 ? "1 día" : `${r.daysLeft} días`}
+                            </span>
+                          </td>
+                          <td className="py-2 font-mono">{r.priceCop ? cop(r.priceCop) : "—"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-[11px] text-muted-foreground mt-3">
+                El cron <code className="font-mono">subscription-renewals</code> manda un recordatorio automático 3 días antes de cada vencimiento y baja a Free a quien no pague tras 3 días de gracia.
+              </p>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="rounded-2xl border border-border bg-muted/30 p-4 flex gap-3">
         <Info className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
         <div className="space-y-1">
           <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Cómo se calcula</p>
           <p className="text-[12px] text-muted-foreground leading-relaxed">
-            El MRR es una ESTIMACIÓN proyectiva (usuarios × precio de su plan actual). Los planes duran 30 días y <strong className="text-foreground">no se renuevan automáticamente</strong> (ver <code className="font-mono text-xs">/pricing</code> FAQ), así que es un techo si todos renuevan a tiempo. Los <strong className="text-foreground">ingresos reales</strong> de abajo salen de las compras aprobadas por Bold (transacciones <code className="font-mono text-xs">bold_approved</code> de los últimos 30 días) y son hechos consumados.
+            El MRR es una ESTIMACIÓN proyectiva (usuarios × precio de su plan actual). Los planes duran 30 días y <strong className="text-foreground">no se renuevan automáticamente</strong> (ver <code className="font-mono text-xs">/pricing</code> FAQ), así que es un techo si todos renuevan a tiempo. Los <strong className="text-foreground">ingresos reales</strong> salen de las compras aprobadas por Bold (transacciones <code className="font-mono text-xs">bold_approved</code> de los últimos 30 días) y son hechos consumados. Las <strong className="text-foreground">próximas renovaciones</strong> son los perfiles cuyo <code className="font-mono text-xs">subscription_expires_at</code> cae en los próximos 30 días.
           </p>
           <div className="flex gap-3 mt-2">
             <Users className="h-3.5 w-3.5 text-muted-foreground" />
-            <p className="text-[11px] text-muted-foreground">Fuentes: <code className="font-mono">/api/admin/stats</code> (usuarios por plan) + <code className="font-mono">/api/admin/finance</code> (compras aprobadas) + <code className="font-mono">src/lib/limits.ts</code> (precios).</p>
+            <p className="text-[11px] text-muted-foreground">Fuentes: <code className="font-mono">/api/admin/stats</code> (usuarios por plan) + <code className="font-mono">/api/admin/finance</code> (compras + renovaciones) + <code className="font-mono">src/lib/limits.ts</code> (precios).</p>
           </div>
         </div>
       </div>
