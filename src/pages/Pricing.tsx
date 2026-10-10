@@ -301,7 +301,7 @@ export default function Pricing() {
             el chat, donde ya eligió claro u oscuro. */}
         <LandingHeader themed />
 
-        <div className="pt-20 lg:pt-32 pb-40 relative z-10">
+        <div className="pt-32 lg:pt-40 pb-40 relative z-10">
           
           {/* ── Hero ────────────────────────────────────────────────────────── */}
           <section className="relative px-6 mb-24 overflow-visible">
