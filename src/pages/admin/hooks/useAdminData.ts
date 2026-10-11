@@ -89,6 +89,15 @@ export interface DailyRevenue {
   salesCount: number;
 }
 
+export interface TopClient {
+  userId: string;
+  name: string;
+  email: string;
+  revenueCop: number;
+  purchases: number;
+  lastPurchaseAt: string;
+}
+
 export interface FinanceData {
   revenueCop: number;
   salesCount: number;
@@ -104,6 +113,7 @@ export interface FinanceData {
   renewalsNext7Count: number;
   renewalsPipeline30dCop: number;
   dailyRevenue: DailyRevenue[];
+  topClients: TopClient[];
 }
 
 export function useAdminFinance(isAdmin: boolean, activeTab: string) {

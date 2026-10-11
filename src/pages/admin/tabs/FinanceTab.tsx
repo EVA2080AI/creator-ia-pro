@@ -7,7 +7,7 @@
 // Ingresos reales = sum(transactions type='bold_approved' últimos 30d, con el
 // monto en COP leído de CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP según el
 // packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
-import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity } from "lucide-react";
+import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy } from "lucide-react";
 import { PLAN_PRICES_COP, PLAN_MONTHLY_CREDITS } from "@/lib/limits";
 import { normalizeTier } from "@/lib/ai/models";
 import type { TierRow } from "../components/OpenRouterProjection";
@@ -362,6 +362,63 @@ export function FinanceTab({
                 El cron <code className="font-mono">subscription-renewals</code> manda un recordatorio automático 3 días antes de cada vencimiento y baja a Free a quien no pague tras 3 días de gracia.
               </p>
             </>
+          )}
+        </div>
+      )}
+
+      {!financeLoading && !financeError && finance && (
+        <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-2xl bg-muted border border-border flex items-center justify-center">
+              <Trophy className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Top 5 clientes · últimos 30 días</h3>
+              <p className="text-[11px] text-muted-foreground font-medium">Quién movió más caja este mes</p>
+            </div>
+          </div>
+
+          {finance.topClients.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-muted/40 p-6 text-center">
+              <p className="text-sm text-muted-foreground">Sin compras aprobadas en los últimos 30 días.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-[10px] font-black uppercase tracking-widest text-muted-foreground border-b border-border">
+                    <th className="py-2 pr-2 w-8">#</th>
+                    <th className="py-2 pr-4">Cliente</th>
+                    <th className="py-2 pr-4 text-right">Ingreso</th>
+                    <th className="py-2 pr-4 text-right">Compras</th>
+                    <th className="py-2 text-right">Última</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {finance.topClients.map((c, i) => (
+                    <tr key={c.userId} className="border-b border-border/50 text-[13px] text-foreground">
+                      <td className="py-2 pr-2">
+                        <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-black ${
+                          i === 0 ? "bg-amber-500/15 text-amber-700 dark:text-amber-400"
+                          : i === 1 ? "bg-zinc-400/15 text-zinc-700 dark:text-zinc-300"
+                          : i === 2 ? "bg-orange-500/15 text-orange-700 dark:text-orange-400"
+                          : "bg-muted text-muted-foreground"
+                        }`}>{i + 1}</span>
+                      </td>
+                      <td className="py-2 pr-4">
+                        <div className="font-bold">{c.name}</div>
+                        <div className="text-[11px] text-muted-foreground">{c.email}</div>
+                      </td>
+                      <td className="py-2 pr-4 font-mono text-right font-bold">{cop(c.revenueCop)}</td>
+                      <td className="py-2 pr-4 font-mono text-right text-muted-foreground">{c.purchases}</td>
+                      <td className="py-2 font-mono text-right text-muted-foreground text-[11px]">
+                        {new Date(c.lastPurchaseAt).toLocaleDateString("es-CO", { day: "numeric", month: "short" })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}

@@ -11,7 +11,7 @@
 // desde los `tiers` que /api/admin/stats devuelve). Este endpoint es solo
 // ingresos reales + última compra + desglose por item vendido.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { and, eq, gte, lte, ne, isNotNull, asc, desc } from "drizzle-orm";
+import { and, eq, gte, lte, ne, isNotNull, asc, desc, inArray } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { requireAdmin } from "../_lib/require-admin.js";
 import { CREDIT_PACK_PRICES_COP, PLAN_PRICES_COP } from "../../src/lib/limits.js";
@@ -81,6 +81,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
     dayMap.set(d.toISOString().slice(0, 10), { revenueCop: 0, salesCount: 0 });
   }
+  // Agregado por cliente — para el "top 5 clientes del mes": quién movió más caja
+  // en los últimos 30 días. Se agrega en el mismo paso para no recorrer dos veces.
+  const byClient = new Map<string, { revenueCop: number; purchases: number; lastPurchaseAt: Date }>();
 
   for (const tx of approved) {
     const packId = (tx.description?.split("|")[0] ?? "").trim();
@@ -94,9 +97,40 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const key = new Date(tx.createdAt).toISOString().slice(0, 10);
     const d = dayMap.get(key);
     if (d) { d.revenueCop += price; d.salesCount++; }
+    const cur = byClient.get(tx.userId) ?? { revenueCop: 0, purchases: 0, lastPurchaseAt: tx.createdAt };
+    cur.revenueCop += price;
+    cur.purchases++;
+    if (tx.createdAt > cur.lastPurchaseAt) cur.lastPurchaseAt = tx.createdAt;
+    byClient.set(tx.userId, cur);
   }
 
   const dailyRevenue = [...dayMap.entries()].map(([date, v]) => ({ date, ...v }));
+
+  // Top 5 clientes por ingreso real del mes. Una sola query extra con `inArray` sobre
+  // los userIds del top (ya ordenados) para traer nombres y correos — no se recorren
+  // todos los clientes para esto.
+  const topIds = [...byClient.entries()]
+    .sort((a, b) => b[1].revenueCop - a[1].revenueCop)
+    .slice(0, 5)
+    .map(([userId]) => userId);
+  const topRows = topIds.length
+    ? await db
+        .select({ id: schema.user.id, name: schema.user.name, email: schema.user.email })
+        .from(schema.user)
+        .where(inArray(schema.user.id, topIds))
+    : [];
+  const topClients = topIds.map((userId) => {
+    const row = topRows.find((r) => r.id === userId);
+    const stats = byClient.get(userId)!;
+    return {
+      userId,
+      name: row?.name ?? "Cliente",
+      email: row?.email ?? "",
+      revenueCop: stats.revenueCop,
+      purchases: stats.purchases,
+      lastPurchaseAt: stats.lastPurchaseAt.toISOString(),
+    };
+  });
 
   const breakdown = [...byItem.entries()]
     .map(([packId, v]) => ({
@@ -148,5 +182,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     renewalsNext7Count: renewalsExpected7d.length,
     renewalsPipeline30dCop,
     dailyRevenue,
+    topClients,
   });
 }
