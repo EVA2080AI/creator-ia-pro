@@ -7,7 +7,7 @@
 // Ingresos reales = sum(transactions type='bold_approved' últimos 30d, con el
 // monto en COP leído de CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP según el
 // packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
-import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock } from "lucide-react";
+import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity } from "lucide-react";
 import { PLAN_PRICES_COP, PLAN_MONTHLY_CREDITS } from "@/lib/limits";
 import { normalizeTier } from "@/lib/ai/models";
 import type { TierRow } from "../components/OpenRouterProjection";
@@ -227,6 +227,67 @@ export function FinanceTab({
           </>
         )}
       </div>
+
+      {!financeLoading && !financeError && finance && finance.dailyRevenue.length > 0 && (
+        <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-2xl bg-muted border border-border flex items-center justify-center">
+              <Activity className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Ingresos diarios 30d</h3>
+              <p className="text-[11px] text-muted-foreground font-medium">Compras aprobadas por día — hover para ver el total</p>
+            </div>
+          </div>
+
+          {(() => {
+            const max = Math.max(1, ...finance.dailyRevenue.map((d) => d.revenueCop));
+            const totalDays = finance.dailyRevenue.length;
+            const avg = Math.round(finance.revenueCop / totalDays);
+            const topDay = finance.dailyRevenue.reduce((best, d) => d.revenueCop > best.revenueCop ? d : best, finance.dailyRevenue[0]);
+            const fmtDay = (iso: string) => new Date(iso + "T12:00:00").toLocaleDateString("es-CO", { day: "numeric", month: "short" });
+            return (
+              <>
+                <div className="grid sm:grid-cols-2 gap-4 mb-5">
+                  <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Promedio diario</p>
+                    <p className="text-xl font-black font-mono text-foreground">{cop(avg)}</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">COP / día (ventana 30d)</p>
+                  </div>
+                  <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Mejor día</p>
+                    <p className="text-xl font-black font-mono text-foreground">{cop(topDay.revenueCop)}</p>
+                    <p className="text-[11px] text-muted-foreground mt-1">{fmtDay(topDay.date)} · {topDay.salesCount.toLocaleString()} compra{topDay.salesCount === 1 ? "" : "s"}</p>
+                  </div>
+                </div>
+
+                <div className="h-32 flex items-end gap-[2px]" role="img" aria-label={`Ingresos diarios de los últimos ${totalDays} días`}>
+                  {finance.dailyRevenue.map((d) => {
+                    const height = max > 0 ? (d.revenueCop / max) * 100 : 0;
+                    const label = `${fmtDay(d.date)}: ${cop(d.revenueCop)} (${d.salesCount} compra${d.salesCount === 1 ? "" : "s"})`;
+                    return (
+                      <div key={d.date} className="flex-1 relative group h-full flex items-end">
+                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 hidden group-hover:block bg-zinc-900 text-white text-[9px] font-bold px-2 py-1 rounded-md whitespace-nowrap z-10">
+                          {label}
+                        </div>
+                        <div
+                          className="w-full bg-muted group-hover:bg-primary/40 rounded-sm transition-all duration-500"
+                          style={{ height: `${Math.max(height, d.revenueCop > 0 ? 4 : 1)}%` }}
+                          title={label}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-2 flex justify-between text-[10px] font-black text-muted-foreground uppercase tracking-widest">
+                  <span>{fmtDay(finance.dailyRevenue[0].date)}</span>
+                  <span>{fmtDay(finance.dailyRevenue[totalDays - 1].date)}</span>
+                </div>
+              </>
+            );
+          })()}
+        </div>
+      )}
 
       {!financeLoading && !financeError && finance && (
         <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">

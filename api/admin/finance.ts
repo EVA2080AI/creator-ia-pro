@@ -74,6 +74,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   let revenueCop = 0;
   const byItem = new Map<string, { items: number; revenueCop: number; creditsGranted: number }>();
+  // 30 slots, uno por día, siempre completos aunque no haya ventas (si no, un día sin
+  // compras desaparece del eje X y el gráfico pintaría un hueco silencioso).
+  const dayMap = new Map<string, { revenueCop: number; salesCount: number }>();
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    dayMap.set(d.toISOString().slice(0, 10), { revenueCop: 0, salesCount: 0 });
+  }
 
   for (const tx of approved) {
     const packId = (tx.description?.split("|")[0] ?? "").trim();
@@ -84,7 +91,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     acc.revenueCop += price;
     acc.creditsGranted += tx.amount;
     byItem.set(packId, acc);
+    const key = new Date(tx.createdAt).toISOString().slice(0, 10);
+    const d = dayMap.get(key);
+    if (d) { d.revenueCop += price; d.salesCount++; }
   }
+
+  const dailyRevenue = [...dayMap.entries()].map(([date, v]) => ({ date, ...v }));
 
   const breakdown = [...byItem.entries()]
     .map(([packId, v]) => ({
@@ -135,5 +147,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     upcomingRenewals,
     renewalsNext7Count: renewalsExpected7d.length,
     renewalsPipeline30dCop,
+    dailyRevenue,
   });
 }

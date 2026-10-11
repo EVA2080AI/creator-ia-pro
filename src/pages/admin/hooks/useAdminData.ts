@@ -83,6 +83,12 @@ export interface UpcomingRenewal {
   priceCop: number;
 }
 
+export interface DailyRevenue {
+  date: string;
+  revenueCop: number;
+  salesCount: number;
+}
+
 export interface FinanceData {
   revenueCop: number;
   salesCount: number;
@@ -97,6 +103,7 @@ export interface FinanceData {
   upcomingRenewals: UpcomingRenewal[];
   renewalsNext7Count: number;
   renewalsPipeline30dCop: number;
+  dailyRevenue: DailyRevenue[];
 }
 
 export function useAdminFinance(isAdmin: boolean, activeTab: string) {
