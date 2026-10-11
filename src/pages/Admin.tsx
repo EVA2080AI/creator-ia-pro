@@ -149,21 +149,26 @@ const Admin = () => {
         <div className="flex items-center gap-3">
           {/* Accesos directos a /product-backlog (tickets) y /system-status (estado real
               de servicios externos): viven como pantallas separadas pero el admin es el
-              lugar donde el super-admin espera verlo todo (pedido 2026-10-10). */}
-          <div className="hidden md:flex items-center gap-2 mr-2">
+              lugar donde el super-admin espera verlo todo (pedido 2026-10-10). En móvil
+              solo el icono (cuadrado 9x9), con texto desde md+. */}
+          <div className="flex items-center gap-1 md:gap-2 md:mr-2">
             <Link
               to="/product-backlog"
-              className="h-9 px-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all inline-flex items-center gap-2 text-xs font-bold"
+              aria-label="Backlog"
+              title="Backlog"
+              className="h-9 w-9 md:w-auto md:px-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all inline-flex items-center justify-center md:justify-start gap-2 text-xs font-bold"
             >
               <ListTodo className="h-3.5 w-3.5" />
-              Backlog
+              <span className="hidden md:inline">Backlog</span>
             </Link>
             <Link
               to="/system-status"
-              className="h-9 px-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all inline-flex items-center gap-2 text-xs font-bold"
+              aria-label="Estado del sistema"
+              title="Estado del sistema"
+              className="h-9 w-9 md:w-auto md:px-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all inline-flex items-center justify-center md:justify-start gap-2 text-xs font-bold"
             >
               <Server className="h-3.5 w-3.5" />
-              Estado
+              <span className="hidden md:inline">Estado</span>
             </Link>
           </div>
           <div className="hidden md:flex items-center gap-6 mr-6">
@@ -177,9 +182,11 @@ const Admin = () => {
           </div>
           <button
             onClick={() => signOut()}
-            className="h-9 px-4 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all flex items-center gap-2 text-xs font-bold"
+            aria-label="Cerrar sesión"
+            title="Cerrar sesión"
+            className="h-9 w-9 md:w-auto md:px-4 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all flex items-center justify-center md:justify-start gap-2 text-xs font-bold"
           >
-            Cerrar Sesión
+            <span className="hidden md:inline">Cerrar Sesión</span>
             <LogOut className="h-3.5 w-3.5" />
           </button>
         </div>
