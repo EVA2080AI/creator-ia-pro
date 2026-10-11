@@ -9,31 +9,7 @@
 // packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
 import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy, TrendingUp, TrendingDown, Minus, Download } from "lucide-react";
 import type { TopClient, UpcomingRenewal, FinanceBreakdownItem } from "../hooks/useAdminData";
-
-/** Serializa un valor como celda CSV: envuelve en comillas si tiene coma, comilla
- *  o salto de línea; escapa comillas duplicándolas (RFC 4180). */
-function csvCell(v: string | number): string {
-  const s = String(v);
-  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-}
-
-/** Convierte un conjunto de filas en un .csv con BOM y lo descarga.
- *  Reusado por el top clientes y las renovaciones próximas — mismo patrón, cada
- *  botón solo mapea sus columnas y nombre de archivo. */
-function downloadCsv(filename: string, header: string[], rows: (string | number)[][]) {
-  // El BOM (U+FEFF) al principio hace que Excel abra el UTF-8 bien; sin eso,
-  // los acentos y la "ñ" salen corruptos al abrir el .csv desde Excel.
-  const csv = "﻿" + [header, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
+import { downloadCsv } from "../csv";
 
 function downloadTopClientsCsv(clients: TopClient[]) {
   downloadCsv(

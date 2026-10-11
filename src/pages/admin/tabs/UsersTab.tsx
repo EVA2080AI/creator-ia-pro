@@ -4,10 +4,26 @@ import { toast } from "sonner";
 import {
   Search, Loader2, RefreshCw, Ban, CheckCircle,
   Coins, Zap, Rocket, Crown, UserCheck, KeyRound,
-  ChevronDown, ChevronUp, UserPlus, Trash2, AlertTriangle
+  ChevronDown, ChevronUp, UserPlus, Trash2, AlertTriangle, Download
 } from "lucide-react";
 import { AdminUser, TIERS } from "../types";
 import { CreateUserModal } from "../components/CreateUserModal";
+import { downloadCsv } from "../csv";
+
+function downloadUsersCsv(users: AdminUser[]) {
+  downloadCsv(
+    `usuarios-${new Date().toISOString().slice(0, 10)}.csv`,
+    ["Nombre", "Email", "Plan", "Créditos", "Registrado", "Activo"],
+    users.map((u) => [
+      u.display_name ?? "",
+      u.email,
+      TIERS[u.subscription_tier]?.label ?? u.subscription_tier,
+      u.credits_balance,
+      new Date(u.created_at).toISOString().slice(0, 10),
+      u.is_active ? "sí" : "no",
+    ]),
+  );
+}
 
 export function UsersTab({
   users,
@@ -96,14 +112,25 @@ export function UsersTab({
             className="flex items-center justify-center gap-2 rounded-xl bg-muted px-4 py-2.5 text-xs font-bold text-muted-foreground hover:bg-accent transition-all active:scale-95"
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            Actualizar
+            <span className="hidden sm:inline">Actualizar</span>
           </button>
+          {users.length > 0 && (
+            <button
+              onClick={() => downloadUsersCsv(users)}
+              className="flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-xs font-bold text-muted-foreground hover:text-foreground hover:bg-muted transition-all active:scale-95"
+              aria-label="Descargar CSV"
+              title="Descargar CSV"
+            >
+              <Download className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">CSV</span>
+            </button>
+          )}
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground hover:bg-primary/90 transition-all active:scale-95"
           >
             <UserPlus className="h-3.5 w-3.5" />
-            Nuevo usuario
+            <span className="hidden sm:inline">Nuevo usuario</span>
           </button>
         </div>
       </div>
