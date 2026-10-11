@@ -10,10 +10,10 @@
 // Nota: el ícono flotante de PerformanceMonitor (abajo-derecha) SOLO existe
 // en dev (`import.meta.env.DEV`). En producción no sale, así que la grabación
 // desde creator-ia.com queda limpia.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Helmet } from "react-helmet-async";
-import { Sparkles, Image as ImageIcon, Code2, FileText, MessageSquare, Zap } from "lucide-react";
+import { Sparkles, Image as ImageIcon, Code2, FileText, MessageSquare, Zap, Volume2, VolumeX, ArrowRight } from "lucide-react";
 
 const SCENES = [
   { key: "hook", durationMs: 3500 },
@@ -26,12 +26,28 @@ const TOTAL = SCENES.reduce((a, s) => a + s.durationMs, 0);
 
 export default function PromoTiktok() {
   const [elapsed, setElapsed] = useState(0);
+  // Arranca MUTED por defecto porque los navegadores bloquean autoplay con
+  // sonido hasta que haya interacción. El toggle en pantalla deja activar la
+  // música cuando Sebastián está listo para grabar.
+  const [muted, setMuted] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     const start = Date.now();
     const id = setInterval(() => setElapsed((Date.now() - start) % TOTAL), 50);
     return () => clearInterval(id);
   }, []);
+
+  // Al desmutear, intenta reproducir — en navegadores que todavía bloquean el
+  // play automático, el click sobre el botón ya cuenta como gesto de usuario.
+  const toggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    const a = audioRef.current;
+    if (!a) return;
+    a.muted = next;
+    if (!next) a.play().catch(() => { /* el navegador puede bloquear si la URL no existe */ });
+  };
 
   let acc = 0;
   const current = SCENES.find((s) => {
@@ -220,17 +236,52 @@ export default function PromoTiktok() {
               <p className="text-sm text-white/60 font-medium mb-10 max-w-[85%]">
                 3.000 créditos · GPT-5 y Claude · chats simultáneos · soporte prioritario
               </p>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.1 }}
+                className="text-[11px] font-black uppercase tracking-[0.3em] text-white/70 mb-3"
+              >
+                Pruébalo gratis en
+              </motion.p>
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.2 }}
-                className="inline-flex items-center gap-2 px-7 py-4 rounded-full bg-white text-black text-sm font-black uppercase tracking-widest"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 1.3, type: "spring", stiffness: 200 }}
+                className="inline-flex items-center gap-3 px-8 py-5 rounded-full bg-white text-black text-base font-black uppercase tracking-widest shadow-2xl shadow-white/20"
               >
                 creator-ia.com
+                <motion.span
+                  animate={{ x: [0, 4, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.4, ease: "easeInOut" }}
+                >
+                  <ArrowRight className="h-5 w-5" />
+                </motion.span>
               </motion.div>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.6 }}
+                className="text-[11px] text-white/40 font-medium mt-4"
+              >
+                Sin tarjeta · 100 créditos de regalo
+              </motion.p>
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Audio opcional — si subes /public/promo-music.mp3 royalty-free, se
+            reproduce al desmutear. Si no, no se oye. Botón mute/unmute arriba
+            a la derecha para controlar antes de grabar. */}
+        <audio ref={audioRef} src="/promo-music.mp3" loop muted preload="auto" />
+        <button
+          onClick={toggleMute}
+          aria-label={muted ? "Activar sonido" : "Silenciar"}
+          title={muted ? "Activar sonido" : "Silenciar"}
+          className="absolute top-5 right-5 z-30 w-9 h-9 rounded-full bg-white/10 border border-white/20 backdrop-blur flex items-center justify-center text-white/80 hover:bg-white/20 hover:text-white transition"
+        >
+          {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        </button>
       </div>
     </div>
   );
