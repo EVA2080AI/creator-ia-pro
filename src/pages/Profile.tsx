@@ -144,9 +144,15 @@ const Profile = () => {
 
   const TIER_LABELS: Record<string, string> = { free: "Free", creador: "Creador", pro: "Pro", agencia: "Agencia", pyme: "Pyme", pymes: "Pymes", admin: "Admin" };
   const tierLabel = TIER_LABELS[profile?.subscriptionTier ?? "free"] ?? "Free";
-  const renewsLabel = profile?.subscriptionExpiresAt
-    ? new Date(profile.subscriptionExpiresAt).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })
+  // Bold no renueva solo — cada pago extiende 30 días; si no pagas, el cron
+  // `subscription-renewals` te baja a Free tras 3 días de gracia. Decir "se
+  // renueva el X" era engañoso: lo correcto es "vence el X" con días restantes.
+  const expiresAt = profile?.subscriptionExpiresAt ? new Date(profile.subscriptionExpiresAt) : null;
+  const expiresLabel = expiresAt
+    ? expiresAt.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })
     : null;
+  const daysLeft = expiresAt ? Math.ceil((expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000)) : null;
+  const expiresUrgent = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7;
   const joinDate = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString("es-ES", { year: "numeric", month: "long", day: "numeric" })
     : "—";
@@ -285,17 +291,26 @@ const Profile = () => {
                 <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-primary" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="font-bold text-foreground">{tierLabel}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {renewsLabel ? `Se renueva el ${renewsLabel}` : "Plan activo"}
+                  <p className="text-xs text-muted-foreground truncate">
+                    {expiresLabel ? `Vence el ${expiresLabel}` : "Plan activo"}
                   </p>
+                  {daysLeft !== null && daysLeft >= 0 && (
+                    <p className={`text-xs font-bold mt-0.5 ${expiresUrgent ? "text-amber-700 dark:text-amber-400" : "text-muted-foreground"}`}>
+                      {daysLeft === 0 ? "Vence hoy" : daysLeft === 1 ? "Vence mañana" : `Faltan ${daysLeft} días`}
+                    </p>
+                  )}
                 </div>
               </div>
-              {renewsLabel && (
+              {expiresLabel && (
                 <button
-                  onClick={() => navigate("/pricing")}
-                  className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-muted border border-border text-muted-foreground text-sm font-bold hover:bg-accent transition-all"
+                  onClick={() => navigate(`/pricing#${profile?.subscriptionTier ?? ""}`)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-bold transition-all ${
+                    expiresUrgent
+                      ? "bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-400 hover:bg-amber-500/20"
+                      : "bg-muted border border-border text-muted-foreground hover:bg-accent"
+                  }`}
                 >
                   Renovar ahora
                   <ChevronRight className="w-4 h-4" />
