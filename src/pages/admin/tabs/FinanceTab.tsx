@@ -8,7 +8,7 @@
 // monto en COP leído de CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP según el
 // packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
 import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy, TrendingUp, TrendingDown, Minus, Download } from "lucide-react";
-import type { TopClient } from "../hooks/useAdminData";
+import type { TopClient, UpcomingRenewal } from "../hooks/useAdminData";
 
 /** Serializa un valor como celda CSV: envuelve en comillas si tiene coma, comilla
  *  o salto de línea; escapa comillas duplicándolas (RFC 4180). */
@@ -17,16 +17,10 @@ function csvCell(v: string | number): string {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-function downloadTopClientsCsv(clients: TopClient[]) {
-  const header = ["Puesto", "Nombre", "Email", "Ingreso (COP)", "Compras", "Última compra"];
-  const rows = clients.map((c, i) => [
-    i + 1,
-    c.name,
-    c.email,
-    c.revenueCop,
-    c.purchases,
-    new Date(c.lastPurchaseAt).toISOString().slice(0, 10),
-  ]);
+/** Convierte un conjunto de filas en un .csv con BOM y lo descarga.
+ *  Reusado por el top clientes y las renovaciones próximas — mismo patrón, cada
+ *  botón solo mapea sus columnas y nombre de archivo. */
+function downloadCsv(filename: string, header: string[], rows: (string | number)[][]) {
   // El BOM (U+FEFF) al principio hace que Excel abra el UTF-8 bien; sin eso,
   // los acentos y la "ñ" salen corruptos al abrir el .csv desde Excel.
   const csv = "﻿" + [header, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
@@ -34,11 +28,41 @@ function downloadTopClientsCsv(clients: TopClient[]) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `top-clientes-30d-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+function downloadTopClientsCsv(clients: TopClient[]) {
+  downloadCsv(
+    `top-clientes-30d-${new Date().toISOString().slice(0, 10)}.csv`,
+    ["Puesto", "Nombre", "Email", "Ingreso (COP)", "Compras", "Última compra"],
+    clients.map((c, i) => [
+      i + 1,
+      c.name,
+      c.email,
+      c.revenueCop,
+      c.purchases,
+      new Date(c.lastPurchaseAt).toISOString().slice(0, 10),
+    ]),
+  );
+}
+
+function downloadRenewalsCsv(renewals: UpcomingRenewal[]) {
+  downloadCsv(
+    `renovaciones-30d-${new Date().toISOString().slice(0, 10)}.csv`,
+    ["Nombre", "Email", "Plan", "Vence", "Días restantes", "Precio (COP)"],
+    renewals.map((r) => [
+      r.name,
+      r.email,
+      r.tierLabel,
+      r.expiresAt.slice(0, 10),
+      r.daysLeft,
+      r.priceCop,
+    ]),
+  );
 }
 import { PLAN_PRICES_COP, PLAN_MONTHLY_CREDITS } from "@/lib/limits";
 import { normalizeTier } from "@/lib/ai/models";
@@ -360,10 +384,21 @@ export function FinanceTab({
             <div className="w-10 h-10 rounded-2xl bg-muted border border-border flex items-center justify-center">
               <CalendarClock className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Próximas renovaciones</h3>
               <p className="text-[11px] text-muted-foreground font-medium">Planes pagados que vencen en los próximos 30 días</p>
             </div>
+            {finance.upcomingRenewals.length > 0 && (
+              <button
+                onClick={() => downloadRenewalsCsv(finance.upcomingRenewals)}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border hover:bg-muted transition-colors text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                aria-label="Descargar CSV"
+                title="Descargar CSV"
+              >
+                <Download className="h-3 w-3" />
+                <span className="hidden sm:inline">CSV</span>
+              </button>
+            )}
           </div>
 
           {finance.upcomingRenewals.length === 0 ? (
