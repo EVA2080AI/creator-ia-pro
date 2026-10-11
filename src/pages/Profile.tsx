@@ -32,6 +32,28 @@ const TX_META: Record<string, { label: string; positive: boolean }> = {
   subscription_change: { label: "Cambio de plan", positive: true },
 };
 
+const TIER_LABEL: Record<string, string> = { creador: "Creador", pro: "Pro", agencia: "Agencia", pyme: "Pyme" };
+
+// `subscription_change` lo usan dos caminos: el webhook de Bold en cada
+// activación ("Plan activado: X (Bold)") y el cron en cada downgrade por
+// vencimiento ("Plan X vencido — bajado a Free (sin renovar)"). Sin parsear
+// la description, al usuario le aparecían ambos como "Cambio de plan +0" en
+// verde y no sabía si había subido o bajado.
+function metaForSubscriptionChange(description: string | null): { label: string; positive: boolean } {
+  if (!description) return { label: "Cambio de plan", positive: true };
+  const expired = description.match(/^Plan (\w+) vencido/);
+  if (expired) {
+    const tier = TIER_LABEL[expired[1]] ?? expired[1];
+    return { label: `Plan ${tier} vencido`, positive: false };
+  }
+  const activated = description.match(/^Plan activado:\s*(\w+)/);
+  if (activated) {
+    const tier = TIER_LABEL[activated[1]] ?? activated[1];
+    return { label: `Plan ${tier} activado`, positive: true };
+  }
+  return { label: "Cambio de plan", positive: true };
+}
+
 const Profile = () => {
   const { user, signOut } = useAuth("/auth");
   const navigate = useNavigate();
@@ -209,7 +231,9 @@ const Profile = () => {
                 <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-6">Últimas transacciones</h2>
                 <div className="space-y-3">
                   {creditHistory.map((tx) => {
-                    const meta = TX_META[tx.type] ?? { label: tx.type, positive: tx.amount > 0 };
+                    const meta = tx.type === "subscription_change"
+                      ? metaForSubscriptionChange(tx.description)
+                      : TX_META[tx.type] ?? { label: tx.type, positive: tx.amount > 0 };
                     return (
                       <div key={tx.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors">
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${meta.positive ? "bg-green-500/10" : "bg-muted"}`}>
