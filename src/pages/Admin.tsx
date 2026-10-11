@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -30,6 +30,14 @@ const Admin = () => {
 
   const [activeTab, setActiveTab] = useState<"users" | "roles" | "analytics" | "finance" | "overview" | "settings" | "credentials" | "tickets">("users");
   const [creditModalUser, setCreditModalUser] = useState<AdminUser | null>(null);
+  const navRef = useRef<HTMLElement>(null);
+
+  // En móvil la barra de tabs es horizontal con scroll: cuando el usuario toca
+  // una tab fuera de vista, la mantenemos visible dentro del contenedor.
+  useEffect(() => {
+    const el = navRef.current?.querySelector<HTMLButtonElement>(`[data-tab="${activeTab}"]`);
+    if (el) el.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [activeTab]);
 
   const { users, loadingUsers, fetchUsers } = useAdminData(!!isAdmin);
   const { data: analyticsData, loading: loadingAnalytics } = useAdminAnalytics(!!isAdmin, activeTab);
@@ -193,32 +201,33 @@ const Admin = () => {
       </header>
 
       {/* ── Layout ── */}
-      <div className="flex-1 flex flex-col md:flex-row max-w-[1600px] mx-auto w-full p-4 md:p-8 gap-8">
-        {/* Sidebar Navigation */}
-        <aside className="w-full md:w-[260px] space-y-1">
-          <p className="px-4 text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Módulos de Gestión</p>
+      <div className="flex-1 flex flex-col md:flex-row max-w-[1600px] mx-auto w-full p-4 md:p-8 gap-4 md:gap-8">
+        {/* Sidebar Navigation — vertical en desktop, tira horizontal scrolleable en móvil */}
+        <aside ref={navRef} className="w-full md:w-[260px] md:space-y-1 md:block flex gap-2 overflow-x-auto md:overflow-visible -mx-4 px-4 md:mx-0 md:px-0 pb-1 md:pb-0 [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
+          <p className="hidden md:block px-4 text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-4">Módulos de Gestión</p>
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
+                data-tab={tab.id}
                 onClick={() => handleTabChange(tab.id)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all group",
+                  "shrink-0 md:w-full flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-xl md:rounded-2xl text-xs md:text-sm font-bold transition-all group whitespace-nowrap",
                   active
                     ? "bg-card border-border shadow-sm text-foreground border"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground border border-transparent"
                 )}
               >
                 <div className={cn(
-                  "h-8 w-8 rounded-lg flex items-center justify-center transition-all",
+                  "h-6 w-6 md:h-8 md:w-8 rounded-md md:rounded-lg flex items-center justify-center transition-all shrink-0",
                   active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground group-hover:bg-accent"
                 )}>
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-3.5 w-3.5 md:h-4 md:w-4" />
                 </div>
                 {tab.label}
-                {active && <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />}
+                {active && <ChevronRight className="hidden md:block ml-auto h-4 w-4 text-muted-foreground" />}
               </button>
             );
           })}
