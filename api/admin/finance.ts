@@ -41,13 +41,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const db = getDb();
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
   const thirtyDaysAhead = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-  const [approved, renewalsRows] = await Promise.all([
+  // Traigo las compras aprobadas de los ÚLTIMOS 60 días en una sola query:
+  // las de 0-30 pintan el "mes actual" (todo lo que ya hace el endpoint); las
+  // de 30-60 van al "mes anterior" solo para la comparación MoM.
+  const [approvedAll, renewalsRows] = await Promise.all([
     db
       .select()
       .from(schema.transaction)
-      .where(and(eq(schema.transaction.type, "bold_approved"), gte(schema.transaction.createdAt, thirtyDaysAgo)))
+      .where(and(eq(schema.transaction.type, "bold_approved"), gte(schema.transaction.createdAt, sixtyDaysAgo)))
       .orderBy(desc(schema.transaction.createdAt)),
     // Planes pagados que vencen en los próximos 30 días — mismo criterio que el cron
     // de recordatorios (api/cron/subscription-renewals.ts) pero con la ventana ampliada
@@ -71,6 +75,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .orderBy(asc(schema.profile.subscriptionExpiresAt))
       .limit(20),
   ]);
+
+  // Separo mes actual (0-30d) vs mes anterior (30-60d) para el MoM.
+  const approved = approvedAll.filter((tx) => tx.createdAt >= thirtyDaysAgo);
+  const approvedPrev = approvedAll.filter((tx) => tx.createdAt < thirtyDaysAgo);
+  const revenueCopPrev30d = approvedPrev.reduce(
+    (a, tx) => a + priceOf((tx.description?.split("|")[0] ?? "").trim()),
+    0,
+  );
+  const salesCountPrev30d = approvedPrev.length;
 
   let revenueCop = 0;
   const byItem = new Map<string, { items: number; revenueCop: number; creditsGranted: number }>();
@@ -172,6 +185,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const renewalsExpected7d = upcomingRenewals.filter((r) => r.daysLeft <= 7);
   const renewalsPipeline30dCop = upcomingRenewals.reduce((a, r) => a + r.priceCop, 0);
 
+  // Crecimiento MoM: % de cambio del mes actual contra el anterior. Si el mes
+  // anterior fue 0, devuelvo null (no es cero, es "no comparable"); el cliente
+  // lo distingue para no pintar "+∞%" o cosas raras.
+  const momGrowthPct = revenueCopPrev30d > 0
+    ? ((revenueCop - revenueCopPrev30d) / revenueCopPrev30d) * 100
+    : null;
+
   res.status(200).json({
     ok: true,
     revenueCop,
@@ -183,5 +203,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     renewalsPipeline30dCop,
     dailyRevenue,
     topClients,
+    revenueCopPrev30d,
+    salesCountPrev30d,
+    momGrowthPct,
   });
 }

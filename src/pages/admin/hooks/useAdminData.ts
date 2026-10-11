@@ -114,6 +114,9 @@ export interface FinanceData {
   renewalsPipeline30dCop: number;
   dailyRevenue: DailyRevenue[];
   topClients: TopClient[];
+  revenueCopPrev30d: number;
+  salesCountPrev30d: number;
+  momGrowthPct: number | null;
 }
 
 export function useAdminFinance(isAdmin: boolean, activeTab: string) {

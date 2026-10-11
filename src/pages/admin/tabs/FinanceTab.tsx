@@ -7,7 +7,7 @@
 // Ingresos reales = sum(transactions type='bold_approved' últimos 30d, con el
 // monto en COP leído de CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP según el
 // packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
-import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy } from "lucide-react";
+import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { PLAN_PRICES_COP, PLAN_MONTHLY_CREDITS } from "@/lib/limits";
 import { normalizeTier } from "@/lib/ai/models";
 import type { TierRow } from "../components/OpenRouterProjection";
@@ -196,6 +196,39 @@ export function FinanceTab({
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Comparación MoM — mes actual (0-30d) vs mes anterior (30-60d).
+                Si no hubo ingresos el mes anterior, "no comparable" en vez de +∞%. */}
+            <div className="grid sm:grid-cols-2 gap-4 mb-6">
+              <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Mes anterior (30-60d)</p>
+                <p className="text-2xl font-black font-mono text-foreground">{cop(finance.revenueCopPrev30d)}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{finance.salesCountPrev30d.toLocaleString()} compra{finance.salesCountPrev30d === 1 ? "" : "s"} aprobada{finance.salesCountPrev30d === 1 ? "" : "s"}</p>
+              </div>
+              {(() => {
+                const growth = finance.momGrowthPct;
+                const isPos = growth !== null && growth > 0.5;
+                const isNeg = growth !== null && growth < -0.5;
+                const [cls, Icon, label] = growth === null
+                  ? ["border-border bg-muted/40 text-muted-foreground", Minus, "Sin comparación"]
+                  : isPos
+                    ? ["border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400", TrendingUp, "Creciendo"]
+                    : isNeg
+                      ? ["border-rose-500/30 bg-rose-500/5 text-rose-700 dark:text-rose-400", TrendingDown, "Bajando"]
+                      : ["border-border bg-muted/40 text-muted-foreground", Minus, "Estable"];
+                return (
+                  <div className={`rounded-2xl border p-4 ${cls}`}>
+                    <p className="text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1.5"><Icon className="h-3 w-3" /> Crecimiento MoM</p>
+                    <p className="text-2xl font-black font-mono text-foreground">
+                      {growth === null ? "—" : `${growth > 0 ? "+" : ""}${growth.toFixed(1)}%`}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      {growth === null ? "No hubo compras en el mes anterior" : `${label} vs mes anterior`}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
 
             {finance.breakdown.length > 0 && (
