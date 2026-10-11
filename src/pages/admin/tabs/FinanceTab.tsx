@@ -7,7 +7,39 @@
 // Ingresos reales = sum(transactions type='bold_approved' últimos 30d, con el
 // monto en COP leído de CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP según el
 // packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
-import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy, TrendingUp, TrendingDown, Minus, Download } from "lucide-react";
+import type { TopClient } from "../hooks/useAdminData";
+
+/** Serializa un valor como celda CSV: envuelve en comillas si tiene coma, comilla
+ *  o salto de línea; escapa comillas duplicándolas (RFC 4180). */
+function csvCell(v: string | number): string {
+  const s = String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function downloadTopClientsCsv(clients: TopClient[]) {
+  const header = ["Puesto", "Nombre", "Email", "Ingreso (COP)", "Compras", "Última compra"];
+  const rows = clients.map((c, i) => [
+    i + 1,
+    c.name,
+    c.email,
+    c.revenueCop,
+    c.purchases,
+    new Date(c.lastPurchaseAt).toISOString().slice(0, 10),
+  ]);
+  // El BOM (U+FEFF) al principio hace que Excel abra el UTF-8 bien; sin eso,
+  // los acentos y la "ñ" salen corruptos al abrir el .csv desde Excel.
+  const csv = "﻿" + [header, ...rows].map((r) => r.map(csvCell).join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `top-clientes-30d-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 import { PLAN_PRICES_COP, PLAN_MONTHLY_CREDITS } from "@/lib/limits";
 import { normalizeTier } from "@/lib/ai/models";
 import type { TierRow } from "../components/OpenRouterProjection";
@@ -405,10 +437,21 @@ export function FinanceTab({
             <div className="w-10 h-10 rounded-2xl bg-muted border border-border flex items-center justify-center">
               <Trophy className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Top 5 clientes · últimos 30 días</h3>
               <p className="text-[11px] text-muted-foreground font-medium">Quién movió más caja este mes</p>
             </div>
+            {finance.topClients.length > 0 && (
+              <button
+                onClick={() => downloadTopClientsCsv(finance.topClients)}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border hover:bg-muted transition-colors text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground"
+                aria-label="Descargar CSV"
+                title="Descargar CSV"
+              >
+                <Download className="h-3 w-3" />
+                <span className="hidden sm:inline">CSV</span>
+              </button>
+            )}
           </div>
 
           {finance.topClients.length === 0 ? (
