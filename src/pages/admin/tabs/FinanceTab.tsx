@@ -7,7 +7,7 @@
 // Ingresos reales = sum(transactions type='bold_approved' últimos 30d, con el
 // monto en COP leído de CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP según el
 // packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
-import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy, TrendingUp, TrendingDown, Minus, Download } from "lucide-react";
+import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy, TrendingUp, TrendingDown, Minus, Download, UserMinus } from "lucide-react";
 import type { TopClient, UpcomingRenewal, FinanceBreakdownItem } from "../hooks/useAdminData";
 import { downloadCsv } from "../csv";
 
@@ -286,6 +286,34 @@ export function FinanceTab({
                   </div>
                 );
               })()}
+            </div>
+
+            {/* Churn — cuántos cayeron a Free por no renovar. Fuente exacta:
+                evento `subscription_change` que inserta el cron en cada downgrade.
+                Rojo si subió, verde si bajó o se mantuvo en 0. */}
+            <div className="grid sm:grid-cols-2 gap-4 mb-6">
+              <div className={`rounded-2xl border p-4 ${finance.churnCount > 0 ? "border-rose-500/30 bg-rose-500/5" : "border-border bg-muted/40"}`}>
+                <p className={`text-[10px] font-black uppercase tracking-widest mb-1 flex items-center gap-1.5 ${finance.churnCount > 0 ? "text-rose-700 dark:text-rose-400" : "text-muted-foreground"}`}>
+                  <UserMinus className="h-3 w-3" /> Churn 30d
+                </p>
+                <p className="text-2xl font-black font-mono text-foreground">{finance.churnCount}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  {finance.churnCount === 0 ? "Nadie bajó a Free este mes" : `${finance.churnCount === 1 ? "Usuario" : "Usuarios"} que no renovaron`}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border bg-muted/40 p-4">
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">Churn mes anterior</p>
+                <p className="text-2xl font-black font-mono text-foreground">{finance.churnCountPrev30d}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  {(() => {
+                    const diff = finance.churnCount - finance.churnCountPrev30d;
+                    if (finance.churnCountPrev30d === 0 && finance.churnCount === 0) return "Sin bajas en ningún mes";
+                    if (diff > 0) return `+${diff} vs este mes · empeorando`;
+                    if (diff < 0) return `${diff} vs este mes · mejorando`;
+                    return "Igual que este mes";
+                  })()}
+                </p>
+              </div>
             </div>
 
             {finance.breakdown.length > 0 && (

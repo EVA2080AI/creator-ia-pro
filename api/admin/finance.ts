@@ -47,7 +47,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Traigo las compras aprobadas de los ÚLTIMOS 60 días en una sola query:
   // las de 0-30 pintan el "mes actual" (todo lo que ya hace el endpoint); las
   // de 30-60 van al "mes anterior" solo para la comparación MoM.
-  const [approvedAll, renewalsRows] = await Promise.all([
+  // Paralelamente traigo los eventos `subscription_change` (inserta el cron
+  // `subscription-renewals` cada vez que baja a alguien a Free por no pagar)
+  // de los últimos 60 días — son el churn exacto, no una estimación.
+  const [approvedAll, renewalsRows, churnRows] = await Promise.all([
     db
       .select()
       .from(schema.transaction)
@@ -74,6 +77,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ))
       .orderBy(asc(schema.profile.subscriptionExpiresAt))
       .limit(20),
+    db
+      .select({ createdAt: schema.transaction.createdAt })
+      .from(schema.transaction)
+      .where(and(eq(schema.transaction.type, "subscription_change"), gte(schema.transaction.createdAt, sixtyDaysAgo))),
   ]);
 
   // Separo mes actual (0-30d) vs mes anterior (30-60d) para el MoM.
@@ -192,6 +199,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ? ((revenueCop - revenueCopPrev30d) / revenueCopPrev30d) * 100
     : null;
 
+  // Churn: cuántos usuarios cayeron a Free este mes vs el anterior. Fuente
+  // exacta — cada evento `subscription_change` lo inserta el cron cuando baja
+  // a alguien que no renovó dentro del período de gracia.
+  const churnCount = churnRows.filter((r) => r.createdAt >= thirtyDaysAgo).length;
+  const churnCountPrev30d = churnRows.length - churnCount;
+
   res.status(200).json({
     ok: true,
     revenueCop,
@@ -206,5 +219,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     revenueCopPrev30d,
     salesCountPrev30d,
     momGrowthPct,
+    churnCount,
+    churnCountPrev30d,
   });
 }

@@ -117,6 +117,8 @@ export interface FinanceData {
   revenueCopPrev30d: number;
   salesCountPrev30d: number;
   momGrowthPct: number | null;
+  churnCount: number;
+  churnCountPrev30d: number;
 }
 
 export function useAdminFinance(isAdmin: boolean, activeTab: string) {
