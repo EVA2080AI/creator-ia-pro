@@ -11,8 +11,9 @@ import { listTransactions, weeklySpend, toolBreakdown } from "@/lib/transactions
 import { toast } from "sonner";
 import {
   Zap, Coins, CreditCard, FolderOpen, Image, Scale,
-  Megaphone, FolderPlus, ListTodo
+  Megaphone, FolderPlus, ListTodo, CalendarClock, ArrowRight
 } from "lucide-react";
+import { PLAN_PRICES_COP } from "@/lib/limits";
 import { ProjectCard } from "@/components/dashboard/ProjectCard";
 import { useStudioProjects } from "@/hooks/useStudioProjects";
 import { LoadingState } from "@/components/dashboard/LoadingState";
@@ -214,6 +215,53 @@ export default function Dashboard() {
               Hola, <span className="text-primary">{profile?.full_name?.split(' ')[0] || 'Creator'}</span>
             </h1>
           </div>
+
+          {/* Callout "próximo cobro" — solo si tiene plan pagado y vence en los
+              próximos 30 días. Hay color urgente si ≤7 días (el cron de recordatorios
+              dispara el aviso por correo a 3 días; esto le da anticipación visual).
+              Los planes NO se renuevan solos: el usuario tiene que pagar antes de
+              que el cron lo baje a Free. */}
+          {currentTier !== "free" && profile?.subscriptionExpiresAt && (() => {
+            const expiresAt = new Date(profile.subscriptionExpiresAt);
+            const daysLeft = Math.ceil((expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+            if (daysLeft > 30 || daysLeft < 0) return null;
+            const isUrgent = daysLeft <= 7;
+            const price = PLAN_PRICES_COP[currentTier] ?? 0;
+            const label = TIER_LABELS[currentTier] ?? currentTier;
+            const dateFmt = expiresAt.toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" });
+            return (
+              <div className={`rounded-2xl border p-4 flex flex-col sm:flex-row sm:items-center gap-4 ${
+                isUrgent
+                  ? "border-amber-500/30 bg-amber-500/5"
+                  : "border-border bg-muted/40"
+              }`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  isUrgent ? "bg-amber-500/15 text-amber-700 dark:text-amber-400" : "bg-muted text-muted-foreground"
+                }`}>
+                  <CalendarClock className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-black ${isUrgent ? "text-foreground" : "text-foreground"}`}>
+                    Tu Plan {label} {daysLeft === 0 ? "vence hoy" : daysLeft === 1 ? "vence mañana" : `vence en ${daysLeft} días`}
+                  </p>
+                  <p className="text-[12px] text-muted-foreground font-medium mt-0.5">
+                    {dateFmt}{price > 0 && ` · $${price.toLocaleString("es-CO")} para renovar`}
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate(`/pricing#${currentTier}`)}
+                  className={`shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                    isUrgent
+                      ? "bg-amber-600 text-white hover:bg-amber-700"
+                      : "bg-primary text-primary-foreground hover:opacity-90"
+                  }`}
+                >
+                  Renovar
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            );
+          })()}
         </section>
 
         {/* Stats Section */}
