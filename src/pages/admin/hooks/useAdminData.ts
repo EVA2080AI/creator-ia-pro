@@ -98,6 +98,15 @@ export interface TopClient {
   lastPurchaseAt: string;
 }
 
+export interface ChurnedUser {
+  userId: string;
+  name: string;
+  email: string;
+  tier: string;
+  tierLabel: string;
+  churnedAt: string;
+}
+
 export interface FinanceData {
   revenueCop: number;
   salesCount: number;
@@ -119,6 +128,7 @@ export interface FinanceData {
   momGrowthPct: number | null;
   churnCount: number;
   churnCountPrev30d: number;
+  churnedUsers: ChurnedUser[];
 }
 
 export function useAdminFinance(isAdmin: boolean, activeTab: string) {

@@ -11,7 +11,7 @@
 // desde los `tiers` que /api/admin/stats devuelve). Este endpoint es solo
 // ingresos reales + última compra + desglose por item vendido.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { and, eq, gte, lte, ne, isNotNull, asc, desc, inArray } from "drizzle-orm";
+import { and, eq, gte, lte, ne, isNotNull, asc, desc, inArray, like } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { requireAdmin } from "../_lib/require-admin.js";
 import { CREDIT_PACK_PRICES_COP, PLAN_PRICES_COP } from "../../src/lib/limits.js";
@@ -47,9 +47,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Traigo las compras aprobadas de los ÚLTIMOS 60 días en una sola query:
   // las de 0-30 pintan el "mes actual" (todo lo que ya hace el endpoint); las
   // de 30-60 van al "mes anterior" solo para la comparación MoM.
-  // Paralelamente traigo los eventos `subscription_change` (inserta el cron
-  // `subscription-renewals` cada vez que baja a alguien a Free por no pagar)
-  // de los últimos 60 días — son el churn exacto, no una estimación.
+  // Paralelamente traigo los eventos `subscription_change` de downgrade de los
+  // últimos 60 días — el cron `subscription-renewals` los inserta con
+  // description "Plan {tier} vencido — bajado a Free (sin renovar)". El mismo
+  // tipo también lo usa el webhook de Bold para activaciones ("Plan activado:
+  // {tier} (Bold)"), por eso filtro por `description like 'Plan%vencido%'` —
+  // sin eso el churn sumaría también a quienes se dieron de alta.
   const [approvedAll, renewalsRows, churnRows] = await Promise.all([
     db
       .select()
@@ -78,9 +81,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .orderBy(asc(schema.profile.subscriptionExpiresAt))
       .limit(20),
     db
-      .select({ createdAt: schema.transaction.createdAt })
+      .select({ userId: schema.transaction.userId, description: schema.transaction.description, createdAt: schema.transaction.createdAt })
       .from(schema.transaction)
-      .where(and(eq(schema.transaction.type, "subscription_change"), gte(schema.transaction.createdAt, sixtyDaysAgo))),
+      .where(and(
+        eq(schema.transaction.type, "subscription_change"),
+        gte(schema.transaction.createdAt, sixtyDaysAgo),
+        like(schema.transaction.description, "Plan %vencido%"),
+      ))
+      .orderBy(desc(schema.transaction.createdAt)),
   ]);
 
   // Separo mes actual (0-30d) vs mes anterior (30-60d) para el MoM.
@@ -200,10 +208,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     : null;
 
   // Churn: cuántos usuarios cayeron a Free este mes vs el anterior. Fuente
-  // exacta — cada evento `subscription_change` lo inserta el cron cuando baja
-  // a alguien que no renovó dentro del período de gracia.
-  const churnCount = churnRows.filter((r) => r.createdAt >= thirtyDaysAgo).length;
+  // exacta — cada evento `subscription_change` con "vencido" lo inserta el
+  // cron al bajar a alguien que no renovó dentro del período de gracia.
+  const churnThisMonth = churnRows.filter((r) => r.createdAt >= thirtyDaysAgo);
+  const churnCount = churnThisMonth.length;
   const churnCountPrev30d = churnRows.length - churnCount;
+
+  // Lista accionable: QUIÉNES churnearon este mes. Un solo `inArray` para
+  // traer nombres+correos sólo de los IDs del mes (no todos). Parseo el tier
+  // de la description "Plan {tier} vencido — bajado a Free (sin renovar)".
+  const churnIds = [...new Set(churnThisMonth.map((r) => r.userId))];
+  const churnUserRows = churnIds.length
+    ? await db
+        .select({ id: schema.user.id, name: schema.user.name, email: schema.user.email })
+        .from(schema.user)
+        .where(inArray(schema.user.id, churnIds))
+    : [];
+  const churnedUsers = churnThisMonth.map((r) => {
+    const row = churnUserRows.find((u) => u.id === r.userId);
+    const match = r.description?.match(/^Plan (\w+) vencido/);
+    const tier = match?.[1] ?? "";
+    return {
+      userId: r.userId,
+      name: row?.name ?? "Cliente",
+      email: row?.email ?? "",
+      tier,
+      tierLabel: PACK_LABEL[tier] ?? tier,
+      churnedAt: r.createdAt.toISOString(),
+    };
+  });
 
   res.status(200).json({
     ok: true,
@@ -221,5 +254,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     momGrowthPct,
     churnCount,
     churnCountPrev30d,
+    churnedUsers,
   });
 }

@@ -8,7 +8,7 @@
 // monto en COP leído de CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP según el
 // packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
 import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy, TrendingUp, TrendingDown, Minus, Download, UserMinus } from "lucide-react";
-import type { TopClient, UpcomingRenewal, FinanceBreakdownItem } from "../hooks/useAdminData";
+import type { TopClient, UpcomingRenewal, FinanceBreakdownItem, ChurnedUser } from "../hooks/useAdminData";
 import { downloadCsv } from "../csv";
 
 function downloadTopClientsCsv(clients: TopClient[]) {
@@ -52,6 +52,14 @@ function downloadBreakdownCsv(breakdown: FinanceBreakdownItem[]) {
       b.creditsGranted,
       b.revenueCop,
     ]),
+  );
+}
+
+function downloadChurnCsv(users: ChurnedUser[]) {
+  downloadCsv(
+    `churn-30d-${new Date().toISOString().slice(0, 10)}.csv`,
+    ["Nombre", "Email", "Plan que perdió", "Fecha de baja"],
+    users.map((u) => [u.name, u.email, u.tierLabel, u.churnedAt.slice(0, 10)]),
   );
 }
 import { PLAN_PRICES_COP, PLAN_MONTHLY_CREDITS } from "@/lib/limits";
@@ -315,6 +323,55 @@ export function FinanceTab({
                 </p>
               </div>
             </div>
+
+            {finance.churnedUsers.length > 0 && (
+              <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-4 mb-6">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
+                      <UserMinus className="h-3 w-3" /> Usuarios que bajaron a Free este mes
+                    </p>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">Contáctalos para recuperarlos.</p>
+                  </div>
+                  <button
+                    onClick={() => downloadChurnCsv(finance.churnedUsers)}
+                    className="shrink-0 inline-flex items-center gap-1.5 rounded-lg border border-border bg-background hover:bg-muted px-2.5 py-1.5 text-[11px] font-bold text-foreground transition-colors"
+                    title="Descargar CSV"
+                  >
+                    <Download className="h-3 w-3" />
+                    <span className="hidden md:inline">CSV</span>
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-[13px]">
+                    <thead>
+                      <tr className="text-[10px] font-black uppercase tracking-widest text-muted-foreground border-b border-border">
+                        <th className="py-2 pr-4">Cliente</th>
+                        <th className="py-2 pr-4">Plan perdido</th>
+                        <th className="py-2">Fecha</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {finance.churnedUsers.slice(0, 10).map((u) => (
+                        <tr key={`${u.userId}-${u.churnedAt}`} className="border-b border-border/50 last:border-b-0">
+                          <td className="py-2 pr-4">
+                            <div className="font-semibold text-foreground truncate max-w-[200px]">{u.name}</div>
+                            <div className="text-[11px] text-muted-foreground truncate max-w-[200px]">{u.email}</div>
+                          </td>
+                          <td className="py-2 pr-4 font-mono text-foreground">{u.tierLabel}</td>
+                          <td className="py-2 text-muted-foreground font-mono">{u.churnedAt.slice(0, 10)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {finance.churnedUsers.length > 10 && (
+                    <p className="text-[11px] text-muted-foreground mt-2">
+                      Mostrando 10 de {finance.churnedUsers.length} · descarga el CSV para la lista completa.
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {finance.breakdown.length > 0 && (
               <div className="overflow-x-auto">
