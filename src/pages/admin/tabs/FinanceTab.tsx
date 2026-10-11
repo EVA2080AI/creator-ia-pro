@@ -8,7 +8,7 @@
 // monto en COP leído de CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP según el
 // packId de la description). Viene de `/api/admin/finance` (ver api/admin/finance.ts).
 import { Loader2, DollarSign, Users, Info, Receipt, Clock, CalendarClock, Activity, Trophy, TrendingUp, TrendingDown, Minus, Download } from "lucide-react";
-import type { TopClient, UpcomingRenewal } from "../hooks/useAdminData";
+import type { TopClient, UpcomingRenewal, FinanceBreakdownItem } from "../hooks/useAdminData";
 
 /** Serializa un valor como celda CSV: envuelve en comillas si tiene coma, comilla
  *  o salto de línea; escapa comillas duplicándolas (RFC 4180). */
@@ -61,6 +61,20 @@ function downloadRenewalsCsv(renewals: UpcomingRenewal[]) {
       r.expiresAt.slice(0, 10),
       r.daysLeft,
       r.priceCop,
+    ]),
+  );
+}
+
+function downloadBreakdownCsv(breakdown: FinanceBreakdownItem[]) {
+  downloadCsv(
+    `ingresos-por-item-30d-${new Date().toISOString().slice(0, 10)}.csv`,
+    ["Item", "Tipo", "Vendidos", "Créditos otorgados", "Ingreso (COP)"],
+    breakdown.map((b) => [
+      b.label,
+      b.kind === "recarga" ? "Recarga" : "Suscripción",
+      b.items,
+      b.creditsGranted,
+      b.revenueCop,
     ]),
   );
 }
@@ -206,10 +220,21 @@ export function FinanceTab({
           <div className="w-10 h-10 rounded-2xl bg-muted border border-border flex items-center justify-center">
             <Receipt className="h-5 w-5 text-muted-foreground" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Ingresos reales 30d</h3>
             <p className="text-[11px] text-muted-foreground font-medium">Compras aprobadas por Bold en los últimos 30 días</p>
           </div>
+          {finance && finance.breakdown.length > 0 && (
+            <button
+              onClick={() => downloadBreakdownCsv(finance.breakdown)}
+              className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border hover:bg-muted transition-colors text-[11px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground"
+              aria-label="Descargar CSV del desglose por item"
+              title="Descargar CSV del desglose por item"
+            >
+              <Download className="h-3 w-3" />
+              <span className="hidden sm:inline">CSV</span>
+            </button>
+          )}
         </div>
 
         {financeLoading && (
