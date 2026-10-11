@@ -821,6 +821,78 @@ export default function Index() {
             </div>
           </section>
 
+          {/* ── Video promocional (plan Pro) ─────────────────────────────── */}
+          <section className="relative px-6 md:px-12 py-24 bg-white overflow-hidden">
+            <div className="max-w-5xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.6 }}
+                className="text-center mb-10"
+              >
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 mb-6">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                  </span>
+                  <span className="text-[11px] font-black uppercase tracking-[0.2em] text-indigo-600">Plan Pro · el más popular</span>
+                </div>
+                <h2 className="text-4xl md:text-6xl font-black text-zinc-900 tracking-tight mb-4">
+                  Míralo en acción
+                </h2>
+                <p className="text-lg text-zinc-600 max-w-2xl mx-auto">
+                  En 60 segundos: un contrato analizado, una imagen generada, una app lista para publicar — todo desde un mismo chat, con los modelos premium que trae el Plan Pro.
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.7, delay: 0.1 }}
+                className="relative rounded-3xl overflow-hidden border border-zinc-200 shadow-2xl shadow-zinc-900/15 bg-zinc-900 aspect-video"
+              >
+                {/* Cuando subas /promo-landing.mp4 a /public (16:9, ~60s), se reproduce
+                    directamente. Mientras tanto, el poster + el controls del navegador
+                    muestran el "preview" y el intento de reproducir mostrará el
+                    error nativo (no se renderiza nada roto en SSR ni en primer paint). */}
+                <video
+                  controls
+                  preload="metadata"
+                  playsInline
+                  poster="/og-image.png"
+                  className="w-full h-full object-cover"
+                >
+                  <source src="/promo-landing.mp4" type="video/mp4" />
+                  Tu navegador no soporta el video HTML5.
+                </video>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3"
+              >
+                <button
+                  onClick={() => navigate("/pricing#pro")}
+                  className="group inline-flex items-center gap-2 px-8 py-4 rounded-full bg-zinc-900 text-white text-sm font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg shadow-zinc-900/20"
+                >
+                  Elegir el Plan Pro — $349.900/mes
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+                <button
+                  onClick={() => navigate("/auth")}
+                  className="inline-flex items-center gap-2 px-6 py-4 rounded-full text-sm font-black uppercase tracking-widest text-zinc-600 hover:text-zinc-900 transition-colors"
+                >
+                  Probar gratis primero
+                </button>
+              </motion.div>
+            </div>
+          </section>
+
           {/* ── Marquee ticker ───────────────────────────────────────────── */}
           <div className="relative overflow-hidden py-4 border-y border-zinc-100 bg-zinc-50/80">
             <div className="flex gap-0">
