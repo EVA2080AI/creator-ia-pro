@@ -551,12 +551,12 @@ export default function BasaltPage() {
   };
 
   if (authLoading) {
-    // bg-white fijo sin dark: — antes de que monte .asst-app no hay
-    // data-asst-theme, así que usa la clase .dark global (Tailwind) en vez
-    // del atributo propio de Basalt (auditoría UX 2026-09-29).
+    // Antes de que monte .asst-app no hay data-asst-theme, así que esta pantalla
+    // vive bajo la clase .dark global (Tailwind) — por eso usa tokens del tema
+    // en vez del atributo propio de Basalt (auditoría UX 2026-09-29).
     return (
-      <div className="flex h-screen items-center justify-center bg-white dark:bg-[#131314]">
-        <Loader2 className="h-7 w-7 animate-spin text-zinc-300 dark:text-zinc-600" />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
       </div>
     );
   }

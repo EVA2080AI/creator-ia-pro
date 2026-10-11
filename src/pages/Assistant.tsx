@@ -466,16 +466,16 @@ export default function AssistantPage() {
 
   if (authLoading || loadingAssistant) {
     return (
-      <div className="flex h-screen items-center justify-center bg-white dark:bg-[#131314]">
-        <Loader2 className="h-7 w-7 animate-spin text-zinc-300 dark:text-zinc-600" />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <Loader2 className="h-7 w-7 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
   if (!assistant) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-white dark:bg-[#131314] text-center px-6">
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">No encontramos este asistente.</p>
+      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-background text-center px-6">
+        <p className="text-sm text-muted-foreground">No encontramos este asistente.</p>
         <button onClick={() => navigate("/a/basalt")} className="text-sm font-bold text-primary underline">Volver al inicio</button>
       </div>
     );
