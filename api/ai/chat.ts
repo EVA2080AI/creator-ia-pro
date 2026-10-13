@@ -25,14 +25,17 @@ const SEARCH_TOOL_COST = 1;
 // Una búsqueda suma latencia real (Tavily + un segundo stream completo de
 // OpenRouter) — sin esto, el timeout implícito de Vercel podría cortar la
 // respuesta a mitad de la vuelta de tool-calling.
-export const config = { maxDuration: 60 };
+// 300s requiere Fluid Compute (activo por defecto en proyectos nuevos; en Hobby
+// llega a 300, en Pro a 800). Si el build de Vercel lo rechaza, volver a 60/54.
+export const config = { maxDuration: 300 };
 // Margen bajo maxDuration: si el modelo es lento (los gratuitos rondan pocos
-// tokens/seg) Vercel mataba la función a los 60s en seco y la respuesta
-// quedaba cortada a mitad de un bloque de código SIN que el cliente se
-// enterara — encontrado en vivo (2026-09-30): un sitio de 3 archivos llegaba
-// solo hasta index.html. Ahora se corta a los 54s con un finish_reason
-// explícito ("length") para que el cliente ofrezca "Continuar".
-const STREAM_DEADLINE_MS = 54_000;
+// tokens/seg) Vercel mataba la función en seco y la respuesta quedaba cortada
+// a mitad de un bloque de código SIN que el cliente se enterara — encontrado
+// en vivo (2026-09-30): un sitio de 3 archivos llegaba solo hasta index.html.
+// Se corta 6s antes del tope con un finish_reason explícito ("length") para
+// que el cliente ofrezca "Continuar". Con 54s un manual Word+Excel se cortaba
+// a mitad del primer archivo (visto en vivo 2026-10-13).
+const STREAM_DEADLINE_MS = 294_000;
 
 // ── Topes de entrada (QA adversarial 2026-10-05) ────────────────────────────
 // El crédito que cobramos es PLANO por mensaje, pero lo que OpenRouter nos cobra

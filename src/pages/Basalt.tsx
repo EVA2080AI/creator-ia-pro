@@ -731,7 +731,7 @@ export default function BasaltPage() {
               ))}
               {truncatedId && !generating && messages[messages.length - 1]?.id === truncatedId && (
                 <div className="asst-cut" role="status">
-                  <span>La respuesta se cortó por el límite de tiempo del modelo.</span>
+                  <span>El modelo llegó a su límite de tiempo. «Continuar» retoma justo donde quedó.</span>
                   <button onClick={() => void sendPrompt(CONTINUE_PROMPT, { continueFrom: truncatedId })}>Continuar</button>
                 </div>
               )}
