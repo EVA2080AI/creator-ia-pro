@@ -20,6 +20,7 @@ import {
   saveConversation, loadMemory, saveMemory, withMemory,
   CONTINUE_PROMPT, joinContinuation,
   type ConversationSummary, type StoredMsg,
+  ENTREGABLES_PROMPT,
 } from "@/lib/basalt";
 import { toast } from "sonner";
 import { mdToHtml } from "@/lib/markdown";
@@ -309,7 +310,10 @@ export default function AssistantPage() {
           model: assistant.defaultModel,
           // Las reglas de documentos también en las preguntas de seguimiento (el documento ya está en
           // el historial y no vuelve a viajar en `documents`).
-          systemPrompt: withMemory(assistant.persona.systemPrompt || "", memory) + (hasDocuments(history.slice(-20)) ? `\n\n${DOC_ANALYSIS_PROMPT}` : "") || undefined,
+          // ENTREGABLES_PROMPT: sin esto un Experto contestaba "no puedo crear
+          // archivos de Excel" (reporte real 2026-10-14) — la persona no sabe de
+          // los bloques con nombre de archivo que el chat convierte en descargas.
+          systemPrompt: [withMemory(assistant.persona.systemPrompt || "", memory), ENTREGABLES_PROMPT, hasDocuments(history.slice(-20)) ? DOC_ANALYSIS_PROMPT : ""].filter(Boolean).join("\n\n"),
           // Mismo tope que Basalt.tsx — sin esto, una conversación larga con
           // un Experto arriesga pegar contra el límite de contexto del
           // modelo (auditoría UX 2026-09-29).

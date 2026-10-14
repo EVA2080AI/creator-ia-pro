@@ -8,6 +8,7 @@ import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
 import { GitHubExportDialog } from "@/components/basalt/GitHubExportDialog";
 import { CHAT_MODELS, getModel, CATEGORY_ORDER, CATEGORY_META, canAccessModel, type ModelDef } from "@/lib/ai/models";
+import { ENTREGABLES_PROMPT } from "@/lib/basalt";
 import "./Assistant.css";
 import { shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
 
@@ -27,7 +28,9 @@ interface Lane {
 const DEFAULT_LANES = ["google/gemini-2.5-flash-lite", "openai/gpt-oss-120b", "meta-llama/llama-3.3-70b-instruct"]
   .filter((id) => CHAT_MODELS.some((m) => m.id === id));
 
-const SYSTEM = "Responde en español de forma clara y útil. Usa markdown cuando ayude.";
+// ENTREGABLES_PROMPT: mismas reglas de archivos descargables que Basalt/Expertos —
+// sin esto, pedirle "dame el Excel" a una columna respondia "no puedo crear archivos".
+const SYSTEM = `Responde en español de forma clara y útil. Usa markdown cuando ayude.\n\n${ENTREGABLES_PROMPT}`;
 
 export default function ArenaPage() {
   const { user, loading: authLoading } = useAuth("/auth");
