@@ -173,18 +173,6 @@ const toolsData: Record<string, ToolInfo> = {
     tryItType: "text-prompt", tryItPlaceholder: "Describe tu producto/servicio para generar anuncios...",
     tryItExamples: ["Anuncio de Google Ads para tienda de ropa online", "Facebook Ad para app de delivery de comida", "LinkedIn Ad para servicio de consultoría empresarial"],
   },
-  "formaketing-studio": {
-    id: "formaketing", name: "Canvas IA Studio",
-    headline: "Marketing visual con lienzo infinito",
-    description: "El estudio de marketing visual más potente. Crea flows, genera assets y construye funnels con IA.",
-    icon: Palette,
-    features: ["Lienzo infinito", "Generación de imágenes inline", "Flows de marketing visual", "Exporta campañas", "Colaboración"],
-    useCases: ["Planificación de campañas", "Funnels de marketing", "Storyboarding", "Workflows"],
-    credits: 1, category: "studio",
-    demoImage: demoGenerate, demoLabel: "Canvas IA Studio — Lienzo infinito con nodos de IA",
-    tryItType: "text-prompt", tryItPlaceholder: "Describe la campaña que quieres planificar...",
-    tryItExamples: ["Funnel de lanzamiento para curso online", "Campaña de Black Friday para e-commerce", "Flow de email marketing para SaaS B2B"],
-  },
 };
 
 const ToolLanding = () => {

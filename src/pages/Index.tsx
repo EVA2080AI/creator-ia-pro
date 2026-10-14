@@ -40,22 +40,6 @@ const PRODUCTS = [
       { label: "styles.css", lines: 16, active: false },
     ],
   },
-  {
-    badge: "Canvas IA",
-    headline: "Conecta nodos de IA en un lienzo visual.",
-    sub: "Arma flujos de varios pasos conectando nodos de texto, imagen y video — cada nodo llama al mismo motor de IA que Basalt, encadenado paso a paso. Ideal para producir varias piezas de una campaña sin repetir el proceso manualmente.",
-    icon: Layers,
-    color: "#8B5CF6",
-    cta: "Próximamente",
-    path: "/studio-flow",
-    features: ["Lienzo de nodos drag & drop", "Encadena texto, imagen y video", "Reutilizable para campañas", "Export del flujo completo"],
-    preview: [
-      { tool: "Texto / Persona",  cr: "Genera copy", color: "#3B82F6" },
-      { tool: "Generar imagen",   cr: "Genera imagen", color: "#a855f7" },
-      { tool: "Generar video",    cr: "Genera video", color: "#3B82F6" },
-      { tool: "Diseño / Layout",  cr: "Arma layout", color: "#10B981" },
-    ],
-  },
 ];
 
 const PLANS = [
@@ -178,7 +162,7 @@ const GUARANTEES = [
   {
     icon: Zap,
     title: "Empezás gratis, sin tarjeta",
-    content: "5 créditos para probar Basalt IA y Canvas IA antes de pagar nada.",
+    content: "5 créditos para probar Basalt IA antes de pagar nada.",
   },
   {
     icon: Shield,
@@ -202,7 +186,6 @@ const MARQUEE_ITEMS = [
   { icon: Wand2,    label: "Gemini Flash Image" },
   { icon: Code2,    label: "Basalt IA" },
   { icon: Image,    label: "Diseño de logos" },
-  { icon: Layers,   label: "Canvas IA" },
   { icon: MessageSquare, label: "GPT-4.1 Mini" },
   { icon: Zap,      label: "Gemini 2.5 Flash" },
   { icon: Star,     label: "DeepSeek V3.1" },
@@ -436,7 +419,7 @@ export default function Index() {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://creator-ia.com/" />
         <meta property="og:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
-        <meta property="og:description" content="Plataforma todo-en-uno: Basalt IA para apps, imágenes y texto + Canvas IA para flujos visuales. Paga en COP con Bold." />
+        <meta property="og:description" content="Plataforma todo-en-uno: Basalt IA para apps, imágenes y texto + Arena IA para comparar modelos. Paga en COP con Bold." />
         <meta property="og:image" content="https://creator-ia.com/og-image.png" />
         <meta property="og:site_name" content="Creator IA Pro" />
         <meta property="og:locale" content="es_CO" />
@@ -445,7 +428,7 @@ export default function Index() {
         <meta property="twitter:card" content="summary_large_image" />
         <meta property="twitter:url" content="https://creator-ia.com/" />
         <meta property="twitter:title" content="Creator IA Pro — Crea Apps con IA en Segundos" />
-        <meta property="twitter:description" content="Plataforma todo-en-uno: Basalt IA para apps, imágenes y texto + Canvas IA para flujos visuales. Paga en COP con Bold." />
+        <meta property="twitter:description" content="Plataforma todo-en-uno: Basalt IA para apps, imágenes y texto + Arena IA para comparar modelos. Paga en COP con Bold." />
         <meta property="twitter:image" content="https://creator-ia.com/og-image.png" />
 
         {/* Canonical */}
@@ -527,7 +510,7 @@ export default function Index() {
                 >
                   <Sparkles className="h-4 w-4 text-primary" />
                 </motion.span>
-                Basalt IA · Canvas IA · V21.0
+                Basalt IA · Arena IA · V21.0
               </motion.div>
 
               {/* Main Headline */}
@@ -1123,213 +1106,6 @@ export default function Index() {
             </InViewSection>
           </section>
 
-          {/* ── Canvas section ──────────────────────────────────────────── */}
-          <section className="relative px-6 md:px-12 py-24 border-t border-zinc-200 overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute inset-0 bg-gradient-to-b from-zinc-50/50 to-transparent" />
-            <InViewSection className="max-w-6xl mx-auto relative z-10">
-              <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                  <motion.div variants={fadeUp} custom={0}>
-                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[11px] font-black uppercase tracking-[0.2em] mb-6">
-                      <Layers className="h-3.5 w-3.5" />
-                      Canvas IA · Próximamente
-                    </div>
-                  </motion.div>
-                  <motion.h2 variants={fadeUp} custom={0.1} className="text-3xl md:text-5xl font-black text-zinc-900 tracking-tight mb-4">
-                    Conecta <span className="text-primary">módulos de IA</span>
-                  </motion.h2>
-                  <motion.p variants={fadeUp} custom={0.2} className="text-[15px] text-zinc-500 mb-6 leading-relaxed">
-                    Un lienzo visual donde conectás módulos de IA en vez de repetir el mismo prompt a mano. Crea flujos arrastrando nodos: genera imágenes, mejora prompts, escribe copy y exporta todo conectado.
-                  </motion.p>
-
-                  {/* Available Nodes */}
-                  <motion.div variants={fadeUp} custom={0.25} className="mb-6">
-                    <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider mb-3">Nodos disponibles</p>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        { label: "Generar imagen", color: "#a855f7" },
-                        { label: "Prompt Builder", color: "#00c2ff" },
-                        { label: "Generar copy", color: "#f59e0b" },
-                        { label: "LLM", color: "#6366f1" },
-                        { label: "Exportar", color: "#10b981" },
-                        { label: "Blueprint", color: "#ec4899" },
-                      ].map((node, i) => (
-                        <motion.div
-                          key={node.label}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: 0.3 + i * 0.05, duration: 0.3 }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[11px] font-medium"
-                          style={{
-                            borderColor: node.color + '30',
-                            background: node.color + '10',
-                            color: node.color,
-                          }}
-                        >
-                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: node.color }} />
-                          {node.label}
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-
-                  <motion.ul variants={fadeUp} custom={0.3} className="space-y-3 mb-8">
-                    {[
-                      "Arrastra y conecta nodos como en Figma",
-                      "Cada nodo es un modelo de IA diferente",
-                      "Conecta salidas con entradas",
-                      "Ejecuta todo el flujo con un click",
-                    ].map((feature, i) => (
-                      <li key={i} className="flex items-center gap-3 text-[14px] text-zinc-600">
-                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Check className="h-3 w-3 text-primary" />
-                        </div>
-                        {feature}
-                      </li>
-                    ))}
-                  </motion.ul>
-
-                  <motion.div variants={fadeUp} custom={0.4} className="flex items-center gap-4">
-                    <motion.button
-                      onClick={() => navigate("/canvas")}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-bold text-[14px] hover:bg-primary/90 transition-colors shadow-lg shadow-primary/25"
-                    >
-                      <Layers className="h-4 w-4" />
-                      Próximamente
-                    </motion.button>
-                    {/* /hub exige sesión (vive dentro de BasaltAppLayout) —
-                        antes mandaba a un visitante sin cuenta por
-                        /hub→/spaces→login, un salto extra de redirects
-                        (auditoría UX 2026-09-29). Directo a /auth. */}
-                    <button
-                      onClick={() => navigate("/auth")}
-                      className="flex items-center gap-2 text-[14px] text-zinc-500 hover:text-zinc-900 transition-colors font-medium"
-                    >
-                      Ver templates <ArrowRight className="h-4 w-4" />
-                    </button>
-                  </motion.div>
-                </div>
-
-                {/* Canvas Preview */}
-                <motion.div
-                  variants={cardEntrance}
-                  custom={0.2}
-                  className="relative"
-                >
-                  <div className="relative rounded-2xl border border-zinc-200 bg-white shadow-2xl shadow-zinc-200/50 overflow-hidden">
-                    {/* Header */}
-                    <div className="flex items-center gap-2 px-4 py-3 border-b border-zinc-100 bg-zinc-50">
-                      <div className="flex gap-1.5">
-                        <div className="w-3 h-3 rounded-full bg-rose-400" />
-                        <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                        <div className="w-3 h-3 rounded-full bg-green-400" />
-                      </div>
-                      <div className="flex-1 text-center">
-                        <span className="text-[11px] text-zinc-400 font-medium">Canvas IA</span>
-                      </div>
-                    </div>
-
-                    {/* Canvas Content */}
-                    <div className="relative h-80 bg-zinc-950 overflow-hidden">
-                      {/* Grid */}
-                      <div
-                        className="absolute inset-0 opacity-20"
-                        style={{
-                          backgroundImage: "radial-gradient(circle, #a855f7 1px, transparent 1px)",
-                          backgroundSize: "24px 24px",
-                        }}
-                      />
-
-                      {/* Connection lines */}
-                      <svg className="absolute inset-0 w-full h-full">
-                        <motion.path
-                          d="M80,60 Q150,60 200,100"
-                          stroke="#a855f7"
-                          strokeWidth="2"
-                          fill="none"
-                          strokeDasharray="6 4"
-                          animate={{ strokeDashoffset: [0, -20] }}
-                          transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-                          opacity="0.6"
-                        />
-                        <motion.path
-                          d="M200,140 Q250,180 320,120"
-                          stroke="#00c2ff"
-                          strokeWidth="2"
-                          fill="none"
-                          strokeDasharray="6 4"
-                          animate={{ strokeDashoffset: [0, -20] }}
-                          transition={{ repeat: Infinity, duration: 1.5, ease: "linear", delay: 0.3 }}
-                          opacity="0.6"
-                        />
-                      </svg>
-
-                      {/* Nodes - Representing real Canvas IA nodes */}
-                      {[
-                        { x: 20, y: 30, color: "#a855f7", icon: Image, label: "Image Gen", active: true, type: "input" },
-                        { x: 160, y: 80, color: "#6366f1", icon: Wand2, label: "LLM", active: false, type: "process" },
-                        { x: 160, y: 150, color: "#f59e0b", icon: MessageSquare, label: "Caption", active: false, type: "process" },
-                        { x: 280, y: 100, color: "#10b981", icon: Layers, label: "Export", active: true, type: "output" },
-                      ].map((node, ni) => (
-                        <motion.div
-                          key={ni}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ delay: 0.5 + ni * 0.15, duration: 0.4 }}
-                          className="absolute"
-                          style={{ left: node.x, top: node.y }}
-                        >
-                          <div
-                            className={`px-3 py-2.5 rounded-xl border shadow-lg min-w-[100px] ${
-                              node.active ? 'bg-zinc-900 border-primary/30' : 'bg-zinc-900/80 border-zinc-700'
-                            }`}
-                          >
-                            {/* Connection points */}
-                            <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-zinc-600 border border-zinc-500" />
-                            <div className="absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-emerald-500 border border-emerald-400" />
-
-                            <div className="flex items-center gap-2">
-                              <div
-                                className="w-7 h-7 rounded-lg flex items-center justify-center"
-                                style={{ background: node.color + '20' }}
-                              >
-                                <node.icon className="h-3.5 w-3.5" style={{ color: node.color }} />
-                              </div>
-                              <span className="text-[10px] font-medium text-zinc-300">{node.label}</span>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Floating badge */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 1, duration: 0.4 }}
-                    className="absolute -bottom-4 -right-4 bg-white rounded-xl border border-zinc-200 shadow-lg p-3"
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <Check className="h-4 w-4 text-emerald-600" />
-                      </div>
-                      <div>
-                        <div className="text-[11px] font-bold text-zinc-900">Flujo ejecutado</div>
-                        <div className="text-[10px] text-zinc-500">4 nodos · 12 segundos</div>
-                      </div>
-                    </div>
-                  </motion.div>
-                </motion.div>
-              </div>
-            </InViewSection>
-          </section>
 
           {/* ── Pricing ─────────────────────────────────────────────────── */}
           <section className="px-6 md:px-12 py-20 border-t border-zinc-200 bg-zinc-50">
@@ -1442,7 +1218,7 @@ export default function Index() {
                 </span>
               </motion.h2>
               <motion.p variants={fadeUp} custom={0.2} className="text-zinc-400 text-[16px] mb-10 leading-relaxed max-w-xl mx-auto">
-                Basalt IA y Canvas IA — todo en un solo lugar, listo para usar hoy.
+                Basalt IA, Arena IA y tus proyectos — todo en un solo lugar, listo para usar hoy.
               </motion.p>
 
               {/* Feature bullets */}
@@ -1512,7 +1288,6 @@ export default function Index() {
                   <ul className="space-y-2">
                     {[
                       { label: "Basalt IA", path: "/a/basalt" },
-                      { label: "Canvas IA", path: "/studio-flow" },
                       { label: "Precios", path: "/pricing" },
                     ].map((item) => (
                       <li key={item.label}>

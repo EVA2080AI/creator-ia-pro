@@ -37,7 +37,6 @@ export function LandingHeader({ themed = false }: { themed?: boolean } = {}): Re
 
   const NAV_LINKS: NavLink[] = [
     { name: "Basalt IA", path: "/a/basalt", icon: Code2 },
-    { name: "Canvas IA", path: "/studio-flow", icon: Layers, badge: "Próximamente" },
     { name: "Planes", path: "/pricing", icon: CreditCard },
     { name: "Ayuda", path: "/help", icon: BookOpen },
   ];

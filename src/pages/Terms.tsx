@@ -25,7 +25,6 @@ La Plataforma es operada por Creator IA Pro, ubicada en Colombia. Estos Término
 • Generación de código y aplicaciones React
 • Creación y edición de imágenes con IA
 • Generación de texto y contenido de marketing
-• Canvas visual para flujos de trabajo creativos
 
 El servicio utiliza modelos de IA de terceros (Google Gemini, OpenAI, Anthropic) y está sujeto a sus propios términos de uso.`
     },

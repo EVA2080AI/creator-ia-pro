@@ -18,7 +18,6 @@ import { motion } from "framer-motion";
 // (panel "Herramientas" en el workspace de Basalt) — 2 items reales, no 4.
 const features = [
   { icon: Code2, text: "Basalt IA — apps React completas + imágenes, logos y textos con IA" },
-  { icon: Wand2, text: "Canvas IA — flujos de producción visuales (Próximamente)" },
 ];
 
 const Auth = () => {
