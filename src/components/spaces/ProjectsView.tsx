@@ -348,7 +348,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
             {search ? "Sin resultados" : "Tu Hub de Proyectos"}
           </p>
           <p className="text-[12px] text-muted-foreground mb-6 px-10 text-center max-w-sm">
-            {search ? "Prueba con otro término." : "Inicia un Flujo visual o un Desarrollo de Código."}
+            {search ? "Prueba con otro término." : CANVAS_ENABLED ? "Inicia un Flujo visual o un Desarrollo de Código." : "Explora las plantillas o pídele un proyecto a Basalt."}
           </p>
           
           {!search && (
@@ -356,9 +356,11 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
               <button onClick={onOpenCreate} className="flex items-center gap-2 px-4 py-2 border border-primary/30 rounded-xl bg-primary/5 hover:bg-primary/10 text-xs font-bold text-primary transition-all font-display shadow-sm">
                 <LayoutTemplate className="h-3.5 w-3.5" /> Explorar Hub (Plantillas)
               </button>
-              <button onClick={goToCanvas} className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl bg-card hover:bg-muted text-xs font-bold text-foreground transition-all font-display shadow-sm">
-                <Plus className="h-3.5 w-3.5" /> Lienzo en Blanco
-              </button>
+              {CANVAS_ENABLED && (
+                <button onClick={goToCanvas} className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl bg-card hover:bg-muted text-xs font-bold text-foreground transition-all font-display shadow-sm">
+                  <Plus className="h-3.5 w-3.5" /> Lienzo en Blanco
+                </button>
+              )}
             </div>
           )}
         </div>

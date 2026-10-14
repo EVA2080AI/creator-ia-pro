@@ -46,8 +46,8 @@
     {
       "name": "Nuevo Proyecto",
       "short_name": "Proyecto",
-      "description": "Crear un nuevo proyecto",
-      "url": "/studio-flow",
+      "description": "Crear un proyecto con Basalt",
+      "url": "/a/basalt",
       "icons": [
         {
           "src": "/icon-192.png",

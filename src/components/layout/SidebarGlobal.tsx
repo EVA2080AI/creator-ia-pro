@@ -21,7 +21,6 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { useSidebarV2 } from '@/hooks/useSidebarV2';
 import { useWorkspaceActions } from '@/hooks/useWorkspaceActions';
 import { toast } from 'sonner';
-import { CANVAS_ENABLED } from '@/lib/features';
 
 /** ─── Tier Hierarchy ────────────────────────────────────────────────────────── */
 const TIER_LEVELS: Record<string, number> = {
@@ -71,7 +70,6 @@ interface NavItemDef {
 const NAV_MAIN: NavItemDef[] = [
   { path: '/a/basalt',     label: 'Basalt IA',     icon: Brain,          minTier: 'free' },
   { path: '/a/arena',      label: 'Arena IA',      icon: Scale,          minTier: 'free' },
-  { path: '/studio-flow',  label: 'Canvas IA',     icon: LayoutTemplate, minTier: CANVAS_ENABLED ? 'pro' : 'soon' },
 ];
 
 const NAV_SYSTEM: NavItemDef[] = [

@@ -307,15 +307,19 @@ export default function Dashboard() {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-[11px] font-black uppercase tracking-[0.4em] text-muted-foreground">Mis Proyectos</h2>
-            <button onClick={() => setIsCreatingSpace(true)} className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/10">
-              + Nuevo Proyecto
-            </button>
+{/* Crear "espacios" era del canvas: oculto con el flag (el diálogo solo
+                abría un lienzo que hoy termina en Próximamente). */}
+            {CANVAS_ENABLED && (
+              <button onClick={() => setIsCreatingSpace(true)} className="bg-primary text-primary-foreground px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/10">
+                + Nuevo Proyecto
+              </button>
+            )}
           </div>
 
           {spaces.length === 0 ? (
             <div className={"p-20 border-2 border-dashed border-border rounded-[2.5rem] text-center bg-muted/50"}>
               <FolderPlus className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">Crea tu primer espacio para comenzar</p>
+              <p className="text-sm text-muted-foreground font-bold uppercase tracking-widest">{CANVAS_ENABLED ? "Crea tu primer espacio para comenzar" : "Tus proyectos aparecerán aquí — pídeselos a Basalt"}</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -326,8 +330,9 @@ export default function Dashboard() {
                   onDuplicate={(e) => handleDuplicate(e, space)} 
                   onDelete={(e) => handleDelete(e, space)}
                   onClick={() => {
-                    if (space.type === 'code') navigate(`/a/basalt?project=${space.id}`);
-                    else navigate(`/studio-flow?spaceId=${space.id}`);
+                    if (space.type === "code") navigate(`/a/basalt?project=${space.id}`);
+                    else if (CANVAS_ENABLED) navigate(`/studio-flow?spaceId=${space.id}`);
+                    else canvasToast();
                   }}
                 />
               ))}

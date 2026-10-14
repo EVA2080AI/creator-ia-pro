@@ -127,7 +127,7 @@ export const HubView = () => {
                 transition={{ duration: 0.45, delay: 0.2 }}
                 className="text-sm text-muted-foreground font-medium"
               >
-                {TEMPLATES.length} plantillas profesionales &mdash; 1 clic para abrir en el Studio.
+                {TEMPLATES.length} plantillas profesionales &mdash; {CANVAS_ENABLED ? "1 clic para abrir en el Studio." : "1 clic y Basalt la construye contigo."}
               </motion.p>
             </div>
             <motion.div
@@ -190,7 +190,7 @@ export const HubView = () => {
               transition={{ duration: 0.4, delay: 0.3 }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              aria-label="Crear lienzo en blanco — nuevo proyecto vacío"
+              aria-label={CANVAS_ENABLED ? "Crear lienzo en blanco — nuevo proyecto vacío" : "Proyecto en blanco — empezar desde cero en Basalt"}
               onClick={() => {
                 // Esta tarjeta no tenía la guarda del flag: a usuarios comunes
                 // les creaba un espacio huérfano y los mandaba a "Próximamente".
@@ -210,7 +210,7 @@ export const HubView = () => {
                 <Plus className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
               </motion.div>
               <div className="text-center space-y-1">
-                <p className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest font-display">Lienzo en Blanco</p>
+                <p className="text-xs font-bold text-muted-foreground group-hover:text-foreground transition-colors uppercase tracking-widest font-display">{CANVAS_ENABLED ? "Lienzo en Blanco" : "Proyecto en Blanco"}</p>
                 <p className="text-[10px] text-muted-foreground font-display uppercase tracking-[0.15em]">Empieza desde cero</p>
               </div>
             </motion.button>
@@ -277,7 +277,7 @@ export const HubView = () => {
 
                 {/* Footer — Tailwind UI divider + action pattern */}
                 <div className="flex items-center justify-between pt-3 border-t border-border">
-                  <span className="text-[10px] text-muted-foreground font-bold font-display uppercase tracking-widest">{template.nodes?.length || 0} nodos</span>
+                  <span className="text-[10px] text-muted-foreground font-bold font-display uppercase tracking-widest">{CANVAS_ENABLED ? `${template.nodes?.length || 0} nodos` : "Plantilla IA"}</span>
                   <button
                     onClick={() => handleUseTemplate(template)}
                     aria-label={`Usar plantilla: ${template.title}`}
