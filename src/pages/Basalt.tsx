@@ -14,6 +14,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { ModelPicker } from "@/components/basalt/ModelPicker";
 import { ReportButton } from "@/components/tickets/ReportButton";
 import { ConversationList } from "@/components/basalt/ConversationList";
+import { projectToMarkdown } from "@/lib/project-preview";
 import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
 import { PendingDocChips, SentDocChips, SentImages } from "@/components/basalt/DocChips";
@@ -148,6 +149,9 @@ export default function BasaltPage() {
   const abortRef = useRef<AbortController | null>(null);
   const scrollerRef = useRef<HTMLDivElement | null>(null);
   const autoSentRef = useRef(false);
+  // Guardas de los otros dos deep-links (?project= y ?c=): un solo disparo por montaje.
+  const openedProjectRef = useRef(false);
+  const openedConvRef = useRef(false);
   const lastPromptRef = useRef("");
   // Documentos adjuntos (contratos, informes…): el texto vive solo en memoria, por mensaje; en el
   // historial guardado queda únicamente el nombre y el tamaño (ver doc-context.ts).
@@ -543,6 +547,54 @@ export default function BasaltPage() {
     chats.remove(id);
     if (id === convId) newChat();
   };
+
+  // /a/basalt?c=<id> — llegar a una conversación desde el historial que ahora
+  // también se ve en Tareas/Proyectos/Perfil (la sidebar de esas páginas no
+  // tenía lista y "se perdían los chats" — reporte 2026-10-14 y correo de
+  // Johanna). Sin array de deps a propósito: espera a que la lista cargue y la
+  // guarda openedConvRef lo limita a un disparo.
+  useEffect(() => {
+    const cid = params.get("c");
+    if (!cid || openedConvRef.current || chats.loading) return;
+    openedConvRef.current = true;
+    setParams({}, { replace: true });
+    const match = chats.conversations.find((c) => c.id === cid);
+    if (match) openConversation(match);
+    else toast.error("Esa conversación ya no existe.");
+  });
+
+  // /a/basalt?project=<id> — "Abrir proyecto" en /spaces. El único lector de
+  // ?project= era Chat.tsx, que quedó sin ruta al fusionar el Studio acá: el
+  // clic navegaba a un parámetro que nadie leía y el proyecto "no abría"
+  // (reporte 2026-10-14). El proyecto guardado entra como mensaje del
+  // asistente con los bloques ```lang Nombre.ext de siempre — vista previa,
+  // ZIP y seguir editando salen del render normal — y recién se persiste si
+  // el usuario continúa el hilo (abrir y mirar no crea conversaciones).
+  useEffect(() => {
+    const pid = params.get("project");
+    if (!pid || openedProjectRef.current || authLoading || !userId) return;
+    openedProjectRef.current = true;
+    setParams({}, { replace: true });
+    void (async () => {
+      try {
+        const res = await fetch("/api/projects", { credentials: "include" });
+        const body = (await res.json().catch(() => null)) as { projects?: { id: string; name: string; description: string | null; files: unknown }[] } | null;
+        if (!res.ok || !body?.projects) throw new Error("bad response");
+        const p = body.projects.find((r) => r.id === pid);
+        if (!p) { toast.error("Proyecto no encontrado."); return; }
+        let files: Record<string, { language?: string; content?: string }> = {};
+        try {
+          const raw = typeof p.files === "string" ? JSON.parse(p.files) : p.files;
+          if (raw && typeof raw === "object" && !Array.isArray(raw)) files = raw as typeof files;
+        } catch { files = {}; }
+        setConvId(crypto.randomUUID());
+        setConvTitle(p.name);
+        setMessages([{ id: crypto.randomUUID(), role: "model", text: projectToMarkdown(p.name, p.description, files) }]);
+      } catch {
+        toast.error("No se pudo cargar el proyecto. Intenta de nuevo.");
+      }
+    })();
+  }, [params, authLoading, userId, setParams]);
 
   /** Un solo camino para todo lo que toca la memoria (añadir, corregir, olvidar). */
   const updateMemory = (next: string[]) => {

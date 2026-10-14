@@ -237,3 +237,29 @@ export function stackblitzFields(files: ProjectFile[], title: string): Record<st
   for (const f of files) fields[`project[files][${normalizePath(f.name)}]`] = f.code;
   return fields;
 }
+
+/**
+ * Inverso del parseo de arriba: un proyecto guardado (api/projects, los del
+ * viejo Studio) vuelve al chat como markdown de bloques ```lang Nombre.ext —
+ * el render normal de Basalt pone vista previa, ZIP y "seguir editando"
+ * gratis. Único consumidor: /a/basalt?project=<id>, el enlace "Abrir
+ * proyecto" de /spaces, que apuntaba a un parámetro que ya nadie leía desde
+ * que Chat.tsx quedó sin ruta.
+ */
+export function projectToMarkdown(
+  name: string,
+  description: string | null,
+  files: Record<string, { language?: string; content?: string }>,
+): string {
+  const entries = Object.entries(files).filter(([n]) => FILE_RE.test(n));
+  if (!entries.length) {
+    return `Abrí tu proyecto **${name}**, pero no tiene archivos guardados. Cuéntame qué quieres construir y lo armamos aquí mismo.`;
+  }
+  const fences = entries.map(([n, f]) => {
+    const lang = f.language || n.split(".").pop() || "txt";
+    return "```" + `${lang} ${n}\n${f.content ?? ""}\n` + "```";
+  });
+  const plural = entries.length === 1 ? "archivo" : "archivos";
+  const desc = description ? ` — ${description}` : "";
+  return `Abrí tu proyecto **${name}**${desc} (${entries.length} ${plural}), tal como quedó guardado. Dime qué cambiamos y sigo desde aquí.\n\n${fences.join("\n\n")}`;
+}
