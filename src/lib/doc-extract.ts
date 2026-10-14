@@ -7,7 +7,7 @@ export const MAX_FILE_BYTES = 15 * 1024 * 1024;
 /** ≈ 50-60 páginas de contrato por documento (~50k tokens). Más que eso se corta y se avisa. */
 export const MAX_DOC_CHARS = 200_000;
 export const MAX_PDF_PAGES = 300;
-export const DOC_ACCEPT = ".pdf,.docx,.txt,.md,.markdown,.csv";
+export const DOC_ACCEPT = ".pdf,.docx,.xlsx,.txt,.md,.markdown,.csv";
 
 export interface ExtractedDoc {
   name: string;
@@ -118,6 +118,80 @@ export async function docxToText(buffer: ArrayBuffer): Promise<string> {
   return blocks(body).join("\n");
 }
 
+
+// ── XLSX ──────────────────────────────────────────────────────────────────────
+/** Referencia de celda "BC12" → índice de columna 0-based (54). */
+function colIndex(ref: string): number {
+  let n = 0;
+  for (const ch of ref) {
+    const c = ch.charCodeAt(0);
+    if (c < 65 || c > 90) break;
+    n = n * 26 + (c - 64);
+  }
+  return n - 1;
+}
+
+/** Hoja de cálculo → texto tabulado por hoja (una línea por fila, celdas con TAB,
+ *  que normalizeText respeta). Las celdas con fórmula se entregan por su último
+ *  valor calculado (<v>) — lo que la persona ve en pantalla —, y las de texto
+ *  compartido se resuelven contra xl/sharedStrings.xml. Pensado para el caso
+ *  real que lo estrenó: un análisis de costos en Excel para revisar en el chat.
+ */
+export async function xlsxToText(buffer: ArrayBuffer): Promise<string> {
+  let zip: JSZipType;
+  try {
+    const { default: JSZip } = await import("jszip");
+    zip = await JSZip.loadAsync(buffer);
+  } catch { throw new DocError("El archivo no parece un .xlsx válido (¿está dañado?)."); }
+
+  const parse = (xml: string) => {
+    const dom = new DOMParser().parseFromString(xml, "application/xml");
+    if (dom.getElementsByTagName("parsererror").length) throw new DocError("No pude leer el contenido del .xlsx.");
+    return dom;
+  };
+  const tags = (dom: Document | Element, name: string) =>
+    Array.from((dom as Document).getElementsByTagNameNS?.("*", name) ?? []);
+
+  // Tabla de textos compartidos: los <c t="s"> solo guardan el índice.
+  const shared: string[] = [];
+  const ssXml = await zip.file("xl/sharedStrings.xml")?.async("string");
+  if (ssXml) for (const si of tags(parse(ssXml), "si")) shared.push(si.textContent ?? "");
+
+  // Nombres de hoja (mismo orden en workbook.xml que sheet1.xml, sheet2.xml…).
+  const names: string[] = [];
+  const wbXml = await zip.file("xl/workbook.xml")?.async("string");
+  if (wbXml) for (const sh of tags(parse(wbXml), "sheet")) names.push(sh.getAttribute("name") ?? "");
+
+  const files = Object.keys(zip.files)
+    .filter((f) => /^xl\/worksheets\/sheet\d+\.xml$/.test(f))
+    .sort((a, b) => Number(a.match(/\d+/)![0]) - Number(b.match(/\d+/)![0]));
+  if (!files.length) throw new DocError("El .xlsx no tiene hojas legibles.");
+
+  const out: string[] = [];
+  for (const [i, path] of files.entries()) {
+    const dom = parse(await zip.file(path)!.async("string"));
+    const rows: string[] = [];
+    for (const row of tags(dom, "row")) {
+      const cells: string[] = [];
+      for (const c of tags(row as Element, "c")) {
+        const idx = colIndex(c.getAttribute("r") ?? "");
+        const t = c.getAttribute("t");
+        let v = "";
+        if (t === "s") v = shared[Number(tags(c as Element, "v")[0]?.textContent ?? "-1")] ?? "";
+        else if (t === "inlineStr") v = c.textContent ?? "";
+        else v = tags(c as Element, "v")[0]?.textContent ?? "";
+        v = v.replace(/[\t\n]/g, " ").trim();
+        if (idx >= 0) { while (cells.length < idx) cells.push(""); cells[idx] = v; }
+        else cells.push(v);
+      }
+      if (cells.some(Boolean)) rows.push(cells.join("\t"));
+    }
+    if (rows.length) out.push(`=== Hoja: ${names[i] || `Hoja ${i + 1}`} ===\n${rows.join("\n")}`);
+  }
+  if (!out.length) throw new DocError("El .xlsx está vacío (no encontré celdas con contenido).");
+  return out.join("\n\n");
+}
+
 // ── PDF ───────────────────────────────────────────────────────────────────────
 interface PdfItem { str?: string; hasEOL?: boolean }
 
@@ -181,6 +255,8 @@ export async function extractDocument(file: File): Promise<ExtractedDoc> {
   if (["txt", "md", "markdown", "csv"].includes(ext)) return finish(name, await readText(file));
   if (ext === "docx") return finish(name, await docxToText(await readBuffer(file)));
   if (ext === "doc") throw new DocError("Los .doc antiguos no se pueden leer: guárdalo como .docx o PDF y vuelve a adjuntarlo.");
+  if (ext === "xlsx") return finish(name, await xlsxToText(await readBuffer(file)));
+  if (ext === "xls") throw new DocError("Los .xls antiguos no se pueden leer: en Excel usa «Guardar como» → .xlsx (o CSV) y vuelve a adjuntarlo.");
   if (ext === "pdf") {
     const r = await pdfToText(await readBuffer(file), name);
     if (!normalizeText(r.text.replace(/--- Página \d+ ---/g, ""))) {
@@ -188,5 +264,5 @@ export async function extractDocument(file: File): Promise<ExtractedDoc> {
     }
     return finish(name, r.text, { pages: r.pages, warning: r.warning });
   }
-  throw new DocError(`No puedo leer archivos .${ext || "sin extensión"}. Adjunta un PDF, .docx o .txt.`);
+  throw new DocError(`No puedo leer archivos .${ext || "sin extensión"}. Adjunta un PDF, .docx, .xlsx (Excel) o .txt.`);
 }

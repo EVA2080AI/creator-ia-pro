@@ -101,3 +101,44 @@ describe("extractDocument con .md", () => {
     expect(doc.text).toContain("Node 20");
   });
 });
+
+// ── XLSX ──────────────────────────────────────────────────────────────────────
+const SS = `<?xml version="1.0"?><sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><si><t>Servicio</t></si><si><t>Costo</t></si><si><t>Aseo</t></si></sst>`;
+const WB = `<?xml version="1.0"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheets><sheet name="Costos" sheetId="1"/></sheets></workbook>`;
+
+async function xlsxFile(sheetXml: string, { shared = SS, workbook = WB }: { shared?: string | null; workbook?: string } = {}): Promise<File> {
+  const zip = new JSZip();
+  zip.file("xl/workbook.xml", workbook);
+  if (shared) zip.file("xl/sharedStrings.xml", shared);
+  zip.file("xl/worksheets/sheet1.xml", `<?xml version="1.0"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${sheetXml}</sheetData></worksheet>`);
+  const buf = await zip.generateAsync({ type: "arraybuffer" });
+  return new File([buf], "costos.xlsx");
+}
+
+describe("xlsxToText (vía extractDocument)", () => {
+  it("resuelve textos compartidos, números y el VALOR calculado de las fórmulas", async () => {
+    const f = await xlsxFile(
+      `<row r="1"><c r="A1" t="s"><v>0</v></c><c r="B1" t="s"><v>1</v></c></row>` +
+      `<row r="2"><c r="A2" t="s"><v>2</v></c><c r="B2"><f>SUM(C1:C9)</f><v>125000</v></c></row>`,
+    );
+    const doc = await extractDocument(f);
+    expect(doc.text).toContain("=== Hoja: Costos ===");
+    expect(doc.text).toContain("Servicio\tCosto");
+    expect(doc.text).toContain("Aseo\t125000");
+    expect(doc.text).not.toContain("SUM(");
+  });
+
+  it("respeta columnas vacías intermedias para no desalinear la tabla", async () => {
+    const f = await xlsxFile(`<row r="1"><c r="A1"><v>1</v></c><c r="C1"><v>3</v></c></row>`);
+    const doc = await extractDocument(f);
+    expect(doc.text).toContain("1\t\t3");
+  });
+
+  it("xls viejo pide convertir, y un zip sin hojas avisa", async () => {
+    await expect(extractDocument(new File([new ArrayBuffer(10)], "viejo.xls"))).rejects.toThrow(/Guardar como/);
+    const zip = new JSZip();
+    zip.file("xl/workbook.xml", WB);
+    const buf = await zip.generateAsync({ type: "arraybuffer" });
+    await expect(extractDocument(new File([buf], "x.xlsx"))).rejects.toThrow(/hojas legibles/);
+  });
+});
