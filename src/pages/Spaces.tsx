@@ -26,7 +26,7 @@ const Spaces = () => {
   // mismo toast que ya usa el sidebar de Basalt en vez de navegar en falso
   // (auditoría UX 2026-09-29).
   const goToCanvas = () => {
-    if (!CANVAS_ENABLED && !isAdmin) {
+    if (!CANVAS_ENABLED) {
       toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
       return;
     }
@@ -103,7 +103,7 @@ const Spaces = () => {
                     Canvas IA no esté listo, un usuario normal solo veía un
                     ítem que abría un toast de "próximamente". Admins sí
                     lo ven para probarlo. */}
-                {(CANVAS_ENABLED || isAdmin) && (
+                {CANVAS_ENABLED && (
                   <>
                     <DropdownMenuItem className="rounded-xl p-3 text-[12px] font-bold cursor-pointer hover:bg-muted focus:bg-primary/10 focus:text-primary transition-all font-display text-muted-foreground mb-0.5"
                       onClick={goToCanvas}>

@@ -151,7 +151,7 @@ export function BasaltShellSidebar({
   // 2026-09-29: WelcomeOnboarding lo mencionaba pero no había forma de
   // encontrarlo).
   const handleCanvasClick = () => {
-    if (!CANVAS_ENABLED && !isAdmin) {
+    if (!CANVAS_ENABLED) {
       toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
       return;
     }
@@ -201,7 +201,7 @@ export function BasaltShellSidebar({
         {/* Mientras Canvas IA no esté listo, para un usuario normal era un ítem de menú
             que solo abría un aviso de "Próximamente": ocupa lugar y no lleva a ningún
             lado (auditoría del cajón, 2026-09-30). Los admins sí lo ven para probarlo. */}
-        {(CANVAS_ENABLED || isAdmin) && (
+        {CANVAS_ENABLED && (
           <button className="asst-side-link" onClick={handleCanvasClick}>
             <LayoutTemplate className="w-4 h-4" /> Canvas IA
           </button>
@@ -288,7 +288,7 @@ export function BasaltShellSidebar({
             </DropdownMenuContent>
           </DropdownMenu>
           <ReportModal open={showReport} onClose={() => setShowReport(false)} />
-          <QuickGuideModal open={showGuide} onClose={() => setShowGuide(false)} showCanvas={CANVAS_ENABLED || isAdmin} onStartTour={onStartTour && (() => { setShowGuide(false); onStartTour(); })} />
+          <QuickGuideModal open={showGuide} onClose={() => setShowGuide(false)} showCanvas={CANVAS_ENABLED} onStartTour={onStartTour && (() => { setShowGuide(false); onStartTour(); })} />
         </div>
       </nav>
       <button

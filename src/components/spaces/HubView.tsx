@@ -41,7 +41,7 @@ export const HubView = () => {
     // pedido a Basalt, que construye un proyecto multi-archivo de verdad.
     // Sin filas huérfanas en Postgres (auditoría UX 2026-09-29) porque no se
     // crea el espacio: el chat es el constructor.
-    if (!CANVAS_ENABLED && !isAdmin) {
+    if (!CANVAS_ENABLED) {
       navigate(`/a/basalt?q=${encodeURIComponent(`Créame "${template.title}": ${template.description}. Entrégamelo como proyecto multi-archivo listo para usar.`)}`);
       return;
     }
@@ -194,7 +194,7 @@ export const HubView = () => {
               onClick={() => {
                 // Esta tarjeta no tenía la guarda del flag: a usuarios comunes
                 // les creaba un espacio huérfano y los mandaba a "Próximamente".
-                if (!CANVAS_ENABLED && !isAdmin) { navigate("/a/basalt"); return; }
+                if (!CANVAS_ENABLED) { navigate("/a/basalt"); return; }
                 createSpace({ name: "Nuevo Proyecto" }).then((space) => {
                   if (space) navigate(`/studio-flow?spaceId=${space.id}`);
                   else navigate("/studio-flow");

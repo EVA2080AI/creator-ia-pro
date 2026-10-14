@@ -48,7 +48,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
   // Mismo toast que ya usa el sidebar de Basalt para Canvas IA (apagado por
   // flag) en vez de navegar a un callejón sin salida (auditoría UX 2026-09-29).
   const goToCanvas = () => {
-    if (!CANVAS_ENABLED && !isAdmin) {
+    if (!CANVAS_ENABLED) {
       toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
       return;
     }
@@ -164,7 +164,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
     if (space.type === "flow") {
       // Mismo criterio que goToCanvas: con el flag apagado, un usuario común
       // aterrizaba en la pantalla "Próximamente" — el proyecto "no abría".
-      if (!CANVAS_ENABLED && !isAdmin) {
+      if (!CANVAS_ENABLED) {
         toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
         return;
       }

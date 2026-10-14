@@ -151,7 +151,7 @@ export default function Dashboard() {
 
   const handleCreateSpace = async () => {
     if (!user || !newSpaceName.trim()) return;
-    if (!CANVAS_ENABLED && !isAdmin) {
+    if (!CANVAS_ENABLED) {
       setIsCreatingSpace(false);
       canvasToast();
       return;
@@ -169,7 +169,7 @@ export default function Dashboard() {
       const newProj = await duplicateProject(project as any);
       if (newProj) setSpaces(prev => [{ ...newProj, type: 'code', thumbnail_url: null } as DashboardProject, ...prev]);
     } else {
-      if (!CANVAS_ENABLED && !isAdmin) { canvasToast(); return; }
+      if (!CANVAS_ENABLED) { canvasToast(); return; }
       const space = await createSpace({ name: `${project.name} (Copia)`, description: project.description ?? undefined });
       if (!space) { toast.error("Error al duplicar"); return; }
       setSpaces(prev => [{
@@ -285,13 +285,13 @@ export default function Dashboard() {
             { icon: Scale, label: "Arena IA", desc: "Compara modelos", path: "/a/arena" },
             // Canvas IA solo cuando exista de verdad: era un acceso directo a un aviso de
             // "Próximamente" (mismo criterio que el menú lateral y la bienvenida).
-            ...(CANVAS_ENABLED || isAdmin ? [{ icon: Megaphone, label: "Canvas IA", desc: "Editor visual", path: "/studio-flow" }] : []),
+            ...(CANVAS_ENABLED ? [{ icon: Megaphone, label: "Canvas IA", desc: "Editor visual", path: "/studio-flow" }] : []),
             { icon: ListTodo, label: "Tareas", desc: "Kanban", path: "/tasks" },
             { icon: FolderOpen, label: "Proyectos", desc: "Tus apps y sitios", path: "/spaces" },
           ].map((app) => (
             <button
               key={app.label}
-              onClick={() => (app.path === "/studio-flow" && !CANVAS_ENABLED && !isAdmin ? canvasToast() : navigate(app.path))}
+              onClick={() => (app.path === "/studio-flow" && !CANVAS_ENABLED ? canvasToast() : navigate(app.path))}
               className="p-5 bg-card border border-border rounded-2xl text-left hover:border-primary transition-all group"
             >
               <div className={"w-10 h-10 rounded-xl bg-muted flex items-center justify-center mb-4 group-hover:bg-primary/10 group-hover:text-primary transition-all"}>

@@ -2,23 +2,21 @@ import { lazy } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layers, ArrowLeft, Brain } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useAdmin } from "@/hooks/useAdmin";
 import { CANVAS_ENABLED } from "@/lib/features";
 
 const Formarketing = lazy(() => import("./Formarketing"));
 
-// Ruta /studio-flow: canvas real si está liberado (o para admins), si no la
-// pantalla de "Próximamente". Ver src/lib/features.ts.
+// Ruta /studio-flow: canvas real solo si el flag está liberado; si no, la
+// pantalla de "Próximamente" para TODOS. Ver src/lib/features.ts.
 export default function CanvasGate() {
   // Como el resto de rutas de AppLayout — sin esto, un visitante sin cuenta
   // veía el chrome real de la app (SidebarGlobal con Dashboard, Admin, etc.)
   // sin haberse logueado nunca.
   const { user, loading: authLoading } = useAuth("/auth");
-  const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
-
   if (authLoading || !user) return null;
-  if (CANVAS_ENABLED || isAdmin) return <Formarketing />;
-  if (adminLoading) return null;
+  // 2026-10-14: sin bypass de admin — el canvas actual "no funciona" (Sebastián)
+  // y se oculta para TODOS hasta el rediseño estilo Freepik Spaces.
+  if (CANVAS_ENABLED) return <Formarketing />;
   return <CanvasComingSoon />;
 }
 
