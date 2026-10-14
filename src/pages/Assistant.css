@@ -839,6 +839,11 @@
 }
 .asst-create-expert { color: var(--asst-accent-text, var(--a-accent, #8b5cf6)); font-weight: 600; }
 .asst-app[data-asst-theme="dark"] .asst-dup-btn { font-family: var(--asst-mono); }
+/* La pastilla "Ticket" hereda .asst-dup-btn (margin-left auto). Cuando ya hay
+   alguien empujando a la derecha (el picker en Basalt, Duplicar en Expertos),
+   ese auto duplicado repartiría el hueco en tercios y dejaría el grupo flotando
+   en el medio — se anula y queda pegada al resto del grupo. */
+.asst-picker + .asst-ticket-btn, .asst-dup-btn + .asst-ticket-btn { margin-left: 0; }
 
 /* ══ Memoria del usuario (ciclo 19) ══════════════════════════════════════════
    Era markup con estilos en línea dentro de Basalt.tsx y solo dejaba BORRAR: para

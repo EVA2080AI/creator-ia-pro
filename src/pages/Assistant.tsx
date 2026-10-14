@@ -27,6 +27,7 @@ import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { PendingDocChips, SentDocChips, SentImages } from "@/components/basalt/DocChips";
 import { Activity, Sources } from "@/components/basalt/SearchActivity";
 import { LinkSuggestions } from "@/components/basalt/LinkSuggestions";
+import { ReportButton } from "@/components/tickets/ReportButton";
 import { MessageActions, EditButton } from "@/components/basalt/MessageActions";
 import { MemoryPanel, MemoryToggle } from "@/components/basalt/MemoryPanel";
 import { findLinks } from "@/lib/links";
@@ -547,6 +548,7 @@ export default function AssistantPage() {
           >
             {assistant.visibility === "system" ? <><Copy className="w-3.5 h-3.5" aria-hidden /> <span>Duplicar y ajustar</span></> : <><Pencil className="w-3.5 h-3.5" aria-hidden /> <span>Editar</span></>}
           </button>
+          <ReportButton />
         </header>
 
         {/* aria-live: sin esto, a quien usa un lector de pantalla la respuesta le

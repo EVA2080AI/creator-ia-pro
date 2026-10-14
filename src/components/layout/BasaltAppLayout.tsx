@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
 import { BasaltShellSidebar } from "./BasaltShellSidebar";
+import { ReportButton } from "@/components/tickets/ReportButton";
 import { useTheme } from "@/hooks/useTheme";
 import { BASALT_ASSISTANT as A } from "@/lib/basalt";
 import { brandCssVars } from "@/lib/assistants";
@@ -60,6 +61,7 @@ export function BasaltAppLayout() {
             <Menu className="w-4 h-4" />
           </button>
           <div className="asst-brand-name">{title}</div>
+          <ReportButton />
         </header>
 
         <div className="asst-shell-scroller">

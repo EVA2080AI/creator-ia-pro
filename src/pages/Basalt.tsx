@@ -12,6 +12,7 @@ import { useProjectCards } from "@/hooks/useProjectCards";
 import { GitHubExportDialog } from "@/components/basalt/GitHubExportDialog";
 import { useProfile } from "@/hooks/useProfile";
 import { ModelPicker } from "@/components/basalt/ModelPicker";
+import { ReportButton } from "@/components/tickets/ReportButton";
 import { ConversationList } from "@/components/basalt/ConversationList";
 import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
@@ -642,6 +643,7 @@ export default function BasaltPage() {
             </button>
           )}
           <ModelPicker model={model} imageModel={imageModel} tier={tier} onModel={setModel} onImageModel={setImageModel} />
+          <ReportButton />
         </header>
 
         {/* aria-live: sin esto, a quien usa un lector de pantalla la respuesta le

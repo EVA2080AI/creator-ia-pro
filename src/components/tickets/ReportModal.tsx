@@ -4,9 +4,10 @@ import { Bug, X, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-// Modal para reportar un error o pedir una mejora — se abre desde el menú de
-// cuenta (SidebarGlobal / Basalt / Expertos), no desde un botón flotante
-// (auditoría UX: "un botón que despliegue, no uno suelto encima de todo").
+// Modal para reportar un error o pedir una mejora — se abre desde la pastilla
+// "Ticket" de la barra superior (ReportButton) y desde el menú de cuenta de la
+// sidebar; nunca como botón flotante (auditoría UX: "un botón que despliegue,
+// no uno suelto encima de todo").
 // Ver api/tickets.ts y la pestaña "Tickets" en /admin.
 export function ReportModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const location = useLocation();
