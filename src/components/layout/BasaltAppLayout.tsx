@@ -9,6 +9,7 @@ import { brandCssVars } from "@/lib/assistants";
 import "@/pages/Assistant.css";
 
 const PAGE_TITLES: Record<string, string> = {
+  "/a/arena": "Arena IA",
   "/dashboard": "Panel de métricas",
   "/tasks": "Tareas",
   "/tareas": "Tareas",

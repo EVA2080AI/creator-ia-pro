@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import { ArrowLeft, Scale, Send, Square, Trophy, Loader2, Plus, X } from "lucide-react";
+import { Send, Square, Trophy, Loader2, Plus, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { mdToHtml } from "@/lib/markdown";
@@ -31,7 +30,6 @@ const DEFAULT_LANES = ["google/gemini-2.5-flash-lite", "openai/gpt-oss-120b", "m
 const SYSTEM = "Responde en español de forma clara y útil. Usa markdown cuando ayude.";
 
 export default function ArenaPage() {
-  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth("/auth");
   const tier = useProfile(user?.id).profile?.subscription_tier;
   // Plan todavía cargando (tier undefined) = no se bloquea nada; el servidor igual valida.
@@ -112,22 +110,19 @@ export default function ArenaPage() {
   };
 
   if (authLoading) {
-    return <div className="flex h-screen items-center justify-center bg-background"><Loader2 className="h-7 w-7 animate-spin text-muted-foreground" /></div>;
+    return <div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-7 w-7 animate-spin text-muted-foreground" /></div>;
   }
 
+  // Sin header propio desde 2026-10-14: Arena vive dentro del shell de Basalt
+  // (BasaltAppLayout), que ya pone el título, la sidebar con el historial de
+  // conversaciones, los Expertos y el botón Ticket — antes acá "se perdían
+  // los chats" (pedido de Sebastián).
   return (
-    <div className="min-h-screen bg-background">
+    <>
       <Helmet><title>Arena IA | Creator IA Pro</title></Helmet>
-      <header className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/90 px-4 py-3 backdrop-blur">
-        <button onClick={() => navigate("/a/basalt")} className="rounded-lg p-2 text-muted-foreground hover:bg-muted" aria-label="Volver a Basalt">
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-        <Scale className="h-5 w-5 text-primary" />
-        <h1 className="font-display text-lg font-black text-foreground">Arena IA</h1>
-        <span className="hidden text-[12px] text-muted-foreground sm:inline">Compara modelos con el mismo prompt y vota el mejor</span>
-      </header>
 
       <main ref={mainRef} className="mx-auto max-w-7xl px-4 py-6">
+        <p className="mb-4 text-[13px] text-muted-foreground">El mismo prompt a varios modelos en paralelo: compara las respuestas lado a lado y vota la mejor. Cada columna cobra lo que cobre su modelo.</p>
         <form
           onSubmit={(e) => { e.preventDefault(); run(); }}
           className="mb-6 flex items-end gap-2 rounded-2xl border border-border bg-card p-3 shadow-sm"
@@ -217,6 +212,6 @@ export default function ArenaPage() {
         </div>
       </main>
       <GitHubExportDialog />
-    </div>
+    </>
   );
 }

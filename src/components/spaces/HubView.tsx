@@ -36,13 +36,12 @@ export const HubView = () => {
 
   const handleUseTemplate = async (template: typeof TEMPLATES[0]) => {
     if (!user) return;
-    // Canvas IA sigue apagado por flag, pero el toast "Próximamente" dejaba
-    // "crear" en NADA (reporte 2026-10-14): ahora la plantilla arranca como
-    // pedido a Basalt, que construye un proyecto multi-archivo de verdad.
-    // Sin filas huérfanas en Postgres (auditoría UX 2026-09-29) porque no se
-    // crea el espacio: el chat es el constructor.
+    // Canvas IA está apagado por flag — sin este chequeo, "usar plantilla"
+    // crea un espacio + nodos + edges reales en Postgres y después manda a
+    // un callejón sin salida ("Próximamente"), dejando basura en la base
+    // por cada intento (auditoría UX 2026-09-29).
     if (!CANVAS_ENABLED && !isAdmin) {
-      navigate(`/a/basalt?q=${encodeURIComponent(`Créame "${template.title}": ${template.description}. Entrégamelo como proyecto multi-archivo listo para usar.`)}`);
+      toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
       return;
     }
     try {
@@ -192,9 +191,6 @@ export const HubView = () => {
               whileTap={{ scale: 0.97 }}
               aria-label="Crear lienzo en blanco — nuevo proyecto vacío"
               onClick={() => {
-                // Esta tarjeta no tenía la guarda del flag: a usuarios comunes
-                // les creaba un espacio huérfano y los mandaba a "Próximamente".
-                if (!CANVAS_ENABLED && !isAdmin) { navigate("/a/basalt"); return; }
                 createSpace({ name: "Nuevo Proyecto" }).then((space) => {
                   if (space) navigate(`/studio-flow?spaceId=${space.id}`);
                   else navigate("/studio-flow");

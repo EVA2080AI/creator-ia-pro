@@ -18,32 +18,12 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { listAssistants, type Assistant } from "@/lib/assistants";
-import { useConversationHistory } from "@/hooks/useConversationHistory";
-import { ConversationList } from "@/components/basalt/ConversationList";
 
 // Mismo mapa que Profile.tsx (TIER_LABELS) — se duplica acá porque es un
 // objeto de 7 entradas, no amerita un módulo compartido.
 const SIDEBAR_KEY = "basalt_sidebar_collapsed";
 
 const TIER_LABELS: Record<string, string> = { free: "Free", creador: "Creador", pro: "Pro", agencia: "Agencia", pyme: "Pyme", pymes: "Pymes", admin: "Admin" };
-
-/**
- * Historial también FUERA de Basalt: en Tareas/Proyectos/Perfil la sidebar no
- * recibía extraNav y las conversaciones "desaparecían" al salir del chat
- * (reporte 2026-10-14 y correo de Johanna). Misma lista y mismo hook del chat;
- * acá no hay hilo abierto, así que abrir = volver a /a/basalt?c=<id>, que
- * Basalt resuelve al montar. onMessages no aplica (nadie pinta mensajes acá).
- */
-function ShellConversations({ userId, onGo }: { userId: string; onGo: (path: string) => void }) {
-  const chats = useConversationHistory({ userId, onMessages: () => {} });
-  return (
-    <ConversationList
-      {...chats.listProps}
-      activeId=""
-      onOpen={(c) => onGo(`/a/basalt?c=${c.id}`)}
-    />
-  );
-}
 
 export interface BasaltShellSidebarProps {
   /** Ruta actual — resalta el ítem de "Plataforma" correspondiente. Un
@@ -231,7 +211,7 @@ export function BasaltShellSidebar({
         {platform("/spaces", "Proyectos", FolderOpen)}
         {isAdmin && platform("/admin", "Panel Admin", ShieldCheck)}
 
-        {extraNav ?? (user?.id ? <ShellConversations userId={user.id} onGo={go} /> : null)}
+        {extraNav}
 
         </div>
 

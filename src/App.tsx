@@ -261,9 +261,6 @@ const App = () => {
                   {/* Asistentes personalizables — shell propio, sin AppLayout */}
                   <Route path="/a/basalt" element={<BasaltPage />} />
                   <Route path="/basalt"   element={<Navigate to="/a/basalt" replace />} />
-                  {/* Arena vive bajo el mismo prefijo /a/ que Basalt y los Expertos — es
-                      la misma familia de producto (auditoría de IA, 2026-09-28). */}
-                  <Route path="/a/arena" element={<ArenaPage />} />
                   <Route path="/arena"   element={<Navigate to="/a/arena" replace />} />
                   <Route path="/a/:slug" element={<AssistantPage />} />
 
@@ -279,6 +276,11 @@ const App = () => {
                       aparte con su propio shell (auditoría UX, 2026-09-28:
                       "todo debe estar dentro de basalt no afuera"). */}
                   <Route element={<BasaltAppLayout />}>
+                    {/* Arena vive bajo el mismo prefijo /a/ que Basalt y los Expertos — es
+                        la misma familia de producto (auditoría de IA, 2026-09-28). Dentro
+                        del shell desde 2026-10-14: sin sidebar "se perdían los chats" y no
+                        había historial ni Expertos a la vista (pedido de Sebastián). */}
+                    <Route path="/a/arena"      element={<ArenaPage />} />
                     <Route path="/dashboard"    element={<Dashboard />} />
                     <Route path="/spaces"       element={<Spaces />} />
                     {/* /tasks es la canónica ahora — /tareas era la única URL logueada

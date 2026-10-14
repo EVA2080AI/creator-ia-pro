@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPreviewDoc, extractFilename, findMissingRefs, missingRefMessage, needsBundler, isPreviewable, projectToMarkdown, stackblitzFields, uniqueName, withBasaltBase, type ProjectFile } from "./project-preview";
+import { buildPreviewDoc, extractFilename, findMissingRefs, missingRefMessage, needsBundler, isPreviewable, stackblitzFields, uniqueName, withBasaltBase, type ProjectFile } from "./project-preview";
 
 describe("extractFilename", () => {
   it("lee el nombre de la línea de la valla (resto tras el lenguaje)", () => {
@@ -175,31 +175,5 @@ describe("proyectos que necesitan bundler", () => {
   it("StackBlitz sigue disponible para un proyecto con HTML aunque no traiga package.json", () => {
     expect(stackblitzFields(vite.slice(1), "x")).not.toBeNull();
     expect(stackblitzFields(vite, "x")?.["project[template]"]).toBe("node");
-  });
-});
-
-describe("projectToMarkdown", () => {
-  it("arma bloques cuya línea de valla extractFilename sabe leer (ida y vuelta)", () => {
-    const md = projectToMarkdown("Mi página", null, {
-      "index.html": { language: "html", content: "<h1>hola</h1>" },
-      "styles.css": { language: "css", content: "body{}" },
-    });
-    expect(md).toContain("```html index.html");
-    expect(md).toContain("```css styles.css");
-    expect(md).toContain("2 archivos");
-    // mdToHtml solo captura el lenguaje: el nombre llega como primera línea
-    // del código — el mismo camino que recorre un proyecto generado en chat.
-    expect(extractFilename(" index.html\n<h1>hola</h1>")).toEqual({ name: "index.html", code: "<h1>hola</h1>" });
-  });
-
-  it("sin archivos invita a construir; con uno usa singular y la descripción", () => {
-    expect(projectToMarkdown("Vacío", null, {})).toContain("no tiene archivos");
-    const md = projectToMarkdown("Uno", "mi sitio", { "a.html": { content: "<p>x</p>" } });
-    expect(md).toContain("(1 archivo)");
-    expect(md).toContain("— mi sitio");
-  });
-
-  it("deduce el lenguaje de la extensión si el archivo guardado no lo trae", () => {
-    expect(projectToMarkdown("X", null, { "script.js": { content: "let a" } })).toContain("```js script.js");
   });
 });

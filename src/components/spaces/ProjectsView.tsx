@@ -161,13 +161,7 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
       return;
     }
 
-    if (space.type === "flow") {
-      // Mismo criterio que goToCanvas: con el flag apagado, un usuario común
-      // aterrizaba en la pantalla "Próximamente" — el proyecto "no abría".
-      if (!CANVAS_ENABLED && !isAdmin) {
-        toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
-        return;
-      }
+    if (space.type === 'flow') {
       navigate(`/studio-flow?spaceId=${space.id}`);
     } else {
       // "Code Editor" ya no existe como interfaz separada — se fusionó
