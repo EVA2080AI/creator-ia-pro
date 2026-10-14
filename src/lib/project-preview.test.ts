@@ -203,3 +203,11 @@ describe("projectToMarkdown", () => {
     expect(projectToMarkdown("X", null, { "script.js": { content: "let a" } })).toContain("```js script.js");
   });
 });
+
+describe("isOfficeHtmlName / preview de documentos de oficina", () => {
+  it("Costos.xls y Propuesta.doc se consideran previsualizables como HTML", () => {
+    expect(isPreviewable([{ name: "Costos.xls", lang: "html", code: "<table></table>" }])).toBe(true);
+    expect(isPreviewable([{ name: "Propuesta.doc", lang: "html", code: "<p>x</p>" }])).toBe(true);
+    expect(isPreviewable([{ name: "datos.csv", lang: "csv", code: "a,b" }])).toBe(false);
+  });
+});

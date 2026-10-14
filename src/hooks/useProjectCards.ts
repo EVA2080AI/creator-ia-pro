@@ -33,6 +33,16 @@ function projectTitle(files: ProjectFile[]): string {
 
 const slug = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "proyecto-basalt";
 
+// El tipo correcto hace que macOS/Windows abran el archivo con Word/Excel
+// directamente en vez de con el navegador.
+const FILE_MIME: Record<string, string> = {
+  xls: "application/vnd.ms-excel",
+  doc: "application/msword",
+  csv: "text/csv;charset=utf-8",
+  html: "text/html;charset=utf-8",
+  htm: "text/html;charset=utf-8",
+};
+
 function download(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
@@ -129,6 +139,21 @@ function attachProjectCards(el: HTMLElement): () => void {
       case "fullscreen": {
         const on = card.classList.toggle("md-proj-full");
         actEl.textContent = on ? "Cerrar" : "Pantalla completa";
+        break;
+      }
+      case "file": {
+        // Descarga UN archivo con su nombre (el boton del encabezado en documentos
+        // de oficina, o el "Descargar" de la barra de cada pestana de archivo).
+        const pane =
+          actEl.closest<HTMLElement>(".md-proj-pane[data-file]") ??
+          card.querySelector<HTMLElement>(".md-proj-pane.active[data-file]") ??
+          card.querySelector<HTMLElement>(".md-proj-pane[data-file]");
+        const name = pane?.dataset.file;
+        const code = pane?.querySelector("pre code")?.textContent ?? "";
+        if (!pane || !name) break;
+        const ext = name.includes(".") ? name.split(".").pop()!.toLowerCase() : "";
+        download(new Blob([code], { type: FILE_MIME[ext] ?? "text/plain;charset=utf-8" }), name);
+        flash(actEl, "Descargado ✓");
         break;
       }
       case "zip": {

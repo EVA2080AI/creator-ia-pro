@@ -16,6 +16,10 @@ const WEB_LANGS = new Set(["html", "css", "js", "javascript"]);
 
 export const isWebLang = (lang: string) => WEB_LANGS.has(lang.toLowerCase());
 export const isHtmlName = (name: string) => /\.html?$/i.test(name);
+/** Documentos de oficina basados en HTML (el prompt pide entregarlos como
+ *  `Costos.xls` / `Propuesta.doc`): se previsualizan como página y la tarjeta
+ *  ofrece descargarlos directo con su nombre. */
+export const isOfficeHtmlName = (name: string) => /\.(xls|doc)$/i.test(name);
 const isCssName = (name: string) => /\.css$/i.test(name);
 const isJsName = (name: string) => /\.m?js$/i.test(name);
 
@@ -81,7 +85,7 @@ export function needsBundler(files: ProjectFile[]): boolean {
   return !!main && /<script\b[^>]*\bsrc\s*=\s*["'][^"']+\.(?:tsx?|jsx)["']/i.test(main.code);
 }
 
-export const isPreviewable = (files: ProjectFile[]) => files.some((f) => isHtmlName(f.name)) && !needsBundler(files);
+export const isPreviewable = (files: ProjectFile[]) => files.some((f) => isHtmlName(f.name) || isOfficeHtmlName(f.name)) && !needsBundler(files);
 
 /** ¿Vale la pena renderizar este ```html sin nombre? Los modelos ilustran con fragmentos de una línea
  *  (`<img src="ruta/tu-imagen.jpg">`, `<style>`) que no son una página: una tarjeta con iframe para eso es ruido. */
@@ -109,7 +113,7 @@ function makeLookup(files: ProjectFile[]) {
 const isLocalRef = (ref: string) => !/^([a-z][a-z0-9+.-]*:|\/\/|#)/i.test(ref.trim());
 
 function mainHtml(files: ProjectFile[]): ProjectFile | undefined {
-  const htmlFiles = files.filter((f) => isHtmlName(f.name));
+  const htmlFiles = files.filter((f) => isHtmlName(f.name) || isOfficeHtmlName(f.name));
   return htmlFiles.find((f) => /^index\.html?$/i.test(baseName(f.name))) ?? htmlFiles[0];
 }
 

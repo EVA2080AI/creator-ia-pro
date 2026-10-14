@@ -163,3 +163,22 @@ describe("mdToHtml — listas", () => {
     expect(host.querySelectorAll("ul")).toHaveLength(1);
   });
 });
+
+describe("mdToHtml — documentos de oficina (Costos.xls / Propuesta.doc)", () => {
+  it("un .xls solo: la tarjeta se llama como el archivo, se previsualiza y el botón primario es descargarlo", () => {
+    const host = render(fence("html Costos.xls", "<table><tr><th>Servicio</th><th>Costo</th></tr><tr><td>Aseo</td><td>125000</td></tr></table>"));
+    expect(host.querySelectorAll(".md-project")).toHaveLength(1);
+    expect(host.querySelector(".md-codehead span")?.textContent).toBe("Costos.xls");
+    // sí hay vista previa (la tabla se ve), y el único botón de acciones es Descargar
+    expect(host.querySelector('[data-tab="preview"]')).not.toBeNull();
+    expect(host.querySelector('.md-preview-actions [data-act="file"]')?.textContent).toContain("Descargar Costos.xls");
+    expect(host.querySelector('[data-act="github"]')).toBeNull();
+    expect(host.querySelector('[data-act="zip"]')).toBeNull();
+  });
+
+  it("todo panel de archivo trae su botón Descargar junto a Copiar", () => {
+    const host = render([fence("html", "<h1>x</h1>"), fence("css", "h1{color:red}")].join("\n\n"));
+    const botones = host.querySelectorAll('.md-proj-filebar [data-act="file"]');
+    expect(botones.length).toBe(2);
+  });
+});
