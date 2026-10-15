@@ -6,6 +6,7 @@ import {
   LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Scale, Dice5, Wallet, Sparkles, Bot,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import { useTheme } from "@/hooks/useTheme";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
@@ -40,7 +41,8 @@ import { ThreadSkeleton } from "@/components/basalt/ThreadSkeleton";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
 import { IMAGE_ACCEPT, imagesFromTransfer, recentImages } from "@/lib/image-attach";
-import { getModel } from "@/lib/ai/models";
+import { canAccessModel, getModel } from "@/lib/ai/models";
+import { ModelPicker } from "@/components/basalt/ModelPicker";
 import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DEFAULT_IMAGE_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import "./Assistant.css";
 import { shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
@@ -50,6 +52,21 @@ import { shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
 // usa el MISMO BasaltShellSidebar en vez de un <nav> propio armado a mano,
 // que había divergido en silencio: menú de Cuenta pelado, sin Guía rápida,
 // sin Arena IA/Canvas IA, sin selector de modelo, historial sin truncar.
+
+/** Clave del modelo elegido por el usuario para un experto (por navegador). */
+const MODEL_KEY = (slug: string) => `asst-model:${slug}`;
+
+/** El modelo con el que habla este chat: el del experto salvo que el usuario
+ *  eligiera otro. Un override que ya no existe en el catálogo o que el plan
+ *  actual no cubre vuelve en silencio al del experto (el servidor cobraría
+ *  403 antes de generar, pero mejor ni ofrecerlo marcado). */
+const modeloEfectivo = (a: Assistant, override: string | null, tier: string | undefined): string => {
+  if (!override || override === a.defaultModel) return a.defaultModel;
+  const m = getModel(override);
+  if (m.id !== override) return a.defaultModel;
+  if (tier && !canAccessModel(tier, m.minTier)) return a.defaultModel;
+  return override;
+};
 
 const ICONS: Record<string, typeof LayoutTemplate> = {
   layout: LayoutTemplate,
@@ -159,6 +176,24 @@ export default function AssistantPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
 
+  // El modelo del experto es el punto de partida, ya no una jaula: el usuario
+  // puede conversar con otro y se recuerda por experto en este navegador.
+  const { profile } = useProfile(user?.id);
+  const tier = profile?.subscription_tier;
+  const [modelOverride, setModelOverride] = useState<string | null>(null);
+  useEffect(() => {
+    try { setModelOverride(localStorage.getItem(MODEL_KEY(slug))); } catch { setModelOverride(null); }
+  }, [slug]);
+  const elegirModelo = useCallback((id: string) => {
+    if (!assistant) return;
+    const propio = id === assistant.defaultModel;
+    setModelOverride(propio ? null : id);
+    try {
+      if (propio) localStorage.removeItem(MODEL_KEY(slug));
+      else localStorage.setItem(MODEL_KEY(slug), id);
+    } catch { /* sin storage: vale solo para esta visita */ }
+  }, [assistant, slug]);
+
   // getAssistant devuelve null tanto si el slug no existe como si falló la red
   // o la sesión: la pantalla de "no encontrado" necesita un Reintentar porque
   // la mitad de las veces el experto sí existe.
@@ -250,10 +285,11 @@ export default function AssistantPage() {
     // guardar se sube el hilo COMPLETO desde el estado local, así que hacerlo con
     // el hilo a medias borraría lo anterior.
     if (!text || generating || !assistant || threadStatus !== "idle" || (!opts?.continueFrom && docsBusy)) return;
-    // Un Experto trae su modelo fijo: si ese no ve, decirlo antes de cobrar el mensaje.
-    if (attachedImages.length && !getModel(assistant.defaultModel).vision) {
-      toast.error(`${assistant.name} usa ${getModel(assistant.defaultModel).label}, que no puede ver imágenes.`, {
-        description: "Pregúntale a Basalt con un modelo con visión, o describe la imagen con palabras.",
+    const modelo = modeloEfectivo(assistant, modelOverride, tier);
+    // Si el modelo del chat no ve, decirlo antes de cobrar el mensaje.
+    if (attachedImages.length && !getModel(modelo).vision) {
+      toast.error(`${assistant.name} está usando ${getModel(modelo).label}, que no puede ver imágenes.`, {
+        description: "Cambia a un modelo con visión en el selector de arriba, o describe la imagen con palabras.",
       });
       return;
     }
@@ -302,7 +338,7 @@ export default function AssistantPage() {
     abortRef.current = new AbortController();
     let sources: SearchSource[] = [];
     let searchCredits = 0;
-    let respondedWith = assistant.defaultModel;
+    let respondedWith = modelo;
     setActivity("");
     try {
       const res = await fetch("/api/ai/chat", {
@@ -311,7 +347,7 @@ export default function AssistantPage() {
         signal: abortRef.current.signal,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: assistant.defaultModel,
+          model: modelo,
           // Las reglas de documentos también en las preguntas de seguimiento (el documento ya está en
           // el historial y no vuelve a viajar en `documents`).
           // ENTREGABLES_PROMPT: sin esto un Experto contestaba "no puedo crear
@@ -343,7 +379,7 @@ export default function AssistantPage() {
         // Con el código, el aviso puede ofrecer la salida (ver src/lib/chat-errors.ts).
         throw chatError(body, res.status);
       }
-      respondedWith = res.headers.get("X-Model-Used") || assistant.defaultModel;
+      respondedWith = res.headers.get("X-Model-Used") || modelo;
 
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
@@ -433,9 +469,9 @@ export default function AssistantPage() {
       abortRef.current = null;
       stickToBottom();
     }
-  }, [assistant, generating, messages, stickToBottom, userId, convId, convTitle, slug, memory, readyDocs, pendingImages, docsBusy, clearDocs, threadStatus, chats]);
+  }, [assistant, generating, messages, stickToBottom, userId, convId, convTitle, slug, memory, readyDocs, pendingImages, docsBusy, clearDocs, threadStatus, chats, modelOverride, tier]);
 
-  /** Rehace la última respuesta del Experto (su modelo es fijo: no hay "otro modelo"). */
+  /** Rehace la última respuesta — con el modelo elegido en el selector, si lo cambiaste. */
   const regenerate = useCallback((msgId: string) => {
     if (generating) return;
     const i = messages.findIndex((m) => m.id === msgId);
@@ -549,6 +585,16 @@ export default function AssistantPage() {
           {/* El atajo que hace que la ventaja se note: partir de un experto real del
               dominio en vez de una hoja en blanco (que es donde la gente abandona).
               Si el experto ya es tuyo, el mismo botón lo abre para editarlo. */}
+          {/* El modelo del experto dejó de ser fijo: es el preseleccionado y
+              el usuario puede conversar con otro (se recuerda por experto en
+              este navegador). Sin sección de imágenes ni "Auto": los Expertos
+              no generan imágenes y "auto" solo lo resuelve Basalt en cliente. */}
+          <ModelPicker
+            model={modeloEfectivo(assistant, modelOverride, tier)}
+            tier={tier}
+            onModel={elegirModelo}
+            autoRow={false}
+          />
           {messages.length > 0 && !generating && (
             <button
               className="asst-icon-btn asst-export-btn"

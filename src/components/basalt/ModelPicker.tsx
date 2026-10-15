@@ -15,11 +15,15 @@ const TIER_LABEL: Record<PlanTier, string> = { free: "Free", creador: "Creador",
 
 interface Props {
   model: string;
-  imageModel: string;
+  /** Sin imageModel/onImageModel el panel omite la sección de imágenes (los Expertos no generan). */
+  imageModel?: string;
   /** Plan del usuario. undefined = todavía cargando: no se bloquea nada (el servidor igual valida). */
   tier: string | undefined;
   onModel: (id: string) => void;
-  onImageModel: (id: string) => void;
+  onImageModel?: (id: string) => void;
+  /** false = sin la fila "Auto": solo Basalt resuelve "auto" en el cliente; un
+   *  Experto manda el id literal al servidor, que no conoce "auto". */
+  autoRow?: boolean;
 }
 
 interface RowProps {
@@ -59,14 +63,15 @@ function Row({ title, sub, desc, chip, selected, lockedTier, slow, onPick }: Row
   );
 }
 
-export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: Props) {
+export function ModelPicker({ model, imageModel, tier, onModel, onImageModel, autoRow = true }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const popRef = useRef<HTMLDivElement | null>(null);
   const popId = useId();
   const esAuto = model === AUTO_MODEL_ID;
   const current = getModel(model);
-  const currentImage = getImageModel(imageModel);
+  const conImagenes = imageModel !== undefined && !!onImageModel;
+  const currentImage = conImagenes ? getImageModel(imageModel) : undefined;
   const lockOf = (min: PlanTier) => (tier && !canAccessModel(tier, min) ? min : undefined);
 
   useEffect(() => {
@@ -92,7 +97,7 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: 
     rows[next].focus();
   };
 
-  const anyLocked = CHAT_MODELS.some((m) => lockOf(m.minTier)) || IMAGE_MODELS.some((m) => lockOf(m.minTier));
+  const anyLocked = CHAT_MODELS.some((m) => lockOf(m.minTier)) || (conImagenes && IMAGE_MODELS.some((m) => lockOf(m.minTier)));
 
   return (
     <div className="asst-picker" ref={rootRef}>
@@ -104,7 +109,7 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: 
         aria-expanded={open}
         aria-controls={open ? popId : undefined}
         onClick={() => setOpen((o) => !o)}
-        title={`Modelo: ${esAuto ? "Auto" : current.label} · Imágenes: ${currentImage.label}`}
+        title={`Modelo: ${esAuto ? "Auto" : current.label}${currentImage ? ` · Imágenes: ${currentImage.label}` : ""}`}
       >
         <Sparkles className="w-3.5 h-3.5" aria-hidden />
         <span className="asst-picker-label">{esAuto ? "Auto" : current.label}</span>
@@ -119,16 +124,18 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: 
               {/* Auto va primero y fuera de las categorías: no es un modelo del
                   catálogo, es "Basalt elige por ti" — y solo entre los gratis,
                   para que nunca gaste créditos por su cuenta. */}
-              <div className="asst-picker-group">
-                <Row
-                  title="Auto"
-                  sub="Basalt elige por ti"
-                  desc="Siempre gratis: Flash Lite para conversar y ver fotos; GPT-OSS 120B cuando pides código o un sitio. Debajo de cada respuesta ves cuál respondió."
-                  chip="Gratis"
-                  selected={esAuto}
-                  onPick={() => { onModel(AUTO_MODEL_ID); setOpen(false); }}
-                />
-              </div>
+              {autoRow && (
+                <div className="asst-picker-group">
+                  <Row
+                    title="Auto"
+                    sub="Basalt elige por ti"
+                    desc="Siempre gratis: Flash Lite para conversar y ver fotos; GPT-OSS 120B cuando pides código o un sitio. Debajo de cada respuesta ves cuál respondió."
+                    chip="Gratis"
+                    selected={esAuto}
+                    onPick={() => { onModel(AUTO_MODEL_ID); setOpen(false); }}
+                  />
+                </div>
+              )}
               {CATEGORY_ORDER.map((cat) => (
                 <div key={cat} className="asst-picker-group">
                   <div className="asst-picker-heading">{cat === "eco" ? "Gratis" : CATEGORY_META[cat].label}</div>
@@ -148,21 +155,23 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel }: 
                 </div>
               ))}
             </div>
-            <div className="asst-picker-scroll asst-picker-images" role="listbox" aria-label="Motores de imagen">
-              <div className="asst-picker-heading"><ImageIcon className="w-3.5 h-3.5" aria-hidden /> Imágenes</div>
-              {IMAGE_MODELS.map((m) => (
-                <Row
-                  key={m.id}
-                  title={m.label}
-                  sub={m.providerLabel}
-                  desc={m.description}
-                  chip={`${m.credits} cr`}
-                  selected={m.id === imageModel}
-                  lockedTier={lockOf(m.minTier)}
-                  onPick={() => { onImageModel(m.id); setOpen(false); }}
-                />
-              ))}
-            </div>
+            {conImagenes && (
+              <div className="asst-picker-scroll asst-picker-images" role="listbox" aria-label="Motores de imagen">
+                <div className="asst-picker-heading"><ImageIcon className="w-3.5 h-3.5" aria-hidden /> Imágenes</div>
+                {IMAGE_MODELS.map((m) => (
+                  <Row
+                    key={m.id}
+                    title={m.label}
+                    sub={m.providerLabel}
+                    desc={m.description}
+                    chip={`${m.credits} cr`}
+                    selected={m.id === imageModel}
+                    lockedTier={lockOf(m.minTier)}
+                    onPick={() => { onImageModel!(m.id); setOpen(false); }}
+                  />
+                ))}
+              </div>
+            )}
             {/* El costo de la búsqueda web no estaba escrito en ninguna parte: el chat
                 puede buscar en internet solo y cada búsqueda suma 1 crédito al del
                 mensaje. Va acá, donde el usuario está mirando precios. */}

@@ -844,6 +844,12 @@
    ese auto duplicado repartiría el hueco en tercios y dejaría el grupo flotando
    en el medio — se anula y queda pegada al resto del grupo. */
 .asst-picker + .asst-ticket-btn, .asst-dup-btn + .asst-ticket-btn { margin-left: 0; }
+/* Mismo principio con el picker en la topbar del Experto: el nombre ya empuja
+   con su margin-right:auto, así que el auto del picker (pensado para topbars
+   sin nombre que empuje) y los de Descargar/Duplicar detrás de él partirían el
+   hueco en pedazos. Con nombre delante o picker delante, esos autos sobran. */
+.asst-brand-name ~ .asst-picker { margin-left: 0; }
+.asst-picker ~ .asst-export-btn, .asst-picker ~ .asst-dup-btn { margin-left: 0; }
 
 /* ══ Memoria del usuario (ciclo 19) ══════════════════════════════════════════
    Era markup con estilos en línea dentro de Basalt.tsx y solo dejaba BORRAR: para
