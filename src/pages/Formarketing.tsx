@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect, useMemo, memo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, memo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
 import { Layers } from 'lucide-react';
@@ -18,11 +18,9 @@ import { type Template } from '@/lib/templates';
 // Components
 import CharacterBreakdownNode from '@/components/formarketing/CharacterBreakdownNode';
 import ModelNode from '@/components/formarketing/ModelNode';
-import VideoModelNode from '@/components/formarketing/VideoModelNode';
 import LayoutBuilderNode from '@/components/formarketing/LayoutBuilderNode';
-import CampaignManagerNode from '@/components/formarketing/CampaignManagerNode';
 import { FormarketingSidebar } from '@/components/formarketing/FormarketingSidebar';
-import AntigravityBridgeNode from '@/components/formarketing/AntigravityBridgeNode';
+import RetiredNode from '@/components/formarketing/RetiredNode';
 import CaptionNode from '@/components/formarketing/CaptionNode';
 import PromptBuilderNode from '@/components/formarketing/PromptBuilderNode';
 import LLMNode from '@/components/formarketing/LLMNode';
@@ -37,81 +35,61 @@ import { ExportModal } from '@/components/formarketing/ExportModal';
 import { StudioToolbar } from '@/components/studio/StudioToolbar';
 import { Onboarding } from './formarketing/components/Onboarding';
 import { ExecutionLog } from './formarketing/components/ExecutionLog';
-import { NODE_META } from '@/components/formarketing/nodeConnections';
+import { EXECUTABLE_NODE_TYPES, NODE_META } from '@/components/formarketing/nodeConnections';
 
 // Hooks
+import { CanvasExecContext } from './formarketing/CanvasExecContext';
 import { useCanvasPersistence } from './formarketing/hooks/useCanvasPersistence';
 import { useCanvasExecution } from './formarketing/hooks/useCanvasExecution';
 import { useCanvasHistory } from '@/hooks/useCanvasHistory';
 import { useCanvasSync } from './formarketing/hooks/useCanvasSync';
 
-// --- Types ---
-interface NodeContext {
-  executeNode?: (id: string) => void;
-  executeUpstream?: (id: string) => Promise<void>;
-}
-
-interface NodeDataWithContext extends Record<string, unknown> {
-  _context?: NodeContext;
-}
-
 // --- Node Wrappers to satisfy IDE parser ---
 // Pass only { id, data } to child nodes — they don't accept full NodeProps.
-// onExecute is extracted from the injected _context in data.
+// La ejecución llega por CanvasExecContext (ver CanvasExecContext.ts), ya no
+// viaja inyectada dentro de data._context.
 const CharacterBreakdownNodeWrapper = memo((props: NodeProps) => {
-  const data = props.data as NodeDataWithContext;
-  return <CharacterBreakdownNode id={props.id} data={data as any} />;
+  return <CharacterBreakdownNode id={props.id} data={props.data as any} />;
 });
 
 const ModelNodeWrapper = memo((props: NodeProps) => {
-  const data = props.data as NodeDataWithContext;
-  return <ModelNode id={props.id} data={data as any} />;
-});
-
-const VideoModelNodeWrapper = memo((props: NodeProps) => {
-  const data = props.data as NodeDataWithContext;
-  return <VideoModelNode id={props.id} data={data as any} />;
+  return <ModelNode id={props.id} data={props.data as any} />;
 });
 
 const LayoutBuilderNodeWrapper = memo((props: NodeProps) => {
-  const data = props.data as NodeDataWithContext;
-  return <LayoutBuilderNode id={props.id} data={data as any} />;
-});
-
-const CampaignManagerNodeWrapper = memo((props: NodeProps) => {
-  const data = props.data as NodeDataWithContext;
-  return <CampaignManagerNode id={props.id} data={data as any} />;
+  return <LayoutBuilderNode id={props.id} data={props.data as any} />;
 });
 
 const CaptionNodeWrapper = memo((props: NodeProps) => {
-  const data = props.data as NodeDataWithContext;
-  return <CaptionNode id={props.id} data={data as any} />;
+  return <CaptionNode id={props.id} data={props.data as any} />;
 });
 
 const PromptBuilderNodeWrapper = memo((props: NodeProps) => {
-  const data = props.data as NodeDataWithContext;
-  return <PromptBuilderNode id={props.id} data={data as any} />;
+  return <PromptBuilderNode id={props.id} data={props.data as any} />;
 });
 
 const LLMNodeWrapper = memo((props: NodeProps) => {
-  const data = props.data as NodeDataWithContext;
-  return <LLMNode id={props.id} data={data as any} />;
+  return <LLMNode id={props.id} data={props.data as any} />;
 });
 
 const TextInputNodeWrapper = memo((props: NodeProps) => {
-  const data = props.data as NodeDataWithContext;
-  return <TextInputNode id={props.id} data={data as any} />;
+  return <TextInputNode id={props.id} data={props.data as any} />;
+});
+
+// Tipos retirados en Fase 0 (teatro / sin backend): las filas guardadas se
+// muestran como RetiredNode con botón para borrarlas de verdad.
+const RetiredNodeWrapper = memo((props: NodeProps) => {
+  return <RetiredNode id={props.id} type={props.type} />;
 });
 
 CharacterBreakdownNodeWrapper.displayName = 'CharacterBreakdownNodeWrapper';
 ModelNodeWrapper.displayName = 'ModelNodeWrapper';
-VideoModelNodeWrapper.displayName = 'VideoModelNodeWrapper';
 LayoutBuilderNodeWrapper.displayName = 'LayoutBuilderNodeWrapper';
-CampaignManagerNodeWrapper.displayName = 'CampaignManagerNodeWrapper';
 CaptionNodeWrapper.displayName = 'CaptionNodeWrapper';
 PromptBuilderNodeWrapper.displayName = 'PromptBuilderNodeWrapper';
 LLMNodeWrapper.displayName = 'LLMNodeWrapper';
 TextInputNodeWrapper.displayName = 'TextInputNodeWrapper';
+RetiredNodeWrapper.displayName = 'RetiredNodeWrapper';
 
 // Blueprint node wrappers
 const BlueprintProjectNodeWrapper = memo((props: NodeProps) => {
@@ -137,6 +115,8 @@ const FormarketingContent = () => {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const [logOpen, setLogOpen] = useState(false);
+  const [snapEnabled, setSnapEnabled] = useState(false);
+  const [execStatus, setExecStatus] = useState<'idle' | 'running' | 'success' | 'error'>('idle');
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem('fm_onboarded'));
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [execLog, setExecLog] = useState<{ time: string; node: string; msg: string; type: 'info' | 'success' | 'error' }[]>([]);
@@ -159,15 +139,33 @@ const FormarketingContent = () => {
   // Enable bi-directional Reverse Sync (Canvas -> Blueprint)
   useCanvasSync(spaceId, user, nodes, edges);
 
-  const { executeNode, executeUpstream } = useCanvasExecution(spaceId, user, setNodes, addLog, setEdges);
+  const execApi = useCanvasExecution(spaceId, user, setNodes, addLog, setEdges);
+  const { executeNode, executeFlow } = execApi;
 
-  // Inject execution context into node data updates
-  useEffect(() => {
-    setNodes(nds => nds.map(n => ({
-      ...n,
-      data: { ...n.data, _context: { executeNode, executeUpstream } }
-    })));
-  }, [executeNode, executeUpstream, setNodes]);
+  // EJECUTAR global: corre las cadenas que terminan en nodos de IA sin salida
+  // (los "terminales"), cada ancestro una sola vez. Antes era un no-op.
+  const runFlow = useCallback(async () => {
+    const nds = getNodes();
+    const conSalida = new Set(getEdges().map(e => e.source));
+    const terminales = nds
+      .filter(n => EXECUTABLE_NODE_TYPES.has(n.type || '') && !conSalida.has(n.id))
+      .map(n => n.id);
+
+    if (terminales.length === 0) {
+      toast.info('No hay nodos de IA al final del flujo. Agrega un LLM, una Imagen IA o un Caption.');
+      return;
+    }
+
+    setExecStatus('running');
+    try {
+      await executeFlow(terminales);
+      setExecStatus('success');
+    } catch {
+      setExecStatus('error');
+    } finally {
+      setTimeout(() => setExecStatus('idle'), 1500);
+    }
+  }, [getNodes, getEdges, executeFlow]);
 
   // Template Listener
   useEffect(() => {
@@ -190,11 +188,10 @@ const FormarketingContent = () => {
           id,
           type: tNode.type,
           position: { x: 400 + (idx * 300), y: 300 },
-          data: { 
-            ...tNode.data, 
+          data: {
+            ...tNode.data,
             status: 'idle',
             title: tNode.data.title || tNode.type,
-            _context: { executeNode } // Immediate injection for new nodes
           }
         });
       });
@@ -234,7 +231,7 @@ const FormarketingContent = () => {
     
     window.addEventListener('add-template', handleAddTemplate);
     return () => window.removeEventListener('add-template', handleAddTemplate);
-  }, [spaceId, user, setNodes, setEdges, record, addLog, executeNode]);
+  }, [spaceId, user, setNodes, setEdges, record, addLog]);
 
   // Handlers
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -253,18 +250,18 @@ const FormarketingContent = () => {
       id: crypto.randomUUID(),
       type,
       position,
-      data: { title: label || 'Nuevo', status: 'idle', prompt: '', _context: { executeNode } },
+      data: { title: label || 'Nuevo', status: 'idle', prompt: '' },
     };
     setNodes((nds) => nds.concat(newNode));
-  }, [screenToFlowPosition, setNodes, executeNode]);
+  }, [screenToFlowPosition, setNodes]);
 
   const nodeTypes = useMemo(() => ({
     characterBreakdown: CharacterBreakdownNodeWrapper,
     modelView: ModelNodeWrapper,
-    videoModel: VideoModelNodeWrapper,
+    videoModel: RetiredNodeWrapper,
     layoutBuilder: LayoutBuilderNodeWrapper,
-    campaignManager: CampaignManagerNodeWrapper,
-    antigravityBridge: AntigravityBridgeNode,
+    campaignManager: RetiredNodeWrapper,
+    antigravityBridge: RetiredNodeWrapper,
     captionNode: CaptionNodeWrapper,
     promptBuilder: PromptBuilderNodeWrapper,
     llmNode: LLMNodeWrapper,
@@ -305,6 +302,7 @@ const FormarketingContent = () => {
   }, [nodes, setEdges, record]);
 
   return (
+    <CanvasExecContext.Provider value={execApi}>
     <div className="h-full w-full bg-[#f8f9fa] flex flex-col relative overflow-hidden font-sans">
       <Helmet><title>Canvas IA — ForMarketing | Creator IA Pro</title></Helmet>
 
@@ -327,28 +325,30 @@ const FormarketingContent = () => {
              canRedo={canRedo}
              onAddNode={() => setCmdOpen(true)} 
              onExport={() => setExportOpen(true)}
-             onToggleSnap={() => {}} 
-             snapEnabled={false}
-             onLayout={() => {}}
+             onToggleSnap={() => setSnapEnabled(s => !s)}
+             snapEnabled={snapEnabled}
              onClear={() => { setNodes([]); setEdges([]); }}
-             onExecute={() => {}}
-             execStatus="idle"
-             onOpenTemplates={() => {}}
+             onExecute={runFlow}
+             execStatus={execStatus}
+             onOpenTemplates={() => window.dispatchEvent(new CustomEvent('open-template-modal'))}
              onBack={() => window.history.back()}
            />
         </div>
       </header>
 
       <main className="flex-1 flex overflow-hidden relative">
-        <FormarketingSidebar onAddNode={(type, label) => {
-          const position = { x: 500, y: 300 };
-          setNodes(nds => nds.concat({ 
-            id: crypto.randomUUID(), 
-            type, 
-            position, 
-            data: { title: label, status: 'idle', _context: { executeNode } } 
-          }));
-        }} />
+        <FormarketingSidebar
+          onOpenLogs={() => setLogOpen(true)}
+          onAddNode={(type, label) => {
+            const position = { x: 500, y: 300 };
+            setNodes(nds => nds.concat({
+              id: crypto.randomUUID(),
+              type,
+              position,
+              data: { title: label, status: 'idle' },
+            }));
+          }}
+        />
         
         <div className="flex-1 relative flex flex-col h-full bg-white/50">
           <ReactFlow
@@ -362,7 +362,8 @@ const FormarketingContent = () => {
             onDrop={onDrop}
             onSelectionChange={({ nodes }) => setSelectedNodeId(nodes[0]?.id || null)}
             fitView selectionMode={SelectionMode.Partial}
-            snapToGrid={false}
+            snapToGrid={snapEnabled}
+            snapGrid={[24, 24]}
             defaultEdgeOptions={{
               type: 'animated',
               animated: true,
@@ -406,11 +407,11 @@ const FormarketingContent = () => {
 
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} onSelect={(type, label) => {
         const position = { x: 500, y: 300 };
-        setNodes(nds => nds.concat({ 
-          id: crypto.randomUUID(), 
-          type, 
-          position, 
-          data: { title: label, status: 'idle', _context: { executeNode } } 
+        setNodes(nds => nds.concat({
+          id: crypto.randomUUID(),
+          type,
+          position,
+          data: { title: label, status: 'idle' },
         }));
         setCmdOpen(false);
       }} />
@@ -419,6 +420,7 @@ const FormarketingContent = () => {
       
       {showOnboarding && <Onboarding step={onboardingStep} setStep={setOnboardingStep} onDismiss={() => { localStorage.setItem('fm_onboarded', '1'); setShowOnboarding(false); }} />}
     </div>
+    </CanvasExecContext.Provider>
   );
 };
 

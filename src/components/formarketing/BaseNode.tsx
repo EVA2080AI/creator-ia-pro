@@ -1,5 +1,6 @@
 import { memo, ReactNode, useState } from 'react';
-import { Position, useReactFlow } from '@xyflow/react';
+import { useCanvasExec } from '@/pages/formarketing/CanvasExecContext';
+import { Position } from '@xyflow/react';
 import { Trash2, Play, Loader2, AlertCircle, PlayCircle, ArrowRight, ArrowLeft, Eye, Database, Minimize2, Maximize2, Power, PowerOff } from 'lucide-react';
 import {
   ContextMenu,
@@ -9,7 +10,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { toast } from 'sonner';
-import { NODE_META, DATA_TYPE_COLORS, DataType } from './nodeConnections';
+import { EXECUTABLE_NODE_TYPES, NODE_META, DATA_TYPE_COLORS, DataType } from './nodeConnections';
 import { NodeHandles } from './NodeHandles';
 import NodeDataPreview from './NodeDataPreview';
 
@@ -30,12 +31,6 @@ interface BaseNodeProps {
   onToggleBypass?: () => void;
 }
 
-interface NodeDataWithContext extends Record<string, unknown> {
-  _context?: {
-    executeUpstream?: (id: string) => Promise<void>;
-  };
-}
-
 const BaseNode = memo(({
   nodeId,
   type,
@@ -52,7 +47,6 @@ const BaseNode = memo(({
   onToggleCollapsed,
   onToggleBypass
 }: BaseNodeProps) => {
-  const { getNode } = useReactFlow();
   const [isUpstreamExecuting, setIsUpstreamExecuting] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
@@ -72,10 +66,13 @@ const BaseNode = memo(({
     onToggleBypass?.();
   };
 
-  // Get executeUpstream from node data context
-  const node = getNode(nodeId);
-  const nodeData = node?.data as NodeDataWithContext;
-  const executeUpstream = nodeData?._context?.executeUpstream;
+  // La ejecución llega por contexto de React (antes viajaba inyectada en
+  // data._context por un efecto que causaba un bucle de re-render).
+  const exec = useCanvasExec();
+  const executeUpstream = exec?.executeUpstream;
+  // Si el nodo no trae su propio onExecute (p. ej. Imagen IA), el Play usa la
+  // ruta común del hook — solo para tipos que de verdad ejecutan.
+  const runSelf = onExecute ?? (exec && EXECUTABLE_NODE_TYPES.has(type) ? () => exec.executeNode(nodeId) : undefined);
 
   const handleExecuteUpstream = async () => {
     if (!executeUpstream || isUpstreamExecuting) return;
@@ -183,9 +180,9 @@ const BaseNode = memo(({
           )}
 
           {/* Execute button */}
-          {onExecute && !isBypassed && status !== 'executing' && status !== 'running' && (
+          {runSelf && !isBypassed && status !== 'executing' && status !== 'running' && (
             <button
-              onClick={onExecute}
+              onClick={runSelf}
               className="p-1.5 hover:bg-primary/10 text-zinc-400 hover:text-primary rounded-lg transition-colors"
               title="Ejecutar nodo"
               aria-label="Ejecutar nodo"
@@ -355,8 +352,8 @@ const BaseNode = memo(({
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem
-          onClick={onExecute}
-          disabled={!onExecute || isExecuting || isBypassed}
+          onClick={runSelf}
+          disabled={!runSelf || isExecuting || isBypassed}
           className="cursor-pointer"
         >
           <Play className="mr-2 h-4 w-4 text-emerald-500" />

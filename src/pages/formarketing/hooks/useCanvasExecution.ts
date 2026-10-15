@@ -1,7 +1,10 @@
+import { useCallback, useMemo } from "react";
 import { createCanvasNode, updateCanvasNode } from "@/lib/canvas-nodes";
+import { EXECUTABLE_NODE_TYPES } from "@/components/formarketing/nodeConnections";
 import { aiService } from "@/services/ai-service";
 import { toast } from "sonner";
-import { Node, useReactFlow, Edge } from "@xyflow/react";
+import { Node, useReactFlow } from "@xyflow/react";
+import { upstreamExecutionOrder } from "../lib/flowGraph";
 
 interface CanvasNodeData {
   title?: string;
@@ -20,6 +23,9 @@ interface UserProfile {
   id: string;
 }
 
+// Todas las funciones devueltas están memoizadas con dependencias estables:
+// este hook alimenta un React Context y antes sus funciones se recreaban en
+// cada render (ver CanvasExecContext.ts para el bucle que causaba).
 export function useCanvasExecution(
   spaceId: string | null,
   user: UserProfile | null,
@@ -29,7 +35,7 @@ export function useCanvasExecution(
 ) {
   const { getNodes, getEdges, setNodes: rfSetNodes } = useReactFlow<Node<CanvasNodeData>>();
 
-  const ensureNodePersisted = async (nodeId: string) => {
+  const ensureNodePersisted = useCallback(async (nodeId: string) => {
     if (!spaceId || !user) return false;
     const nodeToPersist = getNodes().find(n => n.id === nodeId);
     if (!nodeToPersist) return false;
@@ -48,13 +54,10 @@ export function useCanvasExecution(
     });
 
     return !!persisted;
-  };
+  }, [spaceId, user, getNodes]);
 
-  const animateEdgesToNode = (targetNodeId: string, isActive: boolean) => {
+  const animateEdgesToNode = useCallback((targetNodeId: string, isActive: boolean) => {
     if (!setEdges) return;
-    const edges = getEdges();
-    const incomingEdges = edges.filter(e => e.target === targetNodeId);
-
     setEdges((eds) => eds.map(edge => {
       if (edge.target === targetNodeId) {
         return {
@@ -68,15 +71,29 @@ export function useCanvasExecution(
       }
       return edge;
     }));
-  };
+  }, [setEdges]);
 
-  const executeNode = async (nodeId: string) => {
-    const isPersisted = await ensureNodePersisted(nodeId);
-    const currentNodes = getNodes();
-    const node = currentNodes.find((n) => n.id === nodeId);
+  const executeNode = useCallback(async (nodeId: string) => {
+    const node = getNodes().find((n) => n.id === nodeId);
     if (!node) return;
 
     const nodeName = node.data.title || node.type || 'Unknown Node';
+
+    // Un nodo apagado no ejecuta ni cobra (antes el bypass era solo cosmético).
+    if (node.data.status === 'bypassed') {
+      addLog(nodeName, 'Apagado (bypass): no se ejecuta ni consume créditos.', 'info');
+      return;
+    }
+
+    // Los tipos sin lógica de ejecución (Texto, Prompt Builder, Exportar…) ya no
+    // se marcan "listos" en verde sin haber hecho nada.
+    if (!EXECUTABLE_NODE_TYPES.has(node.type || '')) {
+      addLog(nodeName, 'Este nodo no ejecuta por sí mismo: aporta datos o recibe resultados.', 'info');
+      return;
+    }
+
+    const isPersisted = await ensureNodePersisted(nodeId);
+    const currentNodes = getNodes();
 
     // Animate incoming edges
     animateEdgesToNode(nodeId, true);
@@ -114,12 +131,11 @@ export function useCanvasExecution(
           node_id: (spaceId && isPersisted) ? node.id : undefined
         });
         resultText = res.text || '';
-      } else if (node.type === 'modelView' || node.type === 'videoModel') {
-        const action = node.type === 'modelView' ? 'image' : 'video';
+      } else if (node.type === 'modelView') {
         const res = await aiService.processAction({
-          action,
+          action: 'image',
           prompt: node.data.prompt || "Premium marketing visual",
-          model: node.data.model || (action === 'image' ? 'flux-schnell' : 'video'),
+          model: node.data.model || 'flux-schnell',
           node_id: (spaceId && isPersisted) ? node.id : undefined
         });
         assetUrl = res.url || '';
@@ -154,77 +170,52 @@ export function useCanvasExecution(
       addLog(nodeName, 'Error: ' + e.message, 'error');
       toast.error(e.message);
     }
-  };
+  }, [getNodes, getEdges, rfSetNodes, addLog, spaceId, ensureNodePersisted, animateEdgesToNode]);
 
-  // Execute all upstream nodes leading to target node (in topological order)
-  const executeUpstream = async (targetNodeId: string) => {
-    const currentNodes = getNodes();
-    const currentEdges = getEdges();
+  // Ejecuta las cadenas que terminan en los nodos objetivo: ancestros primero,
+  // cada nodo UNA sola vez aunque alimente a varios objetivos (cada ejecución
+  // cobra créditos), saltando apagados y tipos sin lógica.
+  const executeFlow = useCallback(async (targetIds: string[]) => {
+    const { order, hasCycle } = upstreamExecutionOrder(targetIds, getEdges());
 
-    // Build adjacency list (reverse direction - who connects TO each node)
-    const incomingEdges: Record<string, string[]> = {};
-    currentEdges.forEach(edge => {
-      if (!incomingEdges[edge.target]) incomingEdges[edge.target] = [];
-      incomingEdges[edge.target].push(edge.source);
-    });
-
-    // Collect all upstream nodes using BFS backwards
-    const upstream = new Set<string>();
-    const queue = [targetNodeId];
-    const visited = new Set<string>();
-
-    while (queue.length > 0) {
-      const current = queue.shift()!;
-      if (visited.has(current)) continue;
-      visited.add(current);
-
-      if (current !== targetNodeId) upstream.add(current);
-
-      const sources = incomingEdges[current] || [];
-      sources.forEach(src => {
-        if (!visited.has(src)) queue.push(src);
-      });
-    }
-
-    // Topological sort: order nodes by dependency depth
-    const depth: Record<string, number> = {};
-    const calcDepth = (nodeId: string): number => {
-      if (depth[nodeId] !== undefined) return depth[nodeId];
-      const sources = incomingEdges[nodeId] || [];
-      if (sources.length === 0) {
-        depth[nodeId] = 0;
-        return 0;
-      }
-      depth[nodeId] = Math.max(...sources.map(calcDepth)) + 1;
-      return depth[nodeId];
-    };
-
-    // Calculate depth for all upstream nodes
-    upstream.forEach(nodeId => calcDepth(nodeId));
-
-    // Sort upstream nodes by depth (ascending = execute dependencies first)
-    const sortedUpstream = Array.from(upstream).sort((a, b) => depth[a] - depth[b]);
-
-    if (sortedUpstream.length === 0) {
-      // No upstream nodes, just execute the target
-      await executeNode(targetNodeId);
+    if (hasCycle) {
+      const msg = 'Hay un ciclo en las conexiones: un nodo termina alimentándose a sí mismo. Borra uno de los cables del ciclo.';
+      addLog('Sistema', msg, 'error');
+      toast.error(msg);
       return;
     }
 
-    addLog('Sistema', `Ejecutando ${sortedUpstream.length} nodo(s) upstream + objetivo...`, 'info');
+    const nodesById = new Map(getNodes().map(n => [n.id, n]));
+    const ejecutables = order.filter(id => {
+      const n = nodesById.get(id);
+      return !!n && EXECUTABLE_NODE_TYPES.has(n.type || '') && n.data.status !== 'bypassed';
+    });
 
-    // Execute upstream nodes sequentially
-    for (const nodeId of sortedUpstream) {
-      await executeNode(nodeId);
-      // Small delay between executions for visual feedback
-      await new Promise(r => setTimeout(r, 300));
+    if (ejecutables.length === 0) {
+      addLog('Sistema', 'Nada que ejecutar: el flujo no tiene nodos de IA encendidos.', 'info');
+      toast.info('Nada que ejecutar: agrega un nodo de IA (LLM, Imagen o Caption) o reactiva los apagados.');
+      return;
     }
 
-    // Finally execute the target node
-    await executeNode(targetNodeId);
+    if (ejecutables.length > 1) {
+      addLog('Sistema', `Ejecutando ${ejecutables.length} nodos en orden…`, 'info');
+    }
+
+    for (let i = 0; i < ejecutables.length; i++) {
+      if (i > 0) await new Promise(r => setTimeout(r, 300));
+      await executeNode(ejecutables[i]);
+    }
 
     addLog('Sistema', 'Flujo completado ✓', 'success');
-  };
+  }, [getNodes, getEdges, addLog, executeNode]);
 
-  return { executeNode, executeUpstream };
+  // Execute all upstream nodes leading to target node (in topological order)
+  const executeUpstream = useCallback(async (targetNodeId: string) => {
+    await executeFlow([targetNodeId]);
+  }, [executeFlow]);
+
+  return useMemo(
+    () => ({ executeNode, executeUpstream, executeFlow }),
+    [executeNode, executeUpstream, executeFlow],
+  );
 }

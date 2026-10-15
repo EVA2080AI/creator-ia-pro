@@ -135,12 +135,6 @@ describe("aiService — Disabled tools (not yet migrated off Supabase)", () => {
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
-  it("throws a clear message for video generation", async () => {
-    await expect(
-      aiService.processAction({ action: "video", prompt: "x", model: "wan-2.5" })
-    ).rejects.toThrow("temporalmente deshabilitada");
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
 });
 
 describe("aiService — Model Routing", () => {

@@ -14,7 +14,7 @@ export interface ClassifiedError {
 }
 
 export interface AIActionParams {
-  action: "ui" | "image" | "video" | "chat";
+  action: "ui" | "image" | "chat";
   prompt: string;
   model: string;
   image?: string;
@@ -111,9 +111,6 @@ export const aiService = {
     if (action === "image" || tool === "generate" || tool === "logo") {
       return this.handleImageGen(prompt, model, tool, undefined, width, height);
     }
-    if (action === "video") {
-      return this.handleVideoGen(prompt);
-    }
     return this.handleTextGen(action, prompt, model, undefined, persona);
   },
 
@@ -173,10 +170,6 @@ export const aiService = {
     if (!res.ok || !data?.ok) throw new Error(data?.error || `Error ${res.status} generando la imagen`);
     if (data.imageUrl) return { url: data.imageUrl, model: data.model ?? imageModel };
     throw new Error("No se pudo generar la imagen. Intenta de nuevo.");
-  },
-
-  async handleVideoGen(_prompt: string): Promise<AIResponse> {
-    throw new Error("La generación de video está temporalmente deshabilitada mientras se migra su motor. Vuelve pronto.");
   },
 
   async streamTextGen(tool: string, prompt: string, model: string, profile: ProfileData | null, onToken: (chunk: string) => void): Promise<void> {

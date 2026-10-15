@@ -1,7 +1,7 @@
 import {
-  Undo2, Redo2, Grid3X3, LayoutDashboard, Trash2, 
-  Download, Play, Plus, Sparkles, Monitor, Magnet,
-  ChevronDown, Search, ArrowLeft
+  Undo2, Redo2, Trash2,
+  Download, Play, Plus, Sparkles, Magnet,
+  ArrowLeft
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -24,7 +24,6 @@ interface StudioToolbarProps {
   canRedo: boolean;
   onToggleSnap: () => void;
   snapEnabled: boolean;
-  onLayout: () => void;
   onClear: () => void;
   onExport: () => void;
   onExecute: () => void;
@@ -38,7 +37,7 @@ interface StudioToolbarProps {
 export function StudioToolbar({
   onUndo, onRedo, canUndo, canRedo,
   onToggleSnap, snapEnabled,
-  onLayout, onClear,
+  onClear,
   onExport, onExecute, execStatus,
   onAddNode, onOpenTemplates,
   spaceName = "Proyecto sin nombre",
@@ -166,19 +165,6 @@ export function StudioToolbar({
               </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="font-medium text-[11px] translate-y-2">Snap Grid (Ajustar Rejilla)</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={onLayout}
-                aria-label="Organizar nodos automáticamente"
-                className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900 transition-all border border-transparent hover:border-zinc-200/60"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="font-medium text-[11px] translate-y-2">Organizar Nodos (Auto-Layout)</TooltipContent>
           </Tooltip>
 
           <Tooltip>

@@ -3,7 +3,6 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Braces, Trash2, ChevronDown } from 'lucide-react';
 import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
-import { NodeNextAction } from './NodeNextAction';
 
 
 
@@ -164,7 +163,6 @@ const PromptBuilderNode = ({ id, data }: { id: string; data: PromptBuilderNodeDa
           <Handle type="source" position={Position.Right} id="text-out" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
         </div>
       </div>
-      <NodeNextAction nodeId={id} />
 
       {/* Input handle - visible colored dot with glow */}
       <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-50">

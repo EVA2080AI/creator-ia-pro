@@ -3,23 +3,31 @@ import { X, Zap, Copy, Trash2, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { type Node } from '@xyflow/react';
 import { toast } from 'sonner';
+import { EXECUTABLE_NODE_TYPES } from './nodeConnections';
 
 const NODE_TYPE_LABELS: Record<string, string> = {
-  characterBreakdown: 'Texto / Persona',
+  textInput: 'Texto',
+  characterBreakdown: 'Personaje / Brief',
+  promptBuilder: 'Prompt Builder',
+  llmNode: 'LLM',
   modelView: 'Generar imagen',
-  videoModel: 'Generar video',
+  captionNode: 'Caption',
   layoutBuilder: 'Diseño / Layout',
-  campaignManager: 'Gestor de campaña',
-  antigravityBridge: 'Puente de Referencia',
+  exportNode: 'Exportar',
+  videoModel: 'Nodo retirado',
+  campaignManager: 'Nodo retirado',
+  antigravityBridge: 'Nodo retirado',
 };
 
 const NODE_TYPE_COLORS: Record<string, string> = {
+  textInput: 'text-amber-600 bg-amber-50 border-amber-200',
   characterBreakdown: 'text-blue-600 bg-blue-50 border-blue-200',
+  promptBuilder: 'text-zinc-600 bg-zinc-100 border-zinc-200',
+  llmNode: 'text-blue-600 bg-blue-50 border-blue-200',
   modelView: 'text-rose-600 bg-rose-50 border-rose-200',
-  videoModel: 'text-blue-600 bg-blue-50 border-blue-200',
+  captionNode: 'text-amber-600 bg-amber-50 border-amber-200',
   layoutBuilder: 'text-emerald-600 bg-emerald-50 border-emerald-200',
-  campaignManager: 'text-amber-600 bg-amber-50 border-amber-200',
-  antigravityBridge: 'text-zinc-600 bg-zinc-100 border-zinc-200',
+  exportNode: 'text-emerald-600 bg-emerald-50 border-emerald-200',
 };
 
 // Ids "de vitrina" — ver TEXT_MODEL_MAP/IMAGE_MODEL_MAP en ai-service.ts.
@@ -65,7 +73,7 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
   const typeLabel = NODE_TYPE_LABELS[nodeType] || nodeType;
   const typeColor = NODE_TYPE_COLORS[nodeType] || 'text-zinc-500 bg-zinc-100 border-zinc-200';
   const isImageNode = nodeType === 'modelView';
-  const isTextNode = nodeType === 'characterBreakdown' || nodeType === 'layoutBuilder' || nodeType === 'campaignManager';
+  const isExecutable = EXECUTABLE_NODE_TYPES.has(nodeType);
   const models = isImageNode ? IMAGE_MODELS : TEXT_MODELS;
 
   const handleApply = () => {
@@ -182,12 +190,14 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Button
-            onClick={() => onExecute(node.id)}
-            className="flex-1 h-9 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 rounded-xl text-[10px] font-bold uppercase tracking-widest gap-1.5 transition-all shadow-sm"
-          >
-            <Zap className="w-3 h-3 fill-current" /> Ejecutar
-          </Button>
+          {isExecutable && (
+            <Button
+              onClick={() => onExecute(node.id)}
+              className="flex-1 h-9 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 rounded-xl text-[10px] font-bold uppercase tracking-widest gap-1.5 transition-all shadow-sm"
+            >
+              <Zap className="w-3 h-3 fill-current" /> Ejecutar
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"

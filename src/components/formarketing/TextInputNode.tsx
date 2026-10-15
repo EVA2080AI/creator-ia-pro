@@ -3,14 +3,10 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Type, Trash2 } from 'lucide-react';
 import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
-import { NodeConnectionDropdown } from './NodeConnectionDropdown';
-import { NodeNextAction } from './NodeNextAction';
-
 
 interface TextInputNodeData {
   title?: string;
   value?: string;
-  onAddConnected?: (sourceId: string, targetType: string) => void;
 }
 
 const TextInputNode = ({ id, data }: { id: string; data: TextInputNodeData }) => {
@@ -63,12 +59,6 @@ const TextInputNode = ({ id, data }: { id: string; data: TextInputNodeData }) =>
         </div>
       </div>
 
-      <NodeConnectionDropdown
-        nodeType="textInput"
-        nodeId={id}
-        onAddConnected={data.onAddConnected ?? (() => {})}
-      />
-
       {/* Output handle - visible colored dot with glow */}
       <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-50">
         <div className="w-4 h-4 rounded-full bg-amber-400 border-2 border-white shadow-md cursor-crosshair hover:scale-125 transition-transform"
@@ -76,7 +66,6 @@ const TextInputNode = ({ id, data }: { id: string; data: TextInputNodeData }) =>
           <Handle type="source" position={Position.Right} id="text-out" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
         </div>
       </div>
-      <NodeNextAction nodeId={id} />
     </div>
   );
 };

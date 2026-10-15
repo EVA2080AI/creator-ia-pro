@@ -7,8 +7,8 @@ import {
 } from "lucide-react";
 
 export type NodeType = 
-  | 'characterBreakdown' | 'modelView' | 'videoModel' | 'layoutBuilder' 
-  | 'campaignManager' | 'antigravityBridge' | 'llmNode' | 'textInput' 
+  | 'characterBreakdown' | 'modelView' | 'layoutBuilder'
+  | 'llmNode' | 'textInput'
   | 'captionNode' | 'promptBuilder' | 'exportNode';
 
 export interface TemplateNode {
@@ -43,11 +43,11 @@ export const TEMPLATES: Template[] = [
   {
     id: 'meta-ad-single',
     title: 'Meta Ads Standard',
-    description: 'Anatomía de anuncio persuasivo: Brief → Imagen Neural → Campaign Sync. PLANTILLA CON EJEMPLOS EJECUTADOS.',
+    description: 'Anatomía de anuncio persuasivo: Brief → Copy → Imagen → Exportar. PLANTILLA CON EJEMPLOS.',
     category: 'Publicidad',
     icon: Megaphone,
     color: '#3b82f6',
-    tags: ['Meta', 'Neural', 'Sync', 'Pre-ejecutado'],
+    tags: ['Meta', 'Copy', 'Imagen', 'Ejemplos'],
     nodes: [
       { type: 'textInput', data: {
         title: "BRIEFING",
@@ -65,9 +65,8 @@ export const TEMPLATES: Template[] = [
         assetUrl: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&auto=format&fit=crop',
         status: 'ready'
       }},
-      { type: 'campaignManager', data: {
-        title: 'META CONNECT',
-        platforms: { facebook: 'pending', instagram: 'pending' },
+      { type: 'exportNode', data: {
+        title: 'EXPORTAR',
         status: 'idle'
       }}
     ],
@@ -80,7 +79,7 @@ export const TEMPLATES: Template[] = [
   {
     id: 'tiktok_viral',
     title: 'TikTok UGC Engine',
-    description: 'Sistema de viralización vertical: Concepto → Script Viral → Video AI. PLANTILLA CON EJEMPLOS EJECUTADOS.',
+    description: 'Sistema de viralización vertical: Concepto → Script Viral → Portada → Caption. PLANTILLA CON EJEMPLOS.',
     category: 'Redes Sociales',
     icon: Video,
     color: '#6366f1',
@@ -96,8 +95,8 @@ export const TEMPLATES: Template[] = [
         output: "[0:00-0:02] HOOK: '3 apps que usan los CEOs multimillonarios... la #3 me cambió la vida'\n\n[0:02-0:15] PROBLEMA: 'Antes tenía 47 pestañas abiertas, notas en 5 apps diferentes y olvidaba el 80% de mis ideas'\n\n[0:15-0:30] SOLUCIÓN: 'Notion AI consolidó TODO. Ahora mis workflows, notas y bases de datos están en un solo lugar'\n\n[0:30-0:45] CTA: 'Link en bio para template gratuito. ¿Qué app usas tú? 👇'",
         status: 'ready'
       }},
-      { type: 'videoModel', data: {
-        title: 'KLING AI',
+      { type: 'modelView', data: {
+        title: 'PORTADA VERTICAL',
         prompt: "Young professional working on laptop in modern coffee shop, energetic motion, trendy aesthetic, 4k, dynamic transitions",
         assetUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=800&auto=format&fit=crop',
         status: 'ready'
@@ -112,7 +111,7 @@ export const TEMPLATES: Template[] = [
     ],
     edges: [
       { source: 0, target: 1, sourceHandle: 'text-out', targetHandle: 'text-in' },
-      { source: 1, target: 2, sourceHandle: 'text-out', targetHandle: 'any-in' },
+      { source: 1, target: 2, sourceHandle: 'text-out', targetHandle: 'prompt-in' },
       { source: 1, target: 3, sourceHandle: 'text-out', targetHandle: 'text-in' }
     ]
   },
@@ -277,11 +276,11 @@ export const TEMPLATES: Template[] = [
   {
     id: 'character_consistent',
     title: 'Character AI Engine',
-    description: 'Sistema de generación de personajes consistentes: Concepto → Estilo → Poses → Video. Inspirado en Higgsfield AI. PLANTILLA CON EJEMPLOS EJECUTADOS.',
+    description: 'Sistema de generación de personajes consistentes: Concepto → Estilo → Poses → Kit. PLANTILLA CON EJEMPLOS.',
     category: 'Marca',
     icon: Sparkles,
     color: '#a855f7',
-    tags: ['Character', 'Consistent', 'AI', 'Video', 'Pre-ejecutado'],
+    tags: ['Character', 'Consistent', 'AI', 'Ejemplos'],
     nodes: [
       { type: 'textInput', data: {
         title: "CHARACTER BRIEF",
@@ -359,13 +358,6 @@ Uso: Videos explicativos, tutoriales, redes sociales.`
         assetUrl: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=800&auto=format&fit=crop',
         status: 'ready'
       }},
-      { type: 'videoModel', data: {
-        title: 'CHARACTER VIDEO',
-        model: 'veo-3',
-        prompt: 'Cute robot mascot Pixel walking and waving, smooth animation loop, 3D Pixar style, cinematic lighting, clean tech background, professional character animation',
-        assetUrl: 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
-        status: 'ready'
-      }},
       { type: 'exportNode', data: {
         title: 'CHARACTER KIT',
         content: 'pixel-character-kit.zip',
@@ -377,8 +369,7 @@ Uso: Videos explicativos, tutoriales, redes sociales.`
       { source: 0, target: 2, sourceHandle: 'text-out', targetHandle: 'prompt-in' },
       { source: 1, target: 3, sourceHandle: 'context-out', targetHandle: 'text-in' },
       { source: 3, target: 4, sourceHandle: 'text-out', targetHandle: 'prompt-in' },
-      { source: 4, target: 5, sourceHandle: 'image-out', targetHandle: 'any-in' },
-      { source: 5, target: 6, sourceHandle: 'video-out', targetHandle: 'content-in' }
+      { source: 4, target: 5, sourceHandle: 'image-out', targetHandle: 'content-in' }
     ]
   }
 ];

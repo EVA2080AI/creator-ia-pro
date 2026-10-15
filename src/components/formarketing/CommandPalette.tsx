@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Type, Braces, Brain, Image as ImageIcon, Video, MessageSquare,
-  LayoutGrid, Share2, FileOutput, Rocket, Search, Terminal
+  Type, Braces, Brain, Image as ImageIcon, MessageSquare,
+  LayoutGrid, FileOutput, Search, Terminal
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -35,8 +35,7 @@ const CATEGORIES: Category[] = [
     label: 'Inteligencia Artificial',
     nodes: [
       { label: 'LLM · Generador', icon: Brain,         type: 'llmNode',            color: '#60a5fa', description: 'Motor de texto inteligente (DeepSeek, Claude, Gemini)' },
-      { label: 'Generador Visual', icon: ImageIcon,      type: 'modelView',          color: '#8AB4F8', description: 'Sintetizador de imágenes de alta fidelidad (Flux)' },
-      { label: 'Actor de Video',  icon: Video,         type: 'videoModel',         color: '#f472b6', description: 'Generador de secuencias de video automáticas' },
+      { label: 'Generador Visual', icon: ImageIcon,      type: 'modelView',          color: '#8AB4F8', description: 'Sintetizador de imágenes de alta fidelidad' },
       { label: 'Caption Writer',  icon: MessageSquare, type: 'captionNode',        color: '#34d399', description: 'Redactor especializado en formatos cortos (Redes/Ads)' },
     ],
   },
@@ -45,9 +44,7 @@ const CATEGORIES: Category[] = [
     label: 'Orquestación',
     nodes: [
       { label: 'Layout Architect', icon: LayoutGrid,    type: 'layoutBuilder',      color: '#94a3b8', description: 'Estructura el árbol visual de interfaces generadas' },
-      { label: 'Campaign Manager', icon: Share2,        type: 'campaignManager',    color: '#f87171', description: 'Orquesta y distribuye en canales de Paid Media' },
-      { label: 'Módulo Export',    icon: FileOutput,    type: 'exportNode',         color: '#34d399', description: 'Empaqueta y expone endpoints finales del nodo' },
-      { label: 'Puente de Referencia', icon: Rocket,    type: 'antigravityBridge',  color: '#a1a1aa', description: 'Clona el diseño y la marca de un sitio de referencia' },
+      { label: 'Módulo Export',    icon: FileOutput,    type: 'exportNode',         color: '#34d399', description: 'Empaqueta el resultado final del flujo' },
     ],
   },
 ];

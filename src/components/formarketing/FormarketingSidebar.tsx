@@ -1,26 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import {
-  Search, LayoutGrid, Image, Video,
-  Type, Sparkles, Upload,
-  X, Hand, MessageSquare, Settings, Share2, Rocket,
+  Search, LayoutGrid, Image,
+  Type, Sparkles,
+  X, MessageSquare,
   Braces, Brain, FileOutput, ChevronDown,
-  Text, Wand2, Download, Layers, ChevronRight
+  Wand2, Layers, ChevronRight, Terminal,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { TemplateModal } from './TemplateModal';
 import { type Template } from '@/lib/templates';
 import { NODE_META, getNodesByCategory } from './nodeConnections';
 
 interface FormarketingSidebarProps {
-  onAddNode: (type: string, label: string, assetUrl?: string) => void;
+  onAddNode: (type: string, label: string) => void;
+  onOpenLogs: () => void;
 }
 
 // Map node types to icons
@@ -30,12 +25,9 @@ const NODE_ICONS: Record<string, React.ElementType> = {
   promptBuilder: Wand2,
   llmNode: Brain,
   modelView: Image,
-  videoModel: Video,
   captionNode: MessageSquare,
   layoutBuilder: LayoutGrid,
-  campaignManager: Share2,
   exportNode: FileOutput,
-  antigravityBridge: Rocket,
 };
 
 // Category labels
@@ -43,10 +35,9 @@ const CATEGORY_LABELS: Record<string, { label: string; emoji: string; descriptio
   input: { label: 'Entrada de Datos', emoji: '📝', description: 'Fuentes de texto, contexto y prompts' },
   process: { label: 'Procesamiento IA', emoji: '🤖', description: 'Transforman datos usando IA' },
   output: { label: 'Salida', emoji: '📤', description: 'Exportación y distribución final' },
-  bridge: { label: 'Conectores', emoji: '🔗', description: 'Integración con sistemas externos' },
 };
 
-export function FormarketingSidebar({ onAddNode }: FormarketingSidebarProps) {
+export function FormarketingSidebar({ onAddNode, onOpenLogs }: FormarketingSidebarProps) {
   const [search, setSearch] = useState('');
   const [menuOpen, setMenuOpen] = useState(true);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({ output: true, bridge: true });
@@ -58,23 +49,6 @@ export function FormarketingSidebar({ onAddNode }: FormarketingSidebarProps) {
     window.addEventListener('open-template-modal', handleOpen);
     return () => window.removeEventListener('open-template-modal', handleOpen);
   }, []);
-
-  const handleFileUpload = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e: any) => {
-      const file = e.target.files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          onAddNode('modelView', 'imagen_subida', reader.result as string);
-        };
-        reader.readAsDataURL(file);
-      }
-    };
-    input.click();
-  };
 
   const handleSelectTemplate = (template: Template) => {
     toast.success(`Plantilla aplicada: ${template.title}`);
@@ -93,8 +67,7 @@ export function FormarketingSidebar({ onAddNode }: FormarketingSidebarProps) {
   // Get nodes organized by category
   const nodesByCategory = getNodesByCategory('input')
     .concat(getNodesByCategory('process'))
-    .concat(getNodesByCategory('output'))
-    .concat(getNodesByCategory('bridge'));
+    .concat(getNodesByCategory('output'));
 
   // Group by category
   const groupedNodes = nodesByCategory.reduce((acc, [type, meta]) => {
@@ -131,27 +104,6 @@ export function FormarketingSidebar({ onAddNode }: FormarketingSidebarProps) {
           {menuOpen ? <X className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
         </button>
 
-        <div className="w-8 h-px bg-zinc-100 my-1" />
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all group">
-                <Hand className="h-4 w-4 group-hover:scale-110 transition-transform" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Mover canvas</TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button className="flex h-9 w-9 items-center justify-center rounded-xl text-zinc-400 hover:bg-zinc-100 hover:text-zinc-900 transition-all group mt-auto border-t border-zinc-100 pt-3 rounded-none w-8">
-                <Settings className="h-4 w-4 group-hover:scale-110 transition-transform" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right">Configuración</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
       </div>
 
       {/* Slide-in Panel */}
@@ -312,30 +264,18 @@ export function FormarketingSidebar({ onAddNode }: FormarketingSidebarProps) {
             })}
           </div>
 
-          {/* Upload + Footer */}
+          {/* Footer */}
           <div className="mt-auto px-3 pb-4 pt-2 border-t border-zinc-200 bg-white">
-            <button
-              onClick={handleFileUpload}
-              className="flex items-center gap-3 w-full px-3.5 py-3 rounded-xl bg-zinc-50 border border-zinc-200 hover:border-zinc-300 hover:bg-zinc-100 transition-all group shadow-sm"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white group-hover:bg-zinc-50 transition-colors shrink-0">
-                <Upload className="h-4 w-4 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
-              </div>
-              <div className="flex flex-col text-left">
-                <span className="text-[11px] font-semibold text-zinc-700 group-hover:text-zinc-900">
-                  Subir imagen
-                </span>
-                <span className="text-[10px] text-zinc-400">Drag & drop o clic aquí</span>
-              </div>
-            </button>
-
-            <div className="flex items-center justify-between mt-3 px-1">
+            <div className="flex items-center justify-between px-1">
               <span className="text-[9px] font-medium text-zinc-400">
-                Creator IA Pro v21.0
+                Creator IA Pro
               </span>
-              <span className="text-[9px] text-primary font-medium cursor-pointer hover:underline">
-                Ver logs
-              </span>
+              <button
+                onClick={onOpenLogs}
+                className="flex items-center gap-1 text-[9px] text-primary font-medium hover:underline"
+              >
+                <Terminal className="h-3 w-3" aria-hidden /> Ver logs
+              </button>
             </div>
           </div>
         </div>

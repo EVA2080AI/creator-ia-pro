@@ -54,6 +54,9 @@ export interface NodeMeta {
 }
 
 // Enhanced node definitions with better organization
+// 2026-10-15 (Fase 0 Canvas): videoModel, campaignManager y antigravityBridge
+// se retiraron de la paleta (teatro / sin backend). Las filas guardadas con
+// esos tipos se renderizan con RetiredNode en Formarketing.tsx.
 export const NODE_META: Record<string, NodeMeta> = {
   // Input nodes - sources of data
   textInput: {
@@ -64,7 +67,7 @@ export const NODE_META: Record<string, NodeMeta> = {
     outputHandles: [
       { id: 'text-out', dataType: 'text', label: 'Texto', description: 'Texto de entrada' }
     ],
-    compatibleTargets: ['llmNode', 'modelView', 'videoModel', 'captionNode', 'promptBuilder'],
+    compatibleTargets: ['llmNode', 'modelView', 'captionNode', 'promptBuilder'],
     category: 'input',
     color: '#fbbf24',
   },
@@ -78,7 +81,7 @@ export const NODE_META: Record<string, NodeMeta> = {
     outputHandles: [
       { id: 'context-out', dataType: 'context', label: 'Contexto', description: 'Contexto del personaje' }
     ],
-    compatibleTargets: ['modelView', 'videoModel', 'llmNode', 'captionNode'],
+    compatibleTargets: ['modelView', 'llmNode', 'captionNode'],
     category: 'input',
     color: '#fb923c',
   },
@@ -92,7 +95,7 @@ export const NODE_META: Record<string, NodeMeta> = {
     outputHandles: [
       { id: 'text-out', dataType: 'text', label: 'Prompt', description: 'Prompt compilado' }
     ],
-    compatibleTargets: ['llmNode', 'modelView', 'videoModel', 'captionNode'],
+    compatibleTargets: ['llmNode', 'modelView', 'captionNode'],
     category: 'input',
     color: '#94a3b8',
   },
@@ -109,7 +112,7 @@ export const NODE_META: Record<string, NodeMeta> = {
     outputHandles: [
       { id: 'text-out', dataType: 'text', label: 'Texto generado', description: 'Respuesta del modelo' }
     ],
-    compatibleTargets: ['modelView', 'videoModel', 'captionNode', 'campaignManager', 'layoutBuilder', 'exportNode'],
+    compatibleTargets: ['modelView', 'captionNode', 'layoutBuilder', 'exportNode'],
     category: 'process',
     color: '#3b82f6',
   },
@@ -124,23 +127,9 @@ export const NODE_META: Record<string, NodeMeta> = {
     outputHandles: [
       { id: 'image-out', dataType: 'image', label: 'Imagen', description: 'Imagen generada' }
     ],
-    compatibleTargets: ['videoModel', 'campaignManager', 'exportNode', 'layoutBuilder'],
+    compatibleTargets: ['exportNode', 'layoutBuilder'],
     category: 'process',
     color: '#a855f7',
-  },
-  videoModel: {
-    label: 'Video IA',
-    emoji: '🎬',
-    description: 'Genera videos animados a partir de imágenes o prompts',
-    inputHandles: [
-      { id: 'any-in', dataType: 'any', label: 'Entrada', description: 'Cualquier entrada', required: false },
-    ],
-    outputHandles: [
-      { id: 'video-out', dataType: 'video', label: 'Video', description: 'Video generado' }
-    ],
-    compatibleTargets: ['campaignManager', 'exportNode'],
-    category: 'process',
-    color: '#f472b6',
   },
   captionNode: {
     label: 'Caption IA',
@@ -153,7 +142,7 @@ export const NODE_META: Record<string, NodeMeta> = {
     outputHandles: [
       { id: 'text-out', dataType: 'text', label: 'Caption', description: 'Texto para redes' }
     ],
-    compatibleTargets: ['campaignManager', 'exportNode', 'llmNode'],
+    compatibleTargets: ['exportNode', 'llmNode'],
     category: 'process',
     color: '#fbbf24',
   },
@@ -167,42 +156,12 @@ export const NODE_META: Record<string, NodeMeta> = {
     outputHandles: [
       { id: 'ui-out', dataType: 'layout', label: 'UI', description: 'Layout generado' }
     ],
-    compatibleTargets: ['campaignManager', 'exportNode'],
+    compatibleTargets: ['exportNode'],
     category: 'process',
     color: '#60a5fa',
   },
 
-  // Bridge nodes - connect to external systems
-  antigravityBridge: {
-    label: 'Puente de Referencia',
-    emoji: '🌉',
-    description: 'Clona el diseño y la marca de un sitio de referencia para usarlos en tu flujo',
-    inputHandles: [
-      { id: 'any-in', dataType: 'any', label: 'Contenido', description: 'Lo que quieres publicar', required: true },
-    ],
-    outputHandles: [
-      { id: 'any-out', dataType: 'any', label: 'Salida', description: 'Resultado' }
-    ],
-    compatibleTargets: ['exportNode'],
-    category: 'bridge',
-    color: '#22d3ee',
-  },
-
   // Output nodes - final destinations
-  campaignManager: {
-    label: 'Campaign Manager',
-    emoji: '🚀',
-    description: 'Distribuye el contenido a plataformas y calendariza',
-    inputHandles: [
-      { id: 'any-in', dataType: 'any', label: 'Contenido', description: 'Assets para publicar', required: true },
-    ],
-    outputHandles: [
-      { id: 'any-out', dataType: 'any', label: 'Salida', description: 'Resultado' }
-    ],
-    compatibleTargets: ['exportNode'],
-    category: 'output',
-    color: '#34d399',
-  },
   exportNode: {
     label: 'Exportar',
     emoji: '📤',
@@ -240,3 +199,7 @@ export function getNodesByCategory(category: NodeMeta['category']): [string, Nod
 
 // backward-compat alias
 export const NODE_CONNECTIONS = NODE_META;
+
+// Tipos con rama real en useCanvasExecution. Compartido para que el botón
+// EJECUTAR, el inspector y BaseNode no ofrezcan ejecutar lo que no ejecuta.
+export const EXECUTABLE_NODE_TYPES = new Set(['characterBreakdown', 'llmNode', 'captionNode', 'modelView']);

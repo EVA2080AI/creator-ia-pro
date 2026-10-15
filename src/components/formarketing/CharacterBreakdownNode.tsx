@@ -3,7 +3,6 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { UserCircle, Trash2, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import { updateCanvasNode, deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
-import { NodeNextAction } from './NodeNextAction';
 
 interface CharacterNodeData {
   title?: string;
@@ -159,7 +158,6 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
           <Handle type="source" position={Position.Right} id="context-out" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
         </div>
       </div>
-      <NodeNextAction nodeId={id} />
     </div>
 
   );

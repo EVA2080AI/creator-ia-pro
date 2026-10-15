@@ -1,11 +1,8 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
-import { Layout, Trash2, Globe, Smartphone, Monitor, Zap, ChevronDown, ChevronUp } from 'lucide-react';
+import { Layout, Trash2, Globe, Smartphone, Monitor, ChevronDown, ChevronUp } from 'lucide-react';
 import { updateCanvasNode, deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
-import { NodeConnectionDropdown } from './NodeConnectionDropdown';
-import { NodeNextAction } from './NodeNextAction';
-
 
 interface LayoutNodeData {
   title?: string;
@@ -13,7 +10,6 @@ interface LayoutNodeData {
   structure?: string;
   model?: string;
   status?: 'idle' | 'executing' | 'ready' | 'error';
-  onAddConnected?: (sourceId: string, targetType: string) => void;
 }
 
 const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) => {
@@ -21,8 +17,30 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
   const [platform, setPlatform] = useState(data.platform || 'web');
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const updateField = async (field: string, value: any) => {
-    setNodes((nds) => 
+  // Antes cada tecla en título/estructura disparaba un PATCH a la API (y con
+  // `data` viejo del render anterior). Ahora el lienzo se actualiza al
+  // instante y el guardado junta los cambios y los manda 600 ms después de la
+  // última tecla, leyendo el data vigente.
+  const dataRef = useRef(data);
+  dataRef.current = data;
+  const pendingRef = useRef<Record<string, unknown>>({});
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const flushPending = () => {
+    if (Object.keys(pendingRef.current).length === 0) return;
+    const payload = { ...dataRef.current, ...pendingRef.current };
+    pendingRef.current = {};
+    void updateCanvasNode(id, { dataPayload: payload });
+  };
+
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    flushPending();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const updateField = (field: string, value: unknown) => {
+    setNodes((nds) =>
       nds.map((node) => {
         if (node.id === id) {
           return {
@@ -34,8 +52,9 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
       })
     );
 
-    // Sync to DB
-    await updateCanvasNode(id, { dataPayload: { ...data, [field]: value } });
+    pendingRef.current[field] = value;
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(flushPending, 600);
   };
 
   const deleteNode = async () => {
@@ -64,12 +83,6 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
             />
         </div>
         <div className="flex items-center gap-1 shrink-0">
-          <button 
-            onClick={() => (data as any).onExecute?.()}
-            className="p-1.5 hover:bg-zinc-100 text-zinc-400 hover:text-emerald-500 rounded-lg transition-all active:scale-95"
-          >
-             <Zap className="w-3.5 h-3.5" />
-          </button>
           <button onClick={() => setIsExpanded(!isExpanded)} className="p-1.5 hover:bg-zinc-100 text-zinc-400 rounded-xl transition-all">
              {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
@@ -178,7 +191,6 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
           <Handle type="source" position={Position.Right} id="ui-out" className="!w-full !h-full !opacity-0 !border-0 !bg-transparent" />
         </div>
       </div>
-      <NodeNextAction nodeId={id} />
     </div>
 
   );
