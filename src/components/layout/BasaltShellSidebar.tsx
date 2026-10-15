@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   Plus, Scale, ListTodo, FolderOpen, User, ShieldCheck,
   Sun, Moon, LogOut, Bug, HelpCircle, Settings, Activity, LifeBuoy, CreditCard,
@@ -17,7 +17,7 @@ import { CANVAS_ENABLED } from "@/lib/features";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { listAssistants, type Assistant } from "@/lib/assistants";
+import { listAssistants, peekAssistants, type Assistant } from "@/lib/assistants";
 import { useConversationHistory } from "@/hooks/useConversationHistory";
 import { ConversationList } from "@/components/basalt/ConversationList";
 
@@ -97,8 +97,18 @@ export function BasaltShellSidebar({
   });
   const [showReport, setShowReport] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
-  const [experts, setExperts] = useState<Assistant[]>([]);
+  // Arranca con lo último conocido (caché de módulo): sin esto, navegar entre
+  // Basalt y un Experto remontaba el sidebar y la lista parpadeaba en "cargando…".
+  const [experts, setExperts] = useState<Assistant[]>(() =>
+    (peekAssistants() ?? []).filter((a) => a.slug !== "genesis")
+  );
   const [expertsError, setExpertsError] = useState(false);
+  // El experto activo según la URL (las rutas estáticas /a/basalt y /a/arena no
+  // son expertos): con él el acordeón resalta la fila y se abre solo.
+  const { pathname } = useLocation();
+  const slugMatch = pathname.match(/^\/a\/([^/]+)$/);
+  const activeExpertSlug =
+    slugMatch && !["basalt", "arena"].includes(slugMatch[1]) ? decodeURIComponent(slugMatch[1]) : undefined;
 
   // El botón para volver a abrirlo vive fuera del <nav> (si no, se va con él al
   // plegarse) y la barra superior necesita dejarle sitio: las dos cosas se resuelven
@@ -211,6 +221,7 @@ export function BasaltShellSidebar({
 
         <ExpertsAccordion
           experts={experts}
+          activeSlug={activeExpertSlug}
           error={expertsError}
           onRetry={loadExperts}
           onSelect={(a) => go(`/a/${a.slug}`)}

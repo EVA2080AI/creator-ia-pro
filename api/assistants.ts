@@ -53,12 +53,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return;
     }
 
-    const slug = (body.slug || body.name)
+    const crudo = (body.slug || body.name)
       .toLowerCase()
       .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
       .slice(0, 60) || `asistente-${Date.now()}`;
+    // /a/basalt y /a/arena son rutas est\u00e1ticas que ganan sobre /a/:slug (y
+    // /expertos/nuevo sobre /expertos/:slug): un experto llamado "Arena"
+    // quedar\u00eda inaccesible. Se le a\u00f1ade sufijo en vez de rechazarlo.
+    const slug = ["basalt", "arena", "nuevo"].includes(crudo) ? `${crudo}-experto` : crudo;
 
     const [existing] = await db.select({ id: schema.assistant.id }).from(schema.assistant).where(eq(schema.assistant.slug, slug)).limit(1);
     const finalSlug = existing ? `${slug}-${Math.random().toString(36).slice(2, 6)}` : slug;

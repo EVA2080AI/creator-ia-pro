@@ -275,7 +275,10 @@ export default function ExpertEditor() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Borrar «{draft.name}»?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se borra el experto, no las conversaciones que tuviste con él. No se puede deshacer.
+              {/* conversation.assistantId es FK con onDelete cascade (db/schema/assistants.ts):
+                  borrar el experto SÍ borra sus conversaciones. El texto anterior prometía
+                  lo contrario. */}
+              Se borra el experto y también todas las conversaciones que tuviste con él. No se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

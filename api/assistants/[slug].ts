@@ -13,6 +13,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const db = getDb();
   const slug = req.query.slug as string;
 
+  // Mismo envoltorio que api/assistants.ts: sin él, cualquier excepción (BD caída,
+  // body malformado) devolvía el HTML de error de Vercel en vez de {ok:false}.
+  try {
+
   const [row] = await db
     .select()
     .from(schema.assistant)
@@ -54,7 +58,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       isActive?: boolean;
     };
     const patch: Record<string, unknown> = { updatedAt: new Date() };
-    if (body.name !== undefined) patch.name = body.name.trim().slice(0, MAX_NAME);
+    if (body.name !== undefined) {
+      const name = body.name.trim().slice(0, MAX_NAME);
+      // El POST exige nombre; el PATCH dejaba guardarlo vacío (fila sin forma
+      // de identificarla en el sidebar ni en el editor).
+      if (!name) {
+        res.status(400).json({ ok: false, code: "BAD_REQUEST", error: "El nombre no puede quedar vacío." });
+        return;
+      }
+      patch.name = name;
+    }
     if (body.tagline !== undefined) patch.tagline = body.tagline?.trim().slice(0, MAX_TAGLINE) || null;
     if (body.brand !== undefined) patch.brand = body.brand;
     if (body.welcome !== undefined) patch.welcome = body.welcome;
@@ -79,4 +92,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   res.status(405).json({ ok: false, code: "METHOD_NOT_ALLOWED", error: "Método no permitido" });
+  } catch (err) {
+    console.error("[api/assistants/[slug]]", err);
+    res.status(500).json({ ok: false, code: "INTERNAL_ERROR", error: "Error al procesar la solicitud. Intenta de nuevo." });
+  }
 }

@@ -60,11 +60,21 @@ async function api<T>(path: string, init?: RequestInit): Promise<{ ok: boolean; 
   }
 }
 
+/** Última lista buena. El sidebar se remonta al navegar Basalt ⇄ Experto y
+ *  re-pedía la lista cada vez: la sección parpadeaba en "cargando…". Con esto
+ *  el primer render pinta lo último conocido y el fetch de fondo lo refresca.
+ *  Cualquier escritura (crear/editar/borrar) la invalida. */
+let listCache: Assistant[] | null = null;
+
+export const peekAssistants = (): Assistant[] | null => listCache;
+
 /** `null` si no se pudo cargar — con `[]` el menú decía "Expertos · cargando…" para
  *  siempre, que es mentira y además no deja reintentar. */
 export async function listAssistants(): Promise<Assistant[] | null> {
   const res = await api<{ assistants: Assistant[] }>("/api/assistants");
-  return res.ok ? res.data!.assistants : null;
+  if (!res.ok) return null;
+  listCache = res.data!.assistants;
+  return listCache;
 }
 
 export async function getAssistant(slug: string): Promise<Assistant | null> {
@@ -74,16 +84,19 @@ export async function getAssistant(slug: string): Promise<Assistant | null> {
 
 export async function createAssistant(input: Partial<Assistant> & { name: string }): Promise<Assistant | null> {
   const res = await api<{ assistant: Assistant }>("/api/assistants", { method: "POST", body: JSON.stringify(input) });
+  if (res.ok) listCache = null;
   return res.ok ? res.data!.assistant : null;
 }
 
 export async function updateAssistant(slug: string, patch: Partial<Assistant>): Promise<Assistant | null> {
   const res = await api<{ assistant: Assistant }>(`/api/assistants/${slug}`, { method: "PATCH", body: JSON.stringify(patch) });
+  if (res.ok) listCache = null;
   return res.ok ? res.data!.assistant : null;
 }
 
 export async function deleteAssistant(slug: string): Promise<boolean> {
   const res = await api(`/api/assistants/${slug}`, { method: "DELETE" });
+  if (res.ok) listCache = null;
   return res.ok;
 }
 

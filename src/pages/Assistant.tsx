@@ -159,6 +159,10 @@ export default function AssistantPage() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dragging, setDragging] = useState(false);
 
+  // getAssistant devuelve null tanto si el slug no existe como si falló la red
+  // o la sesión: la pantalla de "no encontrado" necesita un Reintentar porque
+  // la mitad de las veces el experto sí existe.
+  const [loadTick, setLoadTick] = useState(0);
   useEffect(() => {
     setLoadingAssistant(true);
     setMessages([]);
@@ -170,7 +174,7 @@ export default function AssistantPage() {
       setAssistant(a);
       setLoadingAssistant(false);
     });
-  }, [slug, clearDocs]);
+  }, [slug, clearDocs, loadTick]);
 
   const stickToBottom = useCallback(() => {
     const el = scrollerRef.current;
@@ -480,8 +484,18 @@ export default function AssistantPage() {
   if (!assistant) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-background text-center px-6">
-        <p className="text-sm text-muted-foreground">No encontramos este asistente.</p>
-        <button onClick={() => navigate("/a/basalt")} className="text-sm font-bold text-primary underline">Volver al inicio</button>
+        <p className="text-sm text-muted-foreground">
+          No pudimos cargar este experto. Puede que ya no exista — o que la conexión fallara justo ahora.
+        </p>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setLoadTick((t) => t + 1)}
+            className="rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground"
+          >
+            Reintentar
+          </button>
+          <button onClick={() => navigate("/a/basalt")} className="text-sm font-bold text-primary underline">Volver al inicio</button>
+        </div>
       </div>
     );
   }

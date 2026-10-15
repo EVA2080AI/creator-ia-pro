@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AlertCircle, ChevronDown, ChevronRight, Pencil, Plus, RotateCw } from "lucide-react";
 import type { Assistant } from "@/lib/assistants";
 
@@ -23,7 +23,14 @@ export function ExpertsAccordion({
   error?: boolean;
   onRetry?: () => void;
 }) {
-  const [open, setOpen] = useState(() => experts.some((a) => a.slug === activeSlug));
+  const [open, setOpen] = useState(false);
+  // No puede ser el init del useState: la lista llega por fetch DESPUÉS del
+  // primer render, así que `experts.some(...)` corría siempre con [] y el
+  // acordeón jamás se abría solo en /a/:slug. Cerrarlo a mano sigue mandando
+  // (el efecto solo re-abre si cambia la ruta o llega la lista).
+  useEffect(() => {
+    if (activeSlug && experts.some((a) => a.slug === activeSlug)) setOpen(true);
+  }, [activeSlug, experts]);
   const propios = experts.filter((a) => a.visibility !== "system");
   const sistema = experts.filter((a) => a.visibility === "system");
   // Mientras cargaban, la sección entera desaparecía del menú: se veía igual que
