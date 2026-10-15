@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { CANVAS_ENABLED } from '@/lib/features';
 import { Logo } from '@/components/Logo';
 import { ReportModal } from '@/components/tickets/ReportModal';
 import {
@@ -70,6 +71,10 @@ interface NavItemDef {
 const NAV_MAIN: NavItemDef[] = [
   { path: '/a/basalt',     label: 'Basalt IA',     icon: Brain,          minTier: 'free' },
   { path: '/a/arena',      label: 'Arena IA',      icon: Scale,          minTier: 'free' },
+  // Con el flag apagado el ítem desaparece (no un toast muerto): cuando se
+  // ocultó el canvas este ítem se borró; al habilitarlo (2026-10-15) vuelve
+  // condicionado al flag, como el resto de entradas.
+  ...(CANVAS_ENABLED ? [{ path: '/studio-flow', label: 'Canvas IA', icon: LayoutTemplate, minTier: 'free' }] : []),
 ];
 
 const NAV_SYSTEM: NavItemDef[] = [
