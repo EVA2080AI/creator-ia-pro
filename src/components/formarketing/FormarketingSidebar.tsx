@@ -39,7 +39,11 @@ const CATEGORY_LABELS: Record<string, { label: string; emoji: string; descriptio
 
 export function FormarketingSidebar({ onAddNode, onOpenLogs }: FormarketingSidebarProps) {
   const [search, setSearch] = useState('');
-  const [menuOpen, setMenuOpen] = useState(true);
+  // En móvil el panel abierto cubría TODO el viewport al entrar (390px):
+  // arranca cerrado en pantallas angostas, abierto en escritorio.
+  const [menuOpen, setMenuOpen] = useState(() =>
+    typeof window === 'undefined' ? true : window.matchMedia('(min-width: 640px)').matches
+  );
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({ output: true, bridge: true });
   const [templateOpen, setTemplateOpen] = useState(false);
 

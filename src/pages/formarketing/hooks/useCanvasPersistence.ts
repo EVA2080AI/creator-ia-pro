@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
-import { Node, Edge, NodeChange, EdgeChange, addEdge } from "@xyflow/react";
+import { Node, Edge, NodeChange, EdgeChange, applyEdgeChanges, useReactFlow } from "@xyflow/react";
 import { toast } from "sonner";
-import { listCanvasNodes, updateCanvasNode, upsertCanvasEdges } from "@/lib/canvas-nodes";
+import { deleteCanvasNode, listCanvasNodes, updateCanvasNode, upsertCanvasEdges } from "@/lib/canvas-nodes";
 
 export function useCanvasPersistence(
   spaceId: string | null,
@@ -13,6 +13,8 @@ export function useCanvasPersistence(
   edges: Edge[],
   record: () => void
 ) {
+  const { getNodes } = useReactFlow();
+
   // Load from DB
   useEffect(() => {
     if (!user || !spaceId) return;
@@ -34,50 +36,59 @@ export function useCanvasPersistence(
             data: {
               ...(dbNode.dataPayload as any),
               assetUrl: dbNode.assetUrl,
-              status: dbNode.status,
+              // Un 'executing' guardado (pestaña cerrada a mitad de ejecución)
+              // volvía como spinner eterno al recargar.
+              status: dbNode.status === 'executing' ? 'idle' : dbNode.status,
               prompt: dbNode.prompt
             }
           });
         }
       });
 
-      if (flowNodes.length > 0) {
+      // No pisar el lienzo si el usuario ya puso nodos localmente y la base aún
+      // no los tiene: es la transición "sin espacio → espacio automático" (el
+      // espacio se crea con el primer nodo y esta carga corre en paralelo).
+      if (flowNodes.length > 0 || getNodes().length === 0) {
         setNodes(flowNodes);
         setEdges(flowEdges);
       }
     };
 
     loadData().catch(() => toast.error("Error al cargar el espacio"));
-  }, [user, spaceId, setNodes, setEdges]);
+  }, [user, spaceId, setNodes, setEdges, getNodes]);
 
-  // Persist Changes (Positions)
+  // Persist Changes (Positions + borrado real: antes Supr/Backspace dejaba la
+  // fila huérfana en la base y el nodo resucitaba al recargar)
   const handleNodesChange = useCallback(
     (changes: NodeChange[]) => {
       onNodesChange(changes);
+      if (!spaceId) return;
       changes.forEach((change) => {
         if (change.type === 'position' && change.position && !change.dragging) {
           void updateCanvasNode(change.id, { posX: change.position.x, posY: change.position.y });
+        } else if (change.type === 'remove') {
+          void deleteCanvasNode(change.id);
         }
       });
     },
-    [onNodesChange]
+    [onNodesChange, spaceId]
   );
 
-  // Persist Edges
+  // Persist Edges. El bug anterior: se guardaba `edges` del render previo (el
+  // cambio recién hecho siempre quedaba fuera) y se disparaba hasta al
+  // seleccionar un cable. Ahora se calcula el array resultante con los mismos
+  // changes que aplica ReactFlow y solo se guarda cuando algo cambió de verdad.
   const handleEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
       onEdgesChange(changes);
-      if (spaceId) {
-        void upsertCanvasEdges(spaceId, edges);
-      }
+      if (!spaceId) return;
+      const relevante = changes.some(c => c.type === 'remove' || c.type === 'add' || c.type === 'replace');
+      if (!relevante) return;
+      const next = applyEdgeChanges(changes, edges);
+      void upsertCanvasEdges(spaceId, next as Edge[]);
     },
     [onEdgesChange, edges, spaceId]
   );
 
-  const onConnect = useCallback((params: any) => {
-    record();
-    setEdges((eds: Edge[]) => addEdge(params, eds));
-  }, [setEdges, record]);
-
-  return { handleNodesChange, handleEdgesChange, onConnect };
+  return { handleNodesChange, handleEdgesChange };
 }

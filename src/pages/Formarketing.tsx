@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo, memo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef, memo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from "react-helmet-async";
 import { Layers } from 'lucide-react';
@@ -12,7 +12,8 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from 'sonner';
-import { createCanvasNode } from '@/lib/canvas-nodes';
+import { createCanvasNode, deleteCanvasNode, upsertCanvasEdges } from '@/lib/canvas-nodes';
+import { createSpace } from '@/lib/spaces';
 import { type Template } from '@/lib/templates';
 
 // Components
@@ -104,8 +105,9 @@ BlueprintPageNodeWrapper.displayName = 'BlueprintPageNodeWrapper';
 
 const FormarketingContent = () => {
   const { user } = useAuth("/auth");
-  const [searchParams] = useSearchParams();
-  const spaceId = searchParams.get('spaceId') || searchParams.get('space');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [autoSpaceId, setAutoSpaceId] = useState<string | null>(null);
+  const spaceId = searchParams.get('spaceId') || searchParams.get('space') || autoSpaceId;
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { screenToFlowPosition, getNodes, getEdges } = useReactFlow();
@@ -132,9 +134,66 @@ const FormarketingContent = () => {
   }, [takeSnapshot, getNodes, getEdges]);
 
   // Modular Logic
-  const { handleNodesChange, handleEdgesChange, onConnect } = useCanvasPersistence(
+  const { handleNodesChange, handleEdgesChange } = useCanvasPersistence(
     spaceId, user, setNodes, setEdges, onNodesChange, onEdgesChange, edges, record
   );
+
+  // Entrar por el menú abría el canvas "Draft": nada se guardaba y no había
+  // forma de guardar después. Ahora el primer nodo crea un espacio automático
+  // ("Canvas sin título") y deja la URL apuntándole; no se crean espacios
+  // vacíos por solo mirar la página.
+  const spaceIdRef = useRef(spaceId);
+  spaceIdRef.current = spaceId;
+  const creatingSpaceRef = useRef<Promise<string | null> | null>(null);
+
+  const ensureSpace = useCallback(async (): Promise<string | null> => {
+    if (spaceIdRef.current) return spaceIdRef.current;
+    if (!creatingSpaceRef.current) {
+      creatingSpaceRef.current = createSpace({ name: 'Canvas sin título' }).then((space) => {
+        if (!space) {
+          creatingSpaceRef.current = null;
+          toast.error('No se pudo crear el espacio: lo que hagas no quedará guardado.');
+          return null;
+        }
+        setAutoSpaceId(space.id);
+        setSearchParams(prev => {
+          const next = new URLSearchParams(prev);
+          next.set('spaceId', space.id);
+          return next;
+        }, { replace: true });
+        toast.success('Espacio "Canvas sin título" creado: tu trabajo se guarda solo.');
+        return space.id;
+      });
+    }
+    return creatingSpaceRef.current;
+  }, [setSearchParams]);
+
+  // Crear un nodo lo guarda en la base al instante. Antes solo se persistía al
+  // ejecutarlo: un nodo recién puesto desaparecía al recargar.
+  const addNode = useCallback(async (type: string, label: string, position: { x: number; y: number }, extraData?: Record<string, unknown>) => {
+    const node: Node = {
+      id: crypto.randomUUID(),
+      type,
+      position,
+      data: { title: label, status: 'idle', ...extraData },
+    };
+    setNodes((nds) => nds.concat(node));
+
+    if (!user) return;
+    const sid = await ensureSpace();
+    if (!sid) return;
+    const created = await createCanvasNode({
+      id: node.id,
+      spaceId: sid,
+      type,
+      prompt: '',
+      status: 'idle',
+      dataPayload: node.data,
+      posX: position.x,
+      posY: position.y,
+    });
+    if (!created) toast.error(`"${label}" no se pudo guardar — revisa tu conexión.`);
+  }, [setNodes, user, ensureSpace]);
 
   // Enable bi-directional Reverse Sync (Canvas -> Blueprint)
   useCanvasSync(spaceId, user, nodes, edges);
@@ -205,14 +264,19 @@ const FormarketingContent = () => {
         targetHandle: tEdge.targetHandle
       }));
       
+      const mergedEdges = [...getEdges(), ...newEdges];
       setNodes(nds => [...nds, ...newNodes]);
-      setEdges(eds => [...eds, ...newEdges]);
-      
-      // Persist to DB
-      if (spaceId && user) {
+      setEdges(mergedEdges);
+
+      // Persist to DB (si no había espacio, la plantilla crea uno). Las
+      // conexiones de la plantilla también se guardan: antes quedaban solo en
+      // memoria y la recarga las perdía.
+      if (user) {
+        const sid = await ensureSpace();
+        if (!sid) return;
         const results = await Promise.all(newNodes.map(n => createCanvasNode({
           id: n.id,
-          spaceId,
+          spaceId: sid,
           type: n.type || 'default',
           prompt: (n.data as any).prompt || (n.data as any).title || '',
           status: 'idle',
@@ -220,8 +284,9 @@ const FormarketingContent = () => {
           posX: n.position.x,
           posY: n.position.y,
         })));
+        const edgesOk = await upsertCanvasEdges(sid, mergedEdges);
 
-        if (results.some(r => !r)) {
+        if (results.some(r => !r) || !edgesOk) {
           toast.error("Error al persistir la plantilla en la base de datos");
         } else {
           addLog('Sistema', `Plantilla '${template.title}' lista.`, 'success');
@@ -231,7 +296,7 @@ const FormarketingContent = () => {
     
     window.addEventListener('add-template', handleAddTemplate);
     return () => window.removeEventListener('add-template', handleAddTemplate);
-  }, [spaceId, user, setNodes, setEdges, record, addLog]);
+  }, [user, setNodes, setEdges, getEdges, record, addLog, ensureSpace]);
 
   // Handlers
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -246,14 +311,8 @@ const FormarketingContent = () => {
     if (!type) return;
 
     const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
-    const newNode: Node = {
-      id: crypto.randomUUID(),
-      type,
-      position,
-      data: { title: label || 'Nuevo', status: 'idle', prompt: '' },
-    };
-    setNodes((nds) => nds.concat(newNode));
-  }, [screenToFlowPosition, setNodes]);
+    void addNode(type, label || 'Nuevo', position, { prompt: '' });
+  }, [screenToFlowPosition, addNode]);
 
   const nodeTypes = useMemo(() => ({
     characterBreakdown: CharacterBreakdownNodeWrapper,
@@ -297,9 +356,13 @@ const FormarketingContent = () => {
       style: { stroke: '#94a3b8', strokeWidth: 2 },
     };
 
-    setEdges((eds: Edge[]) => addEdge(newEdge, eds));
+    // Conectar ahora SÍ guarda: antes el edge vivía solo en memoria hasta que
+    // otro cambio de edges disparara el guardado (y con el array desactualizado).
+    const next = addEdge(newEdge, edges);
+    setEdges(next);
     record();
-  }, [nodes, setEdges, record]);
+    if (spaceId) void upsertCanvasEdges(spaceId, next);
+  }, [nodes, edges, setEdges, record, spaceId]);
 
   return (
     <CanvasExecContext.Provider value={execApi}>
@@ -313,7 +376,7 @@ const FormarketingContent = () => {
            </div>
            <div>
              <h1 className="text-sm font-black text-zinc-900 tracking-tight uppercase leading-none mb-1">ForMarketing Canvas</h1>
-             <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Workspace ID: {spaceId || 'Draft'}</p>
+             <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{spaceId ? 'Se guarda solo' : 'Se guardará al agregar el primer nodo'}</p>
            </div>
         </div>
 
@@ -327,7 +390,17 @@ const FormarketingContent = () => {
              onExport={() => setExportOpen(true)}
              onToggleSnap={() => setSnapEnabled(s => !s)}
              snapEnabled={snapEnabled}
-             onClear={() => { setNodes([]); setEdges([]); }}
+             onClear={async () => {
+               const nds = getNodes();
+               if (nds.length === 0) return;
+               if (!window.confirm(`Esto borra ${nds.length} nodo(s) y sus conexiones, también de lo guardado. No se puede deshacer.`)) return;
+               setNodes([]);
+               setEdges([]);
+               if (spaceId) {
+                 await Promise.all(nds.map(n => deleteCanvasNode(n.id)));
+                 await upsertCanvasEdges(spaceId, []);
+               }
+             }}
              onExecute={runFlow}
              execStatus={execStatus}
              onOpenTemplates={() => window.dispatchEvent(new CustomEvent('open-template-modal'))}
@@ -339,15 +412,7 @@ const FormarketingContent = () => {
       <main className="flex-1 flex overflow-hidden relative">
         <FormarketingSidebar
           onOpenLogs={() => setLogOpen(true)}
-          onAddNode={(type, label) => {
-            const position = { x: 500, y: 300 };
-            setNodes(nds => nds.concat({
-              id: crypto.randomUUID(),
-              type,
-              position,
-              data: { title: label, status: 'idle' },
-            }));
-          }}
+          onAddNode={(type, label) => { void addNode(type, label, { x: 500, y: 300 }); }}
         />
         
         <div className="flex-1 relative flex flex-col h-full bg-white/50">
@@ -398,7 +463,13 @@ const FormarketingContent = () => {
             onUpdate={(id, data) => setNodes(nds => nds.map(n => n.id === id ? { ...n, data: { ...n.data, ...data } } : n))}
             onExecute={() => executeNode(selectedNodeId)}
             onDelete={() => {
+              if (spaceId) void deleteCanvasNode(selectedNodeId);
               setNodes(nds => nds.filter(n => n.id !== selectedNodeId));
+              const nextEdges = edges.filter(e => e.source !== selectedNodeId && e.target !== selectedNodeId);
+              if (nextEdges.length !== edges.length) {
+                setEdges(nextEdges);
+                if (spaceId) void upsertCanvasEdges(spaceId, nextEdges);
+              }
               setSelectedNodeId(null);
             }}
           />
@@ -406,13 +477,7 @@ const FormarketingContent = () => {
       </main>
 
       <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} onSelect={(type, label) => {
-        const position = { x: 500, y: 300 };
-        setNodes(nds => nds.concat({
-          id: crypto.randomUUID(),
-          type,
-          position,
-          data: { title: label, status: 'idle' },
-        }));
+        void addNode(type, label, { x: 500, y: 300 });
         setCmdOpen(false);
       }} />
 
