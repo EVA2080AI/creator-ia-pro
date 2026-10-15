@@ -14,8 +14,8 @@ export default function CanvasGate() {
   // sin haberse logueado nunca.
   const { user, loading: authLoading } = useAuth("/auth");
   if (authLoading || !user) return null;
-  // 2026-10-14: sin bypass de admin — el canvas actual "no funciona" (Sebastián)
-  // y se oculta para TODOS hasta el rediseño estilo Freepik Spaces.
+  // 2026-10-15: flag en `true` (pedido de Sebastián) — todos entran al canvas
+  // real. El rediseño estilo Freepik Spaces sigue pendiente aparte.
   if (CANVAS_ENABLED) return <Formarketing />;
   return <CanvasComingSoon />;
 }
