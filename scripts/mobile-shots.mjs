@@ -30,6 +30,7 @@ await ctx.addInitScript(([guide, dark]) => {
     // El modal de bienvenida del panel tapa la pantalla que se quiere ver; con
     // --welcome se deja aparecer a propósito.
     if (guide) localStorage.removeItem("dashboard_onboarded_v1"); else localStorage.setItem("dashboard_onboarded_v1", "1");
+    if (guide) localStorage.removeItem("fm_onboarded"); else localStorage.setItem("fm_onboarded", "1");
   } catch { /* sin storage */ }
 }, [flag("--guide"), flag("--dark")]);
 

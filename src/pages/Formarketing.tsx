@@ -369,14 +369,15 @@ const FormarketingContent = () => {
     <div className="h-full w-full bg-[#f8f9fa] flex flex-col relative overflow-hidden font-sans">
       <Helmet><title>Canvas IA — ForMarketing | Creator IA Pro</title></Helmet>
 
-      <header className="h-[64px] border-b border-black/[0.04] bg-white/40 backdrop-blur-2xl px-6 flex items-center justify-between z-30 sticky top-0 aether-iridescent">
+      {/* pl-16 en xs: la hamburguesa global flota en left-4 sobre el header */}
+      <header className="h-[64px] border-b border-black/[0.04] bg-white/40 backdrop-blur-2xl pl-16 pr-4 sm:px-6 flex items-center justify-between z-30 sticky top-0 aether-iridescent">
         <div className="flex items-center gap-4">
-           <div className="h-10 w-10 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-900/10">
+           <div className="hidden sm:flex h-10 w-10 rounded-2xl bg-zinc-900 items-center justify-center text-white shadow-xl shadow-zinc-900/10">
              <Layers className="h-5 w-5" />
            </div>
-           <div>
-             <h1 className="text-sm font-black text-zinc-900 tracking-tight uppercase leading-none mb-1">ForMarketing Canvas</h1>
-             <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">{spaceId ? 'Se guarda solo' : 'Se guardará al agregar el primer nodo'}</p>
+           <div className="min-w-0">
+             <h1 className="hidden sm:block text-sm font-black text-zinc-900 tracking-tight uppercase leading-none mb-1">ForMarketing Canvas</h1>
+             <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest truncate max-w-[34vw] sm:max-w-none">{spaceId ? 'Se guarda solo' : 'Aún sin guardar: el primer nodo crea tu espacio'}</p>
            </div>
         </div>
 
@@ -439,7 +440,7 @@ const FormarketingContent = () => {
 
             {/* Mini Map for navigation */}
             <MiniMap
-              className="!bg-white/90 !backdrop-blur-xl !border !border-zinc-200 !rounded-2xl !shadow-xl !m-6"
+              className="hidden sm:block !bg-white/90 !backdrop-blur-xl !border !border-zinc-200 !rounded-2xl !shadow-xl !m-6"
               nodeColor={(node) => {
                 const meta = NODE_META[node.type || ''];
                 return meta?.color || '#94a3b8';
