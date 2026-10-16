@@ -93,7 +93,7 @@ export const seoPresets = {
     noindex: true,
   },
   notFound: {
-    title: "Página No Encontrada",
+    title: "Página no encontrada",
     description: "La página que buscas no existe. Explora Creator IA Pro.",
     noindex: true,
   },
