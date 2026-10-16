@@ -47,12 +47,15 @@ export function useAdminAnalytics(isAdmin: boolean, activeTab: string) {
     tiers?: TierRow[];
   } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchAnalytics = useCallback(async () => {
     if (!isAdmin) return;
     setLoading(true);
+    setError(null);
     const res = await api<{ totalSpend: number; recentUsers: number; totalUsers: number; payingUsers: number; conversionRate: number; toolUsage: any[]; dailyCredits: any[] }>("/api/admin/stats");
     if (res.ok) setData(res.data!);
+    else setError(res.error || "No se pudieron cargar las métricas.");
     setLoading(false);
   }, [isAdmin]);
 
@@ -60,7 +63,7 @@ export function useAdminAnalytics(isAdmin: boolean, activeTab: string) {
     if (activeTab === "analytics" || activeTab === "finance") fetchAnalytics();
   }, [activeTab, fetchAnalytics]);
 
-  return { data, loading, refresh: fetchAnalytics };
+  return { data, loading, error, refresh: fetchAnalytics };
 }
 
 export interface FinanceBreakdownItem {

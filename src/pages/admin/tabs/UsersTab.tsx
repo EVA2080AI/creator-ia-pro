@@ -27,10 +27,14 @@ function downloadUsersCsv(users: AdminUser[]) {
 
 export function UsersTab({
   users,
+  loading,
+  loadError,
   onRefresh,
   onManageCredits
 }: {
   users: AdminUser[];
+  loading?: boolean;
+  loadError?: string | null;
   onRefresh: () => void;
   onManageCredits: (user: AdminUser) => void;
 }) {
@@ -113,7 +117,7 @@ export function UsersTab({
             aria-label="Actualizar"
             className="flex items-center justify-center gap-2 rounded-xl bg-muted px-4 py-2.5 text-xs font-bold text-muted-foreground hover:bg-accent transition-all active:scale-95"
           >
-            <RefreshCw className="h-3.5 w-3.5" />
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
             <span className="hidden sm:inline">Actualizar</span>
           </button>
           {users.length > 0 && (
@@ -153,7 +157,14 @@ export function UsersTab({
 
       {/* User List */}
       <div className="divide-y divide-border border-x border-b border-border rounded-b-2xl overflow-hidden bg-card">
-        {filteredUsers.length === 0 ? (
+        {loading && users.length === 0 ? (
+          <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
+        ) : loadError ? (
+          <div className="flex flex-col items-center gap-3 py-16 text-center">
+            <p className="text-sm text-muted-foreground">No se pudo cargar la lista: <span className="text-foreground">{loadError}</span></p>
+            <button onClick={onRefresh} className="rounded-xl bg-muted px-4 py-2 text-xs font-bold text-foreground hover:bg-accent transition-all">Reintentar</button>
+          </div>
+        ) : filteredUsers.length === 0 ? (
           <div className="py-20 text-center text-sm text-muted-foreground">
             No se encontraron usuarios.
           </div>

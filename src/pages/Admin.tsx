@@ -41,8 +41,8 @@ const Admin = () => {
     if (el) el.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
   }, [activeTab]);
 
-  const { users, loadingUsers, fetchUsers } = useAdminData(!!isAdmin);
-  const { data: analyticsData, loading: loadingAnalytics } = useAdminAnalytics(!!isAdmin, activeTab);
+  const { users, loadingUsers, loadError, fetchUsers } = useAdminData(!!isAdmin);
+  const { data: analyticsData, loading: loadingAnalytics, error: analyticsError, refresh: refreshAnalytics } = useAdminAnalytics(!!isAdmin, activeTab);
   const { data: financeData, loading: loadingFinance, error: financeError } = useAdminFinance(!!isAdmin, activeTab);
 
   // Sync tab from URL query param
@@ -232,6 +232,8 @@ const Admin = () => {
             {activeTab === "users" && (
               <UsersTab 
                 users={users} 
+                loading={loadingUsers}
+                loadError={loadError}
                 onRefresh={fetchUsers} 
                 onManageCredits={setCreditModalUser} 
               />
@@ -239,6 +241,8 @@ const Admin = () => {
             {activeTab === "roles" && (
               <RolesTab
                 users={users}
+                loading={loadingUsers}
+                loadError={loadError}
                 currentUserEmail={user.email!}
                 onRefresh={fetchUsers}
               />
@@ -247,6 +251,8 @@ const Admin = () => {
               <AnalyticsTab
                 data={analyticsData}
                 loading={loadingAnalytics}
+                error={analyticsError}
+                onRetry={refreshAnalytics}
               />
             )}
             {activeTab === "finance" && (

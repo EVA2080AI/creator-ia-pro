@@ -37,6 +37,7 @@ const STATUS_ORDER: Record<Ticket["status"], number> = { abierto: 0, en_progreso
 
 export function TicketsTab() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("todos");
@@ -44,10 +45,14 @@ export function TicketsTab() {
 
   const load = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await fetch("/api/tickets", { credentials: "include" });
       const body = await res.json().catch(() => null);
       if (res.ok && body?.ok) setTickets(body.tickets);
+      else setLoadError(body?.error ?? "No se pudo cargar.");
+    } catch {
+      setLoadError("No se pudo cargar. Revisa tu conexión.");
     } finally {
       setLoading(false);
     }
@@ -56,15 +61,24 @@ export function TicketsTab() {
   useEffect(() => { void load(); }, []);
 
   const setStatus = async (id: string, status: Ticket["status"]) => {
+    // Optimista con reversa: si la API falla, el ticket vuelve a su estado
+    // anterior (solo ese ticket) y se avisa — antes el fallo quedaba mudo y
+    // la UI mentía hasta el próximo reload.
+    const prev = tickets.find((t) => t.id === id)?.status;
     setUpdating(id);
-    setTickets((prev) => prev.map((t) => (t.id === id ? { ...t, status } : t)));
+    setTickets((p) => p.map((t) => (t.id === id ? { ...t, status } : t)));
     try {
-      await fetch(`/api/tickets/${id}`, {
+      const res = await fetch(`/api/tickets/${id}`, {
         method: "PATCH",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
+      const body = await res.json().catch(() => null);
+      if (!res.ok || !body?.ok) throw new Error(body?.error ?? "");
+    } catch (e) {
+      if (prev) setTickets((p) => p.map((t) => (t.id === id ? { ...t, status: prev } : t)));
+      toast.error(e instanceof Error && e.message ? e.message : "No se pudo actualizar el ticket");
     } finally {
       setUpdating(null);
     }
@@ -97,6 +111,15 @@ export function TicketsTab() {
 
   if (loading) {
     return <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-border bg-card py-20 text-center">
+        <p className="text-sm text-muted-foreground">No se pudieron cargar los tickets: <span className="text-foreground">{loadError}</span></p>
+        <button onClick={() => void load()} className="rounded-xl bg-muted px-4 py-2 text-xs font-bold text-foreground hover:bg-accent transition-all">Reintentar</button>
+      </div>
+    );
   }
 
   if (!tickets.length) {

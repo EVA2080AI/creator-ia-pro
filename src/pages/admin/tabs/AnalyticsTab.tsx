@@ -15,16 +15,31 @@ interface AnalyticsData {
 
 export function AnalyticsTab({ 
   data, 
-  loading 
+  loading,
+  error,
+  onRetry
 }: { 
   data: AnalyticsData | null; 
   loading: boolean;
+  error?: string | null;
+  onRetry?: () => void;
 }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-24 space-y-4">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Calculando métricas</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-3 py-24 text-center">
+        <p className="text-sm text-muted-foreground">No se pudieron cargar las métricas: <span className="text-foreground">{error}</span></p>
+        {onRetry && (
+          <button onClick={onRetry} className="rounded-xl bg-muted px-4 py-2 text-xs font-bold text-foreground hover:bg-accent transition-all">Reintentar</button>
+        )}
       </div>
     );
   }

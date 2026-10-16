@@ -8,13 +8,18 @@ import { AdminUser } from "../types";
 // además de "admin", pero nada en el código actual comprueba un rol de
 // moderador, así que no se recreó al migrar. Si hace falta en el futuro,
 // agregar la columna a `profile` y un endpoint análogo a este.
-export function RolesTab({ users, currentUserEmail, onRefresh }: {
+export function RolesTab({ users, loading, loadError, currentUserEmail, onRefresh }: {
   users: AdminUser[];
+  loading?: boolean;
+  loadError?: string | null;
   currentUserEmail: string;
   onRefresh: () => void;
 }) {
   const [search, setSearch] = useState('');
   const [busyUserId, setBusyUserId] = useState<string | null>(null);
+  // Dar/quitar admin cambia permisos reales: pide un "¿seguro?" inline antes
+  // (mismo patrón del borrado de acuerdos), nada de ejecutarlo a un clic.
+  const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const handleToggleAdmin = async (userId: string, currentlyAdmin: boolean) => {
     setBusyUserId(userId);
@@ -85,20 +90,39 @@ export function RolesTab({ users, currentUserEmail, onRefresh }: {
                     <p className="text-[10px] text-muted-foreground font-mono truncate">{u.email}</p>
                   </div>
                 </div>
+                {confirmId === u.user_id ? (
+                  <span className="inline-flex items-center gap-2 text-[12px]">
+                    <span className="font-bold text-foreground">¿{u.is_admin ? 'Quitar' : 'Dar'} admin a {u.display_name || u.email}?</span>
+                    <button
+                      onClick={() => { setConfirmId(null); void handleToggleAdmin(u.user_id, u.is_admin); }}
+                      className="rounded-full bg-primary px-3 py-1 font-bold text-primary-foreground"
+                    >Sí</button>
+                    <button onClick={() => setConfirmId(null)} className="rounded-full border border-border px-3 py-1 font-bold text-muted-foreground">No</button>
+                  </span>
+                ) : (
                 <button disabled={busy || cantRevoke}
-                  onClick={() => handleToggleAdmin(u.user_id, u.is_admin)}
+                  onClick={() => setConfirmId(u.user_id)}
                   title={cantRevoke ? 'No puedes remover tu propio rol de Admin' : (u.is_admin ? 'Remover Admin' : 'Asignar Admin')}
+                  aria-label={cantRevoke ? 'No puedes remover tu propio rol de Admin' : `${u.is_admin ? 'Remover' : 'Asignar'} admin a ${u.email}`}
                   className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all border disabled:cursor-not-allowed ${
                     u.is_admin ? 'bg-primary/10 text-primary border-primary shadow-sm' : 'border-border text-muted-foreground hover:border-ring'
                   } ${cantRevoke ? 'opacity-50' : ''}`}
                 >
                   {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : u.is_admin ? <CheckCircle className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                 </button>
+                )}
               </div>
             );
           })}
         </div>
-        {filtered.length === 0 && <div className="py-12 text-center text-sm text-muted-foreground">Sin usuarios</div>}
+        {loading && users.length === 0 && <div className="flex justify-center py-12"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>}
+        {!loading && loadError && (
+          <div className="flex flex-col items-center gap-3 py-12 text-center">
+            <p className="text-sm text-muted-foreground">No se pudo cargar: <span className="text-foreground">{loadError}</span></p>
+            <button onClick={onRefresh} className="rounded-xl bg-muted px-4 py-2 text-xs font-bold text-foreground hover:bg-accent transition-all">Reintentar</button>
+          </div>
+        )}
+        {!loading && !loadError && filtered.length === 0 && <div className="py-12 text-center text-sm text-muted-foreground">Sin usuarios</div>}
       </div>
     </div>
   );

@@ -42,6 +42,7 @@ const MAX_PDF_MB = 3;
 
 export function AcuerdosTab() {
   const [acuerdos, setAcuerdos] = useState<Acuerdo[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [mostrarForm, setMostrarForm] = useState(false);
   const [titulo, setTitulo] = useState("");
@@ -52,10 +53,14 @@ export function AcuerdosTab() {
 
   const load = async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const res = await fetch("/api/acuerdos", { credentials: "include" });
       const body = await res.json().catch(() => null);
       if (res.ok && body?.ok) setAcuerdos(body.acuerdos);
+      else setLoadError(body?.error ?? "No se pudo cargar.");
+    } catch {
+      setLoadError("No se pudo cargar. Revisa tu conexión.");
     } finally {
       setLoading(false);
     }
@@ -224,7 +229,12 @@ export function AcuerdosTab() {
         </div>
       )}
 
-      {!acuerdos.length ? (
+      {loadError ? (
+        <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-border bg-card py-20 text-center">
+          <p className="text-sm text-muted-foreground">No se pudieron cargar los acuerdos: <span className="text-foreground">{loadError}</span></p>
+          <button onClick={() => void load()} className="rounded-xl bg-muted px-4 py-2 text-xs font-bold text-foreground hover:bg-accent transition-all">Reintentar</button>
+        </div>
+      ) : !acuerdos.length ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border border-border bg-card py-20 text-center">
           <FileText className="h-8 w-8 text-muted-foreground" />
           <p className="text-[13px] font-bold text-muted-foreground">Sin acuerdos todavía. Crea el primero con “Nuevo acuerdo”.</p>
