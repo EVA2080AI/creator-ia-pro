@@ -182,7 +182,6 @@ export const TEMPLATES: Template[] = [
       }},
       { type: 'exportNode', data: {
         title: 'DRAFT EXPORT',
-        content: 'article-ready-for-publish.md',
         status: 'ready'
       }}
     ],
@@ -262,7 +261,6 @@ export const TEMPLATES: Template[] = [
       }},
       { type: 'exportNode', data: {
         title: 'SEQUENCE EXPORT',
-        content: 'email-nurture-sequence.html',
         status: 'ready'
       }}
     ],
@@ -360,7 +358,6 @@ Uso: Videos explicativos, tutoriales, redes sociales.`
       }},
       { type: 'exportNode', data: {
         title: 'CHARACTER KIT',
-        content: 'pixel-character-kit.zip',
         status: 'ready'
       }}
     ],

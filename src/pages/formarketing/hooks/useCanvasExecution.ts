@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useRef } from "react";
+import { createAsset } from "@/lib/assets";
 import { createCanvasNode, updateCanvasNode } from "@/lib/canvas-nodes";
 import { EXECUTABLE_NODE_TYPES } from "@/components/formarketing/nodeConnections";
 import { aiService } from "@/services/ai-service";
@@ -158,6 +159,18 @@ export function useCanvasExecution(
           node_id: (spaceId && isPersisted) ? node.id : undefined
         });
         assetUrl = res.url || '';
+
+        // La imagen queda también en la Biblioteca (Mis Activos) — antes el
+        // canvas nunca la alimentaba y el resultado vivía solo en el nodo.
+        if (assetUrl) {
+          void createAsset({
+            assetUrl,
+            type: 'image',
+            prompt: partes.join('\n'),
+            spaceId: spaceId || undefined,
+            tags: ['canvas'],
+          });
+        }
       }
 
       const updatePayload: Partial<CanvasNodeData> = { status: 'ready' };

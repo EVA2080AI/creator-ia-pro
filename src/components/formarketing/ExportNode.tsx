@@ -1,21 +1,39 @@
 import { memo, useState } from 'react';
-import { useReactFlow } from '@xyflow/react';
-import { Download, Share2, Copy, Check } from 'lucide-react';
+import { useNodeConnections, useNodesData, useReactFlow } from '@xyflow/react';
+import { Download, Share2, Copy, Check, ImageIcon } from 'lucide-react';
 import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import BaseNode from './BaseNode';
+import { imageOutputOf, textOutputOf } from '@/pages/formarketing/lib/nodeData';
 
 interface ExportNodeData {
   title?: string;
-  content?: string;
-  contentType?: 'text' | 'image' | 'video';
   status?: 'idle' | 'bypassed';
   collapsed?: boolean;
 }
 
+// Fase 1: el nodo Exportar LEE lo conectado en vivo (antes dependía de un
+// data.content que nada escribía jamás — sus botones nunca se habilitaron).
+// Deriva texto/imagen de los nodos fuente con los mismos resolvedores que usa
+// la ejecución, así "lo que ves es lo que exportas".
 const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
   const { setNodes } = useReactFlow();
   const [copied, setCopied] = useState(false);
+
+  const connections = useNodeConnections({ id, handleType: 'target' });
+  const fuentes = useNodesData(connections.map((c) => c.source));
+  const textos = fuentes
+    .filter((f): f is NonNullable<typeof f> => !!f)
+    .map((f) => textOutputOf({ id: f.id, type: f.type, data: (f.data ?? {}) as Record<string, unknown> }))
+    .filter(Boolean);
+  const imagenes = fuentes
+    .filter((f): f is NonNullable<typeof f> => !!f)
+    .map((f) => imageOutputOf({ id: f.id, type: f.type, data: (f.data ?? {}) as Record<string, unknown> }))
+    .filter(Boolean);
+
+  const texto = textos.join('\n\n---\n\n');
+  const imagen = imagenes[0] || '';
+  const hayAlgo = !!texto || !!imagen;
 
   const deleteNode = async () => {
     await deleteCanvasNode(id);
@@ -28,7 +46,6 @@ const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
     setNodes((nds) =>
       nds.map((n) => n.id === id ? { ...n, data: { ...n.data, status: newStatus } } : n)
     );
-    toast.success(newStatus === 'bypassed' ? 'Nodo desactivado (bypass)' : 'Nodo reactivado');
   };
 
   const handleToggleCollapsed = () => {
@@ -37,47 +54,30 @@ const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
     );
   };
 
-  const handleDownload = () => {
-    if (!data.content) {
-      toast.error('No hay contenido para exportar');
-      return;
-    }
-    if (
-      data.contentType === 'image' ||
-      data.content.startsWith('data:image') ||
-      data.content.startsWith('http')
-    ) {
-      const a = document.createElement('a');
-      a.href = data.content;
-      a.download = `export-${Date.now()}.png`;
-      a.target = '_blank';
-      a.click();
-    } else {
-      const blob = new Blob([data.content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `export-${Date.now()}.txt`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-    toast.success('¡Exportado!');
+  const descargarTexto = () => {
+    if (!texto) return;
+    const blob = new Blob([texto], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `canvas-export-${Date.now()}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success('Texto descargado');
   };
 
-  const handleCopy = () => {
-    if (!data.content) {
-      toast.error('No hay contenido');
-      return;
-    }
-    navigator.clipboard.writeText(data.content);
+  const abrirImagen = () => {
+    if (!imagen) return;
+    window.open(imagen, '_blank', 'noopener');
+  };
+
+  const copiar = async () => {
+    if (!texto) return;
+    await navigator.clipboard.writeText(texto);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     toast.success('Copiado al portapapeles');
   };
-
-  const isImage =
-    data.content &&
-    (data.content.startsWith('data:image') || data.content.startsWith('https://'));
 
   return (
     <BaseNode
@@ -92,23 +92,21 @@ const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
       onToggleBypass={handleToggleBypass}
     >
       <div className="space-y-3">
-        {/* Preview */}
-        <div className="bg-zinc-50 min-h-[80px] flex items-center justify-center rounded-xl border border-zinc-100 overflow-hidden">
-          {isImage ? (
-            <img
-              src={data.content}
-              alt="Export preview"
-              className="w-full object-cover max-h-[120px]"
-            />
-          ) : data.content ? (
-            <p className="text-[11px] text-zinc-600 p-4 leading-relaxed line-clamp-4 whitespace-pre-wrap">
-              {data.content}
+        {/* Preview en vivo de lo conectado */}
+        <div className="bg-zinc-50 min-h-[80px] flex flex-col items-stretch justify-center rounded-xl border border-zinc-100 overflow-hidden">
+          {imagen && (
+            <img src={imagen} alt="Imagen conectada" className="w-full object-cover max-h-[120px]" />
+          )}
+          {texto && (
+            <p className="text-[11px] text-zinc-600 p-3 leading-relaxed line-clamp-4 whitespace-pre-wrap">
+              {texto}
             </p>
-          ) : (
+          )}
+          {!hayAlgo && (
             <div className="flex flex-col items-center gap-2 text-center py-6">
-              <Share2 className="w-8 h-8 text-zinc-300" />
-              <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium">
-                Conecta un nodo para exportar
+              <Share2 className="w-8 h-8 text-zinc-300" aria-hidden />
+              <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-medium px-3">
+                Conecta un nodo con resultado para exportarlo
               </span>
             </div>
           )}
@@ -116,25 +114,31 @@ const ExportNode = ({ id, data }: { id: string; data: ExportNodeData }) => {
 
         {/* Actions */}
         <div className="space-y-2">
+          {texto && (
+            <button
+              onClick={descargarTexto}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 text-white text-[12px] font-bold uppercase tracking-wider hover:bg-emerald-600 shadow-md transition-all active:scale-95"
+            >
+              <Download className="w-4 h-4" aria-hidden />
+              Descargar .txt
+            </button>
+          )}
+          {imagen && (
+            <button
+              onClick={abrirImagen}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-zinc-900 text-white text-[12px] font-bold uppercase tracking-wider hover:bg-zinc-800 shadow-md transition-all active:scale-95"
+            >
+              <ImageIcon className="w-4 h-4" aria-hidden />
+              Abrir imagen
+            </button>
+          )}
           <button
-            onClick={handleDownload}
-            disabled={!data.content}
-            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-500 text-white text-[12px] font-bold uppercase tracking-wider hover:bg-emerald-600 shadow-md transition-all active:scale-95 disabled:opacity-30"
-          >
-            <Download className="w-4 h-4" />
-            Descargar
-          </button>
-          <button
-            onClick={handleCopy}
-            disabled={!data.content}
+            onClick={copiar}
+            disabled={!texto}
             className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-white border border-zinc-200 shadow-sm text-[12px] text-zinc-600 hover:text-zinc-900 hover:border-zinc-300 hover:bg-zinc-50 transition-all active:scale-95 disabled:opacity-30"
           >
-            {copied ? (
-              <Check className="w-4 h-4 text-emerald-500" />
-            ) : (
-              <Copy className="w-4 h-4" />
-            )}
-            {copied ? 'Copiado' : 'Copiar'}
+            {copied ? <Check className="w-4 h-4 text-emerald-500" aria-hidden /> : <Copy className="w-4 h-4" aria-hidden />}
+            {copied ? 'Copiado' : 'Copiar texto'}
           </button>
         </div>
       </div>
