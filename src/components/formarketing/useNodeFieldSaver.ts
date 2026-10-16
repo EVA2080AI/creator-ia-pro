@@ -17,8 +17,11 @@ export function useNodeFieldSaver(id: string, data: Record<string, unknown>) {
     if (Object.keys(pendingRef.current).length === 0) return;
     const payload = { ...dataRef.current, ...pendingRef.current };
     const prompt = typeof pendingRef.current.prompt === 'string' ? pendingRef.current.prompt : undefined;
+    // La columna status también: la carga la prefiere, y sin esto un bypass
+    // o un 'done' guardados solo en el payload no sobrevivían la recarga.
+    const status = typeof pendingRef.current.status === 'string' ? pendingRef.current.status : undefined;
     pendingRef.current = {};
-    void updateCanvasNode(id, { prompt, dataPayload: payload });
+    void updateCanvasNode(id, { prompt, status, dataPayload: payload });
   };
 
   const flushRef = useRef(flush);

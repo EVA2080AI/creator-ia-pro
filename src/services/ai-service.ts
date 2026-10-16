@@ -73,6 +73,13 @@ export const IMAGE_MODEL_MAP: Record<string, string> = {
 // ─── ERROR CLASSIFIER ─────────────────────────────────────────────────────────
 export function classifyError(msg: string): ClassifiedError {
   const m = msg.toLowerCase();
+  // El mensaje de reembolso del servidor ("Se devolvieron los créditos —
+  // vuelve a intentarlo…") contiene "créditos" y caía en la rama de
+  // "créditos insuficientes: recarga tu plan" — lo contrario de la verdad.
+  // Si el servidor ya explicó el reembolso, ese mensaje se muestra tal cual.
+  if (m.includes('devolv') || m.includes('reembols')) {
+    return { type: 'model_down', userMessage: msg, canRetry: true };
+  }
   if (m.includes('crédito') || m.includes('credit') || m.includes('insufficient') || m.includes('balance')) {
     return { type: 'credits', userMessage: 'Créditos insuficientes. Recarga tu plan para continuar.', canRetry: false };
   }

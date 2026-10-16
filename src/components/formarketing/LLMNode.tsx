@@ -60,7 +60,9 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
     update({ collapsed: !data.collapsed });
   };
 
-  const currentModel = LLM_MODELS.find(m => m.id === (data.model || LLM_MODELS[0].id)) ?? LLM_MODELS[0];
+    // El default visible = el default que la ejecución usa (deepseek-chat).
+  // Antes mostraba el primero de la lista (Claude 5 cr) y ejecutaba DeepSeek.
+  const currentModel = LLM_MODELS.find((m) => m.id === (data.model || 'deepseek-chat')) ?? LLM_MODELS[0];
 
   return (
     <BaseNode
@@ -110,7 +112,7 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
         {/* System prompt */}
         <textarea
           value={data.prompt ?? data.systemPrompt ?? ''}
-          onChange={(e) => update({ prompt: e.target.value })}
+          onChange={(e) => update({ prompt: e.target.value, systemPrompt: undefined })}
           onKeyDown={(e) => e.stopPropagation()}
           placeholder="Instrucción al modelo (opcional)..."
           className="w-full text-xs leading-relaxed text-zinc-900 bg-zinc-50 border border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all resize-none min-h-[60px] placeholder:text-zinc-400"

@@ -67,7 +67,7 @@ export const NODE_META: Record<string, NodeMeta> = {
     outputHandles: [
       { id: 'text-out', dataType: 'text', label: 'Texto', description: 'Texto de entrada' }
     ],
-    compatibleTargets: ['llmNode', 'modelView', 'captionNode', 'promptBuilder'],
+    compatibleTargets: ['llmNode', 'modelView', 'captionNode', 'promptBuilder', 'characterBreakdown', 'exportNode'],
     category: 'input',
     color: '#fbbf24',
   },
@@ -81,7 +81,7 @@ export const NODE_META: Record<string, NodeMeta> = {
     outputHandles: [
       { id: 'context-out', dataType: 'context', label: 'Contexto', description: 'Contexto del personaje' }
     ],
-    compatibleTargets: ['modelView', 'llmNode', 'captionNode'],
+    compatibleTargets: ['modelView', 'llmNode', 'captionNode', 'exportNode'],
     category: 'input',
     color: '#fb923c',
   },
@@ -95,7 +95,7 @@ export const NODE_META: Record<string, NodeMeta> = {
     outputHandles: [
       { id: 'text-out', dataType: 'text', label: 'Prompt', description: 'Prompt compilado' }
     ],
-    compatibleTargets: ['llmNode', 'modelView', 'captionNode'],
+    compatibleTargets: ['llmNode', 'modelView', 'captionNode', 'characterBreakdown', 'exportNode'],
     category: 'input',
     color: '#94a3b8',
   },
@@ -137,7 +137,6 @@ export const NODE_META: Record<string, NodeMeta> = {
     description: 'Genera captions y copy para redes sociales',
     inputHandles: [
       { id: 'text-in', dataType: 'text', label: 'Contexto', description: 'Contexto o tema', required: false },
-      { id: 'image-in', dataType: 'image', label: 'Imagen', description: 'Imagen de referencia', required: false },
     ],
     outputHandles: [
       { id: 'text-out', dataType: 'text', label: 'Caption', description: 'Texto para redes' }

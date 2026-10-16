@@ -52,7 +52,9 @@ export function useCanvasExecution(
   // nodo puede correr dos veces a la vez (Play durante un flujo) ni dos
   // flujos pueden solaparse (dos "Ejecutar desde aquí" re-cobrando ancestros).
   const flowBusyRef = useRef(false);
-  const nodeBusyRef = useRef<Set<string>>(new Set());
+  // id → promesa del vuelo en curso: una segunda llamada ESPERA el resultado
+  // en vez de ejecutar (y cobrar) de nuevo o saltarse el nodo en silencio.
+  const nodeBusyRef = useRef<Map<string, Promise<void>>>(new Map());
 
   const ensureNodePersisted = useCallback(async (nodeId: string) => {
     if (!spaceId || !user) return false;
@@ -93,7 +95,11 @@ export function useCanvasExecution(
   }, [setEdges]);
 
   const executeNodeInner = useCallback(async (nodeId: string) => {
-    if (nodeBusyRef.current.has(nodeId)) return;
+    const enVuelo = nodeBusyRef.current.get(nodeId);
+    if (enVuelo) {
+      await enVuelo;
+      return;
+    }
     const node = getNodes().find((n) => n.id === nodeId);
     if (!node) return;
 
@@ -112,7 +118,8 @@ export function useCanvasExecution(
       return;
     }
 
-    nodeBusyRef.current.add(nodeId);
+    let terminar!: () => void;
+    nodeBusyRef.current.set(nodeId, new Promise<void>((res) => { terminar = res; }));
     try {
     const isPersisted = await ensureNodePersisted(nodeId);
     const currentNodes = getNodes();
@@ -202,11 +209,15 @@ export function useCanvasExecution(
       animateEdgesToNode(nodeId, false);
 
       if (spaceId) {
+        // data FRESCO: si el usuario editó campos mientras generaba, el saver
+        // ya los escribió y este PATCH no debe revertirlos con el snapshot
+        // previo a la ejecución.
+        const fresco = getNodes().find(n => n.id === nodeId)?.data ?? node.data;
         await updateCanvasNode(nodeId, {
           status: 'ready',
           assetUrl: assetUrl || undefined,
-          prompt: node.data.prompt || undefined,
-          dataPayload: { ...node.data, ...updatePayload },
+          prompt: (typeof fresco.prompt === 'string' && fresco.prompt) || undefined,
+          dataPayload: { ...fresco, ...updatePayload },
         });
       }
 
@@ -222,6 +233,7 @@ export function useCanvasExecution(
     }
     } finally {
       nodeBusyRef.current.delete(nodeId);
+      terminar();
     }
   }, [getNodes, getEdges, rfSetNodes, addLog, spaceId, ensureNodePersisted, animateEdgesToNode]);
 
