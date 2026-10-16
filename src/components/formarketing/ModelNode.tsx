@@ -4,12 +4,15 @@ import { Image as ImageIcon, Wand2 } from 'lucide-react';
 import { updateCanvasNode, deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import BaseNode from './BaseNode';
+import { fmtCredits, imageCredits } from './modelCost';
 
+// Solo ratios que la API acepta de verdad (api/ai/image: 1:1/16:9/9:16/3:2/2:3).
+// El 4:5 anterior era decorativo: todo salía 1:1.
 const RATIOS = [
   { id: '1:1', label: '1:1', desc: 'Instagram' },
   { id: '9:16', label: '9:16', desc: 'Story/Reel' },
   { id: '16:9', label: '16:9', desc: 'YouTube' },
-  { id: '4:5', label: '4:5', desc: 'Feed' },
+  { id: '2:3', label: '2:3', desc: 'Feed vertical' },
 ];
 
 interface ModelNodeData {
@@ -149,6 +152,11 @@ const ModelNode = ({ id, data }: { id: string; data: ModelNodeData }) => {
           placeholder="Describe la imagen que quieres generar..."
           className="w-full text-xs leading-relaxed text-zinc-900 bg-zinc-50 border border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-500/10 transition-all resize-none min-h-[60px] placeholder:text-zinc-400"
         />
+
+        {/* Costo explícito antes de ejecutar */}
+        <p className="text-[9px] text-zinc-400 px-1">
+          Cada imagen: <span className="font-bold text-zinc-500">{fmtCredits(imageCredits(data.model || 'flux-schnell'))}</span> · Gemini Flash Image
+        </p>
 
         {/* Ratio selector */}
         <div className="flex gap-1">

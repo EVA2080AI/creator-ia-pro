@@ -45,7 +45,7 @@ interface ProfileData {
 // id de vitrina nuevo, el valor DEBE ser un id que exista hoy en CHAT_MODELS/
 // IMAGE_MODELS — si no, /api/ai/chat lo rechaza y cae en silencio al modelo
 // gratis por defecto (ver api/ai/chat.ts getModel()).
-const TEXT_MODEL_MAP: Record<string, string> = {
+export const TEXT_MODEL_MAP: Record<string, string> = {
   "deepseek-chat":       "deepseek/deepseek-chat-v3.1",
   "gemini-3-flash":      "google/gemini-2.5-flash-lite",
   "gemini-3.1-pro-low":  "google/gemini-2.5-flash",

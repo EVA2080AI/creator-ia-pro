@@ -2,11 +2,22 @@ import { useCallback, useMemo, useRef } from "react";
 import { createAsset } from "@/lib/assets";
 import { createCanvasNode, updateCanvasNode } from "@/lib/canvas-nodes";
 import { EXECUTABLE_NODE_TYPES } from "@/components/formarketing/nodeConnections";
-import { aiService } from "@/services/ai-service";
+import { aiService, classifyError } from "@/services/ai-service";
 import { toast } from "sonner";
 import { Node, useReactFlow } from "@xyflow/react";
 import { upstreamExecutionOrder } from "../lib/flowGraph";
 import { upstreamTexts } from "../lib/nodeData";
+
+// Dimensiones exactas por ratio (el servidor las reduce al aspectRatio con
+// toAspectRatio; antes nunca se enviaban y todo salía 1:1).
+const RATIO_DIMS: Record<string, [number, number]> = {
+  '1:1': [1024, 1024],
+  '9:16': [720, 1280],
+  '16:9': [1280, 720],
+  '2:3': [832, 1248],
+  // legado: nodos guardados con el 4:5 decorativo caen al vertical real
+  '4:5': [832, 1248],
+};
 
 interface CanvasNodeData {
   title?: string;
@@ -152,10 +163,13 @@ export function useCanvasExecution(
         if (partes.length === 0) {
           throw new Error('El nodo Imagen no tiene prompt ni nada conectado que lo alimente. Escribe qué generar o conéctale un texto.');
         }
+        const [width, height] = RATIO_DIMS[node.data.ratio as string] ?? RATIO_DIMS['1:1'];
         const res = await aiService.processAction({
           action: 'image',
           prompt: partes.join('\n'),
           model: node.data.model || 'flux-schnell',
+          width,
+          height,
           node_id: (spaceId && isPersisted) ? node.id : undefined
         });
         assetUrl = res.url || '';
@@ -201,8 +215,10 @@ export function useCanvasExecution(
       rfSetNodes((nds) => nds.map((n) => n.id === nodeId ? { ...n, data: { ...n.data, status: 'error' }, style: { boxShadow: '0 0 0 2px rgba(239,68,68,0.5)', borderRadius: '24px' } } : n));
       // Stop edge animation on error
       animateEdgesToNode(nodeId, false);
-      addLog(nodeName, 'Error: ' + e.message, 'error');
-      toast.error(e.message);
+      // Mensaje clasificado (créditos/límite/caída/red) en vez del error crudo.
+      const ce = classifyError(e?.message ? String(e.message) : String(e));
+      addLog(nodeName, 'Error: ' + ce.userMessage, 'error');
+      toast.error(ce.userMessage);
     }
     } finally {
       nodeBusyRef.current.delete(nodeId);

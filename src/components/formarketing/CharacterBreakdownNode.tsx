@@ -3,6 +3,7 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { UserCircle, Trash2, ShieldCheck, ChevronDown, ChevronUp } from 'lucide-react';
 import { updateCanvasNode, deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
+import { fmtCredits, textCredits } from './modelCost';
 
 interface CharacterNodeData {
   title?: string;
@@ -122,10 +123,12 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
           </div>
           <div className="grid grid-cols-2 gap-2">
             {[
+              // Etiquetas reales (antes "Gemini Hyper" y "Llama 405B" no
+              // correspondían a lo que ejecutaba el servidor).
               { id: 'deepseek-chat', name: 'DeepSeek V3' },
-              { id: 'gemini-3-flash', name: 'Gemini Hyper' },
-              { id: 'claude-3.5-sonnet', name: 'Claude 3.5' },
-              { id: 'gpt-oss-120b', name: 'Llama 405B' }
+              { id: 'gemini-3-flash', name: 'Gemini Flash' },
+              { id: 'claude-3.5-sonnet', name: 'Claude Sonnet' },
+              { id: 'gpt-oss-120b', name: 'GPT-OSS 120B' }
             ].map((m) => (
               <button
                 key={m.id}
@@ -137,6 +140,7 @@ const CharacterBreakdownNode = ({ id, data }: { id: string, data: CharacterNodeD
                 }`}
               >
                 {m.name}
+                <span className="block text-[8px] font-medium opacity-60">{fmtCredits(textCredits(m.id))}</span>
               </button>
             ))}
           </div>

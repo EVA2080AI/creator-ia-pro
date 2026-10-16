@@ -5,6 +5,7 @@ import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import BaseNode from './BaseNode';
 import { useNodeFieldSaver } from './useNodeFieldSaver';
+import { fmtCredits, textCredits } from './modelCost';
 import { NODE_META } from './nodeConnections';
 
 interface LLMNodeData {
@@ -83,7 +84,12 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
             className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white border border-zinc-200 shadow-sm text-[11px] text-zinc-700 hover:border-blue-300 transition-all"
           >
             <span className="font-semibold">{currentModel.name}</span>
-            <ChevronDown className={`w-3.5 h-3.5 transition-transform ${modelOpen ? 'rotate-180' : ''}`} />
+            <span className="flex items-center gap-1.5">
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${textCredits(currentModel.id) === 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
+                {fmtCredits(textCredits(currentModel.id))}
+              </span>
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${modelOpen ? 'rotate-180' : ''}`} />
+            </span>
           </button>
           {modelOpen && (
             <div className="absolute top-full left-0 right-0 mt-1 rounded-xl border border-zinc-200 overflow-hidden z-50 bg-white shadow-lg">
@@ -91,9 +97,10 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
                 <button
                   key={m.id}
                   onClick={() => { update({ model: m.id }); setModelOpen(false); }}
-                  className="w-full px-3 py-2.5 text-left text-[11px] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-all"
+                  className="w-full px-3 py-2.5 text-left text-[11px] text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900 transition-all flex items-center justify-between"
                 >
-                  {m.name}
+                  <span>{m.name}</span>
+                  <span className="text-[9px] text-zinc-400">{fmtCredits(textCredits(m.id))}</span>
                 </button>
               ))}
             </div>

@@ -175,6 +175,7 @@ Devuelve SOLO el caption, sin explicaciones.`;
             : <><Sparkles className="w-4 h-4" />Generar Caption</>
           }
         </button>
+        <p className="text-[9px] text-zinc-400 text-center">Gratis — DeepSeek V3</p>
       </div>
     </BaseNode>
   );

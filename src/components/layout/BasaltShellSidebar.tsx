@@ -122,7 +122,6 @@ export function BasaltShellSidebar({
 
   useEffect(() => {
     if (autoOpenGuide) setShowGuide(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoOpenGuide]);
 
   // "genesis" era Basalt-como-constructor — redundante ahora que Basalt lo
