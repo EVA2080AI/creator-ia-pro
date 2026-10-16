@@ -36,9 +36,10 @@ import { ExportModal } from '@/components/formarketing/ExportModal';
 import { StudioToolbar } from '@/components/studio/StudioToolbar';
 import { Onboarding } from './formarketing/components/Onboarding';
 import { ExecutionLog } from './formarketing/components/ExecutionLog';
-import { EXECUTABLE_NODE_TYPES, NODE_META } from '@/components/formarketing/nodeConnections';
+import { EXECUTABLE_NODE_TYPES, NODE_META, canConnectNodes } from '@/components/formarketing/nodeConnections';
 
 // Hooks
+import { wouldCreateCycle } from './formarketing/lib/flowGraph';
 import { CanvasExecContext } from './formarketing/CanvasExecContext';
 import { useCanvasPersistence } from './formarketing/hooks/useCanvasPersistence';
 import { useCanvasExecution } from './formarketing/hooks/useCanvasExecution';
@@ -342,6 +343,19 @@ const FormarketingContent = () => {
     animated: AnimatedEdge,
   }), []);
 
+  // Fase 1: una conexión imposible ni se deja dibujar — tipos incompatibles
+  // (canConnectNodes, que existía sin usarse) o un cable que cerraría un
+  // ciclo (antes un ciclo colgaba la pestaña al ejecutar).
+  const isValidConnection = useCallback((conn: { source?: string | null; target?: string | null }) => {
+    if (!conn.source || !conn.target || conn.source === conn.target) return false;
+    const nds = getNodes();
+    const src = nds.find(n => n.id === conn.source);
+    const tgt = nds.find(n => n.id === conn.target);
+    if (!src?.type || !tgt?.type) return false;
+    if (!canConnectNodes(src.type, tgt.type)) return false;
+    return !wouldCreateCycle(conn.source, conn.target, getEdges());
+  }, [getNodes, getEdges]);
+
   // Enhanced onConnect that adds data type information
   const handleConnect = useCallback((params: any) => {
     // Get data type from source node's output handle
@@ -433,6 +447,7 @@ const FormarketingContent = () => {
             onNodesChange={handleNodesChange}
             onEdgesChange={handleEdgesChange}
             onConnect={handleConnect}
+            isValidConnection={isValidConnection}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
             onDragOver={onDragOver}

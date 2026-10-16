@@ -5,6 +5,7 @@ import { aiService } from "@/services/ai-service";
 import { toast } from "sonner";
 import { Node, useReactFlow } from "@xyflow/react";
 import { upstreamExecutionOrder } from "../lib/flowGraph";
+import { upstreamTexts } from "../lib/nodeData";
 
 interface CanvasNodeData {
   title?: string;
@@ -114,26 +115,26 @@ export function useCanvasExecution(
       let resultText = '';
       let assetUrl = '';
 
+      // Fase 1: lo conectado llega de verdad — el contexto junta lo que cada
+      // fuente produce (texto del nodo Texto, prompt compilado, output del
+      // LLM, perfil del Personaje…), no solo output/description/caption.
+      const nodesById = new Map(currentNodes.map(n => [n.id, n]));
+      const textosConectados = upstreamTexts(node.id, nodesById, getEdges());
+      const contexto = textosConectados.join('\n---\n');
+
       if (node.type === 'characterBreakdown') {
+        const base = `Analiza este perfil: ${node.data.title}. Contexto: ${node.data.flavor}. Estilo: ${node.data.description}`;
         const res = await aiService.processAction({
           action: 'chat',
-          prompt: `Analiza este perfil: ${node.data.title}. Contexto: ${node.data.flavor}. Estilo: ${node.data.description}`,
+          prompt: contexto ? `${base}\n\nMaterial conectado:\n${contexto}` : base,
           model: node.data.model || 'deepseek-chat',
           node_id: (spaceId && isPersisted) ? node.id : undefined
         });
         resultText = res.text || '';
       } else if (node.type === 'llmNode' || node.type === 'captionNode') {
-        const latestEdges = getEdges();
-        const incomingEdges = latestEdges.filter(e => e.target === node.id);
-        const upstreamContext = incomingEdges.map(edge => {
-          const src = currentNodes.find(n => n.id === edge.source);
-          if (!src) return '';
-          return src.data.output || src.data.description || src.data.caption || '';
-        }).join('\n---\n');
-
         // Las plantillas viejas guardaban el instructivo en systemPrompt.
         const prompt = node.data.prompt || node.data.systemPrompt || (node.type === 'captionNode' ? 'Genera un caption' : 'Analiza');
-        const finalPrompt = `Contexto:\n${upstreamContext}\n\nInstrucción: ${prompt}`;
+        const finalPrompt = contexto ? `Contexto:\n${contexto}\n\nInstrucción: ${prompt}` : prompt;
         const res = await aiService.processAction({
           action: 'chat',
           prompt: finalPrompt,
@@ -142,9 +143,17 @@ export function useCanvasExecution(
         });
         resultText = res.text || '';
       } else if (node.type === 'modelView') {
+        // El prompt de la imagen = lo conectado + lo propio. Sin ninguno de
+        // los dos NO se genera (antes cobraba 3 cr por un visual genérico
+        // con el fallback "Premium marketing visual").
+        const propio = typeof node.data.prompt === 'string' ? node.data.prompt.trim() : '';
+        const partes = [...textosConectados, propio].filter(Boolean);
+        if (partes.length === 0) {
+          throw new Error('El nodo Imagen no tiene prompt ni nada conectado que lo alimente. Escribe qué generar o conéctale un texto.');
+        }
         const res = await aiService.processAction({
           action: 'image',
-          prompt: node.data.prompt || "Premium marketing visual",
+          prompt: partes.join('\n'),
           model: node.data.model || 'flux-schnell',
           node_id: (spaceId && isPersisted) ? node.id : undefined
         });

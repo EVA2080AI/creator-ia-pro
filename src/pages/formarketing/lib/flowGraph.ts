@@ -54,3 +54,29 @@ export function upstreamExecutionOrder(targetIds: string[], edges: EdgeLike[]): 
 
   return { order, hasCycle: false };
 }
+
+/** ¿Agregar el cable source→target cerraría un ciclo? Cierto si ya existe un
+ *  camino target ⇝ source (BFS hacia atrás desde source, tolerante a ciclos
+ *  preexistentes en datos guardados). */
+export function wouldCreateCycle(source: string, target: string, edges: EdgeLike[]): boolean {
+  if (source === target) return true;
+  const incoming = new Map<string, string[]>();
+  for (const e of edges) {
+    const list = incoming.get(e.target);
+    if (list) list.push(e.source);
+    else incoming.set(e.target, [e.source]);
+  }
+  const visited = new Set<string>([source]);
+  const queue = [source];
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    for (const dep of incoming.get(current) ?? []) {
+      if (dep === target) return true;
+      if (!visited.has(dep)) {
+        visited.add(dep);
+        queue.push(dep);
+      }
+    }
+  }
+  return false;
+}

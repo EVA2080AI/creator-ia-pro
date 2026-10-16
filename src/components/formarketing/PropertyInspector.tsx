@@ -177,11 +177,11 @@ export function PropertyInspector({ node, onClose, onUpdate, onExecute, onDelete
             )}
           </div>
         )}
-        {data.text && (
+        {(data.output || data.description) && (
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Resultado</label>
-            <div className="bg-white border border-zinc-200 shadow-sm rounded-xl p-3 text-xs text-zinc-600 max-h-40 overflow-y-auto no-scrollbar leading-relaxed">
-              {data.text}
+            <div className="bg-white border border-zinc-200 shadow-sm rounded-xl p-3 text-xs text-zinc-600 max-h-40 overflow-y-auto no-scrollbar leading-relaxed whitespace-pre-wrap">
+              {data.output || data.description}
             </div>
           </div>
         )}
