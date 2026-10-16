@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { createCanvasNode, updateCanvasNode } from "@/lib/canvas-nodes";
 import { EXECUTABLE_NODE_TYPES } from "@/components/formarketing/nodeConnections";
 import { aiService } from "@/services/ai-service";
@@ -34,6 +34,12 @@ export function useCanvasExecution(
   setEdges?: (updater: (edges: any[]) => any[]) => void
 ) {
   const { getNodes, getEdges, setNodes: rfSetNodes } = useReactFlow<Node<CanvasNodeData>>();
+
+  // Locks de ejecución: cada ejecución cobra créditos, así que ni el mismo
+  // nodo puede correr dos veces a la vez (Play durante un flujo) ni dos
+  // flujos pueden solaparse (dos "Ejecutar desde aquí" re-cobrando ancestros).
+  const flowBusyRef = useRef(false);
+  const nodeBusyRef = useRef<Set<string>>(new Set());
 
   const ensureNodePersisted = useCallback(async (nodeId: string) => {
     if (!spaceId || !user) return false;
@@ -73,7 +79,8 @@ export function useCanvasExecution(
     }));
   }, [setEdges]);
 
-  const executeNode = useCallback(async (nodeId: string) => {
+  const executeNodeInner = useCallback(async (nodeId: string) => {
+    if (nodeBusyRef.current.has(nodeId)) return;
     const node = getNodes().find((n) => n.id === nodeId);
     if (!node) return;
 
@@ -92,6 +99,8 @@ export function useCanvasExecution(
       return;
     }
 
+    nodeBusyRef.current.add(nodeId);
+    try {
     const isPersisted = await ensureNodePersisted(nodeId);
     const currentNodes = getNodes();
 
@@ -122,7 +131,8 @@ export function useCanvasExecution(
           return src.data.output || src.data.description || src.data.caption || '';
         }).join('\n---\n');
 
-        const prompt = node.data.prompt || (node.type === 'captionNode' ? 'Genera un caption' : 'Analiza');
+        // Las plantillas viejas guardaban el instructivo en systemPrompt.
+        const prompt = node.data.prompt || node.data.systemPrompt || (node.type === 'captionNode' ? 'Genera un caption' : 'Analiza');
         const finalPrompt = `Contexto:\n${upstreamContext}\n\nInstrucción: ${prompt}`;
         const res = await aiService.processAction({
           action: 'chat',
@@ -143,8 +153,9 @@ export function useCanvasExecution(
 
       const updatePayload: Partial<CanvasNodeData> = { status: 'ready' };
       if (resultText) {
-        if (node.type === 'llmNode') updatePayload.output = resultText;
-        else if (node.type === 'captionNode') updatePayload.caption = resultText;
+        // CaptionNode muestra data.output: escribir solo en data.caption dejaba
+        // el resultado del flujo invisible (nodo verde, texto en ninguna parte).
+        if (node.type === 'llmNode' || node.type === 'captionNode') updatePayload.output = resultText;
         else updatePayload.description = resultText;
       }
       if (assetUrl) updatePayload.assetUrl = assetUrl;
@@ -171,12 +182,29 @@ export function useCanvasExecution(
       addLog(nodeName, 'Error: ' + e.message, 'error');
       toast.error(e.message);
     }
+    } finally {
+      nodeBusyRef.current.delete(nodeId);
+    }
   }, [getNodes, getEdges, rfSetNodes, addLog, spaceId, ensureNodePersisted, animateEdgesToNode]);
+
+  // Entrada pública (Play de un nodo, inspector): no corre si hay un flujo en
+  // marcha — el flujo igual va a ejecutar ese nodo y sería doble cobro.
+  const executeNode = useCallback(async (nodeId: string) => {
+    if (flowBusyRef.current) {
+      toast.info('Hay una ejecución en curso: espera a que termine.');
+      return;
+    }
+    await executeNodeInner(nodeId);
+  }, [executeNodeInner]);
 
   // Ejecuta las cadenas que terminan en los nodos objetivo: ancestros primero,
   // cada nodo UNA sola vez aunque alimente a varios objetivos (cada ejecución
   // cobra créditos), saltando apagados y tipos sin lógica.
   const executeFlow = useCallback(async (targetIds: string[]) => {
+    if (flowBusyRef.current) {
+      toast.info('Ya hay un flujo ejecutándose: espera a que termine.');
+      return;
+    }
     const { order, hasCycle } = upstreamExecutionOrder(targetIds, getEdges());
 
     if (hasCycle) {
@@ -211,13 +239,18 @@ export function useCanvasExecution(
       addLog('Sistema', `Ejecutando ${ejecutables.length} nodos en orden…`, 'info');
     }
 
-    for (let i = 0; i < ejecutables.length; i++) {
-      if (i > 0) await new Promise(r => setTimeout(r, 300));
-      await executeNode(ejecutables[i]);
+    flowBusyRef.current = true;
+    try {
+      for (let i = 0; i < ejecutables.length; i++) {
+        if (i > 0) await new Promise(r => setTimeout(r, 300));
+        await executeNodeInner(ejecutables[i]);
+      }
+    } finally {
+      flowBusyRef.current = false;
     }
 
     addLog('Sistema', 'Flujo completado ✓', 'success');
-  }, [getNodes, getEdges, addLog, executeNode]);
+  }, [getNodes, getEdges, addLog, executeNodeInner]);
 
   // Execute all upstream nodes leading to target node (in topological order)
   const executeUpstream = useCallback(async (targetNodeId: string) => {
