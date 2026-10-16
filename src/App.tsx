@@ -152,6 +152,7 @@ const Downloads    = lazy(() => import("./pages/Downloads"));
 const ToolLanding  = lazy(() => import("./pages/ToolLanding"));
 const ProductBacklog = lazy(() => import("./pages/ProductBacklog"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const FirmarAcuerdo = lazy(() => import("./pages/FirmarAcuerdo"));
 const PromoTiktok   = lazy(() => import("./pages/PromoTiktok"));
 const PromoLanding  = lazy(() => import("./pages/PromoLanding"));
 const NotFound      = lazy(() => import("./pages/NotFound"));
@@ -229,6 +230,7 @@ const App = () => {
                   <Route path="/product-backlog"      element={<ProductBacklog />} />
                   <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
                   <Route path="/reset-password"       element={<ResetPassword />} />
+                  <Route path="/firmar/:token"        element={<FirmarAcuerdo />} />
                   {/* Páginas pensadas para GRABAR el video promocional:
                       /promo/tiktok (9:16) y /promo/landing (16:9). Loop de ~17s
                       en 4 escenas (hook, tools, demo, cta). Ambas noindex. */}

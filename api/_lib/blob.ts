@@ -59,3 +59,45 @@ export async function uploadImage(dataUri: string, userId: string): Promise<stri
     return null;
   }
 }
+/**
+ * Sube un PDF (Buffer) y devuelve su URL pública no adivinable, o null si Blob
+ * no está configurado o la subida falla. Mismo criterio que uploadImage: URL
+ * con sufijo aleatorio, caché larga, serviría directo desde el CDN.
+ */
+export async function uploadPdf(buffer: Buffer, carpeta: string): Promise<string | null> {
+  if (!isBlobConfigured()) return null;
+  try {
+    const { url } = await put(`${carpeta}/${Date.now()}.pdf`, buffer, {
+      access: "public",
+      contentType: "application/pdf",
+      addRandomSuffix: true,
+      cacheControlMaxAge: 31_536_000,
+    });
+    return url;
+  } catch (err) {
+    console.error("[blob] No se pudo subir el PDF:", err);
+    return null;
+  }
+}
+
+/** Sube el trazo de una firma (data URI PNG) y devuelve su URL, o null si falla. */
+export async function uploadFirmaPng(dataUri: string, carpeta: string): Promise<string | null> {
+  if (!isBlobConfigured()) return null;
+  const match = DATA_URI.exec(dataUri);
+  if (!match) return null;
+  const [, rawMime, base64] = match;
+  if (rawMime.toLowerCase() !== "image/png") return null;
+  try {
+    const body = Buffer.from(base64, "base64");
+    const { url } = await put(`${carpeta}/${Date.now()}.png`, body, {
+      access: "public",
+      contentType: "image/png",
+      addRandomSuffix: true,
+      cacheControlMaxAge: 31_536_000,
+    });
+    return url;
+  } catch (err) {
+    console.error("[blob] No se pudo subir la firma:", err);
+    return null;
+  }
+}

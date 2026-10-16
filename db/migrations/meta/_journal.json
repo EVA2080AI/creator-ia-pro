@@ -57,6 +57,13 @@
       "when": 1790869317080,
       "tag": "0007_acoustic_rogue",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792170916984,
+      "tag": "0008_acuerdos_firma_electronica",
+      "breakpoints": true
     }
   ]
 }

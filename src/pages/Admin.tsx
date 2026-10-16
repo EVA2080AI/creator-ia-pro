@@ -8,7 +8,7 @@ import {
   BarChart2, Activity, Rocket, Image, Video,
   Code2, FileText, Globe, DollarSign, LogOut,
   ChevronRight, LayoutDashboard, Database, KeyRound, Ticket,
-  ListTodo, Server
+  ListTodo, Server, FileSignature
 } from "lucide-react";
 import { AdminUser } from "./admin/types";
 import { CreditModal } from "./admin/components/CreditModal";
@@ -20,6 +20,7 @@ import { FinanceTab } from "./admin/tabs/FinanceTab";
 import { SettingsTab } from "./admin/tabs/SettingsTab";
 import { CredentialsTab } from "./admin/tabs/CredentialsTab";
 import { TicketsTab } from "./admin/tabs/TicketsTab";
+import { AcuerdosTab } from "./admin/tabs/AcuerdosTab";
 import { useAdminData, useAdminAnalytics, useAdminFinance } from "./admin/hooks/useAdminData";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +29,7 @@ const Admin = () => {
   const { isAdmin, loading: adminLoading } = useAdmin(user?.id);
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<"users" | "roles" | "analytics" | "finance" | "overview" | "settings" | "credentials" | "tickets">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "roles" | "analytics" | "finance" | "overview" | "settings" | "credentials" | "tickets" | "acuerdos">("users");
   const [creditModalUser, setCreditModalUser] = useState<AdminUser | null>(null);
   const navRef = useRef<HTMLElement>(null);
 
@@ -54,12 +55,13 @@ const Admin = () => {
     else if (tab === "config") setActiveTab("settings");
     else if (tab === "credenciales") setActiveTab("credentials");
     else if (tab === "tickets") setActiveTab("tickets");
+    else if (tab === "acuerdos") setActiveTab("acuerdos");
   }, []);
 
   const handleTabChange = (tab: typeof activeTab) => {
     setActiveTab(tab);
     const searchParams = new URLSearchParams(window.location.search);
-    const tabMap = { users: "usuarios", roles: "roles", analytics: "analytics", finance: "finanzas", settings: "config", overview: "overview", credentials: "credenciales", tickets: "tickets" };
+    const tabMap = { users: "usuarios", roles: "roles", analytics: "analytics", finance: "finanzas", settings: "config", overview: "overview", credentials: "credenciales", tickets: "tickets", acuerdos: "acuerdos" };
     searchParams.set("tab", tabMap[tab]);
     window.history.replaceState(null, "", `${window.location.pathname}?${searchParams.toString()}`);
   };
@@ -133,6 +135,7 @@ const Admin = () => {
     { id: "finance", label: "Finanzas", icon: DollarSign },
     { id: "credentials", label: "Credenciales", icon: KeyRound },
     { id: "tickets", label: "Tickets", icon: Ticket },
+    { id: "acuerdos", label: "Acuerdos", icon: FileSignature },
     { id: "settings", label: "Infraestructura", icon: Settings },
   ] as const;
 
@@ -270,6 +273,9 @@ const Admin = () => {
             )}
             {activeTab === "tickets" && (
               <TicketsTab />
+            )}
+            {activeTab === "acuerdos" && (
+              <AcuerdosTab />
             )}
             {activeTab === "settings" && (
               <SettingsTab 

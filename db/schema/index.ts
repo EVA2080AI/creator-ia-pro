@@ -6,4 +6,5 @@ export * from "./billing.js";
 export * from "./spaces.js";
 export * from "./canvas.js";
 export * from "./tickets.js";
+export * from "./acuerdos.js";
 export * from "./basalt.js";
