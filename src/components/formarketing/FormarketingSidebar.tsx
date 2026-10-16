@@ -145,14 +145,10 @@ export function FormarketingSidebar({ onAddNode, onOpenLogs }: FormarketingSideb
             </div>
           </div>
 
-          {/* Templates CTA */}
+          {/* Templates CTA (el modal vive fuera del panel para que el botón
+              "Plantillas Pro" del toolbar funcione con el panel cerrado) */}
           <div className="px-4 pt-3 pb-2">
-            <TemplateModal
-              open={templateOpen}
-              onOpenChange={setTemplateOpen}
-              onSelect={handleSelectTemplate}
-              trigger={
-                <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:border-primary/40 hover:bg-primary/10 transition-all group/tpl shadow-sm active:scale-95">
+            <button onClick={() => setTemplateOpen(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-primary/20 bg-primary/5 hover:border-primary/40 hover:bg-primary/10 transition-all group/tpl shadow-sm active:scale-95">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white shadow-md group-hover/tpl:bg-primary group-hover/tpl:text-white transition-all shrink-0">
                     <Sparkles className="h-4 w-4 text-primary group-hover/tpl:text-white transition-colors" />
                   </div>
@@ -161,9 +157,7 @@ export function FormarketingSidebar({ onAddNode, onOpenLogs }: FormarketingSideb
                     <p className="text-[10px] text-zinc-500">Acelera tu flujo creativo</p>
                   </div>
                   <ChevronRight className="h-4 w-4 text-zinc-400 ml-auto group-hover/tpl:translate-x-0.5 transition-transform" />
-                </button>
-              }
-            />
+            </button>
           </div>
 
           {/* Categories */}
@@ -284,6 +278,12 @@ export function FormarketingSidebar({ onAddNode, onOpenLogs }: FormarketingSideb
           </div>
         </div>
       )}
+
+      <TemplateModal
+        open={templateOpen}
+        onOpenChange={setTemplateOpen}
+        onSelect={handleSelectTemplate}
+      />
     </div>
   );
 }

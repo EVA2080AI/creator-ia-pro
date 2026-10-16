@@ -11,13 +11,18 @@ export function useCanvasPersistence(
   onNodesChange: any,
   onEdgesChange: any,
   edges: Edge[],
-  record: () => void
+  record: () => void,
+  // Espacio creado por ESTA sesión (automático al primer nodo/plantilla): no
+  // hay nada que cargar y el GET podía llegar a mitad de los inserts y pisar
+  // el lienzo con una lectura parcial.
+  skipLoadRef?: { current: string | null }
 ) {
   const { getNodes } = useReactFlow();
 
   // Load from DB
   useEffect(() => {
     if (!user || !spaceId) return;
+    if (skipLoadRef?.current === spaceId) return;
 
     const loadData = async () => {
       const dbNodes = await listCanvasNodes(spaceId);
@@ -39,7 +44,9 @@ export function useCanvasPersistence(
               // Un 'executing' guardado (pestaña cerrada a mitad de ejecución)
               // volvía como spinner eterno al recargar.
               status: dbNode.status === 'executing' ? 'idle' : dbNode.status,
-              prompt: dbNode.prompt
+              // La columna prompt nace vacía al crear el nodo: si quedó vacía,
+              // manda el prompt del payload (lo que el usuario escribió).
+              prompt: dbNode.prompt || (dbNode.dataPayload as any)?.prompt
             }
           });
         }
@@ -55,7 +62,7 @@ export function useCanvasPersistence(
     };
 
     loadData().catch(() => toast.error("Error al cargar el espacio"));
-  }, [user, spaceId, setNodes, setEdges, getNodes]);
+  }, [user, spaceId, setNodes, setEdges, getNodes, skipLoadRef]);
 
   // Persist Changes (Positions + borrado real: antes Supr/Backspace dejaba la
   // fila huérfana en la base y el nodo resucitaba al recargar)

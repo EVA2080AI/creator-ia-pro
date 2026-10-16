@@ -25,16 +25,18 @@ const RETIRED_COPY: Record<string, { title: string; detail: string }> = {
 };
 
 const RetiredNode = ({ id, type }: { id: string; type?: string }) => {
-  const { setNodes } = useReactFlow();
+  const { setNodes, setEdges } = useReactFlow();
   const copy = RETIRED_COPY[type ?? ''] ?? {
     title: 'Nodo retirado',
     detail: 'Este tipo de nodo ya no existe en el canvas.',
   };
 
   const borrar = async () => {
-    await deleteCanvasNode(id);
+    const ok = await deleteCanvasNode(id);
     setNodes((nds) => nds.filter((n) => n.id !== id));
-    toast.success('Nodo eliminado');
+    setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
+    if (ok) toast.success('Nodo eliminado');
+    else toast.error('Se quitó del lienzo, pero el servidor no confirmó el borrado.');
   };
 
   return (

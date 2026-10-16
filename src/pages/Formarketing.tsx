@@ -12,7 +12,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from 'sonner';
-import { createCanvasNode, deleteCanvasNode, upsertCanvasEdges } from '@/lib/canvas-nodes';
+import { createCanvasNode, deleteCanvasNode, updateCanvasNode, upsertCanvasEdges } from '@/lib/canvas-nodes';
 import { createSpace } from '@/lib/spaces';
 import { type Template } from '@/lib/templates';
 
@@ -134,8 +134,11 @@ const FormarketingContent = () => {
   }, [takeSnapshot, getNodes, getEdges]);
 
   // Modular Logic
+  // Espacios nacidos en esta sesión: la carga inicial se salta (ver hook).
+  const espacioPropioRef = useRef<string | null>(null);
+
   const { handleNodesChange, handleEdgesChange } = useCanvasPersistence(
-    spaceId, user, setNodes, setEdges, onNodesChange, onEdgesChange, edges, record
+    spaceId, user, setNodes, setEdges, onNodesChange, onEdgesChange, edges, record, espacioPropioRef
   );
 
   // Entrar por el menú abría el canvas "Draft": nada se guardaba y no había
@@ -155,6 +158,7 @@ const FormarketingContent = () => {
           toast.error('No se pudo crear el espacio: lo que hagas no quedará guardado.');
           return null;
         }
+        espacioPropioRef.current = space.id;
         setAutoSpaceId(space.id);
         setSearchParams(prev => {
           const next = new URLSearchParams(prev);
@@ -205,10 +209,12 @@ const FormarketingContent = () => {
   // (los "terminales"), cada ancestro una sola vez. Antes era un no-op.
   const runFlow = useCallback(async () => {
     const nds = getNodes();
-    const conSalida = new Set(getEdges().map(e => e.source));
-    const terminales = nds
-      .filter(n => EXECUTABLE_NODE_TYPES.has(n.type || '') && !conSalida.has(n.id))
-      .map(n => n.id);
+    const ejecutables = nds.filter(n => EXECUTABLE_NODE_TYPES.has(n.type || ''));
+    const idsEjecutables = new Set(ejecutables.map(n => n.id));
+    // Terminal = nodo de IA que no alimenta a OTRO nodo de IA. Una salida hacia
+    // Exportar o Layout no lo descalifica (si no, las plantillas no corrían).
+    const alimentaIA = new Set(getEdges().filter(e => idsEjecutables.has(e.target)).map(e => e.source));
+    const terminales = ejecutables.filter(n => !alimentaIA.has(n.id)).map(n => n.id);
 
     if (terminales.length === 0) {
       toast.info('No hay nodos de IA al final del flujo. Agrega un LLM, una Imagen IA o un Caption.');
@@ -398,8 +404,13 @@ const FormarketingContent = () => {
                setNodes([]);
                setEdges([]);
                if (spaceId) {
-                 await Promise.all(nds.map(n => deleteCanvasNode(n.id)));
-                 await upsertCanvasEdges(spaceId, []);
+                 const resultados = await Promise.all([
+                   ...nds.map(n => deleteCanvasNode(n.id)),
+                   upsertCanvasEdges(spaceId, []),
+                 ]);
+                 if (resultados.some(r => !r)) {
+                   toast.error('No todo se pudo borrar del servidor. Recarga la página para ver lo que quedó.');
+                 }
                }
              }}
              onExecute={runFlow}
@@ -461,7 +472,16 @@ const FormarketingContent = () => {
           <PropertyInspector 
             node={nodes.find(n => n.id === selectedNodeId)} 
             onClose={() => setSelectedNodeId(null)}
-            onUpdate={(id, data) => setNodes(nds => nds.map(n => n.id === id ? { ...n, data: { ...n.data, ...data } } : n))}
+            onUpdate={(id, data) => {
+              setNodes(nds => nds.map(n => n.id === id ? { ...n, data: { ...n.data, ...data } } : n));
+              if (spaceId) {
+                const actual = nodes.find(n => n.id === id);
+                void updateCanvasNode(id, {
+                  prompt: typeof data.prompt === 'string' ? data.prompt : undefined,
+                  dataPayload: { ...(actual?.data ?? {}), ...data },
+                });
+              }
+            }}
             onExecute={() => executeNode(selectedNodeId)}
             onDelete={() => {
               if (spaceId) void deleteCanvasNode(selectedNodeId);

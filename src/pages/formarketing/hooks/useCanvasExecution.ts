@@ -158,6 +158,7 @@ export function useCanvasExecution(
         await updateCanvasNode(nodeId, {
           status: 'ready',
           assetUrl: assetUrl || undefined,
+          prompt: node.data.prompt || undefined,
           dataPayload: { ...node.data, ...updatePayload },
         });
       }
@@ -190,6 +191,15 @@ export function useCanvasExecution(
       const n = nodesById.get(id);
       return !!n && EXECUTABLE_NODE_TYPES.has(n.type || '') && n.data.status !== 'bypassed';
     });
+
+    const apagados = order.filter(id => {
+      const n = nodesById.get(id);
+      return !!n && EXECUTABLE_NODE_TYPES.has(n.type || '') && n.data.status === 'bypassed';
+    });
+    if (apagados.length > 0) {
+      const nombres = apagados.map(id => nodesById.get(id)?.data.title || id).join(', ');
+      addLog('Sistema', `Apagados y saltados: ${nombres}. Lo que dependa de ellos usará su última salida guardada (o ninguna).`, 'info');
+    }
 
     if (ejecutables.length === 0) {
       addLog('Sistema', 'Nada que ejecutar: el flujo no tiene nodos de IA encendidos.', 'info');

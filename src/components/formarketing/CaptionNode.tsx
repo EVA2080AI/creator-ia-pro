@@ -5,6 +5,7 @@ import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { aiService } from '@/services/ai-service';
 import { toast } from 'sonner';
 import BaseNode from './BaseNode';
+import { useNodeFieldSaver } from './useNodeFieldSaver';
 
 const NETWORKS = [
   { id: 'instagram', label: 'Instagram', emoji: '📸', maxChars: 2200 },
@@ -33,9 +34,12 @@ const CaptionNode = ({ id, data }: { id: string; data: CaptionNodeData }) => {
   const [streamedText, setStreamedText] = useState('');
   const [networkOpen, setNetworkOpen] = useState(false);
 
+  const save = useNodeFieldSaver(id, data as Record<string, unknown>);
+
   const update = useCallback((patch: Partial<CaptionNodeData>) => {
     setNodes(nds => nds.map(n => n.id === id ? { ...n, data: { ...n.data, ...patch } } : n));
-  }, [id, setNodes]);
+    save(patch);
+  }, [id, setNodes, save]);
 
   const deleteNode = async () => {
     await deleteCanvasNode(id);

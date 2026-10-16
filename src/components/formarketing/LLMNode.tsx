@@ -4,10 +4,14 @@ import { Brain, ChevronDown } from 'lucide-react';
 import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
 import BaseNode from './BaseNode';
+import { useNodeFieldSaver } from './useNodeFieldSaver';
 import { NODE_META } from './nodeConnections';
 
 interface LLMNodeData {
   title?: string;
+  prompt?: string;
+  /** Campo legado: versiones previas guardaban acá el instructivo, pero la
+   *  ejecución siempre leyó `prompt`. Se muestra como fallback. */
   systemPrompt?: string;
   model?: string;
   output?: string;
@@ -30,12 +34,14 @@ const LLM_MODELS = [
 const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
   const { setNodes } = useReactFlow();
   const [modelOpen, setModelOpen] = useState(false);
+  const save = useNodeFieldSaver(id, data as Record<string, unknown>);
 
   const update = useCallback((patch: Partial<LLMNodeData>) => {
     setNodes((nds) =>
       nds.map((n) => n.id === id ? { ...n, data: { ...n.data, ...patch } } : n)
     );
-  }, [id, setNodes]);
+    save(patch);
+  }, [id, setNodes, save]);
 
   const deleteNode = async () => {
     await deleteCanvasNode(id);
@@ -96,8 +102,8 @@ const LLMNode = ({ id, data }: { id: string; data: LLMNodeData }) => {
 
         {/* System prompt */}
         <textarea
-          value={data.systemPrompt || ''}
-          onChange={(e) => update({ systemPrompt: e.target.value })}
+          value={data.prompt ?? data.systemPrompt ?? ''}
+          onChange={(e) => update({ prompt: e.target.value })}
           onKeyDown={(e) => e.stopPropagation()}
           placeholder="Instrucción al modelo (opcional)..."
           className="w-full text-xs leading-relaxed text-zinc-900 bg-zinc-50 border border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/10 transition-all resize-none min-h-[60px] placeholder:text-zinc-400"

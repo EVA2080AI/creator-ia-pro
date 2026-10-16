@@ -3,6 +3,7 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Braces, Trash2, ChevronDown } from 'lucide-react';
 import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
+import { useNodeFieldSaver } from './useNodeFieldSaver';
 
 
 
@@ -29,9 +30,12 @@ const PromptBuilderNode = ({ id, data }: { id: string; data: PromptBuilderNodeDa
   const { setNodes } = useReactFlow();
   const [presetsOpen, setPresetsOpen] = useState(false);
 
+  const save = useNodeFieldSaver(id, data as Record<string, unknown>);
+
   const update = useCallback((patch: Partial<PromptBuilderNodeData>) => {
     setNodes(nds => nds.map(n => n.id === id ? { ...n, data: { ...n.data, ...patch } } : n));
-  }, [id, setNodes]);
+    save(patch);
+  }, [id, setNodes, save]);
 
   const deleteNode = async () => {
     await deleteCanvasNode(id);

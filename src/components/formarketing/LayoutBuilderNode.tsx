@@ -1,8 +1,9 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useState } from 'react';
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Layout, Trash2, Globe, Smartphone, Monitor, ChevronDown, ChevronUp } from 'lucide-react';
-import { updateCanvasNode, deleteCanvasNode } from '@/lib/canvas-nodes';
+import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
+import { useNodeFieldSaver } from './useNodeFieldSaver';
 
 interface LayoutNodeData {
   title?: string;
@@ -18,26 +19,9 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
   const [isExpanded, setIsExpanded] = useState(true);
 
   // Antes cada tecla en título/estructura disparaba un PATCH a la API (y con
-  // `data` viejo del render anterior). Ahora el lienzo se actualiza al
-  // instante y el guardado junta los cambios y los manda 600 ms después de la
-  // última tecla, leyendo el data vigente.
-  const dataRef = useRef(data);
-  dataRef.current = data;
-  const pendingRef = useRef<Record<string, unknown>>({});
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const flushPending = () => {
-    if (Object.keys(pendingRef.current).length === 0) return;
-    const payload = { ...dataRef.current, ...pendingRef.current };
-    pendingRef.current = {};
-    void updateCanvasNode(id, { dataPayload: payload });
-  };
-
-  useEffect(() => () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    flushPending();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  // `data` viejo del render anterior); ahora el guardado debounced vive en el
+  // hook compartido con el resto de los nodos.
+  const save = useNodeFieldSaver(id, data as Record<string, unknown>);
 
   const updateField = (field: string, value: unknown) => {
     setNodes((nds) =>
@@ -51,10 +35,7 @@ const LayoutBuilderNode = ({ id, data }: { id: string, data: LayoutNodeData }) =
         return node;
       })
     );
-
-    pendingRef.current[field] = value;
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(flushPending, 600);
+    save({ [field]: value });
   };
 
   const deleteNode = async () => {

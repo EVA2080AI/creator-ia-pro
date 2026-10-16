@@ -3,6 +3,7 @@ import { Handle, Position, useReactFlow } from '@xyflow/react';
 import { Type, Trash2 } from 'lucide-react';
 import { deleteCanvasNode } from '@/lib/canvas-nodes';
 import { toast } from 'sonner';
+import { useNodeFieldSaver } from './useNodeFieldSaver';
 
 interface TextInputNodeData {
   title?: string;
@@ -11,12 +12,14 @@ interface TextInputNodeData {
 
 const TextInputNode = ({ id, data }: { id: string; data: TextInputNodeData }) => {
   const { setNodes } = useReactFlow();
+  const save = useNodeFieldSaver(id, data as Record<string, unknown>);
 
   const updateValue = useCallback((val: string) => {
     setNodes((nds) =>
       nds.map((n) => n.id === id ? { ...n, data: { ...n.data, value: val } } : n)
     );
-  }, [id, setNodes]);
+    save({ value: val });
+  }, [id, setNodes, save]);
 
   const deleteNode = async () => {
     await deleteCanvasNode(id);
