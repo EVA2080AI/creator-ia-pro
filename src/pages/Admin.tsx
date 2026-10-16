@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { Logo } from "@/components/Logo";
 import {
   Shield, Users, Loader2, Zap, Settings,
   BarChart2, Activity, Rocket, Image, Video,
@@ -123,9 +124,9 @@ const Admin = () => {
     { name: "ai-proxy", desc: "Texto e imagen IA (OpenRouter)", icon: Zap, color: "#A855F7" },
     { name: "media-proxy", desc: "Edición de imagen (Replicate)", icon: Image, color: "#60A5FA" },
     { name: "video-gen", desc: "Video (Replicate)", icon: Video, color: "#F59E0B" },
-    { name: "studio-generate", desc: "BuilderAI coding", icon: Code2, color: "#A855F7" },
+    { name: "studio-generate", desc: "Generación de código (BuilderAI)", icon: Code2, color: "#A855F7" },
     { name: "bold-webhook", desc: "Pagos Bold.co", icon: Shield, color: "#F59E0B" },
-    { name: "admin-settings", desc: "Settings platform", icon: Settings, color: "#6B7280" },
+    { name: "admin-settings", desc: "Ajustes de la plataforma", icon: Settings, color: "#6B7280" },
   ];
 
   const TABS = [
@@ -142,21 +143,17 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col font-sans">
       <Helmet>
-        <title>Admin Panel | Platform Operations</title>
+        <title>Panel Admin | Creator IA Pro</title>
       </Helmet>
 
       {/* ── Navbar ── */}
       <header className="h-[60px] border-b border-border bg-background/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
         {/* Sin AppLayout (y sin sidebar global) el logo es la salida de vuelta
             a la app, en desktop y en móvil. */}
-        <Link to="/a/basalt" title="Volver a la app" className="flex items-center gap-3 group">
-          <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/10 group-hover:scale-105 transition-transform">
-            <Shield className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-sm font-black text-foreground tracking-tight leading-none uppercase">Ecosistema Creator</h1>
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-0.5">Operaciones Industriales</p>
-          </div>
+        <Link to="/a/basalt" title="Volver a la app" className="flex items-center gap-3">
+          <Logo size="sm" />
+          <span className="h-4 w-px bg-border" aria-hidden />
+          <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Admin</span>
         </Link>
 
         <div className="flex items-center gap-3">
@@ -183,15 +180,6 @@ const Admin = () => {
               <Server className="h-3.5 w-3.5" />
               <span className="hidden md:inline">Estado</span>
             </Link>
-          </div>
-          <div className="hidden md:flex items-center gap-6 mr-6">
-            <div className="text-right">
-              <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Estado Núcleo</p>
-              <div className="flex items-center gap-1.5 justify-end">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400">Sistemas Operativos</span>
-              </div>
-            </div>
           </div>
           <button
             onClick={() => signOut()}

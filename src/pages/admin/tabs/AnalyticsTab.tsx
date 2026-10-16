@@ -24,7 +24,7 @@ export function AnalyticsTab({
     return (
       <div className="flex flex-col items-center justify-center py-24 space-y-4">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Calculando Métricas Generativas</p>
+        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Calculando métricas</p>
       </div>
     );
   }
@@ -106,7 +106,7 @@ export function AnalyticsTab({
               <div key={tool.name} className="space-y-1.5">
                 <div className="flex items-center justify-between text-[11px] font-bold">
                   <span className="text-muted-foreground">{tool.name}</span>
-                  <span className="text-foreground font-mono">{tool.count.toLocaleString()} ops</span>
+                  <span className="text-foreground font-mono">{tool.count.toLocaleString()} usos</span>
                 </div>
                 <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                   <div
@@ -127,7 +127,7 @@ export function AnalyticsTab({
           <div className="px-6 py-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-muted-foreground" />
-              <h4 className="text-xs font-black uppercase tracking-widest text-foreground">Actividad de Red (7d)</h4>
+              <h4 className="text-xs font-black uppercase tracking-widest text-foreground">Créditos por día (7d)</h4>
             </div>
           </div>
           <div className="p-6">
@@ -141,7 +141,7 @@ export function AnalyticsTab({
                        {/* Tooltip bubble — deliberately always-dark, same convention as the
                            spotlight card above. */}
                        <div className="absolute -top-6 hidden group-hover:block bg-zinc-900 text-white text-[9px] font-bold px-2 py-1 rounded-md whitespace-nowrap z-10">
-                        {day.credits.toLocaleString()} pts
+                        {day.credits.toLocaleString()} cr
                       </div>
                       <div
                         className="w-full max-w-[32px] bg-muted group-hover:bg-primary/20 rounded-lg transition-all duration-700"

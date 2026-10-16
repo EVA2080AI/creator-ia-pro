@@ -23,7 +23,7 @@ export function SettingsTab({
           </div>
           <div>
             <h3 className="text-sm font-black text-foreground tracking-tight">Integración de Pagos (Bold.co)</h3>
-            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Pasarela Industrial</p>
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Pasarela de pagos</p>
           </div>
         </div>
 
@@ -47,7 +47,7 @@ export function SettingsTab({
             <div className="px-5 py-3.5 border-b border-border flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Terminal className="h-4 w-4 text-muted-foreground" />
-                <h4 className="text-xs font-black uppercase tracking-widest text-foreground">Motores Generativos (Edge)</h4>
+                <h4 className="text-xs font-black uppercase tracking-widest text-foreground">Funciones Edge</h4>
               </div>
             </div>
             <div className="divide-y divide-border">
@@ -63,10 +63,6 @@ export function SettingsTab({
                         <p className="text-[11px] font-bold text-foreground">{ef.name}</p>
                         <p className="text-[10px] text-muted-foreground">{ef.desc}</p>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 border border-emerald-100/50 dark:border-emerald-500/30">
-                      <div className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase">Live</span>
                     </div>
                   </div>
                 );
@@ -103,7 +99,7 @@ export function SettingsTab({
            <div className="px-5 py-3.5 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Globe className="h-4 w-4 text-muted-foreground" />
-              <h4 className="text-xs font-black uppercase tracking-widest text-foreground">Mapa del Ecosistema</h4>
+              <h4 className="text-xs font-black uppercase tracking-widest text-foreground">Rutas de la app</h4>
             </div>
           </div>
           <div className="divide-y divide-border max-h-[600px] overflow-y-auto scrollbar-thin">
