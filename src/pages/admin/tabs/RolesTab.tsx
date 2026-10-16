@@ -44,8 +44,7 @@ export function RolesTab({ users, currentUserEmail, onRefresh }: {
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-3">
-        <div className="flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold"
-          style={{ borderColor: '#EF444430', color: '#EF4444', background: '#EF444408' }}>
+        <div className="flex items-center gap-2 rounded-xl border border-primary bg-primary/10 text-primary px-3 py-2 text-xs font-semibold">
           <Shield className="h-3 w-3" />
           Admin — <span className="font-normal opacity-70">Acceso total al panel de control</span>
         </div>
@@ -64,7 +63,7 @@ export function RolesTab({ users, currentUserEmail, onRefresh }: {
       <div className="rounded-2xl border border-border overflow-hidden">
         <div className="grid grid-cols-[1fr_auto] gap-4 px-5 py-3 bg-muted/50 border-b border-border text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">
           <span>Usuario</span>
-          <span style={{ color: '#EF4444' }}>Admin</span>
+          <span>Admin</span>
         </div>
         <div className="divide-y divide-border">
           {filtered.map(u => {
@@ -89,10 +88,9 @@ export function RolesTab({ users, currentUserEmail, onRefresh }: {
                 <button disabled={busy || cantRevoke}
                   onClick={() => handleToggleAdmin(u.user_id, u.is_admin)}
                   title={cantRevoke ? 'No puedes remover tu propio rol de Admin' : (u.is_admin ? 'Remover Admin' : 'Asignar Admin')}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg transition-all border disabled:cursor-not-allowed ${
-                    u.is_admin ? 'border-current shadow-sm' : 'border-border text-muted-foreground hover:border-ring'
+                  className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all border disabled:cursor-not-allowed ${
+                    u.is_admin ? 'bg-primary/10 text-primary border-primary shadow-sm' : 'border-border text-muted-foreground hover:border-ring'
                   } ${cantRevoke ? 'opacity-50' : ''}`}
-                  style={u.is_admin ? { background: '#EF444415', color: '#EF4444', borderColor: '#EF444440' } : {}}
                 >
                   {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : u.is_admin ? <CheckCircle className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                 </button>

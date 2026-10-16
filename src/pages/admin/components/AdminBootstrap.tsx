@@ -50,10 +50,10 @@ export function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () =
 
         {result === "admin_exists" ? (
           <div className="space-y-3 text-left">
-            <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 text-xs text-amber-400/80 space-y-2">
-              <p className="font-bold text-amber-400">Ya existe un administrador</p>
+            <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 text-xs text-amber-700 dark:text-amber-400/80 space-y-2">
+              <p className="font-bold text-amber-700 dark:text-amber-400">Ya existe un administrador</p>
               <p>Pídele a quien ya tiene acceso que te agregue desde la pestaña "Roles" del panel admin, o que corra este SQL contra la base de datos (Neon):</p>
-              <pre className="bg-black/40 rounded-xl p-3 text-[10px] text-green-400 font-mono break-all whitespace-pre-wrap select-all">
+              <pre className="bg-zinc-900 rounded-xl p-3 text-[10px] text-green-400 font-mono break-all whitespace-pre-wrap select-all">
 {`UPDATE profile SET is_admin = true WHERE user_id = '${user?.id}';`}
               </pre>
               <p className="text-muted-foreground">Tu ID: <span className="text-muted-foreground font-mono select-all">{user?.id}</span></p>
@@ -66,13 +66,13 @@ export function AdminBootstrap({ user, onSuccess }: { user: any; onSuccess: () =
             </button>
           </div>
         ) : result?.startsWith("error:") ? (
-          <div className="rounded-2xl bg-rose-500/10 border border-rose-500/20 p-4 text-sm text-rose-400">
+          <div className="rounded-2xl bg-rose-500/10 border border-rose-500/20 p-4 text-sm text-rose-700 dark:text-rose-400">
             {result.replace("error:", "")}
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 text-xs text-amber-400/80 text-left space-y-1">
-              <p className="font-bold text-amber-400">Primera configuración</p>
+            <div className="rounded-2xl bg-amber-500/10 border border-amber-500/20 p-4 text-xs text-amber-700 dark:text-amber-400/80 text-left space-y-1">
+              <p className="font-bold text-amber-700 dark:text-amber-400">Primera configuración</p>
               <p>Si aún no hay ningún administrador en el sistema, puedes activar tu cuenta como admin aquí. Esta opción se deshabilita automáticamente una vez que existe un admin.</p>
             </div>
             <button

@@ -76,7 +76,7 @@ export function CredentialsTab() {
         </div>
         <div className="relative z-10">
           <h3 className="text-lg font-black tracking-tight mb-2 uppercase italic leading-none">Se configuran en Vercel</h3>
-          <p className="text-xs text-muted-foreground leading-relaxed font-medium opacity-80">
+          <p className="text-xs text-zinc-400 leading-relaxed font-medium">
             Vercel → proyecto <span className="text-white font-bold">creator-ia-pro</span> → Settings → Environment Variables.
             Cada cambio requiere un nuevo deploy (o redeploy) para tomar efecto en producción.
           </p>
