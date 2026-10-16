@@ -266,6 +266,12 @@ const App = () => {
                   <Route path="/arena"   element={<Navigate to="/a/arena" replace />} />
                   <Route path="/a/:slug" element={<AssistantPage />} />
 
+                  {/* Back-office: pantalla completa con navegación propia ("Módulos de
+                      Gestión") — fuera de AppLayout porque apilaba dos sidebars (la global
+                      encima de la suya, captura 2026-10-16); el guard de admin vive dentro
+                      de la propia página y el logo del header vuelve a /a/basalt. */}
+                  <Route path="/admin" element={<Admin />} />
+
                   {/* ── Redirects ── */}
                   <Route path="/canvas"  element={<CanvasRedirect />} />
                   <Route path="/studio"  element={<Navigate to="/a/basalt" replace />} />
@@ -311,7 +317,6 @@ const App = () => {
                         "Herramientas" — ver Tools.tsx embebido en Chat.tsx. */}
                     <Route path="/tools"        element={<ToolsRedirect />} />
                     <Route path="/apps/:appId"  element={<ToolsRedirect />} />
-                    <Route path="/admin"        element={<Admin />} />
                     <Route path="/studio-flow"  element={<CanvasGate />} />
                     <Route path="/formarketing" element={<Navigate to="/studio-flow" replace />} />
                     {/* Antigravity se fusionó dentro de Genesis de verdad — no solo la ruta,

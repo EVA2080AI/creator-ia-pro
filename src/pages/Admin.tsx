@@ -147,15 +147,17 @@ const Admin = () => {
 
       {/* ── Navbar ── */}
       <header className="h-[60px] border-b border-border bg-background/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/10">
+        {/* Sin AppLayout (y sin sidebar global) el logo es la salida de vuelta
+            a la app, en desktop y en móvil. */}
+        <Link to="/a/basalt" title="Volver a la app" className="flex items-center gap-3 group">
+          <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/10 group-hover:scale-105 transition-transform">
             <Shield className="h-5 w-5" />
           </div>
           <div>
             <h1 className="text-sm font-black text-foreground tracking-tight leading-none uppercase">Ecosistema Creator</h1>
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mt-0.5">Operaciones Industriales</p>
           </div>
-        </div>
+        </Link>
 
         <div className="flex items-center gap-3">
           {/* Accesos directos a /product-backlog (tickets) y /system-status (estado real
