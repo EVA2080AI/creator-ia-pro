@@ -32,7 +32,9 @@ const FirmarAcuerdo = () => {
     try {
       const res = await fetch(`/api/firmar/${token}`);
       const body = await res.json().catch(() => null);
-      if (res.ok && body?.ok) {
+      // body.acuerdo/firmante: sin validar la forma, un ok:true sin cuerpo (proxy
+      // mal configurado, mock) reventaba el render con pantalla de error global.
+      if (res.ok && body?.ok && body.acuerdo && body.firmante) {
         setDatos(body);
         setError(null);
         setEsRed(false);
