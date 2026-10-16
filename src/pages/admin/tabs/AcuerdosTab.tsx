@@ -173,7 +173,7 @@ export function AcuerdosTab() {
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-[12px] font-bold text-muted-foreground">Título</label>
-              <input className={input} value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Acuerdo de Participación Económica — …" />
+              <input className={input} aria-label="Título del acuerdo" value={titulo} onChange={(e) => setTitulo(e.target.value)} placeholder="Acuerdo de Participación Económica — …" />
             </div>
             <div>
               <label className="mb-1 block text-[12px] font-bold text-muted-foreground">PDF del acuerdo (máx. {MAX_PDF_MB} MB)</label>
@@ -187,15 +187,15 @@ export function AcuerdosTab() {
             <p className="text-[12px] font-bold text-muted-foreground">Firmantes (nombre y rol tal como deben quedar en la constancia)</p>
             {firmantes.map((f, i) => (
               <div key={i} className="grid gap-2 sm:grid-cols-[1.4fr_1fr_1fr_1.2fr_auto]">
-                <input className={input} placeholder="Nombre completo" value={f.nombre} onChange={(e) => setCampo(i, "nombre", e.target.value)} />
-                <input className={input} placeholder="Rol (Inversionista…)" value={f.rol} onChange={(e) => setCampo(i, "rol", e.target.value)} />
-                <input className={input} placeholder="C.C. No. …" value={f.documento} onChange={(e) => setCampo(i, "documento", e.target.value)} />
-                <input className={input} placeholder="Correo (opcional)" value={f.email} onChange={(e) => setCampo(i, "email", e.target.value)} />
+                <input className={input} aria-label="Nombre completo del firmante" placeholder="Nombre completo" value={f.nombre} onChange={(e) => setCampo(i, "nombre", e.target.value)} />
+                <input className={input} aria-label="Rol del firmante" placeholder="Rol (Inversionista…)" value={f.rol} onChange={(e) => setCampo(i, "rol", e.target.value)} />
+                <input className={input} aria-label="Documento del firmante" placeholder="C.C. No. …" value={f.documento} onChange={(e) => setCampo(i, "documento", e.target.value)} />
+                <input className={input} type="email" autoComplete="off" aria-label="Correo del firmante" placeholder="Correo (opcional)" value={f.email} onChange={(e) => setCampo(i, "email", e.target.value)} />
                 <button
                   type="button"
                   onClick={() => setFirmantes((prev) => prev.filter((_, j) => j !== i))}
                   disabled={firmantes.length <= 1}
-                  className="rounded-xl border border-border px-3 text-muted-foreground hover:text-red-500 disabled:opacity-30"
+                  className="rounded-xl border border-border px-3 py-2 text-muted-foreground hover:text-red-500 disabled:opacity-30"
                   aria-label="Quitar firmante"
                 >
                   <X className="h-4 w-4" />
@@ -254,7 +254,7 @@ export function AcuerdosTab() {
                     ) : (
                       <button
                         onClick={() => void copiarEnlace(f.token)}
-                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-0.5 text-[12px] font-bold text-muted-foreground hover:border-primary hover:text-primary"
+                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1.5 text-[12px] font-bold text-muted-foreground hover:border-primary hover:text-primary"
                       >
                         <ClipboardCopy className="h-3.5 w-3.5" /> Copiar enlace de firma
                       </button>

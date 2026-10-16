@@ -109,7 +109,7 @@ export function TicketsTab() {
   }
 
   const chip = (active: boolean) =>
-    cn("rounded-full border px-3 py-1 text-[12px] font-bold", active ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground");
+    cn("rounded-full border px-3 py-1.5 text-[12px] font-bold", active ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground");
 
   return (
     <div className="space-y-3">
@@ -125,7 +125,7 @@ export function TicketsTab() {
             {t === "todos" ? "Todo tipo" : t === "mejora" ? "Mejoras" : "Errores"}
           </button>
         ))}
-        <button onClick={() => void copyPending()} className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-[12px] font-bold text-primary-foreground">
+        <button onClick={() => void copyPending()} className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-[12px] font-bold text-primary-foreground">
           <ClipboardCopy className="h-3.5 w-3.5" aria-hidden /> Copiar pendientes para Claude
         </button>
       </div>

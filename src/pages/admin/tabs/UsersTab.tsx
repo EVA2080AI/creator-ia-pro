@@ -100,6 +100,7 @@ export function UsersTab({
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <input
+            aria-label="Buscar por nombre o email"
             placeholder="Nombre o email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -109,6 +110,7 @@ export function UsersTab({
         <div className="flex gap-2">
           <button
             onClick={onRefresh}
+            aria-label="Actualizar"
             className="flex items-center justify-center gap-2 rounded-xl bg-muted px-4 py-2.5 text-xs font-bold text-muted-foreground hover:bg-accent transition-all active:scale-95"
           >
             <RefreshCw className="h-3.5 w-3.5" />
@@ -127,6 +129,7 @@ export function UsersTab({
           )}
           <button
             onClick={() => setShowCreate(true)}
+            aria-label="Nuevo usuario"
             className="flex items-center justify-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground hover:bg-primary/90 transition-all active:scale-95"
           >
             <UserPlus className="h-3.5 w-3.5" />
@@ -204,7 +207,9 @@ export function UsersTab({
                   <div className="flex justify-end">
                     <button
                       onClick={() => setExpandedUser(isExpanded ? null : u.user_id)}
-                      className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all ${isExpanded ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                      aria-label={`Acciones de ${u.email}`}
+                      aria-expanded={isExpanded}
+                      className={`h-10 w-10 md:h-8 md:w-8 rounded-lg flex items-center justify-center transition-all ${isExpanded ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
                     >
                       {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </button>
@@ -230,31 +235,26 @@ export function UsersTab({
                         </div>
                       </button>
 
-                      {/* Tier Management */}
-                      <div className="relative group/tiers">
-                        <div className="flex items-center gap-3 rounded-xl border border-border p-3 text-left">
-                          <div className="h-9 w-9 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                            <UserCheck className="h-5 w-5" />
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-foreground">Cambiar de Plan</p>
-                            <p className="text-[10px] text-muted-foreground">Asignar nueva suscripción</p>
-                          </div>
+                      {/* Cambiar de plan: <select> nativo — el menú anterior solo
+                          abría con hover (inusable en táctil y con teclado). */}
+                      <label className="flex items-center gap-3 rounded-xl border border-border p-3 text-left cursor-pointer focus-within:border-ring transition-colors">
+                        <div className="h-9 w-9 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-500 shrink-0">
+                          <UserCheck className="h-5 w-5" />
                         </div>
-                        <div className="absolute top-full left-0 right-0 mt-1 z-20 hidden group-hover/tiers:block bg-card border border-border rounded-xl shadow-xl p-1.5 space-y-1">
-                          {Object.entries(TIERS).map(([key, t]) => (
-                            <button
-                              key={key}
-                              onClick={() => handleChangeTier(u.user_id, key)}
-                              disabled={u.subscription_tier === key}
-                              className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[11px] font-bold hover:bg-muted text-muted-foreground disabled:opacity-30"
-                            >
-                              {t.label}
-                              {u.subscription_tier === key && <CheckCircle className="h-3 w-3 text-emerald-500" />}
-                            </button>
-                          ))}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-foreground">Cambiar de Plan</p>
+                          <select
+                            value={TIERS[u.subscription_tier] ? u.subscription_tier : "free"}
+                            onChange={(e) => handleChangeTier(u.user_id, e.target.value)}
+                            aria-label={`Plan de ${u.email}`}
+                            className="mt-0.5 w-full bg-transparent text-[11px] font-bold text-muted-foreground outline-none cursor-pointer"
+                          >
+                            {Object.entries(TIERS).map(([key, t]) => (
+                              <option key={key} value={key}>{t.label}</option>
+                            ))}
+                          </select>
                         </div>
-                      </div>
+                      </label>
 
                       {/* Password Reset */}
                       <button

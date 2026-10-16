@@ -40,7 +40,7 @@ export function CreateUserModal({ onClose, onDone }: { onClose: () => void; onDo
             </div>
             <p className="font-semibold text-foreground">Nuevo usuario</p>
           </div>
-          <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+          <button onClick={onClose} aria-label="Cerrar" className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
             <X className="h-4 w-4" />
           </button>
         </div>

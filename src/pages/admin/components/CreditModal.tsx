@@ -104,7 +104,7 @@ export function CreditModal({
               <Coins className="h-3.5 w-3.5 text-amber-400" />
               <span className="text-sm font-bold text-foreground font-mono">{user.credits_balance.toLocaleString()}</span>
             </div>
-            <button onClick={onClose} className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <button onClick={onClose} aria-label="Cerrar" className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -119,6 +119,7 @@ export function CreditModal({
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
+                aria-label={t.label}
                 className="flex flex-1 items-center justify-center gap-1.5 py-3 text-xs font-medium transition-colors"
                 style={{ color: isActive ? t.color : "rgba(113,113,122,1)", borderBottom: isActive ? `2px solid ${t.color}` : "2px solid transparent" }}
               >
