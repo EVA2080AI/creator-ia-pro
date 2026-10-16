@@ -6,11 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Sparkles, ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  // El token puede vencer entre abrir la página y enviar: better-auth responde
+  // INVALID_TOKEN y ahí mostramos la misma tarjeta de enlace vencido.
+  const [vencido, setVencido] = useState(false);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
@@ -28,7 +33,8 @@ const ResetPassword = () => {
     setLoading(true);
     const { error } = await authClient.resetPassword({ newPassword: password, token });
     if (error) {
-      toast.error(error.message);
+      if (error.code === "INVALID_TOKEN") setVencido(true);
+      else toast.error("No se pudo actualizar la contraseña. Intenta de nuevo.");
     } else {
       toast.success("¡Contraseña actualizada!");
       navigate("/auth");
@@ -36,11 +42,14 @@ const ResetPassword = () => {
     setLoading(false);
   };
 
-  if (linkVencido) {
+  if (linkVencido || vencido) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background font-sans">
         <SEO title="Enlace vencido" description="El enlace de recuperación ya no es válido." noindex={true} />
         <div className="relative z-10 w-full max-w-md px-6 text-center">
+          <div className="mb-8 flex justify-center">
+            <Logo size="md" showText showPro onClick={() => navigate("/")} />
+          </div>
           <div className="rounded-[2rem] border border-border bg-card p-10 shadow-xl shadow-black/5">
             <h1 className="text-2xl font-black text-foreground tracking-tight mb-3">Este enlace ya no sirve</h1>
             <p className="text-sm text-muted-foreground leading-relaxed mb-8">
@@ -65,7 +74,7 @@ const ResetPassword = () => {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background font-sans selection:bg-primary/15">
       <SEO
-        title="Restablecer Contraseña"
+        title="Restablecer contraseña"
         description="Restablece tu contraseña de Creator IA Pro."
         noindex={true}
       />
@@ -76,11 +85,11 @@ const ResetPassword = () => {
 
       <div className="relative z-10 w-full max-w-md px-6">
         <div className="mb-10 text-center">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10">
-            <Sparkles className="h-8 w-8 text-primary" />
+          <div className="mb-6 flex justify-center">
+            <Logo size="md" showText showPro onClick={() => navigate("/")} />
           </div>
           <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight">
-            Nueva <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">contraseña</span>
+            Nueva contraseña
           </h1>
           <p className="mt-3 text-[13px] text-muted-foreground font-medium">Ingresa tu nueva contraseña para acceder a tu cuenta</p>
         </div>
@@ -89,16 +98,28 @@ const ResetPassword = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="password" className="text-muted-foreground text-[11px] font-bold uppercase tracking-[0.2em]">Nueva contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Mínimo 8 caracteres"
-                required
-                minLength={8}
-                className="bg-background border-border focus:border-primary/40 rounded-2xl h-12 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all"
-              />
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Mínimo 8 caracteres"
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  autoFocus
+                  className="bg-background border-border focus:border-primary/40 rounded-2xl h-12 pr-12 text-sm text-foreground placeholder:text-muted-foreground/60 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center text-muted-foreground transition-colors"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+                </button>
+              </div>
             </div>
             <Button
               type="submit"
