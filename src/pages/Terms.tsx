@@ -55,10 +55,10 @@ Nos reservamos el derecho de suspender o terminar cuentas que violen estos térm
       title: "5. Pagos y Facturación",
       content: `Los pagos son procesados a través de Bold.co (Colombia):
 
-• Aceptamos pagos en pesos colombianos (COP)
+• Aceptamos pagos en pesos colombianos (COP) con tarjeta débito o crédito, PSE y Bre-B
 • Los precios incluyen impuestos aplicables según la legislación colombiana
-• Las suscripciones se renuevan automáticamente unless canceladas
-• Las cancelaciones son efectivas al final del período de facturación actual
+• Los planes duran 30 días y no se renuevan automáticamente: nunca cobramos sin que inicies tú el pago; antes del vencimiento te enviamos un recordatorio con el enlace para renovar
+• Si no renuevas, tu cuenta pasa al plan Free al final del período y conservas tus proyectos y tu historial
 • No realizamos reembolsos por cambio de opinión`
     },
     {
@@ -189,11 +189,11 @@ Las modificaciones entran en vigor al publicarse en esta página. El uso continu
             <div className="flex items-center gap-4 mt-8 text-sm text-zinc-600 dark:text-zinc-300">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                <span>Versión 2.1.0</span>
+                <span>Versión 2.2.0</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                <span>Vigente desde: 18 Abr 2026</span>
+                <span>Vigente desde: 17 Oct 2026</span>
               </div>
             </div>
           </motion.div>

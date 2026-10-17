@@ -179,7 +179,7 @@ const FAQS = [
   },
   {
     question: "¿Cómo funciona el pago con Bold?",
-    answer: "Bold.co es la plataforma de pagos líder en Colombia. Puedes pagar con tarjeta débito, crédito o PSE en pesos colombianos (COP), sin necesidad de dólares ni cuentas internacionales."
+    answer: "Bold.co es la plataforma de pagos líder en Colombia. Puedes pagar con tarjeta débito o crédito, PSE o Bre-B en pesos colombianos (COP), sin necesidad de dólares ni cuentas internacionales."
   }
 ];
 
