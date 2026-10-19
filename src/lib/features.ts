@@ -1,8 +1,7 @@
 // Feature flags de producto.
 //
-// Canvas IA (/studio-flow, Formarketing): habilitado para todos desde el
-// 2026-10-15 a pedido de Sebastián. El rediseño estilo Freepik Spaces sigue
-// pendiente como "plan de mejora"; mientras tanto se libera el canvas actual.
-// Pasar a `false` vuelve a ocultarlo en toda la app (las entradas muestran
-// "Próximamente" y la ruta renderiza CanvasComingSoon).
-export const CANVAS_ENABLED = true;
+// Canvas IA (/studio-flow, Formarketing): oculto de nuevo desde el 2026-10-19
+// a pedido de Sebastián, mientras se termina el rediseño estilo Freepik
+// Spaces (Fase 2). Pasar a `true` lo libera en toda la app; en `false` las
+// entradas muestran "Próximamente" y la ruta renderiza CanvasComingSoon.
+export const CANVAS_ENABLED = false;
