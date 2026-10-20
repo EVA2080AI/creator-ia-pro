@@ -114,10 +114,10 @@ function AuthWatcher() {
         if (data) { hadSessionRef.current = true; return; }
         // /product-backlog dejó de ser pública: es el backlog interno (equipos, P0/P1,
         // bloqueos) y la página ya exige admin — sin sesión, mejor directo a /auth.
-        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs", "/cookies"];
-        const isPublic = publicPaths.some(p =>
-          window.location.pathname === p || window.location.pathname.startsWith("/herramienta")
-        );
+        const publicPaths = ["/", "/auth", "/pricing", "/descargar", "/empresas", "/terms", "/privacy", "/security", "/contact", "/help", "/documentation", "/docs", "/cookies"];
+        // Normalizado sin slash final: /empresas/ también cuenta como pública.
+        const path = window.location.pathname.replace(/\/+$/, "") || "/";
+        const isPublic = publicPaths.some(p => path === p || path.startsWith("/herramienta"));
         if (!isPublic) {
           toast.error("Tu sesión expiró. Por favor inicia sesión nuevamente.");
           navigate("/auth", { replace: true });
@@ -149,6 +149,7 @@ const Index        = lazy(() => import("./pages/Index"));
 const Auth         = lazy(() => import("./pages/Auth"));
 const Pricing      = lazy(() => import("./pages/Pricing"));
 const Downloads    = lazy(() => import("./pages/Downloads"));
+const Empresas     = lazy(() => import("./pages/Empresas"));
 const ToolLanding  = lazy(() => import("./pages/ToolLanding"));
 const ProductBacklog = lazy(() => import("./pages/ProductBacklog"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -227,6 +228,7 @@ const App = () => {
                   <Route path="/auth"                 element={<Auth />} />
                   <Route path="/pricing"              element={<Pricing />} />
                   <Route path="/descargar"            element={<Downloads />} />
+                  <Route path="/empresas"             element={<Empresas />} />
                   <Route path="/product-backlog"      element={<ProductBacklog />} />
                   <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
                   <Route path="/reset-password"       element={<ResetPassword />} />

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Menu, X, Sparkles, Code2,
+  Menu, X, Sparkles, Code2, Building2,
   CreditCard, BookOpen, ArrowRight, Layers, type LucideIcon
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
@@ -38,6 +38,7 @@ export function LandingHeader({ themed = false }: { themed?: boolean } = {}): Re
   const NAV_LINKS: NavLink[] = [
     { name: "Basalt IA", path: "/a/basalt", icon: Code2 },
     { name: "Planes", path: "/pricing", icon: CreditCard },
+    { name: "Empresas", path: "/empresas", icon: Building2 },
     { name: "Ayuda", path: "/help", icon: BookOpen },
   ];
 
@@ -103,13 +104,19 @@ export function LandingHeader({ themed = false }: { themed?: boolean } = {}): Re
           <div className="flex items-center gap-4">
             <button 
               onClick={() => navigate("/auth")}
-              className="hidden sm:flex items-center gap-2 text-[13px] font-black text-zinc-900 px-6 py-2.5 rounded-xl hover:bg-zinc-100 transition-all active:scale-95 italic tracking-tighter"
+              className={cn(
+                "hidden sm:flex items-center gap-2 text-[13px] font-black text-zinc-900 px-6 py-2.5 rounded-xl hover:bg-zinc-100 transition-all active:scale-95 italic tracking-tighter",
+                themed && "dark:text-zinc-100 dark:hover:bg-zinc-900",
+              )}
             >
               INGRESAR
             </button>
             <button
               onClick={() => navigate("/pricing")}
-              className="flex items-center gap-3 px-6 py-2.5 rounded-xl bg-zinc-950 text-white text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-black transition-all active:scale-95 group-cta italic"
+              className={cn(
+                "flex items-center gap-3 px-6 py-2.5 rounded-xl bg-zinc-950 text-white text-[11px] font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-black transition-all active:scale-95 group-cta italic",
+                themed && "dark:border dark:border-zinc-700",
+              )}
             >
               <Sparkles className="h-4 w-4 text-primary animate-pulse" />
               Ver Planes
@@ -146,7 +153,10 @@ export function LandingHeader({ themed = false }: { themed?: boolean } = {}): Re
                     key={link.name}
                     to={link.path}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="text-lg font-black text-zinc-900 flex items-center justify-between group"
+                    className={cn(
+                      "text-lg font-black text-zinc-900 flex items-center justify-between group",
+                      themed && "dark:text-zinc-100",
+                    )}
                   >
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-xl bg-zinc-950 flex items-center justify-center text-white shadow-xl">
@@ -158,7 +168,7 @@ export function LandingHeader({ themed = false }: { themed?: boolean } = {}): Re
                   </Link>
                 );
               })}
-              <hr className="border-zinc-100" />
+              <hr className={cn("border-zinc-100", themed && "dark:border-zinc-800")} />
               <button
                 onClick={() => navigate("/auth?mode=signup")}
                 className="w-full py-4 bg-zinc-950 text-white rounded-2xl font-black uppercase tracking-widest italic"

@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 import { Mail, Shield, Zap } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function Footer() {
+/** `themed`: seguir el tema claro/oscuro, misma convención que LandingHeader.
+ *  Por defecto NO: las páginas públicas claras conservan el pie blanco de siempre. */
+export function Footer({ themed = false }: { themed?: boolean } = {}) {
   const currentYear = new Date().getFullYear();
 
   const FOOTER_LINKS = [
@@ -11,6 +14,7 @@ export function Footer() {
       links: [
         { name: "Basalt IA", path: "/a/basalt" },
         { name: "Precios", path: "/pricing" },
+        { name: "Para empresas", path: "/empresas" },
       ]
     },
     {
@@ -37,7 +41,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-white border-t border-zinc-100 pt-20 pb-10">
+    <footer className={cn("bg-white border-t border-zinc-100 pt-20 pb-10", themed && "dark:bg-zinc-950 dark:border-zinc-800")}>
       <div className="container px-6 mx-auto">
         <div className="grid md:grid-cols-4 gap-12 mb-16">
           {/* Brand */}
@@ -45,14 +49,14 @@ export function Footer() {
             <Link to="/" className="flex items-center gap-3">
               <Logo className="h-7 w-auto" />
             </Link>
-            <p className="text-zinc-500 text-sm leading-relaxed max-w-xs font-medium">
+            <p className={cn("text-zinc-500 text-sm leading-relaxed max-w-xs font-medium", themed && "dark:text-zinc-400")}>
               La plataforma de IA todo-en-uno para crear apps, imágenes y contenido en segundos.
             </p>
             {/* Eran cuatro iconos con href="#": no llevaban a ningún lado. Queda el correo,
                 que sí existe; las redes vuelven cuando haya cuentas reales que enlazar. */}
             <a
               href="mailto:hola@creator-ia.com"
-              className="inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-primary transition-colors"
+              className={cn("inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-primary transition-colors", themed && "dark:text-zinc-400 dark:hover:text-zinc-100")}
             >
               <Mail className="h-4 w-4" /> hola@creator-ia.com
             </a>
@@ -61,13 +65,13 @@ export function Footer() {
           {/* Link Groups */}
           {FOOTER_LINKS.map((group) => (
             <div key={group.title}>
-              <h3 className="text-zinc-950 font-black uppercase tracking-widest text-[10px] mb-6 italic">{group.title}</h3>
+              <h3 className={cn("text-zinc-950 font-black uppercase tracking-widest text-[10px] mb-6 italic", themed && "dark:text-zinc-100")}>{group.title}</h3>
               <ul className="space-y-4">
                 {group.links.map((link) => (
                   <li key={link.name}>
                     <Link 
                       to={link.path} 
-                      className="text-zinc-500 hover:text-primary text-sm font-medium transition-colors"
+                      className={cn("text-zinc-500 hover:text-primary text-sm font-medium transition-colors", themed && "dark:text-zinc-400 dark:hover:text-zinc-100")}
                     >
                       {link.name}
                     </Link>
@@ -79,16 +83,16 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="flex flex-col md:flex-row items-center justify-between pt-10 border-t border-zinc-100 gap-6">
-          <p className="text-zinc-500 text-xs font-medium italic">
+        <div className={cn("flex flex-col md:flex-row items-center justify-between pt-10 border-t border-zinc-100 gap-6", themed && "dark:border-zinc-800")}>
+          <p className={cn("text-zinc-500 text-xs font-medium italic", themed && "dark:text-zinc-400")}>
             © {currentYear} Creator IA Pro. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200">
+            <div className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200", themed && "dark:bg-zinc-900 dark:border-zinc-700")}>
               <Shield className="h-3 w-3 text-emerald-500" />
               <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">AES-256</span>
             </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200">
+            <div className={cn("flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200", themed && "dark:bg-zinc-900 dark:border-zinc-700")}>
               <Zap className="h-3 w-3 text-amber-500" />
               <span className="text-[11px] font-black text-zinc-500 uppercase tracking-widest">Pagos en COP</span>
             </div>
