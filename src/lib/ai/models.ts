@@ -289,30 +289,13 @@ export const CHAT_MODELS: ModelDef[] = [
     vision: true,
     free: false,
   },
-  {
-    id: "qwen/qwen3-max",
-    label: "Qwen3 Max",
-    provider: "Qwen",
-    description: "Modelo insignia de Alibaba, gran capacidad de razonamiento en texto.",
-    category: "ultra",
-    credits: 5,
-    minTier: "pro",
-    context: "256K tokens",
-    vision: false,
-    free: false,
-  },
-  {
-    id: "qwen/qwen3-coder-plus",
-    label: "Qwen3 Coder Plus",
-    provider: "Qwen",
-    description: "Flagship de Qwen para codificación autónoma, 1M de tokens de contexto.",
-    category: "ultra",
-    credits: 5,
-    minTier: "pro",
-    context: "1M tokens",
-    vision: false,
-    free: false,
-  },
+  // Qwen3 Max y Qwen3 Coder Plus se retiraron el 2026-10-20: siguen fichados en el
+  // catálogo de OpenRouter pero con CERO endpoints activos — nadie los sirve, así que
+  // la llamada fallaba. El crédito volvía (el `!sawAnyContent` de api/ai/chat.ts lo
+  // reembolsa), pero el usuario Pro veía un error en dos de los seis modelos Ultra que
+  // le promete su plan. Antes de añadir un modelo, comprobar que
+  // GET /api/v1/models/<id>/endpoints trae al menos un proveedor: el catálogo lista
+  // fichas que ya no tienen quien las atienda.
 ];
 
 export const DEFAULT_MODEL_ID = CHAT_MODELS[0].id; // google/gemini-2.5-flash-lite — gratis, disponible en todos los planes
