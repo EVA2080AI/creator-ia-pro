@@ -10,7 +10,7 @@ import React from "react";
 import {
   Sparkles, Check, Zap, Crown, Rocket, Loader2,
   Coins, Shield, Code2, Bolt, ArrowRight,
-  TrendingUp, Globe, Lock, Cpu, Star, MessageSquare,
+  TrendingUp, Globe, Lock, Cpu, MessageSquare,
   HelpCircle, ChevronDown, ChevronUp, Layers,
   Layout, MousePointer2, Database, Network
 } from "lucide-react";
@@ -190,26 +190,14 @@ const COMPARISON_DATA = [
   { feature: "Forma de pago", creator: "Bold en COP (local)", others: "Dólares + tarifa internacional" },
 ];
 
-const TESTIMONIALS = [
-  {
-    name: "Carlos Rivera",
-    role: "Creador de contenido digital",
-    content: "Pagar en COP con Bold fue un alivio total. Ya no necesito tarjeta en dólares para usar IA de calidad. Creo el doble de contenido en la mitad del tiempo.",
-    avatar: "https://i.pravatar.cc/150?u=carlos",
-  },
-  {
-    name: "Elena Gómez",
-    role: "Diseñadora y directora creativa",
-    content: "El plan Pro vale cada peso. Genero piezas para mis clientes en minutos y los modelos de imagen son increíbles. Mis entregas mejoraron notablemente.",
-    avatar: "https://i.pravatar.cc/150?u=elena",
-  },
-  {
-    name: "Mario Duarte",
-    role: "Fundador de agencia de marketing",
-    content: "Con el plan Agencia, todo mi equipo trabaja en el mismo Studio. Generamos campañas completas (textos + imágenes + estrategia) en horas, no días.",
-    avatar: "https://i.pravatar.cc/150?u=mario",
-  },
-];
+// Aquí había tres testimonios inventados — "Carlos Rivera", "Elena Gómez" y
+// "Mario Duarte" — con caras sacadas de i.pravatar.cc (un generador de avatares
+// de relleno), cinco estrellas pintadas a mano y un encabezado que decía
+// "Personas reales que ya crean contenido increíble". Eso es publicidad
+// engañosa (Ley 1480, arts. 29 y 30), y uno de los tres vendía una función que
+// no existe ("todo mi equipo trabaja en el mismo Studio"). Se retiraron el
+// 2026-10-21. Cuando haya clientes reales que quieran dar su testimonio, van
+// aquí CON su autorización por escrito, su nombre real y su foto real.
 
 function MeshGradient() {
   return (
@@ -596,38 +584,8 @@ export default function Pricing() {
             </section>
           )}
 
-          {/* ── Testimonios ────────────────────────────────────────────────── */}
-          <section className="px-6 mb-40">
-            <SectionHeader 
-              badge="Lo dicen nuestros creadores" 
-              title="Testimonios."
-              subtitle="Personas reales que ya crean contenido increíble con Creator IA Pro."
-            />
-            <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
-              {TESTIMONIALS.map((t, i) => (
-                <motion.div 
-                  key={t.name}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
-                  className="p-8 rounded-[2.5rem] bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 relative"
-                >
-                  <div className="flex gap-1 mb-6">
-                    {Array.from({ length: 5 }).map((_, j) => <Star key={j} className="h-3 w-3 fill-primary text-primary" />)}
-                  </div>
-                  <p className="text-[14px] text-zinc-500 dark:text-zinc-400 leading-relaxed italic mb-8">"{t.content}"</p>
-                  <div className="flex items-center gap-4">
-                    <img src={t.avatar} className="w-10 h-10 rounded-2xl border border-zinc-200 dark:border-zinc-800" alt={t.name} />
-                    <div>
-                      <div className="text-xs font-black uppercase tracking-widest text-zinc-900 dark:text-zinc-100">{t.name}</div>
-                      <div className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 uppercase">{t.role}</div>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </section>
+          {/* La sección de testimonios se retiró el 2026-10-21: eran inventados.
+              Ver la nota junto a donde estaba la constante TESTIMONIALS. */}
 
           {/* ── FAQ Section ───────────────────────────────────────────────── */}
           <section className="px-6 mb-40">
