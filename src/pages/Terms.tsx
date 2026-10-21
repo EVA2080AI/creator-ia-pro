@@ -50,13 +50,25 @@ Nos reservamos el derecho de suspender o terminar cuentas que violen estos térm
 • Los créditos no tienen fecha de vencimiento mientras la cuenta esté activa
 • Nos reservamos el derecho de modificar los costos de operaciones con previo aviso`
     },
+    /**
+     * §5 no menciona impuestos, a propósito. El parágrafo primero del art. 437
+     * del E.T. prohíbe al no responsable de IVA "adicionar al precio suma alguna
+     * por concepto del impuesto sobre las ventas", y quien lo hace queda sujeto al
+     * régimen común: anunciar "los precios incluyen impuestos aplicables" es justo
+     * lo que un auditor puede leer como que lo estamos cobrando, y esa frase sola
+     * arrastra la consecuencia. Si el servicio está cubierto por la exclusión de
+     * computación en la nube (art. 476 num. 21, vigente), no hay impuesto que
+     * incluir. Lo que sí afirmamos — que el valor mostrado es el total — es lo que
+     * pide el art. 26 de la Ley 1480 y no representa nada sobre tributos.
+     * No reponer la frase sin concepto escrito de un tributarista.
+     */
     {
       id: "payment",
       title: "5. Pagos y Facturación",
       content: `Los pagos son procesados a través de Bold.co (Colombia):
 
 • Aceptamos pagos en pesos colombianos (COP) con tarjeta débito o crédito, PSE y Bre-B
-• Los precios incluyen impuestos aplicables según la legislación colombiana
+• El valor que ves al momento de pagar es el total que se cobra: no añadimos cargos ni recargos adicionales
 • Los planes duran 30 días y no se renuevan automáticamente: nunca cobramos sin que inicies tú el pago; antes del vencimiento te enviamos un recordatorio con el enlace para renovar
 • Si no renuevas, tu cuenta pasa al plan Free al final del período y conservas tus proyectos y tu historial
 • No realizamos reembolsos por cambio de opinión`
@@ -136,12 +148,19 @@ Las modificaciones entran en vigor al publicarse en esta página. El uso continu
 • Dirección: Bogotá, Colombia
 • Tiempo de respuesta: 5-7 días hábiles
 
-Última actualización: 18 de abril de 2026`
+Última actualización: 21 de octubre de 2026`
     }
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950">
+    /* Clara siempre, como /privacy y /help: es la convención de las páginas
+       públicas (ver el comentario de `themed` en LandingHeader). Estaba a medio
+       tematizar — raíz y hero con variantes `dark:` pero el cuerpo del documento
+       en text-zinc-900/600 sin ellas —, así que con el sistema en oscuro (el tema
+       por defecto es "system", no hace falta ni iniciar sesión) las doce cláusulas
+       quedaban a ~1.2:1 sobre un fondo zinc-950. Si algún día se tematiza, hay que
+       hacerlo completo, cuerpo incluido. */
+    <div className="min-h-screen bg-white">
       <SEO
         title="Términos de Servicio"
         description="Términos y condiciones de uso de Creator IA Pro. Lee nuestras políticas de uso del servicio, pagos, créditos y responsabilidades."
@@ -152,7 +171,7 @@ Las modificaciones entran en vigor al publicarse en esta página. El uso continu
       <LandingHeader />
 
       {/* Hero */}
-      <section className="pt-32 pb-16 bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-100 dark:border-zinc-800">
+      <section className="pt-32 pb-16 bg-zinc-50 border-b border-zinc-100">
         <div className="container px-6 mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -161,7 +180,7 @@ Las modificaciones entran en vigor al publicarse en esta página. El uso continu
           >
             <Button
               variant="ghost"
-              className="mb-6 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 -ml-4"
+              className="mb-6 text-zinc-500 hover:text-zinc-900 -ml-4"
               onClick={() => navigate(-1)}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -175,25 +194,25 @@ Las modificaciones entran en vigor al publicarse en esta página. El uso continu
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary italic">Legal</span>
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-black text-zinc-900 dark:text-zinc-100 tracking-tighter mb-6 italic">
+            <h1 className="text-4xl md:text-5xl font-black text-zinc-900 tracking-tighter mb-6 italic">
               Términos de Servicio
             </h1>
 
-            <p className="text-lg text-zinc-500 dark:text-zinc-400 leading-relaxed">
+            <p className="text-lg text-zinc-500 leading-relaxed">
               Al utilizar Creator IA Pro, aceptas estos términos y condiciones.
               Por favor, léelos cuidadosamente antes de continuar.
             </p>
 
             {/* zinc-400 sobre blanco es 2.5:1 — estos metadatos (versión, vigencia) se
                 leían peor que el cuerpo del documento legal que acompañan. */}
-            <div className="flex items-center gap-4 mt-8 text-sm text-zinc-600 dark:text-zinc-300">
+            <div className="flex items-center gap-4 mt-8 text-sm text-zinc-600">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                <span>Versión 2.2.0</span>
+                <span>Versión 2.3.0</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                <span>Vigente desde: 17 Oct 2026</span>
+                <span>Vigente desde: 21 Oct 2026</span>
               </div>
             </div>
           </motion.div>
