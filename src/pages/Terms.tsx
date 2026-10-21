@@ -26,7 +26,7 @@ La Plataforma es operada por Creator IA Pro, ubicada en Colombia. Estos Término
 • Creación y edición de imágenes con IA
 • Generación de texto y contenido de marketing
 
-El servicio utiliza modelos de IA de terceros (Google Gemini, OpenAI, Anthropic) y está sujeto a sus propios términos de uso.`
+Tus mensajes viajan a OpenRouter, que los entrega al modelo que elijas (Google, OpenAI, Anthropic, xAI, DeepSeek, Mistral y otros). Las imágenes también se generan a través de OpenRouter, y las búsquedas web pasan por Tavily. El uso de cada uno de esos modelos está sujeto además a los términos de su proveedor.`
     },
     {
       id: "accounts",
@@ -45,10 +45,10 @@ Nos reservamos el derecho de suspender o terminar cuentas que violen estos térm
       content: `La Plataforma opera con un sistema de "Neural Cycles" (créditos):
 
 • Los créditos se adquieren mediante planes de suscripción o pagos individuales
-• Los créditos no son reembolsables excepto en caso de errores del sistema
+• Los créditos no son reembolsables, salvo por errores del sistema o cuando ejerces el derecho de retracto descrito en la sección 5
 • Las operaciones fallidas por error nuestro reembolsan créditos automáticamente
 • Los créditos no tienen fecha de vencimiento mientras la cuenta esté activa
-• Nos reservamos el derecho de modificar los costos de operaciones con previo aviso`
+• El costo en créditos de cada operación está publicado en la plataforma y puede cambiar. Si un cambio encarece una operación, te avisamos antes de aplicarlo, para que puedas usar el saldo que ya tienes al costo anterior`
     },
     /**
      * §5 no menciona impuestos, a propósito. El parágrafo primero del art. 437
@@ -71,7 +71,9 @@ Nos reservamos el derecho de suspender o terminar cuentas que violen estos térm
 • El valor que ves al momento de pagar es el total que se cobra: no añadimos cargos ni recargos adicionales
 • Los planes duran 30 días y no se renuevan automáticamente: nunca cobramos sin que inicies tú el pago; antes del vencimiento te enviamos un recordatorio con el enlace para renovar
 • Si no renuevas, tu cuenta pasa al plan Free al final del período y conservas tus proyectos y tu historial
-• No realizamos reembolsos por cambio de opinión`
+• Tienes derecho de retracto: dentro de los 5 días hábiles siguientes a la compra puedes echarte atrás, siempre que no hayas empezado a consumir los créditos (art. 47 de la Ley 1480). Basta con escribirnos a legal@creator-ia.com; vale la fecha en que envías el correo, no la fecha en que te respondemos
+• Te devolvemos el valor total, sin descuentos ni retenciones, a más tardar 30 días calendario después de que ejerces el retracto
+• Pasado ese plazo, o si ya consumiste créditos, no hacemos reembolsos por cambio de opinión`
     },
     {
       id: "content",
@@ -123,11 +125,11 @@ Nos reservamos el derecho de suspender o terminar cuentas que violen estos térm
       title: "10. Modificaciones",
       content: `Nos reservamos el derecho de:
 
-• Modificar estos términos en cualquier momento con previo aviso de 30 días
+• Modificar estos términos, publicando siempre la versión y la fecha desde la que rigen
 • Actualizar funcionalidades, precios y políticas
 • Descontinuar el servicio con aviso de 60 días
 
-Las modificaciones entran en vigor al publicarse en esta página. El uso continuado constituye aceptación.`
+Las modificaciones entran en vigor al publicarse en esta página, con dos salvedades que sí podemos garantizarte: siempre pagas el precio que ves en pantalla al momento de comprar, y nunca te cobramos sin que tú inicies el pago. Como ningún plan se renueva solo, un precio nuevo solo te aplica el día que decidas comprar otra vez, y si encarecemos el costo en créditos de alguna operación te avisamos antes, como dice la sección 4.`
     },
     {
       id: "governing",
@@ -208,7 +210,7 @@ Las modificaciones entran en vigor al publicarse en esta página. El uso continu
             <div className="flex items-center gap-4 mt-8 text-sm text-zinc-600">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                <span>Versión 2.3.0</span>
+                <span>Versión 2.4.0</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />

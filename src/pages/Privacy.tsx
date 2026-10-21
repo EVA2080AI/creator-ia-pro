@@ -38,7 +38,7 @@ Datos de uso:
 • Preferencias de configuración
 
 Datos técnicos:
-• Dirección IP (anonimizada)
+• Dirección IP: queda guardada en el registro de cada sesión que abres (lo hace nuestro sistema de autenticación). Si firmas un documento, además se guarda y se imprime dentro de la constancia de firma en PDF, como prueba de quién firmó — tenlo en cuenta antes de compartir ese PDF. Nuestros proveedores de hosting la ven también en sus registros técnicos
 • Tipo de navegador y sistema operativo
 • Logs de errores y rendimiento
 • Cookies y tecnologías similares`
@@ -51,7 +51,7 @@ Datos técnicos:
 • Proporcionar y mantener el servicio de Creator IA Pro
 • Procesar pagos y gestionar tu suscripción
 • Personalizar tu experiencia de usuario
-• Mejorar nuestros algoritmos y modelos de IA
+• Mejorar el producto: qué funciones se usan, qué falla y qué hay que arreglar
 • Detectar y prevenir fraudes o uso indebido
 • Enviar notificaciones importantes sobre tu cuenta
 • Soporte técnico y atención al cliente
@@ -59,7 +59,7 @@ Datos técnicos:
 No usamos tus datos para:
 • Vender publicidad personalizada
 • Compartir con terceros para marketing
-• Entrenar modelos de IA con tus datos sin consentimiento
+• Entrenar modelos de IA con tus datos
 • Acceder a contenido privado de tus proyectos sin autorización`
     },
     {
@@ -67,16 +67,19 @@ No usamos tus datos para:
       title: "4. Almacenamiento y Seguridad",
       content: `Tu información se almacena de forma segura:
 
-• Bases de datos encriptadas en reposo y tránsito (AES-256)
+• La base de datos corre en Neon, que cifra en reposo; el tránsito va por TLS
 • Servidores ubicados en infraestructura administrada (Neon/Vercel)
 • Recuperación a un punto en el tiempo (point-in-time recovery) vía Neon
-• Acceso restringido solo a personal autorizado
+• Acceso a la base de datos restringido solo a personal autorizado
+• Una excepción que debes conocer: las imágenes que generas y las constancias de firma se guardan en un almacenamiento de archivos cuyo enlace es público. No aparecen en buscadores ni se pueden adivinar, pero quien tenga el enlace puede abrirlas sin iniciar sesión
 
 Retención de datos:
-• Datos de cuenta: mientras la cuenta esté activa + 1 año después de eliminación
-• Contenido generado: mientras el proyecto exista + 30 días
-• Logs de actividad: 90 días para análisis de seguridad
-• Datos de pagos: 5 años según requerimientos legales colombianos`
+• Como regla, conservamos tus datos mientras tu cuenta exista: nada se borra por el simple paso del tiempo
+• Con una excepción que sí conviene que sepas: guardamos tus últimas 50 conversaciones de cada chat. Al pasar de ahí se borra sola la más antigua que no hayas anclado, y la aplicación te avisa antes de que ocurra
+• Puedes borrar tus conversaciones y tus proyectos cuando quieras desde la aplicación, y esa fila se elimina de inmediato
+• Las imágenes que generaste las borras tú desde Mis Activos y desaparecen de tu biblioteca de inmediato. Dónde queda el archivo depende de dónde se guardó: si vinculaste tu Google Drive, está en TU Drive y lo borras tú desde allí; si no, queda en el almacenamiento de archivos de Vercel y ese solo lo podemos borrar a mano
+• Lo mismo con la copia de respaldo que queda en el servidor de los chats con un Experto: hoy el botón no la alcanza. Pídenos cualquiera de las dos en privacy@creator-ia.com y las borramos
+• Para eliminar la cuenta entera, escríbenos a privacy@creator-ia.com. Es un reclamo bajo la Ley 1581 y lo atendemos en los 15 días hábiles del art. 15, prorrogables por 8 días hábiles más si te avisamos antes con el motivo`
     },
     {
       id: "sharing",
@@ -86,9 +89,11 @@ Retención de datos:
 Proveedores de servicios:
 • Neon (base de datos)
 • Bold.co (procesamiento de pagos)
-• OpenRouter y proveedores de modelos de IA (procesamiento de IA vía API)
-• Vercel (hosting y funciones edge)
+• OpenRouter y, a través suyo, el proveedor del modelo que elijas (procesamiento de IA vía API)
+• Tavily (búsquedas en la web, cuando se las pides al chat)
+• Vercel (hosting, funciones edge y almacenamiento de las imágenes que generas)
 • Resend (envío de correos transaccionales)
+• Google Drive, solo si tú conectas tu cuenta para guardar ahí tus imágenes
 
 Cada proveedor está sujeto a acuerdos de confidencialidad y solo tiene acceso a los datos necesarios para su función específica.
 
@@ -102,11 +107,11 @@ Obligaciones legales:
       title: "6. Datos e Inteligencia Artificial",
       content: `Respecto al contenido procesado por IA:
 
-• Los prompts y contenido generado se procesan via APIs de terceros (Google, OpenAI)
-• No almacenamos permanentemente las conversaciones con el chat de IA
-• Los modelos de IA no se entrenan con tus datos específicos
-• Puedes solicitar la eliminación de tu historial de generaciones
-• Las imágenes generadas se almacenan temporalmente para tu acceso
+• Tus prompts viajan a OpenRouter, que los entrega al modelo que elijas (Google, OpenAI, Anthropic, xAI, DeepSeek, Mistral y otros). Las imágenes también se generan a través de OpenRouter, y las búsquedas web pasan por Tavily
+• Guardamos tus conversaciones para que puedas volver a ellas. Puedes borrar cualquiera desde la aplicación; de los chats con un Experto queda además una copia de respaldo en el servidor que borramos si nos lo pides
+• Nosotros no entrenamos ningún modelo con tus datos. Lo que haga con tu prompt el proveedor al que viaja se rige por los términos de ese proveedor, no por los nuestros
+• Las imágenes que generas se guardan para que puedas volver a verlas y descargarlas
+• Los documentos que subes al chat para analizarlos NO se guardan: viajan dentro de la petición y se descartan al responder
 
 Contenido de terceros:
 • No somos responsables por el contenido que subas a la plataforma
@@ -127,30 +132,22 @@ Contenido de terceros:
 
 Para ejercer estos derechos:
 • Email: privacy@creator-ia.com
-• Tiempo de respuesta: 10 días hábiles
+• Tiempo de respuesta: 10 días hábiles para una consulta (art. 14 de la Ley 1581) y 15 para un reclamo (art. 15), con las prórrogas de 5 y 8 días hábiles que la misma ley permite si te avisamos antes
 • Identificación requerida para proteger tu privacidad`
     },
     {
       id: "cookies",
       title: "8. Cookies y Tecnologías Similares",
-      content: `Utilizamos cookies para:
+      content: `Usamos una sola cookie, y es la que te mantiene conectado:
 
-Cookies esenciales:
-• Autenticación de sesión
-• Preferencias de seguridad
-• Funcionalidad básica de la plataforma
+• Cookie esencial de sesión: la pone nuestro sistema de autenticación, es httpOnly (ni siquiera el código de la página puede leerla) y sin ella no podrías entrar a tu cuenta
 
-Cookies de rendimiento:
-• Análisis de uso anónimo
-• Mejora de velocidad y rendimiento
-• Detección de errores
+Y hasta ahí llega. Concretamente:
 
-Cookies de funcionalidad:
-• Preferencias de idioma
-• Configuraciones de interfaz
-• Recordar tus preferencias
+• NO usamos cookies de analítica, de publicidad ni de terceros. No hay ninguna herramienta de medición instalada en la plataforma: ni Google Analytics, ni píxeles, ni nada parecido
+• Tus preferencias de interfaz, como el tema claro u oscuro, se guardan en el almacenamiento local de tu navegador — no en cookies — y nunca viajan a nuestros servidores
 
-Puedes deshabilitar cookies en tu navegador, pero esto puede afectar la funcionalidad de la plataforma.`
+Si borras la cookie de sesión tendrás que volver a iniciar sesión, pero no pierdes nada.`
     },
     {
       id: "children",
@@ -167,12 +164,13 @@ Puedes deshabilitar cookies en tu navegador, pero esto puede afectar la funciona
       title: "10. Cambios a esta Política",
       content: `Podemos actualizar esta política de privacidad:
 
-• Cambios significativos: notificación por email 30 días antes
-• Cambios menores: actualización en esta página con fecha revisada
+• Los cambios se publican en esta página, con su número de versión y su fecha de vigencia
+• Abajo queda el historial de versiones para que puedas ver qué cambió y cuándo
 • Recomendamos revisar esta política periódicamente
-• El uso continuado después de cambios constituye aceptación
+• Si un cambio implica tratar tus datos para una finalidad nueva, te pediremos tu autorización antes, como exige el Decreto 1377 de 2013
 
 Historial de versiones:
+• v2.1 - 21 Octubre 2026: Corrección de exactitud — proveedores de IA reales, retención de datos, tratamiento de la IP y cifrado
 • v2.0 - 18 Abril 2026: Actualización integral
 • v1.0 - 1 Enero 2026: Versión inicial`
     },
@@ -193,9 +191,9 @@ Para denuncias sobre protección de datos:
   ];
 
   const features = [
-    { icon: Lock, title: "Encriptación", desc: "AES-256 en reposo y tránsito" },
+    { icon: Lock, title: "Cifrado", desc: "TLS en tránsito y cifrado en reposo por Neon" },
     { icon: Eye, title: "Transparencia", desc: "Sabemos qué datos tenemos y por qué" },
-    { icon: UserX, title: "Control", desc: "Exporta o elimina tus datos cuando quieras" },
+    { icon: UserX, title: "Control", desc: "Borra tus conversaciones y proyectos cuando quieras" },
     { icon: Globe, title: "Cumplimiento", desc: "Ley 1581 de 2012 de Colombia" },
   ];
 
@@ -246,11 +244,11 @@ Para denuncias sobre protección de datos:
             <div className="flex items-center gap-4 mt-8 text-sm text-zinc-400">
               <div className="flex items-center gap-2">
                 <Database className="h-4 w-4" />
-                <span>Versión 2.0</span>
+                <span>Versión 2.1</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                <span>Actualizado: 18 Abr 2026</span>
+                <span>Actualizado: 21 Oct 2026</span>
               </div>
             </div>
           </motion.div>
