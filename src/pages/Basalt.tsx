@@ -711,6 +711,15 @@ export default function BasaltPage() {
             <section className="asst-welcome">
               <h1 className="asst-hello">{A.welcome.title}</h1>
               <p className="asst-hello-sub">{A.welcome.subtitle}</p>
+              {/* Pedido de Johanna (correo del 2026-10-13): faltaba el aviso de que la
+                  IA puede equivocarse. Va acá y no debajo del compositor — ahí estaba y
+                  Sebastián pidió quitarlo (ed08b14). Y va ANTES de las tarjetas: son
+                  nueve y en un iPhone 13 se ven unas cinco, así que debajo de ellas el
+                  aviso caía fuera de pantalla (captura 2026-10-21). Ver .asst-welcome-note. */}
+              <p className="asst-welcome-note">
+                Basalt puede cometer errores. Verifica los datos importantes y no tomes sus
+                respuestas como asesoría profesional.
+              </p>
               <div className="asst-cards">
                 {(A.welcome.cards || []).map((c) => {
                   const Icon = (c.icon && ICONS[c.icon]) || Sparkles;

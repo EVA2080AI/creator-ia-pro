@@ -142,6 +142,16 @@
 .asst-card:hover { background: var(--asst-panel-2); transform: translateY(-2px); }
 .asst-card-ic { width: 32px; height: 32px; border-radius: 50%; background: var(--asst-bg); display: grid; place-items: center; align-self: flex-end; color: var(--asst-txt-2); }
 
+/* Aviso de que la IA puede equivocarse. Vive en la pantalla de bienvenida, NO
+   debajo del compositor: ahí estaba `.asst-disclaimer` y Sebastián pidió quitarlo
+   el 2026-09-30 (ed08b14) porque le robaba una línea a cada pantalla de chat para
+   siempre. Acá se lee al empezar cada conversación y no le quita alto al hilo.
+   Va entre el saludo y las tarjetas: debajo de ellas quedaba fuera de pantalla en
+   un iPhone 13 (Basalt tiene nueve tarjetas y se ven unas cinco). Lo separan de las
+   tarjetas los 6vh de `.asst-cards` (22px en móvil), así que acá basta un margen
+   corto. */
+.asst-welcome-note { margin-top: 14px; font-size: 12.5px; line-height: 1.5; color: var(--asst-txt-3); max-width: 62ch; }
+
 .asst-msg { display: flex; gap: 14px; }
 .asst-msg.user { justify-content: flex-end; }
 .asst-msg.user .asst-bubble {
@@ -303,14 +313,16 @@
   /* Medido en un iPhone 13 (390px): cada tarjeta ocupaba 380px de alto — solo
      entraban dos y se veían vacías (la etiqueta arriba y el icono suelto abajo
      a la derecha). En móvil pasan a ser filas compactas con el icono a la
-     izquierda: entran las cuatro sin desplazar, que es lo que hace que la
-     pantalla de bienvenida sirva para algo. */
+     izquierda: entraban las cuatro sin desplazar, que es lo que hace que la
+     pantalla de bienvenida sirva para algo. (Desde entonces Basalt pasó a nueve
+     tarjetas, así que ya solo se ven unas cinco — medido el 2026-10-21.) */
   .asst-cards { grid-template-columns: 1fr; gap: 8px; margin-top: 22px; }
   .asst-card { min-height: 0; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; padding: 13px 14px; border-radius: 14px; font-size: 14.5px; }
   .asst-card > span:first-child { flex: 1; min-width: 0; }
   .asst-card-ic { order: -1; align-self: center; width: 30px; height: 30px; flex: none; }
   .asst-hello-sub { font-size: 15.5px; line-height: 1.5; margin-top: 6px; }
   .asst-welcome { padding-top: 3vh; }
+  .asst-welcome-note { margin-top: 10px; font-size: 11.5px; }
 }
 
 /* ══ Capa de modernización del shell (Ciclo 2, "css muy antiguo") ═══════════

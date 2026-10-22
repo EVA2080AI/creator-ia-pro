@@ -628,6 +628,13 @@ export default function AssistantPage() {
             <section className="asst-welcome">
               <h1 className="asst-hello">{assistant.welcome.title || `Hola, soy ${assistant.name}`}</h1>
               <p className="asst-hello-sub">{assistant.welcome.subtitle || assistant.tagline}</p>
+              {/* Mismo aviso que Basalt, con el nombre del experto: los de Legal y
+                  Finanzas son justo donde "no es asesoría profesional" hace falta
+                  (pedido de Johanna, correo del 2026-10-13). */}
+              <p className="asst-welcome-note">
+                {assistant.name} puede cometer errores. Verifica los datos importantes y no
+                tomes sus respuestas como asesoría profesional.
+              </p>
               <div className="asst-cards">
                 {welcomeCards.map((c: AssistantWelcomeCard) => (
                   <button

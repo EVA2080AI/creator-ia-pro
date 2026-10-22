@@ -125,7 +125,10 @@ export default function ArenaPage() {
       <Helmet><title>Arena IA | Creator IA Pro</title></Helmet>
 
       <main ref={mainRef} className="mx-auto max-w-7xl px-4 py-6">
-        <p className="mb-4 text-[13px] text-muted-foreground">El mismo prompt a varios modelos en paralelo: compara las respuestas lado a lado y vota la mejor. Cada columna cobra lo que cobre su modelo.</p>
+        {/* El aviso de que la IA se equivoca entra en esta misma línea (pedido de
+            Johanna, 2026-10-13): acá no hay pantalla de bienvenida donde ponerlo y
+            sumar un párrafo aparte repetiría lo mismo dos veces. */}
+        <p className="mb-4 text-[13px] text-muted-foreground">El mismo prompt a varios modelos en paralelo: compara las respuestas lado a lado y vota la mejor. Cada columna cobra lo que cobre su modelo. Todos pueden cometer errores: verifica los datos importantes.</p>
         <form
           onSubmit={(e) => { e.preventDefault(); run(); }}
           className="mb-6 flex items-end gap-2 rounded-2xl border border-border bg-card p-3 shadow-sm"
