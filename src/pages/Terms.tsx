@@ -80,6 +80,8 @@ Nos reservamos el derecho de suspender o terminar cuentas que violen estos térm
       title: "6. Contenido Generado",
       content: `Respecto al contenido generado mediante nuestras herramientas de IA:
 
+• La IA puede equivocarse: sus respuestas pueden contener errores, datos desactualizados o afirmaciones que suenan ciertas y no lo son. Verifica cualquier dato importante antes de usarlo
+• Ninguna respuesta es asesoría profesional. No sustituye a un abogado, un contador, un médico ni ningún otro profesional, aunque el experto que uses lleve el nombre de esa área
 • Tienes los derechos de uso del contenido generado para fines legales
 • No garantizamos que el contenido generado sea único o no infrinja derechos de terceros
 • Eres responsable de verificar la originalidad y legalidad del contenido generado
@@ -210,7 +212,7 @@ Las modificaciones entran en vigor al publicarse en esta página, con dos salved
             <div className="flex items-center gap-4 mt-8 text-sm text-zinc-600">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                <span>Versión 2.4.0</span>
+                <span>Versión 2.5.0</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
