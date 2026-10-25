@@ -1,6 +1,7 @@
 import { Component, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw, Home, Bug } from "lucide-react";
+import { esErrorDeChunk, puedeRecargar } from "@/lib/chunk-reload";
 
 interface Props {
   children: ReactNode;
@@ -18,13 +19,6 @@ interface State {
   esChunk?: boolean;
 }
 
-/** Los mensajes con que Chrome, Safari y Firefox reportan un import() fallido. */
-function esErrorDeChunk(error: Error): boolean {
-  return /Failed to fetch dynamically imported module|Importing a module script failed|error loading dynamically imported module|Unable to preload CSS|ChunkLoadError/i.test(
-    `${error.name} ${error.message}`,
-  );
-}
-
 export class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -39,10 +33,14 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): State {
+    // esChunk explícito: React hace merge, no reemplazo, así que sin esta línea un
+    // `true` de un error anterior se queda pegado y pinta "La app se actualizó" sobre
+    // un fallo que no tiene nada que ver.
     return {
       hasError: true,
       error,
       errorId: ``,
+      esChunk: false,
     };
   }
 
@@ -54,15 +52,7 @@ export class ErrorBoundary extends Component<Props, State> {
     // sería puro ruido. Si ya recargamos hace nada y sigue fallando, entonces sí
     // se muestra, se reporta, y el botón que manda es "Recargar".
     if (esErrorDeChunk(error)) {
-      let recargar = false;
-      try {
-        const ultima = Number(sessionStorage.getItem("chunk_reload_at") || 0);
-        if (Date.now() - ultima >= 60_000) {
-          sessionStorage.setItem("chunk_reload_at", String(Date.now()));
-          recargar = true;
-        }
-      } catch { recargar = true; }
-      if (recargar) {
+      if (puedeRecargar()) {
         window.location.reload();
         return;
       }
@@ -113,6 +103,7 @@ export class ErrorBoundary extends Component<Props, State> {
       error: undefined,
       errorInfo: undefined,
       errorId: "",
+      esChunk: false,
     });
     this.props.onReset?.();
   };
@@ -123,8 +114,13 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen bg-background flex items-center justify-center p-6">
           <div className="max-w-lg w-full bg-card rounded-3xl shadow-xl border border-border p-8 md:p-12">
             <div className="flex flex-col items-center text-center">
-              <div className="w-20 h-20 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-6">
-                <AlertCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />
+              {/* Rojo de alerta solo cuando algo se rompió de verdad. "La app se actualizó"
+                  no es un fallo del usuario ni de la app: es un despliegue, y pintarlo de
+                  rojo lo hace parecer grave sin serlo. */}
+              <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-6 ${this.state.esChunk ? "bg-primary/10" : "bg-rose-500/10"}`}>
+                {this.state.esChunk
+                  ? <RefreshCw className="w-10 h-10 text-primary" />
+                  : <AlertCircle className="w-10 h-10 text-rose-500 dark:text-rose-400" />}
               </div>
 
               <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight mb-3">
@@ -137,7 +133,11 @@ export class ErrorBoundary extends Component<Props, State> {
                   : "Lo sentimos, ha ocurrido un error inesperado. Nuestro equipo ha sido notificado."}
               </p>
 
-              {this.state.errorId && (
+              {/* El ID solo sirve si hay ticket donde buscarlo. En el caso de chunk no se
+                  reporta nada (sería un ticket por pestaña abierta en cada despliegue), así
+                  que mostrarlo repetiría el error del 2026-10-05: un ID que no lleva a
+                  ningún lado. Ver el comentario de componentDidCatch. */}
+              {this.state.errorId && !this.state.esChunk && (
                 <div className="mb-6 p-3 bg-muted rounded-xl w-full">
                   <p className="text-xs text-muted-foreground font-mono">
                     Error ID: {this.state.errorId}
