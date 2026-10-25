@@ -16,7 +16,7 @@
       "destination": "/api/auth/handler"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|assets/).*)",
       "destination": "/index.html"
     }
   ],

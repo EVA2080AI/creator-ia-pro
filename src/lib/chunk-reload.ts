@@ -2,6 +2,12 @@
 // abierta sobre un despliegue anterior y los nombres con hash ya no existen. Recargar
 // trae el HTML nuevo con los chunks nuevos.
 //
+// Esto depende de que un chunk que falta devuelva un 404 de verdad. Por eso el fallback
+// de la SPA en vercel.json excluye `/assets/`: sin esa exclusion, pedir un chunk de un
+// despliegue anterior devolvia 200 con el HTML de index.html (medido en produccion el
+// 2026-10-25), y entonces el service worker lo cacheaba bajo la URL del chunk —solo mira
+// status===200— y la regla de cabeceras lo marcaba `immutable` por un ano al ser un .js.
+//
 // Vive aparte porque la misma guarda la necesitan dos sitios —el manejador de
 // `vite:preloadError` (src/main.tsx) y el ErrorBoundary, que atrapa el fallo si el
 // evento no llegó primero— y antes estaba copiada en los dos con la misma clave y la

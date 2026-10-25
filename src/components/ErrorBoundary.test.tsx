@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { _reiniciarMarcaEnMemoria } from "@/lib/chunk-reload";
 
 /** Un hijo que revienta al montar, con el error que se le indique. */
 function Reventar({ error }: { error: Error }): never {
@@ -29,7 +30,11 @@ beforeEach(() => {
   vi.stubGlobal("fetch", fetchMock);
   // React escribe el error del boundary por console.error; acá es ruido esperado.
   errorSilenciado = vi.spyOn(console, "error").mockImplementation(() => {});
+  // Cada test es una página nueva. Sin esto, la marca en memoria de chunk-reload.ts
+  // sobrevive de un test al siguiente y los de más abajo pasan por arrastre en vez de
+  // por la ventana de 60s que dicen comprobar: quedan atados al orden de declaración.
   sessionStorage.clear();
+  _reiniciarMarcaEnMemoria();
 });
 
 afterEach(() => {
