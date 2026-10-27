@@ -825,7 +825,7 @@ export default function Index() {
                   Míralo en acción
                 </h2>
                 <p className="text-lg text-zinc-600 max-w-2xl mx-auto">
-                  En 60 segundos: un contrato analizado, una imagen generada, una app lista para publicar — todo desde un mismo chat, con los modelos premium que trae el Plan Pro.
+                  En 17 segundos: un contrato analizado, una portada generada — todo desde un mismo chat, con los modelos premium que trae el Plan Pro.
                 </p>
               </motion.div>
 
@@ -836,10 +836,9 @@ export default function Index() {
                 transition={{ duration: 0.7, delay: 0.1 }}
                 className="relative rounded-3xl overflow-hidden border border-zinc-200 shadow-2xl shadow-zinc-900/15 bg-zinc-900 aspect-video"
               >
-                {/* Cuando subas /promo-landing.mp4 a /public (16:9, ~60s), se reproduce
-                    directamente. Mientras tanto, el poster + el controls del navegador
-                    muestran el "preview" y el intento de reproducir mostrará el
-                    error nativo (no se renderiza nada roto en SSR ni en primer paint). */}
+                {/* /promo-landing.mp4 lo regenera `node scripts/record-promo.mjs`
+                    desde /promo/landing. El primer archivo se grabó a mano y salió
+                    con quince segundos de pantalla blanca de carga. */}
                 <video
                   controls
                   preload="metadata"

@@ -1,11 +1,11 @@
 // Página 16:9 pensada para GRABAR y usar como video promocional horizontal
-// (hero de la landing, embed de YouTube, campañas de Meta/X):
-// 1) ábrela en creator-ia.com/promo/landing desde escritorio con la ventana
-//    maximizada (en móvil el canvas se enmarca 16:9 centrado con bandas negras),
-// 2) grábala con QuickTime (Mac) o la grabación nativa del SO,
-// 3) recorta y súbela como /public/promo-landing.mp4 — la sección "Míralo en
-//    acción" del /index la toma directo del poster/src.
+// (hero de la landing, embed de YouTube, campañas de Meta/X).
 // Loop de ~17s en 4 escenas con barra de progreso tipo stories arriba.
+//
+// Para generar /public/promo-landing.mp4: `node scripts/record-promo.mjs` (lee
+// este mismo loop desde el build de producción y recorta el arranque). Grabarla
+// a mano con QuickTime fue lo que produjo el primer archivo roto, quince
+// segundos de pantalla blanca porque el SPA todavía estaba cargando.
 //
 // Nota: el ícono flotante de PerformanceMonitor (abajo-derecha) SOLO existe
 // en dev (`import.meta.env.DEV`). En producción no sale, así que la grabación
