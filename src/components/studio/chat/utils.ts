@@ -239,6 +239,12 @@ export function extractXmlFiles(text: string): Record<string, StudioFile> | null
   return Object.keys(files).length > 0 ? files : null;
 }
 
+/** Lenguajes de bloque que nunca son un archivo del proyecto (ver el uso abajo). */
+const NO_SON_ARCHIVOS = new Set([
+  'mermaid', 'bash', 'sh', 'shell', 'zsh', 'console', 'cmd', 'powershell',
+  'text', 'txt', 'plaintext', 'diff', 'log', 'sql', 'yaml', 'yml', 'env',
+]);
+
 /** IMPROVED: Extract code blocks from markdown with better filename detection */
 export function extractChatCodeFiles(text: string): Record<string, StudioFile> | null {
   // Prefer XML format (v25+ engine) — fall back to markdown if no XML tags found
@@ -277,6 +283,10 @@ export function extractChatCodeFiles(text: string): Record<string, StudioFile> |
 
     // If no filename found, use language-based default
     if (!filename) {
+      // Un diagrama, un comando o un bloque de prosa no es un archivo del
+      // proyecto. Sin esto, un ```mermaid sin nombre caía en el default y se
+      // guardaba como App.tsx, pisando el archivo real.
+      if (NO_SON_ARCHIVOS.has(rawLang)) continue;
       const langMap: Record<string, string> = {
         'tsx': 'App.tsx', 'ts': 'utils.ts', 'jsx': 'App.jsx', 'js': 'script.js',
         'css': 'styles.css', 'html': 'index.html', 'json': 'package.json'
@@ -363,11 +373,17 @@ export function processRawResponse(rawText: string, prompt: string, isChatOnly: 
     }
   }
 
-  // 2. Fallback: extract code from markdown blocks
+  // 2. Archivos del modelo: XML `<file path="...">` (lo que usa el motor desde
+  //    v25) o bloques markdown (formato viejo). extractChatCodeFiles prefiere XML.
   const mdFiles = extractChatCodeFiles(rawText);
   if (mdFiles && Object.keys(mdFiles).length > 0) {
-    const firstBlock = rawText.indexOf('```');
-    const explanation = firstBlock > 0 ? rawText.slice(0, firstBlock).trim() : 'Código generado.';
+    // Lo que el modelo escribe ANTES del primer archivo es su explicación, y se
+    // corta en el marcador que aparezca primero. Buscar solo ``` dejaba sin
+    // explicación TODA respuesta en XML —el panel "Estudio de Ingeniería"
+    // mostraba siempre "Código generado."— porque indexOf devolvía -1.
+    const inicioArchivos = [rawText.search(/<file\s+path\s*=/i), rawText.indexOf('```')].filter((i) => i > 0);
+    const explicacion = inicioArchivos.length > 0 ? rawText.slice(0, Math.min(...inicioArchivos)).trim() : '';
+    const explanation = explicacion || 'Código generado.';
 
     // Check if this is a vanilla HTML project
     const isVanilla = wantsVanilla || isVanillaHtmlProject(mdFiles);

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { detectIntent } from "./utils";
+import { detectIntent, extractChatCodeFiles, processRawResponse } from "./utils";
 
 describe("detectIntent — preguntas genuinas van a chat, no a codegen", () => {
   it("no reescribe el proyecto cuando el usuario solo pregunta qué mejorar (bug real verificado en vivo)", () => {
@@ -37,5 +37,63 @@ describe("detectIntent — pedidos de video (sin proveedor conectado todavía)",
     // "video" como parte de un pedido de app/componente sigue siendo codegen,
     // igual que wantsImageGeneration ya excluye "imagen de fondo" en un hero.
     expect(detectIntent("crea un componente con un reproductor de video para el dashboard")).not.toBe("video");
+  });
+});
+
+describe("processRawResponse — la explicación del modelo no se pierde", () => {
+  it("conserva el texto previo cuando la respuesta viene en XML (bug del panel vacío)", () => {
+    // El motor usa `<file path="...">` desde v25, pero el corte se buscaba solo
+    // con ```, que no aparece: toda respuesta XML perdía su explicación y el
+    // panel "Estudio de Ingeniería" mostraba siempre "Código generado.".
+    const raw = [
+      "Genero una landing para Tinto Bogotá con menú y reservas.",
+      "",
+      '<file path="src/App.tsx">',
+      "export default function App() { return <main>Tinto</main>; }",
+      "</file>",
+    ].join("\n");
+
+    const out = processRawResponse(raw, "crea una landing", false);
+
+    expect(out?.explanation).toBe("Genero una landing para Tinto Bogotá con menú y reservas.");
+    expect(Object.keys(out?.files ?? {})).toContain("src/App.tsx");
+  });
+
+  it("sigue cortando en el primer bloque markdown cuando ese es el formato", () => {
+    const raw = "Aquí va el componente.\n\n```tsx App.tsx\nexport const A = 1;\n```";
+
+    expect(processRawResponse(raw, "crea algo", false)?.explanation).toBe("Aquí va el componente.");
+  });
+
+  it("usa el texto por defecto solo cuando el modelo no escribió explicación", () => {
+    const raw = '<file path="src/App.tsx">\nexport const A = 1;\n</file>';
+
+    expect(processRawResponse(raw, "crea algo", false)?.explanation).toBe("Código generado.");
+  });
+});
+
+describe("extractChatCodeFiles — diagramas y comandos no son archivos", () => {
+  it("ignora un bloque mermaid sin nombre en vez de guardarlo como App.tsx", () => {
+    const files = extractChatCodeFiles("```mermaid\ngraph TD; A-->B;\n```");
+
+    expect(files).toBeNull();
+  });
+
+  it("no deja que un bloque bash pise el archivo real que vino después", () => {
+    const raw = [
+      "```bash",
+      "npm install react",
+      "```",
+      "",
+      "```tsx",
+      "export default function App() {",
+      "  return <main>Hola</main>;",
+      "}",
+      "```",
+    ].join("\n");
+    const files = extractChatCodeFiles(raw);
+
+    expect(Object.keys(files ?? {})).toEqual(["App.tsx"]);
+    expect(files?.["App.tsx"].content).toContain("return <main>Hola</main>;");
   });
 });
