@@ -1,56 +1,81 @@
 # Próximos pasos — creator-ia-pro
 
-Generado tras un QA completo el 2026-08-10 (revisión de código sin commitear + auditoría de backend + pruebas en vivo contra producción). Reporte completo con evidencia y líneas exactas: https://claude.ai/code/artifact/5d4df428-4402-4350-b449-a0fdc46bcd0c
+Lista nacida del QA completo del 2026-08-10 (revisión de código sin commitear + auditoría
+de backend + pruebas en vivo contra producción). Reporte original con evidencia y líneas
+exactas: https://claude.ai/code/artifact/5d4df428-4402-4350-b449-a0fdc46bcd0c
 
-No se aplicó ningún fix — todo lo de abajo está pendiente.
+**Revalidada contra el código el 2026-10-21, después de la migración a Neon.** Más de la
+mitad de la lista se cerró sola con la migración, y los números de línea del QA ya no
+corresponden: lo que sigue abierto lleva su línea de hoy. **No queda nada en 🔴.**
 
-## 🔴 Urgente
+## 🟡 Abierto
 
-1. **Pasar Supabase a plan Pro.** El proyecto (`zfzkohjdwggctogehlkw`) se pausó solo 2 veces en un mes por el plan gratuito (auto-pausa por inactividad), rompiendo el login en producción cada vez. Es el fallo más disruptivo y el único que no se arregla con código. Restaurar manualmente mientras tanto: dashboard de Supabase → botón "Restore project", o `POST https://api.supabase.com/v1/projects/zfzkohjdwggctogehlkw/restore` con el token del CLI.
+1. **El downgrade a modelo gratuito nunca ocurre** — `src/pages/Chat.tsx:607` y `:613`.
+   Dos `useEffect` compiten: el primero escribe `genesis-selected-model` en `localStorage`
+   en cada render (incluido el de montaje), así que cuando el segundo pregunta
+   `if (!saved && (tier === 'free' || credits <= 0))`, `saved` **siempre** tiene valor y la
+   condición nunca entra. Un usuario free con 0 créditos se queda con el modelo de pago y
+   choca contra el error de saldo. Arreglo: decidir el downgrade con una bandera propia
+   ("el usuario eligió modelo") en vez de deducirlo de la presencia de la clave.
 
-2. **Fix: explicación del asistente se descarta en formato XML** — `src/components/studio/chat/utils.ts:172, 182, 296`. Causa raíz más probable de que el panel "Estudio de Ingeniería" (tareas/arquitectura) salga vacío. `processRawResponse` sigue buscando ` ``` ` para cortar el texto de explicación, pero los prompts nuevos (`genesis-prompts.ts`, `specialist-prompts.ts`) ya no usan bloques markdown, solo `<file path="...">`. Además, cualquier bloque ` ```mermaid ` o ` ```bash ` se clasifica como archivo de código fuente en vez de ignorarse. Confirmado por dos revisores independientes.
+2. **El checklist "N archivos listos" subreporta en vivo** — `src/hooks/useStudioChatAI.ts:393`.
+   `delta.includes('</file>')` mira solo el chunk actual, no el buffer acumulado: un cierre
+   de etiqueta partido entre dos chunks no se detecta. El resultado final sí queda bien
+   aplicado — es solo el contador en pantalla.
 
-3. **Quitar 3 modelos de texto muertos del selector** — `src/services/ai-service.ts`, `TEXT_MODEL_MAP`. Probado en vivo contra OpenRouter: `google/gemini-2.0-flash-001` (Gemini 3 Flash), `anthropic/claude-3.5-sonnet` (Claude 3.5 Sonnet) y `anthropic/claude-3-opus-20240229` (Claude 3 Opus) devuelven `"No endpoints found"`. El usuario ve el error crudo sin clasificar. El modelo por defecto (`deepseek-chat`) sí funciona.
+3. **Las 5 herramientas de edición de imagen siguen caídas** — `src/services/ai-service.ts`.
+   `upscale`, `background`, `enhance`, `restore` y `eraser` lanzan *"temporalmente
+   deshabilitada"* (hay un test que lo fija en `src/test/ai-service.test.ts:129`). Nunca se
+   migraron de la edge function `media-proxy` de Supabase. Hoy el camino sería `api/ai/*`,
+   con el mismo patrón de `api/ai/image.ts`: sesión → plan → cobro atómico → reembolso si falla.
+   *(Este ítem reemplaza al viejo "configurar `FAL_KEY` en los secretos de Supabase", que ya
+   no aplica: no hay secretos de Supabase.)*
 
-4. **Fix: selector de modelo fuera de pantalla en móvil** — `src/components/studio/chat/ModelSelector.tsx:118`. El cálculo de posición usa un ancho fijo (416px) en vez del ancho real renderizado; en cualquier viewport <428px el dropdown queda con `left` negativo, recortado contra el borde. Reproduce en el 100% de los teléfonos.
+4. **`newDeps` que ningún parser lee** — `src/prompts/genesis-prompts.ts:32`. La regla 5 le
+   pide al modelo declarar paquetes npm nuevos en un JSON con clave `"newDeps"`; nada en el
+   código la lee, así que se pierde en silencio y el archivo generado que importe ese paquete
+   rompe en el preview.
 
-## 🟡 Importante
-
-5. **Configurar `FAL_KEY` en los secretos de Supabase.** Sin ella, `media-proxy` está completamente caído: mejorar resolución, quitar fondo, restaurar y generar video (Fal.ai) fallan de inmediato, incluso antes de intentar el fallback a Replicate.
-
-6. **`src/hooks/useStudioChatAI.ts:313`** — el detector de archivos en streaming busca `"</file>"` solo en el chunk actual, no en el buffer acumulado; un cierre de tag partido entre dos chunks no se detecta en vivo (el checklist "N archivos listos" subreporta, aunque el resultado final sí queda bien aplicado).
-
-7. **`src/pages/Chat.tsx:579`** — condición de carrera entre dos `useEffect`: un usuario free con 0 créditos nunca recibe el modelo gratuito por defecto porque el efecto que persiste el modelo actual en `localStorage` corre antes que el efecto que decide el downgrade.
-
-8. ~~**`src/components/studio/StudioChat.tsx:490`** — llamada a `/functions/v1/scrape-url`, función que no existe (confirmado 404 en vivo). La función de "pegar una URL y que la IA la lea" falla silenciosamente siempre.~~ **FIX 2026-09-08:** reemplazada por `api/scrape.ts` (Vercel Function con guard SSRF, límite de 512 KB / 15.000 chars y timeout de 10 s) llamada desde StudioChat como `/api/scrape`.
-
-9. **`src/prompts/genesis-prompts.ts:23`** — la regla 5 pide declarar dependencias npm nuevas en un JSON con clave `"newDeps"` que ningún parser del código lee; se pierde silenciosamente y el archivo generado que la importe rompe en el preview.
+5. **`media-proxy` fantasma en el panel admin** — `src/pages/Admin.tsx:125`. Sigue listado
+   como servicio ("Edición de imagen (Replicate)") un endpoint que ya no existe. Se cae con
+   el ítem 3 o se borra la fila.
 
 ## 🟢 Cuando haya tiempo
 
-- Configurar `TAVILY_API_KEY` — sin ella, la búsqueda web de Génesis siempre devuelve un placeholder en vez de buscar de verdad (no rompe, solo no funciona).
-- Limpiar funciones edge huérfanas: `check-subscription` (resto de Stripe pre-Bold.co, sin ninguna referencia en el frontend — candidata a borrar), `groq-proxy` / `huggingface-proxy` (caídas por falta de clave y además código muerto, sin ninguna pantalla que las use hoy).
+- Configurar `TAVILY_API_KEY` si se quiere búsqueda web de verdad. Ya no rompe nada: sin la
+  clave, `api/ai/chat.ts` no ofrece la herramienta y le agrega al prompt una nota de que no
+  puede buscar (`NO_SEARCH_NOTE`), para que el modelo no la prometa.
+- Ejecutar el `git rm` de los 35 archivos muertos identificados en la fase 7 (ver más abajo),
+  si es que siguen ahí.
+
+## ✅ Cerrado desde el QA
+
+| Ítem original | Qué lo cerró |
+|---|---|
+| 🔴 1. Supabase a plan Pro (auto-pausa rompía el login) | La migración a Neon + better-auth. No queda `@supabase/supabase-js` en `package.json`, ni carpeta `supabase/`, ni una sola llamada viva: las 87 menciones que quedan en el código son comentarios históricos del tipo *"reemplaza `supabase.from(...)`"*. |
+| 🔴 2. La explicación del asistente se descartaba en formato XML | **2026-10-21.** `processRawResponse` cortaba la explicación con `rawText.indexOf('```')`, que da `-1` en una respuesta XML — y el motor usa `<file path="...">` desde v25, así que el panel "Estudio de Ingeniería" mostraba **siempre** "Código generado.". Ahora corta en el marcador que aparezca primero (`<file` o ` ``` `). De paso: un bloque ` ```mermaid ` o ` ```bash ` sin nombre caía en el default y se guardaba como `App.tsx`, **pisando el archivo real**; ahora se ignora (`NO_SON_ARCHIVOS` en `utils.ts`). Cubierto por 5 tests nuevos en `utils.test.ts`. |
+| 🔴 3. Tres modelos de texto muertos en el selector | `TEXT_MODEL_MAP` ya remapea `claude-3.5-sonnet` → `anthropic/claude-sonnet-4.5`; `gemini-2.0-flash-001` y `claude-3-opus-20240229` ya no están. |
+| 🔴 4. Selector de modelo recortado en móvil | `ModelSelector.tsx` ya calcula `effectiveWidth = Math.min(416, vw - 24)` y acota `left` contra el viewport. |
+| 🟡 8. `/functions/v1/scrape-url` inexistente | **2026-09-08.** Reemplazada por `api/scrape.ts` (función de Vercel con guard SSRF, límite de 512 KB / 15.000 chars y timeout de 10 s), llamada como `/api/scrape`. |
+| 🟢 Funciones edge huérfanas (`check-subscription`, `groq-proxy`, `huggingface-proxy`) | Desaparecieron con Supabase. No hay ninguna referencia en `src/` ni en `api/`. |
+| 🆕 2026-08-25. Tareas (Kanban) + correo, bloqueado por Supabase pausado | Desbloqueado: `/tasks` y los correos corren sobre Neon + Vercel. El bloque de `npx supabase db push` que estaba aquí ya no aplica. |
+| 🆕 2026-09-08. Seis archivos con Supabase vivo y alcanzable | Todos migrados: `src/integrations/` ya no existe, `AdminLoginGate.tsx` se borró y los otros cinco tienen cero menciones a Supabase. Ver el detalle histórico al final de este documento. |
 
 ## Sin verificar (pendiente de sesión con navegador conectado)
 
-La extensión de Chrome no llegó a conectarse en esta sesión, así que estos dos puntos de la QA original (capturas de hace ~2 meses) no se pudieron reproducir visualmente:
+La extensión de Chrome no llegó a conectarse en la sesión del QA, así que este punto no se
+pudo reproducir visualmente:
 
-- Panel "Estudio de Ingeniería" vacío — respaldado solo por análisis de código (ítem 2 arriba es la hipótesis más fuerte).
-- Pantallas de carga infinita tras navegar a `/chat` y tras "Push to Cloud" — la teoría de las ~45 dependencias de shadcn como causa fue investigada y descartada (Sandpack muestra su propio error de timeout, no es un cuelgue silencioso), pero eso no confirma que el problema original ya no exista por otra causa.
+- Pantallas de carga infinita tras navegar a `/chat` y tras "Push to Cloud". La teoría de las
+  ~45 dependencias de shadcn como causa fue investigada y descartada (Sandpack muestra su
+  propio error de timeout, no es un cuelgue silencioso), pero eso no confirma que el problema
+  original ya no exista por otra causa.
+- El panel "Estudio de Ingeniería" vacío **ya tiene causa confirmada y arreglada** (ítem 2 de
+  la tabla de cerrados). Vale la pena una pasada visual para confirmar que no quedaba una
+  segunda causa.
 
-Para cerrar esto: conectar la extensión con `/chrome` y pedir que se repita la pasada visual, o probarlo manualmente y contarme qué se ve.
-
-## 🆕 2026-08-25 — Tareas (Kanban móvil) + correo con Resend: pendiente de despliegue
-
-Código listo y verificado localmente (tests, build). Bloqueado porque el proyecto de Supabase está **pausado** (`INACTIVE`, el host ni resuelve en DNS) — es el mismo ítem 🔴 #1 de arriba. Al restaurarlo, ejecutar en orden:
-
-```bash
-npx supabase db push                                   # crea tasks + email_logs
-npx supabase secrets set RESEND_API_KEY='re_...'       # clave gratuita de resend.com
-npx supabase functions deploy send-email               # función de correo
-```
-
-Guía completa (plan gratuito de Resend, verificación de dominio, límites): `docs/TAREAS_Y_EMAIL.md`.
+Para cerrar esto: conectar la extensión con `/chrome` y pedir que se repita la pasada visual,
+o probarlo manualmente y contarme qué se ve.
 
 ## 🆕 2026-08-26 — Migración a Vercel + Neon: núcleo de Genesis ya funciona en producción
 
@@ -102,8 +127,9 @@ Trabajo post-26-ago revisado, completado y verificado (tests 29/29 ✅). Pendien
 **CI:** `npm run typecheck` y `typecheck:api` (nuevo `tsconfig.api.json` para `api/`+`db/`) en el workflow; job de E2E de Playwright retirado del pipeline de deploy.
 
 **Sigue pendiente (sin cambios):** claves OAuth de Google/Apple/GitHub en Vercel, migración de datos de Supabase (fase 6, requiere restaurar el proyecto pausado), `TAVILY_API_KEY`, y la fusión visual restante dentro de Genesis (`docs/PLAN_REFACTOR_GENESIS.md`).
+> Al 2026-10-21: la migración de datos ya no aplica (no queda Supabase). OAuth, `TAVILY_API_KEY` y la fusión visual de Genesis siguen abiertos.
 
-**⚠️ Nuevo hallazgo (2026-09-08): Supabase vivo en páginas con ruta.** Al auditar `import ... from '@/integrations/supabase/client'` quedan 6 archivos **alcanzables por el usuario** que siguen llamando al Supabase muerto (todo lo que tocan falla en silencio o con error):
+**⚠️ Nuevo hallazgo (2026-09-08): Supabase vivo en páginas con ruta.** ✅ **Resuelto — tabla histórica, no accionable.** Verificado el 2026-10-21: `src/integrations/` ya no existe, `AdminLoginGate.tsx` se borró y los otros cinco archivos tienen cero menciones a Supabase. Al auditar `import ... from '@/integrations/supabase/client'` quedan 6 archivos **alcanzables por el usuario** que siguen llamando al Supabase muerto (todo lo que tocan falla en silencio o con error):
 
 | Archivo | Qué rompe | Migración necesaria |
 |---|---|---|
