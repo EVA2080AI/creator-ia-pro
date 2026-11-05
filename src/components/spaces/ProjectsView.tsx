@@ -69,6 +69,10 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
   const [creating, setCreating] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string, type: 'flow' | 'code' } | null>(null);
   const [deleting, setDeleting] = useState(false);
+  // Con Canvas IA apagado por flag, un proyecto de flujo no tenía ninguna
+  // salida: el clic solo mostraba un toast. Ahora se ofrece reconstruirlo
+  // con Basalt, que sí está disponible.
+  const [rebuildTarget, setRebuildTarget] = useState<UnifiedProject | null>(null);
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<'updated' | 'name' | 'created'>('updated');
@@ -162,10 +166,11 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
     }
 
     if (space.type === "flow") {
-      // Mismo criterio que goToCanvas: con el flag apagado, un usuario común
-      // aterrizaba en la pantalla "Próximamente" — el proyecto "no abría".
+      // Con el flag apagado, un proyecto de flujo no se puede abrir. Antes
+      // solo salía "Próximamente" y la tarjeta quedaba muerta; ahora se
+      // ofrece la única vía viva: pedirle a Basalt que lo reconstruya.
       if (!CANVAS_ENABLED) {
-        toast("Canvas IA — Próximamente", { description: "Estamos terminando esta función. Te avisaremos cuando esté lista." });
+        setRebuildTarget(space);
         return;
       }
       navigate(`/studio-flow?spaceId=${space.id}`);
@@ -617,6 +622,48 @@ export const ProjectsView = ({ onOpenCreate }: { onOpenCreate: () => void }) => 
               className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-rose-500 text-white rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-rose-400 active:scale-95 transition-all disabled:opacity-50 font-display"
             >
               {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Eliminar"}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Canvas IA apagado — ofrecer reconstruir el flujo con Basalt */}
+      <Dialog open={!!rebuildTarget} onOpenChange={(o) => !o && setRebuildTarget(null)}>
+        <DialogContent className="sm:max-w-[420px] rounded-[2rem] p-10 bg-card border-border shadow-xl shadow-black/5">
+          <DialogHeader>
+            <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-6">
+              <LayoutTemplate className="h-7 w-7 text-primary" />
+            </div>
+            <DialogTitle className="text-2xl font-bold text-foreground tracking-tight font-display">
+              Canvas IA está en rediseño
+            </DialogTitle>
+            <DialogDescription className="text-muted-foreground font-medium leading-relaxed mt-2">
+              «{rebuildTarget?.name}» se creó en Canvas IA, que todavía no está disponible.
+              Basalt puede reconstruirlo como proyecto multi-archivo listo para usar.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-4 mt-8">
+            <button
+              onClick={() => setRebuildTarget(null)}
+              className="flex-1 px-6 py-4 rounded-2xl border border-border text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground hover:bg-muted transition-all font-display"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => {
+                if (!rebuildTarget) return;
+                const description = rebuildTarget.description?.trim();
+                const prompt = [
+                  `Reconstruye mi proyecto "${rebuildTarget.name}" como proyecto multi-archivo listo para usar.`,
+                  description ? `Descripción original: ${description}` : "",
+                ].filter(Boolean).join(" ");
+                setRebuildTarget(null);
+                navigate(`/a/basalt?q=${encodeURIComponent(prompt)}`);
+              }}
+              className="flex-[1.5] flex items-center justify-center gap-2 px-6 py-4 bg-primary text-primary-foreground rounded-2xl text-xs font-bold uppercase tracking-widest hover:bg-primary/90 active:scale-95 transition-all shadow-xl shadow-primary/10 font-display"
+            >
+              <Sparkles className="h-4 w-4" />
+              Reconstruir en Basalt
             </button>
           </DialogFooter>
         </DialogContent>

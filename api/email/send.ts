@@ -9,6 +9,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { and, count, eq, gte } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { requireUser } from "../_lib/require-user.js";
+import { buildTaskReminderEmail } from "../_lib/task-reminder-email.js";
 
 const RESEND_API_URL = "https://api.resend.com/emails";
 const DEFAULT_FROM = "Creator IA Pro <onboarding@resend.dev>";
@@ -177,18 +178,15 @@ function buildEmail(
       const text = `${ctx.senderName} (${ctx.senderEmail}) te compartió una tarea:\n\n${req.message?.trim() ? `"${req.message.trim()}"\n\n` : ""}${taskText(t)}\n\nResponde a este correo para contactar a ${ctx.senderName}.`;
       return { subject, html, text };
     }
-    case "task_reminder": {
-      const n = ctx.tasks.length;
-      const subject = n === 1
-        ? `⏰ Recordatorio: "${ctx.tasks[0].title}" vence hoy o está atrasada`
-        : `⏰ Tienes ${n} tareas que vencen hoy o están atrasadas`;
-      const html = layout(
-        "Recordatorio de tareas",
-        `<p style="margin:0 0 6px;">Estas tareas vencen hoy o ya están atrasadas:</p>${ctx.tasks.map(taskCardHtml).join("")}${button("Ponerme al día", tasksUrl)}`,
-        subject,
-      );
-      return { subject, html, text: `Recordatorio de tareas:\n\n${ctx.tasks.map(taskText).join("\n\n")}${footerText}` };
-    }
+    case "task_reminder":
+      // Misma plantilla que usa el cron diario (api/cron/task-reminders.ts).
+      return buildTaskReminderEmail(ctx.tasks.map((t) => ({
+        title: t.title,
+        description: t.description,
+        status: t.status,
+        priority: t.priority,
+        due_date: t.due_date,
+      })));
     case "custom": {
       const subject = (req.subject ?? "").trim().slice(0, 200);
       const message = (req.message ?? "").trim().slice(0, 5000);

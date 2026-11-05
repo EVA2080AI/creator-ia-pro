@@ -67,6 +67,9 @@ export default function Tasks() {
       } else if (res.code === "NOT_CONFIGURED") {
         console.warn("[tasks] Correo no configurado:", res.error);
       } else {
+        // Sin esto, un fallo transitorio dejaba el recordatorio bloqueado
+        // hasta recargar la página: la bandera se marcaba antes de enviar.
+        reminderRan.current = false;
         toast.error("No se pudo enviar el recordatorio", { description: res.error });
       }
     })();
