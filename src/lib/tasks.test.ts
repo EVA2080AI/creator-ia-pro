@@ -12,6 +12,7 @@ const make = (over: Partial<Task> = {}): Task => ({
   user_id: "u1",
   title: "Tarea",
   description: null,
+  notes: null,
   status: "todo",
   priority: "medium",
   due_date: null,

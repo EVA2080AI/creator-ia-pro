@@ -12,6 +12,7 @@ interface ApiTask {
   userId: string;
   title: string;
   description: string | null;
+  notes: string | null;
   status: TaskStatus;
   priority: "low" | "medium" | "high";
   dueDate: string | null;
@@ -25,7 +26,7 @@ interface ApiTask {
 
 function fromApi(t: ApiTask): Task {
   return {
-    id: t.id, user_id: t.userId, title: t.title, description: t.description,
+    id: t.id, user_id: t.userId, title: t.title, description: t.description, notes: t.notes,
     status: t.status, priority: t.priority, due_date: t.dueDate, position: t.position,
     notify_email: t.notifyEmail, reminder_sent_at: t.reminderSentAt, completed_at: t.completedAt,
     created_at: t.createdAt, updated_at: t.updatedAt,
@@ -92,6 +93,7 @@ export function useTasks(userId: string | undefined) {
       user_id: userId,
       title: input.title.trim(),
       description: input.description?.trim() || null,
+      notes: input.notes?.trim() || null,
       status,
       priority: input.priority ?? "medium",
       due_date: input.due_date || null,
@@ -109,6 +111,7 @@ export function useTasks(userId: string | undefined) {
       body: JSON.stringify({
         title: optimistic.title,
         description: optimistic.description,
+        notes: optimistic.notes,
         status: optimistic.status,
         priority: optimistic.priority,
         dueDate: optimistic.due_date,
@@ -134,6 +137,7 @@ export function useTasks(userId: string | undefined) {
     const clean: Partial<Task> = {};
     if (patch.title !== undefined) clean.title = patch.title.trim();
     if (patch.description !== undefined) clean.description = patch.description?.trim() || null;
+    if (patch.notes !== undefined) clean.notes = patch.notes?.trim() || null;
     if (patch.status !== undefined) clean.status = patch.status;
     if (patch.priority !== undefined) clean.priority = patch.priority;
     if (patch.due_date !== undefined) clean.due_date = patch.due_date || null;
@@ -147,7 +151,7 @@ export function useTasks(userId: string | undefined) {
     const res = await api<{ task: ApiTask }>(`/api/tasks/${id}`, {
       method: "PATCH",
       body: JSON.stringify({
-        title: clean.title, description: clean.description, status: clean.status,
+        title: clean.title, description: clean.description, notes: clean.notes, status: clean.status,
         priority: clean.priority, dueDate: clean.due_date, position: clean.position,
         notifyEmail: clean.notify_email,
       }),

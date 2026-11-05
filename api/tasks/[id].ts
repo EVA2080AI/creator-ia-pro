@@ -6,6 +6,7 @@ import { computeCompletedAt } from "../_lib/tasks.js";
 
 const MAX_TITLE = 200;
 const MAX_DESC = 4000;
+const MAX_NOTES = 4000;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const user = await requireUser(req, res);
@@ -16,12 +17,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === "PATCH") {
     const body = (req.body ?? {}) as {
-      title?: string; description?: string | null; status?: string; priority?: string;
+      title?: string; description?: string | null; notes?: string | null; status?: string; priority?: string;
       dueDate?: string | null; position?: number; notifyEmail?: boolean;
     };
     const patch: Record<string, unknown> = { updatedAt: new Date() };
     if (body.title !== undefined) patch.title = body.title.trim().slice(0, MAX_TITLE);
     if (body.description !== undefined) patch.description = body.description?.trim().slice(0, MAX_DESC) || null;
+    if (body.notes !== undefined) patch.notes = body.notes?.trim().slice(0, MAX_NOTES) || null;
     if (body.priority !== undefined) patch.priority = body.priority;
     if (body.dueDate !== undefined) patch.dueDate = body.dueDate || null;
     if (body.position !== undefined) patch.position = body.position;

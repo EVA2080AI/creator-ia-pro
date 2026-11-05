@@ -1,6 +1,6 @@
 import { memo } from "react";
 import type { DragEvent, KeyboardEvent } from "react";
-import { ArrowLeft, ArrowRight, CalendarDays, Check, GripVertical, Mail, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Check, GripVertical, Mail, StickyNote, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   PRIORITY_META, STATUS_META, formatDueLabel, isDueToday, isOverdue, nextStatus, prevStatus,
@@ -83,6 +83,12 @@ export const TaskCard = memo(function TaskCard({
           </p>
           {task.description && (
             <p className="mt-1 text-[12px] text-muted-foreground leading-relaxed line-clamp-2 whitespace-pre-line">{task.description}</p>
+          )}
+          {task.notes && (
+            <p className="mt-1.5 flex items-start gap-1.5 rounded-lg bg-primary/5 px-2 py-1.5 text-[11px] text-foreground/80 leading-relaxed line-clamp-2 whitespace-pre-line">
+              <StickyNote className="w-3 h-3 mt-0.5 shrink-0 text-primary/70" aria-hidden />
+              <span className="min-w-0">{task.notes}</span>
+            </p>
           )}
           <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
             <span className={cn("inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-bold uppercase tracking-wider", priority.chip)}>

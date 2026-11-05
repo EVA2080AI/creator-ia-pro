@@ -10,6 +10,8 @@ export interface Task {
   user_id: string;
   title: string;
   description: string | null;
+  /** Información adicional que escribe el usuario sobre la tarea (resultados, detalles). */
+  notes: string | null;
   status: TaskStatus;
   priority: TaskPriority;
   /** Fecha límite en formato YYYY-MM-DD (sin hora ni zona horaria). */
@@ -25,6 +27,7 @@ export interface Task {
 export interface TaskInput {
   title: string;
   description?: string | null;
+  notes?: string | null;
   status?: TaskStatus;
   priority?: TaskPriority;
   due_date?: string | null;

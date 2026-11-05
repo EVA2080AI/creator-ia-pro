@@ -69,6 +69,7 @@ const labelCls = "block text-[10px] font-black uppercase tracking-widest text-mu
 function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, onShare, onClose }: TaskSheetProps & { onClose: () => void }) {
   const [title, setTitle] = useState(task?.title ?? "");
   const [desc, setDesc] = useState(task?.description ?? "");
+  const [notes, setNotes] = useState(task?.notes ?? "");
   const [status, setStatus] = useState<TaskStatus>(task?.status ?? defaultStatus ?? "todo");
   const [priority, setPriority] = useState<TaskPriority>(task?.priority ?? "medium");
   const [dueDate, setDueDate] = useState(task?.due_date ?? "");
@@ -99,6 +100,7 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
     const ok = await onSubmit({
       title: title.trim(),
       description: desc.trim() || null,
+      notes: notes.trim() || null,
       status,
       priority,
       due_date: dueDate || null,
@@ -223,6 +225,21 @@ function TaskForm({ mode, task, defaultStatus, userEmail, onSubmit, onDelete, on
             </button>
           ))}
         </div>
+      </div>
+
+      <div>
+        <label htmlFor="task-notes" className={labelCls}>
+          Información adicional <span className="normal-case tracking-normal font-medium">(opcional)</span>
+        </label>
+        <textarea
+          id="task-notes"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          maxLength={4000}
+          rows={3}
+          placeholder="Lo que completaste, resultados, datos o enlaces que quieras guardar…"
+          className={cn(inputCls, "h-auto py-3 resize-none leading-relaxed")}
+        />
       </div>
 
       <label className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-muted/50 cursor-pointer">

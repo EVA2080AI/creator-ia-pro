@@ -11,6 +11,8 @@ export const task = pgTable("task", {
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description"),
+  /** Información adicional que escribe el usuario al cerrar o avanzar la tarea. */
+  notes: text("notes"),
   status: taskStatus("status").notNull().default("todo"),
   priority: taskPriority("priority").notNull().default("medium"),
   dueDate: date("due_date"),

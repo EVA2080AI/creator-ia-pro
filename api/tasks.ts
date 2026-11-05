@@ -10,6 +10,7 @@ import { computeCompletedAt } from "./_lib/tasks.js";
 
 const MAX_TITLE = 200;
 const MAX_DESC = 4000;
+const MAX_NOTES = 4000;
 
 const STATUS_VALUES = ["todo", "in_progress", "done"] as const;
 const PRIORITY_VALUES = ["low", "medium", "high"] as const;
@@ -26,6 +27,7 @@ const MOVE_SCHEMA = z.object({
 const CREATE_SCHEMA = z.object({
   title: z.string().trim().min(1, "Falta el título.").max(MAX_TITLE),
   description: z.string().trim().max(MAX_DESC).nullish(),
+  notes: z.string().trim().max(MAX_NOTES).nullish(),
   status: z.enum(STATUS_VALUES, { errorMap: () => ({ message: `Estado inválido. Usa uno de: ${STATUS_VALUES.join(", ")}.` }) }).optional(),
   priority: z.enum(PRIORITY_VALUES, { errorMap: () => ({ message: `Prioridad inválida. Usa una de: ${PRIORITY_VALUES.join(", ")}.` }) }).optional(),
   dueDate: z.string().nullish(),
@@ -62,6 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ids?: string[];
       title?: string;
       description?: string | null;
+      notes?: string | null;
       status?: string;
       priority?: string;
       dueDate?: string | null;
@@ -121,6 +124,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         userId: user.userId,
         title: data.title,
         description: data.description?.trim() || null,
+        notes: data.notes?.trim() || null,
         status: data.status ?? "todo",
         priority: data.priority ?? "medium",
         dueDate: data.dueDate || null,
