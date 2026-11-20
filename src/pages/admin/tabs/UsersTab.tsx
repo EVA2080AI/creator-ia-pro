@@ -16,6 +16,12 @@ import {
 
 // "¿Quién lo usa?" (pedido 2026-11-20): cada filtro dice cuántas cuentas caen ahí y, al
 // tocarlo, deja en la lista solo a esas personas.
+// Usuario | Plan | (Balance, desde xl) | Uso | Actividad | Acción — las clases completas,
+// escritas enteras para que Tailwind las encuentre. La tabla arranca en lg y no en md: entre
+// 768 y 1024px el menú lateral del panel deja ~450px, y ahí cinco columnas dejaban el nombre
+// en cero. Por debajo de lg cada cuenta es una tarjeta con el uso en una línea.
+const GRID_COLS = "lg:grid-cols-[minmax(0,1fr)_96px_116px_112px_36px] xl:grid-cols-[minmax(0,1fr)_100px_90px_124px_124px_36px]";
+
 const ACTIVITY_FILTERS: { id: ActivityFilter; label: string }[] = [
   { id: "todos", label: "Todos" },
   { id: "hoy", label: "Activos hoy" },
@@ -198,7 +204,7 @@ export function UsersTab({
               );
             })}
           </div>
-          <label className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+          <label className="flex shrink-0 items-center gap-2 whitespace-nowrap text-xs font-bold text-muted-foreground">
             Ordenar por
             <select
               value={sort}
@@ -214,17 +220,21 @@ export function UsersTab({
       )}
 
       {/* Grid Header */}
-      <div className="hidden md:grid grid-cols-[1fr_110px_90px_130px_130px_60px] gap-4 px-5 py-3 bg-muted/50 border border-border rounded-t-2xl text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">
+      {/* Anchos medidos en producción a 1100px (un portátil): con las columnas fijas en
+          520px al nombre le quedaban ~60px y se leía "Juan Se…", justo el dato que se viene
+          a buscar. El saldo aparece desde xl; antes de eso está en "Gestionar créditos". */}
+      <div className={`hidden lg:grid ${GRID_COLS} gap-3 px-5 py-3 bg-muted/50 border border-border rounded-t-2xl text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground`}>
         <span>Usuario</span>
         <span>Plan</span>
-        <span>Balance</span>
+        <span className="hidden xl:block">Balance</span>
         <span>Uso</span>
-        <span title="Lo último que hizo: entrar, escribir, generar una imagen o gastar créditos">Última actividad</span>
-        <span className="text-right">Acción</span>
+        <span title="Lo último que hizo: entrar, escribir, generar una imagen o gastar créditos">Actividad</span>
+        <span className="sr-only">Acción</span>
       </div>
 
       {/* User List */}
-      <div className="divide-y divide-border border-x border-b border-border rounded-b-2xl overflow-hidden bg-card">
+      {/* Sin la cabecera de la tabla (por debajo de lg) la lista cierra ella misma por arriba. */}
+      <div className="divide-y divide-border border-x border-b border-t lg:border-t-0 border-border rounded-b-2xl rounded-t-2xl lg:rounded-t-none overflow-hidden bg-card">
         {loading && users.length === 0 ? (
           <div className="flex justify-center py-20"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>
         ) : loadError ? (
@@ -245,7 +255,7 @@ export function UsersTab({
 
             return (
               <div key={u.user_id} className="group flex flex-col hover:bg-muted/50 transition-colors">
-                <div className="grid grid-cols-[1fr_auto] md:grid-cols-[1fr_110px_90px_130px_130px_60px] gap-4 items-center px-5 py-4">
+                <div className={`grid grid-cols-[minmax(0,1fr)_auto] ${GRID_COLS} gap-3 items-center px-5 py-4`}>
                   {/* User Identity */}
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="relative">
@@ -259,18 +269,19 @@ export function UsersTab({
                         {u.display_name || "Sin nombre"}
                       </p>
                       <p className="text-[11px] text-muted-foreground font-medium truncate font-mono">{u.email}</p>
-                      {/* En el teléfono no hay columnas: el uso va en una línea bajo el correo. */}
+                      {/* Sin columnas (teléfono y tableta): el uso va en una línea bajo el correo. */}
                       {hasActivity && (
-                        <p className="md:hidden mt-0.5 text-[11px] text-muted-foreground truncate">
+                        <p className="lg:hidden mt-0.5 text-[11px] text-muted-foreground truncate">
                           <span className="font-bold text-foreground">{activityLabel(u.last_active_at)}</span>
                           {" · "}{neverUsed(u) ? "nunca lo usó" : `${usageHeadline(u).n} ${usageHeadline(u).label}`}
+                          {u.subscription_tier !== "free" && ` · ${tier.label}`}
                         </p>
                       )}
                     </div>
                   </div>
 
                   {/* Tier */}
-                  <div className="hidden md:block">
+                  <div className="hidden lg:block">
                     <span className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-wider border"
                       style={{ background: tier.color + '08', color: tier.color, borderColor: tier.color + '20' }}>
                       <TierIcon className="h-3 w-3" />
@@ -279,13 +290,13 @@ export function UsersTab({
                   </div>
 
                   {/* Balance */}
-                  <div className="hidden md:flex items-center gap-1.5">
+                  <div className="hidden xl:flex items-center gap-1.5">
                     <Coins className="h-3.5 w-3.5 text-amber-400" />
                     <span className="text-[13px] font-bold text-foreground font-mono tracking-tight">{u.credits_balance.toLocaleString()}</span>
                   </div>
 
                   {/* Uso: cuánto escribió. Quien nunca escribió ni generó nada se dice tal cual. */}
-                  <div className="hidden md:block min-w-0">
+                  <div className="hidden lg:block min-w-0">
                     {!hasActivity ? (
                       <p className="text-[11px] text-muted-foreground">—</p>
                     ) : neverUsed(u) ? (
@@ -301,7 +312,7 @@ export function UsersTab({
                   </div>
 
                   {/* Última actividad, y debajo desde cuándo tiene cuenta */}
-                  <div className="hidden md:block min-w-0">
+                  <div className="hidden lg:block min-w-0">
                     {hasActivity && (
                       <p className="text-[13px] font-bold text-foreground leading-tight" title={u.last_active_at ? new Date(u.last_active_at).toLocaleString() : undefined}>
                         {activityLabel(u.last_active_at)}

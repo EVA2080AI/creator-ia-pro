@@ -8,6 +8,7 @@
 // --guide  muestra la Guía rápida (borra la marca de "ya vista")   --dark  tema oscuro   --full  página completa
 // --click=<selector>  hace clic antes de la captura, para ver un menú abierto (p. ej. --click=.asst-picker-trigger)
 // --device "Desktop Chrome"  la misma pantalla en escritorio
+// --width=<px>  ancho de ventana propio (p. ej. --width=1100 con "Desktop Chrome", un portátil)
 // --admin  la sesión simulada es de administrador y /api/admin/users devuelve cuentas de muestra (para /admin)
 // Por qué existe: resize_window de Claude in Chrome no cambia el viewport, y creator-ia.com bloquea los iframes.
 import { chromium, devices } from "@playwright/test";
@@ -25,7 +26,8 @@ const user = { id: "u-demo", name: "Sebastián Prueba", email: "demo@example.com
 const profile = { userId: "u-demo", displayName: "Sebastián Prueba", avatarUrl: null, email: "demo@example.com", creditsBalance: 120, subscriptionTier: "free", subscriptionExpiresAt: null, isAdmin: flag("--admin"), createdAt: now };
 
 const browser = await chromium.launch();
-const ctx = await browser.newContext({ ...devices[dev], locale: "es-CO", colorScheme: flag("--dark") ? "dark" : "light" });
+const width = Number(opt("--width", 0));
+const ctx = await browser.newContext({ ...devices[dev], ...(width ? { viewport: { width, height: devices[dev].viewport.height } } : {}), locale: "es-CO", colorScheme: flag("--dark") ? "dark" : "light" });
 await ctx.addInitScript(([guide, dark]) => {
   try {
     if (guide) localStorage.removeItem("basalt_guide_seen_v1"); else localStorage.setItem("basalt_guide_seen_v1", "1");
