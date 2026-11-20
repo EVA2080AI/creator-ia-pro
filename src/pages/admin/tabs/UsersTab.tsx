@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import {
@@ -9,11 +9,25 @@ import {
 import { AdminUser, TIERS } from "../types";
 import { CreateUserModal } from "../components/CreateUserModal";
 import { downloadCsv } from "../csv";
+import {
+  activityLabel, matchesActivity, neverUsed, sortUsers, summarizeActivity, usageHeadline, usageLine,
+  type ActivityFilter, type UserSort,
+} from "../activity";
+
+// "¿Quién lo usa?" (pedido 2026-11-20): cada filtro dice cuántas cuentas caen ahí y, al
+// tocarlo, deja en la lista solo a esas personas.
+const ACTIVITY_FILTERS: { id: ActivityFilter; label: string }[] = [
+  { id: "todos", label: "Todos" },
+  { id: "hoy", label: "Activos hoy" },
+  { id: "7d", label: "Últimos 7 días" },
+  { id: "30d", label: "Últimos 30 días" },
+  { id: "sin-uso", label: "Nunca lo usaron" },
+];
 
 function downloadUsersCsv(users: AdminUser[]) {
   downloadCsv(
     `usuarios-${new Date().toISOString().slice(0, 10)}.csv`,
-    ["Nombre", "Email", "Plan", "Créditos", "Registrado", "Activo"],
+    ["Nombre", "Email", "Plan", "Créditos", "Registrado", "Cuenta habilitada", "Última actividad", "Mensajes", "Chats", "Imágenes"],
     users.map((u) => [
       u.display_name ?? "",
       u.email,
@@ -21,6 +35,10 @@ function downloadUsersCsv(users: AdminUser[]) {
       u.credits_balance,
       new Date(u.created_at).toISOString().slice(0, 10),
       u.is_active ? "sí" : "no",
+      u.last_active_at ? new Date(u.last_active_at).toISOString().slice(0, 10) : "",
+      u.messages ?? "",
+      u.chats ?? "",
+      u.images ?? "",
     ]),
   );
 }
@@ -44,11 +62,25 @@ export function UsersTab({
   const [showCreate, setShowCreate] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
-  const filteredUsers = users.filter(
-    (u) =>
-      u.email?.toLowerCase().includes(search.toLowerCase()) ||
-      (u.display_name?.toLowerCase() || "").includes(search.toLowerCase())
-  );
+  const [activityFilter, setActivityFilter] = useState<ActivityFilter>("todos");
+  // Por defecto, quien usó la app más recientemente arriba: es la pregunta que se viene a
+  // responder acá. "Registro" deja el orden que tenía antes (cuentas nuevas primero).
+  const [sort, setSort] = useState<UserSort>("actividad");
+
+  // Si el servidor no pudo calcular la actividad, los campos no vienen: se oculta todo lo
+  // que depende de ellos en vez de mostrar ceros que parecerían "nadie usa la app".
+  const hasActivity = users.some((u) => u.messages !== undefined);
+  const summary = useMemo(() => summarizeActivity(users), [users]);
+
+  const filteredUsers = useMemo(() => {
+    const q = search.toLowerCase();
+    const visibles = users.filter(
+      (u) =>
+        (u.email?.toLowerCase().includes(q) || (u.display_name?.toLowerCase() || "").includes(q)) &&
+        (!hasActivity || matchesActivity(u, activityFilter)),
+    );
+    return hasActivity ? sortUsers(visibles, sort) : visibles;
+  }, [users, search, activityFilter, sort, hasActivity]);
 
   const handleChangeTier = async (targetUserId: string, newTier: string) => {
     setActionLoading(targetUserId + "-tier");
@@ -146,12 +178,48 @@ export function UsersTab({
         <CreateUserModal onClose={() => setShowCreate(false)} onDone={() => { setShowCreate(false); onRefresh(); }} />
       )}
 
+      {/* Quién lo usa: filtros con su conteo + orden */}
+      {hasActivity && (
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar por actividad">
+            {ACTIVITY_FILTERS.map((f) => {
+              const on = activityFilter === f.id;
+              return (
+                <button
+                  key={f.id}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => setActivityFilter(f.id)}
+                  className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold transition-all active:scale-95 ${on ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted"}`}
+                >
+                  {f.label}
+                  <span className={`rounded-md px-1.5 py-0.5 font-mono text-[11px] ${on ? "bg-primary-foreground/20" : "bg-muted text-foreground"}`}>{summary[f.id]}</span>
+                </button>
+              );
+            })}
+          </div>
+          <label className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+            Ordenar por
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as UserSort)}
+              className="rounded-xl border border-border bg-card px-3 py-2 text-xs font-bold text-foreground outline-none focus:border-ring"
+            >
+              <option value="actividad">Última actividad</option>
+              <option value="mensajes">Más mensajes</option>
+              <option value="registro">Registro más reciente</option>
+            </select>
+          </label>
+        </div>
+      )}
+
       {/* Grid Header */}
-      <div className="hidden md:grid grid-cols-[1fr_140px_120px_140px_60px] gap-4 px-5 py-3 bg-muted/50 border border-border rounded-t-2xl text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">
+      <div className="hidden md:grid grid-cols-[1fr_110px_90px_130px_130px_60px] gap-4 px-5 py-3 bg-muted/50 border border-border rounded-t-2xl text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">
         <span>Usuario</span>
         <span>Plan</span>
         <span>Balance</span>
-        <span>Registrado</span>
+        <span>Uso</span>
+        <span title="Lo último que hizo: entrar, escribir, generar una imagen o gastar créditos">Última actividad</span>
         <span className="text-right">Acción</span>
       </div>
 
@@ -166,7 +234,7 @@ export function UsersTab({
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="py-20 text-center text-sm text-muted-foreground">
-            No se encontraron usuarios.
+            {activityFilter !== "todos" && !search ? "Nadie en este grupo." : "No se encontraron usuarios."}
           </div>
         ) : (
           filteredUsers.map((u) => {
@@ -177,7 +245,7 @@ export function UsersTab({
 
             return (
               <div key={u.user_id} className="group flex flex-col hover:bg-muted/50 transition-colors">
-                <div className="grid md:grid-cols-[1fr_140px_120px_140px_60px] gap-4 items-center px-5 py-4">
+                <div className="grid grid-cols-[1fr_auto] md:grid-cols-[1fr_110px_90px_130px_130px_60px] gap-4 items-center px-5 py-4">
                   {/* User Identity */}
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="relative">
@@ -191,6 +259,13 @@ export function UsersTab({
                         {u.display_name || "Sin nombre"}
                       </p>
                       <p className="text-[11px] text-muted-foreground font-medium truncate font-mono">{u.email}</p>
+                      {/* En el teléfono no hay columnas: el uso va en una línea bajo el correo. */}
+                      {hasActivity && (
+                        <p className="md:hidden mt-0.5 text-[11px] text-muted-foreground truncate">
+                          <span className="font-bold text-foreground">{activityLabel(u.last_active_at)}</span>
+                          {" · "}{neverUsed(u) ? "nunca lo usó" : `${usageHeadline(u).n} ${usageHeadline(u).label}`}
+                        </p>
+                      )}
                     </div>
                   </div>
 
@@ -209,9 +284,30 @@ export function UsersTab({
                     <span className="text-[13px] font-bold text-foreground font-mono tracking-tight">{u.credits_balance.toLocaleString()}</span>
                   </div>
 
-                  {/* Date */}
-                  <div className="hidden md:block">
-                    <p className="text-[11px] text-muted-foreground font-medium">{new Date(u.created_at).toLocaleDateString()}</p>
+                  {/* Uso: cuánto escribió. Quien nunca escribió ni generó nada se dice tal cual. */}
+                  <div className="hidden md:block min-w-0">
+                    {!hasActivity ? (
+                      <p className="text-[11px] text-muted-foreground">—</p>
+                    ) : neverUsed(u) ? (
+                      <p className="text-[11px] font-medium text-muted-foreground">Nunca lo usó</p>
+                    ) : (
+                      <>
+                        <p className="text-[13px] font-bold text-foreground leading-tight">
+                          {usageHeadline(u).n} <span className="text-[11px] font-medium text-muted-foreground">{usageHeadline(u).label}</span>
+                        </p>
+                        <p className="text-[11px] text-muted-foreground truncate">{usageLine(u)}</p>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Última actividad, y debajo desde cuándo tiene cuenta */}
+                  <div className="hidden md:block min-w-0">
+                    {hasActivity && (
+                      <p className="text-[13px] font-bold text-foreground leading-tight" title={u.last_active_at ? new Date(u.last_active_at).toLocaleString() : undefined}>
+                        {activityLabel(u.last_active_at)}
+                      </p>
+                    )}
+                    <p className="text-[11px] text-muted-foreground font-medium truncate">Alta: {new Date(u.created_at).toLocaleDateString()}</p>
                   </div>
 
                   {/* Actions Toggle */}

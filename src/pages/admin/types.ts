@@ -8,6 +8,15 @@ export interface AdminUser {
   subscription_tier: string;
   is_active: boolean;
   is_admin: boolean;
+  // ── Uso real (GET /api/admin/users). Opcionales: si la consulta de actividad falla, el
+  //    servidor igual devuelve la lista y estos campos no vienen.
+  /** Lo último que hizo: entrar, escribir un mensaje, generar una imagen o gastar créditos. */
+  last_active_at?: string | null;
+  /** Mensajes que escribió (Basalt + Expertos). Basalt guarda como mucho 50 conversaciones
+   *  por usuario y se pueden borrar, así que es un piso, no un total histórico. */
+  messages?: number;
+  chats?: number;
+  images?: number;
 }
 
 export interface Transaction {

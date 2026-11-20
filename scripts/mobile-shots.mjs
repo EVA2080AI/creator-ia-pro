@@ -8,6 +8,7 @@
 // --guide  muestra la Guía rápida (borra la marca de "ya vista")   --dark  tema oscuro   --full  página completa
 // --click=<selector>  hace clic antes de la captura, para ver un menú abierto (p. ej. --click=.asst-picker-trigger)
 // --device "Desktop Chrome"  la misma pantalla en escritorio
+// --admin  la sesión simulada es de administrador y /api/admin/users devuelve cuentas de muestra (para /admin)
 // Por qué existe: resize_window de Claude in Chrome no cambia el viewport, y creator-ia.com bloquea los iframes.
 import { chromium, devices } from "@playwright/test";
 
@@ -21,7 +22,7 @@ if (!route || !out) throw new Error("Uso: mobile-shots.mjs <ruta> <salida.png> [
 const base = process.env.BASE_URL ?? "http://localhost:5199";
 const now = new Date().toISOString();
 const user = { id: "u-demo", name: "Sebastián Prueba", email: "demo@example.com", emailVerified: true, image: null, createdAt: now, updatedAt: now };
-const profile = { userId: "u-demo", displayName: "Sebastián Prueba", avatarUrl: null, email: "demo@example.com", creditsBalance: 120, subscriptionTier: "free", subscriptionExpiresAt: null, isAdmin: false, createdAt: now };
+const profile = { userId: "u-demo", displayName: "Sebastián Prueba", avatarUrl: null, email: "demo@example.com", creditsBalance: 120, subscriptionTier: "free", subscriptionExpiresAt: null, isAdmin: flag("--admin"), createdAt: now };
 
 const browser = await chromium.launch();
 const ctx = await browser.newContext({ ...devices[dev], locale: "es-CO", colorScheme: flag("--dark") ? "dark" : "light" });
@@ -35,6 +36,17 @@ await ctx.addInitScript(([guide, dark]) => {
     if (guide) localStorage.removeItem("fm_onboarded"); else localStorage.setItem("fm_onboarded", "1");
   } catch { /* sin storage */ }
 }, [flag("--guide"), flag("--dark")]);
+
+// Cuentas de muestra para Admin → Usuarios: una que usa la app a diario, una que volvió
+// esta semana, una que solo generó una imagen, una que entró y nunca escribió, y una vieja.
+const hace = (dias) => new Date(Date.now() - dias * 864e5).toISOString();
+const DEMO_ADMIN_USERS = [
+  { user_id: "d1", email: "laura.gomez@example.com", display_name: "Laura Gómez", credits_balance: 2890, created_at: hace(52), subscription_tier: "pro", is_active: true, is_admin: false, last_active_at: hace(0), messages: 148, chats: 31, images: 12 },
+  { user_id: "d2", email: "panaderia.trigo@example.com", display_name: "Panadería Trigo", credits_balance: 5, created_at: hace(9), subscription_tier: "free", is_active: true, is_admin: false, last_active_at: hace(2), messages: 23, chats: 5, images: 0 },
+  { user_id: "d3", email: "carlos.m@example.com", display_name: "Carlos Mendoza", credits_balance: 2, created_at: hace(21), subscription_tier: "free", is_active: true, is_admin: false, last_active_at: hace(21), messages: 0, chats: 0, images: 1 },
+  { user_id: "d4", email: "ana.restrepo.con.un.correo.bien.largo@example.com", display_name: "Ana María Restrepo Villamizar", credits_balance: 5, created_at: hace(3), subscription_tier: "free", is_active: true, is_admin: false, last_active_at: hace(3), messages: 0, chats: 0, images: 0 },
+  { user_id: "d5", email: "agencia.norte@example.com", display_name: "Agencia Norte", credits_balance: 7400, created_at: hace(80), subscription_tier: "agencia", is_active: false, is_admin: false, last_active_at: hace(64), messages: 9, chats: 2, images: 3 },
+];
 
 const DEMO_EXPERTS = ["marketing", "legal", "financiero", "talento", "ventas"].map((slug, i) => ({
   id: `a${i}`, slug, name: slug[0].toUpperCase() + slug.slice(1), tagline: "Experto de prueba",
@@ -109,6 +121,7 @@ await ctx.route("**/api/**", (r) => {
   // El bloque de GitHub del perfil solo aparece si el servidor dice "configurado";
   // sin este mock la captura de /profile no lo mostraría nunca.
   if (u === "/api/github/export") return json(r, { ok: true, configured: true, linked: false });
+  if (u.startsWith("/api/admin/users")) return json(r, { ok: true, users: DEMO_ADMIN_USERS });
   return json(r, { ok: true });
 });
 
