@@ -38,6 +38,14 @@ export const addCredits = refundCredits;
  * usuario/plan free genera costo real ilimitado en OpenRouter con ingreso cero. */
 export const FREE_DAILY_MESSAGE_LIMIT = 30;
 
+/** Tope diario de mensajes para quien paga un plan, SOLO mientras FREE_ONLY_MODE
+ * (src/lib/ai/models.ts) tiene ocultos los modelos que se cobran con créditos: en ese modo
+ * todo el chat pasa por modelos gratuitos y sin esto un plan Pro quedaba en los 30 del
+ * plan Free. No es "sin límite" porque los gratuitos comparten UNA cuota de la cuenta de
+ * OpenRouter: 1.000 peticiones al día entre todos los usuarios (y cada búsqueda web es
+ * una petición más). */
+export const PAID_PLAN_DAILY_MESSAGE_LIMIT = 150;
+
 /** Cuentas exentas del límite diario de mensajes gratis — pedido directo del
  * usuario para Andrés (usuario real de prueba), 2026-09-29: "quítale los 30
  * mensajes gratuitos, déjaselo full". sebastian689@gmail.com (la cuenta del

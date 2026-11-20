@@ -107,7 +107,7 @@ Obligaciones legales:
       title: "6. Datos e Inteligencia Artificial",
       content: `Respecto al contenido procesado por IA:
 
-• Tus prompts viajan a OpenRouter, que los entrega al modelo que elijas (Google, OpenAI, Anthropic, xAI, DeepSeek, Mistral y otros). Las imágenes también se generan a través de OpenRouter, y las búsquedas web pasan por Tavily
+• Tus prompts viajan a OpenRouter, que los entrega al modelo que elijas (NVIDIA, Google, Baidu, Dots Studio, OpenAI, Anthropic, xAI, DeepSeek, Mistral y otros). Las imágenes también se generan a través de OpenRouter, y las búsquedas web pasan por Tavily
 • Guardamos tus conversaciones para que puedas volver a ellas. Puedes borrar cualquiera desde la aplicación; de los chats con un Experto queda además una copia de respaldo en el servidor que borramos si nos lo pides
 • Nosotros no entrenamos ningún modelo con tus datos. Lo que haga con tu prompt el proveedor al que viaja se rige por los términos de ese proveedor, no por los nuestros
 • Las imágenes que generas se guardan para que puedas volver a verlas y descargarlas
@@ -170,6 +170,7 @@ Si borras la cookie de sesión tendrás que volver a iniciar sesión, pero no pi
 • Si un cambio implica tratar tus datos para una finalidad nueva, te pediremos tu autorización antes, como exige el Decreto 1377 de 2013
 
 Historial de versiones:
+• v2.2 - 20 Noviembre 2026: Se agregan NVIDIA, Baidu y Dots Studio a los proveedores de modelos de IA
 • v2.1 - 21 Octubre 2026: Corrección de exactitud — proveedores de IA reales, retención de datos, tratamiento de la IP y cifrado
 • v2.0 - 18 Abril 2026: Actualización integral
 • v1.0 - 1 Enero 2026: Versión inicial`
@@ -244,11 +245,11 @@ Para denuncias sobre protección de datos:
             <div className="flex items-center gap-4 mt-8 text-sm text-zinc-400">
               <div className="flex items-center gap-2">
                 <Database className="h-4 w-4" />
-                <span>Versión 2.1</span>
+                <span>Versión 2.2</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                <span>Actualizado: 21 Oct 2026</span>
+                <span>Actualizado: 20 Nov 2026</span>
               </div>
             </div>
           </motion.div>

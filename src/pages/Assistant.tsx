@@ -61,10 +61,15 @@ const MODEL_KEY = (slug: string) => `asst-model:${slug}`;
  *  actual no cubre vuelve en silencio al del experto (el servidor cobraría
  *  403 antes de generar, pero mejor ni ofrecerlo marcado). */
 const modeloEfectivo = (a: Assistant, override: string | null, tier: string | undefined): string => {
-  if (!override || override === a.defaultModel) return a.defaultModel;
+  // El del experto también puede estar oculto: los 11 integrados se sembraron con Flash
+  // Lite, que con FREE_ONLY_MODE no se ofrece. `getModel` lo lleva al modelo por defecto
+  // visible — el mismo al que lo llevaría el servidor —, así el selector marca la fila
+  // que de verdad va a responder y el aviso de "no ve imágenes" habla del modelo correcto.
+  const propio = getModel(a.defaultModel).id;
+  if (!override || override === a.defaultModel) return propio;
   const m = getModel(override);
-  if (m.id !== override) return a.defaultModel;
-  if (tier && !canAccessModel(tier, m.minTier)) return a.defaultModel;
+  if (m.id !== override) return propio;
+  if (tier && !canAccessModel(tier, m.minTier)) return propio;
   return override;
 };
 
@@ -186,7 +191,7 @@ export default function AssistantPage() {
   }, [slug]);
   const elegirModelo = useCallback((id: string) => {
     if (!assistant) return;
-    const propio = id === assistant.defaultModel;
+    const propio = id === getModel(assistant.defaultModel).id;
     setModelOverride(propio ? null : id);
     try {
       if (propio) localStorage.removeItem(MODEL_KEY(slug));

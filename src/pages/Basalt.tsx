@@ -33,7 +33,7 @@ import { hasSeenBasaltGuide, markBasaltGuideSeen } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
 import { toast } from "sonner";
 import { mdToHtml } from "@/lib/markdown";
-import { CHAT_MODELS, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID, canAccessModel, getImageModel, getModel, AUTO_MODEL_ID, resolveAutoModel } from "@/lib/ai/models";
+import { CHAT_MODELS, IMAGE_MODELS, DEFAULT_IMAGE_MODEL_ID, FREE_ONLY_MODE, canAccessModel, getImageModel, getModel, AUTO_MODEL_ID, resolveAutoModel } from "@/lib/ai/models";
 import {
   BASALT_ASSISTANT as A, buildSystemPrompt, parseBasaltReply,
   saveConversation, loadMemory, saveMemory, migrateLegacyLocalStorage,
@@ -61,7 +61,11 @@ interface SendOpts {
 const TOUR_STEPS: TourStep[] = [
   { target: "chat", title: "Habla con Basalt", text: "Escríbele aquí lo que necesites: un plan de mercadeo, analizar un contrato, construir una página web completa." },
   { target: "adjuntar", title: "Adjunta archivos", text: "Un contrato en PDF o Word para revisarlo, o una foto para que la mire. También puedes pegar un enlace y te ofrece leerlo." },
-  { target: "modelo", title: "Elige el modelo", text: "Hay 21 modelos — o deja \"Auto\" y Basalt elige por ti (siempre entre los gratis). Los de pago muestran su costo antes de usarlos." },
+  // El número y la frase salen del catálogo visible: decía "21 modelos" a mano, y con
+  // FREE_ONLY_MODE hablaba de modelos de pago que el selector ya no muestra.
+  { target: "modelo", title: "Elige el modelo", text: FREE_ONLY_MODE
+    ? `Hay ${CHAT_MODELS.length} modelos y la etiqueta de cada uno te dice cuál es más potente — o deja "Auto" y Basalt elige por ti. Debajo de cada respuesta ves cuál respondió.`
+    : `Hay ${CHAT_MODELS.length} modelos — o deja "Auto" y Basalt elige por ti (siempre entre los gratis). Los de pago muestran su costo antes de usarlos.` },
   { target: "nuevo-chat", title: "Nuevo chat", text: "Empieza una conversación limpia cuando cambies de tema. Las anteriores quedan guardadas en \"Conversaciones\".", drawer: true },
   { target: "expertos", title: "Expertos", text: "Asistentes por área —Legal, Marketing y más— y los que crees tú. Mismo chat, enfoque distinto.", drawer: true },
   { target: "memoria", title: "Memoria", text: "Lo que le cuentes de tu negocio queda aquí: puedes añadir, corregir u olvidar datos cuando quieras.", drawer: true },

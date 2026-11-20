@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { ModelPicker } from "./ModelPicker";
-import { CHAT_MODELS, DEFAULT_IMAGE_MODEL_ID, IMAGE_MODELS, canAccessModel } from "@/lib/ai/models";
+import { CHAT_MODELS, DEFAULT_IMAGE_MODEL_ID, IMAGE_MODELS, POWER_LABEL, canAccessModel, powerTier } from "@/lib/ai/models";
 
 const freeModel = CHAT_MODELS.find((m) => m.free)!;
-const paidModel = CHAT_MODELS.find((m) => !canAccessModel("free", m.minTier))!;
+// Con FREE_ONLY_MODE no queda ningún modelo de TEXTO bloqueado por plan: el candado se
+// prueba entonces con un motor de imagen, que sigue pidiendo plan en los dos modos.
+const paidModel = CHAT_MODELS.find((m) => !canAccessModel("free", m.minTier)) ?? IMAGE_MODELS.find((m) => !canAccessModel("free", m.minTier))!;
 
 // Los nombres se pisan como prefijo ("Gemini 2.5 Flash" / "… Flash Lite"): se busca por título exacto.
 const rowFor = (label: string, scope: HTMLElement = document.body) =>
@@ -42,7 +44,7 @@ describe("ModelPicker", () => {
     const lista = within(screen.getByRole("dialog")).getByRole("listbox", { name: /modelos de texto/i });
     const filas = within(lista).getAllByRole("option");
     expect(filas[0].textContent).toContain("Auto");
-    expect(filas[0].textContent).toContain("Gratis");
+    expect(filas[0].textContent).toContain("Recomendado");
     fireEvent.click(filas[0]);
     expect(onModel).toHaveBeenCalledWith("auto");
     expect(screen.queryByRole("dialog")).toBeNull();
@@ -101,11 +103,29 @@ describe("ModelPicker", () => {
     fireEvent.keyDown(enabled[0], { key: "ArrowDown" });
     expect(document.activeElement).toBe(enabled[1]);
   });
+  it("la etiqueta de cada modelo dice qué tan potente es, no si es gratis", () => {
+    const { trigger } = setup(undefined);
+    fireEvent.click(trigger);
+    const lista = within(screen.getByRole("dialog")).getByRole("listbox", { name: /modelos de texto/i });
+    for (const m of CHAT_MODELS) {
+      const chips = [...rowFor(m.label, lista).querySelectorAll(".asst-picker-chip")].map((c) => c.textContent);
+      expect(chips).toContain(POWER_LABEL[powerTier(m)]);
+      expect(chips).not.toContain("Gratis");
+      // El costo solo aparece si existe.
+      expect(chips.some((c) => /\d+ cr/.test(c ?? ""))).toBe(!m.free);
+    }
+    // Hay un "Más potente" y va arriba de su grupo: es lo primero que hay que poder ver.
+    const etiquetas = within(lista).getAllByRole("option").map((o) => o.querySelector(".asst-picker-chip")?.textContent);
+    expect(etiquetas).toContain(POWER_LABEL.top);
+    expect(etiquetas[1]).toBe(POWER_LABEL.top); // [0] es la fila Auto
+  });
+
   it("marca como Lento solo a los modelos con slow:true", () => {
     const { trigger } = setup("agencia");
     fireEvent.click(trigger);
+    // Puede no haber ninguno a la vista (el único lento, DeepSeek V3.1, es de los que
+    // FREE_ONLY_MODE oculta): lo que se comprueba es que el chip coincida con el catálogo.
     const slowLabels = CHAT_MODELS.filter((m) => m.slow).map((m) => m.label);
-    expect(slowLabels.length).toBeGreaterThan(0);
     const flagged = screen.getAllByRole("option").filter((o) => o.textContent?.includes("Lento")).map((o) => o.querySelector(".asst-picker-row-title")?.firstChild?.textContent);
     expect(flagged).toEqual(slowLabels);
   });

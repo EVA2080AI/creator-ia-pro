@@ -35,6 +35,10 @@ export interface ModelDef {
   /** true = genera muy despacio (medido: ~9 tokens/s → una página completa tarda varios minutos y el
    *  servidor la corta a los 54s). El selector lo avisa para que no se elija para construir sitios. */
   slow?: boolean;
+  /** Potencia relativa, 1-5. Sin valor vale la de su categoría (`CATEGORY_META.bolts`:
+   *  eco 1, pro 3, ultra 5). Es lo que el selector le muestra al usuario en la etiqueta
+   *  de cada modelo — ver `powerTier`. */
+  power?: number;
 }
 
 export const CATEGORY_META: Record<ModelCategory, { label: string; color: string; bolts: number }> = {
@@ -56,7 +60,16 @@ export function canAccessModel(userTier: string | null | undefined, minTier: Pla
   return TIER_ORDER.indexOf(normalizeTier(userTier)) >= TIER_ORDER.indexOf(minTier);
 }
 
-export const CHAT_MODELS: ModelDef[] = [
+/** true = OpenRouter NO nos cobra por este modelo (variante `:free`). No confundir con
+ *  `ModelDef.free`, que es "no le cuesta créditos al USUARIO": Flash Lite, DeepSeek, Llama y
+ *  GPT-OSS son gratis para él, pero a nosotros OpenRouter sí nos los factura por token. */
+export function isUpstreamFree(id: string): boolean {
+  return id.endsWith(":free");
+}
+
+/** El catálogo ENTERO, incluidos los modelos que hoy están ocultos. Para ofrecer o
+ *  validar un modelo se usa `CHAT_MODELS` (más abajo), no este. */
+export const ALL_CHAT_MODELS: ModelDef[] = [
   // ── Eco — gratis, plan free ─────────────────────────────────────────────
   {
     id: "google/gemini-2.5-flash-lite",
@@ -107,11 +120,79 @@ export const CHAT_MODELS: ModelDef[] = [
     vision: false,
     free: true,
   },
+  // ── Gratis de verdad (costo $0 en OpenRouter) ───────────────────────────
+  // Agregados el 2026-11-20 (pedido: "qué modelos gratuitos potentes podemos habilitar…
+  // y ocultar mientras los de pago"). De los 12 `:free` que había ese día se probaron 11
+  // en vivo con la forma real de la petición (stream + tools) y el benchmark de sitios
+  // (scripts/css-benchmark.ts, 2-4 corridas): quedan los que respondieron SIEMPRE, hablan
+  // buen español, llaman bien a `web_search` y arman un sitio completo.
+  //   Nemotron 3.5 Super  10-12/12 · chat en ~5 s · ve fotos
+  //   Nemotron 3 Ultra    10-11/12 · empieza a escribir un sitio a los ~5 s (los demás
+  //                       razonan 15-130 s en silencio antes de la primera letra)
+  //   ERNIE 5.5 Flash     11-12/12 · el más rápido en chat, pero su razonamiento es muy
+  //                       variable (un sitio tardó 41 s y otro 148 s)
+  //   Dots 3 Note         8-12/12  · ve fotos · OpenRouter lo retira el 2026-12-31
+  // Descartados: Nemotron 3.5 Lightning (llama a web_search para una pregunta normal),
+  // Nemotron 3 Nano Omni (un sitio se le fue en 32k tokens de razonamiento sin entregar
+  // nada), Flint (argumentos de herramienta mal formados), Ling 3.2 Flash (429 en 8 de 8)
+  // y Particle-1 (429 en 6 de 8). El orden importa: el primero es el modelo por defecto
+  // cuando FREE_ONLY_MODE está activo.
+  {
+    id: "nvidia/nemotron-3.5-super-vl:free",
+    label: "Nemotron 3.5 Super",
+    provider: "NVIDIA",
+    description: "Rápido, ve fotos y aguanta documentos largos. El todoterreno.",
+    category: "eco",
+    power: 2,
+    credits: 0,
+    minTier: "free",
+    context: "1M tokens",
+    vision: true,
+    free: true,
+  },
+  {
+    id: "nvidia/nemotron-3-ultra-550b-a55b:free",
+    label: "Nemotron 3 Ultra",
+    provider: "NVIDIA",
+    description: "El más grande: el que mejor redacta y razona. El indicado para sitios y código.",
+    category: "eco",
+    power: 3,
+    credits: 0,
+    minTier: "free",
+    context: "1M tokens",
+    vision: false,
+    free: true,
+  },
+  {
+    id: "baidu/ernie-5.5-flash-preview:free",
+    label: "ERNIE 5.5 Flash",
+    provider: "Baidu",
+    description: "Muy ágil en chat y bueno armando sitios; a veces piensa un rato antes de escribir.",
+    category: "eco",
+    power: 2,
+    credits: 0,
+    minTier: "free",
+    context: "1M tokens",
+    vision: false,
+    free: true,
+  },
+  {
+    id: "dots-studio/dots-3-note-preview:free",
+    label: "Dots 3 Note",
+    provider: "Dots Studio",
+    description: "Alternativa con visión para chat general y análisis de imágenes.",
+    category: "eco",
+    credits: 0,
+    minTier: "free",
+    context: "512K tokens",
+    vision: true,
+    free: true,
+  },
   {
     id: "google/gemma-4-31b-it:free",
     label: "Gemma 4 31B",
     provider: "Google",
-    description: "Modelo gratuito de Google, multimodal, ideal para chat general sin coste.",
+    description: "Modelo abierto de Google, multimodal, para chat general y preguntas rápidas.",
     category: "eco",
     credits: 0,
     minTier: "free",
@@ -298,7 +379,36 @@ export const CHAT_MODELS: ModelDef[] = [
   // fichas que ya no tienen quien las atienda.
 ];
 
-export const DEFAULT_MODEL_ID = CHAT_MODELS[0].id; // google/gemini-2.5-flash-lite — gratis, disponible en todos los planes
+/**
+ * Modo "solo gratuitos" — `true` desde el 2026-11-20, a pedido de Sebastián ("ocultar
+ * mientras los de pago"), con la cuenta de OpenRouter en US$0,45 de saldo.
+ *
+ * En `true`, el producto solo ofrece Y solo acepta modelos que a nosotros no nos cuestan
+ * nada (`isUpstreamFree`): desaparecen del selector los Pro/Ultra y también los cuatro
+ * "Gratis" que en realidad se facturaban por token (Flash Lite, DeepSeek, Llama, GPT-OSS).
+ * El servidor valida contra esta misma lista, así que un id oculto que llegue igual (un
+ * navegador con la app vieja, un Experto guardado con Flash Lite) se atiende con el modelo
+ * por defecto en vez de gastar saldo.
+ *
+ * Para devolver los de pago: recargar OpenRouter y pasar esto a `false`. No hay que tocar
+ * nada más — los gratuitos nuevos se quedan como opciones extra de la sección "Gratis".
+ *
+ * Ojo, esto NO apaga las imágenes: todos los motores de IMAGE_MODELS cuestan plata real
+ * (no existe uno gratuito en OpenRouter) y siguen cobrando créditos al usuario.
+ */
+export const FREE_ONLY_MODE: boolean = true;
+
+/** Lo que se ofrecería con el modo en `freeOnly` — función aparte para poder probar los dos. */
+export function visibleChatModels(freeOnly: boolean): ModelDef[] {
+  return freeOnly ? ALL_CHAT_MODELS.filter((m) => isUpstreamFree(m.id)) : ALL_CHAT_MODELS;
+}
+
+/** Los modelos que HOY se pueden elegir y que el servidor acepta. */
+export const CHAT_MODELS: ModelDef[] = visibleChatModels(FREE_ONLY_MODE);
+
+// El primero de la lista visible: Nemotron 3.5 Super con el modo solo-gratuitos,
+// Gemini 2.5 Flash Lite sin él. Gratis y disponible en todos los planes en ambos casos.
+export const DEFAULT_MODEL_ID = CHAT_MODELS[0].id;
 
 /** "Auto": Basalt elige el modelo según la tarea. No es un modelo del catálogo —
  *  el cliente lo resuelve a uno concreto ANTES de enviar, así el servidor nunca
@@ -310,8 +420,14 @@ export const AUTO_MODEL_ID = "auto";
 // gpt-oss-120b 12/12 en sitios (9-47 s); flash-lite 11/12 y el más rápido
 // (6-14 s), con visión y 1M de contexto. DeepSeek V3.1 fuera (9 tok/s, se corta);
 // Gemma 4 fuera (429 intermitentes del upstream).
-const AUTO_CHAT_ID = "google/gemini-2.5-flash-lite";
-const AUTO_CODE_ID = "openai/gpt-oss-120b";
+//
+// Con FREE_ONLY_MODE (2026-11-20) esos dos están ocultos y Auto usa el par equivalente de
+// costo $0: Nemotron 3.5 Super para chat y fotos (visión, 1M) y Nemotron 3 Ultra para
+// código, que es el único que empieza a escribir el sitio enseguida (~5 s) y saca 10-11/12
+// de forma pareja. ERNIE queda fuera de Auto a propósito: su proveedor es Baidu (China) y
+// eso lo debe elegir el usuario viendo el nombre, no pasarle sin que lo sepa.
+export const AUTO_CHAT_ID = FREE_ONLY_MODE ? "nvidia/nemotron-3.5-super-vl:free" : "google/gemini-2.5-flash-lite";
+export const AUTO_CODE_ID = FREE_ONLY_MODE ? "nvidia/nemotron-3-ultra-550b-a55b:free" : "openai/gpt-oss-120b";
 
 // Señales de "esto es código o un sitio", en el español de los usuarios y en
 // inglés técnico. Deliberadamente conservadora: ante la duda, el chat general.
@@ -336,6 +452,64 @@ export function getModel(id: string | null | undefined): ModelDef {
 
 export function isKnownModel(id: string): boolean {
   return CHAT_MODELS.some((m) => m.id === id);
+}
+
+// ── Potencia: lo que dice la etiqueta de cada modelo ─────────────────────────
+// Pedido de Sebastián (2026-11-20): "el usuario no debe saber en los tags si es gratis,
+// deben saber cuál es más potente". La etiqueta ya no dice "Gratis": dice qué tan potente
+// es el modelo frente a los demás que se ven en ese momento. El costo solo aparece cuando
+// existe ("2 cr"); que no haya chip de costo es lo que significa que no cuesta.
+//
+// Es RELATIVA al catálogo visible a propósito: con FREE_ONLY_MODE el tope es Nemotron 3
+// Ultra, y al volver los de pago el tope pasa a ser la categoría Ultra sin tocar nada.
+// Los valores de los gratuitos nuevos salen de las pruebas del 2026-11-20 (tamaño del
+// modelo + benchmark de sitios); los de los modelos anteriores son los de su categoría y
+// NO están medidos unos contra otros — afinarlos el día que se reactiven.
+export type PowerTier = "top" | "mid" | "light";
+export const POWER_LABEL: Record<PowerTier, string> = { top: "Más potente", mid: "Potente", light: "Ligero" };
+
+export function modelPower(m: ModelDef): number {
+  return m.power ?? CATEGORY_META[m.category].bolts;
+}
+
+/** El escalón de `m` entre los modelos de `among` (por defecto, los que hoy se ofrecen). */
+export function powerTier(m: ModelDef, among: ModelDef[] = CHAT_MODELS): PowerTier {
+  const all = among.map(modelPower);
+  const max = Math.max(...all);
+  const min = Math.min(...all);
+  const p = modelPower(m);
+  if (max === min) return "mid"; // todos iguales: ninguno es "el más potente"
+  return p >= max ? "top" : p <= min ? "light" : "mid";
+}
+
+/** Los modelos de `list` del más potente al menos (orden estable entre iguales). */
+export function byPower(list: ModelDef[]): ModelDef[] {
+  return [...list].sort((a, b) => modelPower(b) - modelPower(a));
+}
+
+/** Nombre de vitrina de un modelo aunque hoy esté oculto: el chip "qué modelo respondió"
+ *  de un mensaje viejo tiene que seguir diciendo "Claude Sonnet 4.5", no el nombre del
+ *  modelo por defecto (que es lo que devolvería `getModel`). */
+export function modelLabel(id: string | null | undefined): string {
+  return ALL_CHAT_MODELS.find((m) => m.id === id)?.label ?? getModel(id).label;
+}
+
+// Los gratuitos se saturan seguido: el día que se probaron, 4 de 11 devolvían 429
+// ("temporarily rate-limited upstream"), incluido Gemma 4, que estaba publicado. Cuando
+// el elegido no responde, el servidor prueba estos en orden antes de mostrar un error.
+// Dos de NVIDIA y uno de otra infraestructura (AtlasCloud) por si la caída es de NVIDIA.
+// Solo gratuitos: un respaldo de pago cobraría saldo sin que nadie lo pidiera.
+const FREE_FALLBACK_ORDER = [
+  "nvidia/nemotron-3.5-super-vl:free",
+  "nvidia/nemotron-3-ultra-550b-a55b:free",
+  "dots-studio/dots-3-note-preview:free",
+];
+
+/** Hasta dos gratuitos para reintentar cuando `id` falla; con fotos, solo los que ven. */
+export function freeFallbacks(id: string, needsVision: boolean): string[] {
+  return FREE_FALLBACK_ORDER
+    .filter((alt) => alt !== id && isKnownModel(alt) && (!needsVision || getModel(alt).vision))
+    .slice(0, 2);
 }
 
 // ── Modelos de imagen (ver /api/ai/image) ─────────────────────────────────────

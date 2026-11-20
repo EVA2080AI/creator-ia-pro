@@ -7,7 +7,7 @@ import { mdToHtml } from "@/lib/markdown";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
 import { GitHubExportDialog } from "@/components/basalt/GitHubExportDialog";
-import { CHAT_MODELS, getModel, CATEGORY_ORDER, CATEGORY_META, canAccessModel, type ModelDef } from "@/lib/ai/models";
+import { CHAT_MODELS, getModel, CATEGORY_ORDER, CATEGORY_META, FREE_ONLY_MODE, POWER_LABEL, byPower, canAccessModel, powerTier, type ModelDef } from "@/lib/ai/models";
 import { ENTREGABLES_PROMPT } from "@/lib/basalt";
 import "./Assistant.css";
 import { shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
@@ -25,8 +25,13 @@ interface Lane {
 }
 
 // DeepSeek V3.1 (~9 tokens/s) dejaba una columna cortada a los 54 s: se cambió por gpt-oss-120b, también gratis y mucho más ágil.
-const DEFAULT_LANES = ["google/gemini-2.5-flash-lite", "openai/gpt-oss-120b", "meta-llama/llama-3.3-70b-instruct"]
-  .filter((id) => CHAT_MODELS.some((m) => m.id === id));
+// Si esos tres están ocultos (FREE_ONLY_MODE) el filtro dejaba la Arena sin NINGUNA
+// columna: se completa hasta tres con los gratis ágiles que sí estén a la vista.
+const PREFERRED_LANES = ["google/gemini-2.5-flash-lite", "openai/gpt-oss-120b", "meta-llama/llama-3.3-70b-instruct"];
+const DEFAULT_LANES = [
+  ...PREFERRED_LANES.filter((id) => CHAT_MODELS.some((m) => m.id === id)),
+  ...CHAT_MODELS.filter((m) => m.free && !m.slow && !PREFERRED_LANES.includes(m.id)).map((m) => m.id),
+].slice(0, 3);
 
 // ENTREGABLES_PROMPT: mismas reglas de archivos descargables que Basalt/Expertos —
 // sin esto, pedirle "dame el Excel" a una columna respondia "no puedo crear archivos".
@@ -38,7 +43,7 @@ export default function ArenaPage() {
   // Plan todavía cargando (tier undefined) = no se bloquea nada; el servidor igual valida.
   const allowed = (m: ModelDef) => !tier || canAccessModel(tier, m.minTier);
   const optionLabel = (m: ModelDef) =>
-    `${m.label} ${allowed(m) ? (m.free ? "· gratis" : `· ${m.credits} cr`) : `· requiere ${m.minTier}`}${m.slow && allowed(m) ? " · lento" : ""}`;
+    `${m.label} ${allowed(m) ? `· ${POWER_LABEL[powerTier(m)].toLowerCase()}${m.free ? "" : ` · ${m.credits} cr`}` : `· requiere ${m.minTier}`}${m.slow && allowed(m) ? " · lento" : ""}`;
   const prefersClickSubmit = usePrefersClickSubmit();
   const [lanes, setLanes] = useState<Lane[]>(DEFAULT_LANES.map((model) => ({ model, text: "", status: "idle" })));
   const [prompt, setPrompt] = useState("");
@@ -169,9 +174,9 @@ export default function ArenaPage() {
                     onChange={(e) => { patch(i, { model: e.target.value, text: "", status: "idle" }); setWinner((w) => (w === i ? null : w)); }}
                     className="min-w-0 flex-1 rounded-lg bg-muted px-2 py-1.5 text-[12px] font-bold text-foreground outline-none"
                   >
-                    {CATEGORY_ORDER.map((cat) => (
-                      <optgroup key={cat} label={CATEGORY_META[cat].label}>
-                        {CHAT_MODELS.filter((cm) => cm.category === cat).map((cm) => (
+                    {CATEGORY_ORDER.filter((cat) => CHAT_MODELS.some((cm) => cm.category === cat)).map((cat) => (
+                      <optgroup key={cat} label={cat === "eco" && FREE_ONLY_MODE ? "Modelos" : CATEGORY_META[cat].label}>
+                        {byPower(CHAT_MODELS.filter((cm) => cm.category === cat)).map((cm) => (
                           <option key={cm.id} value={cm.id} disabled={!allowed(cm) && cm.id !== lane.model}>{optionLabel(cm)}</option>
                         ))}
                       </optgroup>

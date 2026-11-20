@@ -2,10 +2,12 @@
 // que exigen sesión, con la API simulada — así se ve el responsive sin iniciar sesión ni tocar producción.
 //
 //   npx vite --port 5199 --strictPort &          (servidor local)
-//   node scripts/mobile-shots.mjs <ruta> <salida.png> [--device "iPhone 13"] [--guide] [--dark] [--scroll=<px>] [--full]
+//   node scripts/mobile-shots.mjs <ruta> <salida.png> [--device "iPhone 13"] [--guide] [--dark] [--scroll=<px>] [--click=<selector>] [--full]
 //   ej.: node scripts/mobile-shots.mjs /a/basalt /tmp/basalt-movil.png --guide
 //
 // --guide  muestra la Guía rápida (borra la marca de "ya vista")   --dark  tema oscuro   --full  página completa
+// --click=<selector>  hace clic antes de la captura, para ver un menú abierto (p. ej. --click=.asst-picker-trigger)
+// --device "Desktop Chrome"  la misma pantalla en escritorio
 // Por qué existe: resize_window de Claude in Chrome no cambia el viewport, y creator-ia.com bloquea los iframes.
 import { chromium, devices } from "@playwright/test";
 
@@ -124,6 +126,11 @@ if (y) {
     el?.scrollTo(0, v);
   }, y);
   await page.waitForTimeout(300);
+}
+const click = opt("--click", "");
+if (click) {
+  await page.locator(click).first().click();
+  await page.waitForTimeout(400);
 }
 await page.screenshot({ path: out, fullPage: flag("--full") });
 console.log(`${dev} ${page.viewportSize().width}x${page.viewportSize().height} → ${out}`);

@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Check, ChevronDown, Globe, Image as ImageIcon, Lock, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Globe, Image as ImageIcon, Lock, Sparkles, Zap } from "lucide-react";
 import {
-  AUTO_MODEL_ID, CATEGORY_META, CATEGORY_ORDER, CHAT_MODELS, IMAGE_MODELS, canAccessModel, getImageModel, getModel,
-  type PlanTier,
+  AUTO_CHAT_ID, AUTO_CODE_ID, AUTO_MODEL_ID, CATEGORY_META, CATEGORY_ORDER, CHAT_MODELS, FREE_ONLY_MODE, IMAGE_MODELS, POWER_LABEL,
+  byPower, canAccessModel, getImageModel, getModel, powerTier,
+  type PlanTier, type PowerTier,
 } from "@/lib/ai/models";
 
 // Reemplaza los dos <select> nativos de la topbar de Basalt (11-12px, con el
@@ -30,14 +31,20 @@ interface RowProps {
   title: string;
   sub: string;
   desc?: string;
-  chip: string;
+  /** Qué tan potente es frente a los demás modelos a la vista. La etiqueta principal de un
+   *  modelo de texto: antes decía "Gratis", que no le sirve a nadie para elegir. */
+  power?: PowerTier;
+  /** Costo en créditos, solo si lo tiene ("2 cr"). Sin chip de costo = no cuesta. */
+  cost?: string;
+  /** Etiqueta suelta para una fila que no es un modelo (la de "Auto"). */
+  badge?: string;
   selected: boolean;
   lockedTier?: PlanTier;
   slow?: boolean;
   onPick: () => void;
 }
 
-function Row({ title, sub, desc, chip, selected, lockedTier, slow, onPick }: RowProps) {
+function Row({ title, sub, desc, power, cost, badge, selected, lockedTier, slow, onPick }: RowProps) {
   const locked = !!lockedTier;
   return (
     <button
@@ -56,7 +63,9 @@ function Row({ title, sub, desc, chip, selected, lockedTier, slow, onPick }: Row
       </span>
       <span className="asst-picker-row-end">
         {slow && !locked && <span className="asst-picker-chip slow" title="Genera despacio: una página completa tarda varios minutos">Lento</span>}
-        {locked ? <span className="asst-picker-chip lock"><Lock className="w-3 h-3" />{TIER_LABEL[lockedTier]}</span> : <span className={`asst-picker-chip${chip === "Gratis" ? " free" : ""}`}>{chip}</span>}
+        {power && <span className={`asst-picker-chip power-${power}`}>{power === "top" && <Zap className="w-3 h-3" aria-hidden />}{POWER_LABEL[power]}</span>}
+        {badge && <span className="asst-picker-chip rec">{badge}</span>}
+        {locked ? <span className="asst-picker-chip lock"><Lock className="w-3 h-3" />{TIER_LABEL[lockedTier]}</span> : cost && <span className="asst-picker-chip">{cost}</span>}
         {selected && <Check className="w-4 h-4 asst-picker-check" aria-hidden />}
       </span>
     </button>
@@ -97,7 +106,8 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel, au
     rows[next].focus();
   };
 
-  const anyLocked = CHAT_MODELS.some((m) => lockOf(m.minTier)) || (conImagenes && IMAGE_MODELS.some((m) => lockOf(m.minTier)));
+  const chatLocked = CHAT_MODELS.some((m) => lockOf(m.minTier));
+  const anyLocked = chatLocked || (conImagenes && IMAGE_MODELS.some((m) => lockOf(m.minTier)));
 
   return (
     <div className="asst-picker" ref={rootRef}>
@@ -129,23 +139,27 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel, au
                   <Row
                     title="Auto"
                     sub="Basalt elige por ti"
-                    desc="Siempre gratis: Flash Lite para conversar y ver fotos; GPT-OSS 120B cuando pides código o un sitio. Debajo de cada respuesta ves cuál respondió."
-                    chip="Gratis"
+                    desc={`${FREE_ONLY_MODE ? "" : "Siempre gratis: "}${getModel(AUTO_CHAT_ID).label} para conversar y ver fotos; ${getModel(AUTO_CODE_ID).label} cuando pides código o un sitio. Debajo de cada respuesta ves cuál respondió.`}
+                    badge="Recomendado"
                     selected={esAuto}
                     onPick={() => { onModel(AUTO_MODEL_ID); setOpen(false); }}
                   />
                 </div>
               )}
-              {CATEGORY_ORDER.map((cat) => (
+              {/* Una categoría sin modelos no se dibuja: con FREE_ONLY_MODE queda una sola, y
+                  ahí el título ya no separa "gratis" de "de pago" porque no hay de pago. Dentro
+                  de cada una, del más potente al menos. */}
+              {CATEGORY_ORDER.filter((cat) => CHAT_MODELS.some((m) => m.category === cat)).map((cat) => (
                 <div key={cat} className="asst-picker-group">
-                  <div className="asst-picker-heading">{cat === "eco" ? "Gratis" : CATEGORY_META[cat].label}</div>
-                  {CHAT_MODELS.filter((m) => m.category === cat).map((m) => (
+                  <div className="asst-picker-heading">{cat === "eco" ? (FREE_ONLY_MODE ? "Modelos" : "Gratis") : CATEGORY_META[cat].label}</div>
+                  {byPower(CHAT_MODELS.filter((m) => m.category === cat)).map((m) => (
                     <Row
                       key={m.id}
                       title={m.label}
                       sub={`${m.provider} · ${m.context}`}
                       desc={m.description}
-                      chip={m.free ? "Gratis" : `${m.credits} cr`}
+                      power={powerTier(m)}
+                      cost={m.free ? undefined : `${m.credits} cr`}
                       selected={m.id === model}
                       lockedTier={lockOf(m.minTier)}
                       slow={m.slow}
@@ -164,7 +178,7 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel, au
                     title={m.label}
                     sub={m.providerLabel}
                     desc={m.description}
-                    chip={`${m.credits} cr`}
+                    cost={`${m.credits} cr`}
                     selected={m.id === imageModel}
                     lockedTier={lockOf(m.minTier)}
                     onPick={() => { onImageModel!(m.id); setOpen(false); }}
@@ -180,7 +194,7 @@ export function ModelPicker({ model, imageModel, tier, onModel, onImageModel, au
             </p>
             {anyLocked && (
               <a className="asst-picker-upsell" href="/pricing">
-                <Lock className="w-3.5 h-3.5" aria-hidden /> Desbloquea más modelos — ver planes
+                <Lock className="w-3.5 h-3.5" aria-hidden /> {chatLocked ? "Desbloquea más modelos" : "Desbloquea más motores de imagen"} — ver planes
               </a>
             )}
           </div>

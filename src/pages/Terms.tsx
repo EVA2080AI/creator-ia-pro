@@ -26,7 +26,7 @@ La Plataforma es operada por Creator IA Pro, ubicada en Colombia. Estos Término
 • Creación y edición de imágenes con IA
 • Generación de texto y contenido de marketing
 
-Tus mensajes viajan a OpenRouter, que los entrega al modelo que elijas (Google, OpenAI, Anthropic, xAI, DeepSeek, Mistral y otros). Las imágenes también se generan a través de OpenRouter, y las búsquedas web pasan por Tavily. El uso de cada uno de esos modelos está sujeto además a los términos de su proveedor.`
+Tus mensajes viajan a OpenRouter, que los entrega al modelo que elijas (NVIDIA, Google, Baidu, Dots Studio, OpenAI, Anthropic, xAI, DeepSeek, Mistral y otros). Las imágenes también se generan a través de OpenRouter, y las búsquedas web pasan por Tavily. El uso de cada uno de esos modelos está sujeto además a los términos de su proveedor.`
     },
     {
       id: "accounts",
@@ -152,7 +152,7 @@ Las modificaciones entran en vigor al publicarse en esta página, con dos salved
 • Dirección: Bogotá, Colombia
 • Tiempo de respuesta: 5-7 días hábiles
 
-Última actualización: 21 de octubre de 2026`
+Última actualización: 20 de noviembre de 2026`
     }
   ];
 
@@ -216,7 +216,7 @@ Las modificaciones entran en vigor al publicarse en esta página, con dos salved
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                <span>Vigente desde: 21 Oct 2026</span>
+                <span>Vigente desde: 20 Nov 2026</span>
               </div>
             </div>
           </motion.div>

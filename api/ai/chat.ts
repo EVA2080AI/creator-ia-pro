@@ -9,8 +9,8 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { and, eq } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { getSessionUser, getProfile } from "../_lib/session.js";
-import { spendCredits, refundCredits, consumeFreeMessage, logSpend, FREE_DAILY_MESSAGE_LIMIT, FREE_LIMIT_EXEMPT_EMAILS } from "../_lib/credits.js";
-import { CHAT_MODELS, DEFAULT_MODEL_ID, canAccessModel, getModel } from "../../src/lib/ai/models.js";
+import { spendCredits, refundCredits, consumeFreeMessage, logSpend, FREE_DAILY_MESSAGE_LIMIT, PAID_PLAN_DAILY_MESSAGE_LIMIT, FREE_LIMIT_EXEMPT_EMAILS } from "../_lib/credits.js";
+import { CHAT_MODELS, DEFAULT_MODEL_ID, FREE_ONLY_MODE, canAccessModel, freeFallbacks, getModel, isUpstreamFree, normalizeTier } from "../../src/lib/ai/models.js";
 import { tavilySearch, WEB_SEARCH_TOOL } from "../_lib/search.js";
 import { USER_DATA_TOOLS, isUserDataToolName } from "../_lib/userDataTools.js";
 import { getUserProjects, getUserAssets, getUserUsage } from "../_lib/userData.js";
@@ -48,6 +48,21 @@ const MAX_MESSAGES = 60;
 // ni siquiera aceptan tanto contexto.
 const MAX_TOTAL_CHARS = 700_000;
 const MAX_OUTPUT_TOKENS = 8_192;
+
+// Respuestas de OpenRouter por las que vale la pena probar OTRO modelo gratuito en vez de
+// mostrar el error: el proveedor está saturado (429), caído (5xx) o dejó de servir ese
+// modelo (404 "no endpoints"). Un 400/401/402/403 fallaría igual con cualquier otro.
+const RETRYABLE_STATUS = new Set([404, 408, 429, 500, 502, 503, 504, 529]);
+
+/**
+ * Cierre de la última ronda de herramientas, solo para los modelos gratuitos. Medido en vivo
+ * el 2026-11-20: al quitarles las herramientas para forzar la respuesta final, Nemotron 3
+ * Ultra y Dots 3 escribían la llamada como TEXTO ("<tool_call><function=browse>…") y eso
+ * era lo que veía el usuario. Ni `tool_choice:"none"` solo ni el aviso solo lo arreglan en
+ * Ultra; los dos juntos sí, en los tres gratuitos que se probaron.
+ */
+const FINAL_ANSWER_NOTE =
+  "Ya no puedes usar herramientas en este turno. Responde ahora al usuario, en texto normal, con la información que ya tienes; si algo quedó sin confirmar, dilo.";
 
 /** Se agrega al prompt cuando no hay TAVILY_API_KEY en este despliegue. */
 const NO_SEARCH_NOTE =
@@ -147,7 +162,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  const modelId = body.model && CHAT_MODELS.some((m) => m.id === body.model) ? body.model : DEFAULT_MODEL_ID;
+  // `let`: si es un gratuito y su proveedor no responde, `callOpenRouter` lo cambia por el
+  // respaldo que sí contestó, para que X-Model-Used y el historial digan cuál fue de verdad.
+  // CHAT_MODELS es la lista VISIBLE: con FREE_ONLY_MODE un id de pago que llegue igual
+  // (app vieja en caché, Experto guardado con Flash Lite) cae al modelo por defecto.
+  let modelId = body.model && CHAT_MODELS.some((m) => m.id === body.model) ? body.model : DEFAULT_MODEL_ID;
   const model = getModel(modelId);
 
   // Antes de cobrar: si el modelo elegido no ve, decirlo en vez de cobrar un mensaje
@@ -158,7 +177,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(400).json({
       ok: false,
       code: "MODEL_HAS_NO_VISION",
-      error: `"${model.label}" no puede ver imágenes. Cambia a uno que sí${conVista.length ? ` (gratis: ${conVista.join(", ")})` : ""} y vuelve a enviarla.`,
+      error: `"${model.label}" no puede ver imágenes. Cambia a uno que sí${conVista.length ? ` (${FREE_ONLY_MODE ? "por ejemplo" : "gratis"}: ${conVista.join(", ")})` : ""} y vuelve a enviarla.`,
     });
     return;
   }
@@ -191,12 +210,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   } else if (!FREE_LIMIT_EXEMPT_EMAILS.has(user.email ?? "")) {
     // Modelos eco (0 créditos) sí cuestan dinero real en OpenRouter — sin este tope,
     // el costo por usuario/plan free no tiene límite mientras el ingreso es cero.
-    const newCount = await consumeFreeMessage(user.userId);
+    // Con los modelos de pago ocultos, quien paga un plan solo tiene estos: dejarlo en el
+    // tope del plan Free sería cobrarle por nada. Sin el modo, el tope es el de siempre.
+    const conPlan = FREE_ONLY_MODE && normalizeTier(tier) !== "free";
+    const dailyLimit = conPlan ? PAID_PLAN_DAILY_MESSAGE_LIMIT : FREE_DAILY_MESSAGE_LIMIT;
+    const newCount = await consumeFreeMessage(user.userId, dailyLimit);
     if (newCount === null) {
       res.status(429).json({
         ok: false,
         code: "FREE_LIMIT_REACHED",
-        error: `Alcanzaste el límite de ${FREE_DAILY_MESSAGE_LIMIT} mensajes gratis por hoy. Vuelve mañana o mejora tu plan para seguir sin límite.`,
+        error: conPlan
+          ? `Alcanzaste el límite de ${dailyLimit} mensajes por hoy. Vuelve mañana.`
+          : FREE_ONLY_MODE
+            ? `Alcanzaste el límite de ${dailyLimit} mensajes por hoy. Vuelve mañana o mejora tu plan para tener más mensajes al día.`
+            : `Alcanzaste el límite de ${dailyLimit} mensajes gratis por hoy. Vuelve mañana o mejora tu plan para seguir sin límite.`,
       });
       return;
     }
@@ -250,8 +277,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   });
 
-  const callOpenRouter = (msgs: ChatMessage[], withTools: boolean) =>
-    fetch(OPENROUTER_URL, {
+  const toolDefs = [...(TAVILY_API_KEY ? [WEB_SEARCH_TOOL] : []), ...USER_DATA_TOOLS];
+  const callModel = (modelo: string, msgs: ChatMessage[], withTools: boolean) => {
+    // `withTools` solo llega en false en la última ronda permitida. A un gratuito hay que
+    // decírselo dos veces (ver FINAL_ANSWER_NOTE); a los de pago se les sigue mandando la
+    // petición de siempre, sin herramientas, que es lo que está probado con ellos.
+    const forceAnswer = !withTools && isUpstreamFree(modelo) && msgs.some((m) => m.role === "tool");
+    return fetch(OPENROUTER_URL, {
       method: "POST",
       signal: abortController.signal,
       headers: {
@@ -261,19 +293,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         "X-Title": "Creator IA Pro - Basalt",
       },
       body: JSON.stringify({
-        model: modelId,
-        messages: msgs,
+        model: modelo,
+        messages: forceAnswer ? [...msgs, { role: "system", content: FINAL_ANSWER_NOTE }] : msgs,
         stream: true,
         // El modelo decide solo si usa una herramienta (tool_choice:"auto")
         // — el prompt le dice cuándo tiene sentido cada una. `withTools` se
         // apaga en la última ronda permitida (ver MAX_SEARCH_ROUNDS más
         // abajo) para forzar una respuesta final en vez de seguir
         // encadenando llamadas.
-        ...(withTools ? { tools: [...(TAVILY_API_KEY ? [WEB_SEARCH_TOOL] : []), ...USER_DATA_TOOLS], tool_choice: "auto" } : {}),
+        ...(withTools ? { tools: toolDefs, tool_choice: "auto" } : forceAnswer ? { tools: toolDefs, tool_choice: "none" } : {}),
         ...(typeof body.temperature === "number" ? { temperature: Math.min(2, Math.max(0, body.temperature)) } : {}),
         ...(typeof body.maxTokens === "number" ? { max_tokens: Math.min(MAX_OUTPUT_TOKENS, Math.max(16, Math.floor(body.maxTokens))) } : {}),
       }),
     });
+  };
+
+  // Los gratuitos se saturan seguido (el 2026-11-20, 4 de 11 devolvían 429 a la vez). Si el
+  // elegido es gratuito y falla por algo pasajero, se prueba con hasta dos gratuitos más
+  // antes de devolver el error. Nunca salta a uno de pago, y un modelo de pago nunca entra
+  // acá: ese crédito ya se cobró por ESE modelo y se reembolsa si falla.
+  const callOpenRouter = async (msgs: ChatMessage[], withTools: boolean): Promise<Response> => {
+    let res = await callModel(modelId, msgs, withTools);
+    if (res.ok || !isUpstreamFree(modelId) || !RETRYABLE_STATUS.has(res.status)) return res;
+    for (const alt of freeFallbacks(modelId, images.length > 0)) {
+      if (abortController.signal.aborted) break;
+      void res.body?.cancel().catch(() => {});
+      res = await callModel(alt, msgs, withTools);
+      if (res.ok) {
+        console.warn(`[ai/chat] ${modelId} no respondió; atendido con ${alt}`);
+        modelId = alt;
+        break;
+      }
+      if (!RETRYABLE_STATUS.has(res.status)) break;
+    }
+    return res;
+  };
 
   let upstream: Response;
   try {
@@ -287,10 +341,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (!upstream.ok || !upstream.body) {
     if (cost > 0) await refundCredits(user.userId, cost);
     const text = await upstream.text().catch(() => "");
+    // Un gratuito saturado (y sus respaldos también): antes el usuario veía el JSON crudo
+    // de OpenRouter. Es el fallo más común de este tipo de modelo y se arregla esperando.
+    const saturado = isUpstreamFree(modelId) && RETRYABLE_STATUS.has(upstream.status);
     res.status(upstream.status || 502).json({
       ok: false,
       code: "PROVIDER_ERROR",
-      error: text.slice(0, 300) || `El proveedor de IA respondió ${upstream.status}.`,
+      error: saturado
+        ? "Los modelos están saturados en este momento. Espera un minuto y vuelve a intentarlo."
+        : text.slice(0, 300) || `El proveedor de IA respondió ${upstream.status}.`,
     });
     return;
   }

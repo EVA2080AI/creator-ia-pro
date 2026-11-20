@@ -432,6 +432,11 @@
   background: var(--asst-panel-2); color: var(--asst-txt-2); font-variant-numeric: tabular-nums;
 }
 .asst-picker-chip.free { background: color-mix(in oklch, oklch(0.7 0.17 150) 18%, var(--asst-bg)); color: color-mix(in oklch, oklch(0.5 0.14 150) 80%, var(--asst-txt)); }
+/* Potencia del modelo. Solo "Más potente" lleva color (el de marca): es la que tiene que
+   saltar a la vista; "Potente" usa el chip neutro y "Ligero" baja un tono. */
+.asst-picker-chip.power-top { background: color-mix(in oklch, var(--a-accent, #8b5cf6) 16%, var(--asst-bg)); color: var(--asst-accent-text); }
+.asst-picker-chip.power-light { background: transparent; border: 1px solid var(--asst-border); color: var(--asst-txt-2); }
+.asst-picker-chip.rec { background: color-mix(in oklch, oklch(0.7 0.17 150) 18%, var(--asst-bg)); color: color-mix(in oklch, oklch(0.5 0.14 150) 80%, var(--asst-txt)); }
 .asst-picker-chip.slow { background: color-mix(in oklch, oklch(0.78 0.15 75) 22%, var(--asst-bg)); color: color-mix(in oklch, oklch(0.5 0.12 65) 80%, var(--asst-txt)); }
 .asst-picker-chip.lock { background: transparent; border: 1px solid var(--asst-border); color: var(--asst-txt-3); }
 /* Aviso del costo de la búsqueda web, encima del enlace a planes. */

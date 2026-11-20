@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Sparkles, ChevronDown, Zap, Eye, DollarSign, Cpu, Image as ImageIcon } from 'lucide-react';
 import { MODELS } from './constants';
-import { IMAGE_MODELS } from '@/lib/ai/models';
+import { DEFAULT_MODEL_ID, IMAGE_MODELS, getModel } from '@/lib/ai/models';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -27,6 +27,8 @@ interface RowModel {
   vision: boolean;
   free: boolean;
   credits: number;
+  /** "Más potente" / "Potente" / "Ligero" — solo los modelos de texto; los motores de imagen no la tienen. */
+  power?: string;
 }
 
 const IMAGE_ROWS: RowModel[] = IMAGE_MODELS.map((m) => ({
@@ -106,23 +108,24 @@ function ModelRow({
 
         {/* Right: badge + cost */}
         <div className="flex flex-col items-end gap-1 shrink-0">
+          {/* La etiqueta dice qué tan potente es el modelo, no si es gratis; el costo
+              aparece debajo solo cuando lo tiene. */}
           <span className={cn(
             "text-[8px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border",
-            m.free
-              ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+            m.power === 'Más potente'
+              ? "bg-violet-50 text-violet-700 border-violet-200"
+              : m.power
+              ? "bg-zinc-50 text-zinc-600 border-zinc-200"
               : m.badge === 'PRO'
               ? "bg-amber-50 text-amber-600 border-amber-200"
               : "bg-violet-50 text-violet-600 border-violet-200"
           )}>
-            {m.free ? '✓ FREE' : m.badge}
+            {m.power ?? m.badge}
           </span>
           {!m.free && (
             <span className="text-[8px] font-mono text-zinc-400">
               {m.credits} {m.credits === 1 ? 'crédito' : 'créditos'}/uso
             </span>
-          )}
-          {m.free && (
-            <span className="text-[8px] text-emerald-500 font-bold">Sin coste</span>
           )}
         </div>
       </div>
@@ -199,7 +202,7 @@ export function ModelSelector({ selectedModel, onSelect, models = 'text', varian
           <div className="flex flex-col items-start min-w-0">
             <span className="text-[13px] font-bold text-zinc-900 truncate leading-none">{currentModel.label}</span>
             <span className="text-[10px] text-zinc-500 mt-0.5 leading-none">
-              {isFree ? 'Sin coste' : `${currentModel.credits} crédito${currentModel.credits > 1 ? 's' : ''}`} · {currentModel.provider}
+              {isFree ? (currentModel.power ?? 'Incluido') : `${currentModel.credits} crédito${currentModel.credits > 1 ? 's' : ''}`} · {currentModel.provider}
             </span>
           </div>
           <ChevronDown className={cn("h-3.5 w-3.5 shrink-0 transition-transform duration-200", isOpen ? "rotate-180 text-primary" : "text-zinc-400")} />
@@ -226,11 +229,6 @@ export function ModelSelector({ selectedModel, onSelect, models = 'text', varian
           )}>
             {currentModel.label}
           </span>
-          {isFree && (
-            <span className="text-[7px] font-black text-emerald-500 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-              FREE
-            </span>
-          )}
           <ChevronDown className={cn("h-3 w-3 shrink-0 transition-transform duration-200", isOpen ? "rotate-180 text-primary" : "text-zinc-400")} />
         </button>
       )}
@@ -283,7 +281,7 @@ export function ModelSelector({ selectedModel, onSelect, models = 'text', varian
                       <div className="flex items-center gap-2 mb-2 px-1">
                         <ImageIcon className="h-3 w-3 text-teal-500" />
                         <span className="text-[9px] font-black text-teal-600 uppercase tracking-[0.2em]">
-                          Motores de imagen — Replicate
+                          Motores de imagen
                         </span>
                         <div className="flex-1 h-px bg-zinc-100" />
                       </div>
@@ -304,7 +302,7 @@ export function ModelSelector({ selectedModel, onSelect, models = 'text', varian
                       <div className="px-3 pt-3 pb-1">
                         <div className="flex items-center gap-2 mb-2 px-1">
                           <span className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em]">
-                            ✓ Gratis — Sin coste OpenRouter
+                            {PAID_MODELS.length > 0 ? 'Incluidos — no gastan créditos' : 'Modelos'}
                           </span>
                           <div className="flex-1 h-px bg-emerald-100" />
                         </div>
@@ -320,12 +318,12 @@ export function ModelSelector({ selectedModel, onSelect, models = 'text', varian
                         </div>
                       </div>
 
-                      {/* PAID section */}
-                      <div className="px-3 pt-2 pb-3">
+                      {/* PAID section — no se dibuja vacía (FREE_ONLY_MODE oculta los de pago) */}
+                      {PAID_MODELS.length > 0 && <div className="px-3 pt-2 pb-3">
                         <div className="flex items-center gap-2 mb-2 px-1">
                           <DollarSign className="h-3 w-3 text-amber-500" />
                           <span className="text-[9px] font-black text-amber-600 uppercase tracking-[0.2em]">
-                            Premium — Consume créditos OpenRouter
+                            Premium — consumen créditos
                           </span>
                           <div className="flex-1 h-px bg-amber-100" />
                         </div>
@@ -339,7 +337,7 @@ export function ModelSelector({ selectedModel, onSelect, models = 'text', varian
                             />
                           ))}
                         </div>
-                      </div>
+                      </div>}
                     </>
                   )}
                 </div>
@@ -348,8 +346,8 @@ export function ModelSelector({ selectedModel, onSelect, models = 'text', varian
                 <div className="px-4 py-2.5 border-t border-zinc-100 bg-zinc-50 shrink-0">
                   <p className="text-[9px] text-zinc-400 text-center">
                     {models === 'image'
-                      ? <>💡 Por defecto <strong className="text-teal-600">Flux Schnell</strong> — rápido y disponible en todos los planes</>
-                      : <>💡 Por defecto <strong className="text-amber-600">Claude Sonnet 4.5</strong> (pro) o <strong className="text-emerald-600">Gemini 2.5 Flash Lite</strong> (gratis)</>}
+                      ? <>💡 Por defecto <strong className="text-teal-600">{IMAGE_MODELS[0].label}</strong> — rápido y disponible en todos los planes</>
+                      : <>💡 Por defecto <strong className="text-emerald-600">{getModel(DEFAULT_MODEL_ID).label}</strong> — disponible en todos los planes</>}
                   </p>
                 </div>
               </motion.div>

@@ -113,7 +113,7 @@ Lo que el chat gana, y las reglas que trae cada cosa:
    de una función de Vercel tope 4,5 MB). Si el modelo no tiene `vision`, se avisa
    ANTES de cobrar y se ofrece cambiar.
 4. **Acciones del mensaje**: copiar, regenerar, "otro modelo" (la misma pregunta a
-   cualquiera de los 21) y qué modelo respondió (cabecera `X-Model-Used`, que ya
+   cualquiera de los que estén a la vista) y qué modelo respondió (cabecera `X-Model-Used`, que ya
    existía y nadie leía). Renombrar la conversación desde su fila del menú.
 5. **Mis expertos** (`/expertos/nuevo`, `/expertos/<slug>`): crear el tuyo o duplicar
    uno de los 11 y ajustarlo.
@@ -121,8 +121,35 @@ Lo que el chat gana, y las reglas que trae cada cosa:
    para quien nunca eligió). Se resuelve EN EL CLIENTE antes de enviar
    (`resolveAutoModel` en `src/lib/ai/models.ts`) y SOLO a modelos gratis — nunca
    gasta créditos por su cuenta: Flash Lite (visión, 1M) para chat/fotos y
-   GPT-OSS 120B si el texto pinta a código/sitio (benchmark 2026-10-04). El
+   GPT-OSS 120B si el texto pinta a código/sitio (benchmark 2026-10-04) — o su par
+   de costo $0 mientras `FREE_ONLY_MODE` esté activo (ver más abajo). El
    servidor nunca ve "auto"; el chip por mensaje muestra cuál respondió.
+
+## Modo solo-gratuitos y etiquetas de potencia (2026-11-20)
+
+`FREE_ONLY_MODE` en `src/lib/ai/models.ts` está en **`true`**: el producto solo ofrece y
+solo acepta modelos que a nosotros no nos cuestan nada en OpenRouter (los `:free`).
+
+- **Por qué:** la cuenta de OpenRouter quedó en US$0,45 y los cuatro "Gratis" de antes
+  (Flash Lite, DeepSeek, Llama, GPT-OSS) no eran gratis para nosotros: se facturan por token.
+- **Qué se ve:** 5 modelos — Nemotron 3 Ultra, Nemotron 3.5 Super, ERNIE 5.5 Flash,
+  Dots 3 Note y Gemma 4. "Auto" usa Nemotron 3.5 Super (chat y fotos) y Nemotron 3 Ultra
+  (código y sitios). Los 11 Expertos siguen guardados con Flash Lite: el servidor los
+  atiende con el modelo por defecto, sin tocar la base.
+- **Volver a los de pago:** recargar OpenRouter y poner la bandera en `false`. Nada más.
+- **Las etiquetas dicen potencia, no precio** ("Más potente" / "Potente" / "Ligero",
+  `powerTier`). Pedido expreso de Sebastián: el usuario no tiene por qué saber si un modelo
+  es gratis; tiene que saber cuál es más potente. El costo solo se muestra cuando existe.
+- **Los gratuitos se saturan** (429 del proveedor): `api/ai/chat.ts` prueba hasta dos
+  gratuitos más antes de mostrar error (`freeFallbacks`) y `X-Model-Used` dice cuál
+  respondió de verdad. ERNIE (Baidu) nunca es respaldo: solo si el usuario lo elige.
+- **Límites que no dependen de nosotros:** los `:free` comparten UNA cuota de la cuenta —
+  1.000 peticiones al día y 20 por minuto entre todos los usuarios (se ve en
+  `GET https://openrouter.ai/api/v1/key` → `free_model_daily_requests`). Con saldo
+  negativo OpenRouter puede rechazar también los gratuitos.
+- **Las imágenes NO son gratis**: todos los motores cuestan plata real y siguen activos.
+- **Antes de agregar otro `:free`:** probarlo con stream + tools (no todos llaman bien a
+  las herramientas) y con `scripts/css-benchmark.ts`. De 11 probados quedaron 4.
 
 ## Subir a GitHub (2026-10-05)
 

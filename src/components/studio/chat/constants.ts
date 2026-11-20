@@ -2,14 +2,17 @@
 // verificada en vivo contra OpenRouter). Antes había un array separado aquí
 // con 5 IDs de modelo que ya no existen en OpenRouter (ver
 // docs/INVENTARIO_FUNCIONALIDADES.md G-11/T-17).
-import { CHAT_MODELS } from '@/lib/ai/models';
+import { CHAT_MODELS, POWER_LABEL, powerTier } from '@/lib/ai/models';
 
 // ── Model catalog ─────────────────────────────────────────────────────────────
-// Primer modelo = DEFAULT (siempre gratis, sin coste de OpenRouter)
+// Primer modelo = DEFAULT (no gasta créditos del usuario).
+// `power` es la etiqueta que se le muestra: qué tan potente es frente a los demás que se
+// ven (ver powerTier en src/lib/ai/models.ts). La etiqueta ya no dice "FREE".
 export const MODELS = CHAT_MODELS.map((m) => ({
   id: m.id,
   label: m.label,
-  badge: m.category === 'eco' ? 'FREE' : m.category.toUpperCase(),
+  badge: m.category === 'eco' ? 'ECO' : m.category.toUpperCase(),
+  power: POWER_LABEL[powerTier(m)],
   provider: m.provider,
   description: m.description,
   vision: m.vision,

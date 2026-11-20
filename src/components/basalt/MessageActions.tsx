@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { Check, Copy, Pencil, RefreshCw, Sparkles } from "lucide-react";
-import { CHAT_MODELS, canAccessModel, getModel } from "@/lib/ai/models";
+import { CHAT_MODELS, POWER_LABEL, byPower, canAccessModel, modelLabel, powerTier } from "@/lib/ai/models";
 
 // Los gestos que todo el mundo espera bajo una respuesta: copiarla, pedirla de nuevo
 // y —esto Gemini no lo puede ofrecer— pedírsela a OTRO de los 21 modelos sin perder
@@ -67,7 +67,7 @@ export function MessageActions({ text, model, onRegenerate, onRegenerateWith, ti
     };
   }, [open]);
 
-  const usable = CHAT_MODELS.filter((m) => canAccessModel(tier, m.minTier) && m.id !== model);
+  const usable = byPower(CHAT_MODELS.filter((m) => canAccessModel(tier, m.minTier) && m.id !== model));
 
   return (
     <div className="asst-actions" ref={rootRef}>
@@ -106,7 +106,8 @@ export function MessageActions({ text, model, onRegenerate, onRegenerateWith, ti
                   onClick={() => { setOpen(false); onRegenerateWith(m.id); }}
                 >
                   <span className="asst-act-item-name">{m.label}</span>
-                  <span className={`asst-picker-chip${m.free ? " free" : ""}`}>{m.free ? "Gratis" : `${m.credits} cr`}</span>
+                  <span className={`asst-picker-chip power-${powerTier(m)}`}>{POWER_LABEL[powerTier(m)]}</span>
+                  {!m.free && <span className="asst-picker-chip">{m.credits} cr</span>}
                 </button>
               ))}
             </div>
@@ -116,7 +117,7 @@ export function MessageActions({ text, model, onRegenerate, onRegenerateWith, ti
 
       {/* Qué modelo respondió: con 21 modelos y el selector arriba, es la diferencia
           entre "la IA se equivocó" y "este modelo se equivocó". */}
-      {model && <span className="asst-act-model" title={model}>{getModel(model).label}</span>}
+      {model && <span className="asst-act-model" title={model}>{modelLabel(model)}</span>}
     </div>
   );
 }
