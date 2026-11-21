@@ -97,6 +97,13 @@ describe("parseDeck", () => {
     expect(q.type === "quote" && q.author).toBe("Laura Gómez");
   });
 
+  it("en la portada, título, subtítulo y lema seguidos son tres líneas (no una sola frase)", () => {
+    const cover = parseDeck("# Trigo\nDesayunos para empresas\nSabor local cada mañana\nNotas: saludar").slides[0];
+    expect(cover.layout).toBe("cover");
+    expect(cover.blocks.map((b) => b.type === "para" && runsText(b.runs))).toEqual(["Desayunos para empresas", "Sabor local cada mañana"]);
+    expect(cover.notes).toBe("saludar");
+  });
+
   it("sin separadores, cada título abre una diapositiva", () => {
     const d = parseDeck("# Uno\nHola\n\n## Dos\n- a\n- b\n\n## Tres\n- c");
     expect(d.slides.map((s) => s.title)).toEqual(["Uno", "Dos", "Tres"]);

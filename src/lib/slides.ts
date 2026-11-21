@@ -90,7 +90,9 @@ function parseSlide(lines: string[], index: number): Slide | null {
   let notes = "";
   const blocks: Block[] = [];
   let para: string[] = [];
-  const flushPara = () => { if (para.length) { blocks.push({ type: "para", runs: parseRuns(para.join(" ")) }); para = []; } };
+  // En una diapositiva cada línea es una línea: el modelo escribe título, subtítulo y lema
+  // seguidos, sin renglón en blanco, y unidos en un párrafo se leían como una sola frase.
+  const flushPara = () => { para.forEach((l) => blocks.push({ type: "para", runs: parseRuns(l) })); para = []; };
 
   for (let i = 0; i < lines.length; i++) {
     const raw = lines[i];
@@ -158,7 +160,7 @@ function parseSlide(lines: string[], index: number): Slide | null {
 
   if (!title && !blocks.length) return null;
   const only = blocks.length === 1 ? blocks[0] : undefined;
-  const shortBody = blocks.every((b) => b.type === "para") && blocks.length <= 2;
+  const shortBody = blocks.every((b) => b.type === "para") && blocks.length <= 3;
   let layout: SlideLayout = "content";
   if (!blocks.length) layout = index === 0 ? "cover" : "section";
   else if (index === 0 && title && shortBody) layout = "cover";
