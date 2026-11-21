@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from "react";
-import { Check, Copy, Pencil, RefreshCw, Sparkles } from "lucide-react";
+import { Check, Copy, PanelRight, Pencil, RefreshCw, Sparkles } from "lucide-react";
 import { CHAT_MODELS, POWER_LABEL, byPower, canAccessModel, modelLabel, powerTier } from "@/lib/ai/models";
 
 // Los gestos que todo el mundo espera bajo una respuesta: copiarla, pedirla de nuevo
@@ -42,6 +42,9 @@ interface Props {
   text: string;
   /** Id del modelo que respondió (cabecera X-Model-Used). */
   model?: string;
+  /** Abre la respuesta en el Canvas como documento (para leerla, imprimirla o bajarla en
+   *  Word). Solo llega cuando la respuesta tiene forma de documento: un plan, una parrilla. */
+  onDocument?: () => void;
   /** Solo en la última respuesta. */
   onRegenerate?: () => void;
   onRegenerateWith?: (modelId: string) => void;
@@ -50,7 +53,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export function MessageActions({ text, model, onRegenerate, onRegenerateWith, tier, disabled }: Props) {
+export function MessageActions({ text, model, onDocument, onRegenerate, onRegenerateWith, tier, disabled }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const popId = useId();
@@ -72,6 +75,13 @@ export function MessageActions({ text, model, onRegenerate, onRegenerateWith, ti
   return (
     <div className="asst-actions" ref={rootRef}>
       <CopyButton text={text} />
+
+      {onDocument && (
+        <button type="button" className="asst-act" onClick={onDocument} title="Abrirla en el Canvas como documento: leerla, imprimirla o bajarla en Word">
+          <PanelRight className="w-3.5 h-3.5" aria-hidden />
+          <span>Documento</span>
+        </button>
+      )}
 
       {onRegenerate && (
         <button type="button" className="asst-act" onClick={onRegenerate} disabled={disabled} title="Volver a generar la respuesta">

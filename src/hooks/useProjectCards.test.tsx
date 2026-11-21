@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { act } from "@testing-library/react";
+import { CANVAS_OPEN_EVENT, setCanvasTarget } from "@/lib/canvas";
 import { render } from "@testing-library/react";
 import { useRef } from "react";
 import { mdToHtml } from "@/lib/markdown";
@@ -68,5 +70,46 @@ describe("useProjectCards — Subir a GitHub", () => {
     expect(paths).toContain("styles.css");
     const css = detalle!.archivos.find((a) => a.path === "styles.css")!;
     expect(css.content).toBe("h1{color:red}");
+  });
+});
+
+describe("useProjectCards — Canvas", () => {
+  const md = [fence("svg", '<svg viewBox="0 0 1 1"><rect width="1" height="1"/></svg>'), fence("html", "<h1>uno</h1><p>dos</p>")].join("\n\n");
+
+  function InMessage() {
+    const ref = useRef<HTMLDivElement | null>(null);
+    useProjectCards(ref);
+    return <div ref={ref}><div data-msg-id="m7" dangerouslySetInnerHTML={{ __html: mdToHtml(md) }} /></div>;
+  }
+
+  it("«Abrir en Canvas» dice qué artefacto de qué mensaje abrir", () => {
+    const { container } = render(<InMessage />);
+    let detalle: unknown = null;
+    const onOpen = (e: Event) => { detalle = (e as CustomEvent).detail; };
+    window.addEventListener(CANVAS_OPEN_EVENT, onOpen);
+    container.querySelectorAll<HTMLButtonElement>('[data-act="canvas"]')[1].click();
+    window.removeEventListener(CANVAS_OPEN_EVENT, onOpen);
+    expect(detalle).toEqual({ msgId: "m7", index: 1 });
+  });
+
+  it("la tarjeta abierta en el Canvas se marca para no pintar otra copia, y se desmarca al cerrar", () => {
+    const { container } = render(<InMessage />);
+    const cards = container.querySelectorAll(".md-project");
+    act(() => setCanvasTarget({ msgId: "m7", index: 1 }));
+    expect(cards[0].classList.contains("md-in-canvas")).toBe(false);
+    expect(cards[1].classList.contains("md-in-canvas")).toBe(true);
+    act(() => setCanvasTarget(null));
+    expect(cards[1].classList.contains("md-in-canvas")).toBe(false);
+  });
+
+  it("un componente a medio escribir avisa que la vista previa llega al terminar", () => {
+    const stop = document.createElement("button");
+    stop.className = "asst-send stop";
+    document.body.appendChild(stop);
+    const { container } = render(<InMessage />);
+    const [svg, html] = container.querySelectorAll(".md-project");
+    expect(svg.classList.contains("md-pending")).toBe(true);
+    expect(html.classList.contains("md-pending")).toBe(false); // el HTML sí se va pintando mientras llega
+    stop.remove();
   });
 });

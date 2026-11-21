@@ -994,3 +994,106 @@
 .asst-tour-btn:focus-visible { outline: 2px solid var(--asst-accent-text, var(--a-accent, #8b5cf6)); outline-offset: 2px; }
 /* En oscuro, los metadatos del recorrido en mono, como el resto de señales. */
 .asst-app[data-asst-theme="dark"] :is(.asst-tour-count, .asst-tour-skip) { font-family: var(--asst-mono); }
+
+/* ── Canvas (CanvasPanel.tsx) ─────────────────────────────────────────────────
+   Lo que Basalt construye, grande y al lado del chat. En escritorio es una
+   columna más de .asst-app (el chat se angosta, no se tapa); por debajo de
+   1024px no caben los dos y pasa a ocupar la pantalla. El ancho se arrastra
+   desde el borde izquierdo y se recuerda. */
+.asst-canvas {
+  position: relative; flex: none; width: 50%; min-width: 360px; max-width: 72%; min-height: 0;
+  display: flex; flex-direction: column; background: var(--asst-bg); color: var(--asst-txt); border-left: 1px solid var(--asst-border);
+}
+.asst-canvas.expanded { position: fixed; inset: 0; z-index: 70; width: auto; max-width: none; border-left: 0; padding-top: env(safe-area-inset-top); }
+.asst-canvas-grip { position: absolute; inset: 0 auto 0 -4px; width: 8px; z-index: 2; cursor: col-resize; touch-action: none; }
+.asst-canvas-grip::after { content: ""; position: absolute; inset: 0 3px; background: transparent; transition: background 0.15s; }
+.asst-canvas-grip:hover::after, .asst-canvas.dragging .asst-canvas-grip::after { background: var(--asst-accent-text); }
+.asst-canvas.dragging { user-select: none; }
+.asst-canvas.dragging .asst-canvas-frame { pointer-events: none; }
+.asst-canvas.expanded .asst-canvas-grip { display: none; }
+
+.asst-canvas-head { display: flex; align-items: center; gap: 8px; flex: none; padding: 10px 10px 10px 16px; min-height: 56px; }
+.asst-canvas-kind {
+  flex: none; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  background: color-mix(in oklch, var(--a-accent, #8b5cf6) 16%, var(--asst-bg)); color: var(--asst-accent-text);
+}
+.asst-canvas-title { flex: 1; min-width: 0; margin: 0; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asst-canvas-live { flex: none; font-size: 12px; color: var(--asst-txt-3); animation: asst-canvas-pulse 1.4s ease-in-out infinite; }
+@keyframes asst-canvas-pulse { 50% { opacity: 0.45; } }
+.asst-canvas-versions {
+  flex: 0 1 190px; min-width: 0; height: 32px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--asst-border);
+  background: var(--asst-panel); color: var(--asst-txt); font: inherit; font-size: 12.5px; text-overflow: ellipsis;
+}
+
+.asst-canvas-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; flex: none; padding: 0 12px 8px 16px; border-bottom: 1px solid var(--asst-border); }
+.asst-canvas-tabs { display: inline-flex; padding: 3px; border-radius: 12px; background: var(--asst-panel); border: 1px solid var(--asst-border); }
+.asst-canvas-tab { border: 0; background: transparent; color: var(--asst-txt-2); font: inherit; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 9px; cursor: pointer; }
+.asst-canvas-tab.active { background: var(--asst-bg); color: var(--asst-txt); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12); }
+.asst-canvas-tools { display: inline-flex; align-items: center; gap: 2px; }
+.asst-canvas-tool { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 9px; background: transparent; color: var(--asst-txt-3); cursor: pointer; }
+.asst-canvas-tool:hover { background: var(--asst-panel); color: var(--asst-txt); }
+.asst-canvas-tool.active { background: var(--asst-active-bg); color: var(--asst-accent-text); }
+.asst-canvas-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; margin-left: auto; }
+
+.asst-canvas-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.asst-canvas-stage { flex: 1; min-height: 0; display: flex; justify-content: center; background: var(--asst-panel-2); }
+.asst-canvas-frame { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+.asst-canvas-stage[data-device="tablet"] .asst-canvas-frame { width: 768px; max-width: 100%; box-shadow: 0 0 0 1px var(--asst-border); }
+.asst-canvas-stage[data-device="mobile"] .asst-canvas-frame { width: 390px; max-width: 100%; box-shadow: 0 0 0 1px var(--asst-border); }
+.asst-canvas-wait { align-self: center; margin: 0; padding: 24px; max-width: 34ch; text-align: center; font-size: 14px; line-height: 1.5; color: var(--asst-txt-3); }
+
+.asst-canvas-code { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.asst-canvas-files { display: flex; gap: 2px; flex: none; overflow-x: auto; padding: 0 8px; background: var(--asst-panel-2); scrollbar-width: none; }
+.asst-canvas-code pre { flex: 1; min-height: 0; margin: 0; padding: 14px 16px; overflow: auto; background: var(--asst-panel); scrollbar-width: thin; }
+.asst-canvas-code pre code { background: none; padding: 0; font: 13px/1.6 "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre; }
+
+.asst-canvas-docwrap { flex: 1; min-height: 0; overflow-y: auto; background: var(--asst-panel); scrollbar-width: thin; }
+.asst-canvas-doc { box-sizing: border-box; width: min(760px, calc(100% - 32px)); margin: 20px auto; padding: 36px 44px 48px; background: var(--asst-bg); border: 1px solid var(--asst-border); border-radius: 6px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); }
+
+.asst-canvas-console { flex: none; border-top: 1px solid var(--asst-border); }
+.asst-canvas-console summary { display: flex; align-items: center; gap: 4px; cursor: pointer; padding: 8px 12px 8px 16px; font-size: 12.5px; color: var(--asst-txt-2); background: var(--asst-panel-2); user-select: none; }
+.asst-canvas-fix {
+  display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--asst-border);
+  background: var(--asst-bg); color: var(--asst-accent-text); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+}
+.asst-canvas-fix:hover { background: var(--asst-active-bg); }
+
+/* Con el Canvas al lado, el chat no puede exigir 780px ni dejar el compositor apretado. */
+.asst-app[data-canvas="open"] .asst-main { min-width: 320px; }
+
+@media (max-width: 1023px) {
+  .asst-canvas { position: fixed; inset: 0; z-index: 70; width: auto !important; min-width: 0; max-width: none; border-left: 0; padding-top: env(safe-area-inset-top); }
+  .asst-canvas-grip, .asst-canvas-expand { display: none; }
+  .asst-canvas-head { padding-left: 12px; }
+  .asst-canvas-bar { padding-left: 12px; }
+  .asst-canvas-doc { width: 100%; margin: 0; padding: 22px 18px 40px; border: 0; border-radius: 0; box-shadow: none; }
+  .asst-canvas-versions { flex-basis: 120px; }
+}
+@media (prefers-reduced-motion: reduce) { .asst-canvas-live { animation: none; } .asst-canvas-grip::after { transition: none; } }
+
+/* «Abrir en Canvas» en la tarjeta del chat: solo donde hay un panel que lo abra (Basalt y
+   los Expertos); en la Arena, con tres columnas, el botón no haría nada. */
+.md-canvas-btn { display: none; }
+.asst-app[data-canvas] .md-canvas-btn { display: inline-flex; align-items: center; color: var(--asst-accent-text); font-weight: 600; }
+/* La tarjeta cuyo artefacto está abierto en el Canvas no pinta otra copia de la vista previa. */
+.md-project.md-in-canvas .md-proj-preview > * { display: none; }
+.md-project.md-in-canvas .md-proj-preview::before {
+  content: "Abierto en el Canvas."; display: block; padding: 16px 14px; font-size: 13px; color: var(--asst-txt-3);
+  background: var(--asst-panel); border-top: 1px solid var(--asst-border);
+}
+/* Dentro del documento del Canvas no se ofrece abrir otro Canvas encima. */
+.asst-canvas-doc .md-canvas-btn { display: none; }
+
+/* Con el Canvas al lado el chat se angosta: los botones de la tarjeta partían su texto en
+   dos líneas ("Abrir en / Canvas"). Cada botón va entero y el grupo baja de renglón. */
+.md-codehead { flex-wrap: wrap; gap: 2px 8px; }
+.md-preview-actions { flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
+.md-proj-btn, .md-copy-code, .md-proj-tool { white-space: nowrap; }
+/* Un componente o un diagrama a medio escribir todavía no se puede dibujar. */
+.md-project.md-pending .md-preview-frame { display: none; }
+.md-project.md-pending .md-proj-stage::before {
+  content: "La vista previa aparece cuando Basalt termine de escribir."; padding: 16px 14px; font-size: 13px; color: var(--asst-txt-3);
+}
+.md-proj-toolbar { flex-wrap: wrap; }
+/* En un teléfono el Canvas ya ocupa la pantalla: elegir "móvil / tablet / escritorio" no cambia nada. */
+@media (max-width: 640px) { .asst-canvas-tool[aria-pressed] { display: none; } }

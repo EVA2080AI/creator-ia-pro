@@ -15,7 +15,9 @@ describe("mdToHtml — tarjetas de proyecto", () => {
     const host = render(`Acá va:\n\n${fence("html", "<h1>Hola</h1><p>mundo</p>")}\n\nListo.`);
     expect(host.querySelectorAll(".md-project")).toHaveLength(1);
     const iframe = host.querySelector("iframe.md-preview-frame")!;
-    expect(iframe.getAttribute("sandbox")).toBe("allow-scripts");
+    // Corre scripts, formularios y alert(), pero NUNCA con el origen de la app.
+    expect(iframe.getAttribute("sandbox")).toBe("allow-scripts allow-forms allow-modals");
+    expect(iframe.getAttribute("sandbox")).not.toContain("allow-same-origin");
     expect(iframe.hasAttribute("srcdoc")).toBe(false);
     expect(host.querySelector('[data-tab="preview"]')).not.toBeNull();
     expect(host.querySelector('.md-proj-pane[data-file="index.html"] code')?.textContent).toBe("<h1>Hola</h1><p>mundo</p>");
@@ -38,8 +40,9 @@ describe("mdToHtml — tarjetas de proyecto", () => {
     expect(panes.map((p) => p.getAttribute("data-file"))).toEqual(["package.json", "src/App.tsx"]);
     expect(panes[0].querySelector("code")?.textContent).toBe('{"name":"x"}');
     expect(panes[1].querySelector("code")?.textContent).toBe("export default function App() {}");
-    // sin HTML no hay pestaña de vista previa, pero sí ZIP y StackBlitz (hay package.json)
-    expect(host.querySelector('[data-tab="preview"]')).toBeNull();
+    // un proyecto React se previsualiza (lo arma el Canvas en el navegador), y conserva ZIP y StackBlitz
+    expect(host.querySelector(".md-project")?.getAttribute("data-kind")).toBe("react");
+    expect(host.querySelector('[data-tab="preview"]')).not.toBeNull();
     expect(host.querySelector('[data-act="zip"]')).not.toBeNull();
     expect(host.querySelector('[data-act="stackblitz"]')).not.toBeNull();
   });
@@ -108,15 +111,28 @@ describe("mdToHtml — proyectos Vite/React", () => {
     fence("tsx src/main.tsx", "import React from 'react';"),
   ].join("\n\n");
 
-  it("no ofrece vista previa (quedaba en blanco) y explica cómo ejecutarlo", () => {
+  it("tiene vista previa (antes decía que el chat no podía ejecutarlo) y avisa que es aproximada", () => {
     const host = render(vite);
-    expect(host.querySelector(".md-project")).not.toBeNull();
-    expect(host.querySelector("iframe")).toBeNull();
-    expect([...host.querySelectorAll(".md-proj-tab")].map((t) => t.textContent)).toEqual(["package.json", "index.html", "src/main.tsx"]);
-    expect(host.querySelector(".md-proj-tab.active")?.textContent).toBe("package.json");
-    expect(host.querySelector(".md-proj-note")?.textContent).toMatch(/StackBlitz.*ZIP.*npm install/);
+    const card = host.querySelector(".md-project")!;
+    expect(card.getAttribute("data-kind")).toBe("react");
+    expect(host.querySelector("iframe.md-preview-frame")).not.toBeNull();
+    expect([...host.querySelectorAll(".md-proj-tab")].map((t) => t.textContent)).toEqual(["Vista previa", "package.json", "index.html", "src/main.tsx"]);
+    expect(host.querySelector(".md-proj-tab.active")?.textContent).toBe("Vista previa");
+    expect(host.querySelector(".md-proj-note")?.textContent).toMatch(/aproximada.*StackBlitz.*ZIP.*npm install/);
     expect(host.querySelector('[data-act="stackblitz"]')).not.toBeNull();
     expect(host.querySelector(".md-codehead span")?.textContent).toBe("Proyecto · 3 archivos");
+  });
+
+  it("un framework que el navegador no puede montar (Next) sigue sin vista previa y lo explica", () => {
+    const next = [
+      fence("json package.json", '{"dependencies":{"next":"15.0.0","react":"19.0.0"}}'),
+      fence("tsx app/page.tsx", "export default function Page() { return <main>hola</main>; }"),
+    ].join("\n\n");
+    const host = render(next);
+    expect(host.querySelector(".md-project")?.getAttribute("data-kind")).toBe("code");
+    expect(host.querySelector("iframe")).toBeNull();
+    expect(host.querySelector(".md-proj-tab.active")?.textContent).toBe("package.json");
+    expect(host.querySelector(".md-proj-note")?.textContent).toMatch(/no puede ejecutarlo.*StackBlitz/);
   });
 
   it("el aviso de faltantes arranca oculto (lo llena useProjectCards cuando el modelo terminó)", () => {
@@ -180,5 +196,55 @@ describe("mdToHtml — documentos de oficina (Costos.xls / Propuesta.doc)", () =
     const host = render([fence("html", "<h1>x</h1>"), fence("css", "h1{color:red}")].join("\n\n"));
     const botones = host.querySelectorAll('.md-proj-filebar [data-act="file"]');
     expect(botones.length).toBe(2);
+  });
+});
+
+describe("mdToHtml — lo que el Canvas sabe mostrar además de HTML", () => {
+  it("un componente React suelto es una tarjeta con vista previa, no un bloque de código", () => {
+    const host = render(fence("tsx", "export default function Precio() {\n  return <p className=\"text-xl\">$ 12.000</p>;\n}"));
+    const card = host.querySelector(".md-project")!;
+    expect(card.getAttribute("data-kind")).toBe("react");
+    expect(host.querySelector(".md-codehead span")?.textContent).toBe("Componente React");
+    expect(host.querySelector("iframe.md-preview-frame")).not.toBeNull();
+    expect(host.querySelector(".md-proj-pane[data-file]")?.getAttribute("data-file")).toBe("App.tsx");
+    expect(host.querySelectorAll(".md-codeblock")).toHaveLength(0);
+  });
+
+  it("un tsx que no es un componente (solo tipos) sigue siendo código", () => {
+    const host = render(fence("tsx", "export interface Producto { id: string; precio: number }"));
+    expect(host.querySelectorAll(".md-project")).toHaveLength(0);
+    expect(host.querySelectorAll(".md-codeblock")).toHaveLength(1);
+  });
+
+  it("un ```svg se dibuja: sin botones de dispositivo y con su descarga", () => {
+    const host = render(fence("svg", '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4"/></svg>'));
+    const card = host.querySelector(".md-project")!;
+    expect(card.getAttribute("data-kind")).toBe("svg");
+    expect(host.querySelector(".md-codehead span")?.textContent).toBe("Imagen SVG");
+    expect(host.querySelector("button[data-device]")).toBeNull();
+    expect(host.querySelector('[data-act="file"]')?.textContent).toBe("Descargar imagen.svg");
+    expect(host.querySelector('[data-act="zip"]')).toBeNull();
+    // el código viaja como TEXTO: nada de <svg> vivo fuera del iframe aislado
+    expect(host.querySelector(".md-project svg")).toBeNull();
+  });
+
+  it("un ```mermaid es un diagrama", () => {
+    const host = render(fence("mermaid", "graph TD\n  A[Lead] --> B[Venta]"));
+    expect(host.querySelector(".md-project")?.getAttribute("data-kind")).toBe("mermaid");
+    expect(host.querySelector(".md-codehead span")?.textContent).toBe("Diagrama");
+    expect(host.querySelector("iframe.md-preview-frame")).not.toBeNull();
+  });
+
+  it("cada tarjeta lleva su número de artefacto, en orden, y el botón de abrirla en el Canvas", () => {
+    const host = render([
+      fence("html", "<h1>uno</h1><p>a</p>"),
+      fence("python", "print(1)"),
+      fence("mermaid", "graph TD\n  A --> B"),
+      fence("tsx", "export default function A() { return <b>x</b>; }"),
+    ].join("\n\n"));
+    const cards = [...host.querySelectorAll(".md-project")];
+    expect(cards.map((c) => c.getAttribute("data-canvas"))).toEqual(["0", "1", "2"]);
+    expect(cards.map((c) => c.getAttribute("data-kind"))).toEqual(["web", "mermaid", "react"]);
+    expect(cards.every((c) => c.querySelector('[data-act="canvas"]')?.textContent === "Abrir en Canvas")).toBe(true);
   });
 });

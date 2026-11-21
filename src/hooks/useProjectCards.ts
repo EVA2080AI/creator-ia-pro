@@ -1,8 +1,10 @@
 import type { RefObject } from "react";
 import { useAttachWhenReady } from "./useAttachWhenReady";
-import { buildPreviewDoc, stackblitzFields, type ProjectFile } from "@/lib/project-preview";
-import { GITHUB_EXPORT_EVENT } from "@/lib/github-export";
+import type { ProjectFile } from "@/lib/project-preview";
 import { findViteProblems } from "@/lib/vite-check";
+import { buildArtifactDoc } from "@/lib/canvas-preview";
+import { CANVAS_CHANGED_EVENT, CANVAS_OPEN_EVENT, getCanvasTarget, type CanvasKind, type CanvasTarget } from "@/lib/canvas";
+import { downloadFile, downloadZip, exportToGithub, openStackblitz, projectTitle } from "@/lib/project-actions";
 
 // Comportamiento de las tarjetas de proyecto que produce mdToHtml()
 // (src/lib/markdown.ts → projectCardHtml). Las tarjetas llegan como HTML crudo
@@ -11,9 +13,10 @@ import { findViteProblems } from "@/lib/vite-check";
 //  - hidratar el iframe: DOMPurify le saca srcdoc a cualquier iframe (no es
 //    configurable), así que el código real vive como texto en los <pre><code>
 //    de cada pestaña y el documento de vista previa se arma acá y se asigna
-//    por JS, evitando el sanitizador;
+//    por JS, evitando el sanitizador. Qué documento se arma depende del tipo de
+//    la tarjeta (`data-kind`): HTML, React, SVG o diagrama — ver canvas-preview.ts;
 //  - pestañas, dispositivo (móvil/tablet/escritorio), recargar, pantalla
-//    completa, consola (postMessage desde el iframe), ZIP y StackBlitz.
+//    completa, consola (postMessage desde el iframe), ZIP, StackBlitz y Canvas.
 
 const MAX_CONSOLE_LINES = 200;
 
@@ -25,34 +28,14 @@ function readFiles(card: HTMLElement): ProjectFile[] {
   }));
 }
 
-function projectTitle(files: ProjectFile[]): string {
-  const html = files.find((f) => /\.html?$/i.test(f.name));
-  const fromTitle = html && /<title[^>]*>([^<]{1,60})<\/title>/i.exec(html.code)?.[1]?.trim();
-  return fromTitle || "Proyecto Basalt";
+/** Qué artefacto es esta tarjeta: el número que le puso mdToHtml dentro de su mensaje. */
+function cardTarget(card: HTMLElement): CanvasTarget | null {
+  const msgId = card.closest<HTMLElement>("[data-msg-id]")?.dataset.msgId;
+  const index = Number(card.dataset.canvas);
+  return msgId && card.dataset.canvas !== undefined && Number.isInteger(index) ? { msgId, index } : null;
 }
 
-const slug = (s: string) => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "proyecto-basalt";
-
-// El tipo correcto hace que macOS/Windows abran el archivo con Word/Excel
-// directamente en vez de con el navegador.
-const FILE_MIME: Record<string, string> = {
-  xls: "application/vnd.ms-excel",
-  doc: "application/msword",
-  csv: "text/csv;charset=utf-8",
-  html: "text/html;charset=utf-8",
-  htm: "text/html;charset=utf-8",
-};
-
-function download(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 10_000);
-}
+const isGenerating = () => !!document.querySelector(".asst-send.stop");
 
 function flash(btn: HTMLElement, text: string) {
   const original = btn.textContent;
@@ -71,6 +54,10 @@ function activateTab(card: HTMLElement, key: string) {
 
 function attachProjectCards(el: HTMLElement): () => void {
   const built = new WeakMap<HTMLIFrameElement, string>();
+  // Firma (tipo + archivos) de lo último que se pidió armar para cada iframe: armar un
+  // documento es asíncrono (React y los diagramas cargan su motor aparte), y sin esto dos
+  // pasadas seguidas lo armaban dos veces o una respuesta vieja pisaba a la nueva.
+  const wanted = new WeakMap<HTMLIFrameElement, string>();
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   const clearConsole = (card: HTMLElement) => {
@@ -91,19 +78,55 @@ function attachProjectCards(el: HTMLElement): () => void {
   const showProblems = (card: HTMLElement) => {
     const box = card.querySelector<HTMLElement>(".md-proj-problems");
     if (!box) return;
-    const generating = !!document.querySelector(".asst-send.stop");
-    const problems = generating ? [] : findViteProblems(readFiles(card));
+    const problems = isGenerating() ? [] : findViteProblems(readFiles(card));
     box.hidden = problems.length === 0;
     box.textContent = problems.length ? `Revisa antes de ejecutarlo: ${problems.join("; ")}. Pídele a Basalt que agregue lo que falta.` : "";
   };
 
+  /** ¿Esta tarjeta es justo lo que el Canvas tiene abierto? */
+  const isOpenInCanvas = (card: HTMLElement) => {
+    const open = getCanvasTarget();
+    const here = cardTarget(card);
+    return !!open && !!here && open.msgId === here.msgId && open.index === here.index;
+  };
+
+  // Barato y sin esperar: mientras el modelo escribe, React repone el HTML del mensaje en
+  // cada trozo y la tarjeta nace de nuevo sin sus marcas. Si esto esperara al debounce de
+  // hydrate, durante toda la respuesta se vería un recuadro blanco de 380px.
+  //  - md-in-canvas: abierta en el Canvas → la tarjeta no pinta OTRA copia (serían dos apps corriendo);
+  //  - md-pending: un componente o un diagrama a medio escribir no compila → se avisa en vez del blanco.
+  const mark = () => {
+    const generating = isGenerating();
+    el.querySelectorAll<HTMLElement>(".md-project").forEach((card) => {
+      const inCanvas = isOpenInCanvas(card);
+      card.classList.toggle("md-in-canvas", inCanvas);
+      card.classList.toggle("md-pending", !inCanvas && generating && (card.dataset.kind ?? "web") !== "web");
+    });
+  };
+
   const hydrate = () => {
+    mark();
     el.querySelectorAll<HTMLElement>(".md-project").forEach((card) => {
       showProblems(card);
       const iframe = card.querySelector<HTMLIFrameElement>("iframe.md-preview-frame");
       if (!iframe) return;
-      const doc = buildPreviewDoc(readFiles(card));
-      if (doc && built.get(iframe) !== doc) load(card, iframe, doc);
+
+      if (card.classList.contains("md-in-canvas")) {
+        if (wanted.has(iframe)) { wanted.delete(iframe); built.delete(iframe); iframe.removeAttribute("srcdoc"); }
+        return;
+      }
+      if (card.classList.contains("md-pending")) return;
+
+      const kind = (card.dataset.kind ?? "web") as CanvasKind;
+      const files = readFiles(card);
+      const dark = card.closest("[data-asst-theme]")?.getAttribute("data-asst-theme") === "dark";
+      const key = [kind, dark ? "d" : "l", ...files.map((f) => `${f.name}\u0000${f.code}`)].join("\u0001");
+      if (wanted.get(iframe) === key) return;
+      wanted.set(iframe, key);
+      void buildArtifactDoc({ kind, files }, { dark }).then((doc) => {
+        if (wanted.get(iframe) !== key || !iframe.isConnected) return;
+        if (doc && built.get(iframe) !== doc) load(card, iframe, doc);
+      });
     });
   };
 
@@ -141,6 +164,11 @@ function attachProjectCards(el: HTMLElement): () => void {
         actEl.textContent = on ? "Cerrar" : "Pantalla completa";
         break;
       }
+      case "canvas": {
+        const target = cardTarget(card);
+        if (target) window.dispatchEvent(new CustomEvent(CANVAS_OPEN_EVENT, { detail: target }));
+        break;
+      }
       case "file": {
         // Descarga UN archivo con su nombre (el boton del encabezado en documentos
         // de oficina, o el "Descargar" de la barra de cada pestana de archivo).
@@ -149,57 +177,25 @@ function attachProjectCards(el: HTMLElement): () => void {
           card.querySelector<HTMLElement>(".md-proj-pane.active[data-file]") ??
           card.querySelector<HTMLElement>(".md-proj-pane[data-file]");
         const name = pane?.dataset.file;
-        const code = pane?.querySelector("pre code")?.textContent ?? "";
         if (!pane || !name) break;
-        const ext = name.includes(".") ? name.split(".").pop()!.toLowerCase() : "";
-        download(new Blob([code], { type: FILE_MIME[ext] ?? "text/plain;charset=utf-8" }), name);
+        downloadFile(name, pane.querySelector("pre code")?.textContent ?? "");
         flash(actEl, "Descargado ✓");
         break;
       }
       case "zip": {
         const files = readFiles(card);
-        void (async () => {
-          try {
-            const { default: JSZip } = await import("jszip");
-            const zip = new JSZip();
-            files.forEach((f) => zip.file(f.name, f.code));
-            download(await zip.generateAsync({ type: "blob" }), `${slug(projectTitle(files))}.zip`);
-            flash(actEl, "Descargado ✓");
-          } catch {
-            flash(actEl, "Error");
-          }
-        })();
+        downloadZip(files).then(() => flash(actEl, "Descargado ✓"), () => flash(actEl, "Error"));
         break;
       }
       case "github": {
-        // El diálogo (GitHubExportDialog, montado en la página) hace el resto:
-        // estado de vinculación, nombre del repo y subida. Acá solo se juntan
-        // los archivos del DOM, igual que hace el ZIP.
-        const files = readFiles(card);
-        window.dispatchEvent(new CustomEvent(GITHUB_EXPORT_EVENT, {
-          detail: { titulo: projectTitle(files), archivos: files.map((f) => ({ path: f.name, content: f.code })) },
-        }));
+        // El diálogo (GitHubExportDialog, montado en la página) hace el resto. Acá solo
+        // se juntan los archivos del DOM, igual que hace el ZIP.
+        exportToGithub(readFiles(card));
         break;
       }
       case "stackblitz": {
         const files = readFiles(card);
-        const fields = stackblitzFields(files, projectTitle(files));
-        if (!fields) return flash(actEl, "No disponible");
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = "https://stackblitz.com/run";
-        form.target = "_blank";
-        form.style.display = "none";
-        for (const [name, value] of Object.entries(fields)) {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = name;
-          input.value = value;
-          form.appendChild(input);
-        }
-        document.body.appendChild(form);
-        form.submit();
-        form.remove();
+        if (!openStackblitz(files, projectTitle(files))) flash(actEl, "No disponible");
         break;
       }
     }
@@ -240,6 +236,7 @@ function attachProjectCards(el: HTMLElement): () => void {
   // veces por segundo con el código todavía incompleto — solo interesa armar
   // la vista previa cuando el texto se asienta.
   const observer = new MutationObserver(() => {
+    mark();
     if (timer) clearTimeout(timer);
     timer = setTimeout(hydrate, 400);
   });
@@ -248,6 +245,7 @@ function attachProjectCards(el: HTMLElement): () => void {
   observer.observe(el, { childList: true, subtree: true });
   el.addEventListener("click", onClick);
   window.addEventListener("message", onMessage);
+  window.addEventListener(CANVAS_CHANGED_EVENT, hydrate);
   document.addEventListener("keydown", onKey);
 
   return () => {
@@ -255,6 +253,7 @@ function attachProjectCards(el: HTMLElement): () => void {
     if (timer) clearTimeout(timer);
     el.removeEventListener("click", onClick);
     window.removeEventListener("message", onMessage);
+    window.removeEventListener(CANVAS_CHANGED_EVENT, hydrate);
     document.removeEventListener("keydown", onKey);
   };
 }

@@ -10,9 +10,14 @@
 //                     se puede repetir y los clics van en orden
 // --device "Desktop Chrome"  la misma pantalla en escritorio
 // --width=<px>  ancho de ventana propio (p. ej. --width=1100 con "Desktop Chrome", un portátil)
+// --demo=canvas  la conversación de muestra trae un componente React, un SVG, un diagrama, una página
+//                y un proyecto Vite (scripts/demo-canvas.mjs): abrirla con --click=.asst-conv-open
+// --script=<archivo.mjs>  corre `export default async (page) => {…}` antes de la captura (pruebas interactivas)
+// --wait=<ms>  espera extra antes de la captura (una vista previa que baja React de esm.sh)
 // --admin  la sesión simulada es de administrador y /api/admin/users devuelve cuentas de muestra (para /admin)
 // Por qué existe: resize_window de Claude in Chrome no cambia el viewport, y creator-ia.com bloquea los iframes.
 import { chromium, devices } from "@playwright/test";
+import { DEMO_CANVAS_MESSAGES } from "./demo-canvas.mjs";
 
 const args = process.argv.slice(2);
 const flag = (n) => args.includes(n);
@@ -128,7 +133,7 @@ await ctx.route("**/api/**", (r) => {
   // La ruta por id va ANTES del prefijo: si no, el mock de la lista se la come y el
   // cliente cree que la conversación no existe.
   if (/^\/api\/basalt\/conversations\/[^/]+$/.test(u)) {
-    return json(r, { ok: true, conversation: { ...DEMO_CONVERSATIONS[0], messages: DEMO_MESSAGES } });
+    return json(r, { ok: true, conversation: { ...DEMO_CONVERSATIONS[0], messages: opt("--demo", "") === "canvas" ? DEMO_CANVAS_MESSAGES : DEMO_MESSAGES } });
   }
   if (u.startsWith("/api/basalt/conversations")) return json(r, { ok: true, conversations: DEMO_CONVERSATIONS });
   // El bloque de GitHub del perfil solo aparece si el servidor dice "configurado";
@@ -158,6 +163,12 @@ for (const click of args.filter((a) => a.startsWith("--click=")).map((a) => a.sl
   await page.locator(click).first().click();
   await page.waitForTimeout(400);
 }
+const wait = Number(opt("--wait", 0));
+if (wait) await page.waitForTimeout(wait);
+// --script=<archivo.mjs>: pasos propios antes de la captura (export default async (page) => {…}),
+// para probar algo interactivo con la misma sesión y la misma API simulada.
+const script = opt("--script", "");
+if (script) await (await import(new URL(script, `file://${process.cwd()}/`).href)).default(page);
 await page.screenshot({ path: out, fullPage: flag("--full") });
 console.log(`${dev} ${page.viewportSize().width}x${page.viewportSize().height} → ${out}`);
 await browser.close();

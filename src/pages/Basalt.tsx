@@ -10,6 +10,9 @@ import { GitHubExportDialog } from "@/components/basalt/GitHubExportDialog";
 import { useProfile } from "@/hooks/useProfile";
 import { ModelPicker } from "@/components/basalt/ModelPicker";
 import { PromptPicker } from "@/components/basalt/PromptPicker";
+import { CanvasPanel } from "@/components/basalt/CanvasPanel";
+import { useCanvas } from "@/hooks/useCanvas";
+import { WHOLE_MESSAGE, isDocLike } from "@/lib/canvas";
 import { ReportButton } from "@/components/tickets/ReportButton";
 import { ConversationList } from "@/components/basalt/ConversationList";
 import { projectToMarkdown } from "@/lib/project-preview";
@@ -123,6 +126,7 @@ export default function BasaltPage() {
 
   const [input, setInput] = useState("");
   const [generating, setGenerating] = useState(false);
+  const canvas = useCanvas(messages, generating);
   const [error, setError] = useState<string | null>(null);
   /** Código del servidor para el último error: decide qué se ofrece (planes, reintentar). */
   const [errorCode, setErrorCode] = useState<string | undefined>();
@@ -624,7 +628,7 @@ export default function BasaltPage() {
   );
 
   return (
-    <div className="asst-app" data-asst-theme={theme} style={brandCssVars(A.brand) as React.CSSProperties}>
+    <div className="asst-app" data-asst-theme={theme} data-canvas={canvas.artifact ? "open" : "closed"} style={brandCssVars(A.brand) as React.CSSProperties}>
       <Helmet><title>Basalt | Creator IA Pro</title></Helmet>
 
       <BasaltShellSidebar
@@ -729,7 +733,7 @@ export default function BasaltPage() {
           ) : (
             <div className="asst-thread">
               {messages.map((m, i) => (
-                <div key={m.id} className={`asst-msg ${m.role}`}>
+                <div key={m.id} className={`asst-msg ${m.role}`} data-msg-id={m.id}>
                   {m.role === "user" ? (
                     <>
                       <div className="asst-bubble">
@@ -754,6 +758,7 @@ export default function BasaltPage() {
                             model={m.model}
                             tier={tier}
                             disabled={generating}
+                            onDocument={isDocLike(m.text) ? () => canvas.open({ msgId: m.id, index: WHOLE_MESSAGE }) : undefined}
                             onRegenerate={i === messages.length - 1 ? () => regenerate(m.id) : undefined}
                             onRegenerateWith={i === messages.length - 1 ? (id) => regenerate(m.id, id) : undefined}
                           />
@@ -856,6 +861,24 @@ export default function BasaltPage() {
           </div>
         </form>
       </main>
+      {canvas.artifact && canvas.target && (
+        <CanvasPanel
+          key={`${canvas.target.msgId}:${canvas.target.index}`}
+          artifact={canvas.artifact}
+          target={canvas.target}
+          versions={canvas.versions}
+          streaming={canvas.streaming}
+          theme={theme}
+          onSelect={canvas.open}
+          onClose={canvas.close}
+          onAsk={(texto) => {
+            // En un teléfono el Canvas tapa el chat: se cierra para que se vea dónde quedó el texto.
+            if (!window.matchMedia("(min-width: 1024px)").matches) canvas.close();
+            setInput(texto);
+            focusComposer();
+          }}
+        />
+      )}
       <GitHubExportDialog />
     </div>
   );

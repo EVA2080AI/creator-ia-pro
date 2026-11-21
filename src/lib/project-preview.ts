@@ -97,7 +97,25 @@ export function looksRenderable(code: string): boolean {
 // Se inyecta en el <head> del documento de vista previa: reenvía console.* y
 // los errores al padre por postMessage (el iframe no tiene allow-same-origin,
 // así que es la única vía). Sin JSON.stringify para valores raros: String().
-const CONSOLE_SHIM = `<script>(function(){var s=function(x){try{return typeof x==="string"?x:(x instanceof Error?x.message:JSON.stringify(x))}catch(e){return String(x)}};var p=function(t,a){try{parent.postMessage({__basalt:1,t:t,m:Array.prototype.map.call(a,s).join(" ")},"*")}catch(e){}};["log","info","warn","error"].forEach(function(k){var o=console[k];console[k]=function(){p(k,arguments);try{o.apply(console,arguments)}catch(e){}}});window.addEventListener("error",function(e){var t=e.target;if(t&&t!==window&&t.tagName){p("warn",["No se pudo cargar "+(t.tagName==="IMG"?"la imagen ":"")+(t.currentSrc||t.src||t.href)]);return}p("error",[e.message+(e.lineno?" (línea "+e.lineno+")":"")])},true);window.addEventListener("unhandledrejection",function(e){p("error",["Promesa rechazada: "+(e.reason&&e.reason.message||e.reason)])})})()</script>`;
+// Calla el aviso fijo del CDN de Tailwind ("should not be used in production"): en una
+// vista previa es ruido, y encendía el contador de la consola en cada proyecto React.
+const CONSOLE_SHIM = `<script>(function(){var s=function(x){try{return typeof x==="string"?x:(x instanceof Error?x.message:JSON.stringify(x))}catch(e){return String(x)}};var p=function(t,a){try{var m=Array.prototype.map.call(a,s).join(" ");if(m.indexOf("cdn.tailwindcss.com should not be used in production")===0)return;parent.postMessage({__basalt:1,t:t,m:m},"*")}catch(e){}};["log","info","warn","error"].forEach(function(k){var o=console[k];console[k]=function(){p(k,arguments);try{o.apply(console,arguments)}catch(e){}}});window.addEventListener("error",function(e){var t=e.target;if(t&&t!==window&&t.tagName){p("warn",["No se pudo cargar "+(t.tagName==="IMG"?"la imagen ":"")+(t.currentSrc||t.src||t.href)]);return}p("error",[e.message+(e.lineno?" (línea "+e.lineno+")":"")])},true);window.addEventListener("unhandledrejection",function(e){p("error",["Promesa rechazada: "+(e.reason&&e.reason.message||e.reason)])})})()</script>`;
+
+// Lo que el aislamiento del iframe rompe y una página normal da por hecho (medido en
+// Chromium, 2026-11-21): leer `localStorage` lanza SecurityError —y el prompt le pide al
+// modelo usarlo para que los datos sobrevivan—, y `history.pushState` también. Se reemplazan
+// por un almacén en memoria (dura hasta recargar la vista previa) y por un pushState que no
+// revienta. Sin esto una app de reservas quedaba en blanco al primer `localStorage.getItem`.
+const SANDBOX_SHIM = `<script>(function(){var mk=function(){var d={};return{getItem:function(k){return Object.prototype.hasOwnProperty.call(d,k)?d[k]:null},setItem:function(k,v){d[k]=String(v)},removeItem:function(k){delete d[k]},clear:function(){d={}},key:function(i){return Object.keys(d)[i]||null},get length(){return Object.keys(d).length}}};["localStorage","sessionStorage"].forEach(function(n){try{window[n].getItem("_")}catch(e){try{Object.defineProperty(window,n,{value:mk(),configurable:true})}catch(_){}}});["pushState","replaceState"].forEach(function(n){var o=history[n];history[n]=function(){try{return o.apply(history,arguments)}catch(e){}}})})()</script>`;
+
+/** Todo lo que cualquier documento de vista previa lleva al principio de su <head>. */
+export const PREVIEW_SHIM = SANDBOX_SHIM + CONSOLE_SHIM;
+
+/** Permisos del iframe de vista previa. SIN allow-same-origin: el código generado corre pero
+ *  no puede leer cookies ni el almacenamiento de la app, ni navegar la pestaña. allow-forms
+ *  hace falta para que un <form> dispare su evento submit (sin él, "Reservar" no hacía nada:
+ *  medido el 2026-11-21) y allow-modals para alert()/confirm(), que las apps generadas usan. */
+export const PREVIEW_SANDBOX = "allow-scripts allow-forms allow-modals";
 
 const SKIP_JS = /(^|\/)(server|vite\.config|webpack\.config|tailwind\.config|postcss\.config|eslint\.config)\.[mc]?js$|\.(test|spec|config)\.[mc]?js$/i;
 
@@ -217,7 +235,7 @@ export function buildPreviewDoc(files: ProjectFile[]): string | null {
         missing.map((m) => `console.warn(${JSON.stringify(missingRefMessage(m))})`).join(";"),
       )}</script>`
     : "";
-  const head = CONSOLE_SHIM + warn;
+  const head = PREVIEW_SHIM + warn;
 
   if (/<head\b[^>]*>/i.test(doc)) return doc.replace(/<head\b[^>]*>/i, (m) => `${m}${head}`);
   if (/<html\b[^>]*>/i.test(doc)) return doc.replace(/<html\b[^>]*>/i, (m) => `${m}<head>${head}</head>`);

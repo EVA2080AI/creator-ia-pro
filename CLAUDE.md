@@ -151,6 +151,52 @@ solo acepta modelos que a nosotros no nos cuestan nada en OpenRouter (los `:free
 - **Antes de agregar otro `:free`:** probarlo con stream + tools (no todos llaman bien a
   las herramientas) y con `scripts/css-benchmark.ts`. De 11 probados quedaron 4.
 
+## Ideas para empezar y Canvas (2026-11-21)
+
+Dos pedidos de Sebastián del mismo día.
+
+**Ideas para empezar** (`src/components/basalt/PromptPicker.tsx`). Las tarjetas de la
+bienvenida de Basalt y de los Expertos son ahora UN selector, y elegir una idea **deja su
+texto en el compositor, no lo envía** ("prefiero que sea un selector y no empiece a
+desarrollar sino que inyecte el prompt en el chat"). Regla que sale de ahí: nada de la
+interfaz envía un mensaje por el usuario — «Pedir que lo arregle» del Canvas también solo
+escribe en el compositor. Las ideas de adjuntar siguen abriendo el selector de archivos.
+
+**Canvas** ("implementa un visualizador tipo canvas, porque el que hay es solo html"). Lo
+que Basalt construye se abre grande al lado del chat (a pantalla completa bajo 1024px):
+
+- **Qué sabe mostrar:** páginas HTML/CSS/JS, un componente React suelto, un proyecto
+  Vite/React de varios archivos, SVG, diagramas ```mermaid y —con el botón «Documento» de una
+  respuesta larga— la respuesta entera para leerla, imprimirla o bajarla en Word.
+- **Una sola fuente de verdad:** `src/lib/canvas.ts` (`planArtifacts`) decide qué bloques de un
+  mensaje forman un artefacto. Lo usan `mdToHtml` (la tarjeta del chat) y el panel: el
+  artefacto N del Canvas ES la tarjeta `data-canvas="N"` del mensaje `data-msg-id`. No
+  duplicar esa decisión en otro lado.
+- **El panel no guarda copia del código** (`useCanvas` + `CanvasPanel.tsx`): apunta a
+  (mensaje, número) y lo lee del hilo. Por eso se abre solo mientras el modelo escribe
+  (solo desde 1100px de ancho y una vez por respuesta), muestra el código llegar y al
+  terminar pasa a la vista previa.
+- **React sin npm** (`src/lib/react-bundle.ts`): sucrase transpila cada archivo que la app
+  importa y el navegador resuelve los módulos con un import map — los archivos del proyecto
+  como `data:` URLs, los paquetes desde `esm.sh` (`?external=react,react-dom` para que haya UN
+  solo React) y Tailwind desde su CDN. Es una vista previa **aproximada**: sin servidor, sin
+  backend, sin variables de entorno; StackBlitz y el ZIP siguen siendo la versión exacta. Next,
+  Vue, Svelte y Astro no se montan (tipo `code`: solo archivos).
+- **El iframe** lleva `PREVIEW_SANDBOX` = `allow-scripts allow-forms allow-modals`, **nunca**
+  `allow-same-origin`. Medido en Chromium: sin `allow-forms` un `<form>` ni siquiera dispara
+  `submit`; y dentro del aislamiento `localStorage` y `history.pushState` lanzan SecurityError
+  — `PREVIEW_SHIM` los reemplaza por un almacén en memoria y un pushState que no revienta, y
+  react-router se sirve con el enrutador de memoria. Todo documento de vista previa empieza
+  por `PREVIEW_SHIM`.
+- **Terceros que toca el navegador del usuario** al previsualizar React: `esm.sh`,
+  `cdn.tailwindcss.com` (o jsdelivr con Tailwind 4). Solo ven la IP y qué paquete se pide;
+  el código del usuario no sale del iframe.
+- **Cómo probarlo de verdad:** `node scripts/mobile-shots.mjs /a/basalt salida.png
+  --demo=canvas "--click=.asst-conv-row button" --script=<pasos.mjs>` abre una conversación
+  con un artefacto de cada tipo (`scripts/demo-canvas.mjs`) y corre pasos propios con la
+  API simulada. jsdom no ejecuta módulos ni iframes: las pruebas unitarias cubren el plan,
+  el empaquetado y el panel; que React se dibuje se comprueba así.
+
 ## Subir a GitHub (2026-10-05)
 
 La tarjeta de proyecto del chat tiene «Subir a GitHub» (junto a ZIP/StackBlitz):
