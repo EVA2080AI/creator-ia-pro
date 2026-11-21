@@ -48,8 +48,22 @@ export function setCanvasTarget(t: CanvasTarget | null) {
  *  fuente, porque el artefacto N del Canvas tiene que ser la tarjeta N del chat. */
 export const fenceRe = () => /```([\p{L}\p{N}+#_-]*)\n?([\s\S]*?)(?:```|$)/gu;
 
+// Visto en producción (Nemotron 3.5 Super, 2026-11-21): el modelo abrió el bloque con las
+// comillas solas y escribió `slides` en la PRIMERA LÍNEA — y la presentación salió como un
+// bloque de código gris. Para los lenguajes que cambian cómo se muestra un bloque, vale igual.
+const FIRST_LINE_LANG = /^[ \t]*(slides?|presentaci[oó]n|diapositivas|pptx?|deck|mermaid|svg|html|tsx|jsx)[ \t]*\n/i;
+
+/** Un bloque tal como salió de la valla → su lenguaje y su código (compartido con mdToHtml). */
+export function normalizeFence(lang: string, code: string): CodeBlock {
+  if (!lang) {
+    const m = FIRST_LINE_LANG.exec(code);
+    if (m) return { lang: m[1].toLowerCase(), code: code.slice(m[0].length) };
+  }
+  return { lang: lang || "código", code };
+}
+
 export function codeBlocks(md: string): CodeBlock[] {
-  return [...md.matchAll(fenceRe())].map((m) => ({ lang: m[1] || "código", code: m[2] }));
+  return [...md.matchAll(fenceRe())].map((m) => normalizeFence(m[1], m[2]));
 }
 
 const isChart = (lang: string) => /^(chart|grafico|gráfico)$/.test(lang);

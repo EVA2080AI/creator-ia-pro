@@ -167,6 +167,23 @@ describe("la presentación en el chat y en el Canvas", () => {
     expect(extractArtifacts("```markdown\n# Un README cualquiera\n```")).toEqual([]);
   });
 
+  it("vale aunque el modelo escriba «slides» en la primera línea del bloque (visto en producción)", () => {
+    const suelto = "```\nslides\ncolor: #b45309\n# Trigo\nDesayunos\n\n---\n# Dos\n- a\n```";
+    const conEspacio = "``` slides\n# Trigo\n\n---\n# Dos\n- a\n```";
+    for (const md of [suelto, conEspacio]) {
+      const [a] = extractArtifacts(md);
+      expect(a.kind).toBe("slides");
+      expect(a.title).toBe("Trigo");
+      expect(a.files[0].code.startsWith("slides")).toBe(false);
+      const host = document.createElement("div");
+      host.innerHTML = mdToHtml(md);
+      expect(host.querySelector(".md-codehead span")?.textContent).toBe("Presentación · 2 diapositivas");
+    }
+    expect(parseDeck(extractArtifacts(suelto)[0].files[0].code).accent).toBe("#b45309");
+    // un bloque sin lenguaje que no empieza por uno conocido sigue siendo código
+    expect(extractArtifacts("```\nhola\nmundo\n```")).toEqual([]);
+  });
+
   it("la tarjeta dice cuántas diapositivas son y ofrece el PowerPoint, no un ZIP", () => {
     const host = document.createElement("div");
     host.innerHTML = mdToHtml(md);
