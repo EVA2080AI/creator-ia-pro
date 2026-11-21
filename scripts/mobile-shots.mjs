@@ -6,7 +6,8 @@
 //   ej.: node scripts/mobile-shots.mjs /a/basalt /tmp/basalt-movil.png --guide
 //
 // --guide  muestra la Guía rápida (borra la marca de "ya vista")   --dark  tema oscuro   --full  página completa
-// --click=<selector>  hace clic antes de la captura, para ver un menú abierto (p. ej. --click=.asst-picker-trigger)
+// --click=<selector>  hace clic antes de la captura, para ver un menú abierto (p. ej. --click=.asst-picker-trigger);
+//                     se puede repetir y los clics van en orden
 // --device "Desktop Chrome"  la misma pantalla en escritorio
 // --width=<px>  ancho de ventana propio (p. ej. --width=1100 con "Desktop Chrome", un portátil)
 // --admin  la sesión simulada es de administrador y /api/admin/users devuelve cuentas de muestra (para /admin)
@@ -54,6 +55,11 @@ const DEMO_EXPERTS = ["marketing", "legal", "financiero", "talento", "ventas"].m
   id: `a${i}`, slug, name: slug[0].toUpperCase() + slug.slice(1), tagline: "Experto de prueba",
   visibility: "system", isActive: true, brand: {}, welcome: { cards: [] }, persona: {}, capabilities: {},
 }));
+
+const DEMO_EXPERT_CARDS = [
+  { label: "Revisar una cláusula", prompt: "Revisa esta cláusula y dime qué riesgo tiene para mí: ", icon: "compare" },
+  { label: "Redactar un contrato", prompt: "Redacta un contrato de prestación de servicios entre mi empresa y un contratista independiente.", icon: "pen" },
+];
 
 const DEMO_MESSAGES = [
   { id: "u1", role: "user", text: "Analiza este contrato y dime los riesgos para mí." },
@@ -106,6 +112,11 @@ await ctx.route("**/api/**", (r) => {
   if (u.endsWith("/auth/get-session")) return json(r, { session: { id: "s1", userId: user.id, token: "t", expiresAt: new Date(Date.now() + 864e5).toISOString(), createdAt: now, updatedAt: now }, user });
   if (u === "/api/profile") return json(r, { ok: true, profile });
   if (u.startsWith("/api/basalt/memory")) return json(r, { ok: true, facts: [] });
+  // /a/<slug>: el chat de un Experto pide el suyo; sin esto la pantalla quedaba en "No pudimos cargar".
+  if (/^\/api\/assistants\/[\w-]+$/.test(u)) {
+    const base = DEMO_EXPERTS.find((e) => u.endsWith(`/${e.slug}`)) ?? DEMO_EXPERTS[0];
+    return json(r, { ok: true, assistant: { ...base, welcome: { cards: DEMO_EXPERT_CARDS }, persona: { systemPrompt: "" }, defaultModel: "google/gemini-2.5-flash-lite", minTier: "free" } });
+  }
   if (u.startsWith("/api/assistants")) return json(r, { ok: true, assistants: DEMO_EXPERTS });
   // Con las respuestas vacías, /tareas y /proyectos salían en su estado "no hay nada":
   // justo el que NO sirve para ver si algo se desborda en un teléfono.
@@ -142,8 +153,8 @@ if (y) {
   }, y);
   await page.waitForTimeout(300);
 }
-const click = opt("--click", "");
-if (click) {
+// Varios --click se hacen en orden (abrir un menú y luego elegir una fila).
+for (const click of args.filter((a) => a.startsWith("--click=")).map((a) => a.slice(8))) {
   await page.locator(click).first().click();
   await page.waitForTimeout(400);
 }

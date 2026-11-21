@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import {
-  Menu, Send, Square, Loader2, Scale, Paperclip, FileText, Download, Code2,
-  LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Dice5, Sparkles, Bot,
-} from "lucide-react";
+import { Menu, Send, Square, Loader2, Paperclip, Download, Bot } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
@@ -12,6 +9,7 @@ import { useProjectCards } from "@/hooks/useProjectCards";
 import { GitHubExportDialog } from "@/components/basalt/GitHubExportDialog";
 import { useProfile } from "@/hooks/useProfile";
 import { ModelPicker } from "@/components/basalt/ModelPicker";
+import { PromptPicker } from "@/components/basalt/PromptPicker";
 import { ReportButton } from "@/components/tickets/ReportButton";
 import { ConversationList } from "@/components/basalt/ConversationList";
 import { projectToMarkdown } from "@/lib/project-preview";
@@ -27,7 +25,7 @@ import { findLinks } from "@/lib/links";
 import { useDocAttachments } from "@/hooks/useDocAttachments";
 import { DOC_ACCEPT } from "@/lib/doc-extract";
 import { IMAGE_ACCEPT, imagesFromTransfer, recentImages } from "@/lib/image-attach";
-import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DEFAULT_IMAGE_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
+import { DEFAULT_DOC_PROMPT, DEFAULT_IMAGE_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import { BasaltShellSidebar } from "@/components/layout/BasaltShellSidebar";
 import { hasSeenBasaltGuide, markBasaltGuideSeen } from "@/lib/basalt-guide";
 import { brandCssVars } from "@/lib/assistants";
@@ -45,7 +43,7 @@ import { downloadMarkdown, safeFileName, toMarkdown } from "@/lib/export-convers
 import { ChatError, canRetry, chatError, errorAction } from "@/lib/chat-errors";
 import { createAsset } from "@/lib/assets";
 import "./Assistant.css";
-import { shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
+import { focusComposer, shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
 
 /** Opciones de sendPrompt: continuar un mensaje cortado, rehacer el último (sin
  *  duplicar la burbuja del usuario), partir de un hilo recortado y/o usar otro modelo. */
@@ -70,10 +68,6 @@ const TOUR_STEPS: TourStep[] = [
   { target: "expertos", title: "Expertos", text: "Asistentes por área —Legal, Marketing y más— y los que crees tú. Mismo chat, enfoque distinto.", drawer: true },
   { target: "memoria", title: "Memoria", text: "Lo que le cuentes de tu negocio queda aquí: puedes añadir, corregir u olvidar datos cuando quieras.", drawer: true },
 ];
-
-const ICONS: Record<string, typeof LayoutTemplate> = {
-  layout: LayoutTemplate, image: ImageIcon, pen: PenLine, chart: BarChart3, compare: Scale, dice: Dice5, file: FileText, code: Code2,
-};
 
 const MODEL_KEY = "basalt:model";
 const IMAGE_MODEL_KEY = "basalt:image-model";
@@ -519,7 +513,7 @@ export default function BasaltPage() {
     setInput(messages[i].text);
     setMessages(messages.slice(0, i));
     setTruncatedId(null);
-    requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>(".asst-pill textarea")?.focus());
+    focusComposer();
   }, [generating, messages]);
 
   const newChat = () => {
@@ -724,17 +718,12 @@ export default function BasaltPage() {
                 Basalt puede cometer errores. Verifica los datos importantes y no tomes sus
                 respuestas como asesoría profesional.
               </p>
-              <div className="asst-cards">
-                {(A.welcome.cards || []).map((c) => {
-                  const Icon = (c.icon && ICONS[c.icon]) || Sparkles;
-                  return (
-                    <button key={c.label} className="asst-card" onClick={() => (c.prompt === ATTACH_CARD_PROMPT ? fileInputRef.current?.click() : void sendPrompt(c.prompt))}>
-                      <span>{c.label}</span>
-                      <span className="asst-card-ic"><Icon className="w-4 h-4" /></span>
-                    </button>
-                  );
-                })}
-              </div>
+              <PromptPicker
+                cards={A.welcome.cards || []}
+                current={input}
+                onPick={(texto) => { setInput(texto); focusComposer(); }}
+                onAttach={() => fileInputRef.current?.click()}
+              />
               {errorBanner}
             </section>
           ) : (

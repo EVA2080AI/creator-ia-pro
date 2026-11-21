@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
-import {
-  Menu, Send, Square, Loader2, Paperclip, FileText, Copy, Pencil, Download,
-  LayoutTemplate, Image as ImageIcon, PenLine, BarChart3, Scale, Dice5, Wallet, Sparkles, Bot,
-} from "lucide-react";
+import { Menu, Send, Square, Loader2, Paperclip, Copy, Pencil, Download, Bot } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useTheme } from "@/hooks/useTheme";
@@ -43,9 +40,10 @@ import { DOC_ACCEPT } from "@/lib/doc-extract";
 import { IMAGE_ACCEPT, imagesFromTransfer, recentImages } from "@/lib/image-attach";
 import { canAccessModel, getModel } from "@/lib/ai/models";
 import { ModelPicker } from "@/components/basalt/ModelPicker";
+import { PromptPicker } from "@/components/basalt/PromptPicker";
 import { ATTACH_CARD_PROMPT, DEFAULT_DOC_PROMPT, DEFAULT_IMAGE_PROMPT, DOC_ANALYSIS_PROMPT, buildApiMessages, hasDocuments, type DocPayload } from "@/lib/doc-context";
 import "./Assistant.css";
-import { shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
+import { focusComposer, shouldSubmitOnEnter, usePrefersClickSubmit } from "@/lib/composer";
 
 // Homologado con Basalt.tsx (auditoría UX 2026-09-29: "los expertos...
 // deben ser un solo nombre" + "deben tener también persistir sus chat") —
@@ -73,17 +71,6 @@ const modeloEfectivo = (a: Assistant, override: string | null, tier: string | un
   return override;
 };
 
-const ICONS: Record<string, typeof LayoutTemplate> = {
-  layout: LayoutTemplate,
-  image: ImageIcon,
-  pen: PenLine,
-  chart: BarChart3,
-  compare: Scale,
-  dice: Dice5,
-  pay: Wallet,
-  file: FileText,
-};
-
 // Adjuntar documentos sirve en cualquier Experto (un contrato en Legal, una hoja de vida en Talento,
 // un P&G en Financiero), pero las tarjetas de bienvenida vienen de la base de datos y no traen la
 // tarjeta de adjuntar. Se agrega desde acá, con el texto del dominio de cada uno.
@@ -95,11 +82,6 @@ const ATTACH_CARD_LABEL: Record<string, string> = {
   operaciones: "Revisar un procedimiento o manual",
   comunicaciones: "Revisar un documento antes de publicarlo",
 };
-
-function CardIcon({ name }: { name?: string }) {
-  const Icon = (name && ICONS[name]) || Sparkles;
-  return <Icon className="w-4 h-4" />;
-}
 
 export default function AssistantPage() {
   const { slug = "mentor" } = useParams<{ slug: string }>();
@@ -496,7 +478,7 @@ export default function AssistantPage() {
     setInput(messages[i].text);
     setMessages(messages.slice(0, i));
     setTruncatedId(null);
-    requestAnimationFrame(() => document.querySelector<HTMLTextAreaElement>(".asst-pill textarea")?.focus());
+    focusComposer();
   }, [generating, messages]);
 
   const handleStop = () => abortRef.current?.abort();
@@ -640,18 +622,12 @@ export default function AssistantPage() {
                 {assistant.name} puede cometer errores. Verifica los datos importantes y no
                 tomes sus respuestas como asesoría profesional.
               </p>
-              <div className="asst-cards">
-                {welcomeCards.map((c: AssistantWelcomeCard) => (
-                  <button
-                    key={c.label}
-                    className="asst-card"
-                    onClick={() => (c.prompt === ATTACH_CARD_PROMPT ? fileInputRef.current?.click() : void sendPrompt(c.prompt))}
-                  >
-                    <span>{c.label}</span>
-                    <span className="asst-card-ic"><CardIcon name={c.icon} /></span>
-                  </button>
-                ))}
-              </div>
+              <PromptPicker
+                cards={welcomeCards}
+                current={input}
+                onPick={(texto) => { setInput(texto); focusComposer(); }}
+                onAttach={() => fileInputRef.current?.click()}
+              />
             </section>
           ) : (
             <div className="asst-thread">

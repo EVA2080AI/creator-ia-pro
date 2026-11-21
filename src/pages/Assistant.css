@@ -133,23 +133,50 @@
   background: var(--a-grad); -webkit-background-clip: text; background-clip: text; color: transparent; width: fit-content;
 }
 .asst-hello-sub { font-size: clamp(18px, 2.6vw, 24px); color: var(--asst-txt-3); font-weight: 400; margin-top: 4px; }
-.asst-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 6vh; }
-.asst-card {
-  background: var(--asst-panel); border-radius: 20px; padding: 16px; min-height: 130px; display: flex;
-  flex-direction: column; justify-content: space-between; gap: 16px; text-align: left; font-size: 14px;
-  line-height: 1.4; border: none; cursor: pointer; transition: background 0.18s, transform 0.18s;
+
+/* Ideas para empezar (PromptPicker.tsx). Eran nueve tarjetas de 130px que ENVIABAN el
+   mensaje al tocarlas; ahora es un selector y la idea elegida queda escrita en el
+   compositor para ajustarla (pedido de Sebastián, 2026-11-21). Las filas y la hoja
+   inferior de móvil son las del selector de modelos (.asst-picker-row / -backdrop). */
+.asst-prompts { position: relative; margin-top: 5vh; max-width: 460px; }
+.asst-prompts-trigger {
+  display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 10px 14px 10px 16px;
+  background: var(--asst-panel); color: var(--asst-txt); border: 1px solid var(--asst-border); border-radius: 16px;
+  font: inherit; font-size: 15px; font-weight: 500; text-align: left; cursor: pointer; transition: background 0.15s, border-color 0.15s;
 }
-.asst-card:hover { background: var(--asst-panel-2); transform: translateY(-2px); }
-.asst-card-ic { width: 32px; height: 32px; border-radius: 50%; background: var(--asst-bg); display: grid; place-items: center; align-self: flex-end; color: var(--asst-txt-2); }
+.asst-prompts-trigger:hover { background: var(--asst-panel-2); }
+.asst-prompts-trigger[aria-expanded="true"] { border-color: var(--asst-accent-text); }
+.asst-prompts-trigger > svg:first-child { color: var(--asst-accent-text); flex: none; }
+.asst-prompts-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.asst-prompts-hint { margin: 8px 2px 0; font-size: 12.5px; line-height: 1.5; color: var(--asst-txt-3); }
+.asst-prompts-pop {
+  position: absolute; top: 56px; left: 0; z-index: 60; width: 100%; max-height: min(52vh, 460px);
+  display: flex; flex-direction: column; overflow-y: auto; overscroll-behavior: contain; padding: 6px;
+  background: var(--asst-bg); color: var(--asst-txt); border: 1px solid var(--asst-border); border-radius: 20px;
+  box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.28), 0 2px 6px rgba(0, 0, 0, 0.06);
+  scrollbar-width: thin; animation: asst-picker-in 0.16s ease-out;
+}
+.asst-prompts-pop .asst-picker-row { justify-content: flex-start; flex: none; }
+.asst-prompts-pop .asst-picker-row-main { flex: 1; }
+.asst-prompts-ic { width: 32px; height: 32px; flex: none; border-radius: 50%; background: var(--asst-panel); display: grid; place-items: center; color: var(--asst-txt-2); }
+.asst-prompts-pop .asst-picker-row:hover .asst-prompts-ic, .asst-prompts-pop .asst-picker-row.selected .asst-prompts-ic { background: var(--asst-bg); }
+.asst-prompts :is(.asst-prompts-trigger, .asst-picker-row):focus-visible { outline: 2px solid var(--asst-accent-text); outline-offset: -2px; }
+@media (max-width: 640px) {
+  .asst-prompts { margin-top: 22px; max-width: none; }
+  .asst-prompts-pop {
+    position: fixed; inset: auto 0 0 0; top: auto; z-index: 60; width: auto; max-height: 76dvh; padding-bottom: calc(6px + env(safe-area-inset-bottom));
+    border-radius: 20px 20px 0 0; border-bottom: 0; animation: asst-sheet-in 0.22s ease-out;
+  }
+}
+@media (prefers-reduced-motion: reduce) { .asst-prompts-pop { animation: none; } .asst-prompts-trigger { transition: none; } }
 
 /* Aviso de que la IA puede equivocarse. Vive en la pantalla de bienvenida, NO
    debajo del compositor: ahí estaba `.asst-disclaimer` y Sebastián pidió quitarlo
    el 2026-09-30 (ed08b14) porque le robaba una línea a cada pantalla de chat para
    siempre. Acá se lee al empezar cada conversación y no le quita alto al hilo.
-   Va entre el saludo y las tarjetas: debajo de ellas quedaba fuera de pantalla en
-   un iPhone 13 (Basalt tiene nueve tarjetas y se ven unas cinco). Lo separan de las
-   tarjetas los 6vh de `.asst-cards` (22px en móvil), así que acá basta un margen
-   corto. */
+   Va entre el saludo y el selector de ideas (cuando eran nueve tarjetas, debajo de
+   ellas quedaba fuera de pantalla en un iPhone 13). Lo separa del selector el margen
+   de `.asst-prompts`, así que acá basta uno corto. */
 .asst-welcome-note { margin-top: 14px; font-size: 12.5px; line-height: 1.5; color: var(--asst-txt-3); max-width: 62ch; }
 
 .asst-msg { display: flex; gap: 14px; }
@@ -310,16 +337,6 @@
   .asst-pill textarea { font-size: 16px; } /* evita el zoom automático de iOS */
   .asst-topbar { padding: 8px 10px; gap: 6px; }
   .asst-brand-name { font-size: 15px; }
-  /* Medido en un iPhone 13 (390px): cada tarjeta ocupaba 380px de alto — solo
-     entraban dos y se veían vacías (la etiqueta arriba y el icono suelto abajo
-     a la derecha). En móvil pasan a ser filas compactas con el icono a la
-     izquierda: entraban las cuatro sin desplazar, que es lo que hace que la
-     pantalla de bienvenida sirva para algo. (Desde entonces Basalt pasó a nueve
-     tarjetas, así que ya solo se ven unas cinco — medido el 2026-10-21.) */
-  .asst-cards { grid-template-columns: 1fr; gap: 8px; margin-top: 22px; }
-  .asst-card { min-height: 0; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; padding: 13px 14px; border-radius: 14px; font-size: 14.5px; }
-  .asst-card > span:first-child { flex: 1; min-width: 0; }
-  .asst-card-ic { order: -1; align-self: center; width: 30px; height: 30px; flex: none; }
   .asst-hello-sub { font-size: 15.5px; line-height: 1.5; margin-top: 6px; }
   .asst-welcome { padding-top: 3vh; }
   .asst-welcome-note { margin-top: 10px; font-size: 11.5px; }
@@ -355,9 +372,6 @@
 /* Profundidad: paneles casi idénticos al fondo se leían planos. */
 .asst-sidebar { border-right: 1px solid var(--asst-border); }
 .asst-pill { border: 1px solid var(--asst-border); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04); }
-.asst-card { border: 1px solid var(--asst-border); }
-.asst-card:hover { box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.18); }
-.asst-app[data-asst-theme="dark"] .asst-card:hover { box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.6); }
 
 /* Tipografía: cortes de línea más prolijos. */
 .asst-hello { text-wrap: balance; }
@@ -372,14 +386,12 @@
   .asst-switch-item, .asst-side-link { padding-block: 12px; }
   .md-proj-tab, .md-proj-tool, .md-proj-btn, .md-copy-code { min-height: 36px; }
 }
-@media (hover: none) { .asst-card:hover { transform: none; box-shadow: none; } }
 
-/* Movimiento reducido: shimmer, smooth-scroll, transiciones y el "levantar" de las tarjetas. */
+/* Movimiento reducido: shimmer, smooth-scroll y transiciones. */
 @media (prefers-reduced-motion: reduce) {
   .asst-scroller { scroll-behavior: auto; }
   .asst-shimmer i { animation: none; }
-  .asst-sidebar, .asst-card, .asst-backdrop, .asst-switch-item, .asst-side-link, .asst-icon-btn { transition: none; }
-  .asst-card:hover { transform: none; }
+  .asst-sidebar, .asst-backdrop, .asst-switch-item, .asst-side-link, .asst-icon-btn { transition: none; }
 }
 
 /* ══ Selector de modelo de Basalt (Ciclo 3) ═════════════════════════════════

@@ -29,3 +29,17 @@ export function usePrefersClickSubmit(): boolean {
   }, []);
   return v;
 }
+
+/** Enfoca el compositor con el cursor al final y lo deja del alto de su texto. Para cuando el
+ *  texto llega por código (una idea del selector, editar un mensaje): el alto solo se
+ *  recalculaba al teclear, así que un prompt de tres líneas quedaba metido en una. */
+export function focusComposer(): void {
+  requestAnimationFrame(() => {
+    const ta = document.querySelector<HTMLTextAreaElement>(".asst-pill textarea");
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 170) + "px";
+    ta.focus();
+    ta.setSelectionRange(ta.value.length, ta.value.length);
+  });
+}

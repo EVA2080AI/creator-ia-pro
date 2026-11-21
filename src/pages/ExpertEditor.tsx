@@ -218,21 +218,21 @@ export default function ExpertEditor() {
           </div>
 
           <div className="rounded-3xl bg-card/70 border border-border/60 p-6 md:p-8">
-            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Tarjetas de bienvenida</h2>
+            <h2 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-1">Ideas para empezar</h2>
             <p className="text-xs text-muted-foreground mb-5">
-              Los atajos que ve quien abre el chat. Dejarlas vacías también está bien: la pantalla queda limpia.
+              Lo que ofrece el selector al abrir el chat. Elegir una deja su mensaje escrito para ajustarlo; no lo envía.
             </p>
             <div className="space-y-3">
               {draft.cards.map((c, i) => (
                 <div key={i} className="flex flex-col sm:flex-row gap-2">
                   <input className={`${field} sm:w-56`} value={c.label} maxLength={60} placeholder="Revisar un pliego"
-                    aria-label={`Título de la tarjeta ${i + 1}`}
+                    aria-label={`Título de la idea ${i + 1}`}
                     onChange={(e) => setCard(i, { label: e.target.value })} />
                   <input className={field} value={c.prompt} maxLength={500} placeholder="Revisa este pliego y dime los riesgos…"
-                    aria-label={`Mensaje de la tarjeta ${i + 1}`}
+                    aria-label={`Mensaje de la idea ${i + 1}`}
                     onChange={(e) => setCard(i, { prompt: e.target.value })} />
                   <button type="button" className="shrink-0 px-3 py-3 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted"
-                    aria-label={`Quitar la tarjeta ${i + 1}`}
+                    aria-label={`Quitar la idea ${i + 1}`}
                     onClick={() => setDraft((d) => ({ ...d, cards: d.cards.filter((_, k) => k !== i) }))}>
                     <X className="w-4 h-4" />
                   </button>
@@ -242,7 +242,7 @@ export default function ExpertEditor() {
             {draft.cards.length < MAX_CARDS && (
               <button type="button" className="mt-4 flex items-center gap-2 text-sm font-semibold text-primary"
                 onClick={() => setDraft((d) => ({ ...d, cards: [...d.cards, { label: "", prompt: "" }] }))}>
-                <Plus className="w-4 h-4" /> Agregar tarjeta
+                <Plus className="w-4 h-4" /> Agregar idea
               </button>
             )}
           </div>
