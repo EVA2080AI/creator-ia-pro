@@ -8,6 +8,12 @@ import { WHOLE_MESSAGE, docArtifact, type CanvasArtifact } from "@/lib/canvas";
 const buildArtifactDoc = vi.fn(async () => "<!DOCTYPE html><html><body>vista</body></html>");
 vi.mock("@/lib/canvas-preview", () => ({ buildArtifactDoc: (...args: unknown[]) => buildArtifactDoc(...(args as [])) }));
 
+const downloadPptx = vi.fn(async (_source: string) => {});
+vi.mock("@/lib/project-actions", async (original) => ({ ...(await original<typeof import("@/lib/project-actions")>()), downloadPptx: (source: string) => downloadPptx(source) }));
+
+const DECK = "# Trigo\nPropuesta 2027\n\n---\n\n## El problema\n- Los pedidos no crecen";
+const slides: CanvasArtifact = { kind: "slides", title: "Trigo", files: [{ name: "presentacion.md", lang: "markdown", code: DECK }] };
+
 const react: CanvasArtifact = {
   kind: "react", title: "Componente React",
   files: [{ name: "App.tsx", lang: "tsx", code: "export default function App() { return <b>hola</b>; }" }],
@@ -110,5 +116,27 @@ describe("CanvasPanel", () => {
     await waitFor(() => expect(screen.getByTitle("Vista previa: Componente React")).not.toBe(before));
     fireEvent.click(screen.getByRole("button", { name: "Cerrar el Canvas" }));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("una presentación: pestañas Diapositivas / Texto y acciones propias (PowerPoint, PDF, Presentar)", async () => {
+    setup(slides);
+    expect(screen.getByRole("tab", { name: "Diapositivas" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "Texto" })).toBeInTheDocument();
+    await screen.findByTitle("Vista previa: Trigo");
+    expect(screen.getByRole("button", { name: /PDF/ })).toBeEnabled();
+    expect(screen.getByRole("button", { name: /Presentar/ })).toBeEnabled();
+    // Una presentación no es una página: sin tamaños de dispositivo, ni ZIP, ni GitHub.
+    expect(screen.queryByRole("button", { name: "Ver como Móvil" })).toBeNull();
+    expect(screen.queryByText("ZIP")).toBeNull();
+    expect(screen.queryByText("GitHub")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /PowerPoint/ }));
+    expect(downloadPptx).toHaveBeenCalledWith(DECK);
+  });
+
+  it("mientras se escribe la presentación no se puede presentar ni descargar a medias", () => {
+    setup(slides, { streaming: true });
+    expect(screen.getByRole("button", { name: /PowerPoint/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /Presentar/ })).toBeDisabled();
+    expect(screen.getByLabelText("Código de presentacion.md")).toHaveTextContent("# Trigo");
   });
 });

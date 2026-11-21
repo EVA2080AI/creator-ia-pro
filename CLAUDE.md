@@ -166,8 +166,24 @@ escribe en el compositor. Las ideas de adjuntar siguen abriendo el selector de a
 que Basalt construye se abre grande al lado del chat (a pantalla completa bajo 1024px):
 
 - **Qué sabe mostrar:** páginas HTML/CSS/JS, un componente React suelto, un proyecto
-  Vite/React de varios archivos, SVG, diagramas ```mermaid y —con el botón «Documento» de una
-  respuesta larga— la respuesta entera para leerla, imprimirla o bajarla en Word.
+  Vite/React de varios archivos, SVG, diagramas ```mermaid, presentaciones ```slides y —con
+  el botón «Documento» de una respuesta larga— la respuesta entera para leerla, imprimirla
+  o bajarla en Word.
+- **Presentaciones** ("debe poder hacer presentaciones, así que pon un visualizador de ppt").
+  El modelo escribe UN bloque ```slides: markdown con las diapositivas separadas por `---`
+  (cabecera opcional `color: #hex` / `tema: oscuro`; `Notas:` deja el guion del orador). De
+  ese único modelo (`src/lib/slides.ts` → `parseDeck`) salen la vista (`deckHtml`: lista de
+  diapositivas 16:9 y modo «Presentar») y el PowerPoint (`slides-pptx.ts`, con pptxgenjs,
+  cargado solo al descargar). La distribución se infiere: portada, sección, cifra grande
+  (`# 85%`), cita, y título + contenido. Dos cosas que no son obvias: pptxgenjs 4 escribe un
+  `<a:pPr>` por cada trozo de un párrafo y PowerPoint solo admite uno → `fixParagraphs` lo
+  corrige al final; y las listas numeradas llevan el número explícito (`numberStartAt`)
+  porque con "empieza en 1" repetido LibreOffice numeraba 1. 1. 1. Para comprobar un .pptx
+  de verdad: `soffice --headless --convert-to pdf archivo.pptx` y mirar el PDF.
+- **«Proyecto» no significa código** (misma tanda de pedidos: "cuando le pidan proyecto no
+  debe por qué hacer html o react"). El prompt lo dice en la sección 5 y en
+  `ENTREGABLES_PROMPT`: un proyecto puede ser un plan, una propuesta o una presentación; HTML
+  o React solo cuando piden una página o una app.
 - **Una sola fuente de verdad:** `src/lib/canvas.ts` (`planArtifacts`) decide qué bloques de un
   mensaje forman un artefacto. Lo usan `mdToHtml` (la tarjeta del chat) y el panel: el
   artefacto N del Canvas ES la tarjeta `data-canvas="N"` del mensaje `data-msg-id`. No

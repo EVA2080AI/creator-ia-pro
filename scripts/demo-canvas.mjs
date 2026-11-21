@@ -128,6 +128,59 @@ Trigo vende bien entre semana a vecinos del barrio, pero casi no tiene pedidos p
 
 > Siguiente paso: definir quién responde WhatsApp en menos de cinco minutos.`;
 
+export const DEMO_DECK = `color: #b45309
+
+# Panadería Trigo
+Propuesta comercial 2027 · Pedidos por encargo para empresas
+
+---
+
+## El problema
+- Los pedidos por encargo no crecen: **8 por semana** desde marzo
+- La marca casi no existe en redes
+  - 310 seguidores en Instagram
+  - Sin reseñas en Google
+- Dos cadenas a menos de 500 metros
+
+Notas: Abrir con la anécdota del cliente que llamó tres veces y no pudo pedir.
+
+---
+
+## 85%
+de los clientes que prueban el pan de masa madre vuelve a comprar en menos de 30 días.
+
+---
+
+## La propuesta
+1. Canal de pedidos por WhatsApp con respuesta en 5 minutos
+2. Combos de desayuno para oficinas
+3. Contenido semanal: el horno a las 4 a. m.
+
+---
+
+## Planes para empresas
+| Plan | Incluye | Precio mensual |
+|---|---|---|
+| Básico | 20 desayunos | $ 380.000 |
+| Equipo | 60 desayunos y café | $ 990.000 |
+| Evento | A la medida | Cotizar |
+
+---
+
+> "Desde que pedimos a Trigo, las reuniones de los lunes empiezan a tiempo."
+> — Laura Gómez, gerente de Agencia Norte
+
+---
+
+## Siguiente paso
+Aprobar el piloto de **cuatro semanas** y definir quién responde WhatsApp.
+
+Más información en [trigo.example](https://trigo.example).
+
+---
+
+# ¡Gracias!`;
+
 export const DEMO_CANVAS_MESSAGES = [
   { id: "u1", role: "user", text: "Hazme un componente de pedidos, un logo, el flujo de ventas, una página de reservas y la app." },
   { id: "m1", role: "model", text: `Aquí está el componente de pedidos:\n\n${fence("tsx", REACT)}\n\nEl logo en SVG:\n\n${fence("svg", SVG)}\n\nY el flujo de ventas:\n\n${fence("mermaid", MERMAID)}` },
@@ -137,4 +190,6 @@ export const DEMO_CANVAS_MESSAGES = [
   { id: "m3", role: "model", text: `Proyecto Vite con dos pantallas:\n\n${VITE}` },
   { id: "u4", role: "user", text: "Escribe el plan de mercadeo." },
   { id: "m4", role: "model", text: PLAN },
+  { id: "u5", role: "user", text: "Ahora la presentación para el cliente." },
+  { id: "m5", role: "model", text: `Aquí está la presentación, lista para descargar en PowerPoint:\n\n${fence("slides", DEMO_DECK)}\n\nSon ocho diapositivas. ¿Ajusto los precios?` },
 ];

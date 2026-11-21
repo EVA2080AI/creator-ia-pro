@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Check, Copy, Download, ExternalLink, FileText, Maximize2, Minimize2, Monitor, Printer, RotateCw, Smartphone, Tablet, Wrench, X,
+  Check, Copy, Download, ExternalLink, FileText, Maximize2, Minimize2, Monitor, Play, Presentation, Printer, RotateCw, Smartphone, Tablet, Wrench, X,
 } from "lucide-react";
 import { KIND_LABEL, WHOLE_MESSAGE, fileSlug, hasPreview, type CanvasArtifact, type CanvasTarget } from "@/lib/canvas";
 import { buildArtifactDoc } from "@/lib/canvas-preview";
 import { PREVIEW_SANDBOX } from "@/lib/project-preview";
-import { canStackblitz, download, downloadFile, downloadZip, exportToGithub, openStackblitz } from "@/lib/project-actions";
-import { printDocument, wordDocument } from "@/lib/doc-export";
+import { canStackblitz, download, downloadFile, downloadPptx, downloadZip, exportToGithub, openStackblitz } from "@/lib/project-actions";
+import { printDocument, printHtml, wordDocument } from "@/lib/doc-export";
 import { mdToHtml } from "@/lib/markdown";
 import { useCopyCodeButtons } from "@/hooks/useCopyCodeButtons";
 import { useProjectCards } from "@/hooks/useProjectCards";
@@ -15,8 +15,8 @@ import type { CanvasVersion } from "@/hooks/useCanvas";
 // El Canvas: lo que Basalt construye, grande y al lado del chat (en un teléfono, a pantalla
 // completa). Pedido de Sebastián (2026-11-21): "implementa un visualizador tipo canvas,
 // porque el que hay es solo html". Muestra páginas, componentes y proyectos React, SVG,
-// diagramas y —desde «Abrir como documento»— una respuesta entera para leerla, imprimirla
-// o bajarla en Word.
+// diagramas, presentaciones (con «Presentar» a pantalla completa y descarga en PowerPoint)
+// y —desde «Documento»— una respuesta entera para leerla, imprimirla o bajarla en Word.
 //
 // No guarda copia del código: recibe el artefacto ya resuelto desde el hilo (useCanvas), así
 // que mientras el modelo escribe se ve el código llegar y, al terminar, pasa solo a la vista
@@ -75,6 +75,7 @@ function DocView({ markdown, msgId }: { markdown: string; msgId: string }) {
 export function CanvasPanel({ artifact, target, versions, streaming, theme, onSelect, onClose, onAsk }: Props) {
   const { kind, files, title } = artifact;
   const isDoc = kind === "doc";
+  const isSlides = kind === "slides";
   const canPreview = hasPreview(kind);
   const sized = kind === "web" || kind === "react";
 
@@ -86,6 +87,7 @@ export function CanvasPanel({ artifact, target, versions, streaming, theme, onSe
   const [reloads, setReloads] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [pptx, setPptx] = useState<"idle" | "busy" | "error">("idle");
   const [width, setWidth] = useState<number | undefined>(readWidth);
   const [dragging, setDragging] = useState(false);
   const rootRef = useRef<HTMLElement | null>(null);
@@ -99,7 +101,7 @@ export function CanvasPanel({ artifact, target, versions, streaming, theme, onSe
   const fileIdx = Math.min(pickedFile ?? (streaming ? files.length - 1 : 0), files.length - 1);
   const file = files[fileIdx] ?? files[0];
 
-  const darkStage = (kind === "svg" || kind === "mermaid") && theme === "dark";
+  const darkStage = (kind === "svg" || kind === "mermaid" || isSlides) && theme === "dark";
   const signature = useMemo(() => files.map((f) => `${f.name}\u0000${f.code}`).join("\u0001"), [files]);
 
   useEffect(() => {
@@ -124,6 +126,40 @@ export function CanvasPanel({ artifact, target, versions, streaming, theme, onSe
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
   }, []);
+
+  // «Presentar»: el iframe pasa a pantalla completa y la presentación a una diapositiva por
+  // vez. Los dos lados se avisan por postMessage (el iframe no comparte origen): si se sale
+  // con Esc acá, la presentación vuelve a la lista; si se sale desde adentro, se deja la pantalla completa.
+  const tell = (mode: "present" | "list") => frameRef.current?.contentWindow?.postMessage({ __basaltSlides: mode }, "*");
+  const present = () => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    tell("present");
+    void frame.requestFullscreen?.().catch(() => { /* sin pantalla completa (iPhone): se presenta dentro del panel */ });
+    frame.focus();
+  };
+  useEffect(() => {
+    if (!isSlides) return;
+    const onFullscreen = () => { if (!document.fullscreenElement) tell("list"); };
+    const onMessage = (e: MessageEvent) => {
+      const mode = (e.data as { __basaltSlides?: string } | null)?.__basaltSlides;
+      const frame = frameRef.current;
+      if (!mode || !frame || e.source !== frame.contentWindow) return;
+      if (mode === "list" && document.fullscreenElement === frame) void document.exitFullscreen();
+      if (mode === "presenting" && !document.fullscreenElement) void frame.requestFullscreen?.().catch(() => {});
+    };
+    document.addEventListener("fullscreenchange", onFullscreen);
+    window.addEventListener("message", onMessage);
+    return () => {
+      document.removeEventListener("fullscreenchange", onFullscreen);
+      window.removeEventListener("message", onMessage);
+    };
+  }, [isSlides]);
+
+  const savePptx = () => {
+    setPptx("busy");
+    downloadPptx(files[0].code).then(() => setPptx("idle"), () => setPptx("error"));
+  };
 
   useEffect(() => {
     if (streaming && tab === "code" && codeRef.current) codeRef.current.scrollTop = codeRef.current.scrollHeight;
@@ -234,10 +270,10 @@ export function CanvasPanel({ artifact, target, versions, streaming, theme, onSe
         {(canPreview || isDoc) && (
           <div className="asst-canvas-tabs" role="tablist" aria-label="Qué ver">
             <button type="button" role="tab" aria-selected={tab === "preview"} className={`asst-canvas-tab${tab === "preview" ? " active" : ""}`} onClick={() => setPicked("preview")}>
-              {isDoc ? "Documento" : "Vista previa"}
+              {isDoc ? "Documento" : isSlides ? "Diapositivas" : "Vista previa"}
             </button>
             <button type="button" role="tab" aria-selected={tab === "code"} className={`asst-canvas-tab${tab === "code" ? " active" : ""}`} onClick={() => setPicked("code")}>
-              {isDoc ? "Markdown" : "Código"}
+              {isDoc ? "Markdown" : isSlides ? "Texto" : "Código"}
             </button>
           </div>
         )}
@@ -256,11 +292,23 @@ export function CanvasPanel({ artifact, target, versions, streaming, theme, onSe
         )}
 
         <div className="asst-canvas-actions">
-          <button type="button" className="asst-act" onClick={() => void copy()} title={isDoc ? "Copiar el texto" : `Copiar ${file?.name ?? "el código"}`}>
+          <button type="button" className="asst-act" onClick={() => void copy()} title={isDoc || isSlides ? "Copiar el texto" : `Copiar ${file?.name ?? "el código"}`}>
             {copied ? <Check className="w-3.5 h-3.5" aria-hidden /> : <Copy className="w-3.5 h-3.5" aria-hidden />}
             <span>{copied ? "Copiado" : "Copiar"}</span>
           </button>
-          {isDoc ? (
+          {isSlides ? (
+            <>
+              <button type="button" className="asst-act" onClick={savePptx} disabled={pptx === "busy" || streaming} title="Descargarla como archivo de PowerPoint (.pptx)">
+                <Presentation className="w-3.5 h-3.5" aria-hidden /><span>{pptx === "busy" ? "Preparando…" : pptx === "error" ? "No se pudo, reintentar" : "PowerPoint"}</span>
+              </button>
+              <button type="button" className="asst-act" onClick={() => doc && printHtml(doc)} disabled={!doc || streaming} title="Imprimir o guardar como PDF, una diapositiva por página">
+                <Printer className="w-3.5 h-3.5" aria-hidden /><span>PDF</span>
+              </button>
+              <button type="button" className="asst-act asst-canvas-present" onClick={present} disabled={!doc || streaming || tab !== "preview"} title="Presentar a pantalla completa (flechas para pasar, Esc para salir)">
+                <Play className="w-3.5 h-3.5" aria-hidden /><span>Presentar</span>
+              </button>
+            </>
+          ) : isDoc ? (
             <>
               <button type="button" className="asst-act" onClick={() => downloadFile(`${fileSlug(title)}.doc`, wordDocument(title, files[0].code))} title="Descargar para abrir en Word">
                 <FileText className="w-3.5 h-3.5" aria-hidden /><span>Word</span>

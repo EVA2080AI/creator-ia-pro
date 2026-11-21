@@ -1097,3 +1097,9 @@
 .md-proj-toolbar { flex-wrap: wrap; }
 /* En un teléfono el Canvas ya ocupa la pantalla: elegir "móvil / tablet / escritorio" no cambia nada. */
 @media (max-width: 640px) { .asst-canvas-tool[aria-pressed] { display: none; } }
+/* «Presentar» es la acción principal de una presentación: lleva el color de marca. */
+/* Fondo = el morado "de texto" y letra = el fondo de la app: en claro da blanco sobre morado
+   oscuro y en oscuro casi negro sobre lila; blanco sobre el morado de marca quedaba en 3,96:1. */
+.asst-canvas-present:not(:disabled) { background: var(--asst-accent-text); color: var(--asst-bg); border-color: transparent; }
+.asst-canvas-present:hover:not(:disabled) { background: color-mix(in oklch, var(--asst-accent-text) 88%, var(--asst-txt)); color: var(--asst-bg); border-color: transparent; }
+.asst-canvas-frame:fullscreen { width: 100vw; height: 100vh; }

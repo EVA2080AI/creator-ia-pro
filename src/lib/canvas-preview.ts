@@ -7,6 +7,7 @@
 import type { CanvasArtifact } from "./canvas";
 import { PREVIEW_SHIM, buildPreviewDoc } from "./project-preview";
 import { bundleReact } from "./react-bundle";
+import { deckHtml, parseDeck } from "./slides";
 
 const escapeHtml = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const jsonForScript = (v: unknown) => JSON.stringify(v).replace(/</g, "\\u003c");
@@ -71,6 +72,8 @@ export async function buildArtifactDoc(artifact: Pick<CanvasArtifact, "kind" | "
         return first ? svgDoc(first.code, opts.dark) : null;
       case "mermaid":
         return first ? await mermaidDoc(first.code, !!opts.dark) : null;
+      case "slides":
+        return first ? deckHtml(parseDeck(first.code), { dark: opts.dark }) : null;
       case "react": {
         const { transform } = await import("sucrase");
         return bundleReact(artifact.files, transform).html;

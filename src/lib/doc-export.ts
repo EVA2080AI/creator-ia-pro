@@ -27,16 +27,20 @@ export function wordDocument(title: string, markdown: string): string {
   return `<html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>${DOC_CSS}</style></head><body>${docBodyHtml(markdown)}</body></html>`;
 }
 
-/** Imprime (o guarda como PDF) SOLO el documento: un iframe oculto con su propio HTML, sin
- *  scripts (el contenido ya pasó por DOMPurify), para no imprimir la app entera. */
+/** Imprime (o guarda como PDF) la respuesta como documento. */
 export function printDocument(title: string, markdown: string): void {
+  printHtml(wordDocument(title, markdown));
+}
+
+/** Imprime SOLO ese HTML: un iframe oculto con su propio documento, para no imprimir la app entera. */
+export function printHtml(html: string): void {
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
-  // Mismo origen (para poder pedirle que imprima) pero SIN scripts: el contenido ya pasó por
-  // DOMPurify, y si algo se colara igual no podría ejecutarse.
+  // Mismo origen (para poder pedirle que imprima) pero SIN scripts: lo que entra ya viene
+  // escapado o saneado, y si algo se colara igual no podría ejecutarse.
   frame.setAttribute("sandbox", "allow-same-origin allow-modals");
   frame.style.cssText = "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden";
-  frame.srcdoc = wordDocument(title, markdown);
+  frame.srcdoc = html;
   frame.onload = () => {
     try {
       frame.contentWindow?.focus();

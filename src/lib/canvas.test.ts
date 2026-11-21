@@ -112,6 +112,12 @@ describe("la respuesta como documento", () => {
     expect(isDocLike("palabra ".repeat(100))).toBe(false);
   });
 
+  it("una respuesta que es casi toda un bloque (una presentación, una página) no es un documento", () => {
+    const deck = "Aquí va:\n\n```slides\n" + "# Título\n- punto con bastante texto para llenar\n\n---\n\n".repeat(20) + "```\n\n¿Ajusto algo?";
+    expect(deck.length).toBeGreaterThan(500);
+    expect(isDocLike(deck)).toBe(false);
+  });
+
   it("el título sale del primer encabezado, sin marcas de markdown, y da nombre al archivo", () => {
     expect(docTitle(plan)).toBe("Plan de mercadeo para Trigo");
     expect(docTitle("**Hola** [mundo](https://x.co) y más")).toBe("Hola mundo y más");

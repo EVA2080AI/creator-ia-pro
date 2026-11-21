@@ -10,10 +10,12 @@ import {
   extractFilename, isHtmlName, isOfficeHtmlName, isPreviewable, isWebLang, looksRenderable, uniqueName, withBasaltBase,
   type ProjectFile,
 } from "./project-preview";
+import { SLIDES_LANGS, parseDeck } from "./slides";
 
 /** web: HTML(+CSS+JS) · react: componente o proyecto Vite/React · svg · mermaid: diagrama ·
- *  code: varios archivos que el navegador no puede ejecutar · doc: una respuesta leída como documento. */
-export type CanvasKind = "web" | "react" | "svg" | "mermaid" | "code" | "doc";
+ *  slides: presentación · code: varios archivos que el navegador no puede ejecutar ·
+ *  doc: una respuesta leída como documento. */
+export type CanvasKind = "web" | "react" | "svg" | "mermaid" | "slides" | "code" | "doc";
 
 export interface CanvasArtifact {
   kind: CanvasKind;
@@ -75,7 +77,7 @@ export function projectKind(files: ProjectFile[]): CanvasKind {
 }
 
 /** Los tipos que tienen algo que VER (los demás solo muestran sus archivos). */
-export const hasPreview = (kind: CanvasKind) => kind === "web" || kind === "react" || kind === "svg" || kind === "mermaid";
+export const hasPreview = (kind: CanvasKind) => kind === "web" || kind === "react" || kind === "svg" || kind === "mermaid" || kind === "slides";
 
 function htmlTitle(files: ProjectFile[]): string | undefined {
   const html = files.find((f) => isHtmlName(f.name));
@@ -100,6 +102,12 @@ function soloArtifact(b: CodeBlock): CanvasArtifact | null {
   const { name, code: body } = extractFilename(b.code);
   const code = body.replace(/\n$/, "");
   if (!code.trim()) return null;
+
+  // Presentación: un bloque ```slides (o el markdown de Marp, que los modelos también conocen).
+  const marp = (lang === "md" || lang === "markdown") && /^\s*---\s*\n(?:[^\n]*\n){0,8}?marp\s*:\s*true/i.test(code);
+  if (SLIDES_LANGS.test(lang) || marp) {
+    return { kind: "slides", title: parseDeck(code).title, files: [{ name: name ?? "presentacion.md", lang: "markdown", code }] };
+  }
 
   if (lang === "mermaid") return { kind: "mermaid", title: "Diagrama", files: [{ name: name ?? "diagrama.mmd", lang: "mermaid", code }] };
 
@@ -174,8 +182,11 @@ export function extractArtifacts(md: string): CanvasArtifact[] {
 /** ¿Vale la pena leer esta respuesta como documento? Un plan o una parrilla sí; un "claro,
  *  dime más" no. */
 export function isDocLike(text: string): boolean {
-  if (text.length < 500) return false;
-  return /^#{1,6}\s/m.test(text) || /^\|.+\|\s*$/m.test(text) || text.split(/\n{2,}/).length >= 5;
+  // Solo cuenta la prosa: una respuesta que es casi toda un bloque (una página, una
+  // presentación) ya tiene su tarjeta, y los `#` de adentro no la vuelven un documento.
+  const prose = text.includes("```") ? text.replace(fenceRe(), "") : text;
+  if (prose.length < 500) return false;
+  return /^#{1,6}\s/m.test(prose) || /^\|.+\|\s*$/m.test(prose) || prose.split(/\n{2,}/).length >= 5;
 }
 
 export function docTitle(text: string): string {
@@ -196,5 +207,5 @@ export const fileSlug = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "documento";
 
 export const KIND_LABEL: Record<CanvasKind, string> = {
-  web: "Página web", react: "React", svg: "SVG", mermaid: "Diagrama", code: "Código", doc: "Documento",
+  web: "Página web", react: "React", svg: "SVG", mermaid: "Diagrama", slides: "Presentación", code: "Código", doc: "Documento",
 };

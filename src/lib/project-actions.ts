@@ -3,6 +3,7 @@
 // que el mismo botón haga lo mismo en los dos lados.
 import { stackblitzFields, type ProjectFile } from "./project-preview";
 import { GITHUB_EXPORT_EVENT } from "./github-export";
+import { parseDeck } from "./slides";
 
 export function projectTitle(files: ProjectFile[]): string {
   const html = files.find((f) => /\.html?$/i.test(f.name));
@@ -81,4 +82,11 @@ export function exportToGithub(files: ProjectFile[], title = projectTitle(files)
   window.dispatchEvent(new CustomEvent(GITHUB_EXPORT_EVENT, {
     detail: { titulo: title, archivos: files.map((f) => ({ path: f.name, content: f.code })) },
   }));
+}
+
+/** El bloque ```slides como archivo de PowerPoint. El generador se carga recién acá. */
+export async function downloadPptx(source: string): Promise<void> {
+  const { deckToPptx } = await import("./slides-pptx");
+  const deck = parseDeck(source);
+  download((await deckToPptx(deck)) as Blob, `${slug(deck.title).slice(0, 60) || "presentacion"}.pptx`);
 }

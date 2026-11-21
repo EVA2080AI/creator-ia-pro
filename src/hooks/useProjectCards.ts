@@ -4,7 +4,7 @@ import type { ProjectFile } from "@/lib/project-preview";
 import { findViteProblems } from "@/lib/vite-check";
 import { buildArtifactDoc } from "@/lib/canvas-preview";
 import { CANVAS_CHANGED_EVENT, CANVAS_OPEN_EVENT, getCanvasTarget, type CanvasKind, type CanvasTarget } from "@/lib/canvas";
-import { downloadFile, downloadZip, exportToGithub, openStackblitz, projectTitle } from "@/lib/project-actions";
+import { downloadFile, downloadPptx, downloadZip, exportToGithub, openStackblitz, projectTitle } from "@/lib/project-actions";
 
 // Comportamiento de las tarjetas de proyecto que produce mdToHtml()
 // (src/lib/markdown.ts → projectCardHtml). Las tarjetas llegan como HTML crudo
@@ -180,6 +180,11 @@ function attachProjectCards(el: HTMLElement): () => void {
         if (!pane || !name) break;
         downloadFile(name, pane.querySelector("pre code")?.textContent ?? "");
         flash(actEl, "Descargado ✓");
+        break;
+      }
+      case "pptx": {
+        const source = readFiles(card)[0]?.code ?? "";
+        downloadPptx(source).then(() => flash(actEl, "Descargado ✓"), () => flash(actEl, "Error"));
         break;
       }
       case "zip": {

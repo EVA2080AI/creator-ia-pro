@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import {
-  BarChart3, Check, ChevronDown, Code2, Dice5, FileText, Image as ImageIcon, LayoutTemplate, Lightbulb, Paperclip, PenLine, Scale, Sparkles, Wallet,
+  BarChart3, Check, ChevronDown, Code2, Dice5, FileText, Image as ImageIcon, LayoutTemplate, Lightbulb, Paperclip, PenLine, Presentation, Scale, Sparkles, Wallet,
 } from "lucide-react";
 import { ATTACH_CARD_PROMPT } from "@/lib/doc-context";
 import type { AssistantWelcomeCard } from "@/lib/assistants";
@@ -13,7 +13,7 @@ import type { AssistantWelcomeCard } from "@/lib/assistants";
 
 const ICONS: Record<string, typeof LayoutTemplate> = {
   layout: LayoutTemplate, image: ImageIcon, pen: PenLine, chart: BarChart3, compare: Scale,
-  dice: Dice5, pay: Wallet, file: FileText, code: Code2,
+  dice: Dice5, pay: Wallet, file: FileText, code: Code2, slides: Presentation,
 };
 
 const ATTACH_DESC = "Adjunta el archivo (PDF, Word o texto) y dime qué quieres saber.";
