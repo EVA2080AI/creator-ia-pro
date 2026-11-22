@@ -2,7 +2,7 @@
 //
 // Fuente: `transaction` type = 'bold_approved' (que es como el webhook de Bold
 // marca una compra confirmada — ver api/billing/webhook.ts). La `description`
-// tiene el formato `<packId>|<linkId>` donde packId es "pack_200|pack_1000|
+// tiene el formato `<packId>|<linkId>|<pesos cobrados>` (src/lib/bold.ts) donde packId es "pack_200|pack_1000|
 // pack_2000" para recargas o "creador|pro|agencia|pyme" para suscripciones.
 // Mapear packId → precio COP (CREDIT_PACK_PRICES_COP / PLAN_PRICES_COP) da el
 // monto cobrado. `amount` sigue en créditos otorgados, no en pesos.
@@ -15,6 +15,7 @@ import { and, eq, gte, lte, ne, isNotNull, asc, desc, inArray, like } from "driz
 import { getDb, schema } from "../../db/index.js";
 import { requireAdmin } from "../_lib/require-admin.js";
 import { CREDIT_PACK_PRICES_COP, PLAN_PRICES_COP } from "../../src/lib/limits.js";
+import { isTestPurchase } from "../../src/lib/bold.js";
 
 const PACK_LABEL: Record<string, string> = {
   pack_200: "Pack 200 créditos",
@@ -28,6 +29,15 @@ const PACK_LABEL: Record<string, string> = {
 
 function priceOf(packId: string): number {
   return CREDIT_PACK_PRICES_COP[packId] ?? PLAN_PRICES_COP[packId] ?? 0;
+}
+
+/** Lo cobrado en una compra: el monto que quedó guardado con ella (tercer campo de la
+ * descripción, desde 2026-11-22) o, en filas anteriores, el precio actual del producto.
+ * Así un cambio de precios no reescribe los ingresos de los meses pasados. */
+function chargedCop(description: string | null): number {
+  const [packId, , amount] = (description ?? "").split("|").map((s) => s.trim());
+  const n = Number(amount);
+  return amount && Number.isFinite(n) && n > 0 ? n : priceOf(packId ?? "");
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -53,7 +63,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // tipo también lo usa el webhook de Bold para activaciones ("Plan activado:
   // {tier} (Bold)"), por eso filtro por `description like 'Plan%vencido%'` —
   // sin eso el churn sumaría también a quienes se dieron de alta.
-  const [approvedAll, renewalsRows, churnRows] = await Promise.all([
+  const [approvedRaw, renewalsRows, churnRows] = await Promise.all([
     db
       .select()
       .from(schema.transaction)
@@ -91,11 +101,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .orderBy(desc(schema.transaction.createdAt)),
   ]);
 
+  // Las compras hechas con llaves de prueba de Bold (solo un admin puede acreditarlas) no
+  // son plata: fuera de ingresos, promedios y top de clientes.
+  const approvedAll = approvedRaw.filter((tx) => !isTestPurchase(tx.description));
+
   // Separo mes actual (0-30d) vs mes anterior (30-60d) para el MoM.
   const approved = approvedAll.filter((tx) => tx.createdAt >= thirtyDaysAgo);
   const approvedPrev = approvedAll.filter((tx) => tx.createdAt < thirtyDaysAgo);
   const revenueCopPrev30d = approvedPrev.reduce(
-    (a, tx) => a + priceOf((tx.description?.split("|")[0] ?? "").trim()),
+    (a, tx) => a + chargedCop(tx.description),
     0,
   );
   const salesCountPrev30d = approvedPrev.length;
@@ -115,7 +129,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   for (const tx of approved) {
     const packId = (tx.description?.split("|")[0] ?? "").trim();
-    const price = priceOf(packId);
+    const price = chargedCop(tx.description);
     revenueCop += price;
     const acc = byItem.get(packId) ?? { items: 0, revenueCop: 0, creditsGranted: 0 };
     acc.items++;
@@ -174,7 +188,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     ? {
         packId: (last.description?.split("|")[0] ?? "").trim(),
         label: PACK_LABEL[(last.description?.split("|")[0] ?? "").trim()] ?? "Compra",
-        amountCop: priceOf((last.description?.split("|")[0] ?? "").trim()),
+        amountCop: chargedCop(last.description),
         creditsGranted: last.amount,
         createdAt: last.createdAt,
       }
@@ -240,6 +254,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   res.status(200).json({
     ok: true,
+    // Solo si existen, nunca su valor: para que el panel avise cuando los pagos están apagados.
+    gateway: { checkout: !!process.env.BOLD_API_KEY, webhook: !!process.env.BOLD_WEBHOOK_SECRET },
     revenueCop,
     salesCount: approved.length,
     breakdown,

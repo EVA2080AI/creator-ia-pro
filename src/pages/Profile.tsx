@@ -27,7 +27,7 @@ const TX_META: Record<string, { label: string; positive: boolean }> = {
   admin_grant: { label: "Créditos de soporte", positive: true },
   admin_deduct: { label: "Ajuste de soporte", positive: false },
   refund: { label: "Reembolso", positive: true },
-  bold_pending: { label: "Pago en proceso", positive: true },
+  bold_pending: { label: "Pago iniciado", positive: false },
   bold_approved: { label: "Pago aprobado", positive: true },
   subscription_change: { label: "Cambio de plan", positive: true },
 };

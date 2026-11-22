@@ -111,6 +111,9 @@ export interface ChurnedUser {
 }
 
 export interface FinanceData {
+  /** ¿Están cargadas en Vercel las llaves de Bold? `checkout` = se puede cobrar;
+   *  `webhook` = se aceptan los avisos de pago. Sin la primera nadie puede comprar. */
+  gateway?: { checkout: boolean; webhook: boolean };
   revenueCop: number;
   salesCount: number;
   breakdown: FinanceBreakdownItem[];

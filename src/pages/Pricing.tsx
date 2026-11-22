@@ -1,11 +1,10 @@
-import { useNavigate } from "react-router-dom";
-import { useState, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { boldService } from "@/services/billing-service";
 import { CREDIT_PACKS } from "@/lib/credit-packs";
 import { motion, AnimatePresence } from "framer-motion";
-import confetti from "canvas-confetti";
 import React from "react";
 import {
   Sparkles, Check, Zap, Crown, Rocket, Loader2,
@@ -17,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { LandingHeader } from "@/components/layout/LandingHeader";
+import { PaymentReturn } from "@/components/billing/PaymentReturn";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const PLANS = [
@@ -238,6 +238,24 @@ export default function Pricing() {
   const [annual, setAnnual] = useState(false);
   const [estimateSlider, setEstimateSlider] = useState(500);
 
+  // Bold devuelve al comprador a /pricing?status=payment_returned&pack=<id>.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paymentReturned = searchParams.get("status") === "payment_returned";
+
+  // "Comprar" deja el botón girando y redirige a Bold. Si el comprador vuelve con «Atrás», el
+  // navegador puede restaurar esta página tal como quedó (bfcache): el botón seguía
+  // deshabilitado hasta recargar.
+  useEffect(() => {
+    const restore = (e: PageTransitionEvent) => { if (e.persisted) setLoadingAction(null); };
+    window.addEventListener("pageshow", restore);
+    return () => window.removeEventListener("pageshow", restore);
+  }, []);
+  const closePaymentReturn = () => {
+    const next = new URLSearchParams(searchParams);
+    for (const k of ["status", "pack", "bold-order-id", "bold-tx-status"]) next.delete(k);
+    setSearchParams(next, { replace: true });
+  };
+
   const handleBoldAction = async (id: string) => {
     if (!isLoggedIn) {
       toast.info("Identidad requerida. Por favor inicia sesión.");
@@ -246,13 +264,9 @@ export default function Pricing() {
     }
     setLoadingAction(id);
     try {
+      // Lleva a la página de pago de Bold. No se celebra nada acá: todavía no se pagó.
+      // El resultado se muestra al volver (PaymentReturn).
       await boldService.purchaseCredits(id);
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#ffffff', '#4ade80', '#a855f7']
-      });
     } catch (err: any) {
       toast.error(err.message || "Error al conectar con Bold");
       setLoadingAction(null);
@@ -288,6 +302,13 @@ export default function Pricing() {
         {/* La única página pública que sigue el tema: es a donde entra el usuario desde
             el chat, donde ya eligió claro u oscuro. */}
         <LandingHeader themed />
+        {paymentReturned && (
+          <PaymentReturn
+            pack={searchParams.get("pack")}
+            likelyPaid={searchParams.get("bold-tx-status") === "approved"}
+            onClose={closePaymentReturn}
+          />
+        )}
 
         <div className="pt-32 lg:pt-40 pb-40 relative z-10">
           

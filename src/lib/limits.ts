@@ -50,3 +50,40 @@ export const CREDIT_PACK_PRICES_COP: Record<string, number> = {
   pack_1000: 90_000,
   pack_2000: 150_000,
 };
+
+/** Créditos que entrega cada recarga puntual. Debe coincidir con `src/lib/credit-packs.ts`. */
+export const CREDIT_PACK_CREDITS: Record<string, number> = {
+  pack_200: 200,
+  pack_1000: 1_000,
+  pack_2000: 2_000,
+};
+
+export interface BillingProduct {
+  id: string;
+  /** Lo que se cobra, en pesos colombianos. */
+  priceCop: number;
+  /** Créditos que se suman al aprobarse el pago. */
+  credits: number;
+  /** Un plan además cambia `subscription_tier` y corre el vencimiento 30 días. */
+  isPlan: boolean;
+}
+
+const own = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
+
+/**
+ * Lo ÚNICO que se puede comprar: el cobro (api/billing/checkout.ts) y la acreditación
+ * (api/_lib/billing.ts) salen de acá, así que no puede cobrarse un precio y acreditarse
+ * otro. Antes cada archivo llevaba su propia tabla de precios y de créditos.
+ * `own()` y no `mapa[id]`: el id viene del navegador y "constructor" o "toString" existen
+ * en cualquier objeto.
+ */
+export function billingProduct(id: unknown): BillingProduct | null {
+  if (typeof id !== "string") return null;
+  if (id !== "free" && own(PLAN_PRICES_COP, id) && own(PLAN_MONTHLY_CREDITS, id)) {
+    return { id, priceCop: PLAN_PRICES_COP[id], credits: PLAN_MONTHLY_CREDITS[id], isPlan: true };
+  }
+  if (own(CREDIT_PACK_PRICES_COP, id) && own(CREDIT_PACK_CREDITS, id)) {
+    return { id, priceCop: CREDIT_PACK_PRICES_COP[id], credits: CREDIT_PACK_CREDITS[id], isPlan: false };
+  }
+  return null;
+}

@@ -7,6 +7,9 @@
   "functions": {
     "api/cron/task-reminders.ts": {
       "maxDuration": 60
+    },
+    "api/cron/subscription-renewals.ts": {
+      "maxDuration": 120
     }
   },
   "crons": [

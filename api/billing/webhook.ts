@@ -1,11 +1,24 @@
-// Receptor del webhook de Bold.co — puerto de supabase/functions/bold-webhook.
-// Bold llama esto directamente (sin sesión de usuario); la única defensa es la
-// firma HMAC. Necesita el body crudo tal cual llegó, por eso bodyParser:false.
+// Receptor de los avisos de Bold. Bold llama esto directamente, sin sesión: la única
+// defensa es la firma, y se necesita el cuerpo crudo tal cual llegó (bodyParser:false).
+//
+// Reglas, todas de la documentación de Bold (developers.bold.co/webhook):
+//  · Sin BOLD_WEBHOOK_SECRET NO se procesa nada. Antes se saltaba la verificación "con un
+//    aviso en el log": cualquiera podía mandar un pago aprobado inventado.
+//  · Bold avisa TODAS las ventas del comercio (datáfono, otros links): lo que no es una
+//    compra nuestra se responde 200 y se ignora. Con otra respuesta Bold reintenta 5 veces.
+//  · El mismo aviso puede llegar más de una vez: acreditar es idempotente (api/_lib/billing.ts).
+//  · La firma dice que el aviso es de Bold, NO que sea de un link nuestro: la referencia la
+//    elige quien crea el link, y la llave de identidad con la que se crean es pública según
+//    Bold. Alguien podría crear en el comercio un link de $1.000 con `reference` = el id de
+//    su compra pendiente de un plan y pagarlo. Por eso acá solo se acredita si el monto
+//    pagado cubre lo que se cobró; si no, deciden los caminos que le preguntan a Bold por el
+//    link mismo (confirm y la conciliación), que no se pueden falsificar.
+//  · Hay que responder 200 en menos de 2 segundos: acá no se llama a Bold, solo a la base.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { createHmac, timingSafeEqual } from "node:crypto";
-import { eq, and, like, sql } from "drizzle-orm";
-import { getDb, schema } from "../../db/index.js";
-import { addCredits } from "../_lib/credits.js";
+import { getDb } from "../../db/index.js";
+import { verifySignature } from "../_lib/bold.js";
+import { findPurchaseByLink, settlePurchase } from "../_lib/billing.js";
+import { isLinkId, parseNotification } from "../../src/lib/bold.js";
 
 export const config = { api: { bodyParser: false } };
 
@@ -15,50 +28,28 @@ async function readRawBody(req: VercelRequest): Promise<string> {
   return Buffer.concat(chunks).toString("utf8");
 }
 
-/** Firma Bold = HMAC-SHA256(base64(body crudo), secreto), en hex. */
-function verifySignature(rawBody: string, signature: string | null, secret: string): boolean {
-  if (!signature) return false;
-  const base64Body = Buffer.from(rawBody, "utf8").toString("base64");
-  const expected = createHmac("sha256", secret).update(base64Body).digest("hex");
-  const a = Buffer.from(expected, "utf8");
-  const b = Buffer.from(signature, "utf8");
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
-}
-
-const CREDIT_MAP: Record<string, number> = {
-  pack_200: 200,
-  pack_1000: 1000,
-  pack_2000: 2000,
-  creador: 1000,
-  pro: 3000,
-  agencia: 8000,
-  pyme: 20000,
-};
-
-const PLAN_IDS = new Set(["creador", "pro", "agencia", "pyme"]);
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
     res.status(405).end("Método no permitido");
     return;
   }
 
-  const rawBody = await readRawBody(req);
   const secret = process.env.BOLD_WEBHOOK_SECRET;
-  const signature = (req.headers["x-bold-signature"] as string | undefined) ?? null;
-
-  if (secret) {
-    if (!verifySignature(rawBody, signature, secret)) {
-      console.error("[billing/webhook] Firma inválida");
-      res.status(401).end("Unauthorized");
-      return;
-    }
-  } else {
-    console.warn("[billing/webhook] BOLD_WEBHOOK_SECRET no configurado — verificación omitida.");
+  if (!secret) {
+    console.error("[billing/webhook] BOLD_WEBHOOK_SECRET no está configurado: el aviso se rechaza sin procesar.");
+    res.status(503).end("Webhook sin configurar");
+    return;
   }
 
-  let payload: any;
+  const rawBody = await readRawBody(req);
+  const signature = req.headers["x-bold-signature"];
+  if (!verifySignature(rawBody, Array.isArray(signature) ? signature[0] : signature, secret)) {
+    console.error("[billing/webhook] Firma inválida");
+    res.status(401).end("Unauthorized");
+    return;
+  }
+
+  let payload: unknown;
   try {
     payload = JSON.parse(rawBody);
   } catch {
@@ -66,66 +57,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const linkId = payload?.data?.reference || payload?.reference || payload?.payment_link_id;
-  const status = payload?.data?.status || payload?.status;
-
-  if (!linkId) {
-    res.status(400).end("Falta reference");
+  const notice = parseNotification(payload);
+  if (!notice) {
+    console.warn("[billing/webhook] Aviso con un formato que no se reconoce; se ignora.");
+    res.status(200).json({ ok: true, ignored: "formato" });
     return;
   }
 
-  if (status !== "APPROVED" && status !== "PAID") {
-    res.status(200).json({ ok: true, ignored: true });
+  if (notice.type !== "SALE_APPROVED") {
+    // Una anulación (VOID_APPROVED) devuelve la plata pero NO quita los créditos sola: se
+    // hace a mano desde Admin → Usuarios. Queda en el log para que no pase inadvertida.
+    if (notice.type === "VOID_APPROVED") {
+      console.warn(`[billing/webhook] Venta anulada en Bold (${notice.reference ?? "sin referencia"}): revisar los créditos de esa compra.`);
+    }
+    res.status(200).json({ ok: true, ignored: notice.type });
     return;
   }
 
-  const db = getDb();
-  const pending = await db
-    .select()
-    .from(schema.transaction)
-    .where(and(eq(schema.transaction.type, "bold_pending"), like(schema.transaction.description, `%${linkId}%`)));
-
-  const tx = pending.find((t) => t.description?.includes(linkId));
-  if (!tx) {
-    console.error("[billing/webhook] Sin transacción pendiente para:", linkId);
-    res.status(404).end("Transaction not found");
-    return;
-  }
-
-  const packId = tx.description?.split("|")[0]?.trim() ?? "";
-  const creditsToAdd = CREDIT_MAP[packId] || 0;
-
-  if (creditsToAdd > 0) {
-    await addCredits(tx.userId, creditsToAdd);
-
-    if (PLAN_IDS.has(packId)) {
-      // Bold no soporta cobro recurrente automático — cada compra extiende el
-      // vencimiento 30 días desde el mayor entre "ahora" y el vencimiento
-      // actual (si renuevas antes de que venza, no pierdes los días que
-      // quedaban). Ver api/cron/subscription-renewals.ts para el recordatorio.
-      await db
-        .update(schema.profile)
-        .set({
-          subscriptionTier: packId,
-          subscriptionExpiresAt: sql`greatest(${schema.profile.subscriptionExpiresAt}, now()) + interval '30 days'`,
-          renewalReminderSentAt: null,
-          updatedAt: new Date(),
-        })
-        .where(eq(schema.profile.userId, tx.userId));
-      await db.insert(schema.transaction).values({
-        id: crypto.randomUUID(),
-        userId: tx.userId,
-        type: "subscription_change",
-        amount: 0,
-        description: `Plan activado: ${packId} (Bold)`,
-      });
+  try {
+    const db = getDb();
+    const purchase = await findPurchaseByLink(db, notice.reference);
+    if (!purchase) {
+      // Los links que se crean a mano en la app de Bold también empiezan por LNK_: lo normal
+      // es que sea una de esas ventas. Queda anotado por si fuera una compra de la app sin fila.
+      if (isLinkId(notice.reference)) console.warn(`[billing/webhook] Venta aprobada del link ${notice.reference}, que no es una compra de la app.`);
+      res.status(200).json({ ok: true, ignored: "otra venta" });
+      return;
     }
 
-    await db
-      .update(schema.transaction)
-      .set({ type: "bold_approved", amount: creditsToAdd })
-      .where(eq(schema.transaction.id, tx.id));
-  }
+    if (purchase.amountCop == null || notice.totalCop == null || notice.totalCop < purchase.amountCop) {
+      console.error(`[billing/webhook] ${purchase.linkId}: el aviso trae ${notice.totalCop ?? "ningún monto"} y la compra es de ${purchase.amountCop ?? "monto desconocido"}. NO se acredita por este camino.`);
+      res.status(200).json({ ok: true, ignored: "monto" });
+      return;
+    }
 
-  res.status(200).json({ ok: true });
+    const result = await settlePurchase(db, purchase);
+    if (result.status === "invalid") {
+      console.error(`[billing/webhook] ${purchase.linkId}: pago aprobado SIN acreditar — ${result.reason}`);
+      res.status(500).end("No se pudo acreditar");
+      return;
+    }
+    res.status(200).json({ ok: true, status: result.status });
+  } catch (err) {
+    // 500 para que Bold reintente (15 min, 1 h, 4 h, 8 h, 24 h).
+    console.error("[billing/webhook] fallo:", err);
+    res.status(500).end("Error interno");
+  }
 }

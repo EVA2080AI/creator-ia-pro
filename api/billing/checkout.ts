@@ -1,30 +1,21 @@
-// Genera un link de pago Bold.co — puerto de supabase/functions/bold-checkout,
-// que dejó de funcionar en producción tras la migración a better-auth: dependía
-// de `supabase.auth.getUser()` en el cliente, que ya no tiene sesión (ver
-// src/services/billing-service.ts). Ahora el usuario y el email salen de la
-// sesión de better-auth en el servidor — nunca del body del request.
+// Genera un link de pago de Bold. El usuario y el correo salen de la sesión de better-auth
+// y el precio del catálogo del servidor (src/lib/limits.ts → billingProduct): del navegador
+// solo llega el id de lo que se quiere comprar.
+//
+// La compra queda como una fila `bold_pending`; quién la convierte en créditos y cómo está
+// en api/_lib/billing.ts.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { getDb, schema } from "../../db/index.js";
 import { getSessionUser } from "../_lib/session.js";
-
-interface CheckoutBody {
-  packId?: string;
-}
-
-// Precios verificados en servidor — el cliente solo manda el id del pack.
-const PRICE_MAP: Record<string, number> = {
-  // Planes mensuales
-  creador: 149900,
-  pro: 349900,
-  agencia: 699900,
-  pyme: 1499900,
-  // Recargas puntuales
-  pack_200: 25000,
-  pack_1000: 90000,
-  pack_2000: 150000,
-};
+import { BoldError, createPaymentLink } from "../_lib/bold.js";
+import { recentPendingCount } from "../_lib/billing.js";
+import { billingProduct } from "../../src/lib/limits.js";
+import { encodePurchase, purchaseDescription } from "../../src/lib/bold.js";
 
 const APP_URL = process.env.APP_URL || "https://creator-ia.com";
+
+/** Links por usuario y por hora. Nadie necesita más para comprar, y cada uno es una llamada a Bold y una fila. */
+const MAX_LINKS_PER_HOUR = 8;
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "POST") {
@@ -38,73 +29,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return;
   }
 
-  const { packId } = req.body as CheckoutBody;
-  const amount = packId ? PRICE_MAP[packId] : undefined;
-  if (!packId || !amount) {
-    res.status(400).json({ ok: false, code: "BAD_REQUEST", error: `Identificador de pack inválido: ${packId}` });
+  const product = billingProduct((req.body as { packId?: unknown } | undefined)?.packId);
+  if (!product) {
+    res.status(400).json({ ok: false, code: "BAD_REQUEST", error: "Ese plan o recarga no está disponible." });
     return;
   }
 
-  const BOLD_API_KEY = process.env.BOLD_API_KEY;
-  if (!BOLD_API_KEY) {
-    res.status(200).json({ ok: false, code: "NOT_CONFIGURED", error: "Pasarela de pagos no configurada. Contacta soporte." });
+  const apiKey = process.env.BOLD_API_KEY;
+  if (!apiKey) {
+    res.status(200).json({ ok: false, code: "NOT_CONFIGURED", error: "Los pagos todavía no están habilitados. Escríbenos y lo resolvemos." });
     return;
   }
 
   try {
-    const payload = {
-      amount_type: "CLOSE",
-      amount: { currency: "COP", total_amount: amount },
-      description: `Creator IA Pro: ${packId}`,
-      payer_email: user.email,
-      callback_url: `${APP_URL}/pricing?status=payment_returned&pack=${packId}`,
-    };
+    const db = getDb();
+    if ((await recentPendingCount(db, user.userId)) >= MAX_LINKS_PER_HOUR) {
+      res.status(429).json({ ok: false, code: "TOO_MANY", error: "Ya abriste varios pagos en la última hora. Termina uno de ellos o espera un momento." });
+      return;
+    }
 
-    const boldRes = await fetch("https://integrations.api.bold.co/online/link/v1", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `x-api-key ${BOLD_API_KEY}` },
-      body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(10000),
+    const { linkId, url } = await createPaymentLink(apiKey, {
+      amountCop: product.priceCop,
+      description: purchaseDescription(product),
+      callbackUrl: `${APP_URL}/pricing?status=payment_returned&pack=${encodeURIComponent(product.id)}`,
     });
 
-    const rawText = await boldRes.text();
-    let data: { payload?: { payment_link?: string; url?: string }; message?: string; errors?: Array<{ detail?: string }> };
-    try {
-      data = JSON.parse(rawText);
-    } catch {
-      throw new Error(`Bold respondió algo inesperado (status ${boldRes.status}).`);
-    }
-
-    if (!boldRes.ok) {
-      throw new Error(data?.errors?.[0]?.detail || data?.message || `Bold API error (${boldRes.status})`);
-    }
-
-    const linkId = data.payload?.payment_link;
-    const url = data.payload?.url;
-    if (!url || !linkId) throw new Error("Bold no devolvió un link de pago.");
-
-    // Transacción pendiente — el webhook la busca por linkId para saber a quién
-    // acreditar cuando Bold confirme el pago.
-    const db = getDb();
+    // Si esto falla el link no llega a nadie (no se devuelve, y Bold no lo envía por correo
+    // porque no se manda payer_email): un pago sin fila pendiente no tendría a quién acreditarse.
     await db.insert(schema.transaction).values({
       id: crypto.randomUUID(),
       userId: user.userId,
       type: "bold_pending",
       amount: 0,
-      description: `${packId}|${linkId}`,
+      description: encodePurchase(product.id, linkId, product.priceCop),
     });
 
-    res.status(200).json({ ok: true, url, linkId });
+    res.status(200).json({ ok: true, url });
   } catch (err) {
-    const isTimeout = err instanceof Error && err.name === "TimeoutError";
-    // err.message puede incluir data.errors[0].detail de Bold (bodies
-    // crudos de la API del merchant). Útil para debug, no para el usuario:
-    // registramos el detalle y devolvemos un mensaje genérico.
+    // El detalle de Bold (o de la base) sirve para depurar, no para el usuario.
     console.error("[billing/checkout] fallo:", err);
+    const timeout = err instanceof BoldError && err.timeout;
     res.status(502).json({
       ok: false,
-      code: isTimeout ? "TIMEOUT" : "PROVIDER_ERROR",
-      error: isTimeout
+      code: timeout ? "TIMEOUT" : "PROVIDER_ERROR",
+      error: timeout
         ? "Bold tardó demasiado en responder. Intenta de nuevo."
         : "No se pudo iniciar el pago. Intenta de nuevo en unos minutos.",
     });

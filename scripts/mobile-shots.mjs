@@ -14,6 +14,8 @@
 //                y un proyecto Vite (scripts/demo-canvas.mjs): abrirla con --click=.asst-conv-open
 // --script=<archivo.mjs>  corre `export default async (page) => {…}` antes de la captura (pruebas interactivas)
 // --wait=<ms>  espera extra antes de la captura (una vista previa que baja React de esm.sh)
+// --pay=approved|processing|unpaid|sandbox|none|error  qué responde "¿ya entró mi pago?" al volver de Bold:
+//                abrir /pricing?status=payment_returned&pack=pro (por defecto, approved)
 // --admin  la sesión simulada es de administrador y /api/admin/users devuelve cuentas de muestra (para /admin)
 // Por qué existe: resize_window de Claude in Chrome no cambia el viewport, y creator-ia.com bloquea los iframes.
 import { chromium, devices } from "@playwright/test";
@@ -130,6 +132,11 @@ await ctx.route("**/api/**", (r) => {
   if (u === "/api/projects") return json(r, { ok: true, projects: DEMO_PROJECTS });
   if (u.startsWith("/api/assets")) return json(r, { ok: true, assets: [], total: 12 });
   if (u.startsWith("/api/billing/transactions")) return json(r, { ok: true, transactions: DEMO_TRANSACTIONS });
+  if (u === "/api/billing/confirm") {
+    const pay = opt("--pay", "approved");
+    if (pay === "error") return r.fulfill({ status: 502, contentType: "application/json", body: JSON.stringify({ ok: false, code: "PROVIDER_ERROR", error: "No pudimos consultar el pago en este momento." }) });
+    return json(r, { ok: true, state: pay, fresh: true, packId: "pro", credits: 3000, isPlan: true });
+  }
   // La ruta por id va ANTES del prefijo: si no, el mock de la lista se la come y el
   // cliente cree que la conversación no existe.
   if (/^\/api\/basalt\/conversations\/[^/]+$/.test(u)) {

@@ -133,8 +133,28 @@ export function FinanceTab({
   const payingUsers = filas.filter((f) => f.plan !== "free").reduce((a, f) => a + f.users, 0);
   const totalUsers = filas.reduce((a, f) => a + f.users, 0);
 
+  // Los pagos estuvieron apagados dos meses y medio (llaves de Bold que se quedaron en
+  // Supabase) sin que ninguna pantalla lo dijera: "ingresos $0" se leía como "no hay ventas".
+  const gateway = finance?.gateway;
+
   return (
     <div className="space-y-6">
+      {gateway && (!gateway.checkout || !gateway.webhook) && (
+        <div role="alert" className="rounded-3xl border border-amber-500/40 bg-amber-500/10 p-5">
+          <p className="text-sm font-black text-foreground">
+            {gateway.checkout ? "Los avisos de pago de Bold se están rechazando" : "Los pagos están apagados"}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+            {gateway.checkout ? (
+              <>Falta <code className="font-mono text-[11px]">BOLD_WEBHOOK_SECRET</code> en Vercel. Las compras se siguen acreditando cuando el comprador vuelve a la app y en la conciliación diaria, pero no al instante.</>
+            ) : (
+              <>Falta <code className="font-mono text-[11px]">BOLD_API_KEY</code> en Vercel: quien intenta comprar ve «los pagos todavía no están habilitados». </>
+            )}{" "}
+            Los pasos para cargar las llaves están en la pestaña Ajustes.
+          </p>
+        </div>
+      )}
+
       <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-10 h-10 rounded-2xl bg-muted border border-border flex items-center justify-center">

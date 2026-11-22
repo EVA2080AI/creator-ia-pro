@@ -1,35 +1,81 @@
-// Cron diario — avisa antes de que venza un plan pagado y baja a Free a quien
-// dejó vencer el suyo. Bold no soporta cobro recurrente automático (tarjeta
-// tokenizada) contra su API real, así que esto es lo más cerca de "renovación
-// automática" que se puede construir hoy: nunca se cobra nada solo, siempre
-// hay un correo con un link de pago de un clic antes de actuar.
+// Cron diario — concilia los pagos de Bold, avisa antes de que venza un plan pagado y baja
+// a Free a quien dejó vencer el suyo. Bold no soporta cobro recurrente automático (tarjeta
+// tokenizada) contra su API real, así que esto es lo más cerca de "renovación automática"
+// que se puede construir hoy: nunca se cobra nada solo, siempre hay un correo con un link
+// de pago de un clic antes de actuar.
 //
 // Programado en vercel.json (`crons`). Vercel firma la llamada con
-// `Authorization: Bearer $CRON_SECRET` si esa variable está configurada — si
-// no lo está, se procesa igual (mismo criterio que BOLD_WEBHOOK_SECRET en
-// api/billing/webhook.ts) pero se loguea la advertencia.
+// `Authorization: Bearer $CRON_SECRET`. Sin esa variable NO corre: desde que concilia
+// pagos, cada llamada le pregunta a Bold por las compras pendientes, y eso no puede
+// quedar abierto a quien encuentre la URL.
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { and, eq, gte, isNotNull, lt, lte, ne, or, isNull } from "drizzle-orm";
+import { and, eq, gte, isNotNull, lt, lte, ne, or, isNull, sql } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { sendSystemEmail, emailLayout, emailButton } from "../_lib/send-system-email.js";
+import { getPaymentLink } from "../_lib/bold.js";
+import { pendingPurchases, settlePurchase } from "../_lib/billing.js";
 
 const REMINDER_WINDOW_DAYS = 3;
 const GRACE_PERIOD_DAYS = 3;
+
+// Conciliación: de a 5 links a la vez y con un tope de tiempo, para que una caída de Bold
+// no se coma la función entera y deje sin correr los recordatorios y las bajadas de plan.
+const RECONCILE_BATCH = 5;
+const RECONCILE_BUDGET_MS = 45_000;
 
 const TIER_LABEL: Record<string, string> = { creador: "Creador", pro: "Pro", agencia: "Agencia", pyme: "Pyme" };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    if (req.headers.authorization !== `Bearer ${cronSecret}`) {
-      res.status(401).json({ ok: false, error: "Unauthorized" });
-      return;
-    }
-  } else {
-    console.warn("[cron/subscription-renewals] CRON_SECRET no configurado — verificación omitida.");
+  if (!cronSecret) {
+    console.error("[cron/subscription-renewals] CRON_SECRET no está configurado: no se ejecuta.");
+    res.status(503).json({ ok: false, error: "Cron sin configurar" });
+    return;
+  }
+  if (req.headers.authorization !== `Bearer ${cronSecret}`) {
+    res.status(401).json({ ok: false, error: "Unauthorized" });
+    return;
   }
 
   const db = getDb();
+
+  // ── 0. Conciliar: compras que Bold ya cobró y acá siguen pendientes ──
+  // El aviso de Bold puede perderse (webhook sin registrar, una caída, el comprador que
+  // cierra la pestaña antes de volver). Una vez al día se le pregunta a Bold por cada compra
+  // pendiente de los últimos 30 días (un link no vence). Va PRIMERO: quien renovó ayer no
+  // debe recibir el recordatorio ni bajar a Free unas líneas más abajo.
+  let reconciled = 0;
+  let reconcileSkipped = 0;
+  const boldKey = process.env.BOLD_API_KEY;
+  if (boldKey) {
+    try {
+      const pending = await pendingPurchases(db);
+      const deadline = Date.now() + RECONCILE_BUDGET_MS;
+      for (let i = 0; i < pending.length; i += RECONCILE_BATCH) {
+        if (Date.now() > deadline) {
+          reconcileSkipped = pending.length - i;
+          console.error(`[cron/subscription-renewals] conciliación: se acabó el tiempo y quedaron ${reconcileSkipped} compras sin revisar.`);
+          break;
+        }
+        await Promise.all(pending.slice(i, i + RECONCILE_BATCH).map(async (purchase) => {
+          try {
+            const link = await getPaymentLink(boldKey, purchase.linkId, 5_000);
+            if (link.status !== "PAID") return;
+            // Pago de prueba (o Bold no dijo si lo era): solo a un admin. Ver api/billing/confirm.ts.
+            if (link.isSandbox !== false && !purchase.isAdmin) return;
+            const result = await settlePurchase(db, purchase, { test: link.isSandbox !== false });
+            if (result.status === "credited") reconciled++;
+            else if (result.status === "invalid") console.error(`[cron/subscription-renewals] ${purchase.linkId}: pagado SIN acreditar — ${result.reason}`);
+          } catch (err) {
+            console.error(`[cron/subscription-renewals] no se pudo conciliar ${purchase.linkId}:`, err);
+          }
+        }));
+      }
+    } catch (err) {
+      console.error("[cron/subscription-renewals] conciliación:", err);
+    }
+  }
+
   const now = new Date();
   const reminderCutoff = new Date(now.getTime() + REMINDER_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const graceCutoff = new Date(now.getTime() - GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000);
@@ -49,7 +95,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       isNotNull(schema.profile.subscriptionExpiresAt),
       lte(schema.profile.subscriptionExpiresAt, reminderCutoff),
       gte(schema.profile.subscriptionExpiresAt, now),
-      or(isNull(schema.profile.renewalReminderSentAt), lt(schema.profile.renewalReminderSentAt, schema.profile.subscriptionExpiresAt)),
+      // "Todavía no se avisó de ESTE vencimiento": el aviso de este ciclo solo puede haber
+      // salido dentro de la ventana (vencimiento − 3 días). Antes comparaba contra el
+      // vencimiento a secas, que siempre es posterior al aviso: salía un correo cada día.
+      or(
+        isNull(schema.profile.renewalReminderSentAt),
+        lt(schema.profile.renewalReminderSentAt, sql`${schema.profile.subscriptionExpiresAt} - make_interval(days => ${REMINDER_WINDOW_DAYS}::int)`),
+      ),
     ));
 
   let remindersSent = 0;
@@ -92,9 +144,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   let downgraded = 0;
   for (const row of dueForDowngrade) {
     const tierLabel = TIER_LABEL[row.subscriptionTier] ?? row.subscriptionTier;
-    await db.update(schema.profile)
+    // La condición se repite en el UPDATE: entre la lista de arriba y este punto se mandan
+    // correos, y en ese rato puede entrar el aviso de Bold de una renovación. Sin esto la
+    // bajada pisaba el plan recién pagado y además le avisaba "bajamos tu plan".
+    const changed = await db.update(schema.profile)
       .set({ subscriptionTier: "free", subscriptionExpiresAt: null, renewalReminderSentAt: null, updatedAt: now })
-      .where(eq(schema.profile.userId, row.userId));
+      .where(and(
+        eq(schema.profile.userId, row.userId),
+        ne(schema.profile.subscriptionTier, "free"),
+        lt(schema.profile.subscriptionExpiresAt, graceCutoff),
+      ))
+      .returning({ userId: schema.profile.userId });
+    if (changed.length === 0) continue;
     await db.insert(schema.transaction).values({
       id: crypto.randomUUID(),
       userId: row.userId,
@@ -117,5 +178,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     downgraded++;
   }
 
-  res.status(200).json({ ok: true, remindersSent, downgraded, checkedReminders: dueForReminder.length, checkedDowngrades: dueForDowngrade.length });
+  res.status(200).json({ ok: true, reconciled, reconcileSkipped, remindersSent, downgraded, checkedReminders: dueForReminder.length, checkedDowngrades: dueForDowngrade.length });
 }

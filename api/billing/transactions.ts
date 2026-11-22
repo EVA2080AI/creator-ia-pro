@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { eq, desc } from "drizzle-orm";
+import { and, desc, eq, gt, ne, or } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { getSessionUser } from "../_lib/session.js";
 
@@ -20,7 +20,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const rows = await db
       .select()
       .from(schema.transaction)
-      .where(eq(schema.transaction.userId, user.userId))
+      // Cada clic en "comprar" deja una fila pendiente. Si el pago no se hizo, al día
+      // siguiente deja de mostrarse: no es un movimiento, es un intento.
+      .where(and(
+        eq(schema.transaction.userId, user.userId),
+        or(ne(schema.transaction.type, "bold_pending"), gt(schema.transaction.createdAt, new Date(Date.now() - 24 * 60 * 60 * 1000))),
+      ))
       .orderBy(desc(schema.transaction.createdAt))
       .limit(50);
 

@@ -213,6 +213,80 @@ que Basalt construye se abre grande al lado del chat (a pantalla completa bajo 1
   API simulada. jsdom no ejecuta módulos ni iframes: las pruebas unitarias cubren el plan,
   el empaquetado y el panel; que React se dibuje se comprueba así.
 
+## Pasarela de pagos — Bold (2026-11-22)
+
+Sebastián pidió "revisa la pasarela de pagos". Lo que se encontró, medido en producción:
+
+- **Estaba apagada y nadie lo sabía.** `BOLD_API_KEY` y `BOLD_WEBHOOK_SECRET` vivían en los
+  Secrets de Supabase; al retirar Supabase (2026-09-08) no se pasaron a Vercel. Desde entonces
+  «comprar» respondía "pasarela no configurada" y en Neon hay **cero** compras por Bold. Las
+  llaves NO están en Neon ni en ningún archivo: solo se copian de nuevo desde el panel de Bold
+  (los tres pasos están en Admin → Ajustes). Cargarlas es de Sebastián, no de Claude.
+- **Aunque hubiera tenido llaves, no habría acreditado.** El receptor leía `data.status` y
+  `data.reference`; Bold manda `type: "SALE_APPROVED"` y `data.metadata.reference`. Con un
+  aviso real respondía "Falta reference": plata cobrada, créditos nunca.
+- **Y sin secreto aceptaba cualquier aviso**, buscando la compra con `LIKE '%<referencia>%'`:
+  una referencia `|` coincidía con la compra pendiente de cualquier usuario.
+
+Cómo quedó (no deshacer sin leer esto):
+
+- **Un pago se vuelve créditos en un solo lugar:** `settlePurchase` (`api/_lib/billing.ts`), UNA
+  sentencia SQL que marca la fila `bold_pending → bold_approved` solo si seguía pendiente y en
+  la misma sentencia suma créditos / activa el plan. Llegan tres caminos y pueden coincidir:
+  el aviso de Bold (`api/billing/webhook.ts`), el comprador que vuelve
+  (`api/billing/confirm.ts`, que le PREGUNTA a Bold por el link) y la conciliación diaria (primer
+  paso de `api/cron/subscription-renewals.ts`). Son independientes a propósito: si un supuesto
+  sobre Bold resulta falso en uno, los otros siguen acreditando.
+- **El webhook falla cerrado:** sin `BOLD_WEBHOOK_SECRET` responde 503 y no procesa nada. Lo que
+  no es una compra de la app (Bold avisa TODAS las ventas del comercio) se responde 200 e
+  ignora — con otra respuesta Bold reintenta 5 veces. La referencia se compara EXACTA
+  (`split_part(description,'|',2)`), nunca con LIKE.
+- **La firma no basta: el aviso solo acredita si el monto cubre lo cobrado.** Lo encontró la
+  revisión adversarial: la referencia de un aviso la elige quien crea el link, y la llave de
+  identidad con la que se crean es *pública* según Bold. Alguien podía crear en el comercio un
+  link de $1.000 con `reference` = el id de su compra pendiente de Pyme, pagarlo, y Bold
+  mandaba un aviso bien firmado. Por eso la fila guarda los pesos cobrados y el webhook exige
+  `total >= cobrado`; si no, responde 200 sin acreditar y deciden `confirm` y la
+  conciliación, que le preguntan a Bold por el link mismo (eso no se falsifica).
+- **No se envía `payer_email` a Bold:** con ese campo Bold manda el link por correo, y el
+  correo de una cuenta no está verificado (`requireEmailVerification: false`): cualquiera
+  podía hacer que Bold le enviara cobros "de Creator IA" a un tercero. Tampoco `reference`
+  (la referencia tiene que ser el id del link) ni `expiration_date` (la documentación se
+  contradice entre nanosegundos y milisegundos: probarlo con llaves reales antes de usarlo).
+  Como un link no vence, `confirm` y la conciliación miran las pendientes de **30 días**.
+- **Catálogo único:** `billingProduct()` en `src/lib/limits.ts` — precio y créditos de cada plan
+  y recarga. Lo usan el cobro y la acreditación; una prueba lo compara con lo que muestra
+  `/pricing`. No volver a poner una tabla de precios en otro archivo.
+- **La fila de la compra** (`transaction.description`) es `<producto>|<LNK_…>|<pesos cobrados>`
+  (`src/lib/bold.ts`). No hubo migración: si el volumen crece, eso pide columnas propias e
+  índice (hoy la tabla tiene decenas de filas).
+- **Llaves de prueba:** Bold aprueba compras con una tarjeta de ejemplo que es pública, así que
+  solo se acredita a un usuario cualquiera si Bold dice `is_sandbox: false`; de prueba (o si el
+  campo falta) solo a un administrador, y la fila queda marcada `|prueba` para que Finanzas no
+  la cuente como ingreso. Con llaves de prueba Bold no envía avisos (y firma con llave vacía,
+  que nunca se acepta): el flujo se prueba volviendo de pagar.
+- **El cron, de paso** (dos fallos que ya estaban): el recordatorio de vencimiento salía CADA
+  día de la ventana (comparaba contra un vencimiento que siempre es posterior al aviso) y la
+  bajada a Free hacía un UPDATE sin condición, así que podía pisar una renovación que entrara
+  mientras se mandaban correos. La conciliación va por lotes de 5 con tope de 45 s y la
+  función tiene `maxDuration` 120 en `vercel.json`.
+- **Al volver de pagar** (`/pricing?status=payment_returned&pack=…`) `PaymentReturn` dice la
+  verdad: aprobado / en proceso / sin pago. El confeti ya no sale al hacer clic en "comprar".
+- **Lo que NO hace:** cobro recurrente (Bold no lo ofrece: el plan dura 30 días y se renueva
+  pagando otra vez), quitar créditos cuando se anula una venta en Bold (`VOID_APPROVED` solo
+  queda en el log; se ajusta a mano en Admin → Usuarios) y recibo propio por correo (el
+  comprobante lo manda Bold).
+- **Cómo probarlo:** `npx vitest run src/test/billing.test.ts src/test/billing-cron.test.ts`
+  corre las sentencias de verdad contra PGlite con `db/migrations` (un doble de la base no
+  prueba una sentencia SQL; PGlite es de una sola conexión, así que prueba la idempotencia,
+  no el bloqueo de fila entre conexiones). Para validar contra Neon sin escribir: envolver
+  cada sentencia en `EXPLAIN` (planifica con los parámetros reales y no ejecuta). La
+  pantalla: `node scripts/mobile-shots.mjs "/pricing?status=payment_returned&pack=pro" salida.png
+  --pay=approved|processing|unpaid|sandbox|none|error`. Lo único que no se puede probar sin
+  llaves es Bold mismo: el primer pago real hay que mirarlo en los logs de Vercel.
+- **Antes de encender los pagos:** `/pricing` todavía promete modelos (Claude, GPT-5) que
+  `FREE_ONLY_MODE` tiene ocultos. Cobrar por eso es vender algo que no se entrega.
+
 ## Subir a GitHub (2026-10-05)
 
 La tarjeta de proyecto del chat tiene «Subir a GitHub» (junto a ZIP/StackBlitz):

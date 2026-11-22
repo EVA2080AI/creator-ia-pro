@@ -13,9 +13,9 @@ export function SettingsTab({
 }) {
   return (
     <div className="space-y-6">
-      {/* Bold.co Configuration — informativo: las claves reales viven en Vercel, no aquí.
-          Este panel escribía antes a una función de Supabase que nadie lee (api/billing/checkout.ts
-          solo lee process.env.BOLD_API_KEY en Vercel), así que guardar algo aquí no tenía ningún efecto. */}
+      {/* Bold.co — informativo: las llaves viven en Vercel, no aquí. Este panel escribía antes a una
+          función de Supabase (retirado el 2026-09-08) y las llaves se quedaron allá: desde entonces
+          los pagos estuvieron apagados sin que nada lo dijera. Por eso ahora se explican los tres pasos. */}
       <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <div className="h-10 w-10 rounded-xl bg-primary flex items-center justify-center text-primary-foreground">
@@ -29,12 +29,27 @@ export function SettingsTab({
 
         <div className="rounded-2xl border border-border bg-muted/50 p-6">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            <code className="font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded">BOLD_API_KEY</code> y{" "}
-            <code className="font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded">BOLD_WEBHOOK_SECRET</code> ya no se configuran desde aquí.
-            El checkout de producción las lee directamente de las variables de entorno del proyecto en Vercel — cambiarlas ahí es lo único que tiene efecto real.
+            Las llaves no se guardan aquí ni en la base de datos: el servidor las lee de las variables de entorno del
+            proyecto en Vercel. Sin ellas el botón de comprar responde «los pagos todavía no están habilitados».
           </p>
-          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-3">
-            Vercel → creator-ia-pro → Settings → Environment Variables
+          <ol className="mt-4 space-y-3 text-xs text-muted-foreground leading-relaxed list-decimal pl-4">
+            <li>
+              En <span className="font-bold text-foreground">Bold → Panel de comercios → Integraciones → Llaves de integración</span>{" "}
+              (Botón de pagos) copia la <span className="font-bold text-foreground">llave de identidad</span> y la{" "}
+              <span className="font-bold text-foreground">llave secreta</span> de producción.
+            </li>
+            <li>
+              En <span className="font-bold text-foreground">Vercel → creator-ia-pro → Settings → Environment Variables</span> (Production) crea{" "}
+              <code className="font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded">BOLD_API_KEY</code> con la llave de identidad y{" "}
+              <code className="font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded">BOLD_WEBHOOK_SECRET</code> con la llave secreta, y vuelve a desplegar.
+            </li>
+            <li>
+              En <span className="font-bold text-foreground">Bold → Integraciones → Webhooks</span> registra{" "}
+              <code className="font-mono text-[11px] bg-muted px-1.5 py-0.5 rounded break-all">https://creator-ia.com/api/billing/webhook</code>.
+            </li>
+          </ol>
+          <p className="text-xs text-muted-foreground leading-relaxed mt-4">
+            Con llaves de <span className="font-bold text-foreground">prueba</span> los pagos simulados solo acreditan a cuentas de administrador.
           </p>
         </div>
       </div>

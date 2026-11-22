@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -17,7 +17,6 @@ import { PLAN_PRICES_COP } from "@/lib/limits";
 import { ProjectCard } from "@/components/dashboard/ProjectCard";
 import { useStudioProjects } from "@/hooks/useStudioProjects";
 import { LoadingState } from "@/components/dashboard/LoadingState";
-import { CheckoutBanner } from "@/components/dashboard/CheckoutBanner";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { ChartSection } from "@/components/dashboard/ChartSection";
 import { WelcomeOnboarding } from "@/components/dashboard/WelcomeOnboarding";
@@ -59,7 +58,6 @@ const TIER_LABELS: Record<string, string> = {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { profile } = useProfile(user?.id);
   const { isAdmin } = useAdmin(user?.id);
@@ -82,8 +80,6 @@ export default function Dashboard() {
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState(false);
 
-  const checkoutSuccess = searchParams.get("checkout") === "success";
-  const creditsSuccess = searchParams.get("credits") === "success";
   const currentTier = profile?.subscription_tier || "free";
 
   useEffect(() => {
@@ -197,15 +193,6 @@ export default function Dashboard() {
       <div className="max-w-[1240px] mx-auto px-6 pt-6 pb-20 space-y-8">
         {/* Header & Notifications */}
         <section className="space-y-6">
-          {(checkoutSuccess || creditsSuccess) && (
-            <CheckoutBanner 
-              checkoutSuccess={checkoutSuccess} 
-              creditsSuccess={creditsSuccess} 
-              balance={profile?.credits_balance ?? 0}
-              onAction={() => navigate('/a/basalt')}
-            />
-          )}
-
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />

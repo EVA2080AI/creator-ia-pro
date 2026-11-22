@@ -31,7 +31,7 @@ export interface Invoice {
 export interface Transaction {
   id: string;
   user_id: string;
-  type: 'purchase' | 'spend' | 'admin_grant' | 'admin_deduct' | 'refund' | 'bold_pending' | 'bold_approved';
+  type: 'purchase' | 'spend' | 'admin_grant' | 'admin_deduct' | 'refund' | 'bold_pending' | 'bold_approved' | 'subscription_change';
   amount: number;
   description: string;
   created_at: string;
@@ -98,7 +98,50 @@ export const boldService = {
 
     window.location.href = data.url;
   },
+
+  /**
+   * "¿Ya entró mi pago?" — se llama cuando el comprador vuelve de Bold. El servidor mira
+   * la última compra de la sesión y le pregunta a Bold por ella (api/billing/confirm.ts);
+   * de acá no viaja nada que decida el resultado. Lanza si no se pudo consultar.
+   */
+  async confirmPayment(pack?: string | null): Promise<PaymentCheck> {
+    const res = await fetch("/api/billing/confirm", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pack ? { pack } : {}),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data?.ok || !PAYMENT_STATES.includes(data.state)) {
+      const code = res.status === 401 ? "UNAUTHORIZED" : res.status === 429 ? "TOO_MANY" : data?.code;
+      throw new PaymentCheckError(data?.error || "No pudimos consultar el pago.", code);
+    }
+    return data as PaymentCheck;
+  },
 };
+
+/**
+ * approved: la compra está acreditada (`fresh` = se acreditó en esta misma consulta) ·
+ * processing: Bold todavía la está cobrando · unpaid: no hay un pago aprobado ·
+ * sandbox: pago hecho con llaves de prueba, no suma · none: no hay compra reciente.
+ */
+const PAYMENT_STATES = ["approved", "processing", "unpaid", "sandbox", "none"] as const;
+export type PaymentState = (typeof PAYMENT_STATES)[number];
+
+export interface PaymentCheck {
+  state: PaymentState;
+  packId?: string;
+  credits?: number;
+  isPlan?: boolean;
+  fresh?: boolean;
+}
+
+export class PaymentCheckError extends Error {
+  constructor(message: string, readonly code?: string) {
+    super(message);
+    this.name = "PaymentCheckError";
+  }
+}
 
 // ─── Credit Operations ───────────────────────────────────────────────────────
 // El gasto/reembolso real ocurre atómicamente en el servidor dentro de cada
