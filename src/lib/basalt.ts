@@ -30,7 +30,7 @@ const SYSTEM_PROMPT = `Eres Basalt, el asistente de Creator IA. Conversas en esp
 2. PIEZAS GRÁFICAS
 Cuando el usuario pida una imagen, pieza gráfica, post, banner, flyer, logo o mockup de producto, primero explica en 1-2 frases la idea creativa y luego incluye UNA etiqueta así (el sistema generará la imagen automáticamente):
 <imagen formato="1:1">descripción visual detallada en inglés: sujeto, composición, estilo, colores, iluminación, texto corto si aplica</imagen>
-Formatos válidos: 1:1 (post), 9:16 (historia/reel), 16:9 (banner/YouTube), 3:2, 2:3. Máximo 2 etiquetas por respuesta. Esta misma etiqueta sirve para logos (describe estilo, tipografía y colores de marca) y mockups de producto (describe el producto y la escena) — es el mismo generador, solo cambia qué tan detallado sea el prompt.
+Formatos válidos: 1:1 (post), 9:16 (historia/reel), 16:9 (banner/YouTube), 3:2, 2:3. Máximo 2 etiquetas por respuesta. Escríbela SOLO cuando de verdad vayas a generar la imagen: si te preguntan qué sabes hacer, descríbelo con palabras y nunca pongas la etiqueta como ejemplo. Esta misma etiqueta sirve para logos (describe estilo, tipografía y colores de marca) y mockups de producto (describe el producto y la escena) — es el mismo generador, solo cambia qué tan detallado sea el prompt.
 El usuario SÍ puede subirte fotos (con el clip, arrastrándolas o pegándolas): cuando llega una, mírala y responde sobre lo que ves — describirla, transcribir su texto, revisar un diseño, leer una factura o una tabla. Lo que todavía no puedes es EDITAR una foto suya (quitarle el fondo, mejorarla, restaurarla, cambiarle el estilo): eso no existe aún, dilo con naturalidad en vez de inventarlo, y ofrece en cambio generar una pieza nueva con la etiqueta <imagen>.
 
 3. AGENTES DE IA Y HERRAMIENTAS
@@ -395,11 +395,28 @@ export async function saveMemory(userId: string, facts: string[]) {
   await apiJson("/api/basalt/memory", { method: "PUT", body: JSON.stringify({ facts: facts.slice(-60) }) });
 }
 
-/** Separa las etiquetas <memoria> e <imagen> del texto visible. */
-export function parseBasaltReply(text: string) {
+/**
+ * Separa las etiquetas <memoria> e <imagen> del texto visible.
+ *
+ * · Lo que va entre comillas invertidas (en línea o en bloque) es TEXTO, no una orden: al
+ *   preguntarle "¿qué puedes hacer?" el modelo escribe la etiqueta como ejemplo, y tratarla
+ *   como real generaba una imagen que nadie pidió y se tragaba el resto de la respuesta
+ *   (2026-11-23: el texto se cortaba en "Incluyo una etiqueta `").
+ * · Una etiqueta sin cerrar solo se esconde MIENTRAS llega el stream (`streaming`). Con la
+ *   respuesta ya completa no se esconde nada: ocultar "hasta el final" borraba texto bueno.
+ */
+export function parseBasaltReply(text: string, o: { streaming?: boolean } = {}) {
   const memories: string[] = [];
   const images: { prompt: string; format: string }[] = [];
-  let visible = text.replace(/<memoria>([\s\S]*?)<\/memoria>/gi, (_, fact: string) => {
+
+  // El código se aparta antes de buscar etiquetas y se devuelve intacto después.
+  const kept: string[] = [];
+  const mark = (_: string) => `\uE000${kept.push(_) - 1}\uE000`;
+  let visible = text
+    .replace(/```[\s\S]*?(?:```|$)/g, mark)
+    .replace(/`[^`\n]*`/g, mark);
+
+  visible = visible.replace(/<memoria>([\s\S]*?)<\/memoria>/gi, (_, fact: string) => {
     if (fact.trim()) memories.push(fact.trim());
     return "";
   });
@@ -407,8 +424,9 @@ export function parseBasaltReply(text: string) {
     if (prompt.trim()) images.push({ prompt: prompt.trim(), format: format || "1:1" });
     return "";
   });
-  // Mientras llega el stream, esconde una etiqueta que todavía no se cerró.
-  visible = visible.replace(/<(memoria|imagen)[^]*$/i, "");
+  if (o.streaming) visible = visible.replace(/<(memoria|imagen)[^]*$/i, "");
+
+  visible = visible.replace(/\uE000(\d+)\uE000/g, (_, i: string) => kept[Number(i)] ?? "");
   return { visible: visible.trim(), memories, images };
 }
 

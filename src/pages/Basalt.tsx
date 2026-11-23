@@ -423,7 +423,7 @@ export default function BasaltPage() {
               acc += delta;
               const now = Date.now();
               if (now - lastPaint > 40) {
-                const { visible } = parseBasaltReply(acc);
+                const { visible } = parseBasaltReply(acc, { streaming: true });
                 setMessages((prev) => prev.map((m) => (m.id === modelMsgId ? { ...m, text: joinContinuation(prefix, visible) } : m)));
                 lastPaint = now;
                 stickToBottom();

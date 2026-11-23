@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterConversations, groupConversationsByDate, joinContinuation, type StoredConversation } from "./basalt";
+import { filterConversations, groupConversationsByDate, joinContinuation, parseBasaltReply, type StoredConversation } from "./basalt";
 
 const conv = (id: string, title: string, updatedAt = Date.now()): StoredConversation => ({ id, title, updatedAt, messages: [] });
 
@@ -123,5 +123,43 @@ describe("groupConversationsByDate con ancladas", () => {
   it("sin ancladas no aparece el grupo", () => {
     const groups = groupConversationsByDate([at("hoy", new Date(2026, 9, 1, 9, 0))], now);
     expect(groups.map((g) => g.label)).toEqual(["Hoy"]);
+  });
+});
+
+describe("parseBasaltReply", () => {
+  it("saca la etiqueta real y deja el texto", () => {
+    const r = parseBasaltReply('Un póster sobrio.\n<imagen formato="9:16">a red poster</imagen>');
+    expect(r.visible).toBe("Un póster sobrio.");
+    expect(r.images).toEqual([{ prompt: "a red poster", format: "9:16" }]);
+  });
+
+  it("la etiqueta citada entre comillas invertidas es texto: no genera imagen ni corta la respuesta", () => {
+    const text = 'Incluyo una etiqueta `<imagen formato="1:1">ejemplo</imagen>` y el sistema la dibuja.\n3. Y más cosas después.';
+    const r = parseBasaltReply(text);
+    expect(r.images).toEqual([]);
+    expect(r.visible).toBe(text);
+  });
+
+  it("tampoco dentro de un bloque de código", () => {
+    const text = 'Así:\n```\n<imagen>x</imagen>\n```\nFin.';
+    const r = parseBasaltReply(text);
+    expect(r.images).toEqual([]);
+    expect(r.visible).toBe(text);
+  });
+
+  it("una etiqueta sin cerrar no se traga lo que sigue cuando la respuesta ya terminó", () => {
+    const r = parseBasaltReply("Mira <imagen formato=\"1:1\"> y sigue el texto.");
+    expect(r.visible).toContain("y sigue el texto.");
+  });
+
+  it("mientras llega el stream sí esconde la etiqueta a medias", () => {
+    const r = parseBasaltReply('Hola <imagen formato="1:1">un gat', { streaming: true });
+    expect(r.visible).toBe("Hola");
+  });
+
+  it("memoria: se extrae igual", () => {
+    const r = parseBasaltReply("Listo. <memoria>Se llama Ana</memoria>");
+    expect(r.memories).toEqual(["Se llama Ana"]);
+    expect(r.visible).toBe("Listo.");
   });
 });
