@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Creator IA – Más IA, menos costo</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#2a1650;--lime:#c084fc;--ink:#0f141c;--paper:#eceaf3;--white:#fff;
+--head:'Anton','Impact','Arial Narrow',sans-serif;--body:'Inter',system-ui,sans-serif;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;font-family:var(--body);background:var(--ink);color:var(--white);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:var(--head);font-weight:400;text-transform:uppercase;margin:0;letter-spacing:.005em}
+.btn{display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--lime);color:var(--lime);padding:11px 20px;font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;border-radius:4px;transition:.2s}
+.btn:hover,.btn:focus-visible{background:var(--lime);color:var(--blue);outline:none}
+.btn.solid{background:var(--lime);color:var(--blue)}
+.btn.solid:hover{background:var(--white)}
+:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+.light :focus-visible{outline-color:var(--blue)}
+.star{display:inline-block;width:1em;height:1em;background:var(--lime);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)}
+
+/* HERO */
+.hero{background:radial-gradient(circle at 85% 0,#2f1a5c 0,#0f141c 58%);position:relative;overflow:hidden}
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0;gap:16px}
+.logo{display:flex;align-items:center;gap:10px;font-family:var(--head);font-size:1.7rem;letter-spacing:.04em}
+.logo .star{font-size:1.8rem}
+nav ul{display:flex;gap:28px;list-style:none;margin:0;padding:0;font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+nav ul a:hover{color:var(--lime)}
+.hero-grid{display:grid;grid-template-columns:150px 1fr;gap:24px;padding:28px 0 70px;position:relative}
+.stats{display:flex;flex-direction:column;gap:20px}
+.stat{border-bottom:1px solid rgba(255,255,255,.35);padding-bottom:14px}
+.stat b{font-family:var(--head);font-weight:400;font-size:2.6rem;line-height:1}
+.stat b i{color:var(--lime);font-style:normal;font-size:1.3rem;vertical-align:top}
+.stat span{display:block;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85;margin-top:6px}
+.title{position:relative;display:flex;flex-wrap:wrap;gap:28px;align-items:flex-end;justify-content:flex-start}
+.title h1{flex:1 1 100%;max-width:66%}
+.hero-art{position:absolute;right:0;bottom:-80px;width:34%;max-width:430px;aspect-ratio:4/5;z-index:1}
+.hero-art .blob{position:absolute;left:50%;bottom:6%;width:88%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 32% 24%,#e4c7ff 0,#c084fc 45%,#8b3fe0 100%);transform:translateX(-50%)}
+.hero-art .ring{position:absolute;left:50%;bottom:0;width:104%;aspect-ratio:1;border-radius:50%;border:2px dashed var(--lime);transform:translateX(-50%);opacity:.7}
+.hero-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:bottom;opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.hero-art img{filter:drop-shadow(0 22px 26px rgba(12,4,36,.55)) drop-shadow(0 0 22px rgba(192,132,252,.28))}
+.hero-art img.on{opacity:1;transform:none}
+.card-ai .msg,.card-ai .chip{transition:opacity .25s ease}
+.card-ai.swap .msg,.card-ai.swap .chip{opacity:0}
+.title h1{font-size:clamp(2.5rem,6.4vw,5.6rem);line-height:1;color:var(--lime)}
+.title h1 .out{color:transparent;-webkit-text-stroke:2px var(--lime);display:block}
+.card-ai{position:relative;transform:rotate(-2deg);width:min(320px,100%);background:var(--white);color:var(--ink);border-radius:20px;padding:18px;box-shadow:0 30px 60px rgba(0,0,30,.45);z-index:2}
+.card-ai .bar{display:flex;gap:6px;margin-bottom:12px}
+.card-ai .bar i{width:9px;height:9px;border-radius:50%;background:var(--blue)}
+.msg{font-size:.82rem;line-height:1.45;padding:10px 12px;border-radius:12px;margin-bottom:8px}
+.msg.q{background:var(--paper)}
+.msg.a{background:var(--blue);color:var(--white)}
+.chip{display:inline-block;background:var(--lime);color:var(--blue);font-weight:700;font-size:.7rem;padding:4px 10px;border-radius:99px;margin-top:2px}
+.hero-side{max-width:300px;font-size:.82rem;line-height:1.55}
+.hero-side p{margin:0 0 16px;opacity:.92}
+.spin{position:absolute;right:4%;top:10px;font-size:4rem;z-index:3;animation:turn 14s linear infinite}
+@keyframes turn{to{transform:rotate(360deg)}}
+
+/* MARQUEE */
+.marquee{background:var(--lime);color:var(--blue);transform:rotate(-1.2deg) scaleX(1.03);overflow:hidden;white-space:nowrap;margin-top:-34px;position:relative;z-index:4;border-block:3px solid var(--ink)}
+.marquee div{display:inline-flex;gap:30px;padding:12px 0;animation:slide 26s linear infinite;font-family:var(--head);font-size:2.1rem;text-transform:uppercase;align-items:center}
+.marquee .star{background:var(--blue);font-size:1.4rem}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* SERVICES */
+.services{padding:110px 0 90px}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:48px}
+.kicker{display:flex;align-items:center;gap:10px;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:18px}
+.sec-head h2{font-size:clamp(2.2rem,5vw,3.9rem);line-height:1.02;max-width:760px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.svc{background:#161d27;border:1px solid #3d4a60;padding:24px;border-radius:6px;display:flex;flex-direction:column;gap:14px;min-height:340px}
+.svc.hot{background:var(--blue);border-color:var(--blue);transform:translateY(-18px)}
+.svc h3{font-size:1.7rem;line-height:1.05}
+.svc p{margin:0;font-size:.86rem;line-height:1.6;opacity:.8}
+.svc .go{margin-top:auto;width:42px;height:42px;border-radius:50%;background:var(--lime);color:var(--blue);display:grid;place-items:center;font-weight:700;align-self:flex-end}
+.art{height:120px;border-radius:4px;background:#2a1650;display:grid;place-items:center;overflow:hidden;position:relative}
+.art.a1{background:repeating-linear-gradient(90deg,#2a1650 0 14px,#3b2276 14px 28px)}
+.art.a2{background:var(--lime)}
+.art.a3{background:radial-gradient(circle at 30% 40%,#7c3aed 0 38px,transparent 39px),#2a1650}
+.art .star{font-size:3.2rem;background:var(--lime)}
+.art.a2 .star{background:var(--blue)}
+
+.art.a1{background:#2a1650 url(/educacion/hero-1.jpg) center 20%/cover no-repeat}
+.art.a2{background:#2a1650 url(/educacion/hero-2.jpg) center 20%/cover no-repeat}
+.art.a3{background:#2a1650 url(/educacion/hero-3.jpg) center 20%/cover no-repeat}
+.art{height:170px}.art .star{display:none}
+.multi{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px;max-width:100%}
+.multi span{white-space:nowrap;font-size:.62rem;font-weight:700;background:var(--paper);color:var(--blue);padding:3px 8px;border-radius:99px}
+.multi span::before{content:"\2713\00a0";color:#7c3aed}
+.orq{padding:100px 0;background:#0b1017}
+.orq .note{max-width:320px;margin:0;opacity:.85;line-height:1.6}
+.orq-flow{display:grid;grid-template-columns:1.1fr auto 1.2fr auto .9fr;gap:18px;align-items:center;margin-bottom:46px}
+.orq-q{background:var(--white);color:var(--ink);border-radius:14px;padding:18px;font-size:.88rem;line-height:1.45;font-weight:600}
+.orq-arrow{font-family:var(--head);font-size:1.8rem;color:var(--lime)}
+.orq-models{display:grid;gap:10px}
+.m{background:#161d27;border:1px solid #3d4a60;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:12px;font-size:.8rem}
+.m b{min-width:34px;color:var(--lime)}
+.m i{display:block;height:8px;border-radius:99px;background:linear-gradient(90deg,#7c3aed,var(--lime));width:var(--w);animation:fill 3.2s ease-in-out infinite alternate}
+@keyframes fill{from{width:10%}to{width:var(--w)}}
+.orq-best{background:var(--lime);color:var(--blue);border-radius:14px;padding:22px 16px;font-family:var(--head);font-size:1.4rem;text-transform:uppercase;text-align:center;display:flex;gap:10px;align-items:center;justify-content:center;line-height:1.1}
+.orq-best .star{background:var(--blue)}
+.orq-points{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.orq-points li{border-top:3px solid var(--lime);padding-top:18px}
+.orq-points h3{font-size:1.5rem;margin-bottom:8px}
+.orq-points p{margin:0;font-size:.9rem;line-height:1.6;opacity:.8}
+.hero-art .blob{display:none}
+.hero-art .ring{width:104%;height:84%;aspect-ratio:auto;border-radius:999px 999px 0 0;border-bottom:0}
+@media(max-width:900px){
+ .orq-flow{grid-template-columns:1fr}
+ .orq-arrow{transform:rotate(90deg);justify-self:center}
+ .orq-points{grid-template-columns:1fr}
+ .orq,.planes,.faq,.how,.light,.services{padding-top:70px;padding-bottom:70px}
+}
+@media(max-width:480px){
+ .wrap{padding:0 18px}
+ nav{padding:16px 0}
+ nav .btn{padding:9px 14px;font-size:.72rem}
+ .logo{font-size:1.4rem}
+ .cta-row .btn{flex:1;justify-content:center}
+ .stats{gap:18px}.stat b{font-size:1.8rem}
+ .strip{font-size:1.15rem;padding:20px 14px}
+ .marquee div{font-size:1.5rem}
+ .sec-head h2{font-size:2.1rem}
+}
+@media(prefers-reduced-motion:reduce){.m i{animation:none}}
+/* LIGHT SECTION */
+.light{background:var(--paper);color:var(--ink);padding:100px 0}
+.split{display:grid;grid-template-columns:1.1fr 1fr;gap:60px;align-items:center}
+.light h2{font-size:clamp(2.4rem,5.2vw,4.2rem);line-height:1}
+.light p.lead{font-size:.95rem;line-height:1.7;max-width:480px;margin:22px 0 28px;color:#444}
+.light .btn{color:var(--blue);border-color:var(--blue)}
+.light .btn:hover{background:var(--blue);color:var(--white)}
+.bars{background:var(--white);border-radius:10px;padding:28px;display:grid;gap:22px;box-shadow:0 20px 50px rgba(0,0,0,.08)}
+.bar-row b{display:flex;justify-content:space-between;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.track{height:10px;background:var(--paper);border-radius:99px;overflow:hidden}
+.track i{display:block;height:100%;background:var(--blue);border-radius:99px}
+.track i.l{background:#7c3aed}
+.strip{margin-top:60px;background:var(--ink);border-radius:10px;display:flex;justify-content:space-around;flex-wrap:wrap;gap:18px;padding:26px;color:var(--lime);font-family:var(--head);font-size:1.5rem;text-transform:uppercase;letter-spacing:.03em}
+
+/* HOW */
+.how{padding:100px 0}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.step{border-top:3px solid var(--lime);padding-top:20px}
+.step h3{font-size:1.6rem;margin-bottom:10px}
+.step p{margin:0;font-size:.9rem;line-height:1.6;opacity:.8}
+
+.rot{display:block;color:var(--white);transition:opacity .25s ease,transform .25s ease;will-change:transform}
+.rot.leave{opacity:0;transform:translateY(-.3em)}
+.rot.enter{opacity:0;transform:translateY(.3em);transition:none}
+.l3{display:block}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.kick{flex:1 1 100%;margin:0;font-size:.78rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lime)}
+.micro{font-size:.74rem;opacity:.85;margin:14px 0 0!important}
+.hero-side .btn{margin:0 6px 6px 0}
+.planes,.faq{padding:100px 0}
+.planes .note{max-width:320px;margin:0;opacity:.85;line-height:1.6}
+.plan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;align-items:stretch}
+.plan{position:relative;background:#161d27;border:1px solid #3d4a60;border-radius:8px;padding:26px 22px;display:flex;flex-direction:column;gap:14px}
+.plan.hot{background:var(--blue);border:2px solid var(--lime);transform:translateY(-12px)}
+.badge{position:absolute;top:-14px;left:22px;background:var(--lime);color:var(--blue);font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:99px}
+.plan h3{font-size:1.7rem}
+.plan .who{margin:0;font-size:.82rem;line-height:1.5;opacity:.85;min-height:2.6em}
+.plan .price{margin:0;font-family:var(--head);font-size:1.9rem;text-transform:uppercase;color:var(--lime)}
+.plan .price small{display:block;font-family:var(--body);font-size:.72rem;color:var(--white);opacity:.85;text-transform:none}
+.plan ul{margin:0;padding:0;list-style:none;display:grid;gap:10px;font-size:.86rem;line-height:1.45}
+.plan li{padding-left:22px;position:relative}
+.plan li::before{content:"";position:absolute;left:0;top:.3em;width:.8em;height:.8em;background:var(--lime);clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%)}
+.plan .btn{margin-top:auto;justify-content:center}
+.guarantee{display:flex;justify-content:center;align-items:center;gap:10px;margin:44px 0 0;font-weight:700;text-align:center}
+.faq{background:var(--paper);color:var(--ink)}
+.faq details{background:var(--white);border-radius:10px;margin-bottom:14px;padding:0 26px;box-shadow:0 6px 20px rgba(0,0,0,.05)}
+.faq .wrap{max-width:900px}
+.faq summary{cursor:pointer;padding:22px 0;font-weight:700;line-height:1.35;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq details[open] summary{padding-bottom:10px}
+.faq summary::after{content:"+";font-size:1.4rem;line-height:1;color:var(--blue)}
+.faq details[open] summary::after{content:"–"}
+.faq details p{margin:0;padding:0 40px 22px 0;line-height:1.65;color:#444}
+/* CTA */
+.cta{background:var(--blue);padding:90px 0;text-align:center;position:relative;overflow:hidden}
+.cta h2{font-size:clamp(3rem,10vw,8rem);line-height:.9;color:var(--lime)}
+.cta-center{justify-content:center}
+.cta-center .btn{flex:0 1 auto;min-width:220px;justify-content:center;padding:15px 28px}
+@media(max-width:480px){.cta-center{flex-direction:column;align-items:center}.cta-center .btn{width:100%;max-width:320px}}
+.cta p{max-width:520px;margin:22px auto 30px;line-height:1.6;opacity:.92}
+footer{padding:28px 0;font-size:.78rem;opacity:.7}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+@media(max-width:1000px){.plan-grid{grid-template-columns:1fr 1fr}.plan.hot{transform:none}}
+@media(max-width:640px){.plan-grid{grid-template-columns:1fr}}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center;padding:40px 0 90px}
+.copy{display:flex;flex-direction:column;align-items:flex-start}
+.copy .kick{flex:none;margin:0 0 18px}
+.copy h1{font-size:clamp(2.6rem,5.4vw,5rem);line-height:1;color:var(--lime);margin:0 0 22px;max-width:none}
+.copy .lead{font-size:1.02rem;line-height:1.6;max-width:520px;margin:0 0 26px;opacity:.95}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap}
+.cta-row .btn{padding:14px 26px;font-size:.85rem}
+.copy .micro{margin:14px 0 0!important}
+.stats{display:flex;flex-direction:row;gap:40px;margin-top:34px;padding-top:22px;border-top:1px solid rgba(255,255,255,.25);width:100%;max-width:520px}
+.stat{border:0;padding:0}
+.stat b{font-size:2.2rem}
+.visual{position:relative;justify-self:end;width:100%;max-width:470px;margin-bottom:-90px}
+.hero-art{position:relative;right:auto;bottom:auto;width:100%;max-width:none;margin:0;aspect-ratio:4/5}
+.visual .card-ai{position:absolute;left:-16%;bottom:14%;width:min(250px,60%);transform:rotate(-3deg);padding:14px}
+.card-ai .msg{font-size:.74rem;padding:8px 10px;margin-bottom:6px}
+.visual .spin{right:0;top:4%;font-size:3.2rem}
+@media(max-width:900px){
+ nav ul{display:none}
+ .hero-grid{grid-template-columns:1fr;gap:30px;padding:24px 0 34px}
+ .visual{justify-self:center;max-width:340px;margin-bottom:0}
+ .visual .card-ai{left:-3%;bottom:5%;width:54%;padding:12px}
+ .card-ai .msg.q,.card-ai .chip{display:none}
+ .multi{gap:4px}.multi span{font-size:.56rem;padding:3px 6px}
+ .visual{margin-top:-6px}
+ .stats{gap:24px}
+ .cards,.steps,.split{grid-template-columns:1fr}
+ .svc.hot{transform:none}
+}
+@media(prefers-reduced-motion:reduce){.hero-art img{transition:none}.spin,.marquee div{animation:none}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<header class="hero" id="inicio">
+ <div class="wrap">
+  <nav aria-label="Principal">
+   <a class="logo" href="#inicio" aria-label="Creator IA"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" aria-hidden="true" style="flex:none"><circle cx="12" cy="12" r="8" stroke="#fff" stroke-width="5" stroke-linecap="butt" stroke-dasharray="39 50.3" transform="rotate(40.35 12 12)"/><rect x="17.85" y="8.9" width="4.8" height="6.2" rx="1" fill="#A855F7"/></svg>Creator IA</a>
+   <ul>
+    <li><a href="#inicio">Inicio</a></li>
+    <li><a href="#que-hacemos">Qué hace</a></li>
+    <li><a href="#orquestador">Orquestador</a></li>
+    <li><a href="#impacto">Impacto</a></li>
+    <li><a href="#planes">Planes</a></li>
+    <li><a href="#como">Cómo funciona</a></li>
+   </ul>
+   <a class="btn solid" href="#planes">Ver planes</a>
+  </nav>
+
+  <div class="hero-grid">
+   <div class="copy">
+    <h1>IA para <span class="rot" id="rot" aria-hidden="true">tus estudiantes</span><span class="sr">tus estudiantes, tu equipo, tu empresa, tu institución</span><span class="l3">sin pagar de más</span></h1>
+    <p class="lead">Prueba varias IA a la vez en una sola pantalla, compara sus respuestas y quédate con la mejor. Con hasta 90% menos costo por consulta y sin contratos largos.</p>
+    <div class="cta-row"><a class="btn solid" href="#empezar">Probar gratis</a><a class="btn" href="#planes">Ver planes</a></div>
+    <p class="micro">Sin tarjeta · Sin permanencia · Soporte en español</p>
+    <div class="stats">
+     <div class="stat"><b>10<i>x</i></b><span>Más económico por token</span></div>
+     <div class="stat"><b>24<i>/7</i></b><span>Asistencia académica</span></div>
+    </div>
+   </div>
+   <div class="visual">
+    <span class="star spin" aria-hidden="true"></span>
+    <div class="hero-art" aria-hidden="true"><span class="blob"></span><span class="ring"></span><img class="on" src="/educacion/hero-4.webp" alt="" width="720" height="900"><img class="" src="/educacion/hero-5.webp" alt="" width="720" height="900" loading="lazy"><img class="" src="/educacion/hero-6.webp" alt="" width="720" height="900" loading="lazy"><img class="" src="/educacion/hero-7.webp" alt="" width="720" height="900" loading="lazy"><img class="" src="/educacion/hero-8.webp" alt="" width="720" height="900" loading="lazy"><img class="" src="/educacion/hero-9.webp" alt="" width="720" height="900" loading="lazy"></div>
+    <div class="card-ai" aria-hidden="true">
+     <div class="bar"><i></i><i></i><i></i></div>
+     <div class="msg q" id="cq">Explícame la regresión lineal con un ejemplo de mi carrera.</div>
+     <div class="msg a" id="ca">Claro. Imagina que predices la nota final según las horas de estudio…</div>
+     <div class="multi" aria-hidden="true"><span>IA A</span><span>IA B</span><span>IA C</span></div><span class="chip" id="cc">Costo de esta respuesta: casi cero</span>
+    </div>
+   </div>
+  </div>
+ </div>
+</header>
+
+<div class="marquee" aria-hidden="true"><div>
+ <span>IA accesible</span><span class="star"></span><span>Varias IA a la vez</span><span class="star"></span><span>Tokens económicos</span><span class="star"></span><span>Educación superior</span><span class="star"></span><span>Para docentes</span><span class="star"></span>
+ <span>IA accesible</span><span class="star"></span><span>Varias IA a la vez</span><span class="star"></span><span>Tokens económicos</span><span class="star"></span><span>Educación superior</span><span class="star"></span><span>Para docentes</span><span class="star"></span>
+</div></div>
+
+<section class="services" id="que-hacemos">
+ <div class="wrap">
+  <div class="sec-head">
+   <div>
+    <div class="kicker"><span class="star"></span>Qué hace Creator IA</div>
+    <h2>Diseñada para que aprender con IA sea simple y asequible.</h2>
+   </div>
+   <a class="btn" href="#como">Ver cómo funciona</a>
+  </div>
+  <div class="cards">
+   <article class="svc">
+    <div class="art a1"><span class="star"></span></div>
+    <h3>Estudiantes</h3>
+    <p>Resuelve dudas, practica con ejercicios y recibe explicaciones adaptadas a tu carrera, a cualquier hora.</p>
+    <a class="go" href="#empezar" aria-label="Soy estudiante">↗</a>
+   </article>
+   <article class="svc hot">
+    <div class="art a2"><span class="star"></span></div>
+    <h3>Docentes</h3>
+    <p>Prepara clases, rúbricas y evaluaciones en minutos y dedica tu tiempo a lo que importa: enseñar.</p>
+    <a class="go" href="#empezar" aria-label="Soy docente">↗</a>
+   </article>
+   <article class="svc">
+    <div class="art a3"><span class="star"></span></div>
+    <h3>Instituciones</h3>
+    <p>Lleva IA a toda la comunidad académica con un costo por uso predecible y sin barreras de entrada.</p>
+    <a class="go" href="#empezar" aria-label="Soy institución">↗</a>
+   </article>
+  </div>
+ </div>
+</section>
+
+<section class="orq" id="orquestador">
+ <div class="wrap">
+  <div class="sec-head"><div><div class="kicker"><span class="star"></span>Orquestador de IA</div><h2>Una pregunta. Varias IA. La mejor respuesta.</h2></div><p class="note">No dependas de una sola IA: pruébalas juntas y elige la que mejor responde a lo que necesitas.</p></div>
+  <div class="orq-flow" aria-hidden="true">
+   <div class="orq-q">¿Cómo le explico la inflación a mis estudiantes?</div>
+   <span class="orq-arrow">→</span>
+   <div class="orq-models"><div class="m"><b>IA A</b><i style="--w:92%"></i></div><div class="m"><b>IA B</b><i style="--w:68%"></i></div><div class="m"><b>IA C</b><i style="--w:84%"></i></div><div class="m"><b>IA D</b><i style="--w:56%"></i></div></div>
+   <span class="orq-arrow">→</span>
+   <div class="orq-best"><span class="star"></span>Tu mejor respuesta</div>
+  </div>
+  <ul class="orq-points">
+   <li><h3>Pregunta una vez</h3><p>Escribes tu consulta una sola vez y se envía a varias IA al mismo tiempo.</p></li>
+   <li><h3>Compara en paralelo</h3><p>Ves las respuestas lado a lado y eliges la más clara, completa o creativa.</p></li>
+   <li><h3>Todo en un solo lugar</h3><p>Sin saltar entre plataformas ni pagar varias suscripciones.</p></li>
+  </ul>
+ </div>
+</section>
+
+<section class="light" id="impacto">
+ <div class="wrap">
+  <div class="split">
+   <div>
+    <div class="kicker"><span class="star" style="background:var(--blue)"></span>Por qué Creator IA</div>
+    <h2>Tecnología potente, sin precios imposibles.</h2>
+    <p class="lead">Muchas universidades quedan fuera de la IA por su costo. Creator IA reduce el precio de cada consulta para que más personas puedan usarla todos los días.</p>
+    <a class="btn" href="#empezar">Conocer más</a>
+   </div>
+   <div class="bars">
+    <div class="bar-row"><b>Ahorro en tokens <span>90%</span></b><div class="track"><i style="width:90%"></i></div></div>
+    <div class="bar-row"><b>Facilidad de uso <span>95%</span></b><div class="track"><i class="l" style="width:95%"></i></div></div>
+    <div class="bar-row"><b>Adopción en el aula <span>80%</span></b><div class="track"><i style="width:80%"></i></div></div>
+    <small style="color:#595959">Cifras de ejemplo: reemplázalas por tus datos reales.</small>
+   </div>
+  </div>
+  <div class="strip"><span>Tutorías</span><span>Investigación</span><span>Redacción</span><span>Evaluación</span><span>Idiomas</span></div>
+ </div>
+</section>
+
+<section class="planes" id="planes">
+ <div class="wrap">
+  <div class="sec-head"><div><div class="kicker"><span class="star"></span>Planes</div><h2>Un plan para cada bolsillo y cada tamaño.</h2></div><p class="note">Empieza gratis y escala cuando lo necesites. Sin letra pequeña.</p></div>
+  <div class="plan-grid">
+   <article class="plan"><h3>Persona natural</h3><p class="who">Estudiantes, docentes y profesionales independientes</p><p class="price">Gratis<small> para empezar</small></p><ul><li>Varias IA en una pantalla para estudiar, investigar y redactar</li><li>Recarga solo lo que uses</li><li>Cancela cuando quieras</li></ul><a class="btn" href="#empezar">Crear cuenta gratis</a></article>
+   <article class="plan hot"><span class="badge">Recomendado</span><h3>Empresa y pyme</h3><p class="who">Equipos que quieren productividad sin una factura enorme</p><p class="price">Pago por uso<small> sin cuota fija</small></p><ul><li>Varios usuarios en una sola cuenta</li><li>Control de gasto por persona</li><li>Soporte prioritario en español</li></ul><a class="btn solid" href="#empezar">Probar con mi equipo</a></article>
+   <article class="plan"><h3>Instituto</h3><p class="who">Centros técnicos y de formación</p><p class="price">Plan por cupos<small> a tu medida</small></p><ul><li>Cuentas para docentes y estudiantes</li><li>Costo predecible cada mes</li><li>Acompañamiento de arranque</li></ul><a class="btn" href="#empezar">Cotizar mi instituto</a></article>
+   <article class="plan"><h3>Universidad</h3><p class="who">Toda la comunidad académica</p><p class="price">Convenio<small> institucional</small></p><ul><li>Acceso para facultades y áreas</li><li>Panel de uso e impacto</li><li>Capacitación para docentes</li></ul><a class="btn" href="#empezar">Agendar demo</a></article>
+  </div>
+  <p class="guarantee"><span class="star"></span> Pruébalo sin riesgo: si no es para ti, no pagas nada.</p>
+ </div>
+</section>
+
+<section class="how" id="como">
+ <div class="wrap">
+  <div class="sec-head">
+   <div>
+    <div class="kicker"><span class="star"></span>Cómo funciona</div>
+    <h2>Empieza en tres pasos.</h2>
+   </div>
+  </div>
+  <div class="steps">
+   <div class="step"><h3>Crea tu cuenta</h3><p>Regístrate con tu correo institucional en menos de un minuto.</p></div>
+   <div class="step"><h3>Elige tu rol</h3><p>Estudiante, docente o institución: cada uno ve las herramientas que necesita.</p></div>
+   <div class="step"><h3>Pregunta y crea</h3><p>Escribe lo que necesitas y paga solo por lo que usas.</p></div>
+  </div>
+ </div>
+</section>
+
+<section class="faq" id="faq">
+ <div class="wrap">
+  <div class="sec-head"><div><div class="kicker"><span class="star"></span>Preguntas frecuentes</div><h2>Resolvemos tus dudas antes de que las tengas.</h2></div></div>
+  <details open><summary>¿Cuánto cuesta realmente?</summary><p>Empiezas gratis y luego pagas solo por lo que usas. Para instituciones armamos una cotización con costo mensual predecible.</p></details>
+  <details><summary>¿Qué es el orquestador de IA?</summary><p>Es enviar una misma pregunta a varias IA a la vez, comparar sus respuestas en una sola pantalla y quedarte con la mejor, sin cambiar de plataforma.</p></details>
+  <details><summary>¿Puedo probarlo antes de decidir?</summary><p>Sí. Crea tu cuenta sin tarjeta o agenda una demo para tu equipo.</p></details>
+  <details><summary>¿Sirve para toda mi institución?</summary><p>Sí. Hay cuentas para estudiantes, docentes y administrativos, con control de uso por grupo.</p></details>
+  <details><summary>¿Qué pasa con la información de mis usuarios?</summary><p>Tu información es tuya. Te explicamos cómo se almacena y se protege antes de firmar cualquier convenio.</p></details>
+  <details><summary>¿Hay contratos largos?</summary><p>No. Puedes empezar pequeño y ampliar cuando quieras.</p></details>
+ </div>
+</section>
+
+<section class="cta" id="empezar">
+ <div class="wrap">
+  <h2>Empieza hoy, <span style="color:var(--white)">sin riesgo</span></h2>
+  <p>Crea tu cuenta gratis o agenda una demo de 20 minutos para tu universidad, instituto o empresa.</p>
+  <div class="cta-row cta-center"><a class="btn solid" href="/auth">Crear cuenta gratis</a><a class="btn" href="mailto:hola@creator-ia.com?subject=Quiero%20una%20demo">Agendar demo</a></div>
+ </div>
+</section>
+
+<footer><div class="wrap"><span>© 2026 Creator IA</span><span>IA accesible para todos</span></div></footer>
+<script>
+(function(){
+ var el=document.getElementById('rot');
+ if(!el||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+ var w=['tus estudiantes','tu equipo','tu empresa','tu corporación','tu universidad','tus docentes'],i=0,im=document.querySelectorAll('.hero-art img'),T=[['Explícame la regresión lineal con un ejemplo de mi carrera.','Claro. Imagina que predices tu nota final según las horas de estudio…','Costo de esta respuesta: casi cero'],['Resume la reunión de hoy y asígnale tareas a cada persona.','Listo. 3 decisiones, 5 tareas y un responsable para cada una…','Todo tu equipo en una sola cuenta'],['Redacta una propuesta para mi cliente con tres opciones de precio.','Aquí va: resumen claro, tres planes y un cierre que invita a decidir…','Menos costo en cada consulta'],['Compara estos tres informes trimestrales y dime los riesgos.','Los tres coinciden en la caída de márgenes. Estos son los puntos críticos…','Control de gasto por área'],['Dame 5 fuentes sobre aprendizaje automático y resume cada una.','Estas son 5 lecturas clave, con una síntesis de dos líneas cada una…','Acceso para toda la comunidad'],['Crea una rúbrica para evaluar un ensayo de 1.500 palabras.','Lista: 4 criterios, 4 niveles de desempeño y descriptores claros…','Clases listas en minutos']],cd=document.querySelector('.card-ai'),cq=document.getElementById('cq'),ca=document.getElementById('ca'),cc=document.getElementById('cc');
+ setInterval(function(){
+  el.classList.add('leave');cd.classList.add('swap');
+  setTimeout(function(){
+   i=(i+1)%w.length;el.textContent=w[i];im.forEach(function(x,j){x.classList.toggle('on',j===i)});cq.textContent=T[i][0];ca.textContent=T[i][1];cc.textContent=T[i][2];cd.classList.remove('swap');
+   el.classList.remove('leave');el.classList.add('enter');
+   void el.offsetWidth;
+   el.classList.remove('enter');
+  },260);
+ },2400);
+})();
+</script>
+</body>
+</html>

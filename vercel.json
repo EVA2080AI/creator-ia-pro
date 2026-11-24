@@ -28,6 +28,10 @@
       "destination": "/api/auth/handler"
     },
     {
+      "source": "/educacion",
+      "destination": "/educacion.html"
+    },
+    {
       "source": "/((?!api/|assets/).*)",
       "destination": "/index.html"
     }
