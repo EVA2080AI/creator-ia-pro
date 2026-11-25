@@ -150,6 +150,7 @@ const Auth         = lazy(() => import("./pages/Auth"));
 const Pricing      = lazy(() => import("./pages/Pricing"));
 const Downloads    = lazy(() => import("./pages/Downloads"));
 const Empresas     = lazy(() => import("./pages/Empresas"));
+const SectorPublico = lazy(() => import("./pages/SectorPublico"));
 const ToolLanding  = lazy(() => import("./pages/ToolLanding"));
 const ProductBacklog = lazy(() => import("./pages/ProductBacklog"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -229,6 +230,7 @@ const App = () => {
                   <Route path="/pricing"              element={<Pricing />} />
                   <Route path="/descargar"            element={<Downloads />} />
                   <Route path="/empresas"             element={<Empresas />} />
+                  <Route path="/sector-publico"       element={<SectorPublico />} />
                   <Route path="/product-backlog"      element={<ProductBacklog />} />
                   <Route path="/herramienta/:toolSlug" element={<ToolLanding />} />
                   <Route path="/reset-password"       element={<ResetPassword />} />

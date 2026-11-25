@@ -5,6 +5,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import {eq, or, and, count} from "drizzle-orm";
 import { getDb, schema } from "../db/index.js";
 import { requireUser } from "./_lib/require-user.js";
+import { ensureSystemAssistants } from "./_lib/system-assistants.js";
 
 const MAX_NAME = 60;
 const MAX_TAGLINE = 140;
@@ -16,6 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
   if (req.method === "GET") {
+    await ensureSystemAssistants(db);
     const rows = await db
       .select()
       .from(schema.assistant)

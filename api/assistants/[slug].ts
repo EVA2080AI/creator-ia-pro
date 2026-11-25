@@ -3,6 +3,7 @@ import { eq, or, and } from "drizzle-orm";
 import { getDb, schema } from "../../db/index.js";
 import { requireUser } from "../_lib/require-user.js";
 import { getProfile } from "../_lib/session.js";
+import { ensureSystemAssistants } from "../_lib/system-assistants.js";
 
 const MAX_NAME = 60;
 const MAX_TAGLINE = 140;
@@ -16,6 +17,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Mismo envoltorio que api/assistants.ts: sin él, cualquier excepción (BD caída,
   // body malformado) devolvía el HTML de error de Vercel en vez de {ok:false}.
   try {
+
+  if (req.method === "GET") await ensureSystemAssistants(db);
 
   const [row] = await db
     .select()

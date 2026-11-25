@@ -84,6 +84,7 @@ const ATTACH_CARD_LABEL: Record<string, string> = {
   talento: "Revisar una hoja de vida",
   operaciones: "Revisar un procedimiento o manual",
   comunicaciones: "Revisar un documento antes de publicarlo",
+  licitaciones: "Cargar el pliego y las propuestas",
 };
 
 export default function AssistantPage() {
